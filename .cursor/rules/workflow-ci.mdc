@@ -1,0 +1,11 @@
+---
+description: Testing and verification workflow expectations.
+alwaysApply: false
+---
+
+# Workflow and CI
+
+- Prefer small, focused stories and commits.
+- Run relevant checks for modified scope before concluding work.
+- Treat repository git hooks and CI workflows in `.github/workflows/` as the mandatory enforcement layer.
+- Keep local progress tracking out of PR diffs; use local `.ai/progress.md` only when needed.

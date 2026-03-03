@@ -1,0 +1,11 @@
+---
+description: Core governance and portability guardrails.
+alwaysApply: true
+---
+
+# Core Governance
+
+- Read `AGENTS.md` first; treat it as the canonical cross-agent instruction source.
+- Do not suggest changes that contradict an ADR marked `Status: Accepted` unless you explicitly flag the conflict.
+- If intent is ambiguous, surface uncertainty explicitly rather than guessing silently.
+- Keep changes scoped and focused; prefer updating enforcement through CI/hooks over adding verbose prompt-only rules.

@@ -1,0 +1,22 @@
+# .cursorrules
+# Cursor-specific extensions to AGENTS.md. Read AGENTS.md first.
+
+## On Session Start
+- Read `.ai/memory.md` and `.ai/progress.md` before beginning any task.
+- Consult `ARCHITECTURE.md` and relevant `docs/adr/` entries before touching structural code.
+
+## On Session End
+- Update `.ai/progress.md` with what was completed and what remains.
+- If you learned something durable about the project, add it to `.ai/memory.md`.
+
+## Editing Behaviour
+- Follow all conventions in `CONVENTIONS.md`.
+- Prefer targeted edits over rewrites. Do not refactor code outside the scope of the current task.
+- When introducing a new pattern not covered by `CONVENTIONS.md`, add it there.
+
+## Autocomplete & Suggestions
+- Do not suggest changes that contradict an Accepted ADR without flagging the conflict explicitly.
+- When uncertain about intent, surface the uncertainty as a comment rather than guessing silently.
+
+## ADRs
+- Suggest an ADR whenever a significant design decision is made. Template: `docs/adr/0000-template.md`.
