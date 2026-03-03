@@ -6,9 +6,13 @@
 
 ## Project Overview
 
-**BrewUI** is Homebrew's official macOS GUI — a native macOS application that provides a graphical interface for managing Homebrew packages, casks, and updates.
+**BrewUI** is Homebrew's official macOS GUI — a native macOS application that makes Homebrew approachable for users who prefer graphical interfaces over Terminal, while maintaining complete transparency about underlying operations.
 
-> ⚠️ This file contains placeholder sections. When project-specific context is migrated from the prototype repo, update the relevant sections and remove this notice.
+**Mission:** Enable CLI-averse users to safely discover, install, update, and manage Homebrew packages through a native SwiftUI interface that never hides what Homebrew is doing.
+
+**Stack:** Swift 6.0 · SwiftUI · Swift Package Manager · macOS Tahoe 26+ (also Sequoia 15, Sonoma 14)
+
+See `ARCHITECTURE.md` for full design detail.
 
 ---
 
@@ -20,8 +24,10 @@
 4. **Respect existing conventions.** Consult `CONVENTIONS.md` before introducing new patterns, file structures, or naming schemes.
 5. **Document significant decisions.** Any non-obvious architectural or design decision should be captured as an ADR in `docs/adr/`. Use the template at `docs/adr/0000-template.md`.
 6. **Do not guess at intent.** If requirements are ambiguous, note the ambiguity in `.ai/scratchpad.md` and surface it to the user rather than making assumptions silently.
-7. **Prefer small, focused commits.** Each change should do one thing and have a clear commit message.
-8. **Never remove or overwrite memory files.** `.ai/memory.md` and `.ai/progress.md` are append-and-update files. Do not wipe their history.
+7. **Stay in scope for the current deliverable.** Check `.ai/progress.md` for the active deliverable phase. Do not implement features from later phases. Each deliverable should be independently useful before the next begins.
+8. **Work in small, focused stories.** Each task should be a single user story or feature. After completing one, run the quality gates before starting the next (see Workflow).
+9. **Prefer small, focused commits.** Each change should do one thing and have a clear commit message.
+10. **Never remove or overwrite memory files.** `.ai/memory.md` and `.ai/progress.md` are append-and-update files. Do not wipe their history.
 
 ---
 
@@ -39,7 +45,12 @@
 
 1. **Start of session:** Read `.ai/memory.md` and `.ai/progress.md` to orient yourself.
 2. **During work:** Use `.ai/scratchpad.md` for working notes. Consult `ARCHITECTURE.md` and `docs/adr/` for context on design decisions.
-3. **End of session:** Update `.ai/progress.md`. If anything belongs in long-term memory, update `.ai/memory.md`.
+3. **After each story/feature:** Run quality gates before marking it complete and moving on:
+   - Unit tests pass
+   - UI tests pass
+   - Manual pre-merge checklist reviewed
+   - PR/review ready
+4. **End of session:** Update `.ai/progress.md`. If anything belongs in long-term memory, update `.ai/memory.md`.
 
 ---
 
@@ -65,3 +76,6 @@ docs/adr/           ← architecture decision records
 - Do not modify `LICENSE`.
 - Do not commit secrets, API keys, or credentials.
 - Do not alter ADR files that are marked `Status: Accepted` without creating a superseding ADR.
+- Do not implement features from a future deliverable phase while the current one is incomplete.
+- Do not hard-code file paths — use `ProcessInfo` or `FileManager` to locate `brew`.
+- Do not hide errors from the user — surface them appropriately.
