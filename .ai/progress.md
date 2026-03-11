@@ -5,6 +5,17 @@
 
 ---
 
+## 2026-03-11 — Add Brew tooling bundle file
+
+**Completed:**
+- Added root `Brewfile` with `swiftformat` and `swiftlint` formula entries
+- Verified latest stable versions at time of creation (`swiftformat` 0.59.1, `swiftlint` 0.63.2) and recorded them as comments in the file
+
+**Remaining:**
+- Keep versions current as Homebrew formulae update over time
+
+---
+
 ## 2026-03-03 — Repository scaffolding + prototype migration
 
 **Completed:**
