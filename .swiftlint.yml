@@ -1,0 +1,25 @@
+included:
+  - BrewUI
+  - BrewUITests
+  - BrewUIUITests
+
+excluded:
+  - .build
+  - docs
+  - scripts
+
+line_length:
+  warning: 120
+  error: 140
+  ignores_comments: true
+
+identifier_name:
+  min_length:
+    warning: 1
+  excluded:
+    - id
+    - i
+    - j
+    - x
+    - y
+    - z
