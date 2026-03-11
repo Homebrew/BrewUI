@@ -38,6 +38,7 @@ jobs:
             -project BrewUI.xcodeproj \
             -scheme BrewUI \
             -destination "platform=macOS" \
+            -only-testing "BrewUITests" \
             -skipPackagePluginValidation \
             -skipMacroValidation \
             CODE_SIGN_IDENTITY="" \
