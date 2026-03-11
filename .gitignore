@@ -41,6 +41,9 @@ Podfile.lock
 # Carthage (if used)
 Carthage/Build/
 
+# Per-developer signing config (copy from Configurations/Signing.local.xcconfig.example)
+Configurations/Signing.local.xcconfig
+
 # Environment / secrets
 .env
 *.pem

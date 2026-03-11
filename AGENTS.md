@@ -4,6 +4,14 @@
 
 ---
 
+## First-time Setup
+
+Run `scripts/bootstrap` before opening the project. It installs tooling, resolves Swift packages, and creates `Configurations/Signing.local.xcconfig` from the committed example file. Open that file and replace `YOUR_TEAM_ID_HERE` with your 10-character Apple Team ID — Xcode resolves signing automatically after that.
+
+`Configurations/Signing.local.xcconfig` is gitignored. Do not commit it.
+
+---
+
 ## Project Overview
 
 **BrewUI** is Homebrew's official macOS GUI — a native macOS application that makes Homebrew approachable for users who prefer graphical interfaces over Terminal, while maintaining complete transparency about underlying operations.

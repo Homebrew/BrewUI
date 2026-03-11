@@ -39,5 +39,23 @@ echo "==> Installing repository git hooks"
 echo "==> Resolving Swift package dependencies"
 xcodebuild -resolvePackageDependencies -project "$ROOT_DIR/BrewUI.xcodeproj"
 
+# ---------------------------------------------------------------------------
+# Per-developer signing config
+# ---------------------------------------------------------------------------
+SIGNING_LOCAL="$ROOT_DIR/Configurations/Signing.local.xcconfig"
+SIGNING_EXAMPLE="$ROOT_DIR/Configurations/Signing.local.xcconfig.example"
+
+if [ ! -f "$SIGNING_LOCAL" ]; then
+    cp "$SIGNING_EXAMPLE" "$SIGNING_LOCAL"
+    echo ""
+    echo "==> Created Configurations/Signing.local.xcconfig"
+    echo "    Open that file and replace YOUR_TEAM_ID_HERE with your"
+    echo "    10-character Apple Team ID (Xcode → Settings → Accounts)."
+    echo "    Then open BrewUI.xcodeproj — signing will resolve automatically."
+else
+    echo "==> Signing config already exists (Configurations/Signing.local.xcconfig)"
+fi
+
+echo ""
 echo "==> Bootstrap complete"
 echo "Next step: open BrewUI.xcodeproj"
