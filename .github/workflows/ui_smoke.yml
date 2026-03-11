@@ -18,7 +18,7 @@ concurrency:
 jobs:
   ui-smoke:
     name: Run UI smoke test
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 40
     steps:
       - name: Checkout
