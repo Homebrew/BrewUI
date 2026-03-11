@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - 'v*.*.*'
+    branches:
+      - 'release-test'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. 1.0.0)'
+        required: true
 
 jobs:
   release:
@@ -89,7 +96,10 @@ jobs:
 
       - name: Build component package
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          # On a tag push, derive the version from the tag (strips the leading
+          # 'v'). On a manual dispatch or branch push, use the workflow input.
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+          VERSION="${INPUT_VERSION:-${GITHUB_REF_NAME#v}}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           pkgbuild \
             --root "$RUNNER_TEMP/export" \
@@ -112,6 +122,7 @@ jobs:
           echo "PKG_PATH=$PKG_PATH" >> "$GITHUB_ENV"
 
       - name: Notarize package
+        if: startsWith(github.ref, 'refs/tags/')
         env:
           APPLE_ID: ${{ secrets.PKG_APPLE_ID_EMAIL }}
           APPLE_ID_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
@@ -123,14 +134,25 @@ jobs:
             --wait
 
       - name: Staple notarization ticket to package
+        if: startsWith(github.ref, 'refs/tags/')
         run: xcrun stapler staple "$PKG_PATH"
 
       - name: Generate build attestation
+        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: ${{ env.PKG_PATH }}
 
+      - name: Upload package artifact (non-release runs)
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: actions/upload-artifact@v4
+        with:
+          name: BrewUI-${{ env.VERSION }}.pkg
+          path: ${{ env.PKG_PATH }}
+          retention-days: 5
+
       - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.PKG_PATH }}

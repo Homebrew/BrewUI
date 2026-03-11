@@ -27,6 +27,8 @@
 		EEC39EBF2F5AB4B900269514 /* BrewUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BrewUI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ECC2F5AB4B900269514 /* BrewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ED62F5AB4B900269514 /* BrewUIUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewUIUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE00AA000000000000000001 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
+		EE00AA000000000000000002 /* Signing.local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.local.xcconfig.example; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +81,7 @@
 				EEC39ECF2F5AB4B900269514 /* BrewUITests */,
 				EEC39ED92F5AB4B900269514 /* BrewUIUITests */,
 				EEC39EC02F5AB4B900269514 /* Products */,
+				EE00AA000000000000000003 /* Configurations */,
 			);
 			sourceTree = "<group>";
 		};
@@ -90,6 +93,16 @@
 				EEC39ED62F5AB4B900269514 /* BrewUIUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		EE00AA000000000000000003 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				EE00AA000000000000000001 /* Signing.xcconfig */,
+				EE00AA000000000000000002 /* Signing.local.xcconfig.example */,
+			);
+			name = Configurations;
+			path = Configurations;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -271,6 +284,7 @@
 /* Begin XCBuildConfiguration section */
 		EEC39EDE2F5AB4B900269514 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -304,7 +318,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 9FLQCSG748;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -335,6 +348,7 @@
 		};
 		EEC39EDF2F5AB4B900269514 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -368,7 +382,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 9FLQCSG748;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -391,13 +404,12 @@
 		};
 		EEC39EE12F5AB4B900269514 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7P5KY6H48B;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -423,13 +435,12 @@
 		};
 		EEC39EE22F5AB4B900269514 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7P5KY6H48B;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -455,11 +466,10 @@
 		};
 		EEC39EE42F5AB4B900269514 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9FLQCSG748;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
@@ -476,11 +486,10 @@
 		};
 		EEC39EE52F5AB4B900269514 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9FLQCSG748;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
@@ -497,10 +506,9 @@
 		};
 		EEC39EE72F5AB4B900269514 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9FLQCSG748;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUIUITests;
@@ -516,10 +524,9 @@
 		};
 		EEC39EE82F5AB4B900269514 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 9FLQCSG748;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUIUITests;
