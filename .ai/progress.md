@@ -16,6 +16,19 @@
 
 ---
 
+## 2026-03-11 — Add developer bootstrap flow
+
+**Completed:**
+- Added `scripts/bootstrap` as a single idempotent setup command for local development
+- Bootstrap now verifies CLT, installs Homebrew when missing, runs `brew bundle`, and resolves Swift package dependencies
+- Added a lightweight `Quickstart (Development)` section in `README.md` documenting `./scripts/bootstrap`
+- Marked `scripts/bootstrap` executable and validated shell syntax with `bash -n`
+
+**Remaining:**
+- Expand contributor workflow docs later (e.g., lint/test commands and troubleshooting) when `CONTRIBUTING.md` is introduced
+
+---
+
 ## 2026-03-03 — Repository scaffolding + prototype migration
 
 **Completed:**

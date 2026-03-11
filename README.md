@@ -16,6 +16,16 @@ Enable CLI-averse users to safely discover, install, update, and manage Homebrew
 
 Early development — currently building the app foundation (D1). See `.ai/progress.md` for the current deliverable checklist.
 
+## Quickstart (Development)
+
+After cloning:
+
+```bash
+./scripts/bootstrap
+```
+
+This installs project tooling from `Brewfile` (including SwiftFormat and SwiftLint) and resolves Swift package dependencies for `BrewUI.xcodeproj`.
+
 ## Contributing
 
 This project will be open source. Contribution guidelines, issue templates, and a getting started guide are coming as part of the initial setup work. In the meantime, see `AGENTS.md` for project conventions and workflow, and `ARCHITECTURE.md` for design detail.
