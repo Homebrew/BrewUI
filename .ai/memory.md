@@ -34,3 +34,14 @@
 - **Sandboxing:** App is unsandboxed. No entitlements needed for subprocess execution.
 - **Homebrew detection:** Check `/opt/homebrew/bin/brew` (Apple Silicon) then `/usr/local/bin/brew` (Intel). Degrade gracefully if neither found.
 - **JSON API schema drift:** Handle via optional decoding — never crash on unknown fields.
+
+## 2026-03-11 — Developer Hook Workflow
+
+- **Pre-commit enforcement:** Repository-managed pre-commit hook runs staged Swift files through `swiftformat`, then `swiftlint --fix`, then strict `swiftlint` validation.
+- **Bootstrap integration:** `./scripts/bootstrap` installs git hooks automatically via `scripts/install-git-hooks` to minimize manual setup for contributors.
+
+## 2026-03-11 — Lint/Format Baseline Config
+
+- **Pinned Swift version for tooling:** Added root `.swift-version` with `6.2` (aligned to latest installed stable Swift 6.2.4) for deterministic SwiftFormat behavior.
+- **Project formatter config:** Added root `.swiftformat` with explicit Swift version and baseline whitespace/line-ending settings.
+- **Project linter config:** Added root `.swiftlint.yml` with scoped includes/excludes and practical early-stage defaults for `line_length` and `identifier_name`.

@@ -29,6 +29,21 @@
 
 ---
 
+## 2026-03-11 — Add pre-commit format/lint pipeline
+
+**Completed:**
+- Added `scripts/pre-commit` to run staged Swift files through `swiftformat`, `swiftlint --fix`, re-stage changes, and enforce strict lint validation
+- Added `scripts/install-git-hooks` with idempotent pre-commit hook installation to `.git/hooks/pre-commit`
+- Updated `scripts/bootstrap` to automatically install repository git hooks during setup
+- Updated `README.md` with pre-commit behavior documentation and automatic hook setup note
+- Validated hook flows manually: no-op when no staged Swift files, pass when auto-fix resolves issues, and fail with specific lint output when non-fixable violations remain
+- Added root `.swift-version` (`6.2`), `.swiftformat`, and `.swiftlint.yml` for deterministic formatter/linter behavior
+
+**Remaining:**
+- Refine `.swiftformat` and `.swiftlint.yml` rule sets as codebase conventions mature
+
+---
+
 ## 2026-03-03 — Repository scaffolding + prototype migration
 
 **Completed:**

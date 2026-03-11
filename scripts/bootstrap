@@ -33,6 +33,9 @@ fi
 echo "==> Installing tooling from Brewfile"
 brew bundle --file "$ROOT_DIR/Brewfile"
 
+echo "==> Installing repository git hooks"
+"$ROOT_DIR/scripts/install-git-hooks"
+
 echo "==> Resolving Swift package dependencies"
 xcodebuild -resolvePackageDependencies -project "$ROOT_DIR/BrewUI.xcodeproj"
 

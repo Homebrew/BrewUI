@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+#
+# pre-commit — format and lint staged Swift files before commit.
+
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -z "${ROOT_DIR}" ]]; then
+    echo "pre-commit: could not determine git repository root."
+    exit 1
+fi
+cd "${ROOT_DIR}"
+
+if ! command -v swiftformat >/dev/null 2>&1; then
+    echo "pre-commit: swiftformat is not installed."
+    echo "Run ./scripts/bootstrap (recommended) or install via Homebrew."
+    exit 1
+fi
+
+if ! command -v swiftlint >/dev/null 2>&1; then
+    echo "pre-commit: swiftlint is not installed."
+    echo "Run ./scripts/bootstrap (recommended) or install via Homebrew."
+    exit 1
+fi
+
+swift_files=()
+while IFS= read -r -d '' file; do
+    if [[ "${file}" == *.swift ]]; then
+        swift_files+=("${file}")
+    fi
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+if [[ ${#swift_files[@]} -eq 0 ]]; then
+    echo "pre-commit: no staged Swift files, skipping format/lint checks."
+    exit 0
+fi
+
+echo "pre-commit: formatting staged Swift files (swiftformat)..."
+swiftformat "${swift_files[@]}"
+
+echo "pre-commit: applying auto-fixes (swiftlint --fix)..."
+set +e
+swiftlint lint --fix --quiet "${swift_files[@]}"
+fix_status=$?
+set -e
+
+if [[ ${fix_status} -ne 0 ]]; then
+    echo "pre-commit: swiftlint auto-fix reported unresolved issues; running final validation."
+fi
+
+echo "pre-commit: staging formatter/linter changes..."
+git add -- "${swift_files[@]}"
+
+echo "pre-commit: validating lint status..."
+set +e
+lint_output="$(swiftlint lint --strict --quiet "${swift_files[@]}" 2>&1)"
+lint_status=$?
+set -e
+
+if [[ ${lint_status} -ne 0 ]]; then
+    echo ""
+    echo "pre-commit: commit blocked due to unresolved SwiftLint violations."
+    echo "Fix the issues below, stage changes, and commit again:"
+    echo ""
+    echo "${lint_output}"
+    exit 1
+fi
+
+echo "pre-commit: checks passed."
+exit 0
