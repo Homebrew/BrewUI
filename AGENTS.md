@@ -4,6 +4,21 @@
 
 ---
 
+## Always Web-Search Versioned or Scheduled Values
+
+Before using any value that changes on a regular or unpredictable schedule, always perform a web search rather than relying on training knowledge. This includes but is not limited to:
+
+- CI runner tags and OS versions (e.g. `macos-latest`, `macos-26`, `ubuntu-latest`)
+- Xcode and Swift toolchain version strings
+- GitHub Actions action versions (e.g. `actions/checkout@v4`)
+- Homebrew formula versions or tap names
+- Apple SDK / deployment target version numbers
+- Any third-party dependency version that may have had releases
+
+Training data has a cutoff and will silently be wrong about these. A web search takes seconds; a wrong version can waste hours.
+
+---
+
 ## First-time Setup
 
 Run `scripts/bootstrap` before opening the project. It installs tooling, resolves Swift packages, and creates `Configurations/Signing.local.xcconfig` from the committed example file. Open that file and replace `YOUR_TEAM_ID_HERE` with your 10-character Apple Team ID — Xcode resolves signing automatically after that.
