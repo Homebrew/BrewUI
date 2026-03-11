@@ -44,6 +44,20 @@
 
 ---
 
+## 2026-03-11 — Add lightweight PR CI workflows
+
+**Completed:**
+- Added `.github/workflows/swift_quality.yml` to run `swiftformat --lint` and `swiftlint lint --strict` on PRs with Swift/tooling changes
+- Added `.github/workflows/pr_build_test.yml` for PR build + unit test validation with cancellation and failure-log artifact upload
+- Added `.github/workflows/actionlint.yml` to lint workflow files when `.github/workflows/**` changes
+- Added `.github/workflows/ui_smoke.yml` as opt-in UI smoke coverage via `workflow_dispatch` (manual only)
+
+**Remaining:**
+- Configure GitHub branch protection to require `Swift Quality` and `Build and Unit Tests`
+- Add richer unit/UI tests so CI checks provide deeper product confidence
+
+---
+
 ## 2026-03-03 — Repository scaffolding + prototype migration
 
 **Completed:**

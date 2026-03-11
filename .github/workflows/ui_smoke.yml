@@ -1,0 +1,44 @@
+name: UI Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: "Optional xcodebuild -only-testing filter"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-smoke:
+    name: Run UI smoke test
+    runs-on: macos-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve package dependencies
+        run: xcodebuild -resolvePackageDependencies -project BrewUI.xcodeproj
+
+      - name: Run UI smoke test
+        run: |
+          set -euo pipefail
+          TEST_FILTER="${{ github.event.inputs.test_filter }}"
+          if [[ -z "$TEST_FILTER" ]]; then
+            TEST_FILTER="BrewUIUITests/BrewUIUITests/testExample"
+          fi
+
+          xcodebuild test \
+            -project BrewUI.xcodeproj \
+            -scheme BrewUI \
+            -destination "platform=macOS" \
+            -only-testing "$TEST_FILTER" \
+            -skipPackagePluginValidation \
+            -skipMacroValidation
