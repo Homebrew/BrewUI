@@ -47,7 +47,11 @@
 - **Project formatter config:** Added root `.swiftformat` with explicit Swift version and baseline whitespace/line-ending settings.
 - **Project linter config:** Added root `.swiftlint.yml` with scoped includes/excludes and practical early-stage defaults for `line_length` and `identifier_name`.
 
----
+## 2026-03-11 — PR CI Baseline
+
+- **PR checks policy:** Required PR checks are lightweight and path-scoped for fast feedback.
+- **Workflow split:** CI is separated into focused workflows (`swift_quality`, `pr_build_test`, `actionlint`, `ui_smoke`) instead of a monolithic pipeline.
+- **Optional heavy check:** UI smoke testing is explicitly opt-in via manual `workflow_dispatch` (`ui_smoke.yml`) and is not required by default.
 
 ## 2026-03-20 — Decision logging (no ADRs)
 
