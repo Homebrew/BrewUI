@@ -24,7 +24,7 @@ After cloning:
 ./scripts/bootstrap
 ```
 
-This installs project tooling from `Brewfile` (including SwiftFormat and SwiftLint), enables repository git hooks, and resolves Swift package dependencies for `BrewUI.xcodeproj`.
+This installs project tooling from `Brewfile` (including SwiftFormat and SwiftLint), enables repository git hooks, and resolves Swift package dependencies for `Brew.xcodeproj`.
 
 ### Pre-commit formatting and linting
 

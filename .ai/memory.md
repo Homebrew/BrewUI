@@ -53,6 +53,15 @@
 - **Workflow split:** CI is separated into focused workflows (`swift_quality`, `pr_build_test`, `actionlint`, `ui_smoke`) instead of a monolithic pipeline.
 - **Optional heavy check:** UI smoke testing is explicitly opt-in via manual `workflow_dispatch` (`ui_smoke.yml`) and is not required by default.
 
+## 2026-03-14 — Project Naming Renamed To Brew
+
+- Xcode project/scheme/targets were renamed from `BrewUI` to `Brew` for clarity.
+- Test targets now map as:
+  - `BrewTests` = unit tests
+  - `BrewUITests` = UI tests
+- Repository root folder remains `BrewUI` (part of a larger parent project layout).
+- App bundle/package identifier remains unchanged for compatibility (`sh.brew.BrewUI`), while test bundle identifiers were updated to match renamed targets (`sh.brew.BrewTests` and `sh.brew.BrewUITests`).
+
 ## 2026-03-20 — Decision logging (no ADRs)
 
 - **No `docs/adr/`:** Architecture Decision Records are not used in this repo.

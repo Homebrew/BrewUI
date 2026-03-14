@@ -1,6 +1,6 @@
 //
-//  BrewUIApp.swift
-//  BrewUI
+//  BrewApp.swift
+//  Brew
 //
 //  Created by Graeme Arthur on 6/3/2026.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct BrewUIApp: App {
+struct BrewApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
