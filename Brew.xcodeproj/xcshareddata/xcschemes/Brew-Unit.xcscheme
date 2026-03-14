@@ -34,30 +34,6 @@
             default = "YES">
          </TestPlanReference>
       </TestPlans>
-      <Testables>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EEC39ECB2F5AB4B900269514"
-               BuildableName = "BrewTests.xctest"
-               BlueprintName = "BrewTests"
-               ReferencedContainer = "container:Brew.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EEC39ED52F5AB4B900269514"
-               BuildableName = "BrewUITests.xctest"
-               BlueprintName = "BrewUITests"
-               ReferencedContainer = "container:Brew.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
