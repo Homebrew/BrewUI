@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "3A23003A-5B61-4E4A-888C-8A49F40BC97A",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Brew.xcodeproj",
+        "identifier" : "EEC39ED52F5AB4B900269514",
+        "name" : "BrewUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

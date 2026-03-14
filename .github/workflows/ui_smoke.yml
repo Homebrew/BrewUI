@@ -33,9 +33,6 @@ jobs:
         run: |
           set -euo pipefail
           TEST_FILTER="${{ github.event.inputs.test_filter }}"
-          if [[ -z "$TEST_FILTER" ]]; then
-            TEST_FILTER="BrewUITests/BrewUITests/testExample"
-          fi
 
           # UI test bundles must be signed. In CI, use ad-hoc signing by default
           # (no certificate required). If a CI development team ID secret is
@@ -53,11 +50,16 @@ jobs:
             )
           fi
 
-          xcodebuild test \
-            -project Brew.xcodeproj \
-            -scheme Brew \
-            -destination "platform=macOS" \
-            -only-testing "$TEST_FILTER" \
-            -skipPackagePluginValidation \
-            -skipMacroValidation \
-            "${SIGNING_ARGS[@]}"
+          XCODEBUILD_ARGS=(
+            test
+            -project Brew.xcodeproj
+            -scheme Brew-UI
+            -destination "platform=macOS"
+            -skipPackagePluginValidation
+            -skipMacroValidation
+          )
+          if [[ -n "$TEST_FILTER" ]]; then
+            XCODEBUILD_ARGS+=(-only-testing "$TEST_FILTER")
+          fi
+
+          xcodebuild "${XCODEBUILD_ARGS[@]}" "${SIGNING_ARGS[@]}"

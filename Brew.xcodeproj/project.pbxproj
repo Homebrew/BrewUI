@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EE2FB0362F653F89004AE92A /* Brew-Unit.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */; };
+		EE2FB0382F654024004AE92A /* Brew-UI.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		EEC39ECD2F5AB4B900269514 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -26,6 +31,8 @@
 /* Begin PBXFileReference section */
 		EE00AA000000000000000001 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		EE00AA000000000000000002 /* Signing.local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.local.xcconfig.example; sourceTree = "<group>"; };
+		EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-Unit.xctestplan"; sourceTree = "<group>"; };
+		EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-UI.xctestplan"; sourceTree = "<group>"; };
 		EEC39EBF2F5AB4B900269514 /* Brew.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Brew.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ECC2F5AB4B900269514 /* BrewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -86,6 +93,8 @@
 		EEC39EB62F5AB4B900269514 = {
 			isa = PBXGroup;
 			children = (
+				EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */,
+				EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */,
 				EEC39EC12F5AB4B900269514 /* Brew */,
 				EEC39ECF2F5AB4B900269514 /* BrewTests */,
 				EEC39ED92F5AB4B900269514 /* BrewUITests */,
@@ -224,6 +233,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EE2FB0382F654024004AE92A /* Brew-UI.xctestplan in Resources */,
+				EE2FB0362F653F89004AE92A /* Brew-Unit.xctestplan in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
