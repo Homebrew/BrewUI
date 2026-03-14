@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# postinstall — runs as root after the .pkg installs BrewUI.app
+# postinstall — runs as root after the .pkg installs Brew.app
 #
 # Installs Homebrew for the current console user if it is not already present.
 # Because pkg scripts run as root, we delegate to the logged-in user so that

@@ -5,6 +5,33 @@
 
 ---
 
+## 2026-03-14 — Rename project and test targets to Brew
+
+**Completed:**
+- Renamed Xcode project from `BrewUI.xcodeproj` to `Brew.xcodeproj` and shared scheme from `BrewUI` to `Brew`
+- Renamed targets/products to remove ambiguity:
+  - app target: `BrewUI` -> `Brew`
+  - unit test target: `BrewUITests` -> `BrewTests`
+  - UI test target: `BrewUIUITests` -> `BrewUITests`
+- Renamed source/test folders to match targets:
+  - `BrewUI/` -> `Brew/`
+  - `BrewUITests/` -> `BrewTests/`
+  - `BrewUIUITests/` -> `BrewUITests/`
+- Renamed Swift symbols/files to match target names (`BrewApp`, `BrewTests`, `BrewUITests`, `BrewUITestsLaunchTests`)
+- Updated CI/workflows/bootstrap/lint includes/README project references to `Brew.xcodeproj`, scheme `Brew`, and new test target names
+- Preserved app bundle/package identifier for compatibility (`sh.brew.BrewUI`) and updated test bundle identifiers to match renamed test targets (`sh.brew.BrewTests`, `sh.brew.BrewUITests`)
+
+**Verification:**
+- `xcodebuild -list -project Brew.xcodeproj` confirms targets: `Brew`, `BrewTests`, `BrewUITests`; scheme: `Brew`
+- Unit tests pass with ad-hoc signing overrides:
+  - `xcodebuild test -project Brew.xcodeproj -scheme Brew -only-testing BrewTests CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO`
+- UI test filter path is valid and updated (`BrewUITests/BrewUITests/testExample`); local run reached UI test execution but failed due macOS automation initialization timeout (environment/runtime issue)
+
+**Remaining:**
+- Investigate local UI test runner timeout (`Timed out while enabling automation mode`) if reliable local UI smoke execution is required outside CI
+
+---
+
 ## 2026-03-11 — Add Brew tooling bundle file
 
 **Completed:**

@@ -1,15 +1,14 @@
 //
-//  BrewUIUITestsLaunchTests.swift
-//  BrewUIUITests
+//  BrewUITestsLaunchTests.swift
+//  BrewUITests
 //
 //  Created by Graeme Arthur on 6/3/2026.
 //
 
 import XCTest
 
-final class BrewUIUITestsLaunchTests: XCTestCase {
-
-    override class var runsForEachTargetApplicationUIConfiguration: Bool {
+final class BrewUITestsLaunchTests: XCTestCase {
+    override static var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }
 
@@ -18,7 +17,7 @@ final class BrewUIUITestsLaunchTests: XCTestCase {
     }
 
     @MainActor
-    func testLaunch() throws {
+    func testLaunch() {
         let app = XCUIApplication()
         app.launch()
 

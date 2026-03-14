@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  BrewUI
+//  Brew
 //
 //  Created by Graeme Arthur on 6/3/2026.
 //

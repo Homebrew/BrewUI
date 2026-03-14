@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# bootstrap — one-time/local setup for BrewUI development.
+# bootstrap — one-time/local setup for Brew development.
 #
 # Safe to re-run: installs missing tooling and refreshes package resolution.
 
@@ -37,7 +37,7 @@ echo "==> Installing repository git hooks"
 "$ROOT_DIR/scripts/install-git-hooks"
 
 echo "==> Resolving Swift package dependencies"
-xcodebuild -resolvePackageDependencies -project "$ROOT_DIR/BrewUI.xcodeproj"
+xcodebuild -resolvePackageDependencies -project "$ROOT_DIR/Brew.xcodeproj"
 
 # ---------------------------------------------------------------------------
 # Per-developer signing config
@@ -51,11 +51,11 @@ if [ ! -f "$SIGNING_LOCAL" ]; then
     echo "==> Created Configurations/Signing.local.xcconfig"
     echo "    Open that file and replace YOUR_TEAM_ID_HERE with your"
     echo "    10-character Apple Team ID (Xcode → Settings → Accounts)."
-    echo "    Then open BrewUI.xcodeproj — signing will resolve automatically."
+    echo "    Then open Brew.xcodeproj — signing will resolve automatically."
 else
     echo "==> Signing config already exists (Configurations/Signing.local.xcconfig)"
 fi
 
 echo ""
 echo "==> Bootstrap complete"
-echo "Next step: open BrewUI.xcodeproj"
+echo "Next step: open Brew.xcodeproj"

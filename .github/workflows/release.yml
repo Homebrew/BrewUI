@@ -59,10 +59,10 @@ jobs:
       - name: Build and archive
         run: |
           xcodebuild archive \
-            -project BrewUI.xcodeproj \
-            -scheme BrewUI \
+            -project Brew.xcodeproj \
+            -scheme Brew \
             -configuration Release \
-            -archivePath "$RUNNER_TEMP/BrewUI.xcarchive" \
+            -archivePath "$RUNNER_TEMP/Brew.xcarchive" \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
@@ -85,7 +85,7 @@ jobs:
           </plist>
           EOF
           xcodebuild -exportArchive \
-            -archivePath "$RUNNER_TEMP/BrewUI.xcarchive" \
+            -archivePath "$RUNNER_TEMP/Brew.xcarchive" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             -exportPath "$RUNNER_TEMP/export"
 

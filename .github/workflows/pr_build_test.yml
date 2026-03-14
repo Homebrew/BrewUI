@@ -4,11 +4,11 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
-      - "BrewUI/**"
+      - "Brew/**"
+      - "BrewTests/**"
       - "BrewUITests/**"
-      - "BrewUIUITests/**"
-      - "BrewUI.xcodeproj/**"
-      - "BrewUI.entitlements"
+      - "Brew.xcodeproj/**"
+      - "Brew.entitlements"
       - "Package.resolved"
       - ".github/workflows/pr_build_test.yml"
 
@@ -29,16 +29,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Resolve package dependencies
-        run: xcodebuild -resolvePackageDependencies -project BrewUI.xcodeproj
+        run: xcodebuild -resolvePackageDependencies -project Brew.xcodeproj
 
       - name: Build and test
         run: |
           set -o pipefail
           xcodebuild test \
-            -project BrewUI.xcodeproj \
-            -scheme BrewUI \
+            -project Brew.xcodeproj \
+            -scheme Brew \
             -destination "platform=macOS" \
-            -only-testing "BrewUITests" \
+            -only-testing "BrewTests" \
             -skipPackagePluginValidation \
             -skipMacroValidation \
             CODE_SIGN_IDENTITY="" \
