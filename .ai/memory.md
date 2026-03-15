@@ -62,6 +62,15 @@
 - Repository root folder remains `BrewUI` (part of a larger parent project layout).
 - App bundle/package identifier remains unchanged for compatibility (`sh.brew.BrewUI`), while test bundle identifiers were updated to match renamed targets (`sh.brew.BrewTests` and `sh.brew.BrewUITests`).
 
+## 2026-03-15 — Actionlint Policy-Compliant Pattern
+
+- GitHub workflow linting should avoid `uses: docker://...` because org allowlist policy can reject it.
+- Preferred pattern for this repo is Homebrew-influenced and allowlist-friendly:
+  - use `Homebrew/actions/setup-homebrew@main`
+  - use `Homebrew/actions/cache-homebrew-prefix@main` to install `actionlint`/`shellcheck`
+  - run `actionlint` via a `run:` step
+- Actionlint remains path-scoped to workflow changes for low CI overhead.
+
 ## 2026-03-20 — Decision logging (no ADRs)
 
 - **No `docs/adr/`:** Architecture Decision Records are not used in this repo.
