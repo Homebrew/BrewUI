@@ -1,22 +1,51 @@
 name: Actionlint
 
 on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - ".github/workflows/**"
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
       - ".github/workflows/**"
 
-permissions:
-  contents: read
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
+concurrency:
+  group: actionlint-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions: {}
 
 jobs:
-  actionlint:
+  workflow_syntax:
     name: Lint GitHub workflows
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'Homebrew'
+    permissions:
+      contents: read
     steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          core: false
+          cask: false
+
+      - name: Install actionlint and shellcheck
+        uses: Homebrew/actions/cache-homebrew-prefix@main
+        with:
+          install: actionlint shellcheck
+          workflow-key: actionlint
+
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Run actionlint
-        uses: docker://rhysd/actionlint:latest
         with:
-          args: -color -shellcheck=
+          persist-credentials: false
+
+      - name: Run actionlint
+        run: actionlint

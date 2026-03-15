@@ -5,6 +5,22 @@
 
 ---
 
+## 2026-03-15 — Align Actionlint workflow with Homebrew style
+
+**Completed:**
+- Replaced disallowed `uses: docker://rhysd/actionlint:latest` in `.github/workflows/actionlint.yml` with an allowlist-compliant approach using Homebrew-owned setup actions and a direct `run: actionlint`
+- Updated workflow structure to mirror mature Homebrew conventions where appropriate:
+  - added strict shell defaults (`bash -xeuo pipefail`)
+  - added concurrency control for PR runs
+  - expanded triggers to include pushes to `main`/`master` when workflow files change
+  - set explicit minimal job permissions and `persist-credentials: false` on checkout
+- Kept scope intentionally lightweight (no SARIF/zizmor multi-job pipeline) for current repo maturity
+
+**Remaining:**
+- Optionally add branch/ruleset required-check enforcement for the `Actionlint` check if merge-blocking behavior is desired
+
+---
+
 ## 2026-03-14 — Rename project and test targets to Brew
 
 **Completed:**
