@@ -1,6 +1,15 @@
 name: Swift Quality
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.swift"
+      - ".swiftlint*"
+      - ".swiftformat"
+      - "Brewfile"
+      - "scripts/pre-commit"
   pull_request:
     types: [opened, reopened, synchronize]
     paths:

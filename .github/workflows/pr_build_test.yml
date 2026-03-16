@@ -1,6 +1,17 @@
 name: Build and Unit Tests
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Brew/**"
+      - "BrewTests/**"
+      - "BrewUITests/**"
+      - "Brew.xcodeproj/**"
+      - "Brew.entitlements"
+      - "Package.resolved"
+      - ".github/workflows/pr_build_test.yml"
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
