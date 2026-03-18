@@ -5,24 +5,35 @@
 
 ## Memory Tools
 
-When working in Cowork mode or Claude Code, use the todo list tool to track multi-step tasks within a session. This complements (does not replace) `.ai/progress.md`, which is the persistent cross-session record.
+When working in Cowork mode or Claude Code, use the todo list tool to track multi-step tasks within a session.
+Use local `.ai/progress.md` only for personal continuity when needed (it is gitignored in this repo).
 
-## Session Discipline
+## Scope of This File
 
-- At the **start** of a session: read `.ai/memory.md` and `.ai/progress.md`.
-- At the **end** of a session: update `.ai/progress.md` and, if anything durable was learned, `.ai/memory.md`.
-- Use `.ai/scratchpad.md` freely for working notes.
+- `AGENTS.md` is the canonical, cross-agent policy source.
+- `CLAUDE.md` should contain only Claude-specific behavior extensions.
 
-## Clarification Before Action
+## When Providing Code
 
-If a task is ambiguous or underspecified, ask one focused clarifying question before proceeding — do not make silent assumptions on consequential decisions.
+Always include:
+- Necessary imports (`Foundation`, `SwiftUI`, etc.)
+- Complete, compilable examples — not pseudocode or stubs unless explicitly asked
+- Error handling, not just the happy path
+- `@MainActor` annotations wherever UI state is updated
+- A brief comment explaining any non-obvious Swift behaviour
+- After writing or editing code, briefly summarise what changed and why
 
-## Code Generation
+```swift
+import Foundation
+import SwiftUI
 
-- Prefer editing existing files over creating new ones unless a new file is clearly needed.
-- When creating files, match the conventions in `CONVENTIONS.md` exactly.
-- After writing or editing code, briefly summarise what changed and why.
+@Observable
+@MainActor
+final class ExampleViewModel {
+    var formulae: [Formula] = []
 
-## ADR Creation
-
-When you make or confirm a significant design decision, proactively suggest creating an ADR. Use `docs/adr/0000-template.md` as the template and number it sequentially.
+    func loadFormulae() async throws {
+        formulae = try await repository.fetchInstalled()
+    }
+}
+```

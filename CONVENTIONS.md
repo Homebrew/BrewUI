@@ -6,9 +6,9 @@
 
 ## Language & Platform
 
-- **Platform:** macOS (native)
-- **Primary language:** Swift / SwiftUI
-- **Minimum macOS version:** _[To be confirmed once prototype is migrated]_
+- **Platform:** macOS (native) — Tahoe 26, Sequoia 15, Sonoma 14; **minimum: Tahoe 26**
+- **Language:** Swift 6.0 with strict concurrency mode enabled
+- **UI Framework:** SwiftUI — pure; use AppKit only when SwiftUI cannot meet a requirement
 - **Dependency manager:** Swift Package Manager (SPM)
 
 ---
@@ -19,28 +19,47 @@
 > The following summarises the most relevant rules. When in doubt, defer to the official guidelines.
 
 ### Files
-- Named after the primary type they define, in `UpperCamelCase` — e.g. `PackageListView.swift`, `BrewService.swift`.
+- Named after the primary type they define, in `UpperCamelCase` — e.g. `PackageListView.swift`, `BrewCommandService.swift`.
 - One primary type per file. Small supporting types (e.g. a private helper struct) may live in the same file if they exist solely to support it.
-- Test files mirror their source counterpart with a `Tests` suffix — e.g. `BrewServiceTests.swift`.
+- Test files mirror their source counterpart with a `Tests` suffix — e.g. `BrewCommandServiceTests.swift`.
 
 ### Types (classes, structs, enums, protocols, typealiases)
-- `UpperCamelCase` — e.g. `Package`, `InstallState`, `BrewServiceProtocol`.
+- `UpperCamelCase` — e.g. `Formula`, `InstallState`, `FormulaRepository`.
 - Protocols describing what something **is** use nouns — e.g. `Collection`, `Publisher`.
 - Protocols describing a **capability** use `-able`, `-ible`, or `-ing` suffixes — e.g. `Equatable`, `ProgressReporting`.
 - Enum cases: `lowerCamelCase` — e.g. `case notInstalled`, `case installing`.
 
+### Architecture-specific naming
+
+The project follows a layered architecture (see `ARCHITECTURE.md`). Naming conventions per layer:
+
+| Layer | Protocol | Real implementation | Test/demo double |
+|---|---|---|---|
+| **Repositories** | `FormulaRepository` | `BrewFormulaRepository` | `MockFormulaRepository` |
+| **Interactors** | `RunDoctorInteracting` | `RunDoctorInteractor` | `MockRunDoctorInteractor` |
+| **ViewModels** | — | `InstalledViewModel` | — |
+| **Services** | — | `BrewCommandService`, `JSONAPIService` | — |
+| **Models** | — | `Formula`, `CommandJob`, `BrewConfig` | — |
+| **Views** | — | `InstalledView`, `PackageRow`, `CommandOutputView` | — |
+
+Rules:
+- **Repository protocols** are named for the resource (`FormulaRepository`). The `Brew` prefix belongs on the concrete implementation.
+- **Interactor protocols** use the `-Interacting` suffix; implementations use `-Interactor`. No `Brew` prefix when the type name is already self-explanatory.
+- **ViewModels** are named after the screen/tab they serve: `InstalledViewModel`, `DiscoverViewModel`.
+- Keep names concise and self-documenting — `RunDoctorInteractor` over `BrewRunDoctorInteractor`.
+
 ### Functions & Methods
-- `lowerCamelCase` — e.g. `fetchInstalledPackages()`, `uninstall(_ package: Package)`.
+- `lowerCamelCase` — e.g. `fetchInstalledFormulae()`, `uninstall(_ formula: Formula)`.
 - Name for **clarity at the point of use**, not brevity at the point of definition.
-- Mutating/non-mutating pairs should be consistent: non-mutating returns a new value (`sorted()`), mutating modifies in place (`sort()`).
+- Mutating/non-mutating pairs: non-mutating returns a new value (`sorted()`), mutating modifies in place (`sort()`).
 - Boolean methods and properties read as assertions — e.g. `isEmpty`, `isInstalled`, `canUpdate`.
 - Omit needless words; don't repeat type information already visible from context.
 
 ### Variables & Constants
-- `lowerCamelCase` for both — e.g. `let packageName`, `var installedPackages`.
+- `lowerCamelCase` for both — e.g. `let formulaName`, `var installedFormulae`.
 - Use `let` by default; reach for `var` only when mutation is genuinely needed.
-- No Hungarian notation or type suffixes in variable names — not `packageArray`, `nameString`.
-- Avoid abbreviations unless they are universally understood (e.g. `url`, `id` are fine; `pkg`, `mgr` are not).
+- No Hungarian notation or type suffixes — not `formulaArray`, `nameString`.
+- Avoid abbreviations unless universally understood — `url` and `id` are fine; `pkg`, `fml`, `mgr` are not.
 
 ---
 
@@ -49,11 +68,15 @@
 > **Official formatter:** [`swift-format`](https://github.com/swiftlang/swift-format) (the Swift project's own tool — prefer this over third-party linters as the primary style enforcer).
 
 - **Indentation:** 4 spaces (Xcode and `swift-format` default).
-- **Line length:** 100 characters (a reasonable default; adjust in `.swift-format` config if needed once the project structure is confirmed).
-- Prefer clarity over brevity — this is a first-party principle from the Swift API Design Guidelines.
-- Avoid magic numbers and magic strings — use named constants with a comment if the name alone isn't self-explanatory.
-- Prefer value types (`struct`, `enum`) over reference types (`class`) unless you need reference semantics, inheritance, or `@Observable`/Combine integration.
+- **Line length:** 100 characters (adjust in `.swift-format` config if the project warrants it).
+- **Concurrency:** Swift 6.0 strict concurrency mode is enabled. All shared mutable state must be protected — via actors, `@MainActor`, or `Sendable` conformances. Do not disable concurrency checks.
+- **Async/await:** Use `async`/`await` for all I/O and command execution. Avoid completion handlers. Never block the main thread.
+- Prefer value types (`struct`, `enum`) over reference types (`class`) unless reference semantics, inheritance, or `@Observable` integration require it.
 - Use `guard` for early exits rather than deeply nested `if` statements.
+- Avoid magic numbers and magic strings — use named constants with a comment if the name alone is not self-explanatory.
+- Prefer clarity over brevity — this is a first-party principle from the Swift API Design Guidelines.
+- Avoid global mutable state — prefer environment objects or injected dependencies.
+- Hard-coded paths are forbidden — use `ProcessInfo.processInfo.environment` or `FileManager` to locate `brew`.
 
 ---
 
@@ -61,11 +84,26 @@
 
 > Swift's error handling model: [The Swift Programming Language — Error Handling](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/errorhandling/)
 
-- Define typed errors using `enum` conforming to `Error`, with associated values where appropriate.
+- Define typed errors using `enum` conforming to `Error`, with associated values where appropriate. Domain-specific types include `BrewCommandError`, `JSONParseError`, `InstallationError`.
+- User-facing error messages must be separate from technical details. Show a friendly message to the user; log the full technical error internally.
+- Provide suggested recovery actions in error UI where possible.
 - Never use `try!` anywhere — production or tests. In production, handle or propagate errors properly. In tests, a thrown error should fail the test cleanly, not crash the process mid-run.
 - Never use force-unwrap (`!`) anywhere — production or tests. Use unwrapping assertions instead: `XCTUnwrap` in XCTest, or [`#require`](https://developer.apple.com/documentation/testing/require(_:_:sourceLocation:)-5l63q) in Swift Testing. These fail the test with a clear message rather than crashing.
 - Reserve `try?` for cases where failure is genuinely uninteresting and you have explicitly decided to discard the error — add a comment explaining that decision.
 - Never silently swallow errors. At minimum, log; ideally surface meaningfully to the user.
+
+---
+
+## SwiftUI Best Practices
+
+> Reference: [SwiftUI Documentation](https://developer.apple.com/documentation/swiftui)
+
+- Extract subviews when a view body exceeds ~100 lines.
+- Use `@ViewBuilder` for conditional view logic.
+- Prefer `.task {}` over `.onAppear {}` for async work — `.task` is lifecycle-aware and cancels automatically.
+- Use custom view modifiers for repeated styling rather than duplicating modifiers inline.
+- Use environment objects for cross-feature state.
+- Annotate all UI-touching code with `@MainActor`.
 
 ---
 
@@ -78,11 +116,11 @@
 - Use structured markup for parameters, return values, and thrown errors:
 
 ```swift
-/// Fetches the list of packages currently installed via Homebrew.
+/// Fetches the list of formulae currently installed via Homebrew.
 ///
-/// - Returns: An array of ``Package`` values representing installed formulae.
-/// - Throws: ``BrewError.notInstalled`` if Homebrew cannot be located.
-func fetchInstalledPackages() async throws -> [Package]
+/// - Returns: An array of ``Formula`` values representing installed formulae.
+/// - Throws: ``BrewCommandError.notFound`` if Homebrew cannot be located.
+func fetchInstalledFormulae() async throws -> [Formula]
 ```
 
 - Inline comments (`//`) should explain **why**, not **what**. The code itself should make the *what* obvious.
@@ -95,6 +133,24 @@ func fetchInstalledPackages() async throws -> [Package]
 
 ---
 
+## Accessibility
+
+> Reference: [Apple Accessibility Guidelines](https://developer.apple.com/documentation/accessibility)
+
+- **All interactive UI elements** must have accessibility labels (and hints where they clarify behaviour) so VoiceOver and other assistive technologies describe them correctly. Use `.accessibilityLabel(_:)` and `.accessibilityHint(_:)`.
+- Use semantic SwiftUI controls (`Button`, `NavigationLink`, `Toggle`) so the accessibility tree stays meaningful — avoid recreating native behaviour with custom gestures.
+- Provide **standard keyboard shortcuts** where applicable (e.g. ⌘R for refresh, Escape to cancel). Use `.keyboardShortcut(_:)` and document shortcuts in tooltips or help text.
+- Aim for a VoiceOver-friendly view hierarchy: logical order, no redundant elements, grouped content with `.accessibilityElement(children: .combine)` where appropriate.
+- Ensure sufficient colour contrast and support Dynamic Type where feasible.
+
+### Accessibility identifiers for UI tests
+- All elements used in UI tests must have an accessibility identifier set via `.accessibilityIdentifier(_:)`.
+- **Single source of truth:** define all identifiers in `Utilities/AccessibilityIdentifiers.swift`. This file must be compiled into both the main app target and the UI test target — do not duplicate identifier strings in the test target.
+- Use stable, semantic IDs that survive copy and layout changes — e.g. `sidebar.installed`, `toolbar.search`, `doctor.runButton`.
+- When adding a new screen or primary control, add its identifier to the shared constants first, then set it on the view.
+
+---
+
 ## Testing
 
 > **Framework:** [Swift Testing](https://developer.apple.com/documentation/testing/) (preferred for new tests) or XCTest.
@@ -102,9 +158,21 @@ func fetchInstalledPackages() async throws -> [Package]
 
 - Test files live in a `Tests/` target within the Swift package.
 - Test names should read as sentences describing the behaviour under test — e.g. `testFetchReturnsEmptyArrayWhenBrewNotInstalled`.
-- Mock/stub Homebrew CLI interactions — tests should never invoke real `brew` subprocesses.
+- **Unit tests cover:** command/output parsing (in Interactors or Models), JSON decoding, and ViewModels (with mocked Repositories). Mock Repositories — not just `BrewCommandService` — so that ViewModel presentation logic is isolated from data concerns.
+- **UI tests:** use accessibility identifiers from `AccessibilityIdentifiers.swift` — the same constants the app uses. Do not hard-code identifier strings in the test target.
+- Test async flows using Swift Concurrency testing support.
+- Test error paths and edge cases explicitly — not just the happy path.
 - Never use `try!` or force-unwrap (`!`) in tests — a crashing test gives no useful failure message and can prevent other tests from running. Use `XCTUnwrap` (XCTest) or `#require` (Swift Testing) to unwrap optionals and propagate thrown errors as clean test failures.
-- _[Further testing conventions to be filled in once prototype is migrated]_
+- Mock and stub all `brew` CLI interactions — tests must never invoke real `brew` subprocesses.
+
+---
+
+## Dependencies
+
+- Avoid external dependencies where possible. Foundation and SwiftUI cover most needs.
+- If a dependency is needed, prefer well-maintained packages from Apple or the Swift open-source community.
+- Every dependency must have a documented justification — add a comment in `Package.swift` explaining why it is needed.
+- Version-lock all dependencies for build stability.
 
 ---
 
@@ -112,7 +180,6 @@ func fetchInstalledPackages() async throws -> [Package]
 
 - Commit messages: imperative mood — "Add package list view", not "Added" or "Adding".
 - One logical change per commit. Do not mix feature changes with refactors.
-- Branch naming: _[To be confirmed — e.g. `feature/`, `fix/`, `chore/`]_
 
 ---
 

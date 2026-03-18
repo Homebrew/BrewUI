@@ -4,24 +4,53 @@
 
 ---
 
+## Always Web-Search Versioned or Scheduled Values
+
+Before using any value that changes on a regular or unpredictable schedule, always perform a web search rather than relying on training knowledge. This includes but is not limited to:
+
+- CI runner tags and OS versions (e.g. `macos-latest`, `macos-26`, `ubuntu-latest`)
+- Xcode and Swift toolchain version strings
+- GitHub Actions action versions (e.g. `actions/checkout@v4`)
+- Homebrew formula versions or tap names
+- Apple SDK / deployment target version numbers
+- Any third-party dependency version that may have had releases
+
+Training data has a cutoff and will silently be wrong about these. A web search takes seconds; a wrong version can waste hours.
+
+---
+
+## First-time Setup
+
+Run `scripts/bootstrap` before opening the project. It installs tooling, resolves Swift packages, and creates `Configurations/Signing.local.xcconfig` from the committed example file. Open that file and replace `YOUR_TEAM_ID_HERE` with your 10-character Apple Team ID — Xcode resolves signing automatically after that.
+
+`Configurations/Signing.local.xcconfig` is gitignored. Do not commit it.
+
+---
+
 ## Project Overview
 
-**BrewUI** is Homebrew's official macOS GUI — a native macOS application that provides a graphical interface for managing Homebrew packages, casks, and updates.
+**BrewUI** is Homebrew's official macOS GUI — a native macOS application that makes Homebrew approachable for users who prefer graphical interfaces over Terminal, while maintaining complete transparency about underlying operations.
 
-> ⚠️ This file contains placeholder sections. When project-specific context is migrated from the prototype repo, update the relevant sections and remove this notice.
+**Mission:** Enable CLI-averse users to safely discover, install, update, and manage Homebrew packages through a native SwiftUI interface that never hides what Homebrew is doing.
+
+**Stack:** Swift 6.0 · SwiftUI · Swift Package Manager · macOS Tahoe 26+ (also Sequoia 15, Sonoma 14)
+
+See `ARCHITECTURE.md` for full design detail.
 
 ---
 
 ## Core Rules
 
 1. **Read before writing.** Before editing any file, understand its current state and purpose. Check `ARCHITECTURE.md` and relevant ADRs if your change touches structure or design.
-2. **Update memory when context changes.** If you learn something important about the project (a decision, a pattern, a constraint), add it to `.ai/memory.md` before ending the session.
-3. **Update progress at session end.** Before finishing any work session, update `.ai/progress.md` with what was completed and what remains.
+2. **Update memory when context changes.** If you learn something important about the project (a decision, a pattern, a constraint), add it to `.ai/memory.md` or a new ADR before ending the session.
+3. **Track local progress as needed.** Use local `.ai/progress.md` notes for active session continuity; keep PRs focused on product and project-documentation changes.
 4. **Respect existing conventions.** Consult `CONVENTIONS.md` before introducing new patterns, file structures, or naming schemes.
 5. **Document significant decisions.** Any non-obvious architectural or design decision should be captured as an ADR in `docs/adr/`. Use the template at `docs/adr/0000-template.md`.
 6. **Do not guess at intent.** If requirements are ambiguous, note the ambiguity in `.ai/scratchpad.md` and surface it to the user rather than making assumptions silently.
-7. **Prefer small, focused commits.** Each change should do one thing and have a clear commit message.
-8. **Never remove or overwrite memory files.** `.ai/memory.md` and `.ai/progress.md` are append-and-update files. Do not wipe their history.
+7. **Stay in scope for the current deliverable.** Check active roadmap docs/issues and local progress notes before implementation. Do not implement features from later phases. Each deliverable should be independently useful before the next begins.
+8. **Work in small, focused stories.** Each task should be a single user story or feature. After completing one, run the quality gates before starting the next (see Workflow).
+9. **Prefer small, focused commits.** Each change should do one thing and have a clear commit message.
+10. **Never remove or overwrite durable memory files.** `.ai/memory.md` is append-and-update. Do not wipe its history.
 
 ---
 
@@ -30,16 +59,21 @@
 | File | Purpose | When to update |
 |---|---|---|
 | `.ai/memory.md` | Long-term project knowledge, decisions, constraints | When you learn something durable about the project |
-| `.ai/progress.md` | Current and recent work status | At the end of every work session |
+| `.ai/progress.md` (gitignored) | Local per-developer session notes | Optional; update at meaningful milestones |
 | `.ai/scratchpad.md` | Transient working notes | During a session; contents may be cleared between sessions |
 
 ---
 
 ## Workflow
 
-1. **Start of session:** Read `.ai/memory.md` and `.ai/progress.md` to orient yourself.
+1. **Start of session:** Read `.ai/memory.md`; also read local `.ai/progress.md` if present.
 2. **During work:** Use `.ai/scratchpad.md` for working notes. Consult `ARCHITECTURE.md` and `docs/adr/` for context on design decisions.
-3. **End of session:** Update `.ai/progress.md`. If anything belongs in long-term memory, update `.ai/memory.md`.
+3. **After each story/feature:** Run quality gates before marking it complete and moving on:
+   - Unit tests pass
+   - UI tests pass
+   - Manual pre-merge checklist reviewed
+   - PR/review ready
+4. **End of session:** Update local `.ai/progress.md` if useful for continuity. If anything belongs in long-term shared memory, update `.ai/memory.md` or add an ADR.
 
 ---
 
@@ -48,15 +82,28 @@
 ```
 AGENTS.md           ← you are here; rules for all agents
 CLAUDE.md           ← Claude-specific extensions (thin)
-.cursorrules        ← Cursor-specific extensions (thin)
+.cursor/rules/      ← Cursor-specific rule files (thin, scoped)
 CONVENTIONS.md      ← code style, naming, patterns
 ARCHITECTURE.md     ← high-level system design
 docs/adr/           ← architecture decision records
 .ai/
   memory.md         ← long-term persistent knowledge
-  progress.md       ← current work state
+  progress.md       ← local current work state (gitignored)
   scratchpad.md     ← ephemeral working notes (gitignored)
 ```
+
+---
+
+## Instruction Precedence
+
+When guidance conflicts, resolve in this order:
+
+1. Explicit user request in the current conversation
+2. Nearest nested `AGENTS.md` to the file being edited
+3. Root `AGENTS.md`
+4. Tool-specific overlays (`CLAUDE.md`, `.cursor/rules/*`)
+
+Use executable checks (CI workflows and git hooks) as the source of truth for mandatory enforcement.
 
 ---
 
@@ -65,3 +112,6 @@ docs/adr/           ← architecture decision records
 - Do not modify `LICENSE`.
 - Do not commit secrets, API keys, or credentials.
 - Do not alter ADR files that are marked `Status: Accepted` without creating a superseding ADR.
+- Do not implement features from a future deliverable phase while the current one is incomplete.
+- Do not hard-code file paths — use `ProcessInfo` or `FileManager` to locate `brew`.
+- Do not hide errors from the user — surface them appropriately.
