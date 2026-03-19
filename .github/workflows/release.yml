@@ -55,7 +55,25 @@ jobs:
             -T /usr/bin/productbuild
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
+          CODESIGN_IDENTITIES=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true)
+          BASIC_IDENTITIES=$(security find-identity -v -p basic "$KEYCHAIN_PATH" || true)
+          echo "$CODESIGN_IDENTITIES"
+          echo "$BASIC_IDENTITIES"
+          if ! echo "$CODESIGN_IDENTITIES" | grep -q "Developer ID Application"; then
+            echo "Missing Developer ID Application identity in imported keychain."
+            exit 1
+          fi
+          if ! echo "$BASIC_IDENTITIES" | grep -q "Developer ID Installer"; then
+            echo "Missing Developer ID Installer identity in imported keychain."
+            exit 1
+          fi
           rm "$CERTIFICATE_PATH"
+
+      - name: Preflight signing configuration
+        run: |
+          echo "Using app signing identity: Developer ID Application"
+          echo "Using installer signing identity: Developer ID Installer"
+          echo "Using team ID: ${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}"
 
       - name: Build and archive
         run: |
@@ -90,6 +108,15 @@ jobs:
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             -exportPath "$RUNNER_TEMP/export"
 
+      - name: Verify app signature from export
+        run: |
+          APP_BUNDLE_PATH="$RUNNER_TEMP/export/Brew.app"
+          xcrun codesign -dv --verbose=4 "$APP_BUNDLE_PATH" 2>&1 | tee "$RUNNER_TEMP/app-signature.txt"
+          if ! grep -q "Authority=Developer ID Application" "$RUNNER_TEMP/app-signature.txt"; then
+            echo "Exported app is not signed with a Developer ID Application authority."
+            exit 1
+          fi
+
       # Ensure the postinstall script is executable — pkgbuild will reject it
       # otherwise. This is a safety net; the file should be committed +x.
       - name: Mark installer scripts executable
@@ -108,7 +135,7 @@ jobs:
             --version "$VERSION" \
             --install-location "/Applications" \
             --scripts scripts \
-            --sign "${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
+            --sign "Developer ID Installer" \
             --keychain "$KEYCHAIN_PATH" \
             "$RUNNER_TEMP/BrewUI-component.pkg"
 
@@ -117,10 +144,18 @@ jobs:
           PKG_PATH="$RUNNER_TEMP/BrewUI-${VERSION}.pkg"
           productbuild \
             --package "$RUNNER_TEMP/BrewUI-component.pkg" \
-            --sign "${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
+            --sign "Developer ID Installer" \
             --keychain "$KEYCHAIN_PATH" \
             "$PKG_PATH"
           echo "PKG_PATH=$PKG_PATH" >> "$GITHUB_ENV"
+
+      - name: Verify package signature
+        run: |
+          pkgutil --check-signature "$PKG_PATH" | tee "$RUNNER_TEMP/pkg-signature.txt"
+          if ! grep -q "Developer ID Installer" "$RUNNER_TEMP/pkg-signature.txt"; then
+            echo "Package is not signed with a Developer ID Installer authority."
+            exit 1
+          fi
 
       - name: Notarize package
         if: startsWith(github.ref, 'refs/tags/')
