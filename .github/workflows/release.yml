@@ -6,6 +6,7 @@ on:
       - 'v*.*.*'
     branches:
       - 'release-test'
+      - 'release-workflow/**'
   workflow_dispatch:
     inputs:
       version:
@@ -153,10 +154,9 @@ jobs:
 
       - name: Create GitHub release
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ env.PKG_PATH }}
-          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "$PKG_PATH" --generate-notes
 
       - name: Delete temporary keychain
         if: always()
