@@ -34,7 +34,7 @@ jobs:
   build-and-test:
     name: Build + unit tests
     runs-on: macos-26
-    timeout-minutes: 40
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
