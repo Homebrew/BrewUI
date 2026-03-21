@@ -185,4 +185,4 @@ func fetchInstalledFormulae() async throws -> [Formula]
 
 ## Updating This File
 
-When a new pattern or convention is established, add it here with a rationale if non-obvious. If the decision is significant, create an ADR in `docs/adr/` and link to it from the relevant section.
+When a new pattern or convention is established, add it here with a rationale if non-obvious. If the decision is significant or cross-cutting, also record it in `.ai/memory.md` and link or reference that entry from the relevant section if helpful.

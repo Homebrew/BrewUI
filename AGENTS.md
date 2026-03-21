@@ -41,11 +41,11 @@ See `ARCHITECTURE.md` for full design detail.
 
 ## Core Rules
 
-1. **Read before writing.** Before editing any file, understand its current state and purpose. Check `ARCHITECTURE.md` and relevant ADRs if your change touches structure or design.
-2. **Update memory when context changes.** If you learn something important about the project (a decision, a pattern, a constraint), add it to `.ai/memory.md` or a new ADR before ending the session.
+1. **Read before writing.** Before editing any file, understand its current state and purpose. If your change touches structure or design, check `ARCHITECTURE.md` and `.ai/memory.md` for prior decisions and constraints.
+2. **Update memory when context changes.** If you learn something important about the project (a decision, a pattern, a constraint), add it to `.ai/memory.md` before ending the session.
 3. **Track local progress as needed.** Use local `.ai/progress.md` notes for active session continuity; keep PRs focused on product and project-documentation changes.
 4. **Respect existing conventions.** Consult `CONVENTIONS.md` before introducing new patterns, file structures, or naming schemes.
-5. **Document significant decisions.** Any non-obvious architectural or design decision should be captured as an ADR in `docs/adr/`. Use the template at `docs/adr/0000-template.md`.
+5. **Document significant decisions.** Any non-obvious architectural or design decision should be captured in `.ai/memory.md` (append a dated entry with context and rationale).
 6. **Do not guess at intent.** If requirements are ambiguous, note the ambiguity in `.ai/scratchpad.md` and surface it to the user rather than making assumptions silently.
 7. **Stay in scope for the current deliverable.** Check active roadmap docs/issues and local progress notes before implementation. Do not implement features from later phases. Each deliverable should be independently useful before the next begins.
 8. **Work in small, focused stories.** Each task should be a single user story or feature. After completing one, run the quality gates before starting the next (see Workflow).
@@ -67,13 +67,13 @@ See `ARCHITECTURE.md` for full design detail.
 ## Workflow
 
 1. **Start of session:** Read `.ai/memory.md`; also read local `.ai/progress.md` if present.
-2. **During work:** Use `.ai/scratchpad.md` for working notes. Consult `ARCHITECTURE.md` and `docs/adr/` for context on design decisions.
+2. **During work:** Use `.ai/scratchpad.md` for working notes. Consult `ARCHITECTURE.md` and `.ai/memory.md` for structure and prior decisions.
 3. **After each story/feature:** Run quality gates before marking it complete and moving on:
    - Unit tests pass
    - UI tests pass
    - Manual pre-merge checklist reviewed
    - PR/review ready
-4. **End of session:** Update local `.ai/progress.md` if useful for continuity. If anything belongs in long-term shared memory, update `.ai/memory.md` or add an ADR.
+4. **End of session:** Update local `.ai/progress.md` if useful for continuity. If anything belongs in long-term shared memory, update `.ai/memory.md`.
 
 ---
 
@@ -84,8 +84,7 @@ AGENTS.md           ← you are here; rules for all agents
 CLAUDE.md           ← Claude-specific extensions (thin)
 .cursor/rules/      ← Cursor-specific rule files (thin, scoped)
 CONVENTIONS.md      ← code style, naming, patterns
-ARCHITECTURE.md     ← high-level system design
-docs/adr/           ← architecture decision records
+ARCHITECTURE.md     ← high-level system design (structure; brief context only when unusual)
 .ai/
   memory.md         ← long-term persistent knowledge
   progress.md       ← local current work state (gitignored)
@@ -111,7 +110,7 @@ Use executable checks (CI workflows and git hooks) as the source of truth for ma
 
 - Do not modify `LICENSE`.
 - Do not commit secrets, API keys, or credentials.
-- Do not alter ADR files that are marked `Status: Accepted` without creating a superseding ADR.
+- Do not contradict `ARCHITECTURE.md` or durable decisions recorded in `.ai/memory.md` without explicitly flagging the conflict.
 - Do not implement features from a future deliverable phase while the current one is incomplete.
 - Do not hard-code file paths — use `ProcessInfo` or `FileManager` to locate `brew`.
 - Do not hide errors from the user — surface them appropriately.

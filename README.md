@@ -14,7 +14,7 @@ Enable CLI-averse users to safely discover, install, update, and manage Homebrew
 
 ## Status
 
-Early development — currently building the app foundation (D1). Durable project direction and decisions live in `AGENTS.md`, `ARCHITECTURE.md`, and `docs/adr/`.
+Early development — currently building the app foundation (D1). Project rules and architecture live in `AGENTS.md` and `ARCHITECTURE.md`; durable decisions and constraints are recorded in `.ai/memory.md`.
 
 Optional local session tracking (for agents or developers; `.ai/progress.md` is gitignored):
 

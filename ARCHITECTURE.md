@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 > High-level system design for BrewUI.
-> Consult this before making structural changes. Update it (or create an ADR) when the architecture evolves.
+> Consult this before making structural changes. Update it when the layout of the system changes. Describe *what* exists and how it fits; add brief rationale only for *unusual* choices. Record durable decisions and their full rationale in `.ai/memory.md`.
 
 ---
 
@@ -215,4 +215,4 @@ These are first-class architectural constraints — they determine what guarante
 
 ## Updating This File
 
-Update this file when the component structure changes significantly, a new major subsystem is introduced, or a constraint or assumption is invalidated. For non-obvious *decisions* (why something was done a particular way), prefer creating an ADR in `docs/adr/` over adding prose here.
+Update this file when the component structure changes significantly, a new major subsystem is introduced, or a constraint or assumption is invalidated. Add extra narrative here only when something is non-obvious or easy to misread from the sections above. Record broader or contentious decisions in `.ai/memory.md`.
