@@ -19,15 +19,12 @@
 > The following summarises the most relevant rules. When in doubt, defer to the official guidelines.
 
 ### Files
-- Named after the primary type they define, in `UpperCamelCase` — e.g. `PackageListView.swift`, `BrewCommandService.swift`.
 - One primary type per file. Small supporting types (e.g. a private helper struct) may live in the same file if they exist solely to support it.
 - Test files mirror their source counterpart with a `Tests` suffix — e.g. `BrewCommandServiceTests.swift`.
 
 ### Types (classes, structs, enums, protocols, typealiases)
-- `UpperCamelCase` — e.g. `Formula`, `InstallState`, `FormulaRepository`.
 - Protocols describing what something **is** use nouns — e.g. `Collection`, `Publisher`.
 - Protocols describing a **capability** use `-able`, `-ible`, or `-ing` suffixes — e.g. `Equatable`, `ProgressReporting`.
-- Enum cases: `lowerCamelCase` — e.g. `case notInstalled`, `case installing`.
 
 ### Architecture-specific naming
 
@@ -49,14 +46,12 @@ Rules:
 - Keep names concise and self-documenting — `RunDoctorInteractor` over `BrewRunDoctorInteractor`.
 
 ### Functions & Methods
-- `lowerCamelCase` — e.g. `fetchInstalledFormulae()`, `uninstall(_ formula: Formula)`.
 - Name for **clarity at the point of use**, not brevity at the point of definition.
 - Mutating/non-mutating pairs: non-mutating returns a new value (`sorted()`), mutating modifies in place (`sort()`).
 - Boolean methods and properties read as assertions — e.g. `isEmpty`, `isInstalled`, `canUpdate`.
 - Omit needless words; don't repeat type information already visible from context.
 
 ### Variables & Constants
-- `lowerCamelCase` for both — e.g. `let formulaName`, `var installedFormulae`.
 - Use `let` by default; reach for `var` only when mutation is genuinely needed.
 - No Hungarian notation or type suffixes — not `formulaArray`, `nameString`.
 - Avoid abbreviations unless universally understood — `url` and `id` are fine; `pkg`, `fml`, `mgr` are not.
@@ -65,10 +60,7 @@ Rules:
 
 ## Code Style
 
-> **Official formatter:** [`swift-format`](https://github.com/swiftlang/swift-format) (the Swift project's own tool — prefer this over third-party linters as the primary style enforcer).
-
-- **Indentation:** 4 spaces (Xcode and `swift-format` default).
-- **Line length:** 100 characters (adjust in `.swift-format` config if the project warrants it).
+> **Formatting and linting:** Enforce mechanically checkable style in tool config (`.swiftformat`, `.swiftlint.yml`) rather than duplicating those rules here.
 - **Concurrency:** Swift 6.0 strict concurrency mode is enabled. All shared mutable state must be protected — via actors, `@MainActor`, or `Sendable` conformances. Do not disable concurrency checks.
 - **Async/await:** Use `async`/`await` for all I/O and command execution. Avoid completion handlers. Never block the main thread.
 - Prefer value types (`struct`, `enum`) over reference types (`class`) unless reference semantics, inheritance, or `@Observable` integration require it.
@@ -87,8 +79,6 @@ Rules:
 - Define typed errors using `enum` conforming to `Error`, with associated values where appropriate. Domain-specific types include `BrewCommandError`, `JSONParseError`, `InstallationError`.
 - User-facing error messages must be separate from technical details. Show a friendly message to the user; log the full technical error internally.
 - Provide suggested recovery actions in error UI where possible.
-- Never use `try!` anywhere — production or tests. In production, handle or propagate errors properly. In tests, a thrown error should fail the test cleanly, not crash the process mid-run.
-- Never use force-unwrap (`!`) anywhere — production or tests. Use unwrapping assertions instead: `XCTUnwrap` in XCTest, or [`#require`](https://developer.apple.com/documentation/testing/require(_:_:sourceLocation:)-5l63q) in Swift Testing. These fail the test with a clear message rather than crashing.
 - Reserve `try?` for cases where failure is genuinely uninteresting and you have explicitly decided to discard the error — add a comment explaining that decision.
 - Never silently swallow errors. At minimum, log; ideally surface meaningfully to the user.
 
@@ -111,7 +101,6 @@ Rules:
 
 > **Source of truth:** [DocC documentation](https://www.swift.org/documentation/docc/) and [Xcode doc comment format](https://developer.apple.com/documentation/xcode/writing-symbol-documentation-in-your-source-files)
 
-- Use `///` (triple-slash) for all documentation comments — Xcode and DocC recognise this format.
 - Document all `public` and `internal` types, methods, and properties unless they are trivially self-evident.
 - Use structured markup for parameters, return values, and thrown errors:
 
@@ -162,7 +151,6 @@ func fetchInstalledFormulae() async throws -> [Formula]
 - **UI tests:** use accessibility identifiers from `AccessibilityIdentifiers.swift` — the same constants the app uses. Do not hard-code identifier strings in the test target.
 - Test async flows using Swift Concurrency testing support.
 - Test error paths and edge cases explicitly — not just the happy path.
-- Never use `try!` or force-unwrap (`!`) in tests — a crashing test gives no useful failure message and can prevent other tests from running. Use `XCTUnwrap` (XCTest) or `#require` (Swift Testing) to unwrap optionals and propagate thrown errors as clean test failures.
 - Mock and stub all `brew` CLI interactions — tests must never invoke real `brew` subprocesses.
 
 ---
