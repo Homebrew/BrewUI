@@ -1,7 +1,4 @@
 # BrewUI
-<<<<<<< Updated upstream
-Homebrew's official macOS GUI
-=======
 
 Homebrew's official macOS GUI — making package management approachable for users who prefer graphical interfaces over Terminal, while maintaining complete transparency about underlying Homebrew operations.
 
@@ -24,4 +21,3 @@ Optional local session tracking (for agents or developers; `.ai/progress.md` is 
 ```bash
 cp .ai/progress.template.md .ai/progress.md
 ```
->>>>>>> Stashed changes
