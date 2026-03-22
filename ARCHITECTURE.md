@@ -1,22 +1,6 @@
 # ARCHITECTURE.md
-> High-level system design for BrewUI.
-> Consult this before making structural changes. Update it when the layout of the system changes. Describe *what* exists and how it fits; add brief rationale only for *unusual* choices. Record durable decisions and their full rationale in `.ai/memory.md`.
 
-## Document scope
-
-- **This file owns:** system shape, layers, responsibilities, data flow, file/folder layout, integration boundaries (Homebrew CLI / JSON API), and product-level constraints that affect structure.
-- **This file does not own:** naming rules beyond layer roles, code style, or contributor workflow — see [`CONVENTIONS.md`](CONVENTIONS.md).
-- **Cross-reference:** coding standards and patterns live in `CONVENTIONS.md`; defer there instead of restating the same guidance here.
-
----
-
-## Overview
-
-**BrewUI** is a native macOS GUI that makes Homebrew approachable for users who prefer graphical interfaces over Terminal, while maintaining complete transparency about underlying Homebrew operations.
-
-**Mission:** Enable CLI-averse users to safely discover, install, update, and manage Homebrew packages through a native SwiftUI interface that never hides what Homebrew is doing.
-
----
+> High-level system design for BrewUI. Update when structure changes. **Owns:** layers, data flow, folder layout, integrations (Homebrew CLI / JSON API), and product constraints. **Defers** naming and day-to-day coding patterns to [`CONVENTIONS.md`](CONVENTIONS.md). Record durable rationale in [`.ai/memory.md`](.ai/memory.md).
 
 ## Tech Stack
 
@@ -31,195 +15,78 @@
 | Data sources | Homebrew JSON API (`formulae.brew.sh`) + `brew` CLI subprocess |
 | Deployment | Unsandboxed macOS app (default Homebrew prefix) |
 
----
+## System shape
 
-## System Diagram
+Flow: **View → ViewModel → Repository *or* Interactor → Services →** `brew` CLI **or** JSON API.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                    BrewUI (macOS App)                        │
-│                                                              │
-│  ┌──────────────┐        ┌──────────────────────────────┐   │
-│  │    Views     │───────▶│  ViewModels (presentation)   │   │
-│  │  (SwiftUI)   │        └──────────┬───────────────────┘   │
-│  └──────────────┘                   │                        │
-│                          ┌──────────┴──────────┐            │
-│                          ▼                     ▼            │
-│               ┌────────────────┐   ┌────────────────────┐   │
-│               │  Repositories  │   │    Interactors     │   │
-│               │  (CRUD / data) │   │    (use cases)     │   │
-│               └───────┬────────┘   └─────────┬──────────┘   │
-│                       │                      │               │
-│                  ┌────┴──────────────────────┴────┐         │
-│                  │           Services              │         │
-│                  │  BrewCommandService             │         │
-│                  │  JSONAPIService                 │         │
-│                  └────────────────┬───────────────┘         │
-└───────────────────────────────────┼────────────────────────-┘
-                                    │
-              ┌─────────────────────┴──────────────────────┐
-              │  External                                   │
-              │  ├── brew CLI (subprocess)                  │
-              │  └── formulae.brew.sh JSON API              │
-              └─────────────────────────────────────────────┘
+│  Views (SwiftUI) ──▶ ViewModels                              │
+│         │                    │                               │
+│         │          Repositories    Interactors               │
+│         │                 └────┬────┘                        │
+│         │                      Services (brew + JSON API)   │
+└────────────────────────────────┼─────────────────────────────┘
+                                 ▼
+              brew CLI (subprocess) · formulae.brew.sh JSON API
 ```
 
----
+## Core components
 
-## Core Components
+- **Views:** SwiftUI; thin — bind state, forward actions. Shared pieces in `Views/`.
+- **ViewModels:** Presentation state and mapping; delegate work downward. Keep domain rules in Interactors or Models, not here.
+- **Repositories:** CRUD-shaped access to a **data source** (CLI output, API, storage, in-memory). Swap the implementation, keep the contract.
+- **Interactors:** One **use case** each — not generic CRUD (e.g. doctor run, config snapshot). Prefer protocols + real/mock impls for tests.
+- **Services:** Infrastructure — e.g. `BrewCommandService` (subprocess, streaming, cancellation), `JSONAPIService` (fetch/decode).
+- **Models:** Shared types (`Formula`, jobs, config, …) and pure parsing/helpers where it keeps UI layers thin.
 
-### Views (SwiftUI layer)
-- Thin. Bind to ViewModel state and invoke ViewModel actions. No business logic or parsing.
-- Extract subviews when a view body exceeds ~100 lines.
-- One primary View per feature/screen (e.g. `InstalledView`, `DiscoverView`).
-- Reusable components (shared across features) live in `Views/`.
-
-### ViewModels (Presentation layer)
-- Hold state the View needs; map data to UI-ready representations.
-- Own transient UI state (e.g. `searchQuery`, `isLoading`, `selection`, sheet visibility) when Repositories cannot own it.
-- Properties and function names map directly to View components (e.g. `toolbarTitle`, `packageRows`, `onPackageTapped`).
-- **Business logic does not live here** — it belongs in Interactors or Models.
-- Keep testable logic in the ViewModel, not in the View; Views remain thin and declarative.
-- One ViewModel per tab/screen: `InstalledViewModel`, `DiscoverViewModel`, etc.
-
-### Repositories (Data / CRUD layer)
-- Abstract **CRUD operations on a data source** — the contract you'd swap if the backing store changed.
-- Implementations may be: CLI (via `BrewCommandService`, treating output as fetched/cached data), JSON API (via `JSONAPIService`), SwiftData/UserDefaults, or in-memory.
-- Caching and cache invalidation are implementation details of the repository.
-- Can expose async sequences or callbacks for live updates.
-
-### Interactors (Use-case layer)
-- Carry out **a single use case** that is not a CRUD operation on a stored data source.
-- Examples: running `brew doctor` and mapping its output to structured issues; running `brew config` and returning key/value pairs.
-- Defined by a protocol per use case so implementations can be swapped (real vs. mock) for testing.
-- May call Services and Repositories; return a typed domain result.
-- Do **not** use a Repository for run-and-return workflows with no notion of persistence.
-
-### Services
-- Low-level infrastructure shared by Repositories and Interactors.
-- **`BrewCommandService`**: spawns and manages `brew` subprocesses, streams stdout/stderr line-by-line, handles cancellation, exposes `CommandJob`.
-- **`JSONAPIService`**: fetches and decodes Homebrew JSON API responses.
-
-### Models
-- Shared domain types: `Formula`, `CommandJob`, `BrewConfig`, etc.
-- May encapsulate domain rules and pure functions (e.g. parsing `brew list` output into `[Formula]`).
-- Keep Views and ViewModels free of parsing and validation details.
-
----
-
-## File Organisation
+## File organisation
 
 ```
-Features/         ← One folder per major feature (Installed, Discover, Updates, Doctor, Config, …)
-│                   Each may contain: View, ViewModel, and optionally a feature-local Interactor.
-Models/           ← Shared domain types (Formula, CommandJob, BrewConfig, …)
-Repositories/     ← Protocols + implementations for CRUD on a data source
-Interactors/      ← Protocols + implementations for use cases
-Services/         ← BrewCommandService, JSONAPIService
-Views/            ← Reusable UI components shared across features
-Utilities/        ← Extensions, helpers, constants
-└── AccessibilityIdentifiers.swift  ← single source of truth for accessibility IDs;
-                                       compiled into both the app and UI test targets
+Features/          ← per feature: View, ViewModel, optional local Interactor
+Models/
+Repositories/
+Interactors/
+Services/
+Views/             ← reusable UI across features
+Utilities/
+└── AccessibilityIdentifiers.swift  ← shared with UI tests; single source for IDs
 ```
 
----
+## Command execution
 
-## Data Flow
+Run Homebrew commands **asynchronously** via subprocess; support **cancellation**; **stream or preserve** stdout/stderr for transparency and logs. Always make the **exact command** visible to the user; treat **CLI text output as unstable** (tolerant parsing, fallbacks).
 
-1. User triggers an action in the UI (e.g. "Install package").
-2. View calls ViewModel action.
-3. ViewModel delegates to Repository or Interactor.
-4. Repository/Interactor calls `BrewCommandService` (or `JSONAPIService`).
-5. Service streams output line-by-line; updates `CommandJob` state.
-6. ViewModel receives structured result and updates published properties.
-7. View re-renders reactively via `@Observable`.
+## JSON API
 
----
+Use the [Homebrew JSON API](https://formulae.brew.sh/docs/api/) where it helps. Prefer **optional / resilient decoding** — schema can change; **never crash** on unknown fields. Combine with CLI only as needed when the app grows.
 
-## Command Execution Pattern
+## Constraints & decisions
 
-All Homebrew commands are executed asynchronously with streamed output via `Process`. Commands are cancellable; status is tracked as `queued / running / success / failure`. stdout and stderr are parsed separately. Full output is always preserved for session logs and user transparency.
+- **macOS-only.** No iOS / iPadOS / cross-platform for now.
+- **Default Homebrew prefix only:** `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel). No custom prefix initially.
+- **No custom taps initially** — core tap scope.
+- **`brew` is the source of truth** — BrewUI does not poke Homebrew internals.
+- **Transparency** — users see what runs; no hidden commands.
+- **Homebrew is separate** — detect and degrade if missing; do not bundle Homebrew.
+- **Detection:** try `/opt/homebrew/bin/brew` then `/usr/local/bin/brew`.
+- **Open source** — patterns should stay contributor-friendly.
 
-```swift
-// Step 1: build command array
-let args = ["brew", "info", "wget"]
+### Platform constraints
 
-// Step 2: create Process with stdout/stderr pipes
-// Step 3: stream output line-by-line into CommandJob.output
-// Step 4: parse exit code for success/failure
-// Step 5: update UI state on @MainActor
-// Step 6: preserve full command string and output for logs
-
-@Observable
-class CommandJob: Identifiable {
-    let id = UUID()
-    let command: String
-    var status: JobStatus
-    var output: [String]
-    var exitCode: Int32?
-}
-```
-
----
-
-## JSON API Integration
-
-- Endpoints: `https://formulae.brew.sh/api/formula.json` and `cask.json`
-- Decode incrementally for large datasets (consider a streaming parser if performance requires it)
-- Cache with timestamp; invalidate on `brew update`
-- Merge with `brew info` output for live install status and version data
-- Handle schema changes gracefully via optional decoding — do not crash on unknown fields
-
-Reference: [Homebrew JSON API docs](https://formulae.brew.sh/docs/api/)
-
----
-
-## UX Principles
-
-These are first-class architectural constraints — they determine what guarantees the app must uphold at every layer, not just what the UI looks like.
-
-**Approachable First** — Plain language in UI strings; no jargon; SF Symbols for affordance; tooltips for technical terms; "what this does" explanations before destructive actions.
-
-**Safe by Default** — Confirmation dialogs for install/uninstall/upgrade; disable conflicting actions during ongoing operations; show command preview before execution; validate exit codes with user-friendly error messages.
-
-**Transparent** — Always show the underlying `brew` command being run; live output console available for every operation; session logs with copy/export; no "magic" behind the scenes.
-
-**Progressive Disclosure** — Simple primary actions visible by default; advanced options in disclosure groups; technical details (JSON, exit codes) available but not prominent; command output collapsed by default after success, expandable on demand.
-
----
-
-## Constraints & Decisions
-
-- **macOS-only.** No iOS, iPadOS, or cross-platform considerations.
-- **Default Homebrew prefix only.** `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel). No custom prefix support initially.
-- **No custom taps initially.** Scope limited to the core Homebrew tap.
-- **`brew` is the source of truth.** BrewUI never manipulates Homebrew internals directly.
-- **Transparency is non-negotiable.** Command execution is always visible to the user.
-- **Homebrew must be installed separately.** BrewUI detects it and degrades gracefully if absent; it does not bundle Homebrew.
-- **Homebrew detection.** Locate `brew` by checking known standard paths: `/opt/homebrew/bin/brew` (Apple Silicon) and `/usr/local/bin/brew` (Intel).
-- **Open source.** Code must be well-commented and follow consistent patterns suitable for public contributors.
-
-### Platform constraints that affect implementation
-
-- **Homebrew output drift**: `brew` text output is not a strict API; parsers need tolerant handling and fallback behavior.
-- **JSON API schema drift**: API contracts can evolve; decoding must have explicit resilience paths.
-- **UI test stability on macOS**: asynchronous command output and sheet/dialog timing can make UI tests flaky without deliberate synchronization.
-- **Accessibility for desktop workflows**: keyboard navigation/shortcuts and VoiceOver semantics need explicit validation, not just labels.
-
----
+- **CLI drift:** `brew` text is not a stable API — parsers must be tolerant.
+- **JSON drift:** decoding must stay resilient as the API evolves.
+- **UI tests:** async output and sheets need deliberate sync; avoid flakiness.
+- **Accessibility:** desktop workflows need keyboard and VoiceOver semantics, not only labels.
 
 ## Resources
 
-- [`CONVENTIONS.md`](CONVENTIONS.md) — coding conventions and patterns (this file defines structure; that file defines how to write code)
+- [`CONVENTIONS.md`](CONVENTIONS.md)
 - [Homebrew JSON API](https://formulae.brew.sh/docs/api/)
-- [Homebrew Man Pages](https://docs.brew.sh/Manpage)
-- [Homebrew Formula Cookbook](https://docs.brew.sh/Formula-Cookbook)
-- [SwiftUI Documentation](https://developer.apple.com/documentation/swiftui)
 - [Swift Concurrency](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/)
-- [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/)
+- [SwiftUI](https://developer.apple.com/documentation/swiftui)
 
----
+## Updating this file
 
-## Updating This File
-
-Update this file when the component structure changes significantly, a new major subsystem is introduced, or a constraint or assumption is invalidated. Add extra narrative here only when something is non-obvious or easy to misread from the sections above. Record broader or contentious decisions in `.ai/memory.md`.
+Change when layers, folders, or major assumptions shift. Put **why** in `.ai/memory.md` when it is non-obvious or contentious.
