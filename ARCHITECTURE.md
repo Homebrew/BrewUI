@@ -2,6 +2,12 @@
 > High-level system design for BrewUI.
 > Consult this before making structural changes. Update it when the layout of the system changes. Describe *what* exists and how it fits; add brief rationale only for *unusual* choices. Record durable decisions and their full rationale in `.ai/memory.md`.
 
+## Document scope
+
+- **This file owns:** system shape, layers, responsibilities, data flow, file/folder layout, integration boundaries (Homebrew CLI / JSON API), and product-level constraints that affect structure.
+- **This file does not own:** naming rules beyond layer roles, code style, or contributor workflow — see [`CONVENTIONS.md`](CONVENTIONS.md).
+- **Cross-reference:** coding standards and patterns live in `CONVENTIONS.md`; defer there instead of restating the same guidance here.
+
 ---
 
 ## Overview
@@ -204,6 +210,7 @@ These are first-class architectural constraints — they determine what guarante
 
 ## Resources
 
+- [`CONVENTIONS.md`](CONVENTIONS.md) — coding conventions and patterns (this file defines structure; that file defines how to write code)
 - [Homebrew JSON API](https://formulae.brew.sh/docs/api/)
 - [Homebrew Man Pages](https://docs.brew.sh/Manpage)
 - [Homebrew Formula Cookbook](https://docs.brew.sh/Formula-Cookbook)

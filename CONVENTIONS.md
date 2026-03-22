@@ -2,14 +2,27 @@
 > Coding conventions, naming standards, and patterns for BrewUI.
 > All agents and contributors should follow these. Update this file when new patterns are established — don't let it fall out of sync.
 
+## Document scope
+
+- **This file owns:** naming conventions, implementation patterns, error-handling and testing practices, documentation comment expectations, and git/commit habits.
+- **This file does not own:** layer topology, data flow, folder layout, or platform/toolchain baseline — see [`ARCHITECTURE.md`](ARCHITECTURE.md).
+- **Cross-reference:** when guidance would duplicate `ARCHITECTURE.md`, add a short pointer instead of copying the text.
+
+## Documentation ownership matrix
+
+| Topic | Canonical location |
+|---|---|
+| Layers, responsibilities, data flow | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| Tech stack, macOS targets, deployment | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| File/folder layout; accessibility ID file location | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+| Naming rules, style, testing/accessibility *how-to* | This file (`CONVENTIONS.md`) |
+| Durable rationale and decision history | [`.ai/memory.md`](.ai/memory.md) |
+
 ---
 
 ## Language & Platform
 
-- **Platform:** macOS (native) — Tahoe 26, Sequoia 15, Sonoma 14; **minimum: Tahoe 26**
-- **Language:** Swift 6.0 with strict concurrency mode enabled
-- **UI Framework:** SwiftUI — pure; use AppKit only when SwiftUI cannot meet a requirement
-- **Dependency manager:** Swift Package Manager (SPM)
+For **macOS targets**, **Swift** version and concurrency mode, **SwiftUI** vs AppKit, **SPM**, **data sources**, and **deployment** assumptions, see [`ARCHITECTURE.md`](ARCHITECTURE.md) — **Tech Stack** and **Constraints & Decisions**.
 
 ---
 
@@ -28,22 +41,12 @@
 
 ### Architecture-specific naming
 
-The project follows a layered architecture (see `ARCHITECTURE.md`). Naming conventions per layer:
+Layer roles and where each kind of type lives are defined in [`ARCHITECTURE.md`](ARCHITECTURE.md) — **Core Components** and **File Organisation**. Apply these **naming** rules on top of that structure:
 
-| Layer | Protocol | Real implementation | Test/demo double |
-|---|---|---|---|
-| **Repositories** | `FormulaRepository` | `BrewFormulaRepository` | `MockFormulaRepository` |
-| **Interactors** | `RunDoctorInteracting` | `RunDoctorInteractor` | `MockRunDoctorInteractor` |
-| **ViewModels** | — | `InstalledViewModel` | — |
-| **Services** | — | `BrewCommandService`, `JSONAPIService` | — |
-| **Models** | — | `Formula`, `CommandJob`, `BrewConfig` | — |
-| **Views** | — | `InstalledView`, `PackageRow`, `CommandOutputView` | — |
-
-Rules:
-- **Repository protocols** are named for the resource (`FormulaRepository`). The `Brew` prefix belongs on the concrete implementation.
-- **Interactor protocols** use the `-Interacting` suffix; implementations use `-Interactor`. No `Brew` prefix when the type name is already self-explanatory.
-- **ViewModels** are named after the screen/tab they serve: `InstalledViewModel`, `DiscoverViewModel`.
-- Keep names concise and self-documenting — `RunDoctorInteractor` over `BrewRunDoctorInteractor`.
+- **Repository protocols** are named for the resource (e.g. `FormulaRepository`). The `Brew` prefix belongs on the concrete implementation (e.g. `BrewFormulaRepository`). Test doubles use the `Mock` prefix (e.g. `MockFormulaRepository`).
+- **Interactor protocols** use the `-Interacting` suffix; implementations use `-Interactor` (e.g. `RunDoctorInteracting` / `RunDoctorInteractor` / `MockRunDoctorInteractor`). No `Brew` prefix when the type name is already self-explanatory.
+- **ViewModels** are named after the screen or tab they serve (e.g. `InstalledViewModel`, `DiscoverViewModel`).
+- Keep names concise and self-documenting — prefer `RunDoctorInteractor` over `BrewRunDoctorInteractor` when the context is clear.
 
 ### Functions & Methods
 - Name for **clarity at the point of use**, not brevity at the point of definition.
@@ -61,7 +64,10 @@ Rules:
 ## Code Style
 
 > **Formatting and linting:** Enforce mechanically checkable style in tool config (`.swiftformat`, `.swiftlint.yml`) rather than duplicating those rules here.
-- **Concurrency:** Swift 6.0 strict concurrency mode is enabled. All shared mutable state must be protected — via actors, `@MainActor`, or `Sendable` conformances. Do not disable concurrency checks.
+
+Concurrency targets and async I/O expectations are set in [`ARCHITECTURE.md`](ARCHITECTURE.md) — **Tech Stack** and **Data Flow**. In code:
+
+- **Concurrency:** All shared mutable state must be protected — via actors, `@MainActor`, or `Sendable` conformances. Do not disable concurrency checks.
 - **Async/await:** Use `async`/`await` for all I/O and command execution. Avoid completion handlers. Never block the main thread.
 - Prefer value types (`struct`, `enum`) over reference types (`class`) unless reference semantics, inheritance, or `@Observable` integration require it.
 - Use `guard` for early exits rather than deeply nested `if` statements.
@@ -88,7 +94,8 @@ Rules:
 
 > Reference: [SwiftUI Documentation](https://developer.apple.com/documentation/swiftui)
 
-- Extract subviews when a view body exceeds ~100 lines.
+View thinness and when to extract subviews are described in [`ARCHITECTURE.md`](ARCHITECTURE.md) — **Core Components** (Views).
+
 - Use `@ViewBuilder` for conditional view logic.
 - Prefer `.task {}` over `.onAppear {}` for async work — `.task` is lifecycle-aware and cancels automatically.
 - Use custom view modifiers for repeated styling rather than duplicating modifiers inline.
@@ -134,7 +141,7 @@ func fetchInstalledFormulae() async throws -> [Formula]
 
 ### Accessibility identifiers for UI tests
 - All elements used in UI tests must have an accessibility identifier set via `.accessibilityIdentifier(_:)`.
-- **Single source of truth:** define all identifiers in `Utilities/AccessibilityIdentifiers.swift`. This file must be compiled into both the main app target and the UI test target — do not duplicate identifier strings in the test target.
+- **Single source of truth for file location and target wiring:** see [`ARCHITECTURE.md`](ARCHITECTURE.md) — **File Organisation** (`Utilities/AccessibilityIdentifiers.swift`). Do not duplicate identifier strings in the test target — import the shared constants.
 - Use stable, semantic IDs that survive copy and layout changes — e.g. `sidebar.installed`, `toolbar.search`, `doctor.runButton`.
 - When adding a new screen or primary control, add its identifier to the shared constants first, then set it on the view.
 
@@ -148,7 +155,7 @@ func fetchInstalledFormulae() async throws -> [Formula]
 - Test files live in a `Tests/` target within the Swift package.
 - Test names should read as sentences describing the behaviour under test — e.g. `testFetchReturnsEmptyArrayWhenBrewNotInstalled`.
 - **Unit tests cover:** command/output parsing (in Interactors or Models), JSON decoding, and ViewModels (with mocked Repositories). Mock Repositories — not just `BrewCommandService` — so that ViewModel presentation logic is isolated from data concerns.
-- **UI tests:** use accessibility identifiers from `AccessibilityIdentifiers.swift` — the same constants the app uses. Do not hard-code identifier strings in the test target.
+- **UI tests:** use the shared accessibility identifier constants (see [`ARCHITECTURE.md`](ARCHITECTURE.md) — **File Organisation**). Do not hard-code identifier strings in the test target.
 - Test async flows using Swift Concurrency testing support.
 - Test error paths and edge cases explicitly — not just the happy path.
 - Mock and stub all `brew` CLI interactions — tests must never invoke real `brew` subprocesses.
