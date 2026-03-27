@@ -1,0 +1,46 @@
+# AI working files
+# scratchpad is ephemeral and should not be committed
+.ai/scratchpad.md
+# progress is per-developer local state
+.ai/progress.md
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+DerivedData/
+build/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Per-developer signing config (copy from Configurations/Signing.local.xcconfig.example)
+Configurations/Signing.local.xcconfig
+
+# Environment / secrets
+.env
+*.pem
+*.p12
+*.mobileprovision
