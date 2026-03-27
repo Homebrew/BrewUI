@@ -1,0 +1,11 @@
+---
+description: Use relative links when docs reference repo doc files.
+globs: **/*.md
+alwaysApply: false
+---
+
+# Doc-to-doc Links
+
+- When one Markdown document references another documentation file in this repository, use a relative Markdown link (for example, `[ARCHITECTURE.md](./ARCHITECTURE.md)`).
+- Do not use absolute GitHub `https://github.com/.../blob/...` links for intra-repo documentation references.
+- Use path-correct relative links for subdirectories (for example, from `.ai/memory.md` to `../ARCHITECTURE.md`).

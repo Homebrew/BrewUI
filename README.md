@@ -14,9 +14,9 @@ Enable CLI-averse users to safely discover, install, update, and manage Homebrew
 
 ## Status
 
-Early development — currently building the app foundation (D1). Project rules and architecture live in `AGENTS.md` and `ARCHITECTURE.md`; durable decisions and constraints are recorded in `.ai/memory.md`.
+Early development — currently building the app foundation (D1). Project rules and architecture live in [`AGENTS.md`](./AGENTS.md) and [`ARCHITECTURE.md`](./ARCHITECTURE.md); durable decisions and constraints are recorded in [`.ai/memory.md`](./.ai/memory.md).
 
-Optional local session tracking (for agents or developers; `.ai/progress.md` is gitignored):
+Optional local session tracking (for agents or developers; [`.ai/progress.md`](./.ai/progress.md) is gitignored):
 
 ```bash
 cp .ai/progress.template.md .ai/progress.md
