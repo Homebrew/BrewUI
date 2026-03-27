@@ -1,0 +1,66 @@
+name: UI Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: "Optional xcodebuild -only-testing filter"
+        required: false
+        type: string
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-smoke:
+    name: Run UI smoke test
+    runs-on: macos-26
+    timeout-minutes: 40
+    env:
+      CI_APPLE_DEVELOPER_TEAM_ID: ${{ secrets.CI_APPLE_DEVELOPER_TEAM_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve package dependencies
+        run: xcodebuild -resolvePackageDependencies -project Brew.xcodeproj
+
+      - name: Run UI smoke test
+        run: |
+          set -euo pipefail
+          TEST_FILTER="${{ github.event.inputs.test_filter }}"
+
+          # UI test bundles must be signed. In CI, use ad-hoc signing by default
+          # (no certificate required). If a CI development team ID secret is
+          # configured, prefer automatic Apple Development signing instead.
+          SIGNING_ARGS=(
+            CODE_SIGN_STYLE=Manual
+            CODE_SIGN_IDENTITY=-
+            CODE_SIGNING_REQUIRED=NO
+          )
+          if [[ -n "${CI_APPLE_DEVELOPER_TEAM_ID:-}" ]]; then
+            SIGNING_ARGS=(
+              CODE_SIGN_STYLE=Automatic
+              CODE_SIGN_IDENTITY="Apple Development"
+              DEVELOPMENT_TEAM="$CI_APPLE_DEVELOPER_TEAM_ID"
+            )
+          fi
+
+          XCODEBUILD_ARGS=(
+            test
+            -project Brew.xcodeproj
+            -scheme Brew-UI
+            -destination "platform=macOS"
+            -skipPackagePluginValidation
+            -skipMacroValidation
+          )
+          if [[ -n "$TEST_FILTER" ]]; then
+            XCODEBUILD_ARGS+=(-only-testing "$TEST_FILTER")
+          fi
+
+          xcodebuild "${XCODEBUILD_ARGS[@]}" "${SIGNING_ARGS[@]}"

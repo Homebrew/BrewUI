@@ -21,3 +21,27 @@ Optional local session tracking (for agents or developers; [`.ai/progress.md`](.
 ```bash
 cp .ai/progress.template.md .ai/progress.md
 ```
+
+## Quickstart (Development)
+
+After cloning:
+
+```bash
+./scripts/bootstrap
+```
+
+This installs project tooling from `Brewfile` (including SwiftFormat and SwiftLint), enables repository git hooks, and resolves Swift package dependencies for `Brew.xcodeproj`.
+
+### Pre-commit formatting and linting
+
+After bootstrap, commits automatically run checks on staged Swift files:
+
+1. `swiftformat`
+2. `swiftlint --fix`
+3. `swiftlint --strict`
+
+If unresolved lint violations remain, the commit is blocked and the hook prints specific SwiftLint failures so you can fix and re-commit.
+
+## Contributing
+
+This project will be open source. Contribution guidelines, issue templates, and a getting started guide are coming as part of the initial setup work. In the meantime, see `CONVENTIONS.md` for project conventions and workflow, and `ARCHITECTURE.md` for design detail.

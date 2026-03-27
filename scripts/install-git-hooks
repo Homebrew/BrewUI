@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+#
+# install-git-hooks — install repository-managed git hooks.
+
+set -euo pipefail
+
+ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+if [[ -z "${ROOT_DIR}" ]]; then
+    echo "install-git-hooks: must be run inside a git repository."
+    exit 1
+fi
+
+HOOKS_DIR="$(git rev-parse --git-path hooks)"
+SOURCE_HOOK="${ROOT_DIR}/scripts/pre-commit"
+TARGET_HOOK="${HOOKS_DIR}/pre-commit"
+
+if [[ ! -f "${SOURCE_HOOK}" ]]; then
+    echo "install-git-hooks: source hook not found at ${SOURCE_HOOK}"
+    exit 1
+fi
+
+mkdir -p "${HOOKS_DIR}"
+chmod +x "${SOURCE_HOOK}"
+
+if [[ -e "${TARGET_HOOK}" && ! -L "${TARGET_HOOK}" ]]; then
+    BACKUP_HOOK="${TARGET_HOOK}.local-backup"
+    if [[ ! -e "${BACKUP_HOOK}" ]]; then
+        mv "${TARGET_HOOK}" "${BACKUP_HOOK}"
+        echo "install-git-hooks: backed up existing hook to ${BACKUP_HOOK}"
+    else
+        rm -f "${TARGET_HOOK}"
+    fi
+fi
+
+ln -sfn "${SOURCE_HOOK}" "${TARGET_HOOK}"
+chmod +x "${TARGET_HOOK}"
+
+echo "install-git-hooks: installed pre-commit hook -> ${TARGET_HOOK}"

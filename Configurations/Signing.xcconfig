@@ -1,0 +1,28 @@
+// Configurations/Signing.xcconfig
+//
+// This file IS committed to the repository. It acts as a thin wrapper that
+// optionally pulls in per-developer signing overrides from a gitignored local
+// file using Xcode's #include? (silent-skip) directive.
+//
+// First-time setup
+// ----------------
+// Run `scripts/bootstrap` — it copies Signing.local.xcconfig.example to
+// Signing.local.xcconfig automatically and prints next steps.
+//
+// Or do it manually:
+//   cp Configurations/Signing.local.xcconfig.example Configurations/Signing.local.xcconfig
+// Then open Signing.local.xcconfig and replace YOUR_TEAM_ID_HERE with your
+// 10-character Apple Team ID (Xcode → Settings → Accounts, or
+// https://developer.apple.com/account).
+
+// Fallback values — used on CI (where local file is absent) and on fresh
+// clones before Signing.local.xcconfig has been created.
+// The release workflow overrides DEVELOPMENT_TEAM and CODE_SIGN_IDENTITY on
+// the xcodebuild command line, so these defaults don't affect releases.
+DEVELOPMENT_TEAM =
+CODE_SIGN_STYLE = Automatic
+CODE_SIGN_IDENTITY = Apple Development
+
+// Pull in local overrides LAST so they win over the fallbacks above.
+// The '?' makes this a no-op when the file is absent.
+#include? "Signing.local.xcconfig"
