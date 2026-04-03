@@ -23,6 +23,10 @@ Follow [Swift API Design Guidelines](https://www.swift.org/documentation/api-des
 - **Paths:** no hard-coded install paths — locate `brew` via `ProcessInfo` / `FileManager` (see `AGENTS.md`).
 - Otherwise prefer idiomatic Swift; use Apple’s language and SwiftUI docs for general patterns.
 
+## Design system
+
+UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`BrewColors`, `BrewSpacing` / `BrewLayout` / `BrewRadius`, `BrewFonts`). Do not hard-code colours, spacing, or typography in feature views — **add or extend tokens** in Theme when new semantics appear. Cursor agents: see [`.cursor/rules/design-system.mdc`](.cursor/rules/design-system.mdc).
+
 ## Implementation notes
 
 **Errors:** Prefer typed `Error` enums with associated values where useful. Separate **user-facing** copy from **technical** detail; log or preserve detail; do not swallow errors silently.
