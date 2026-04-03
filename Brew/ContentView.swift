@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedSidebarItem: SidebarItem = .installed
+    @State private var installedViewModel = InstalledViewModel()
 
     var body: some View {
         NavigationSplitView {
@@ -32,7 +33,7 @@ struct ContentView: View {
     private var detailContent: some View {
         switch selectedSidebarItem {
         case .installed:
-            InstalledShellView()
+            InstalledShellView(viewModel: installedViewModel)
         }
     }
 }

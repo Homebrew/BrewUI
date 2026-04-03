@@ -9,7 +9,10 @@
 import Testing
 
 struct BrewTests {
-    @Test func example() {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    @Test @MainActor func `installed view model dummy total count`() {
+        let viewModel = InstalledViewModel()
+        #expect(viewModel.totalPackageCount == 5)
+        #expect(viewModel.formulaRows.count == 3)
+        #expect(viewModel.caskRows.count == 2)
     }
 }

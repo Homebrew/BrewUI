@@ -5,10 +5,9 @@
 
 import SwiftUI
 
-/// Shell for the Installed tab: page chrome and an empty region for the future package list.
+/// Shell for the Installed tab: page chrome and scrollable list of packages.
 struct InstalledShellView: View {
-    /// Placeholder until `InstalledViewModel` supplies a real count.
-    private let packageCountSubtitle: String = "0 packages"
+    @Bindable var viewModel: InstalledViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -16,7 +15,7 @@ struct InstalledShellView: View {
                 Text("Installed")
                     .font(.brewTitle1)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(packageCountSubtitle)
+                Text(viewModel.packageCountSubtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
             }
@@ -25,16 +24,47 @@ struct InstalledShellView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            Color.clear
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .accessibilityLabel("Installed packages")
-                .accessibilityHint("List of packages will appear here.")
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    installedSection(
+                        title: "Formulae",
+                        rows: viewModel.formulaRows,
+                    )
+
+                    Divider()
+                        .overlay(Color.brewBorderSeparator)
+                        .padding(.vertical, BrewSpacing.md)
+
+                    installedSection(
+                        title: "Casks",
+                        rows: viewModel.caskRows,
+                    )
+                }
+                .padding(.horizontal, BrewSpacing.lg)
+                .padding(.bottom, BrewSpacing.xl)
+            }
+            .accessibilityLabel("Installed packages")
         }
         .background(Color.brewSurface)
+    }
+
+    @ViewBuilder
+    private func installedSection(title: String, rows: [InstalledPackageRow]) -> some View {
+        if rows.isEmpty {
+            EmptyView()
+        } else {
+            VStack(alignment: .leading, spacing: BrewSpacing.md) {
+                InstalledSectionHeader(title: title, count: rows.count)
+
+                ForEach(rows) { row in
+                    InstalledListRowView(row: row)
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    InstalledShellView()
-        .frame(minWidth: 400, minHeight: 300)
+    InstalledShellView(viewModel: InstalledViewModel())
+        .frame(minWidth: 400, minHeight: 500)
 }

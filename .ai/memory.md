@@ -108,3 +108,7 @@
 
 - **Where it lives:** `Brew/Theme/` (`BrewColors`, `BrewSpacing` / `BrewLayout` / `BrewRadius`, `BrewFonts`) is the single source for UI semantics; `CONVENTIONS.md` has a **Design system** section; agents use `.cursor/rules/design-system.mdc` (globs `Brew/**/*.swift`) alongside `swift-implementation.mdc`.
 - **Rule:** Extend Theme when adding new semantics — avoid raw hex or magic numbers in feature views (already stated in `BrewColors.swift` comments).
+
+## 2026-04-03 — InstalledViewModel dummy data (Swift 6)
+
+- **`InstalledViewModelDummyData`** lives in its own file with static sample arrays. **`InstalledViewModel.init`** takes optional row arrays and applies `?? InstalledViewModelDummyData.*` **in the initializer body** — do not use `= InstalledViewModelDummyData.formulae` as default parameter values, or Swift 6 reports main-actor / default-argument isolation issues.
