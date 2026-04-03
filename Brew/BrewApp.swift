@@ -13,5 +13,9 @@ struct BrewApp: App {
         WindowGroup {
             ContentView()
         }
+        .defaultSize(
+            width: BrewLayout.minWindowWidth,
+            height: BrewLayout.minWindowHeight,
+        )
     }
 }
