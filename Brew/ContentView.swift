@@ -8,12 +8,32 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedSidebarItem: SidebarItem = .installed
+
     var body: some View {
-        VStack {
-            Text("🍺").font(.largeTitle)
-            Text("Hello, world!")
+        NavigationSplitView {
+            ShellSidebarView(selection: $selectedSidebarItem)
+                .navigationSplitViewColumnWidth(
+                    min: BrewLayout.sidebarWidth,
+                    ideal: BrewLayout.sidebarWidth,
+                    max: BrewLayout.sidebarWidth + 40,
+                )
+        } detail: {
+            detailContent
         }
-        .padding()
+        .frame(
+            minWidth: BrewLayout.minWindowWidth,
+            minHeight: BrewLayout.minWindowHeight,
+        )
+        .background(Color.brewWindowBase)
+    }
+
+    @ViewBuilder
+    private var detailContent: some View {
+        switch selectedSidebarItem {
+        case .installed:
+            InstalledShellView()
+        }
     }
 }
 
