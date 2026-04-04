@@ -113,7 +113,20 @@
 
 - **`InstalledViewModelDummyData`** lives in its own file with static sample arrays. **`InstalledViewModel.init`** takes optional row arrays and applies `?? InstalledViewModelDummyData.*` **in the initializer body** — do not use `= InstalledViewModelDummyData.formulae` as default parameter values, or Swift 6 reports main-actor / default-argument isolation issues.
 
+## 2026-04-04 — Installed packages fetch layer
+
+- **Flow:** `InstalledViewModel` → `InstalledPackagesRepository` → `BrewCommandRunning` + `BrewExecutableLocator`. Parsing is pure `InstalledPackagesParser` on `brew list --versions --formula|cask` stdout (`ARCHITECTURE.md` — tolerant CLI handling).
+- **Tests:** Mock `BrewCommandRunning` with a `[[String]: CommandOutput]` map; never run real `brew` in unit tests (`CONVENTIONS.md` **Testing**). `BrewExecutableLocator(overrideURL:)` exists for tests only.
+
 ## 2026-04-04 — App Sandbox disabled on Brew target
 
 - **Drift:** Xcode had `ENABLE_APP_SANDBOX = YES` while `ARCHITECTURE.md` specifies an **unsandboxed** app (`2026-03-03 — Additional Decisions`). Sandboxing prevented seeing/executing `/opt/homebrew/bin/brew` and writing session logs under the repo `.cursor/` path.
 - **Fix:** `ENABLE_APP_SANDBOX = NO` for the Brew app target (Debug and Release). Revisit sandbox + entitlements only if distribution constraints require it.
+
+## 2026-04-04 — Installed packages slice tests
+
+- **Pattern:** `InstalledViewModelTests` and `BrewInstalledPackagesRepositoryTests` use the real `BrewInstalledPackagesRepository` with boundary fakes only: `MockBrewCommandRunner` + `BrewExecutableLocator(overrideURL:)` or `MissingBrewExecutableLocator` (`BrewExecutableLocating`). Shared helpers: `BrewTests/TestSupport/InstalledPackagesRepositoryTestSupport.swift`. Documented in `CONVENTIONS.md` **Testing**.
+
+## 2026-04-04 — Main window / sidebar VM (deferred)
+
+- When **`SidebarItem`** gains a second case (e.g. Discover), introduce a **`MainWindowViewModel`** (or `AppShellViewModel`) to own selection and any tab rules; keep **`ContentView`’s** `switch` only for constructing child views. Presentation for sidebar rows can move there for unit tests.
