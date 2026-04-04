@@ -112,3 +112,8 @@
 ## 2026-04-03 — InstalledViewModel dummy data (Swift 6)
 
 - **`InstalledViewModelDummyData`** lives in its own file with static sample arrays. **`InstalledViewModel.init`** takes optional row arrays and applies `?? InstalledViewModelDummyData.*` **in the initializer body** — do not use `= InstalledViewModelDummyData.formulae` as default parameter values, or Swift 6 reports main-actor / default-argument isolation issues.
+
+## 2026-04-04 — App Sandbox disabled on Brew target
+
+- **Drift:** Xcode had `ENABLE_APP_SANDBOX = YES` while `ARCHITECTURE.md` specifies an **unsandboxed** app (`2026-03-03 — Additional Decisions`). Sandboxing prevented seeing/executing `/opt/homebrew/bin/brew` and writing session logs under the repo `.cursor/` path.
+- **Fix:** `ENABLE_APP_SANDBOX = NO` for the Brew app target (Debug and Release). Revisit sandbox + entitlements only if distribution constraints require it.
