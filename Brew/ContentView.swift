@@ -9,7 +9,17 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedSidebarItem: SidebarItem = .installed
-    @State private var installedViewModel = InstalledViewModel()
+    @State private var installedViewModel: InstalledViewModel
+
+    init() {
+        _installedViewModel = State(
+            initialValue: InstalledViewModel(repository: BrewInstalledPackagesRepository.live()),
+        )
+    }
+
+    init(installedViewModel: InstalledViewModel) {
+        _installedViewModel = State(initialValue: installedViewModel)
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -39,5 +49,10 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(
+        installedViewModel: InstalledViewModel(
+            previewFormulae: InstalledViewModelDummyData.formulae,
+            previewCasks: InstalledViewModelDummyData.casks,
+        ),
+    )
 }

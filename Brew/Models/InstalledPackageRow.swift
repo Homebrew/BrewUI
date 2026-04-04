@@ -13,7 +13,11 @@ enum InstalledPackageKind: String, Hashable {
 
 /// One row in the Installed list (presentation model; map from domain later).
 struct InstalledPackageRow: Identifiable, Hashable {
-    let id: UUID
+    /// Stable across reloads so list identity stays predictable.
+    var id: String {
+        "\(kind.rawValue):\(name)"
+    }
+
     var name: String
     var kind: InstalledPackageKind
     var description: String
@@ -23,14 +27,12 @@ struct InstalledPackageRow: Identifiable, Hashable {
     var updateVersion: String?
 
     init(
-        id: UUID = UUID(),
         name: String,
         kind: InstalledPackageKind,
         description: String,
         installedVersion: String,
         updateVersion: String? = nil,
     ) {
-        self.id = id
         self.name = name
         self.kind = kind
         self.description = description

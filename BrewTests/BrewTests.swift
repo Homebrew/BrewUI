@@ -9,8 +9,11 @@
 import Testing
 
 struct BrewTests {
-    @Test @MainActor func `installed view model dummy total count`() {
-        let viewModel = InstalledViewModel()
+    @Test @MainActor func `installed view model preview data count`() {
+        let viewModel = InstalledViewModel(
+            previewFormulae: InstalledViewModelDummyData.formulae,
+            previewCasks: InstalledViewModelDummyData.casks,
+        )
         #expect(viewModel.totalPackageCount == 5)
         #expect(viewModel.formulaRows.count == 3)
         #expect(viewModel.caskRows.count == 2)

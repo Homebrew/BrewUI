@@ -22,42 +22,19 @@ struct InstalledSectionHeader: View {
 struct InstalledListRowView: View {
     let row: InstalledPackageRow
 
-    private var accentColor: Color {
-        switch row.kind {
-        case .formula:
-            Color.brewBrandPrimary
-        case .cask:
-            Color.brewStatusInfo
-        }
-    }
-
-    private var iconBackground: Color {
-        switch row.kind {
-        case .formula:
-            Color.brewBrandTint
-        case .cask:
-            Color.brewStatusInfoSubtle
-        }
-    }
-
-    private var badgeLabel: String {
-        switch row.kind {
-        case .formula:
-            "FORMULA"
-        case .cask:
-            "CASK"
-        }
+    private var chrome: PackageKindChrome {
+        row.kind.chrome
     }
 
     var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             ZStack {
                 Circle()
-                    .fill(iconBackground)
+                    .fill(iconBackgroundColor(chrome.iconBackground))
                     .frame(width: 36, height: 36)
                 Image(systemName: "cube.box.fill")
                     .font(.body)
-                    .foregroundStyle(accentColor)
+                    .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
 
@@ -72,9 +49,9 @@ struct InstalledListRowView: View {
                         .foregroundStyle(Color.brewStatusSuccess)
                         .accessibilityLabel("Installed")
 
-                    Text(badgeLabel)
+                    Text(chrome.badgeLabel)
                         .font(.brewCaption2)
-                        .foregroundStyle(accentColor)
+                        .foregroundStyle(accentColor(chrome.accent))
                         .padding(.horizontal, BrewSpacing.xs)
                         .padding(.vertical, BrewSpacing.xxs)
                         .background {
@@ -89,43 +66,56 @@ struct InstalledListRowView: View {
                     Spacer(minLength: 0)
                 }
 
-                Text(row.description)
-                    .font(.brewCallout)
-                    .foregroundStyle(Color.brewTextSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if row.hasDescription {
+                    Text(row.description)
+                        .font(.brewCallout)
+                        .foregroundStyle(Color.brewTextSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 versionLine
             }
         }
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilitySummary)
-    }
-
-    private var accessibilitySummary: String {
-        var parts = [row.name, row.description, row.installedVersion]
-        if let update = row.updateVersion {
-            parts.append("Update available to \(update)")
-        }
-        return parts.joined(separator: ", ")
+        .accessibilityLabel(row.listRowAccessibilitySummary)
     }
 
     @ViewBuilder
     private var versionLine: some View {
-        if let update = row.updateVersion {
+        switch row.versionPresentation {
+        case let .installed(version):
+            Text(version)
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextTertiary)
+        case let .upgrade(current, latest):
             HStack(spacing: BrewSpacing.xs) {
-                Text(row.installedVersion)
+                Text(current)
                     .foregroundStyle(Color.brewTextTertiary)
                 Text("→")
                     .foregroundStyle(Color.brewTextTertiary)
-                Text(update)
+                Text(latest)
                     .foregroundStyle(Color.brewBrandPrimary)
             }
             .font(.brewCaption)
-        } else {
-            Text(row.installedVersion)
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
+        }
+    }
+
+    private func accentColor(_ token: PackageKindAccentToken) -> Color {
+        switch token {
+        case .brandPrimary:
+            Color.brewBrandPrimary
+        case .statusInfo:
+            Color.brewStatusInfo
+        }
+    }
+
+    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
+        switch token {
+        case .brandTint:
+            Color.brewBrandTint
+        case .statusInfoSubtle:
+            Color.brewStatusInfoSubtle
         }
     }
 }

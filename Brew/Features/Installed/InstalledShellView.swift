@@ -24,47 +24,77 @@ struct InstalledShellView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
-                    installedSection(
-                        title: "Formulae",
-                        rows: viewModel.formulaRows,
-                    )
-
-                    Divider()
-                        .overlay(Color.brewBorderSeparator)
-                        .padding(.vertical, BrewSpacing.md)
-
-                    installedSection(
-                        title: "Casks",
-                        rows: viewModel.caskRows,
-                    )
-                }
-                .padding(.horizontal, BrewSpacing.lg)
-                .padding(.bottom, BrewSpacing.xl)
+            if let message = viewModel.userFacingError {
+                Text(message)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewStatusError)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, BrewSpacing.lg)
+                    .padding(.bottom, BrewSpacing.sm)
+                    .accessibilityLabel(message)
             }
-            .accessibilityLabel("Installed packages")
+
+            ZStack {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        if viewModel.shouldShowFormulaeSection {
+                            installedSection(
+                                title: "Formulae",
+                                rows: viewModel.formulaRows,
+                            )
+                        }
+
+                        if viewModel.shouldShowInterSectionDivider {
+                            Divider()
+                                .overlay(Color.brewBorderSeparator)
+                                .padding(.vertical, BrewSpacing.md)
+                        }
+
+                        if viewModel.shouldShowCasksSection {
+                            installedSection(
+                                title: "Casks",
+                                rows: viewModel.caskRows,
+                            )
+                        }
+                    }
+                    .padding(.horizontal, BrewSpacing.lg)
+                    .padding(.bottom, BrewSpacing.xl)
+                }
+                .accessibilityLabel("Installed packages")
+
+                if viewModel.shouldShowInitialLoadingIndicator {
+                    ProgressView()
+                        .controlSize(.large)
+                        .accessibilityLabel(
+                            String(localized: "Loading packages", comment: "Installed tab loading a11y"),
+                        )
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Color.brewSurface)
+        .task {
+            await viewModel.load()
+        }
     }
 
-    @ViewBuilder
     private func installedSection(title: String, rows: [InstalledPackageRow]) -> some View {
-        if rows.isEmpty {
-            EmptyView()
-        } else {
-            VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                InstalledSectionHeader(title: title, count: rows.count)
+        VStack(alignment: .leading, spacing: BrewSpacing.md) {
+            InstalledSectionHeader(title: title, count: rows.count)
 
-                ForEach(rows) { row in
-                    InstalledListRowView(row: row)
-                }
+            ForEach(rows) { row in
+                InstalledListRowView(row: row)
             }
         }
     }
 }
 
 #Preview {
-    InstalledShellView(viewModel: InstalledViewModel())
-        .frame(minWidth: 400, minHeight: 500)
+    InstalledShellView(
+        viewModel: InstalledViewModel(
+            previewFormulae: InstalledViewModelDummyData.formulae,
+            previewCasks: InstalledViewModelDummyData.casks,
+        ),
+    )
+    .frame(minWidth: 400, minHeight: 500)
 }
