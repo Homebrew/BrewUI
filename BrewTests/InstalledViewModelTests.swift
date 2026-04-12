@@ -71,10 +71,10 @@ struct InstalledViewModelTests {
         let vm = await loadViewModel(commandRunner: runner)
         let expected = VMStateSnapshot(
             formulaRows: [
-                InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0")
+                InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0"),
             ],
             caskRows: [
-                InstalledPackageRow(name: "slack", kind: .cask, description: "", installedVersion: "—")
+                InstalledPackageRow(name: "slack", kind: .cask, description: "", installedVersion: "—"),
             ],
             userFacingError: nil,
             isLoading: false,
@@ -144,7 +144,7 @@ struct InstalledViewModelTests {
         let runner = MockBrewCommandRunner(behaviors: [
             ["list", "--versions", "--formula"]: .throw(
                 BrewCommandError.launchFailed(underlying: "posix spawn failed"),
-            )
+            ),
         ])
         let vm = await loadViewModel(commandRunner: runner)
         #expect(vm.userFacingError == "posix spawn failed")

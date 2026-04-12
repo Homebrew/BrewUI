@@ -31,7 +31,7 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `shouldShowInitialLoadingIndicator is false when loading but rows exist`() {
         let vm = InstalledViewModel(
             testingFormulaRows: [
-                InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1"),
             ],
             isLoading: true,
         )
@@ -49,10 +49,10 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `section visibility shows both sections and divider when formulae and casks present`() {
         let vm = InstalledViewModel(
             testingFormulaRows: [
-                InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1"),
             ],
             testingCaskRows: [
-                InstalledPackageRow(name: "c", kind: .cask, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "c", kind: .cask, description: "", installedVersion: "v1"),
             ],
         )
         #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: true, divider: true))
@@ -61,7 +61,7 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `section visibility shows only formulae when no casks`() {
         let vm = InstalledViewModel(
             testingFormulaRows: [
-                InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1"),
             ],
         )
         #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: false, divider: false))
@@ -75,10 +75,10 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `totalPackageCount sums formula and cask rows`() {
         let vm = InstalledViewModel(
             testingFormulaRows: [
-                InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1"),
             ],
             testingCaskRows: [
-                InstalledPackageRow(name: "c", kind: .cask, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "c", kind: .cask, description: "", installedVersion: "v1"),
             ],
         )
         #expect(vm.totalPackageCount == 2)
@@ -93,7 +93,7 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `packageCountSubtitle is singular for one package`() {
         let vm = InstalledViewModel(
             testingFormulaRows: [
-                InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1"),
             ],
         )
         #expect(vm.packageCountSubtitle == "1 package")
@@ -103,7 +103,7 @@ struct InstalledViewModelPresentationTests {
         let vm = InstalledViewModel(
             testingFormulaRows: [
                 InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1"),
-                InstalledPackageRow(name: "b", kind: .formula, description: "", installedVersion: "v1")
+                InstalledPackageRow(name: "b", kind: .formula, description: "", installedVersion: "v1"),
             ],
         )
         #expect(vm.packageCountSubtitle == "2 packages")

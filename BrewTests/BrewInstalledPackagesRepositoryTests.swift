@@ -18,7 +18,7 @@ struct BrewInstalledPackagesRepositoryTests {
         let expected = InstalledPackagesSnapshot(
             formulae: [
                 InstalledPackageInfo(name: "a", version: "1"),
-                InstalledPackageInfo(name: "b", version: "2")
+                InstalledPackageInfo(name: "b", version: "2"),
             ],
             casks: [InstalledPackageInfo(name: "zed", version: "3")],
         )

@@ -28,7 +28,7 @@ enum InstalledViewModelDummyData {
             kind: .formula,
             description: "Interpreted, interactive, object-oriented programming language",
             installedVersion: "v3.13.2",
-        )
+        ),
     ]
 
     static let casks: [InstalledPackageRow] = [
@@ -43,6 +43,6 @@ enum InstalledViewModelDummyData {
             kind: .cask,
             description: "App to build and share containerized applications",
             installedVersion: "v4.39.0",
-        )
+        ),
     ]
 }

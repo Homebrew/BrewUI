@@ -28,7 +28,7 @@ struct BrewExecutableLocator: BrewExecutableLocating {
         }
         let candidates = [
             URL(fileURLWithPath: "/opt/homebrew/bin/brew"),
-            URL(fileURLWithPath: "/usr/local/bin/brew")
+            URL(fileURLWithPath: "/usr/local/bin/brew"),
         ]
         for url in candidates {
             let path = url.path

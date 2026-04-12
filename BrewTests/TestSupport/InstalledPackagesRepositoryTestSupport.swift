@@ -100,7 +100,7 @@ enum InstalledPackagesTestSupport {
                 standardOutput: standardOutput,
                 standardError: standardError,
                 terminationStatus: terminationStatus,
-            )
+            ),
         ]
     }
 
@@ -120,7 +120,7 @@ enum InstalledPackagesTestSupport {
                 standardOutput: "",
                 standardError: caskStandardError,
                 terminationStatus: caskTerminationStatus,
-            )
+            ),
         ]
     }
 
@@ -143,7 +143,7 @@ enum InstalledPackagesTestSupport {
                 standardOutput: caskStandardOutput,
                 standardError: caskStandardError,
                 terminationStatus: caskTerminationStatus,
-            )
+            ),
         ]
     }
 }
