@@ -11,15 +11,9 @@ if [[ -z "${ROOT_DIR}" ]]; then
 fi
 cd "${ROOT_DIR}"
 
-if ! command -v swiftformat >/dev/null 2>&1; then
-    echo "pre-commit: swiftformat is not installed."
-    echo "Run ./scripts/bootstrap (recommended) or install via Homebrew."
-    exit 1
-fi
-
-if ! command -v swiftlint >/dev/null 2>&1; then
-    echo "pre-commit: swiftlint is not installed."
-    echo "Run ./scripts/bootstrap (recommended) or install via Homebrew."
+if ! command -v mint >/dev/null 2>&1; then
+    echo "pre-commit: mint is not installed."
+    echo "Run ./scripts/bootstrap (recommended) or: brew install mint && mint bootstrap"
     exit 1
 fi
 
@@ -35,12 +29,12 @@ if [[ ${#swift_files[@]} -eq 0 ]]; then
     exit 0
 fi
 
-echo "pre-commit: formatting staged Swift files (swiftformat)..."
-swiftformat "${swift_files[@]}"
+echo "pre-commit: formatting staged Swift files (mint run swiftformat)..."
+mint run swiftformat "${swift_files[@]}"
 
-echo "pre-commit: applying auto-fixes (swiftlint --fix)..."
+echo "pre-commit: applying auto-fixes (mint run swiftlint --fix)..."
 set +e
-swiftlint lint --fix --quiet "${swift_files[@]}"
+mint run swiftlint lint --fix --quiet "${swift_files[@]}"
 fix_status=$?
 set -e
 
@@ -53,7 +47,7 @@ git add -- "${swift_files[@]}"
 
 echo "pre-commit: validating lint status..."
 set +e
-lint_output="$(swiftlint lint --strict --quiet "${swift_files[@]}" 2>&1)"
+lint_output="$(mint run swiftlint lint --strict --quiet "${swift_files[@]}" 2>&1)"
 lint_status=$?
 set -e
 

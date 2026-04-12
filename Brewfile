@@ -1,7 +1,4 @@
 # Brew bundle dependencies for BrewUI development tooling.
-# Latest stable at creation time:
-# - swiftformat 0.59.1
-# - swiftlint 0.63.2
+# SwiftFormat and SwiftLint versions are pinned in Mintfile (installed via mint).
 
-brew "swiftformat"
-brew "swiftlint"
+brew "mint"

@@ -9,6 +9,8 @@ on:
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
+      - "Mintfile"
+      - "scripts/bootstrap"
       - "scripts/pre-commit"
   pull_request:
     types: [opened, reopened, synchronize]
@@ -17,6 +19,8 @@ on:
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
+      - "Mintfile"
+      - "scripts/bootstrap"
       - "scripts/pre-commit"
 
 permissions:
@@ -31,10 +35,13 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Install tools
-        run: brew install swiftformat swiftlint
+        run: brew bundle --file Brewfile
+
+      - name: Install Mintfile packages
+        run: mint bootstrap --mintfile Mintfile
 
       - name: Check formatting
-        run: swiftformat --lint .
+        run: mint run swiftformat --lint .
 
       - name: Run SwiftLint (strict)
-        run: swiftlint lint --strict
+        run: mint run swiftlint lint --strict

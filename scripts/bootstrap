@@ -33,6 +33,14 @@ fi
 echo "==> Installing tooling from Brewfile"
 brew bundle --file "$ROOT_DIR/Brewfile"
 
+if ! command -v mint >/dev/null 2>&1; then
+    echo "mint not found after brew bundle. Check Brewfile and Homebrew setup."
+    exit 1
+fi
+
+echo "==> Installing Mintfile packages (SwiftFormat, SwiftLint)"
+mint bootstrap --mintfile "$ROOT_DIR/Mintfile"
+
 echo "==> Installing repository git hooks"
 "$ROOT_DIR/scripts/install-git-hooks"
 
