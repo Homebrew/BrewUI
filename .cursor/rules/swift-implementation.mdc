@@ -5,7 +5,7 @@ alwaysApply: false
 
 # Swift Implementation
 
-- Follow `CONVENTIONS.md` for naming, architecture boundaries, and error handling.
+- Follow `CONVENTIONS.md` for naming, architecture boundaries, error handling, and **design system** (`Brew/Theme/` — see `design-system.mdc` when editing `Brew/**/*.swift`).
 - Include required imports and provide compilable code updates.
 - Use `@MainActor` where UI state is mutated.
 - Avoid force unwraps/`try!`; use safe handling patterns and test helpers (`#require`, `XCTUnwrap`) in tests.
