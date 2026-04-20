@@ -38,8 +38,14 @@
 
 ## 2026-03-11 — Developer Hook Workflow
 
-- **Pre-commit enforcement:** Repository-managed pre-commit hook runs staged Swift files through `swiftformat`, then `swiftlint --fix`, then strict `swiftlint` validation.
+- **Pre-commit enforcement:** Repository-managed pre-commit hook runs staged Swift files through Mint (`mint run swiftformat`, then `mint run swiftlint` with `--fix`, then strict `mint run swiftlint`). See **2026-04-12 — Mint for SwiftFormat and SwiftLint**.
 - **Bootstrap integration:** `./scripts/bootstrap` installs git hooks automatically via `scripts/install-git-hooks` to minimize manual setup for contributors.
+
+## 2026-04-12 — Mint for SwiftFormat and SwiftLint
+
+- **Version pins:** SwiftFormat and SwiftLint versions live in root `Mintfile` (`nicklockwood/SwiftFormat`, `realm/SwiftLint`).
+- **Install path:** Homebrew (`Brewfile`) installs **Mint** only; `./scripts/bootstrap` runs `mint bootstrap` so pinned tools are built once and cached under Mint.
+- **Enforcement:** Pre-commit and `swift_quality` CI invoke tools via `mint run swiftformat` / `mint run swiftlint` from the repo root (Mintfile discovery), not global Homebrew formulae for those binaries.
 
 ## 2026-03-11 — Lint/Format Baseline Config
 

@@ -30,15 +30,14 @@ After cloning:
 ./scripts/bootstrap
 ```
 
-This installs project tooling from `Brewfile` (including SwiftFormat and SwiftLint), enables repository git hooks, and resolves Swift package dependencies for `Brew.xcodeproj`.
+This installs Mint from `Brewfile`, runs `mint bootstrap` to build the SwiftFormat and SwiftLint versions pinned in `Mintfile`, enables repository git hooks, and resolves Swift package dependencies for `Brew.xcodeproj`.
 
 ### Pre-commit formatting and linting
 
 After bootstrap, commits automatically run checks on staged Swift files:
 
-1. `swiftformat`
-2. `swiftlint --fix`
-3. `swiftlint --strict`
+1. `mint run swiftformat`
+2. `mint run swiftlint` (with `--fix`, then strict validation)
 
 If unresolved lint violations remain, the commit is blocked and the hook prints specific SwiftLint failures so you can fix and re-commit.
 
