@@ -1,3 +1,23 @@
+# SwiftFormat (see Mintfile / `.swiftformat`) owns mechanical layout and spacing.
+# Disable SwiftLint rules that duplicate it — especially correctable ones, or
+# `swiftlint --fix` after SwiftFormat will fight the formatter (e.g. trailing_comma).
+disabled_rules:
+  - closing_brace
+  - colon
+  - comma
+  - empty_parentheses_with_trailing_closure
+  - function_name_whitespace
+  - leading_whitespace
+  - opening_brace
+  - redundant_void_return
+  - return_arrow_whitespace
+  - trailing_comma
+  - trailing_newline
+  - trailing_semicolon
+  - trailing_whitespace
+  - vertical_whitespace
+  - void_return
+
 included:
   - Brew
   - BrewTests
