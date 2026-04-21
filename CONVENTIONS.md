@@ -12,7 +12,8 @@ Follow [Swift API Design Guidelines](https://www.swift.org/documentation/api-des
 
 **Layer naming** (roles in [`ARCHITECTURE.md`](ARCHITECTURE.md) — **Core components**):
 
-- **Repositories:** protocol `FormulaRepository`; concrete `BrewFormulaRepository`; tests `MockFormulaRepository`.
+- **Repositories:** protocol `FormulaRepository`; concrete `BrewFormulaRepository`; tests `MockFormulaRepository`. Installed inventory: `InstalledPackagesRepository` / `BrewInstalledPackagesRepository` (see **Testing** for boundary fakes).
+- **Services:** subprocess execution via protocol `BrewCommandRunning` and `BrewCommandService`; resolve `brew` with `BrewExecutableLocator` conforming to `BrewExecutableLocating` (default prefix order matches product constraints in [`ARCHITECTURE.md`](ARCHITECTURE.md)).
 - **Interactors:** protocol `…Interacting`; type `…Interactor`; mock `Mock…Interactor`. Skip a `Brew` prefix when the name is already clear.
 - **ViewModels:** named for screen or tab (e.g. `InstalledViewModel`).
 
@@ -37,7 +38,9 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Accessibility:** Meaningful labels (and hints where needed) on interactive controls; keyboard shortcuts where it matters. **UI test IDs:** shared constants in `Utilities/AccessibilityIdentifiers.swift` — see [`ARCHITECTURE.md`](ARCHITECTURE.md) — **File organisation**; do not duplicate strings in the test target.
 
-**Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub subprocesses. Cover errors and async paths, not only happy paths. Unit tests can target parsing/decoding and view models with mocked repositories per [`ARCHITECTURE.md`](ARCHITECTURE.md).
+**Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub only **boundaries**: `BrewCommandRunning` (subprocess) and, when needed, `BrewExecutableLocating` (e.g. `MissingBrewExecutableLocator` for “brew not found”). Prefer **slice tests** that use the real `BrewInstalledPackagesRepository` (and thus real parsing) with those fakes; shared helpers live under [`BrewTests/TestSupport/`](BrewTests/TestSupport/). Pure presentation tests may use `InstalledViewModel`’s `init(testing…)` without a repository. Cover errors and async paths, not only happy paths. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for layer flow.
+
+**Test shape:** Prefer **one logical behavior per `@Test`** — typically a **single `#expect`**, or **one** equality check on a small `Equatable` snapshot (e.g. expected rows + errors + flags) so related outcomes stay one assertion. **`BrewInstalledPackagesRepository.live()`** is not a unit-test target: it wires real `BrewCommandService` and filesystem discovery; rely on slice tests with fakes and UI/manual smoke if needed.
 
 ## Dependencies
 
