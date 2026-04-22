@@ -35,39 +35,35 @@ struct InstalledShellView: View {
             }
 
             ZStack {
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        if viewModel.shouldShowFormulaeSection {
-                            installedSection(
-                                title: "Formulae",
-                                rows: viewModel.formulaRows,
-                            )
-                        }
-
-                        if viewModel.shouldShowInterSectionDivider {
-                            Divider()
-                                .overlay(Color.brewBorderSeparator)
-                                .padding(.vertical, BrewSpacing.md)
-                        }
-
-                        if viewModel.shouldShowCasksSection {
-                            installedSection(
-                                title: "Casks",
-                                rows: viewModel.caskRows,
-                            )
-                        }
-                    }
-                    .padding(.horizontal, BrewSpacing.lg)
-                    .padding(.bottom, BrewSpacing.xl)
-                }
-                .accessibilityLabel("Installed packages")
-
                 if viewModel.shouldShowInitialLoadingIndicator {
-                    ProgressView()
-                        .controlSize(.large)
-                        .accessibilityLabel(
-                            String(localized: "Loading packages", comment: "Installed tab loading a11y"),
-                        )
+                    loadingSkeletonList
+                } else {
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            if viewModel.shouldShowFormulaeSection {
+                                installedSection(
+                                    title: "Formulae",
+                                    rows: viewModel.formulaRows,
+                                )
+                            }
+
+                            if viewModel.shouldShowInterSectionDivider {
+                                Divider()
+                                    .overlay(Color.brewBorderSeparator)
+                                    .padding(.vertical, BrewSpacing.md)
+                            }
+
+                            if viewModel.shouldShowCasksSection {
+                                installedSection(
+                                    title: "Casks",
+                                    rows: viewModel.caskRows,
+                                )
+                            }
+                        }
+                        .padding(.horizontal, BrewSpacing.lg)
+                        .padding(.bottom, BrewSpacing.xl)
+                    }
+                    .accessibilityLabel("Installed packages")
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -86,6 +82,57 @@ struct InstalledShellView: View {
                 InstalledListRowView(row: row)
             }
         }
+    }
+
+    private var loadingSkeletonList: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                InstalledSectionHeader(title: "Formulae", count: 3)
+                ForEach(0 ..< 3, id: \.self) { _ in
+                    InstalledSkeletonRowView()
+                }
+
+                Divider()
+                    .overlay(Color.brewBorderSeparator)
+                    .padding(.vertical, BrewSpacing.md)
+
+                InstalledSectionHeader(title: "Casks", count: 2)
+                ForEach(0 ..< 2, id: \.self) { _ in
+                    InstalledSkeletonRowView()
+                }
+            }
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.xl)
+        }
+        .redacted(reason: .placeholder)
+        .allowsHitTesting(false)
+        .accessibilityLabel("Loading package list")
+    }
+}
+
+private struct InstalledSkeletonRowView: View {
+    var body: some View {
+        HStack(alignment: .top, spacing: BrewSpacing.md) {
+            Circle()
+                .fill(Color.brewSurfaceElevated)
+                .frame(width: 36, height: 36)
+
+            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                RoundedRectangle(cornerRadius: BrewRadius.sm)
+                    .fill(Color.brewSurfaceElevated)
+                    .frame(width: 180, height: 16)
+
+                RoundedRectangle(cornerRadius: BrewRadius.sm)
+                    .fill(Color.brewSurfaceElevated)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 12)
+
+                RoundedRectangle(cornerRadius: BrewRadius.sm)
+                    .fill(Color.brewSurfaceElevated)
+                    .frame(width: 90, height: 10)
+            }
+        }
+        .padding(.vertical, BrewSpacing.sm)
     }
 }
 
