@@ -10,7 +10,6 @@ import Testing
 private struct SectionVisibilitySnapshot: Equatable {
     var formulae: Bool
     var casks: Bool
-    var divider: Bool
 }
 
 @MainActor
@@ -18,7 +17,6 @@ private func sectionVisibility(_ vm: InstalledViewModel) -> SectionVisibilitySna
     SectionVisibilitySnapshot(
         formulae: vm.shouldShowFormulaeSection,
         casks: vm.shouldShowCasksSection,
-        divider: vm.shouldShowInterSectionDivider,
     )
 }
 
@@ -46,7 +44,7 @@ struct InstalledViewModelPresentationTests {
         #expect(!vm.shouldShowInitialLoadingIndicator)
     }
 
-    @Test @MainActor func `section visibility shows both sections and divider when formulae and casks present`() {
+    @Test @MainActor func `section visibility shows both sections when formulae and casks present`() {
         let vm = InstalledViewModel(
             testingFormulaRows: [
                 InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1"),
@@ -55,7 +53,7 @@ struct InstalledViewModelPresentationTests {
                 InstalledPackageRow(name: "c", kind: .cask, description: "", installedVersion: "v1"),
             ],
         )
-        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: true, divider: true))
+        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: true))
     }
 
     @Test @MainActor func `section visibility shows only formulae when no casks`() {
@@ -64,12 +62,12 @@ struct InstalledViewModelPresentationTests {
                 InstalledPackageRow(name: "f", kind: .formula, description: "", installedVersion: "v1"),
             ],
         )
-        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: false, divider: false))
+        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: false))
     }
 
     @Test @MainActor func `section visibility hides all sections when empty`() {
         let vm = InstalledViewModel()
-        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: false, casks: false, divider: false))
+        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: false, casks: false))
     }
 
     @Test @MainActor func `totalPackageCount sums formula and cask rows`() {

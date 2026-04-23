@@ -10,6 +10,26 @@ struct InstalledShellView: View {
     @Bindable var viewModel: InstalledViewModel
 
     var body: some View {
+        HSplitView {
+            installedMasterPanel
+                .frame(minWidth: 360, idealWidth: 460)
+
+            if let selectedRow = viewModel.selectedPackageRow {
+                InstalledDetailSelectionView(row: selectedRow)
+                    .frame(minWidth: BrewLayout.inspectorWidth)
+            } else {
+                Color.clear
+                    .frame(minWidth: BrewLayout.inspectorWidth)
+            }
+        }
+        .background(Color.brewSurface)
+        .task {
+            await viewModel.load()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private var installedMasterPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 Text("Installed")
@@ -38,49 +58,29 @@ struct InstalledShellView: View {
                 if viewModel.shouldShowInitialLoadingIndicator {
                     loadingSkeletonList
                 } else {
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 0) {
-                            if viewModel.shouldShowFormulaeSection {
-                                installedSection(
-                                    title: "Formulae",
-                                    rows: viewModel.formulaRows,
-                                )
-                            }
-
-                            if viewModel.shouldShowInterSectionDivider {
-                                Divider()
-                                    .overlay(Color.brewBorderSeparator)
-                                    .padding(.vertical, BrewSpacing.md)
-                            }
-
-                            if viewModel.shouldShowCasksSection {
-                                installedSection(
-                                    title: "Casks",
-                                    rows: viewModel.caskRows,
-                                )
+                    List(selection: $viewModel.selectedPackageID) {
+                        if viewModel.shouldShowFormulaeSection {
+                            Section("Formulae") {
+                                ForEach(viewModel.formulaRows) { row in
+                                    InstalledListRowView(row: row)
+                                        .tag(row.id)
+                                }
                             }
                         }
-                        .padding(.horizontal, BrewSpacing.lg)
-                        .padding(.bottom, BrewSpacing.xl)
+
+                        if viewModel.shouldShowCasksSection {
+                            Section("Casks") {
+                                ForEach(viewModel.caskRows) { row in
+                                    InstalledListRowView(row: row)
+                                        .tag(row.id)
+                                }
+                            }
+                        }
                     }
                     .accessibilityLabel("Installed packages")
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .background(Color.brewSurface)
-        .task {
-            await viewModel.load()
-        }
-    }
-
-    private func installedSection(title: String, rows: [InstalledPackageRow]) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            InstalledSectionHeader(title: title, count: rows.count)
-
-            ForEach(rows) { row in
-                InstalledListRowView(row: row)
-            }
         }
     }
 
@@ -88,17 +88,8 @@ struct InstalledShellView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 InstalledSectionHeader(title: "Formulae", count: 3)
-                ForEach(0 ..< 3, id: \.self) { _ in
-                    InstalledSkeletonRowView()
-                }
-
-                Divider()
-                    .overlay(Color.brewBorderSeparator)
-                    .padding(.vertical, BrewSpacing.md)
-
-                InstalledSectionHeader(title: "Casks", count: 2)
-                ForEach(0 ..< 2, id: \.self) { _ in
-                    InstalledSkeletonRowView()
+                ForEach(loadingFormulaeRows) { row in
+                    InstalledListRowView(row: row)
                 }
             }
             .padding(.horizontal, BrewSpacing.lg)
@@ -108,31 +99,69 @@ struct InstalledShellView: View {
         .allowsHitTesting(false)
         .accessibilityLabel("Loading package list")
     }
+
+    private var loadingFormulaeRows: [InstalledPackageRow] {
+        [
+            InstalledPackageRow(
+                name: "Placeholder Formula",
+                kind: .formula,
+                description: "Placeholder description text for loading row shell.",
+                installedVersion: "v0.0.0",
+            ),
+            InstalledPackageRow(
+                name: "Placeholder Formula",
+                kind: .formula,
+                description: "Placeholder description text for loading row shell.",
+                installedVersion: "v0.0.0",
+            ),
+            InstalledPackageRow(
+                name: "Placeholder Formula",
+                kind: .formula,
+                description: "Placeholder description text for loading row shell.",
+                installedVersion: "v0.0.0",
+            ),
+        ]
+    }
+
 }
 
-private struct InstalledSkeletonRowView: View {
+private struct InstalledDetailSelectionView: View {
+    let row: InstalledPackageRow
+
     var body: some View {
-        HStack(alignment: .top, spacing: BrewSpacing.md) {
-            Circle()
-                .fill(Color.brewSurfaceElevated)
-                .frame(width: 36, height: 36)
+        VStack(alignment: .leading, spacing: BrewSpacing.md) {
+            HStack(alignment: .center, spacing: BrewSpacing.sm) {
+                Text(row.name)
+                    .font(.brewTitle1)
+                    .foregroundStyle(Color.brewTextPrimary)
 
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                RoundedRectangle(cornerRadius: BrewRadius.sm)
-                    .fill(Color.brewSurfaceElevated)
-                    .frame(width: 180, height: 16)
-
-                RoundedRectangle(cornerRadius: BrewRadius.sm)
-                    .fill(Color.brewSurfaceElevated)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 12)
-
-                RoundedRectangle(cornerRadius: BrewRadius.sm)
-                    .fill(Color.brewSurfaceElevated)
-                    .frame(width: 90, height: 10)
+                Text(row.kind.rawValue.uppercased())
+                    .font(.brewCaption2)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .padding(.horizontal, BrewSpacing.xs)
+                    .padding(.vertical, BrewSpacing.xxs)
+                    .background(Color.brewSurfaceElevated)
+                    .clipShape(Capsule())
             }
+
+            Text("Installed: \(row.installedVersion)")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+
+            if row.hasDescription {
+                Text(row.description)
+                    .font(.brewBody)
+                    .foregroundStyle(Color.brewTextPrimary)
+            } else {
+                Text("Package detail content will be expanded in the next step.")
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewTextSecondary)
+            }
+
+            Spacer()
         }
-        .padding(.vertical, BrewSpacing.sm)
+        .padding(BrewSpacing.xl)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 }
 

@@ -13,6 +13,7 @@ final class InstalledViewModel {
 
     private(set) var formulaRows: [InstalledPackageRow] = []
     private(set) var caskRows: [InstalledPackageRow] = []
+    var selectedPackageID: InstalledPackageRow.ID?
     private(set) var isLoading = false
     private(set) var userFacingError: String?
 
@@ -33,10 +34,6 @@ final class InstalledViewModel {
         !caskRows.isEmpty
     }
 
-    var shouldShowInterSectionDivider: Bool {
-        shouldShowFormulaeSection && shouldShowCasksSection
-    }
-
     var packageCountSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
@@ -45,6 +42,10 @@ final class InstalledViewModel {
             return "1 package"
         }
         return "\(totalPackageCount) packages"
+    }
+
+    var selectedPackageRow: InstalledPackageRow? {
+        allRows.first(where: { $0.id == selectedPackageID })
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
@@ -57,6 +58,7 @@ final class InstalledViewModel {
         repository = nil
         formulaRows = previewFormulae
         caskRows = previewCasks
+        ensureValidSelection()
     }
 
     /// Unit tests for presentation flags (`@testable import Brew`).
@@ -71,6 +73,7 @@ final class InstalledViewModel {
         caskRows = testingCaskRows
         self.isLoading = isLoading
         self.userFacingError = userFacingError
+        ensureValidSelection()
     }
 
     func load() async {
@@ -84,11 +87,25 @@ final class InstalledViewModel {
             let snapshot = try await repository.loadInstalledPackages()
             formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
             caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
+            ensureValidSelection()
         } catch {
             formulaRows = []
             caskRows = []
+            selectedPackageID = nil
             userFacingError = Self.userMessage(for: error)
         }
+    }
+
+    func ensureValidSelection() {
+        let ids = Set(allRows.map(\.id))
+        if let selectedPackageID, ids.contains(selectedPackageID) {
+            return
+        }
+        selectedPackageID = allRows.first?.id
+    }
+
+    private var allRows: [InstalledPackageRow] {
+        formulaRows + caskRows
     }
 
     private static func row(from info: InstalledPackageInfo, kind: InstalledPackageKind) -> InstalledPackageRow {
