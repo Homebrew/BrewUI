@@ -36,7 +36,8 @@ struct ContentView: View {
             minWidth: BrewLayout.minWindowWidth,
             minHeight: BrewLayout.minWindowHeight,
         )
-        .background(Color.brewWindowBase)
+        .background(.bar)
+        .navigationSplitViewStyle(.balanced)
     }
 
     @ViewBuilder

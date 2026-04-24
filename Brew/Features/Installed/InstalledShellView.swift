@@ -22,7 +22,6 @@ struct InstalledShellView: View {
                     .frame(minWidth: BrewLayout.inspectorWidth)
             }
         }
-        .background(Color.brewSurface)
         .task {
             await viewModel.load()
         }
