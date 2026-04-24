@@ -57,12 +57,18 @@ struct InstalledShellView: View {
                 if viewModel.shouldShowInitialLoadingIndicator {
                     loadingSkeletonList
                 } else {
-                    List(selection: $viewModel.selectedPackageID) {
+                    List {
                         if viewModel.shouldShowFormulaeSection {
                             Section("Formulae") {
                                 ForEach(viewModel.formulaRows) { row in
                                     InstalledListRowView(row: row)
-                                        .tag(row.id)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.selectedPackageID = row.id
+                                        }
+                                        .listRowBackground(
+                                            viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                                        )
                                 }
                             }
                         }
@@ -71,11 +77,18 @@ struct InstalledShellView: View {
                             Section("Casks") {
                                 ForEach(viewModel.caskRows) { row in
                                     InstalledListRowView(row: row)
-                                        .tag(row.id)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            viewModel.selectedPackageID = row.id
+                                        }
+                                        .listRowBackground(
+                                            viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                                        )
                                 }
                             }
                         }
                     }
+                    .listStyle(.plain)
                     .accessibilityLabel("Installed packages")
                 }
             }
