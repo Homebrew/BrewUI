@@ -5,30 +5,16 @@
 
 import SwiftUI
 
-/// Shell for the Installed tab: page chrome and scrollable list of packages.
+/// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledShellView: View {
     @Bindable var viewModel: InstalledViewModel
 
     var body: some View {
-        HSplitView {
-            installedMasterPanel
-                .frame(minWidth: 360, idealWidth: 460)
-
-            if let selectedRow = viewModel.selectedPackageRow {
-                InstalledDetailSelectionView(row: selectedRow)
-                    .frame(minWidth: BrewLayout.inspectorWidth)
-            } else {
-                Color.clear
-                    .frame(minWidth: BrewLayout.inspectorWidth)
-            }
-        }
-        .task {
-            await viewModel.load()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        installedListContent
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private var installedMasterPanel: some View {
+    private var installedListContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 Text("Installed")
@@ -134,10 +120,10 @@ struct InstalledShellView: View {
             ),
         ]
     }
-
 }
 
-private struct InstalledDetailSelectionView: View {
+/// Right-hand column: detail for the selected installed package.
+struct InstalledPackageDetailView: View {
     let row: InstalledPackageRow
 
     var body: some View {
@@ -177,12 +163,36 @@ private struct InstalledDetailSelectionView: View {
     }
 }
 
-#Preview {
+/// Empty third column when no package is selected.
+struct InstalledPackageDetailPlaceholder: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            Text("No selection")
+                .font(.brewTitle2)
+                .foregroundStyle(Color.brewTextPrimary)
+            Text("Choose a package from the list to see details.")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(BrewSpacing.xl)
+    }
+}
+
+#Preview("List column") {
     InstalledShellView(
         viewModel: InstalledViewModel(
             previewFormulae: InstalledViewModelDummyData.formulae,
             previewCasks: InstalledViewModelDummyData.casks,
         ),
     )
-    .frame(minWidth: 400, minHeight: 500)
+    .frame(minWidth: 360, minHeight: 500)
+}
+
+#Preview("Detail") {
+    InstalledPackageDetailView(
+        row: InstalledViewModelDummyData.formulae[0],
+    )
+    .frame(minWidth: 280, minHeight: 200)
 }

@@ -29,22 +29,53 @@ struct ContentView: View {
                     ideal: BrewLayout.sidebarWidth,
                     max: BrewLayout.sidebarWidth + 40,
                 )
+        } content: {
+            contentColumn
         } detail: {
-            detailContent
+            detailColumn
         }
         .frame(
             minWidth: BrewLayout.minWindowWidth,
             minHeight: BrewLayout.minWindowHeight,
         )
         .background(.bar)
-        .navigationSplitViewStyle(.balanced)
+        .task(id: selectedSidebarItem) {
+            if selectedSidebarItem == .installed {
+                await installedViewModel.load()
+            }
+        }
     }
 
     @ViewBuilder
-    private var detailContent: some View {
+    private var contentColumn: some View {
         switch selectedSidebarItem {
         case .installed:
             InstalledShellView(viewModel: installedViewModel)
+                .navigationSplitViewColumnWidth(
+                    min: BrewLayout.installedListColumnMinWidth,
+                    ideal: BrewLayout.installedListColumnIdealWidth,
+                    max: BrewLayout.installedListColumnMaxWidth,
+                )
+        }
+    }
+
+    @ViewBuilder
+    private var detailColumn: some View {
+        switch selectedSidebarItem {
+        case .installed:
+            Group {
+                if let row = installedViewModel.selectedPackageRow {
+                    InstalledPackageDetailView(row: row)
+                } else {
+                    InstalledPackageDetailPlaceholder()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .navigationSplitViewColumnWidth(
+                min: BrewLayout.inspectorWidth,
+                ideal: BrewLayout.installedDetailColumnIdealWidth,
+                max: BrewLayout.installedDetailColumnMaxWidth,
+            )
         }
     }
 }

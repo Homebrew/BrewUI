@@ -38,8 +38,18 @@ enum BrewLayout {
     /// Detail inspector panel width.
     static let inspectorWidth: CGFloat = 280
 
-    /// Minimum supported window width.
-    static let minWindowWidth: CGFloat = 800
+    /// Installed list column (middle pane of `NavigationSplitView`).
+    static let installedListColumnMinWidth: CGFloat = 360
+    static let installedListColumnIdealWidth: CGFloat = 460
+    static let installedListColumnMaxWidth: CGFloat = 800
+
+    /// Third column (package detail).
+    static let installedDetailColumnIdealWidth: CGFloat = 320
+    static let installedDetailColumnMaxWidth: CGFloat = 1200
+
+    /// Minimum window width: sidebar + installed list + detail column minimums.
+    static let minWindowWidth: CGFloat =
+        Self.sidebarWidth + Self.installedListColumnMinWidth + Self.inspectorWidth
 
     /// Minimum supported window height.
     static let minWindowHeight: CGFloat = 520

@@ -130,3 +130,7 @@
 ## 2026-04-04 — Main window / sidebar VM (deferred)
 
 - When **`SidebarItem`** gains a second case (e.g. Discover), introduce a **`MainWindowViewModel`** (or `AppShellViewModel`) to own selection and any tab rules; keep **`ContentView`’s** `switch` only for constructing child views. Presentation for sidebar rows can move there for unit tests.
+
+## 2026-04-25 — Main window: three-column `NavigationSplitView`
+
+- **Layout:** The main window uses the three-column `NavigationSplitView` initializer: **sidebar** (`ShellSidebarView`), **content** (`InstalledShellView` — list + chrome only), **detail** (`InstalledPackageDetailView` / `InstalledPackageDetailPlaceholder`). The previous `HSplitView` inside the detail region is removed; column widths use `BrewLayout` tokens including `installedListColumn*` and `installedDetailColumn*`. **`minWindowWidth`** is the sum of sidebar, list, and detail minimum column widths. Installed data loading runs from `ContentView` via `.task(id: selectedSidebarItem)` when the Installed tab is selected.
