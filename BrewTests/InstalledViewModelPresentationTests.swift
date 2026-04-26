@@ -21,6 +21,11 @@ private func sectionVisibility(_ vm: InstalledViewModel) -> SectionVisibilitySna
 }
 
 struct InstalledViewModelPresentationTests {
+    @Test @MainActor func `selectedPackageID is nil for initial no-data state`() {
+        let vm = InstalledViewModel()
+        #expect(vm.selectedPackageID == nil)
+    }
+
     @Test @MainActor func `shouldShowInitialLoadingIndicator is true when loading with no rows and no error`() {
         let vm = InstalledViewModel(isLoading: true)
         #expect(vm.shouldShowInitialLoadingIndicator)
@@ -105,5 +110,28 @@ struct InstalledViewModelPresentationTests {
             ],
         )
         #expect(vm.packageCountSubtitle == "2 packages")
+    }
+
+    @Test @MainActor func `toggleSelection selects row when nothing selected`() {
+        let row = InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1")
+        let vm = InstalledViewModel(testingFormulaRows: [row])
+        vm.toggleSelection(for: row.id)
+        #expect(vm.selectedPackageID == row.id)
+    }
+
+    @Test @MainActor func `toggleSelection clears selection when tapping selected row`() {
+        let row = InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1")
+        let vm = InstalledViewModel(testingFormulaRows: [row])
+        vm.toggleSelection(for: row.id)
+        vm.toggleSelection(for: row.id)
+        #expect(vm.selectedPackageID == nil)
+    }
+
+    @Test @MainActor func `clearSelection clears selected package`() {
+        let row = InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1")
+        let vm = InstalledViewModel(testingFormulaRows: [row])
+        vm.selectedPackageID = row.id
+        vm.clearSelection()
+        #expect(vm.selectedPackageID == nil)
     }
 }

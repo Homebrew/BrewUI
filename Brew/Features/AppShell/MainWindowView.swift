@@ -4,17 +4,22 @@ struct MainWindowView: View {
     @Bindable var viewModel: MainWindowViewModel
 
     var body: some View {
-        NavigationSplitView {
-            ShellSidebarView(selection: $viewModel.selectedSidebarItem)
-                .navigationSplitViewColumnWidth(
-                    min: BrewLayout.sidebarWidth,
-                    ideal: BrewLayout.sidebarWidth,
-                    max: BrewLayout.sidebarWidth + 40,
-                )
-        } content: {
-            contentColumn
-        } detail: {
-            detailColumn
+        Group {
+            if viewModel.shouldShowInstalledDetailColumn {
+                NavigationSplitView {
+                    sidebarColumn
+                } content: {
+                    contentColumn
+                } detail: {
+                    detailColumn
+                }
+            } else {
+                NavigationSplitView {
+                    sidebarColumn
+                } detail: {
+                    contentColumn
+                }
+            }
         }
         .frame(
             minWidth: BrewLayout.minWindowWidth,
@@ -24,6 +29,15 @@ struct MainWindowView: View {
         .task(id: viewModel.selectedSidebarItem) {
             await viewModel.loadForCurrentSelection()
         }
+    }
+
+    private var sidebarColumn: some View {
+        ShellSidebarView(selection: $viewModel.selectedSidebarItem)
+            .navigationSplitViewColumnWidth(
+                min: BrewLayout.sidebarWidth,
+                ideal: BrewLayout.sidebarWidth,
+                max: BrewLayout.sidebarWidth + 40,
+            )
     }
 
     @ViewBuilder

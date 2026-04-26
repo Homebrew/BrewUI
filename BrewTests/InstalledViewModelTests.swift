@@ -12,6 +12,7 @@ import Testing
 private struct VMStateSnapshot: Equatable {
     var formulaRows: [InstalledPackageRow]
     var caskRows: [InstalledPackageRow]
+    var selectedPackageID: InstalledPackageRow.ID?
     var userFacingError: String?
     var isLoading: Bool
     var totalPackageCount: Int
@@ -21,6 +22,7 @@ private struct VMStateSnapshot: Equatable {
         VMStateSnapshot(
             formulaRows: [],
             caskRows: [],
+            selectedPackageID: nil,
             userFacingError: userFacingError,
             isLoading: false,
             totalPackageCount: 0,
@@ -33,6 +35,7 @@ private func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
     VMStateSnapshot(
         formulaRows: vm.formulaRows,
         caskRows: vm.caskRows,
+        selectedPackageID: vm.selectedPackageID,
         userFacingError: vm.userFacingError,
         isLoading: vm.isLoading,
         totalPackageCount: vm.totalPackageCount,
@@ -76,11 +79,33 @@ struct InstalledViewModelTests {
             caskRows: [
                 InstalledPackageRow(name: "slack", kind: .cask, description: "", installedVersion: "—"),
             ],
+            selectedPackageID: nil,
             userFacingError: nil,
             isLoading: false,
             totalPackageCount: 2,
         )
         #expect(snapshot(vm) == expected)
+    }
+
+    @Test @MainActor func `load does not auto-select first package when rows are loaded`() async {
+        let runner = MockBrewCommandRunner(responses: InstalledPackagesTestSupport.listVersionsResponses(
+            formulaStandardOutput: "git 2.0\n",
+            caskStandardOutput: "\n",
+        ))
+        let vm = await loadViewModel(commandRunner: runner)
+        #expect(vm.totalPackageCount == 1)
+        #expect(vm.selectedPackageID == nil)
+    }
+
+    @Test @MainActor func `ensureValidSelection clears invalid selection instead of selecting first row`() {
+        let vm = InstalledViewModel(
+            testingFormulaRows: [
+                InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0"),
+            ],
+        )
+        vm.selectedPackageID = "missing-id"
+        vm.ensureValidSelection()
+        #expect(vm.selectedPackageID == nil)
     }
 
     @Test @MainActor func `load maps formula version that already has lowercase v prefix`() async {

@@ -50,7 +50,7 @@ struct InstalledShellView: View {
                                     InstalledListRowView(row: row)
                                         .contentShape(Rectangle())
                                         .onTapGesture {
-                                            viewModel.selectedPackageID = row.id
+                                            viewModel.toggleSelection(for: row.id)
                                         }
                                         .listRowBackground(
                                             viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
@@ -65,7 +65,7 @@ struct InstalledShellView: View {
                                     InstalledListRowView(row: row)
                                         .contentShape(Rectangle())
                                         .onTapGesture {
-                                            viewModel.selectedPackageID = row.id
+                                            viewModel.toggleSelection(for: row.id)
                                         }
                                         .listRowBackground(
                                             viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
@@ -76,6 +76,9 @@ struct InstalledShellView: View {
                     }
                     .listStyle(.plain)
                     .accessibilityLabel("Installed packages")
+                    .onExitCommand {
+                        viewModel.clearSelection()
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

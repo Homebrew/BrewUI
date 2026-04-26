@@ -101,7 +101,19 @@ final class InstalledViewModel {
         if let selectedPackageID, ids.contains(selectedPackageID) {
             return
         }
-        selectedPackageID = allRows.first?.id
+        selectedPackageID = nil
+    }
+
+    func toggleSelection(for rowID: InstalledPackageRow.ID) {
+        if selectedPackageID == rowID {
+            selectedPackageID = nil
+        } else {
+            selectedPackageID = rowID
+        }
+    }
+
+    func clearSelection() {
+        selectedPackageID = nil
     }
 
     private var allRows: [InstalledPackageRow] {

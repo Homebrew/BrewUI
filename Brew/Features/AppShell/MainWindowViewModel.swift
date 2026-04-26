@@ -6,6 +6,13 @@ final class MainWindowViewModel {
     var selectedSidebarItem: SidebarItem
     var installedViewModel: InstalledViewModel
 
+    var shouldShowInstalledDetailColumn: Bool {
+        switch selectedSidebarItem {
+        case .installed:
+            installedViewModel.selectedPackageRow != nil
+        }
+    }
+
     init(
         selectedSidebarItem: SidebarItem = .installed,
         installedViewModel: InstalledViewModel
