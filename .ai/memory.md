@@ -134,3 +134,9 @@
 ## 2026-04-25 — Main window: three-column `NavigationSplitView`
 
 - **Layout:** The main window uses the three-column `NavigationSplitView` initializer: **sidebar** (`ShellSidebarView`), **content** (`InstalledShellView` — list + chrome only), **detail** (`InstalledPackageDetailView` / `InstalledPackageDetailPlaceholder`). The previous `HSplitView` inside the detail region is removed; column widths use `BrewLayout` tokens including `installedListColumn*` and `installedDetailColumn*`. **`minWindowWidth`** is the sum of sidebar, list, and detail minimum column widths. Installed data loading runs from `ContentView` via `.task(id: selectedSidebarItem)` when the Installed tab is selected.
+
+## 2026-04-26 — App shell decomposition (MVVM-C lightweight)
+
+- Added `MainWindowView` + `MainWindowViewModel` so shell layout/navigation selection/load policy are separated from feature views.
+- `InstalledColumns` now owns Installed feature column composition (`contentColumn`, `detailColumn`) and related width modifiers.
+- `BrewApp` now presents `MainWindowView` directly; `ContentView` remains a thin compatibility wrapper for previews/incremental migration.

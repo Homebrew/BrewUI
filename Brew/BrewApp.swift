@@ -11,7 +11,11 @@ import SwiftUI
 struct BrewApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainWindowView(
+                viewModel: MainWindowViewModel(
+                    installedViewModel: InstalledViewModel(repository: BrewInstalledPackagesRepository.live()),
+                ),
+            )
         }
         .defaultSize(
             width: BrewLayout.minWindowWidth,
