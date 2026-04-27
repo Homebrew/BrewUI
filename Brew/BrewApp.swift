@@ -13,7 +13,10 @@ struct BrewApp: App {
         WindowGroup {
             MainWindowView(
                 viewModel: MainWindowViewModel(
-                    installedViewModel: InstalledViewModel(repository: BrewInstalledPackagesRepository.live()),
+                    installedViewModel: InstalledViewModel(
+                        repository: BrewInstalledPackagesRepository.live(),
+                        detailsRepository: BrewPackageDetailsRepository.live(),
+                    ),
                 ),
             )
         }

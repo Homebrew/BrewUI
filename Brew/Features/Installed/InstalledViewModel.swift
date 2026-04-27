@@ -10,12 +10,14 @@ import Observation
 @MainActor
 final class InstalledViewModel {
     private let repository: InstalledPackagesRepository?
+    private let detailsRepository: (any PackageDetailsRepository)?
 
     private(set) var formulaRows: [InstalledPackageRow] = []
     private(set) var caskRows: [InstalledPackageRow] = []
     var selectedPackageID: InstalledPackageRow.ID?
     private(set) var isLoading = false
     private(set) var userFacingError: String?
+    private(set) var detailsViewModel: InstalledDetailsViewModel?
 
     var totalPackageCount: Int {
         formulaRows.count + caskRows.count
@@ -49,13 +51,15 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: InstalledPackagesRepository) {
+    init(repository: InstalledPackagesRepository, detailsRepository: (any PackageDetailsRepository)? = nil) {
         self.repository = repository
+        self.detailsRepository = detailsRepository
     }
 
     /// SwiftUI previews and tests: fixed rows, `load()` is a no-op.
     init(previewFormulae: [InstalledPackageRow], previewCasks: [InstalledPackageRow]) {
         repository = nil
+        detailsRepository = nil
         formulaRows = previewFormulae
         caskRows = previewCasks
         ensureValidSelection()
@@ -69,6 +73,7 @@ final class InstalledViewModel {
         userFacingError: String? = nil,
     ) {
         repository = nil
+        detailsRepository = nil
         formulaRows = testingFormulaRows
         caskRows = testingCaskRows
         self.isLoading = isLoading
@@ -88,10 +93,12 @@ final class InstalledViewModel {
             formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
             caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
             ensureValidSelection()
+            startDetailsLoadForCurrentSelection()
         } catch {
             formulaRows = []
             caskRows = []
             selectedPackageID = nil
+            clearDetailsState()
             userFacingError = Self.userMessage(for: error)
         }
     }
@@ -102,6 +109,7 @@ final class InstalledViewModel {
             return
         }
         selectedPackageID = nil
+        detailsViewModel = nil
     }
 
     func toggleSelection(for rowID: InstalledPackageRow.ID) {
@@ -110,14 +118,39 @@ final class InstalledViewModel {
         } else {
             selectedPackageID = rowID
         }
+        startDetailsLoadForCurrentSelection()
     }
 
     func clearSelection() {
         selectedPackageID = nil
+        startDetailsLoadForCurrentSelection()
     }
 
     private var allRows: [InstalledPackageRow] {
         formulaRows + caskRows
+    }
+
+    private func startDetailsLoadForCurrentSelection() {
+        guard let selectedRow = selectedPackageRow else {
+            detailsViewModel = nil
+            return
+        }
+
+        guard let detailsRepository else {
+            detailsViewModel = nil
+            return
+        }
+
+        let detailsViewModel = InstalledDetailsViewModel(
+            selectedRow: selectedRow,
+            repository: detailsRepository,
+        )
+        self.detailsViewModel = detailsViewModel
+        detailsViewModel.load()
+    }
+
+    private func clearDetailsState() {
+        detailsViewModel = nil
     }
 
     private static func row(from info: InstalledPackageInfo, kind: InstalledPackageKind) -> InstalledPackageRow {
@@ -162,4 +195,5 @@ final class InstalledViewModel {
             return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
         }
     }
+
 }

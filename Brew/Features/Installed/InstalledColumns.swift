@@ -15,8 +15,8 @@ struct InstalledColumns {
 
     var detailColumn: some View {
         Group {
-            if let row = viewModel.selectedPackageRow {
-                InstalledPackageDetailView(row: row)
+            if let detailsViewModel = viewModel.detailsViewModel {
+                InstalledPackageDetailView(viewModel: detailsViewModel)
             } else {
                 InstalledPackageDetailPlaceholder()
             }
