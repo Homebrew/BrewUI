@@ -41,6 +41,14 @@ final class InstalledDetailsViewModel {
         "brew info \(packageName)"
     }
 
+    /// Valid homepage URL for display, if available.
+    var homepageURL: URL? {
+        guard case let .loaded(details) = state else {
+            return nil
+        }
+        return Self.validWebURL(from: details.homepage)
+    }
+
     init(selectedRow: InstalledPackageRow, repository: any PackageDetailsRepository) {
         self.selectedRow = selectedRow
         self.repository = repository
@@ -125,5 +133,20 @@ final class InstalledDetailsViewModel {
                 comment: "Installed detail generic load error",
             )
         }
+    }
+
+    private static func validWebURL(from rawValue: String?) -> URL? {
+        guard let rawValue else {
+            return nil
+        }
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard
+            let url = URL(string: trimmed),
+            let scheme = url.scheme?.lowercased(),
+            ["http", "https"].contains(scheme)
+        else {
+            return nil
+        }
+        return url
     }
 }

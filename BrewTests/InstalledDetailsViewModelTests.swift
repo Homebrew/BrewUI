@@ -20,6 +20,31 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.displayCommand == "brew info wget@2")
     }
 
+    @Test @MainActor func `homepageURL returns valid http URL from loaded details`() {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        var loadedDetails = details(name: "wget")
+        loadedDetails.homepage = "https://example.com"
+        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loaded(loadedDetails))
+
+        #expect(viewModel.homepageURL?.absoluteString == "https://example.com")
+    }
+
+    @Test @MainActor func `homepageURL returns nil for invalid homepage`() {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        var loadedDetails = details(name: "wget")
+        loadedDetails.homepage = "not-a-url"
+        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loaded(loadedDetails))
+
+        #expect(viewModel.homepageURL == nil)
+    }
+
+    @Test @MainActor func `homepageURL returns nil outside loaded state`() {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loading)
+
+        #expect(viewModel.homepageURL == nil)
+    }
+
     @Test @MainActor func `load maps package not found to user-facing error`() async {
         let row = InstalledPackageRow(name: "ghost", kind: .formula, description: "", installedVersion: "v1")
         let repository = StubDetailsRepository(error: PackageDetailsRepositoryError.packageNotFound(name: "ghost"))

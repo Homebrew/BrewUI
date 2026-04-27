@@ -184,7 +184,9 @@ struct InstalledPackageDetailView: View {
                 .foregroundStyle(Color.brewTextSecondary)
             detailRow(label: "Version", value: details.version ?? "—")
             detailRow(label: "Installed", value: installedValue(details))
-            detailRow(label: "Homepage", value: details.homepage ?? "—")
+            if let homepageURL = viewModel.homepageURL {
+                homepageRow(url: homepageURL)
+            }
         }
 
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
@@ -236,12 +238,30 @@ struct InstalledPackageDetailView: View {
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .frame(width: 70, alignment: .leading)
-            Text(value)
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewTextPrimary)
-                .textSelection(.enabled)
+            detailValueView(value)
             Spacer(minLength: 0)
         }
+    }
+
+    private func homepageRow(url: URL) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
+            Text("Homepage")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+                .frame(width: 70, alignment: .leading)
+            Link(destination: url) {
+                Text(url.absoluteString)
+                    .font(.brewCallout)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func detailValueView(_ value: String) -> some View {
+        Text(value)
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewTextPrimary)
+            .textSelection(.enabled)
     }
 
     private func descriptionText(_ details: InstalledPackageDetails) -> String {
