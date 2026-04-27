@@ -89,14 +89,14 @@ enum InstalledPackagesTestSupport {
         )
     }
 
-    /// Only `brew list --versions --formula` — second phase uncaptured unless you merge dictionaries.
-    static func responsesFormulaListFailure(
+    /// Response for `brew info --installed --json=v2`.
+    static func responsesInstalledInfoFailure(
         standardOutput: String = "",
         standardError: String,
         terminationStatus: Int32,
     ) -> [[String]: CommandOutput] {
         [
-            ["list", "--versions", "--formula"]: CommandOutput(
+            ["info", "--installed", "--json=v2"]: CommandOutput(
                 standardOutput: standardOutput,
                 standardError: standardError,
                 terminationStatus: terminationStatus,
@@ -104,45 +104,17 @@ enum InstalledPackagesTestSupport {
         ]
     }
 
-    /// Formula succeeds; cask list fails (non-zero exit).
-    static func responsesFormulaSuccessCaskFailure(
-        formulaStandardOutput: String,
-        caskStandardError: String,
-        caskTerminationStatus: Int32,
+    /// Success response for `brew info --installed --json=v2`.
+    static func installedInfoJSONResponse(
+        standardOutput: String,
+        terminationStatus: Int32 = 0,
+        standardError: String = "",
     ) -> [[String]: CommandOutput] {
         [
-            ["list", "--versions", "--formula"]: CommandOutput(
-                standardOutput: formulaStandardOutput,
-                standardError: "",
-                terminationStatus: 0,
-            ),
-            ["list", "--versions", "--cask"]: CommandOutput(
-                standardOutput: "",
-                standardError: caskStandardError,
-                terminationStatus: caskTerminationStatus,
-            ),
-        ]
-    }
-
-    /// Responses for `brew list --versions --formula` and `--cask`, matching [`BrewInstalledPackagesRepository`](BrewInstalledPackagesRepository.swift) argument order.
-    static func listVersionsResponses(
-        formulaStandardOutput: String,
-        caskStandardOutput: String,
-        formulaTerminationStatus: Int32 = 0,
-        caskTerminationStatus: Int32 = 0,
-        formulaStandardError: String = "",
-        caskStandardError: String = "",
-    ) -> [[String]: CommandOutput] {
-        [
-            ["list", "--versions", "--formula"]: CommandOutput(
-                standardOutput: formulaStandardOutput,
-                standardError: formulaStandardError,
-                terminationStatus: formulaTerminationStatus,
-            ),
-            ["list", "--versions", "--cask"]: CommandOutput(
-                standardOutput: caskStandardOutput,
-                standardError: caskStandardError,
-                terminationStatus: caskTerminationStatus,
+            ["info", "--installed", "--json=v2"]: CommandOutput(
+                standardOutput: standardOutput,
+                standardError: standardError,
+                terminationStatus: terminationStatus,
             ),
         ]
     }

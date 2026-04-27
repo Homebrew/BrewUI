@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// One installed package line parsed from `brew list --versions` output (formula or cask).
+/// One installed package entry hydrated from Homebrew output (formula or cask).
 struct InstalledPackageInfo: Equatable, Hashable {
     var name: String
     var version: String?

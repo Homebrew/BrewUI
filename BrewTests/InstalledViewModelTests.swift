@@ -87,10 +87,16 @@ private struct StubPackageDetailsRepository: PackageDetailsRepository {
 
 struct InstalledViewModelTests {
     @Test @MainActor func `load produces expected row snapshot`() async {
-        let runner = MockBrewCommandRunner(responses: InstalledPackagesTestSupport.listVersionsResponses(
-            formulaStandardOutput: "git 2.0\n",
-            caskStandardOutput: "slack\n",
-        ))
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(
+                standardOutput: """
+                {
+                  "formulae": [{ "name": "git", "installed": [{ "version": "2.0" }] }],
+                  "casks": [{ "token": "slack" }]
+                }
+                """,
+            ),
+        )
         let vm = await loadViewModel(commandRunner: runner)
         let expected = VMStateSnapshot(
             state: .loaded(
@@ -116,10 +122,16 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `load does not auto-select first package when rows are loaded`() async {
-        let runner = MockBrewCommandRunner(responses: InstalledPackagesTestSupport.listVersionsResponses(
-            formulaStandardOutput: "git 2.0\n",
-            caskStandardOutput: "\n",
-        ))
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(
+                standardOutput: """
+                {
+                  "formulae": [{ "name": "git", "installed": [{ "version": "2.0" }] }],
+                  "casks": []
+                }
+                """,
+            ),
+        )
         let vm = await loadViewModel(commandRunner: runner)
         #expect(vm.totalPackageCount == 1)
         #expect(vm.selectedPackageID == nil)
@@ -145,19 +157,31 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `load maps formula version that already has lowercase v prefix`() async {
-        let runner = MockBrewCommandRunner(responses: InstalledPackagesTestSupport.listVersionsResponses(
-            formulaStandardOutput: "pkg v1.0\n",
-            caskStandardOutput: "\n",
-        ))
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(
+                standardOutput: """
+                {
+                  "formulae": [{ "name": "pkg", "installed": [{ "version": "v1.0" }] }],
+                  "casks": []
+                }
+                """,
+            ),
+        )
         let vm = await loadViewModel(commandRunner: runner)
         #expect(vm.formulaRows.first?.installedVersion == "v1.0")
     }
 
     @Test @MainActor func `load maps formula version that already has uppercase V prefix`() async {
-        let runner = MockBrewCommandRunner(responses: InstalledPackagesTestSupport.listVersionsResponses(
-            formulaStandardOutput: "pkg V1.0\n",
-            caskStandardOutput: "\n",
-        ))
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(
+                standardOutput: """
+                {
+                  "formulae": [{ "name": "pkg", "installed": [{ "version": "V1.0" }] }],
+                  "casks": []
+                }
+                """,
+            ),
+        )
         let vm = await loadViewModel(commandRunner: runner)
         #expect(vm.formulaRows.first?.installedVersion == "V1.0")
     }
@@ -179,9 +203,9 @@ struct InstalledViewModelTests {
         #expect(snapshot(vm) == expected)
     }
 
-    @Test @MainActor func `load surfaces stderr when brew list fails`() async {
+    @Test @MainActor func `load surfaces stderr when brew info fails`() async {
         let runner = MockBrewCommandRunner(
-            responses: InstalledPackagesTestSupport.responsesFormulaListFailure(
+            responses: InstalledPackagesTestSupport.responsesInstalledInfoFailure(
                 standardError: "formula list failed",
                 terminationStatus: 1,
             ),
@@ -190,9 +214,9 @@ struct InstalledViewModelTests {
         #expect(snapshot(vm) == VMStateSnapshot.emptyAfterLoad(userFacingError: "formula list failed"))
     }
 
-    @Test @MainActor func `load surfaces generic message when brew list fails with whitespace only stderr`() async {
+    @Test @MainActor func `load surfaces generic message when brew info fails with whitespace only stderr`() async {
         let runner = MockBrewCommandRunner(
-            responses: InstalledPackagesTestSupport.responsesFormulaListFailure(
+            responses: InstalledPackagesTestSupport.responsesInstalledInfoFailure(
                 standardError: "   \n",
                 terminationStatus: 1,
             ),
@@ -203,7 +227,7 @@ struct InstalledViewModelTests {
 
     @Test @MainActor func `load surfaces launch failure underlying message`() async {
         let runner = MockBrewCommandRunner(behaviors: [
-            ["list", "--versions", "--formula"]: .throw(
+            ["info", "--installed", "--json=v2"]: .throw(
                 BrewCommandError.launchFailed(underlying: "posix spawn failed"),
             ),
         ])

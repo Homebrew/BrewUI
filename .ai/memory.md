@@ -145,3 +145,14 @@
 
 - For async/failable view-model data that drives UI rendering, prefer a single enum state (for example `.loading`, `.loaded(Data)`, `.error(String)`) over separate `isLoading`/`data`/`error` properties.
 - This pattern is now used by `InstalledDetailsViewModel` via `InstalledDetailsLoadState`, and documented in `CONVENTIONS.md` under **Implementation notes**.
+
+## 2026-04-27 — Installed list source migrated to brew info JSON
+
+- `BrewInstalledPackagesRepository` now hydrates installed list data from a single `brew info --installed --json=v2` call instead of `brew list --versions` text output.
+- Existing Installed list UI contract remains stable because repository output is still `InstalledPackagesSnapshot`, mapped/sorted before `InstalledViewModel` row mapping.
+- Tests now validate mixed formula/cask JSON payloads, optional/missing fields, command failure behavior, and invalid JSON decode failures for installed list loading.
+
+## 2026-04-27 — Brew command pipe-drain fix
+
+- `BrewCommandService` now starts concurrent stdout/stderr readers immediately after process launch and only then waits for process termination, avoiding wait-before-read deadlocks on large command output.
+- Added `BrewCommandServiceTests` including a large output regression case (250k chars on each stream) to protect command execution paths used by installed list and details loading.
