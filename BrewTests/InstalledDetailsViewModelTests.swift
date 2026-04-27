@@ -8,6 +8,18 @@ import Foundation
 import Testing
 
 struct InstalledDetailsViewModelTests {
+    @Test @MainActor func `displayCommand uses selected row name before load`() {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loading)
+        #expect(viewModel.displayCommand == "brew info wget")
+    }
+
+    @Test @MainActor func `displayCommand uses loaded details name after load`() {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loaded(details(name: "wget@2")))
+        #expect(viewModel.displayCommand == "brew info wget@2")
+    }
+
     @Test @MainActor func `load maps package not found to user-facing error`() async {
         let row = InstalledPackageRow(name: "ghost", kind: .formula, description: "", installedVersion: "v1")
         let repository = StubDetailsRepository(error: PackageDetailsRepositoryError.packageNotFound(name: "ghost"))
@@ -133,6 +145,5 @@ private func details(name: String) -> InstalledPackageDetails {
         installedVersions: ["1.0.0"],
         homepage: nil,
         dependencies: [],
-        command: "brew info \(name) --json=v2",
     )
 }

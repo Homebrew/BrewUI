@@ -14,6 +14,4 @@ struct InstalledPackageDetails: Equatable {
     var installedVersions: [String]
     var homepage: String?
     var dependencies: [String]
-    /// Exact command shown for transparency in the UI.
-    var command: String
 }

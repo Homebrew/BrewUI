@@ -78,7 +78,6 @@ private struct StubPackageDetailsRepository: PackageDetailsRepository {
             installedVersions: ["1.0.0"],
             homepage: nil,
             dependencies: [],
-            command: "brew info \(name) --json=v2",
         )
     }
 }

@@ -26,7 +26,6 @@ struct BrewPackageDetailsRepositoryTests {
             installedVersions: ["1.24.5", "1.24.4"],
             homepage: "https://www.gnu.org/software/wget/",
             dependencies: ["libidn2", "openssl@3", "pkgconf"],
-            command: "brew info wget --json=v2",
         )
         #expect(details == expected)
     }
@@ -48,7 +47,6 @@ struct BrewPackageDetailsRepositoryTests {
         #expect(details.installedVersions == ["4.41.105"])
         #expect(details.homepage == "https://slack.com/")
         #expect(Set(details.dependencies) == Set(["mas", "microsoft-auto-update", "ventura"]))
-        #expect(details.command == "brew info slack --json=v2")
     }
 
     @Test @MainActor func `load honors preferred kind when payload includes formula and cask`() async throws {

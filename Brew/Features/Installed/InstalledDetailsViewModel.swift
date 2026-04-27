@@ -36,6 +36,11 @@ final class InstalledDetailsViewModel {
         return selectedRow.kind
     }
 
+    /// User-facing command for the currently selected package details.
+    var displayCommand: String {
+        "brew info \(packageName)"
+    }
+
     init(selectedRow: InstalledPackageRow, repository: any PackageDetailsRepository) {
         self.selectedRow = selectedRow
         self.repository = repository

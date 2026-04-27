@@ -73,7 +73,6 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
             installedVersions: installedVersions,
             homepage: Self.trimmedOrNil(formula.homepage),
             dependencies: dependencies,
-            command: "brew info \(formula.name) --json=v2",
         )
     }
 
@@ -97,7 +96,6 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
             installedVersions: installedVersions,
             homepage: Self.trimmedOrNil(cask.homepage),
             dependencies: Self.uniqueNonEmpty(cask.dependencies),
-            command: "brew info \(cask.token) --json=v2",
         )
     }
 

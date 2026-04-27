@@ -219,13 +219,14 @@ struct InstalledPackageDetailView: View {
             Text("Command")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewTextSecondary)
-            Text(details.command)
+            Text(viewModel.displayCommand)
                 .font(.brewCode)
                 .foregroundStyle(Color.brewCodeDefault)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(BrewSpacing.md)
                 .background(Color.brewTerminal)
                 .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
+                .textSelection(.enabled)
         }
     }
 
@@ -305,7 +306,7 @@ struct InstalledPackageDetailView: View {
                 Text("Command")
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
-                Text("brew info placeholder --json=v2")
+                Text("brew info placeholder")
                     .font(.brewCode)
                     .foregroundStyle(Color.brewCodeDefault)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -318,6 +319,7 @@ struct InstalledPackageDetailView: View {
         .allowsHitTesting(false)
         .accessibilityLabel("Loading package details")
     }
+
 }
 
 /// Empty third column when no package is selected.
@@ -360,7 +362,6 @@ struct InstalledPackageDetailPlaceholder: View {
                     installedVersions: ["2.45.0"],
                     homepage: "https://git-scm.com",
                     dependencies: ["gettext", "pcre2"],
-                    command: "brew info git --json=v2",
                 ),
             ),
         ),
