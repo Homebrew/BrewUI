@@ -10,21 +10,19 @@ import Testing
 // MARK: - Snapshots (one logical assertion per load test)
 
 private struct VMStateSnapshot: Equatable {
+    var state: InstalledLoadState
     var formulaRows: [InstalledPackageRow]
     var caskRows: [InstalledPackageRow]
     var selectedPackageID: InstalledPackageRow.ID?
-    var userFacingError: String?
-    var isLoading: Bool
     var totalPackageCount: Int
 
     /// Rows cleared, load finished, after a failed `load()`.
-    static func emptyAfterLoad(userFacingError: String?) -> VMStateSnapshot {
+    static func emptyAfterLoad(userFacingError: String) -> VMStateSnapshot {
         VMStateSnapshot(
+            state: .error(userFacingError),
             formulaRows: [],
             caskRows: [],
             selectedPackageID: nil,
-            userFacingError: userFacingError,
-            isLoading: false,
             totalPackageCount: 0,
         )
     }
@@ -33,11 +31,10 @@ private struct VMStateSnapshot: Equatable {
 @MainActor
 private func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
     VMStateSnapshot(
+        state: vm.state,
         formulaRows: vm.formulaRows,
         caskRows: vm.caskRows,
         selectedPackageID: vm.selectedPackageID,
-        userFacingError: vm.userFacingError,
-        isLoading: vm.isLoading,
         totalPackageCount: vm.totalPackageCount,
     )
 }
@@ -63,6 +60,29 @@ private struct StubThrowingRepository: InstalledPackagesRepository {
     }
 }
 
+private struct StubInstalledRepository: InstalledPackagesRepository {
+    let snapshot: InstalledPackagesSnapshot
+
+    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+        snapshot
+    }
+}
+
+private struct StubPackageDetailsRepository: PackageDetailsRepository {
+    func loadPackageDetails(named name: String, preferredKind: InstalledPackageKind?) async throws -> InstalledPackageDetails {
+        InstalledPackageDetails(
+            name: name,
+            kind: preferredKind ?? .formula,
+            description: "desc",
+            version: "1.0.0",
+            installedVersions: ["1.0.0"],
+            homepage: nil,
+            dependencies: [],
+            command: "brew info \(name) --json=v2",
+        )
+    }
+}
+
 // MARK: - Tests
 
 struct InstalledViewModelTests {
@@ -73,6 +93,16 @@ struct InstalledViewModelTests {
         ))
         let vm = await loadViewModel(commandRunner: runner)
         let expected = VMStateSnapshot(
+            state: .loaded(
+                InstalledPackagesContent(
+                    formulaRows: [
+                        InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0"),
+                    ],
+                    caskRows: [
+                        InstalledPackageRow(name: "slack", kind: .cask, description: "", installedVersion: "—"),
+                    ],
+                ),
+            ),
             formulaRows: [
                 InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0"),
             ],
@@ -80,8 +110,6 @@ struct InstalledViewModelTests {
                 InstalledPackageRow(name: "slack", kind: .cask, description: "", installedVersion: "—"),
             ],
             selectedPackageID: nil,
-            userFacingError: nil,
-            isLoading: false,
             totalPackageCount: 2,
         )
         #expect(snapshot(vm) == expected)
@@ -106,6 +134,14 @@ struct InstalledViewModelTests {
         vm.selectedPackageID = "missing-id"
         vm.ensureValidSelection()
         #expect(vm.selectedPackageID == nil)
+    }
+
+    @Test @MainActor func `ensureValidSelection keeps existing valid selection`() {
+        let row = InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0")
+        let vm = InstalledViewModel(testingFormulaRows: [row])
+        vm.selectedPackageID = row.id
+        vm.ensureValidSelection()
+        #expect(vm.selectedPackageID == row.id)
     }
 
     @Test @MainActor func `load maps formula version that already has lowercase v prefix`() async {
@@ -162,7 +198,7 @@ struct InstalledViewModelTests {
             ),
         )
         let vm = await loadViewModel(commandRunner: runner)
-        #expect(vm.userFacingError == InstalledPackagesTestSupport.localizedHomebrewCommandFailedMessage())
+        #expect(vm.state == .error(InstalledPackagesTestSupport.localizedHomebrewCommandFailedMessage()))
     }
 
     @Test @MainActor func `load surfaces launch failure underlying message`() async {
@@ -172,13 +208,50 @@ struct InstalledViewModelTests {
             ),
         ])
         let vm = await loadViewModel(commandRunner: runner)
-        #expect(vm.userFacingError == "posix spawn failed")
+        #expect(vm.state == .error("posix spawn failed"))
     }
 
     @Test @MainActor func `load surfaces generic message for unknown repository errors`() async {
         let repo = StubThrowingRepository(error: OddRepositoryError())
         let vm = InstalledViewModel(repository: repo)
         await vm.load()
-        #expect(vm.userFacingError == InstalledPackagesTestSupport.localizedGenericLoadFailureMessage())
+        #expect(vm.state == .error(InstalledPackagesTestSupport.localizedGenericLoadFailureMessage()))
+    }
+
+    @Test @MainActor func `toggleSelection with details repository creates details view model`() async {
+        let repo = StubInstalledRepository(snapshot: InstalledPackagesSnapshot(
+            formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
+            casks: [],
+        ))
+        let vm = InstalledViewModel(
+            repository: repo,
+            detailsRepository: StubPackageDetailsRepository(),
+        )
+        await vm.load()
+        #expect(vm.formulaRows.first != nil)
+        guard let selectedID = vm.formulaRows.first?.id else {
+            return
+        }
+        vm.toggleSelection(for: selectedID)
+        #expect(vm.detailsViewModel != nil)
+    }
+
+    @Test @MainActor func `clearSelection clears details view model`() async {
+        let repo = StubInstalledRepository(snapshot: InstalledPackagesSnapshot(
+            formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
+            casks: [],
+        ))
+        let vm = InstalledViewModel(
+            repository: repo,
+            detailsRepository: StubPackageDetailsRepository(),
+        )
+        await vm.load()
+        #expect(vm.formulaRows.first != nil)
+        guard let selectedID = vm.formulaRows.first?.id else {
+            return
+        }
+        vm.toggleSelection(for: selectedID)
+        vm.clearSelection()
+        #expect(vm.detailsViewModel == nil)
     }
 }

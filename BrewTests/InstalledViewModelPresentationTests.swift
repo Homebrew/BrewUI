@@ -27,7 +27,7 @@ struct InstalledViewModelPresentationTests {
     }
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is true when loading with no rows and no error`() {
-        let vm = InstalledViewModel(isLoading: true)
+        let vm = InstalledViewModel(state: .loading)
         #expect(vm.shouldShowInitialLoadingIndicator)
     }
 
@@ -36,15 +36,21 @@ struct InstalledViewModelPresentationTests {
             testingFormulaRows: [
                 InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1"),
             ],
-            isLoading: true,
+            state: .loaded(
+                InstalledPackagesContent(
+                    formulaRows: [
+                        InstalledPackageRow(name: "a", kind: .formula, description: "", installedVersion: "v1"),
+                    ],
+                    caskRows: [],
+                ),
+            ),
         )
         #expect(!vm.shouldShowInitialLoadingIndicator)
     }
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is false when loading with user error`() {
         let vm = InstalledViewModel(
-            isLoading: true,
-            userFacingError: "oops",
+            state: .error("oops"),
         )
         #expect(!vm.shouldShowInitialLoadingIndicator)
     }
@@ -88,7 +94,7 @@ struct InstalledViewModelPresentationTests {
     }
 
     @Test @MainActor func `packageCountSubtitle shows localized loading text when initial loading`() {
-        let vm = InstalledViewModel(isLoading: true)
+        let vm = InstalledViewModel(state: .loading)
         let expected = String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
         #expect(vm.packageCountSubtitle == expected)
     }

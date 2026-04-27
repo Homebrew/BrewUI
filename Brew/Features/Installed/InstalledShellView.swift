@@ -29,7 +29,7 @@ struct InstalledShellView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            if let message = viewModel.userFacingError {
+            if case let .error(message) = viewModel.state {
                 Text(message)
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewStatusError)
@@ -40,7 +40,7 @@ struct InstalledShellView: View {
             }
 
             ZStack {
-                if viewModel.shouldShowInitialLoadingIndicator {
+                if case .loading = viewModel.state {
                     loadingSkeletonList
                 } else {
                     List {

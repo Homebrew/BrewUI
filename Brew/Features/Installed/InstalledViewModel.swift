@@ -6,18 +6,47 @@
 import Foundation
 import Observation
 
+struct InstalledPackagesContent: Equatable {
+    var formulaRows: [InstalledPackageRow]
+    var caskRows: [InstalledPackageRow]
+}
+
+enum InstalledLoadState: Equatable {
+    case loading
+    case loaded(InstalledPackagesContent)
+    case error(String)
+}
+
 @Observable
 @MainActor
 final class InstalledViewModel {
     private let repository: InstalledPackagesRepository?
     private let detailsRepository: (any PackageDetailsRepository)?
 
-    private(set) var formulaRows: [InstalledPackageRow] = []
-    private(set) var caskRows: [InstalledPackageRow] = []
+    private(set) var state: InstalledLoadState = .loading
     var selectedPackageID: InstalledPackageRow.ID?
-    private(set) var isLoading = false
-    private(set) var userFacingError: String?
     private(set) var detailsViewModel: InstalledDetailsViewModel?
+
+    var formulaRows: [InstalledPackageRow] {
+        if case let .loaded(content) = state {
+            return content.formulaRows
+        }
+        return []
+    }
+
+    var caskRows: [InstalledPackageRow] {
+        if case let .loaded(content) = state {
+            return content.caskRows
+        }
+        return []
+    }
+
+    var userFacingError: String? {
+        if case let .error(message) = state {
+            return message
+        }
+        return nil
+    }
 
     var totalPackageCount: Int {
         formulaRows.count + caskRows.count
@@ -25,7 +54,10 @@ final class InstalledViewModel {
 
     /// Initial fetch with no rows yet — show blocking spinner (unit-tested via `init(testing…)`).
     var shouldShowInitialLoadingIndicator: Bool {
-        isLoading && totalPackageCount == 0 && userFacingError == nil
+        if case .loading = state {
+            return true
+        }
+        return false
     }
 
     var shouldShowFormulaeSection: Bool {
@@ -56,12 +88,19 @@ final class InstalledViewModel {
         self.detailsRepository = detailsRepository
     }
 
+    /// Empty local state used by presentation tests.
+    init() {
+        repository = nil
+        detailsRepository = nil
+        state = .loaded(InstalledPackagesContent(formulaRows: [], caskRows: []))
+        ensureValidSelection()
+    }
+
     /// SwiftUI previews and tests: fixed rows, `load()` is a no-op.
     init(previewFormulae: [InstalledPackageRow], previewCasks: [InstalledPackageRow]) {
         repository = nil
         detailsRepository = nil
-        formulaRows = previewFormulae
-        caskRows = previewCasks
+        state = .loaded(InstalledPackagesContent(formulaRows: previewFormulae, caskRows: previewCasks))
         ensureValidSelection()
     }
 
@@ -69,15 +108,36 @@ final class InstalledViewModel {
     init(
         testingFormulaRows: [InstalledPackageRow] = [],
         testingCaskRows: [InstalledPackageRow] = [],
-        isLoading: Bool = false,
-        userFacingError: String? = nil,
+        state: InstalledLoadState? = nil,
     ) {
         repository = nil
         detailsRepository = nil
-        formulaRows = testingFormulaRows
-        caskRows = testingCaskRows
-        self.isLoading = isLoading
-        self.userFacingError = userFacingError
+        if let state {
+            self.state = state
+        } else {
+            self.state = .loaded(InstalledPackagesContent(formulaRows: testingFormulaRows, caskRows: testingCaskRows))
+        }
+        ensureValidSelection()
+    }
+
+    /// Backward-compatible initializer used by older tests while state migrates to enum-based loading.
+    init(
+        testingFormulaRows: [InstalledPackageRow] = [],
+        testingCaskRows: [InstalledPackageRow] = [],
+        isLoading: Bool,
+        userFacingError: String? = nil,
+    ) {
+        let resolvedState: InstalledLoadState
+        if isLoading, testingFormulaRows.isEmpty, testingCaskRows.isEmpty, userFacingError == nil {
+            resolvedState = .loading
+        } else if let userFacingError {
+            resolvedState = .error(userFacingError)
+        } else {
+            resolvedState = .loaded(InstalledPackagesContent(formulaRows: testingFormulaRows, caskRows: testingCaskRows))
+        }
+        repository = nil
+        detailsRepository = nil
+        state = resolvedState
         ensureValidSelection()
     }
 
@@ -85,21 +145,18 @@ final class InstalledViewModel {
         guard let repository else {
             return
         }
-        isLoading = true
-        userFacingError = nil
-        defer { isLoading = false }
+        state = .loading
         do {
             let snapshot = try await repository.loadInstalledPackages()
-            formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
-            caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
+            let formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
+            let caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
+            state = .loaded(InstalledPackagesContent(formulaRows: formulaRows, caskRows: caskRows))
             ensureValidSelection()
             startDetailsLoadForCurrentSelection()
         } catch {
-            formulaRows = []
-            caskRows = []
+            state = .error(Self.userMessage(for: error))
             selectedPackageID = nil
             clearDetailsState()
-            userFacingError = Self.userMessage(for: error)
         }
     }
 
