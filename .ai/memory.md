@@ -140,3 +140,8 @@
 - Added `MainWindowView` + `MainWindowViewModel` so shell layout/navigation selection/load policy are separated from feature views.
 - `InstalledColumns` now owns Installed feature column composition (`contentColumn`, `detailColumn`) and related width modifiers.
 - `BrewApp` now presents `MainWindowView` directly; `ContentView` remains a thin compatibility wrapper for previews/incremental migration.
+
+## 2026-04-26 — Loadable view state convention
+
+- For async/failable view-model data that drives UI rendering, prefer a single enum state (for example `.loading`, `.loaded(Data)`, `.error(String)`) over separate `isLoading`/`data`/`error` properties.
+- This pattern is now used by `InstalledDetailsViewModel` via `InstalledDetailsLoadState`, and documented in `CONVENTIONS.md` under **Implementation notes**.
