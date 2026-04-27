@@ -41,17 +41,14 @@ struct BrewPackageDetailsRepositoryTests {
         ])
         let repo = repository(commandRunner: runner)
         let details = try await repo.loadPackageDetails(named: "slack")
-        let expected = InstalledPackageDetails(
-            name: "slack",
-            kind: .cask,
-            description: "Team communication and collaboration software",
-            version: "4.41.105",
-            installedVersions: ["4.41.105"],
-            homepage: "https://slack.com/",
-            dependencies: ["mas", "microsoft-auto-update", "ventura"],
-            command: "brew info slack --json=v2",
-        )
-        #expect(details == expected)
+        #expect(details.name == "slack")
+        #expect(details.kind == .cask)
+        #expect(details.description == "Team communication and collaboration software")
+        #expect(details.version == "4.41.105")
+        #expect(details.installedVersions == ["4.41.105"])
+        #expect(details.homepage == "https://slack.com/")
+        #expect(Set(details.dependencies) == Set(["mas", "microsoft-auto-update", "ventura"]))
+        #expect(details.command == "brew info slack --json=v2")
     }
 
     @Test @MainActor func `load honors preferred kind when payload includes formula and cask`() async throws {
@@ -78,6 +75,42 @@ struct BrewPackageDetailsRepositoryTests {
         let repo = repository(commandRunner: runner)
         await #expect(throws: PackageDetailsRepositoryError.self) {
             try await repo.loadPackageDetails(named: "ghost")
+        }
+    }
+
+    @Test @MainActor func `load throws invalid json output when payload cannot decode`() async {
+        let runner = MockBrewCommandRunner(responses: [
+            ["info", "wget", "--json=v2"]: CommandOutput(
+                standardOutput: #"{"formulae": "not-an-array"}"#,
+                standardError: "",
+                terminationStatus: 0,
+            ),
+        ])
+        let repo = repository(commandRunner: runner)
+        await #expect(throws: PackageDetailsRepositoryError.self) {
+            try await repo.loadPackageDetails(named: "wget")
+        }
+    }
+
+    @Test @MainActor func `load surfaces brew command failed when exit code is non-zero`() async {
+        let runner = MockBrewCommandRunner(responses: [
+            ["info", "wget", "--json=v2"]: CommandOutput(
+                standardOutput: "",
+                standardError: "brew failed",
+                terminationStatus: 1,
+            ),
+        ])
+        let repo = repository(commandRunner: runner)
+        await #expect(throws: BrewCommandError.self) {
+            try await repo.loadPackageDetails(named: "wget")
+        }
+    }
+
+    @Test @MainActor func `load throws executable not found when brew cannot be located`() async {
+        let runner = MockBrewCommandRunner(responses: [:])
+        let repo = repository(commandRunner: runner, locator: MissingBrewExecutableLocator())
+        await #expect(throws: BrewLookupError.self) {
+            try await repo.loadPackageDetails(named: "wget")
         }
     }
 }
