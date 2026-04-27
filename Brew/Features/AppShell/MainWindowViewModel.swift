@@ -1,3 +1,4 @@
+import CoreGraphics
 import Observation
 
 @Observable
@@ -11,6 +12,14 @@ final class MainWindowViewModel {
         case .installed:
             installedViewModel.selectedPackageRow != nil
         }
+    }
+
+    var minimumWindowWidth: CGFloat {
+        if shouldShowInstalledDetailColumn {
+            let threePaneFloor = BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth + BrewLayout.inspectorWidth
+            return max(threePaneFloor, BrewLayout.installedThreePaneMinWindowWidth)
+        }
+        return BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth
     }
 
     init(

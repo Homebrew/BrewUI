@@ -1,34 +1,44 @@
+import AppKit
 import SwiftUI
 
 struct MainWindowView: View {
     @Bindable var viewModel: MainWindowViewModel
 
     var body: some View {
-        Group {
-            if viewModel.shouldShowInstalledDetailColumn {
-                NavigationSplitView {
-                    sidebarColumn
-                } content: {
-                    contentColumn
-                } detail: {
-                    detailColumn
-                }
-            } else {
-                NavigationSplitView {
-                    sidebarColumn
-                } detail: {
-                    contentColumn
-                }
-            }
+        NavigationSplitView {
+            sidebarColumn
+        } detail: {
+            featureColumn
         }
         .frame(
-            minWidth: BrewLayout.minWindowWidth,
+            minWidth: viewModel.minimumWindowWidth,
             minHeight: BrewLayout.minWindowHeight,
         )
         .background(.bar)
+        .onAppear {
+            ensureWindowMeetsMinimumWidth()
+        }
+        .onChange(of: viewModel.shouldShowInstalledDetailColumn) { _, _ in
+            ensureWindowMeetsMinimumWidth()
+        }
         .task(id: viewModel.selectedSidebarItem) {
             await viewModel.loadForCurrentSelection()
         }
+    }
+
+    private func ensureWindowMeetsMinimumWidth() {
+        let requiredWidth = viewModel.minimumWindowWidth
+        guard let window = NSApplication.shared.keyWindow ?? NSApplication.shared.mainWindow ?? NSApplication.shared.windows.first else {
+            return
+        }
+        let frame = window.frame
+        guard frame.width < requiredWidth else {
+            return
+        }
+
+        var expandedFrame = frame
+        expandedFrame.size.width = requiredWidth
+        window.setFrame(expandedFrame, display: true, animate: true)
     }
 
     private var sidebarColumn: some View {
@@ -41,18 +51,10 @@ struct MainWindowView: View {
     }
 
     @ViewBuilder
-    private var contentColumn: some View {
+    private var featureColumn: some View {
         switch viewModel.selectedSidebarItem {
         case .installed:
-            InstalledColumns(viewModel: viewModel.installedViewModel).contentColumn
-        }
-    }
-
-    @ViewBuilder
-    private var detailColumn: some View {
-        switch viewModel.selectedSidebarItem {
-        case .installed:
-            InstalledColumns(viewModel: viewModel.installedViewModel).detailColumn
+            InstalledColumns(viewModel: viewModel.installedViewModel).featureView
         }
     }
 }

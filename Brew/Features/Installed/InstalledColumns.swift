@@ -4,28 +4,34 @@ import SwiftUI
 struct InstalledColumns {
     @Bindable var viewModel: InstalledViewModel
 
-    var contentColumn: some View {
-        InstalledShellView(viewModel: viewModel)
-            .navigationSplitViewColumnWidth(
-                min: BrewLayout.installedListColumnMinWidth,
-                ideal: BrewLayout.installedListColumnIdealWidth,
-                max: BrewLayout.installedListColumnMaxWidth,
-            )
-    }
-
-    var detailColumn: some View {
+    /// Right-side feature surface in the app shell.
+    /// Uses a two-pane internal split only when a row is selected.
+    var featureView: some View {
         Group {
             if let detailsViewModel = viewModel.detailsViewModel {
-                InstalledPackageDetailView(viewModel: detailsViewModel)
+                HSplitView {
+                    InstalledShellView(viewModel: viewModel)
+                        .frame(
+                            minWidth: BrewLayout.installedListColumnMinWidth,
+                            idealWidth: BrewLayout.installedListColumnIdealWidth,
+                            maxWidth: BrewLayout.installedListColumnMaxWidth,
+                            maxHeight: .infinity,
+                            alignment: .topLeading,
+                        )
+
+                    InstalledPackageDetailView(viewModel: detailsViewModel)
+                        .frame(
+                            minWidth: BrewLayout.inspectorWidth,
+                            idealWidth: BrewLayout.installedDetailColumnIdealWidth,
+                            maxWidth: BrewLayout.installedDetailColumnMaxWidth,
+                            maxHeight: .infinity,
+                            alignment: .topLeading,
+                        )
+                }
             } else {
-                InstalledPackageDetailPlaceholder()
+                InstalledShellView(viewModel: viewModel)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .navigationSplitViewColumnWidth(
-            min: BrewLayout.inspectorWidth,
-            ideal: BrewLayout.installedDetailColumnIdealWidth,
-            max: BrewLayout.installedDetailColumnMaxWidth,
-        )
     }
 }
