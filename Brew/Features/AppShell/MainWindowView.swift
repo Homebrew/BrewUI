@@ -11,34 +11,13 @@ struct MainWindowView: View {
             featureColumn
         }
         .frame(
-            minWidth: viewModel.minimumWindowWidth,
+            minWidth: minimumWindowWidth,
             minHeight: BrewLayout.minWindowHeight,
         )
         .background(.bar)
-        .onAppear {
-            ensureWindowMeetsMinimumWidth()
-        }
-        .onChange(of: viewModel.shouldShowInstalledDetailColumn) { _, _ in
-            ensureWindowMeetsMinimumWidth()
-        }
         .task(id: viewModel.selectedSidebarItem) {
             await viewModel.loadForCurrentSelection()
         }
-    }
-
-    private func ensureWindowMeetsMinimumWidth() {
-        let requiredWidth = viewModel.minimumWindowWidth
-        guard let window = NSApplication.shared.keyWindow ?? NSApplication.shared.mainWindow ?? NSApplication.shared.windows.first else {
-            return
-        }
-        let frame = window.frame
-        guard frame.width < requiredWidth else {
-            return
-        }
-
-        var expandedFrame = frame
-        expandedFrame.size.width = requiredWidth
-        window.setFrame(expandedFrame, display: true, animate: true)
     }
 
     private var sidebarColumn: some View {
@@ -56,6 +35,14 @@ struct MainWindowView: View {
         case .installed:
             InstalledColumns(viewModel: viewModel.installedViewModel).featureView
         }
+    }
+
+    private var minimumWindowWidth: CGFloat {
+        if viewModel.shouldShowInstalledDetailColumn {
+            let threePaneFloor = BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth + BrewLayout.inspectorWidth
+            return max(threePaneFloor, BrewLayout.installedThreePaneMinWindowWidth)
+        }
+        return BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth
     }
 }
 

@@ -14,14 +14,6 @@ final class MainWindowViewModel {
         }
     }
 
-    var minimumWindowWidth: CGFloat {
-        if shouldShowInstalledDetailColumn {
-            let threePaneFloor = BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth + BrewLayout.inspectorWidth
-            return max(threePaneFloor, BrewLayout.installedThreePaneMinWindowWidth)
-        }
-        return BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth
-    }
-
     init(
         selectedSidebarItem: SidebarItem = .installed,
         installedViewModel: InstalledViewModel
