@@ -372,32 +372,35 @@ struct InstalledPackageDetailPlaceholder: View {
     }
 }
 
-//#Preview("List column") {
-//    InstalledShellView(
-//        viewModel: InstalledViewModel(
-//            previewFormulae: InstalledViewModelDummyData.formulae,
-//            previewCasks: InstalledViewModelDummyData.casks,
-//        ),
-//    )
-//    .frame(minWidth: 360, minHeight: 500)
-//}
-//
-//#Preview("Detail") {
-//    InstalledPackageDetailView(
-//        viewModel: InstalledDetailsViewModel(
-//            testingSelectedRow: InstalledViewModelDummyData.formulae[0],
-//            state: .loaded(
-//                InstalledPackageDetails(
-//                    name: "git",
-//                    kind: .formula,
-//                    description: "Distributed version control system.",
-//                    version: "2.45.0",
-//                    installedVersions: ["2.45.0"],
-//                    homepage: "https://git-scm.com",
-//                    dependencies: ["gettext", "pcre2"],
-//                ),
-//            ),
-//        ),
-//    )
-//    .frame(minWidth: 280, minHeight: 200)
-//}
+#Preview("List column") {
+    let viewModel = InstalledViewModel(
+        repository: PreviewInstalledPackagesRepository(),
+        detailsRepository: PreviewPackageDetailsRepository(),
+    )
+    InstalledShellView(
+        viewModel: viewModel,
+    )
+    .task {
+        await viewModel.load()
+    }
+    .frame(minWidth: 360, minHeight: 500)
+}
+
+#Preview("Detail") {
+    let detailsViewModel = InstalledDetailsViewModel(
+        selectedRow: InstalledPackageRow(
+            name: "git",
+            kind: .formula,
+            description: "Distributed revision control system",
+            installedVersion: "v2.45.0",
+        ),
+        repository: PreviewPackageDetailsRepository(),
+    )
+    InstalledPackageDetailView(
+        viewModel: detailsViewModel,
+    )
+    .task {
+        detailsViewModel.load()
+    }
+    .frame(minWidth: 280, minHeight: 200)
+}

@@ -10,37 +10,52 @@ import Testing
 struct InstalledDetailsViewModelTests {
     @Test @MainActor func `displayCommand uses selected row name before load`() {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loading)
+        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: SuccessDetailsRepository(details: details(name: "wget")))
         #expect(viewModel.displayCommand == "brew info wget")
     }
 
-    @Test @MainActor func `displayCommand uses loaded details name after load`() {
+    @Test @MainActor func `displayCommand uses loaded details name after load`() async {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loaded(details(name: "wget@2")))
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget@2")),
+        )
+        viewModel.load()
+        await waitForState(on: viewModel, toSatisfy: isLoaded)
         #expect(viewModel.displayCommand == "brew info wget@2")
     }
 
-    @Test @MainActor func `homepageURL returns valid http URL from loaded details`() {
+    @Test @MainActor func `homepageURL returns valid http URL from loaded details`() async {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
         var loadedDetails = details(name: "wget")
         loadedDetails.homepage = "https://example.com"
-        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loaded(loadedDetails))
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: loadedDetails),
+        )
+        viewModel.load()
+        await waitForState(on: viewModel, toSatisfy: isLoaded)
 
         #expect(viewModel.homepageURL?.absoluteString == "https://example.com")
     }
 
-    @Test @MainActor func `homepageURL returns nil for invalid homepage`() {
+    @Test @MainActor func `homepageURL returns nil for invalid homepage`() async {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
         var loadedDetails = details(name: "wget")
         loadedDetails.homepage = "not-a-url"
-        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loaded(loadedDetails))
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: loadedDetails),
+        )
+        viewModel.load()
+        await waitForState(on: viewModel, toSatisfy: isLoaded)
 
         #expect(viewModel.homepageURL == nil)
     }
 
     @Test @MainActor func `homepageURL returns nil outside loaded state`() {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        let viewModel = InstalledDetailsViewModel(testingSelectedRow: row, state: .loading)
+        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: SuccessDetailsRepository(details: details(name: "wget")))
 
         #expect(viewModel.homepageURL == nil)
     }
@@ -116,6 +131,14 @@ private struct StubDetailsRepository: PackageDetailsRepository {
     }
 }
 
+private struct SuccessDetailsRepository: PackageDetailsRepository {
+    let details: InstalledPackageDetails
+
+    func loadPackageDetails(named _: String, preferredKind _: InstalledPackageKind?) async throws -> InstalledPackageDetails {
+        details
+    }
+}
+
 private actor DeferredDetailsRepository: PackageDetailsRepository {
     private var continuations: [CheckedContinuation<InstalledPackageDetails, Error>] = []
     private var callCount: Int = 0
@@ -171,4 +194,11 @@ private func details(name: String) -> InstalledPackageDetails {
         homepage: nil,
         dependencies: [],
     )
+}
+
+private func isLoaded(_ state: InstalledDetailsLoadState) -> Bool {
+    if case .loaded = state {
+        return true
+    }
+    return false
 }

@@ -34,13 +34,13 @@ struct MainWindowView: View {
     }
 }
 
-//#Preview {
-//    MainWindowView(
-//        viewModel: MainWindowViewModel(
-//            installedViewModel: InstalledViewModel(
-//                previewFormulae: InstalledViewModelDummyData.formulae,
-//                previewCasks: InstalledViewModelDummyData.casks,
-//            ),
-//        ),
-//    )
-//}
+#Preview {
+    MainWindowView(
+        viewModel: MainWindowViewModel(
+            installedViewModel: InstalledViewModel(
+                repository: PreviewInstalledPackagesRepository(),
+                detailsRepository: PreviewPackageDetailsRepository(),
+            ),
+        ),
+    )
+}
