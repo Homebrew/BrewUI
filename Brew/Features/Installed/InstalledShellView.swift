@@ -10,11 +10,6 @@ struct InstalledShellView: View {
     @Bindable var viewModel: InstalledViewModel
 
     var body: some View {
-        installedListContent
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private var installedListContent: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 Text("Installed")
@@ -35,56 +30,48 @@ struct InstalledShellView: View {
             case .error(let message):
                 errorView(message)
             case .loaded(let content):
-                List {
-                    if content.shouldShowFormulaeSection {
-                        Section("Formulae") {
-                            ForEach(content.formulaRows) { row in
-                                InstalledListRowView(row: row)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        viewModel.toggleSelection(for: row.id)
-                                    }
-                                    .listRowBackground(
-                                        viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
-                                    )
-                            }
-                        }
-                    }
+                installedList(content)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+        }
+    }
 
-                    if content.shouldShowCasksSection {
-                        Section("Casks") {
-                            ForEach(content.caskRows) { row in
-                                InstalledListRowView(row: row)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        viewModel.toggleSelection(for: row.id)
-                                    }
-                                    .listRowBackground(
-                                        viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
-                                    )
+    private func installedList(_ content: InstalledPackagesContent) -> some View {
+        List {
+            if content.shouldShowFormulaeSection {
+                Section("Formulae") {
+                    ForEach(content.formulaRows) { row in
+                        InstalledListRowView(row: row)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                viewModel.toggleSelection(for: row.id)
                             }
-                        }
+                            .listRowBackground(
+                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                            )
                     }
-                }
-                .listStyle(.plain)
-                .accessibilityLabel("Installed packages")
-                .onExitCommand {
-                    viewModel.clearSelection()
                 }
             }
-//
-//            if case let .error(message) = viewModel.state {
-//                
-//            }
-//
-//            ZStack {
-//                if case .loading = viewModel.state {
-//                    loadingSkeletonList
-//                } else {
-//
-//                }
-//            }
-//            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            if content.shouldShowCasksSection {
+                Section("Casks") {
+                    ForEach(content.caskRows) { row in
+                        InstalledListRowView(row: row)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                viewModel.toggleSelection(for: row.id)
+                            }
+                            .listRowBackground(
+                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                            )
+                    }
+                }
+            }
+        }
+        .listStyle(.plain)
+        .accessibilityLabel("Installed packages")
+        .onExitCommand {
+            viewModel.clearSelection()
         }
     }
 
