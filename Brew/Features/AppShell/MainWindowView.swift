@@ -10,10 +10,6 @@ struct MainWindowView: View {
         } detail: {
             featureColumn
         }
-        .frame(
-            minWidth: minimumWindowWidth,
-            minHeight: BrewLayout.minWindowHeight,
-        )
         .background(.bar)
         .task(id: viewModel.selectedSidebarItem) {
             await viewModel.loadForCurrentSelection()
@@ -36,23 +32,15 @@ struct MainWindowView: View {
             InstalledColumns(viewModel: viewModel.installedViewModel).featureView
         }
     }
-
-    private var minimumWindowWidth: CGFloat {
-        if viewModel.shouldShowInstalledDetailColumn {
-            let threePaneFloor = BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth + BrewLayout.inspectorWidth
-            return max(threePaneFloor, BrewLayout.installedThreePaneMinWindowWidth)
-        }
-        return BrewLayout.sidebarWidth + BrewLayout.installedListColumnMinWidth
-    }
 }
 
-#Preview {
-    MainWindowView(
-        viewModel: MainWindowViewModel(
-            installedViewModel: InstalledViewModel(
-                previewFormulae: InstalledViewModelDummyData.formulae,
-                previewCasks: InstalledViewModelDummyData.casks,
-            ),
-        ),
-    )
-}
+//#Preview {
+//    MainWindowView(
+//        viewModel: MainWindowViewModel(
+//            installedViewModel: InstalledViewModel(
+//                previewFormulae: InstalledViewModelDummyData.formulae,
+//                previewCasks: InstalledViewModelDummyData.casks,
+//            ),
+//        ),
+//    )
+//}

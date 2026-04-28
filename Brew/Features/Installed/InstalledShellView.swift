@@ -29,59 +29,62 @@ struct InstalledShellView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            if case let .error(message) = viewModel.state {
-                Text(message)
-                    .font(.brewCallout)
-                    .foregroundStyle(Color.brewStatusError)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, BrewSpacing.lg)
-                    .padding(.bottom, BrewSpacing.sm)
-                    .accessibilityLabel(message)
-            }
-
-            ZStack {
-                if case .loading = viewModel.state {
-                    loadingSkeletonList
-                } else {
-                    List {
-                        if viewModel.shouldShowFormulaeSection {
-                            Section("Formulae") {
-                                ForEach(viewModel.formulaRows) { row in
-                                    InstalledListRowView(row: row)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            viewModel.toggleSelection(for: row.id)
-                                        }
-                                        .listRowBackground(
-                                            viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
-                                        )
-                                }
-                            }
-                        }
-
-                        if viewModel.shouldShowCasksSection {
-                            Section("Casks") {
-                                ForEach(viewModel.caskRows) { row in
-                                    InstalledListRowView(row: row)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            viewModel.toggleSelection(for: row.id)
-                                        }
-                                        .listRowBackground(
-                                            viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
-                                        )
-                                }
+            switch viewModel.state {
+            case .loading:
+                loadingSkeletonList
+            case .error(let message):
+                errorView(message)
+            case .loaded(let content):
+                List {
+                    if content.shouldShowFormulaeSection {
+                        Section("Formulae") {
+                            ForEach(content.formulaRows) { row in
+                                InstalledListRowView(row: row)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        viewModel.toggleSelection(for: row.id)
+                                    }
+                                    .listRowBackground(
+                                        viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                                    )
                             }
                         }
                     }
-                    .listStyle(.plain)
-                    .accessibilityLabel("Installed packages")
-                    .onExitCommand {
-                        viewModel.clearSelection()
+
+                    if content.shouldShowCasksSection {
+                        Section("Casks") {
+                            ForEach(content.caskRows) { row in
+                                InstalledListRowView(row: row)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        viewModel.toggleSelection(for: row.id)
+                                    }
+                                    .listRowBackground(
+                                        viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                                    )
+                            }
+                        }
                     }
                 }
+                .listStyle(.plain)
+                .accessibilityLabel("Installed packages")
+                .onExitCommand {
+                    viewModel.clearSelection()
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+//
+//            if case let .error(message) = viewModel.state {
+//                
+//            }
+//
+//            ZStack {
+//                if case .loading = viewModel.state {
+//                    loadingSkeletonList
+//                } else {
+//
+//                }
+//            }
+//            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
@@ -122,6 +125,16 @@ struct InstalledShellView: View {
                 installedVersion: "v0.0.0",
             ),
         ]
+    }
+
+    private func errorView(_ message: String) -> some View {
+        Text(message)
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewStatusError)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.sm)
+            .accessibilityLabel(message)
     }
 }
 
@@ -359,32 +372,32 @@ struct InstalledPackageDetailPlaceholder: View {
     }
 }
 
-#Preview("List column") {
-    InstalledShellView(
-        viewModel: InstalledViewModel(
-            previewFormulae: InstalledViewModelDummyData.formulae,
-            previewCasks: InstalledViewModelDummyData.casks,
-        ),
-    )
-    .frame(minWidth: 360, minHeight: 500)
-}
-
-#Preview("Detail") {
-    InstalledPackageDetailView(
-        viewModel: InstalledDetailsViewModel(
-            testingSelectedRow: InstalledViewModelDummyData.formulae[0],
-            state: .loaded(
-                InstalledPackageDetails(
-                    name: "git",
-                    kind: .formula,
-                    description: "Distributed version control system.",
-                    version: "2.45.0",
-                    installedVersions: ["2.45.0"],
-                    homepage: "https://git-scm.com",
-                    dependencies: ["gettext", "pcre2"],
-                ),
-            ),
-        ),
-    )
-    .frame(minWidth: 280, minHeight: 200)
-}
+//#Preview("List column") {
+//    InstalledShellView(
+//        viewModel: InstalledViewModel(
+//            previewFormulae: InstalledViewModelDummyData.formulae,
+//            previewCasks: InstalledViewModelDummyData.casks,
+//        ),
+//    )
+//    .frame(minWidth: 360, minHeight: 500)
+//}
+//
+//#Preview("Detail") {
+//    InstalledPackageDetailView(
+//        viewModel: InstalledDetailsViewModel(
+//            testingSelectedRow: InstalledViewModelDummyData.formulae[0],
+//            state: .loaded(
+//                InstalledPackageDetails(
+//                    name: "git",
+//                    kind: .formula,
+//                    description: "Distributed version control system.",
+//                    version: "2.45.0",
+//                    installedVersions: ["2.45.0"],
+//                    homepage: "https://git-scm.com",
+//                    dependencies: ["gettext", "pcre2"],
+//                ),
+//            ),
+//        ),
+//    )
+//    .frame(minWidth: 280, minHeight: 200)
+//}

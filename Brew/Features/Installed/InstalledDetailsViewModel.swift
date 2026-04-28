@@ -15,7 +15,7 @@ enum InstalledDetailsLoadState: Equatable {
 @Observable
 @MainActor
 final class InstalledDetailsViewModel {
-    private let repository: (any PackageDetailsRepository)?
+    private let repository: PackageDetailsRepository
     private let selectedRow: InstalledPackageRow
     private var loadTask: Task<Void, Never>?
     private var requestID: Int = 0
@@ -54,19 +54,7 @@ final class InstalledDetailsViewModel {
         self.repository = repository
     }
 
-    init(
-        testingSelectedRow: InstalledPackageRow,
-        state: InstalledDetailsLoadState = .loading,
-    ) {
-        selectedRow = testingSelectedRow
-        repository = nil
-        self.state = state
-    }
-
     func load() {
-        guard let repository else {
-            return
-        }
         loadTask?.cancel()
         requestID += 1
         let activeRequestID = requestID
@@ -85,12 +73,12 @@ final class InstalledDetailsViewModel {
                 guard !Task.isCancelled else {
                     return
                 }
-                await self.applyResult(requestID: activeRequestID, state: .loaded(details))
+                applyResult(requestID: activeRequestID, state: .loaded(details))
             } catch {
                 guard !Task.isCancelled else {
                     return
                 }
-                await self.applyResult(requestID: activeRequestID, state: .error(Self.userMessage(for: error)))
+                applyResult(requestID: activeRequestID, state: .error(Self.userMessage(for: error)))
             }
         }
     }
