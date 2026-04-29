@@ -8,7 +8,7 @@ import Foundation
 protocol PackageDetailsRepository: Sendable {
     func loadPackageDetails(
         named name: String,
-        preferredKind: InstalledPackageKind?
+        preferredKind: InstalledPackageKind?,
     ) async throws -> InstalledPackageDetails
 }
 

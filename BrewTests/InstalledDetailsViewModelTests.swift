@@ -134,7 +134,7 @@ private struct StubDetailsRepository: PackageDetailsRepository {
 
     func loadPackageDetails(
         named _: String,
-        preferredKind _: InstalledPackageKind?
+        preferredKind _: InstalledPackageKind?,
     ) async throws -> InstalledPackageDetails {
         throw error
     }
@@ -145,7 +145,7 @@ private struct SuccessDetailsRepository: PackageDetailsRepository {
 
     func loadPackageDetails(
         named _: String,
-        preferredKind _: InstalledPackageKind?
+        preferredKind _: InstalledPackageKind?,
     ) async throws -> InstalledPackageDetails {
         details
     }
@@ -157,7 +157,7 @@ private actor DeferredDetailsRepository: PackageDetailsRepository {
 
     func loadPackageDetails(
         named _: String,
-        preferredKind _: InstalledPackageKind?
+        preferredKind _: InstalledPackageKind?,
     ) async throws -> InstalledPackageDetails {
         callCount += 1
         return try await withCheckedThrowingContinuation { continuation in

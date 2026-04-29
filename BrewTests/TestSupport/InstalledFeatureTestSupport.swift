@@ -36,7 +36,7 @@ struct StubPackageDetailsRepository: PackageDetailsRepository {
 
     func loadPackageDetails(
         named name: String,
-        preferredKind: InstalledPackageKind?
+        preferredKind: InstalledPackageKind?,
     ) async throws -> InstalledPackageDetails {
         if let details {
             return details

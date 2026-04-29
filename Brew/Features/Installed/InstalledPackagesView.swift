@@ -186,7 +186,6 @@ struct InstalledPackageDetailView: View {
         }
     }
 
-    @ViewBuilder
     private func detailsSection(details: InstalledPackageDetails) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Details")
@@ -200,7 +199,6 @@ struct InstalledPackageDetailView: View {
         }
     }
 
-    @ViewBuilder
     private func dependenciesSection(details: InstalledPackageDetails) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Dependencies")
@@ -219,7 +217,7 @@ struct InstalledPackageDetailView: View {
     private func dependencyGrid(_ dependencies: [String]) -> some View {
         LazyVGrid(
             columns: [GridItem(.adaptive(minimum: 120), spacing: BrewSpacing.sm)],
-            spacing: BrewSpacing.sm
+            spacing: BrewSpacing.sm,
         ) {
             ForEach(dependencies, id: \.self) { dependency in
                 Text(dependency)
@@ -328,7 +326,7 @@ struct InstalledPackageDetailView: View {
                     .foregroundStyle(Color.brewTextSecondary)
                 LazyVGrid(
                     columns: [GridItem(.adaptive(minimum: 120), spacing: BrewSpacing.sm)],
-                    spacing: BrewSpacing.sm
+                    spacing: BrewSpacing.sm,
                 ) {
                     ForEach(0 ..< 3, id: \.self) { _ in
                         Text("placeholder-dependency")

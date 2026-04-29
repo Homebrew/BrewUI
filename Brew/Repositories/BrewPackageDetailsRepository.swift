@@ -24,7 +24,7 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
 
     func loadPackageDetails(
         named name: String,
-        preferredKind: InstalledPackageKind? = nil
+        preferredKind: InstalledPackageKind? = nil,
     ) async throws -> InstalledPackageDetails {
         let brew = try locator.findBrewExecutable()
         let arguments = ["info", name, "--json=v2"]

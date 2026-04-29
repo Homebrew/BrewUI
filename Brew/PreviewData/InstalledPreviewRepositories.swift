@@ -58,7 +58,7 @@ struct PreviewInstalledPackagesRepository: InstalledPackagesRepository {
 struct PreviewPackageDetailsRepository: PackageDetailsRepository {
     func loadPackageDetails(
         named name: String,
-        preferredKind: InstalledPackageKind?
+        preferredKind: InstalledPackageKind?,
     ) async throws -> InstalledPackageDetails {
         InstalledPreviewData.details(for: name, preferredKind: preferredKind)
     }
