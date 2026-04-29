@@ -21,7 +21,7 @@
 
 These are the raw named colours extracted from the brew.sh visual identity. They are the foundation from which semantic tokens below are derived. Do not use these directly in components — use the semantic tokens in Section 4.
 
-```
+```text
 Amber 500    #FBB040   // Primary brand — beer amber, Homebrew logo
 Amber 400    #FCC96B   // Lighter amber for highlights / hover
 Amber 600    #E8971C   // Deeper amber for pressed states
@@ -150,19 +150,19 @@ All component and layout work should reference these tokens only. Values are giv
 
 ## 5. Component Tokens
 
-> **System accent vs. Homebrew amber — the boundary:**
->
-> | Uses system accent (`.tint()`) | Uses Homebrew amber (`color.brand.primary`) |
-> |---|---|
-> | `Toggle` on-state | Install/upgrade `ProgressView` fill |
-> | `Checkbox` / `Toggle` in forms | Console cursor & progress indicator |
-> | `Picker` selection | Sidebar selected item indicator |
-> | Text selection highlight | Primary action `Button` (custom style) |
-> | Default SwiftUI focus ring | Active tab / filter bar indicator |
-> | `DatePicker`, `Slider` thumb | Package row selected background tint |
-> | Any control using `.buttonStyle(.borderedProminent)` by default | SF Symbol tint on selected sidebar items |
->
-> In SwiftUI, apply `.tint(Color.accentColor)` at the root `WindowGroup` level and do not override it on standard controls. Apply `color.brand.primary` explicitly only on the custom components listed above.
+#### System accent vs. Homebrew amber — the boundary
+
+| Uses system accent (`.tint()`) | Uses Homebrew amber (`color.brand.primary`) |
+|---|---|
+| `Toggle` on-state | Install/upgrade `ProgressView` fill |
+| `Checkbox` / `Toggle` in forms | Console cursor & progress indicator |
+| `Picker` selection | Sidebar selected item indicator |
+| Text selection highlight | Primary action `Button` (custom style) |
+| Default SwiftUI focus ring | Active tab / filter bar indicator |
+| `DatePicker`, `Slider` thumb | Package row selected background tint |
+| Any control using `.buttonStyle(.borderedProminent)` by default | SF Symbol tint on selected sidebar items |
+
+In SwiftUI, apply `.tint(Color.accentColor)` at the root `WindowGroup` level and do not override it on standard controls. Apply `color.brand.primary` explicitly only on the custom components listed above.
 
 ### 5.1 Buttons
 
@@ -353,66 +353,3 @@ Follow macOS standard animation curves. Avoid custom spring configs unless match
 | Focus ring colour | **System accent** (do not override — macOS renders this automatically) |
 | Support Dynamic Type | Yes — use relative SwiftUI font styles, not fixed sizes |
 | Reduce Motion support | Yes — check `accessibilityReduceMotion` |
-
----
-
-## 12. Figma Variable Naming Convention
-
-When implementing these tokens in Figma Variables, use the following slash-delimited naming:
-
-```
-Color/Background/Window Base
-Color/Background/Surface
-Color/Background/Surface Elevated
-Color/Background/Surface Recessed
-Color/Background/Terminal
-
-Color/Text/Primary
-Color/Text/Secondary
-Color/Text/Tertiary
-Color/Text/Link
-Color/Text/On Brand
-Color/Text/Code Default
-Color/Text/Code Command
-Color/Text/Code Argument
-Color/Text/Code Output
-Color/Text/Code Error
-
-Color/Brand/Primary
-Color/Brand/Primary Hover
-Color/Brand/Primary Pressed
-Color/Brand/Tint
-
-Color/Status/Success
-Color/Status/Success Subtle
-Color/Status/Warning
-Color/Status/Warning Subtle
-Color/Status/Error
-Color/Status/Error Subtle
-Color/Status/Info
-Color/Status/Info Subtle
-
-Color/Border/Default
-Color/Border/Strong
-Color/Border/Brand
-Color/Border/Separator
-
-Number/Spacing/XXS  → 2
-Number/Spacing/XS   → 4
-Number/Spacing/SM   → 8
-Number/Spacing/MD   → 12
-Number/Spacing/LG   → 16
-Number/Spacing/XL   → 24
-Number/Spacing/XXL  → 32
-
-Number/Radius/SM    → 4
-Number/Radius/MD    → 6
-Number/Radius/LG    → 10
-Number/Radius/XL    → 14
-```
-
-Each colour variable should have two modes: **Light** and **Dark**.
-
----
-
-*BrewUI Design System v1.1 — generated for Figma prototype integration*
