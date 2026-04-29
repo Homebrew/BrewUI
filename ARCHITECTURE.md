@@ -19,6 +19,12 @@
 
 Flow: **View → ViewModel → Repository *or* Interactor → Services →** `brew` CLI **or** JSON API.
 
+Guiding patterns:
+
+- **MVVM-C (lightweight):** Views stay declarative; ViewModels own presentation state; coordination/navigation policy is centralized in small coordinator-style shell types when needed.
+- **Clean Architecture principles:** Depend inward on abstractions, keep use cases in Interactors/Repositories, isolate infrastructure in Services, and keep UI/framework concerns out of domain decisions.
+- **Emergent architecture:** Prefer the smallest pattern that solves today’s problem; evolve structure incrementally as features and complexity grow.
+
 ```
 ┌──────────────────────────────────────────────────────────────┐
 │                    BrewUI (macOS App)                        │

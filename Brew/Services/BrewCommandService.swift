@@ -23,10 +23,21 @@ struct BrewCommandService: BrewCommandRunning {
             } catch {
                 throw BrewCommandError.launchFailed(underlying: String(describing: error))
             }
+
+            // Drain pipes concurrently while the subprocess runs.
+            // Large outputs (for example `brew info --installed --json=v2`) can deadlock
+            // if we wait for exit before reading from stdout/stderr.
+            let outReadTask = Task.detached {
+                outPipe.fileHandleForReading.readDataToEndOfFile()
+            }
+            let errReadTask = Task.detached {
+                errPipe.fileHandleForReading.readDataToEndOfFile()
+            }
+
             process.waitUntilExit()
 
-            let outData = outPipe.fileHandleForReading.readDataToEndOfFile()
-            let errData = errPipe.fileHandleForReading.readDataToEndOfFile()
+            let outData = await outReadTask.value
+            let errData = await errReadTask.value
             let stdout = String(bytes: outData, encoding: .utf8) ?? ""
             let stderr = String(bytes: errData, encoding: .utf8) ?? ""
             return CommandOutput(

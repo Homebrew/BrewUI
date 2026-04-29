@@ -6,24 +6,9 @@
 import Foundation
 import Observation
 
-@Observable
-@MainActor
-final class InstalledViewModel {
-    private let repository: InstalledPackagesRepository?
-
-    private(set) var formulaRows: [InstalledPackageRow] = []
-    private(set) var caskRows: [InstalledPackageRow] = []
-    private(set) var isLoading = false
-    private(set) var userFacingError: String?
-
-    var totalPackageCount: Int {
-        formulaRows.count + caskRows.count
-    }
-
-    /// Initial fetch with no rows yet — show blocking spinner (unit-tested via `init(testing…)`).
-    var shouldShowInitialLoadingIndicator: Bool {
-        isLoading && totalPackageCount == 0 && userFacingError == nil
-    }
+struct InstalledPackagesContent: Equatable {
+    var formulaRows: [InstalledPackageRow]
+    var caskRows: [InstalledPackageRow]
 
     var shouldShowFormulaeSection: Bool {
         !formulaRows.isEmpty
@@ -32,9 +17,34 @@ final class InstalledViewModel {
     var shouldShowCasksSection: Bool {
         !caskRows.isEmpty
     }
+}
 
-    var shouldShowInterSectionDivider: Bool {
-        shouldShowFormulaeSection && shouldShowCasksSection
+enum InstalledLoadState: Equatable {
+    case loading
+    case loaded(InstalledPackagesContent)
+    case error(String)
+}
+
+@Observable
+@MainActor
+final class InstalledViewModel {
+    private let repository: InstalledPackagesRepository
+    private let detailsRepository: any PackageDetailsRepository
+
+    private(set) var state: InstalledLoadState = .loading
+    var selectedPackageID: InstalledPackageRow.ID?
+    private(set) var detailsViewModel: InstalledDetailsViewModel?
+
+    var totalPackageCount: Int {
+        allRows.count
+    }
+
+    /// Initial fetch with no rows yet — show blocking spinner (unit-tested via `init(testing…)`).
+    var shouldShowInitialLoadingIndicator: Bool {
+        if case .loading = state {
+            return true
+        }
+        return false
     }
 
     var packageCountSubtitle: String {
@@ -47,48 +57,68 @@ final class InstalledViewModel {
         return "\(totalPackageCount) packages"
     }
 
+    var selectedPackageRow: InstalledPackageRow? {
+        allRows.first(where: { $0.id == selectedPackageID })
+    }
+
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: InstalledPackagesRepository) {
+    init(repository: InstalledPackagesRepository, detailsRepository: PackageDetailsRepository) {
         self.repository = repository
-    }
-
-    /// SwiftUI previews and tests: fixed rows, `load()` is a no-op.
-    init(previewFormulae: [InstalledPackageRow], previewCasks: [InstalledPackageRow]) {
-        repository = nil
-        formulaRows = previewFormulae
-        caskRows = previewCasks
-    }
-
-    /// Unit tests for presentation flags (`@testable import Brew`).
-    init(
-        testingFormulaRows: [InstalledPackageRow] = [],
-        testingCaskRows: [InstalledPackageRow] = [],
-        isLoading: Bool = false,
-        userFacingError: String? = nil,
-    ) {
-        repository = nil
-        formulaRows = testingFormulaRows
-        caskRows = testingCaskRows
-        self.isLoading = isLoading
-        self.userFacingError = userFacingError
+        self.detailsRepository = detailsRepository
     }
 
     func load() async {
-        guard let repository else {
-            return
-        }
-        isLoading = true
-        userFacingError = nil
-        defer { isLoading = false }
+        state = .loading
         do {
             let snapshot = try await repository.loadInstalledPackages()
-            formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
-            caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
+            let formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
+            let caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
+            state = .loaded(InstalledPackagesContent(formulaRows: formulaRows, caskRows: caskRows))
+            startDetailsLoadForCurrentSelection()
         } catch {
-            formulaRows = []
-            caskRows = []
-            userFacingError = Self.userMessage(for: error)
+            state = .error(Self.userMessage(for: error))
+            selectedPackageID = nil
+            clearDetailsState()
         }
+    }
+
+    func toggleSelection(for rowID: InstalledPackageRow.ID) {
+        if selectedPackageID == rowID {
+            selectedPackageID = nil
+        } else {
+            selectedPackageID = rowID
+        }
+        startDetailsLoadForCurrentSelection()
+    }
+
+    func clearSelection() {
+        selectedPackageID = nil
+        startDetailsLoadForCurrentSelection()
+    }
+
+    private var allRows: [InstalledPackageRow] {
+        guard case let .loaded(content) = state else {
+            return []
+        }
+        return content.formulaRows + content.caskRows
+    }
+
+    private func startDetailsLoadForCurrentSelection() {
+        guard let selectedRow = selectedPackageRow else {
+            detailsViewModel = nil
+            return
+        }
+
+        let detailsViewModel = InstalledDetailsViewModel(
+            selectedRow: selectedRow,
+            repository: detailsRepository,
+        )
+        self.detailsViewModel = detailsViewModel
+        detailsViewModel.load()
+    }
+
+    private func clearDetailsState() {
+        detailsViewModel = nil
     }
 
     private static func row(from info: InstalledPackageInfo, kind: InstalledPackageKind) -> InstalledPackageRow {

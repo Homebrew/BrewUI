@@ -1,5 +1,5 @@
 //
-//  ShellSidebarView.swift
+//  MainSidebarView.swift
 //  Brew
 //
 
@@ -14,7 +14,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     }
 }
 
-struct ShellSidebarView: View {
+struct MainSidebarView: View {
     @Binding var selection: SidebarItem
 
     var body: some View {
@@ -80,6 +80,6 @@ struct ShellSidebarView: View {
 }
 
 #Preview {
-    ShellSidebarView(selection: .constant(.installed))
+    MainSidebarView(selection: .constant(.installed))
         .frame(width: BrewLayout.sidebarWidth, height: 400)
 }
