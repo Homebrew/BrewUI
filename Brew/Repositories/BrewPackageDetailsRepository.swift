@@ -58,7 +58,7 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
         let installedVersions = formula.installed
             .compactMap(\.version)
             .map(Self.trimmedOrNil(_:))
-            .compactMap { $0 }
+            .compactMap(\.self)
         let dependencies = Self.uniqueNonEmpty(
             formula.dependencies +
                 formula.buildDependencies +

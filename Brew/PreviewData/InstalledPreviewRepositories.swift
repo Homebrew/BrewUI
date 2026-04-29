@@ -16,7 +16,7 @@ enum InstalledPreviewData {
     static func details(for name: String, preferredKind: InstalledPackageKind?) -> InstalledPackageDetails {
         switch (name, preferredKind) {
         case ("docker", .cask):
-            return InstalledPackageDetails(
+            InstalledPackageDetails(
                 name: "docker",
                 kind: .cask,
                 description: "App to build and share containerized applications",
@@ -26,7 +26,7 @@ enum InstalledPreviewData {
                 dependencies: [],
             )
         case ("visual-studio-code", .cask):
-            return InstalledPackageDetails(
+            InstalledPackageDetails(
                 name: "visual-studio-code",
                 kind: .cask,
                 description: "Code editing redefined",
@@ -36,7 +36,7 @@ enum InstalledPreviewData {
                 dependencies: [],
             )
         default:
-            return InstalledPackageDetails(
+            InstalledPackageDetails(
                 name: "git",
                 kind: .formula,
                 description: "Distributed revision control system",

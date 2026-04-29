@@ -220,14 +220,14 @@ struct InstalledViewModelTests {
 
 private extension InstalledViewModel {
     var loadedFormulaRows: [InstalledPackageRow] {
-        guard case .loaded(let content) = state else {
+        guard case let .loaded(content) = state else {
             return []
         }
         return content.formulaRows
     }
 
     var loadedCaskRows: [InstalledPackageRow] {
-        guard case .loaded(let content) = state else {
+        guard case let .loaded(content) = state else {
             return []
         }
         return content.caskRows

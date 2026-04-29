@@ -9,7 +9,7 @@ final class MainWindowViewModel {
 
     init(
         selectedSidebarItem: SidebarItem = .installed,
-        installedViewModel: InstalledViewModel
+        installedViewModel: InstalledViewModel,
     ) {
         self.selectedSidebarItem = selectedSidebarItem
         self.installedViewModel = installedViewModel

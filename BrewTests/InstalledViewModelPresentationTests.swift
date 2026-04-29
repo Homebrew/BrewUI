@@ -14,7 +14,7 @@ private struct SectionVisibilitySnapshot: Equatable {
 
 @MainActor
 private func sectionVisibility(_ vm: InstalledViewModel) -> SectionVisibilitySnapshot {
-    guard case .loaded(let content) = vm.state else {
+    guard case let .loaded(content) = vm.state else {
         return SectionVisibilitySnapshot(formulae: false, casks: false)
     }
     return SectionVisibilitySnapshot(
@@ -159,7 +159,7 @@ private struct FailingInstalledRepository: InstalledPackagesRepository {
 
 @MainActor
 private func selectedFormulaRow(from vm: InstalledViewModel) -> InstalledPackageRow? {
-    guard case .loaded(let content) = vm.state else {
+    guard case let .loaded(content) = vm.state else {
         return nil
     }
     return content.formulaRows.first

@@ -27,9 +27,9 @@ struct InstalledPackagesView: View {
             switch viewModel.state {
             case .loading:
                 loadingSkeletonList
-            case .error(let message):
+            case let .error(message):
                 errorView(message)
-            case .loaded(let content):
+            case let .loaded(content):
                 installedList(content)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
@@ -47,7 +47,7 @@ struct InstalledPackagesView: View {
                                 viewModel.toggleSelection(for: row.id)
                             }
                             .listRowBackground(
-                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
                 }
@@ -62,7 +62,7 @@ struct InstalledPackagesView: View {
                                 viewModel.toggleSelection(for: row.id)
                             }
                             .listRowBackground(
-                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear
+                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
                 }
@@ -339,7 +339,6 @@ struct InstalledPackageDetailView: View {
         .allowsHitTesting(false)
         .accessibilityLabel("Loading package details")
     }
-
 }
 
 /// Empty third column when no package is selected.

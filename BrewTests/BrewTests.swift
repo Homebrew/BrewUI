@@ -21,7 +21,7 @@ struct BrewTests {
                 InstalledPackageInfo(name: "docker", version: "4.39.0"),
             ],
         )
-        guard case .loaded(let content) = viewModel.state else {
+        guard case let .loaded(content) = viewModel.state else {
             Issue.record("expected loaded state")
             return
         }

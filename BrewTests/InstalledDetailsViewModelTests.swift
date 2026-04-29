@@ -143,7 +143,7 @@ private actor DeferredDetailsRepository: PackageDetailsRepository {
     private var continuations: [CheckedContinuation<InstalledPackageDetails, Error>] = []
     private var callCount: Int = 0
 
-    func loadPackageDetails(named name: String, preferredKind kind: InstalledPackageKind?) async throws -> InstalledPackageDetails {
+    func loadPackageDetails(named _: String, preferredKind _: InstalledPackageKind?) async throws -> InstalledPackageDetails {
         callCount += 1
         return try await withCheckedThrowingContinuation { continuation in
             continuations.append(continuation)

@@ -29,7 +29,7 @@ enum InstalledLoadState: Equatable {
 @MainActor
 final class InstalledViewModel {
     private let repository: InstalledPackagesRepository
-    private let detailsRepository: (any PackageDetailsRepository)
+    private let detailsRepository: any PackageDetailsRepository
 
     private(set) var state: InstalledLoadState = .loading
     var selectedPackageID: InstalledPackageRow.ID?
@@ -97,7 +97,7 @@ final class InstalledViewModel {
     }
 
     private var allRows: [InstalledPackageRow] {
-        guard case .loaded(let content) = state else {
+        guard case let .loaded(content) = state else {
             return []
         }
         return content.formulaRows + content.caskRows
@@ -163,5 +163,4 @@ final class InstalledViewModel {
             return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
         }
     }
-
 }
