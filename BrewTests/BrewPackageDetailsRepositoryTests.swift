@@ -117,7 +117,10 @@ private func repository(
     commandRunner: BrewCommandRunning,
     locator: (any BrewExecutableLocating)? = nil,
 ) -> BrewPackageDetailsRepository {
-    let resolvedLocator = locator ?? BrewExecutableLocator(overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL)
+    let resolvedLocator = locator
+        ?? BrewExecutableLocator(
+            overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL
+        )
     return BrewPackageDetailsRepository(commandRunner: commandRunner, locator: resolvedLocator)
 }
 

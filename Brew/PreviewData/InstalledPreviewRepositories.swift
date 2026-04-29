@@ -56,7 +56,10 @@ struct PreviewInstalledPackagesRepository: InstalledPackagesRepository {
 }
 
 struct PreviewPackageDetailsRepository: PackageDetailsRepository {
-    func loadPackageDetails(named name: String, preferredKind: InstalledPackageKind?) async throws -> InstalledPackageDetails {
+    func loadPackageDetails(
+        named name: String,
+        preferredKind: InstalledPackageKind?
+    ) async throws -> InstalledPackageDetails {
         InstalledPreviewData.details(for: name, preferredKind: preferredKind)
     }
 }

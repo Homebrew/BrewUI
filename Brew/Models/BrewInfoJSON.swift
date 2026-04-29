@@ -7,13 +7,13 @@ import Foundation
 
 /// Minimal resilient schema for `brew info --json=v2`.
 struct BrewInfoJSON: Decodable {
-    var formulae: [Formula]
-    var casks: [Cask]
+    var formulae: [BrewInfoFormula]
+    var casks: [BrewInfoCask]
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        formulae = (try? container.decode([Formula].self, forKey: .formulae)) ?? []
-        casks = (try? container.decode([Cask].self, forKey: .casks)) ?? []
+        formulae = (try? container.decode([BrewInfoFormula].self, forKey: .formulae)) ?? []
+        casks = (try? container.decode([BrewInfoCask].self, forKey: .casks)) ?? []
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -22,80 +22,78 @@ struct BrewInfoJSON: Decodable {
     }
 }
 
-extension BrewInfoJSON {
-    struct Formula: Decodable {
-        var name: String
-        var desc: String?
-        var homepage: String?
-        var dependencies: [String]
-        var buildDependencies: [String]
-        var recommendedDependencies: [String]
-        var optionalDependencies: [String]
-        var versions: Versions
-        var installed: [Installed]
+struct BrewInfoFormula: Decodable {
+    var name: String
+    var desc: String?
+    var homepage: String?
+    var dependencies: [String]
+    var buildDependencies: [String]
+    var recommendedDependencies: [String]
+    var optionalDependencies: [String]
+    var versions: BrewInfoFormulaVersions
+    var installed: [BrewInfoFormulaInstalled]
 
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            name = (try? container.decode(String.self, forKey: .name)) ?? ""
-            desc = try? container.decode(String.self, forKey: .desc)
-            homepage = try? container.decode(String.self, forKey: .homepage)
-            dependencies = container.decodeStringArray(forKey: .dependencies)
-            buildDependencies = container.decodeStringArray(forKey: .buildDependencies)
-            recommendedDependencies = container.decodeStringArray(forKey: .recommendedDependencies)
-            optionalDependencies = container.decodeStringArray(forKey: .optionalDependencies)
-            versions = (try? container.decode(Versions.self, forKey: .versions)) ?? Versions(stable: nil)
-            installed = (try? container.decode([Installed].self, forKey: .installed)) ?? []
-        }
-
-        private enum CodingKeys: String, CodingKey {
-            case name
-            case desc
-            case homepage
-            case dependencies
-            case buildDependencies = "build_dependencies"
-            case recommendedDependencies = "recommended_dependencies"
-            case optionalDependencies = "optional_dependencies"
-            case versions
-            case installed
-        }
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = (try? container.decode(String.self, forKey: .name)) ?? ""
+        desc = try? container.decode(String.self, forKey: .desc)
+        homepage = try? container.decode(String.self, forKey: .homepage)
+        dependencies = container.decodeStringArray(forKey: .dependencies)
+        buildDependencies = container.decodeStringArray(forKey: .buildDependencies)
+        recommendedDependencies = container.decodeStringArray(forKey: .recommendedDependencies)
+        optionalDependencies = container.decodeStringArray(forKey: .optionalDependencies)
+        versions = (try? container.decode(BrewInfoFormulaVersions.self, forKey: .versions))
+            ?? BrewInfoFormulaVersions(stable: nil)
+        installed = (try? container.decode([BrewInfoFormulaInstalled].self, forKey: .installed))
+            ?? []
     }
 
-    struct Versions: Decodable {
-        var stable: String?
-    }
-
-    struct Installed: Decodable {
-        var version: String?
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case desc
+        case homepage
+        case dependencies
+        case buildDependencies = "build_dependencies"
+        case recommendedDependencies = "recommended_dependencies"
+        case optionalDependencies = "optional_dependencies"
+        case versions
+        case installed
     }
 }
 
-extension BrewInfoJSON {
-    struct Cask: Decodable {
-        var token: String
-        var desc: String?
-        var homepage: String?
-        var version: String?
-        var installedVersions: [String]
-        var dependencies: [String]
+struct BrewInfoFormulaVersions: Decodable {
+    var stable: String?
+}
 
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            token = (try? container.decode(String.self, forKey: .token)) ?? ""
-            desc = try? container.decode(String.self, forKey: .desc)
-            homepage = try? container.decode(String.self, forKey: .homepage)
-            version = try? container.decode(String.self, forKey: .version)
-            installedVersions = container.decodeInstalledVersions(forKey: .installed)
-            dependencies = container.decodeCaskDependencies(forKey: .dependencies)
-        }
+struct BrewInfoFormulaInstalled: Decodable {
+    var version: String?
+}
 
-        private enum CodingKeys: String, CodingKey {
-            case token
-            case desc
-            case homepage
-            case version
-            case installed
-            case dependencies
-        }
+struct BrewInfoCask: Decodable {
+    var token: String
+    var desc: String?
+    var homepage: String?
+    var version: String?
+    var installedVersions: [String]
+    var dependencies: [String]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        token = (try? container.decode(String.self, forKey: .token)) ?? ""
+        desc = try? container.decode(String.self, forKey: .desc)
+        homepage = try? container.decode(String.self, forKey: .homepage)
+        version = try? container.decode(String.self, forKey: .version)
+        installedVersions = container.decodeInstalledVersions(forKey: .installed)
+        dependencies = container.decodeCaskDependencies(forKey: .dependencies)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case token
+        case desc
+        case homepage
+        case version
+        case installed
+        case dependencies
     }
 }
 

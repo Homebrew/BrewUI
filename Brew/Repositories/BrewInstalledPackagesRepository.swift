@@ -55,7 +55,7 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
         }
     }
 
-    private static func formulaInfo(from formula: BrewInfoJSON.Formula) -> InstalledPackageInfo {
+    private static func formulaInfo(from formula: BrewInfoFormula) -> InstalledPackageInfo {
         InstalledPackageInfo(
             name: formula.name,
             version: formula.installed
@@ -65,7 +65,7 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
         )
     }
 
-    private static func caskInfo(from cask: BrewInfoJSON.Cask) -> InstalledPackageInfo {
+    private static func caskInfo(from cask: BrewInfoCask) -> InstalledPackageInfo {
         InstalledPackageInfo(
             name: cask.token,
             version: cask.installedVersions.first ?? cask.version,

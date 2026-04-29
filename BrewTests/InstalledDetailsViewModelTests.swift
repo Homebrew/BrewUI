@@ -10,7 +10,10 @@ import Testing
 struct InstalledDetailsViewModelTests {
     @Test @MainActor func `displayCommand uses selected row name before load`() {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: SuccessDetailsRepository(details: details(name: "wget")))
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+        )
         #expect(viewModel.displayCommand == "brew info wget")
     }
 
@@ -55,7 +58,10 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `homepageURL returns nil outside loaded state`() {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: SuccessDetailsRepository(details: details(name: "wget")))
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+        )
 
         #expect(viewModel.homepageURL == nil)
     }
@@ -126,7 +132,10 @@ struct InstalledDetailsViewModelTests {
 private struct StubDetailsRepository: PackageDetailsRepository {
     var error: Error
 
-    func loadPackageDetails(named _: String, preferredKind _: InstalledPackageKind?) async throws -> InstalledPackageDetails {
+    func loadPackageDetails(
+        named _: String,
+        preferredKind _: InstalledPackageKind?
+    ) async throws -> InstalledPackageDetails {
         throw error
     }
 }
@@ -134,7 +143,10 @@ private struct StubDetailsRepository: PackageDetailsRepository {
 private struct SuccessDetailsRepository: PackageDetailsRepository {
     let details: InstalledPackageDetails
 
-    func loadPackageDetails(named _: String, preferredKind _: InstalledPackageKind?) async throws -> InstalledPackageDetails {
+    func loadPackageDetails(
+        named _: String,
+        preferredKind _: InstalledPackageKind?
+    ) async throws -> InstalledPackageDetails {
         details
     }
 }
@@ -143,7 +155,10 @@ private actor DeferredDetailsRepository: PackageDetailsRepository {
     private var continuations: [CheckedContinuation<InstalledPackageDetails, Error>] = []
     private var callCount: Int = 0
 
-    func loadPackageDetails(named _: String, preferredKind _: InstalledPackageKind?) async throws -> InstalledPackageDetails {
+    func loadPackageDetails(
+        named _: String,
+        preferredKind _: InstalledPackageKind?
+    ) async throws -> InstalledPackageDetails {
         callCount += 1
         return try await withCheckedThrowingContinuation { continuation in
             continuations.append(continuation)

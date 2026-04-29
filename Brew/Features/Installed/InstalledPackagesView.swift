@@ -169,6 +169,13 @@ struct InstalledPackageDetailView: View {
 
     @ViewBuilder
     private func packageDetailsSections(details: InstalledPackageDetails) -> some View {
+        descriptionSection(details: details)
+        detailsSection(details: details)
+        dependenciesSection(details: details)
+        commandSection
+    }
+
+    private func descriptionSection(details: InstalledPackageDetails) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Description")
                 .font(.brewSubheadline)
@@ -177,7 +184,10 @@ struct InstalledPackageDetailView: View {
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextPrimary)
         }
+    }
 
+    @ViewBuilder
+    private func detailsSection(details: InstalledPackageDetails) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Details")
                 .font(.brewSubheadline)
@@ -188,7 +198,10 @@ struct InstalledPackageDetailView: View {
                 homepageRow(url: homepageURL)
             }
         }
+    }
 
+    @ViewBuilder
+    private func dependenciesSection(details: InstalledPackageDetails) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Dependencies")
                 .font(.brewSubheadline)
@@ -198,25 +211,34 @@ struct InstalledPackageDetailView: View {
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: BrewSpacing.sm)], spacing: BrewSpacing.sm) {
-                    ForEach(details.dependencies, id: \.self) { dependency in
-                        Text(dependency)
-                            .font(.brewCaption)
-                            .foregroundStyle(Color.brewTextPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, BrewSpacing.sm)
-                            .padding(.vertical, BrewSpacing.xs)
-                            .background(Color.brewSurfaceElevated)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: BrewRadius.sm)
-                                    .stroke(Color.brewBorderDefault, lineWidth: 1),
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
-                    }
-                }
+                dependencyGrid(details.dependencies)
             }
         }
+    }
 
+    private func dependencyGrid(_ dependencies: [String]) -> some View {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 120), spacing: BrewSpacing.sm)],
+            spacing: BrewSpacing.sm
+        ) {
+            ForEach(dependencies, id: \.self) { dependency in
+                Text(dependency)
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextPrimary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, BrewSpacing.sm)
+                    .padding(.vertical, BrewSpacing.xs)
+                    .background(Color.brewSurfaceElevated)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BrewRadius.sm)
+                            .stroke(Color.brewBorderDefault, lineWidth: 1),
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+            }
+        }
+    }
+
+    private var commandSection: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Command")
                 .font(.brewSubheadline)
@@ -304,7 +326,10 @@ struct InstalledPackageDetailView: View {
                 Text("Dependencies")
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: BrewSpacing.sm)], spacing: BrewSpacing.sm) {
+                LazyVGrid(
+                    columns: [GridItem(.adaptive(minimum: 120), spacing: BrewSpacing.sm)],
+                    spacing: BrewSpacing.sm
+                ) {
                     ForEach(0 ..< 3, id: \.self) { _ in
                         Text("placeholder-dependency")
                             .font(.brewCaption)
@@ -356,37 +381,4 @@ struct InstalledPackageDetailPlaceholder: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(BrewSpacing.xl)
     }
-}
-
-#Preview("List column") {
-    let viewModel = InstalledViewModel(
-        repository: PreviewInstalledPackagesRepository(),
-        detailsRepository: PreviewPackageDetailsRepository(),
-    )
-    InstalledPackagesView(
-        viewModel: viewModel,
-    )
-    .task {
-        await viewModel.load()
-    }
-    .frame(minWidth: 360, minHeight: 500)
-}
-
-#Preview("Detail") {
-    let detailsViewModel = InstalledDetailsViewModel(
-        selectedRow: InstalledPackageRow(
-            name: "git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            installedVersion: "v2.45.0",
-        ),
-        repository: PreviewPackageDetailsRepository(),
-    )
-    InstalledPackageDetailView(
-        viewModel: detailsViewModel,
-    )
-    .task {
-        detailsViewModel.load()
-    }
-    .frame(minWidth: 280, minHeight: 200)
 }

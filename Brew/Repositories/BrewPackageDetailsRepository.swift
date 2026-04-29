@@ -22,7 +22,10 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
         )
     }
 
-    func loadPackageDetails(named name: String, preferredKind: InstalledPackageKind? = nil) async throws -> InstalledPackageDetails {
+    func loadPackageDetails(
+        named name: String,
+        preferredKind: InstalledPackageKind? = nil
+    ) async throws -> InstalledPackageDetails {
         let brew = try locator.findBrewExecutable()
         let arguments = ["info", name, "--json=v2"]
         let output = try await commandRunner.run(executableURL: brew, arguments: arguments)
