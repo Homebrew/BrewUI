@@ -130,3 +130,29 @@
 ## 2026-04-04 — Main window / sidebar VM (deferred)
 
 - When **`SidebarItem`** gains a second case (e.g. Discover), introduce a **`MainWindowViewModel`** (or `AppShellViewModel`) to own selection and any tab rules; keep **`ContentView`’s** `switch` only for constructing child views. Presentation for sidebar rows can move there for unit tests.
+
+## 2026-04-25 — Main window: three-column `NavigationSplitView`
+
+- **Layout:** The main window uses the three-column `NavigationSplitView` initializer: **sidebar** (`ShellSidebarView`), **content** (`InstalledShellView` — list + chrome only), **detail** (`InstalledPackageDetailView` / `InstalledPackageDetailPlaceholder`). The previous `HSplitView` inside the detail region is removed; column widths use `BrewLayout` tokens including `installedListColumn*` and `installedDetailColumn*`. **`minWindowWidth`** is the sum of sidebar, list, and detail minimum column widths. Installed data loading runs from `ContentView` via `.task(id: selectedSidebarItem)` when the Installed tab is selected.
+
+## 2026-04-26 — App shell decomposition (MVVM-C lightweight)
+
+- Added `MainWindowView` + `MainWindowViewModel` so shell layout/navigation selection/load policy are separated from feature views.
+- `InstalledColumns` now owns Installed feature column composition (`contentColumn`, `detailColumn`) and related width modifiers.
+- `BrewApp` now presents `MainWindowView` directly; `ContentView` remains a thin compatibility wrapper for previews/incremental migration.
+
+## 2026-04-26 — Loadable view state convention
+
+- For async/failable view-model data that drives UI rendering, prefer a single enum state (for example `.loading`, `.loaded(Data)`, `.error(String)`) over separate `isLoading`/`data`/`error` properties.
+- This pattern is now used by `InstalledDetailsViewModel` via `InstalledDetailsLoadState`, and documented in `CONVENTIONS.md` under **Implementation notes**.
+
+## 2026-04-27 — Installed list source migrated to brew info JSON
+
+- `BrewInstalledPackagesRepository` now hydrates installed list data from a single `brew info --installed --json=v2` call instead of `brew list --versions` text output.
+- Existing Installed list UI contract remains stable because repository output is still `InstalledPackagesSnapshot`, mapped/sorted before `InstalledViewModel` row mapping.
+- Tests now validate mixed formula/cask JSON payloads, optional/missing fields, command failure behavior, and invalid JSON decode failures for installed list loading.
+
+## 2026-04-27 — Brew command pipe-drain fix
+
+- `BrewCommandService` now starts concurrent stdout/stderr readers immediately after process launch and only then waits for process termination, avoiding wait-before-read deadlocks on large command output.
+- Added `BrewCommandServiceTests` including a large output regression case (250k chars on each stream) to protect command execution paths used by installed list and details loading.
