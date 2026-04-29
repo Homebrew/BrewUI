@@ -150,7 +150,7 @@ All component and layout work should reference these tokens only. Values are giv
 
 ## 5. Component Tokens
 
-#### System accent vs. Homebrew amber — the boundary
+System accent vs. Homebrew amber — the boundary
 
 | Uses system accent (`.tint()`) | Uses Homebrew amber (`color.brand.primary`) |
 |---|---|
