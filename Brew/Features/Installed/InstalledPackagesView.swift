@@ -1,12 +1,12 @@
 //
-//  InstalledShellView.swift
+//  InstalledPackagesView.swift
 //  Brew
 //
 
 import SwiftUI
 
 /// Middle column of the main window: “Installed” chrome and the package list.
-struct InstalledShellView: View {
+struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
 
     var body: some View {
@@ -96,19 +96,19 @@ struct InstalledShellView: View {
             InstalledPackageRow(
                 name: "Placeholder Formula",
                 kind: .formula,
-                description: "Placeholder description text for loading row shell.",
+                description: "Placeholder description text for loading row.",
                 installedVersion: "v0.0.0",
             ),
             InstalledPackageRow(
                 name: "Placeholder Formula",
                 kind: .formula,
-                description: "Placeholder description text for loading row shell.",
+                description: "Placeholder description text for loading row.",
                 installedVersion: "v0.0.0",
             ),
             InstalledPackageRow(
                 name: "Placeholder Formula",
                 kind: .formula,
-                description: "Placeholder description text for loading row shell.",
+                description: "Placeholder description text for loading row.",
                 installedVersion: "v0.0.0",
             ),
         ]
@@ -364,7 +364,7 @@ struct InstalledPackageDetailPlaceholder: View {
         repository: PreviewInstalledPackagesRepository(),
         detailsRepository: PreviewPackageDetailsRepository(),
     )
-    InstalledShellView(
+    InstalledPackagesView(
         viewModel: viewModel,
     )
     .task {

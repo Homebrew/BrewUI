@@ -48,7 +48,7 @@ enum BrewLayout {
     static let installedDetailColumnMaxWidth: CGFloat = 1200
     static let installedThreePaneMinWindowWidth: CGFloat = 960
 
-    /// Minimum window width for the app shell: sidebar + feature surface.
+    /// Minimum window width for the main window: sidebar + feature surface.
     /// Installed detail is handled inside the feature view when selected.
     static let minWindowWidth: CGFloat =
         Self.sidebarWidth + Self.installedListColumnMinWidth

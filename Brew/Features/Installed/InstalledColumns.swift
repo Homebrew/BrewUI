@@ -1,16 +1,16 @@
 import SwiftUI
 
-/// Feature-owned content/detail columns for the main window shell.
+/// Feature-owned content/detail columns for the main window.
 struct InstalledColumns {
     @Bindable var viewModel: InstalledViewModel
 
-    /// Right-side feature surface in the app shell.
+    /// Right-side feature surface in the main window.
     /// Uses a two-pane internal split only when a row is selected.
     var featureView: some View {
         Group {
             if let detailsViewModel = viewModel.detailsViewModel {
                 HSplitView {
-                    InstalledShellView(viewModel: viewModel)
+                    InstalledPackagesView(viewModel: viewModel)
                         .frame(
                             minWidth: BrewLayout.installedListColumnMinWidth,
                             idealWidth: BrewLayout.installedListColumnIdealWidth,
@@ -29,7 +29,7 @@ struct InstalledColumns {
                         )
                 }
             } else {
-                InstalledShellView(viewModel: viewModel)
+                InstalledPackagesView(viewModel: viewModel)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)

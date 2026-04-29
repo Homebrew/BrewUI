@@ -17,7 +17,7 @@ struct MainWindowView: View {
     }
 
     private var sidebarColumn: some View {
-        ShellSidebarView(selection: $viewModel.selectedSidebarItem)
+        MainSidebarView(selection: $viewModel.selectedSidebarItem)
             .navigationSplitViewColumnWidth(
                 min: BrewLayout.sidebarWidth,
                 ideal: BrewLayout.sidebarWidth,
