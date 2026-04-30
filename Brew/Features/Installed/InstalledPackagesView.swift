@@ -34,6 +34,11 @@ struct InstalledPackagesView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
+        .searchable(
+            text: $viewModel.searchQuery,
+            placement: .toolbar,
+            prompt: "Search",
+        )
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
