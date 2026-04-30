@@ -36,6 +36,7 @@ struct InstalledPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
+            isPresented: $viewModel.isSearchSelected,
             placement: .toolbar,
             prompt: "Search",
         )
@@ -52,7 +53,7 @@ struct InstalledPackagesView: View {
                                 viewModel.toggleSelection(for: row.id)
                             }
                             .listRowBackground(
-                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
+                                viewModel.activeSelectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
                 }
@@ -67,7 +68,7 @@ struct InstalledPackagesView: View {
                                 viewModel.toggleSelection(for: row.id)
                             }
                             .listRowBackground(
-                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
+                                viewModel.activeSelectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
                 }

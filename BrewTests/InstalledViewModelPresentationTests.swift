@@ -143,7 +143,7 @@ struct InstalledViewModelPresentationTests {
             Issue.record("expected row in loaded state")
             return
         }
-        vm.selectedPackageID = row.id
+        vm.toggleSelection(for: row.id)
         vm.clearSelection()
         #expect(vm.selectedPackageID == nil)
     }

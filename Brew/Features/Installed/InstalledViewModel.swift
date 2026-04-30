@@ -32,14 +32,25 @@ final class InstalledViewModel {
     private let detailsRepository: any PackageDetailsRepository
 
     private var loadedContent: InstalledPackagesContent?
+    private var preSearchSelectedPackageID: InstalledPackageRow.ID?
+    private var searchPreviewSelectedPackageID: InstalledPackageRow.ID?
+    private var didCommitSelectionDuringSearch = false
     private(set) var state: InstalledLoadState = .loading
     var searchQuery: String = "" {
         didSet {
             applyLoadedStateForCurrentQuery()
+            updateSelectionForSearchQueryChange(from: oldValue, to: searchQuery)
+            startDetailsLoadForCurrentSelection()
+            isSearchSelected = true
         }
     }
-    var selectedPackageID: InstalledPackageRow.ID?
+    private(set) var selectedPackageID: InstalledPackageRow.ID?
     private(set) var detailsViewModel: InstalledDetailsViewModel?
+    var isSearchSelected: Bool = false
+
+    var activeSelectedPackageID: InstalledPackageRow.ID? {
+        searchPreviewSelectedPackageID ?? selectedPackageID
+    }
 
     var totalPackageCount: Int {
         allRows.count
@@ -64,7 +75,7 @@ final class InstalledViewModel {
     }
 
     var selectedPackageRow: InstalledPackageRow? {
-        allRows.first(where: { $0.id == selectedPackageID })
+        allRows.first(where: { $0.id == activeSelectedPackageID })
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
@@ -91,6 +102,10 @@ final class InstalledViewModel {
     }
 
     func toggleSelection(for rowID: InstalledPackageRow.ID) {
+        if isSearchActive {
+            didCommitSelectionDuringSearch = true
+            searchPreviewSelectedPackageID = nil
+        }
         if selectedPackageID == rowID {
             selectedPackageID = nil
         } else {
@@ -101,7 +116,12 @@ final class InstalledViewModel {
 
     func clearSelection() {
         selectedPackageID = nil
+        searchPreviewSelectedPackageID = nil
         startDetailsLoadForCurrentSelection()
+    }
+
+    private var isSearchActive: Bool {
+        !Self.normalizedSearchQuery(searchQuery).isEmpty
     }
 
     private var allRows: [InstalledPackageRow] {
@@ -118,8 +138,42 @@ final class InstalledViewModel {
         state = .loaded(Self.filteredContent(loadedContent, query: searchQuery))
     }
 
+    private func updateSelectionForSearchQueryChange(from oldQuery: String, to newQuery: String) {
+        let oldNormalizedQuery = Self.normalizedSearchQuery(oldQuery)
+        let newNormalizedQuery = Self.normalizedSearchQuery(newQuery)
+        let wasSearchActive = !oldNormalizedQuery.isEmpty
+        let isSearchActive = !newNormalizedQuery.isEmpty
+
+        if !wasSearchActive, isSearchActive {
+            preSearchSelectedPackageID = selectedPackageID
+            didCommitSelectionDuringSearch = false
+            searchPreviewSelectedPackageID = firstVisibleRowID()
+            return
+        }
+
+        if wasSearchActive, isSearchActive {
+            if !didCommitSelectionDuringSearch {
+                searchPreviewSelectedPackageID = firstVisibleRowID()
+            }
+            return
+        }
+
+        if wasSearchActive, !isSearchActive {
+            if !didCommitSelectionDuringSearch {
+                selectedPackageID = preSearchSelectedPackageID
+            }
+            preSearchSelectedPackageID = nil
+            searchPreviewSelectedPackageID = nil
+            didCommitSelectionDuringSearch = false
+        }
+    }
+
+    private func firstVisibleRowID() -> InstalledPackageRow.ID? {
+        allRows.first?.id
+    }
+
     private static func filteredContent(_ content: InstalledPackagesContent, query: String) -> InstalledPackagesContent {
-        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedQuery = normalizedSearchQuery(query)
         guard !normalizedQuery.isEmpty else {
             return content
         }
@@ -134,6 +188,10 @@ final class InstalledViewModel {
             formulaRows: filteredFormulaRows,
             caskRows: filteredCaskRows,
         )
+    }
+
+    private static func normalizedSearchQuery(_ query: String) -> String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func startDetailsLoadForCurrentSelection() {
