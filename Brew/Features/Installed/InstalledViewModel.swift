@@ -31,7 +31,13 @@ final class InstalledViewModel {
     private let repository: InstalledPackagesRepository
     private let detailsRepository: any PackageDetailsRepository
 
+    private var loadedContent: InstalledPackagesContent?
     private(set) var state: InstalledLoadState = .loading
+    var searchQuery: String = "" {
+        didSet {
+            applyLoadedStateForCurrentQuery()
+        }
+    }
     var selectedPackageID: InstalledPackageRow.ID?
     private(set) var detailsViewModel: InstalledDetailsViewModel?
 
@@ -68,12 +74,14 @@ final class InstalledViewModel {
     }
 
     func load() async {
+        loadedContent = nil
         state = .loading
         do {
             let snapshot = try await repository.loadInstalledPackages()
             let formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
             let caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
-            state = .loaded(InstalledPackagesContent(formulaRows: formulaRows, caskRows: caskRows))
+            loadedContent = InstalledPackagesContent(formulaRows: formulaRows, caskRows: caskRows)
+            applyLoadedStateForCurrentQuery()
             startDetailsLoadForCurrentSelection()
         } catch {
             state = .error(Self.userMessage(for: error))
@@ -101,6 +109,31 @@ final class InstalledViewModel {
             return []
         }
         return content.formulaRows + content.caskRows
+    }
+
+    private func applyLoadedStateForCurrentQuery() {
+        guard let loadedContent else {
+            return
+        }
+        state = .loaded(Self.filteredContent(loadedContent, query: searchQuery))
+    }
+
+    private static func filteredContent(_ content: InstalledPackagesContent, query: String) -> InstalledPackagesContent {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedQuery.isEmpty else {
+            return content
+        }
+
+        let filteredFormulaRows = content.formulaRows.filter {
+            $0.name.localizedCaseInsensitiveContains(normalizedQuery)
+        }
+        let filteredCaskRows = content.caskRows.filter {
+            $0.name.localizedCaseInsensitiveContains(normalizedQuery)
+        }
+        return InstalledPackagesContent(
+            formulaRows: filteredFormulaRows,
+            caskRows: filteredCaskRows,
+        )
     }
 
     private func startDetailsLoadForCurrentSelection() {

@@ -216,6 +216,131 @@ struct InstalledViewModelTests {
         vm.clearSelection()
         #expect(vm.detailsViewModel == nil)
     }
+
+    @Test @MainActor func `searchQuery didSet filters loaded formula and cask rows case insensitively`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                InstalledPackageInfo(name: "Git", version: "2.0"),
+                InstalledPackageInfo(name: "wget", version: "1.0"),
+            ],
+            casks: [
+                InstalledPackageInfo(name: "GitHub", version: nil),
+                InstalledPackageInfo(name: "Slack", version: nil),
+            ],
+        )
+        vm.searchQuery = "git"
+        #expect(
+            snapshot(vm) == VMStateSnapshot(
+                state: .loaded(
+                    InstalledPackagesContent(
+                        formulaRows: [
+                            InstalledPackageRow(name: "Git", kind: .formula, description: "", installedVersion: "v2.0"),
+                        ],
+                        caskRows: [
+                            InstalledPackageRow(name: "GitHub", kind: .cask, description: "", installedVersion: "—"),
+                        ],
+                    ),
+                ),
+                formulaRows: [
+                    InstalledPackageRow(name: "Git", kind: .formula, description: "", installedVersion: "v2.0"),
+                ],
+                caskRows: [
+                    InstalledPackageRow(name: "GitHub", kind: .cask, description: "", installedVersion: "—"),
+                ],
+                selectedPackageID: nil,
+                totalPackageCount: 2,
+            ),
+        )
+    }
+
+    @Test @MainActor func `searchQuery didSet whitespace query restores all loaded rows`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                InstalledPackageInfo(name: "git", version: "2.0"),
+                InstalledPackageInfo(name: "wget", version: "1.0"),
+            ],
+            casks: [
+                InstalledPackageInfo(name: "slack", version: nil),
+            ],
+        )
+        vm.searchQuery = "git"
+        vm.searchQuery = "   "
+        #expect(
+            snapshot(vm) == VMStateSnapshot(
+                state: .loaded(
+                    InstalledPackagesContent(
+                        formulaRows: [
+                            InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0"),
+                            InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1.0"),
+                        ],
+                        caskRows: [
+                            InstalledPackageRow(name: "slack", kind: .cask, description: "", installedVersion: "—"),
+                        ],
+                    ),
+                ),
+                formulaRows: [
+                    InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2.0"),
+                    InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1.0"),
+                ],
+                caskRows: [
+                    InstalledPackageRow(name: "slack", kind: .cask, description: "", installedVersion: "—"),
+                ],
+                selectedPackageID: nil,
+                totalPackageCount: 3,
+            ),
+        )
+    }
+
+    @Test @MainActor func `searchQuery didSet with no matches sets loaded state to empty rows`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
+            casks: [InstalledPackageInfo(name: "slack", version: nil)],
+        )
+        vm.searchQuery = "zzz"
+        #expect(
+            snapshot(vm) == VMStateSnapshot(
+                state: .loaded(InstalledPackagesContent(formulaRows: [], caskRows: [])),
+                formulaRows: [],
+                caskRows: [],
+                selectedPackageID: nil,
+                totalPackageCount: 0,
+            ),
+        )
+    }
+
+    @Test @MainActor func `searchQuery didSet before load keeps loading state`() {
+        let vm = InstalledViewModel(
+            repository: StubInstalledPackagesRepository(snapshot: .empty),
+            detailsRepository: StubPackageDetailsRepository(),
+        )
+        vm.searchQuery = "git"
+        #expect(snapshot(vm) == VMStateSnapshot(state: .loading, formulaRows: [], caskRows: [], selectedPackageID: nil, totalPackageCount: 0))
+    }
+
+    @Test @MainActor func `searchQuery didSet after load failure preserves error state`() async {
+        let vm = InstalledViewModel(
+            repository: StubThrowingRepository(error: OddRepositoryError()),
+            detailsRepository: StubPackageDetailsRepository(),
+        )
+        await vm.load()
+        let beforeQuerySnapshot = snapshot(vm)
+        vm.searchQuery = "git"
+        #expect(snapshot(vm) == beforeQuerySnapshot)
+    }
+
+    @Test @MainActor func `searchQuery didSet on empty loaded content remains empty loaded`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel()
+        vm.searchQuery = "git"
+        #expect(
+            snapshot(vm) == VMStateSnapshot(
+                state: .loaded(InstalledPackagesContent(formulaRows: [], caskRows: [])),
+                formulaRows: [],
+                caskRows: [],
+                selectedPackageID: nil,
+                totalPackageCount: 0,
+            ),
+        )
+    }
 }
 
 private extension InstalledViewModel {
