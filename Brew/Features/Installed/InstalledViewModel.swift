@@ -38,9 +38,12 @@ final class InstalledViewModel {
     private(set) var state: InstalledLoadState = .loading
     var searchQuery: String = "" {
         didSet {
+            let previousActiveSelectionID = activeSelectedPackageID
             applyLoadedStateForCurrentQuery()
             updateSelectionForSearchQueryChange(from: oldValue, to: searchQuery)
-            startDetailsLoadForCurrentSelection()
+            if previousActiveSelectionID != activeSelectedPackageID {
+                startDetailsLoadForCurrentSelection()
+            }
             isSearchSelected = true
         }
     }

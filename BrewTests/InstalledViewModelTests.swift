@@ -464,6 +464,64 @@ struct InstalledViewModelTests {
         #expect(vm.activeSelectedPackageID == clickedRowID)
     }
 
+    @Test @MainActor func `searchQuery typing with stable active selection does not recreate details view model`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                InstalledPackageInfo(name: "alpha", version: "1.0"),
+                InstalledPackageInfo(name: "alpine", version: "1.0"),
+                InstalledPackageInfo(name: "zeta", version: "1.0"),
+            ],
+        )
+        guard let preSearchSelectionID = vm.loadedFormulaRows.last?.id else {
+            Issue.record("expected row in loaded state")
+            return
+        }
+        vm.toggleSelection(for: preSearchSelectionID)
+
+        vm.searchQuery = "a"
+        guard let firstSearchDetailsViewModel = vm.detailsViewModel else {
+            Issue.record("expected details view model after search starts")
+            return
+        }
+
+        vm.searchQuery = "al"
+        guard let secondSearchDetailsViewModel = vm.detailsViewModel else {
+            Issue.record("expected details view model while searching")
+            return
+        }
+
+        #expect(ObjectIdentifier(firstSearchDetailsViewModel) == ObjectIdentifier(secondSearchDetailsViewModel))
+    }
+
+    @Test @MainActor func `searchQuery typing with changed active selection recreates details view model`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                InstalledPackageInfo(name: "alpha", version: "1.0"),
+                InstalledPackageInfo(name: "alpine", version: "1.0"),
+                InstalledPackageInfo(name: "zeta", version: "1.0"),
+            ],
+        )
+        guard let preSearchSelectionID = vm.loadedFormulaRows.last?.id else {
+            Issue.record("expected row in loaded state")
+            return
+        }
+        vm.toggleSelection(for: preSearchSelectionID)
+
+        vm.searchQuery = "a"
+        guard let firstSearchDetailsViewModel = vm.detailsViewModel else {
+            Issue.record("expected details view model after search starts")
+            return
+        }
+
+        vm.searchQuery = "alpi"
+        guard let secondSearchDetailsViewModel = vm.detailsViewModel else {
+            Issue.record("expected details view model after active selection changes")
+            return
+        }
+
+        #expect(ObjectIdentifier(firstSearchDetailsViewModel) != ObjectIdentifier(secondSearchDetailsViewModel))
+    }
+
     @Test @MainActor func `searchQuery didSet marks search as presented`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
