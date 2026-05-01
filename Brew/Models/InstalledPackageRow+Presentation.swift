@@ -16,6 +16,11 @@ extension InstalledPackageRow {
         !description.isEmpty
     }
 
+    /// Whether the list row should show “update available” styling (paired with ``versionPresentation``).
+    var showsUpdateAvailable: Bool {
+        updateVersion != nil
+    }
+
     var versionPresentation: RowVersionPresentation {
         if let latest = updateVersion {
             return .upgrade(current: installedVersion, latest: latest)
@@ -32,6 +37,8 @@ extension InstalledPackageRow {
         parts.append(installedVersion)
         if let update = updateVersion {
             parts.append("Update available to \(update)")
+        } else {
+            parts.append("Installed and up to date")
         }
         return parts.joined(separator: ", ")
     }

@@ -50,6 +50,22 @@ struct InstalledPackageRowPresentationTests {
         #expect(row.versionPresentation == .upgrade(current: "v1", latest: "v2"))
     }
 
+    @Test func `showsUpdateAvailable is false when no update`() {
+        let row = InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v1")
+        #expect(!row.showsUpdateAvailable)
+    }
+
+    @Test func `showsUpdateAvailable is true when update set`() {
+        let row = InstalledPackageRow(
+            name: "git",
+            kind: .formula,
+            description: "",
+            installedVersion: "v1",
+            updateVersion: "v2",
+        )
+        #expect(row.showsUpdateAvailable)
+    }
+
     @Test func `listRowAccessibilitySummary omits description when empty`() {
         let row = InstalledPackageRow(
             name: "Git",
@@ -57,7 +73,7 @@ struct InstalledPackageRowPresentationTests {
             description: "",
             installedVersion: "v2.0",
         )
-        #expect(row.listRowAccessibilitySummary == "Git, v2.0")
+        #expect(row.listRowAccessibilitySummary == "Git, v2.0, Installed and up to date")
     }
 
     @Test func `listRowAccessibilitySummary includes description when present`() {
@@ -67,7 +83,7 @@ struct InstalledPackageRowPresentationTests {
             description: "DVCS",
             installedVersion: "v2.0",
         )
-        #expect(row.listRowAccessibilitySummary == "Git, DVCS, v2.0")
+        #expect(row.listRowAccessibilitySummary == "Git, DVCS, v2.0, Installed and up to date")
     }
 
     @Test func `listRowAccessibilitySummary appends update line when update available`() {

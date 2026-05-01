@@ -26,6 +26,14 @@ struct InstalledListRowView: View {
         row.kind.chrome
     }
 
+    private var statusIconName: String {
+        row.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+    }
+
+    private var statusIconColor: Color {
+        row.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
+    }
+
     var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             ZStack {
@@ -44,10 +52,10 @@ struct InstalledListRowView: View {
                         .font(.brewBody)
                         .foregroundStyle(Color.brewTextPrimary)
 
-                    Image(systemName: "checkmark.circle.fill")
+                    Image(systemName: statusIconName)
                         .font(.body)
-                        .foregroundStyle(Color.brewStatusSuccess)
-                        .accessibilityLabel("Installed")
+                        .foregroundStyle(statusIconColor)
+                        .accessibilityHidden(true)
 
                     Text(chrome.badgeLabel)
                         .font(.brewCaption2)
@@ -89,7 +97,7 @@ struct InstalledListRowView: View {
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
         case let .upgrade(current, latest):
-            HStack(spacing: BrewSpacing.xs) {
+            HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.xs) {
                 Text(current)
                     .foregroundStyle(Color.brewTextTertiary)
                 Text("→")
@@ -98,6 +106,7 @@ struct InstalledListRowView: View {
                     .foregroundStyle(Color.brewBrandPrimary)
             }
             .font(.brewCaption)
+            .fixedSize(horizontal: false, vertical: true)
         }
     }
 
