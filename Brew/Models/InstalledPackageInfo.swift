@@ -9,7 +9,7 @@ import Foundation
 struct InstalledPackageInfo: Equatable, Hashable {
     var name: String
     var version: String?
-    /// Formatted upgrade target when Homebrew marks the package outdated and a stable/tap version is known.
+    /// Raw stable / tap version string when Homebrew marks the package outdated (whitespace-trimmed; display formatting is a ViewModel concern).
     var upgradeToVersion: String?
 
     init(name: String, version: String?, upgradeToVersion: String? = nil) {

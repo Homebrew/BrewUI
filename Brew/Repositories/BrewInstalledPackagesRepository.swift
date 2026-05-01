@@ -60,26 +60,31 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
             .compactMap(\.version)
             .first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
             ?? formula.versions.stable
-        let upgrade = formula.outdated
-            ? InstalledBrewVersionFormatting.upgradeDisplayLabel(from: formula.versions.stable)
-            : nil
+        let upgradeRaw = formula.outdated ? trimmedNonEmpty(formula.versions.stable) : nil
         return InstalledPackageInfo(
             name: formula.name,
             version: installedVersion,
-            upgradeToVersion: upgrade,
+            upgradeToVersion: upgradeRaw,
         )
     }
 
     private static func caskInfo(from cask: BrewInfoCask) -> InstalledPackageInfo {
         let tapStable = cask.versions.stable ?? cask.version
-        let upgrade = cask.outdated
-            ? InstalledBrewVersionFormatting.upgradeDisplayLabel(from: tapStable)
-            : nil
+        let upgradeRaw = cask.outdated ? trimmedNonEmpty(tapStable) : nil
         return InstalledPackageInfo(
             name: cask.token,
             version: cask.installedVersions.first ?? cask.version,
-            upgradeToVersion: upgrade,
+            upgradeToVersion: upgradeRaw,
         )
+    }
+
+    /// Trims whitespace; returns nil when empty — boundary cleanup only (no presentation rules).
+    private static func trimmedNonEmpty(_ raw: String?) -> String? {
+        let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !trimmed.isEmpty else {
+            return nil
+        }
+        return trimmed
     }
 
     private static func sortByName(_ lhs: InstalledPackageInfo, _ rhs: InstalledPackageInfo) -> Bool {

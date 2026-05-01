@@ -76,7 +76,7 @@ struct BrewInstalledPackagesRepositoryTests {
             snap.formulae.first { $0.name == name }
         }
 
-        #expect(info("wget")?.upgradeToVersion == "v1.26.0")
+        #expect(info("wget")?.upgradeToVersion == "1.26.0")
         #expect(info("fresh")?.upgradeToVersion == nil)
         #expect(info("edge")?.upgradeToVersion == nil)
         #expect(info("already-v-prefix")?.upgradeToVersion == "v2.5")
@@ -112,8 +112,8 @@ struct BrewInstalledPackagesRepositoryTests {
             snap.casks.first { $0.name == token }
         }
 
-        #expect(cask("zed")?.upgradeToVersion == "v1.3.0")
-        #expect(cask("nested-stable")?.upgradeToVersion == "v9.9")
+        #expect(cask("zed")?.upgradeToVersion == "1.3.0")
+        #expect(cask("nested-stable")?.upgradeToVersion == "9.9")
     }
 
     @Test @MainActor func `load handles mixed payload version fallback rules`() async throws {

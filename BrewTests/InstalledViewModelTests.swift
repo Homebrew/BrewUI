@@ -91,6 +91,28 @@ struct InstalledViewModelTests {
         #expect(vm.loadedFormulaRows.first?.installedVersion == "V1.0")
     }
 
+    @Test @MainActor func `load formats outdated upgrade target for list row`() async {
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(
+                standardOutput: """
+                {
+                  "formulae": [{
+                    "name": "wget",
+                    "outdated": true,
+                    "versions": { "stable": "1.26.0" },
+                    "installed": [{ "version": "1.24.5" }]
+                  }],
+                  "casks": []
+                }
+                """,
+            ),
+        )
+        let vm = await loadViewModel(commandRunner: runner)
+        let row = vm.loadedFormulaRows.first
+        #expect(row?.installedVersion == "v1.24.5")
+        #expect(row?.updateVersion == "v1.26.0")
+    }
+
     @Test @MainActor func `load clears rows and sets localized message when brew executable missing`() async {
         let runner = MockBrewCommandRunner(responses: [:])
         let vm = await loadViewModel(commandRunner: runner, locator: MissingBrewExecutableLocator())

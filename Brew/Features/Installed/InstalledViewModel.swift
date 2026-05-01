@@ -224,22 +224,15 @@ final class InstalledViewModel {
         let versionLabel: String = if trimmed.isEmpty {
             "—"
         } else {
-            displayVersion(trimmed)
+            InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: trimmed)
         }
         return InstalledPackageRow(
             name: info.name,
             kind: kind,
             description: "",
             installedVersion: versionLabel,
-            updateVersion: nil,
+            updateVersion: InstalledBrewVersionFormatting.upgradeDisplayLabel(from: info.upgradeToVersion),
         )
-    }
-
-    private static func displayVersion(_ raw: String) -> String {
-        if raw.hasPrefix("v") || raw.hasPrefix("V") {
-            return raw
-        }
-        return "v\(raw)"
     }
 
     private static func userMessage(for error: Error) -> String {
