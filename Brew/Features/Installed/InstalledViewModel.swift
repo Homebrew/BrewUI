@@ -176,7 +176,10 @@ final class InstalledViewModel {
         allRows.first?.id
     }
 
-    private static func filteredContent(_ content: InstalledPackagesContent, query: String) -> InstalledPackagesContent {
+    private static func filteredContent(
+        _ content: InstalledPackagesContent,
+        query: String,
+    ) -> InstalledPackagesContent {
         let normalizedQuery = normalizedSearchQuery(query)
         guard !normalizedQuery.isEmpty else {
             return content
