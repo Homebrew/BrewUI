@@ -7,59 +7,6 @@
 import Foundation
 import Testing
 
-// MARK: - Snapshots (one logical assertion per load test)
-
-private struct VMStateSnapshot: Equatable {
-    var state: InstalledLoadState
-    var formulaRows: [InstalledPackageRow]
-    var caskRows: [InstalledPackageRow]
-    var selectedPackageID: InstalledPackageRow.ID?
-    var totalPackageCount: Int
-
-    /// Rows cleared, load finished, after a failed `load()`.
-    static func emptyAfterLoad(userFacingError: String) -> VMStateSnapshot {
-        VMStateSnapshot(
-            state: .error(userFacingError),
-            formulaRows: [],
-            caskRows: [],
-            selectedPackageID: nil,
-            totalPackageCount: 0,
-        )
-    }
-}
-
-@MainActor
-private func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
-    VMStateSnapshot(
-        state: vm.state,
-        formulaRows: vm.loadedFormulaRows,
-        caskRows: vm.loadedCaskRows,
-        selectedPackageID: vm.selectedPackageID,
-        totalPackageCount: vm.totalPackageCount,
-    )
-}
-
-@MainActor
-private func loadViewModel(
-    commandRunner: BrewCommandRunning,
-    locator: (any BrewExecutableLocating)? = nil,
-) async -> InstalledViewModel {
-    let repo = InstalledPackagesTestSupport.repository(commandRunner: commandRunner, locator: locator)
-    let vm = InstalledViewModel(repository: repo, detailsRepository: StubPackageDetailsRepository())
-    await vm.load()
-    return vm
-}
-
-private struct OddRepositoryError: Error {}
-
-private struct StubThrowingRepository: InstalledPackagesRepository {
-    let error: Error
-
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
-        throw error
-    }
-}
-
 // MARK: - Tests
 
 struct InstalledViewModelTests {
@@ -215,21 +162,5 @@ struct InstalledViewModelTests {
         vm.toggleSelection(for: selectedID)
         vm.clearSelection()
         #expect(vm.detailsViewModel == nil)
-    }
-}
-
-private extension InstalledViewModel {
-    var loadedFormulaRows: [InstalledPackageRow] {
-        guard case let .loaded(content) = state else {
-            return []
-        }
-        return content.formulaRows
-    }
-
-    var loadedCaskRows: [InstalledPackageRow] {
-        guard case let .loaded(content) = state else {
-            return []
-        }
-        return content.caskRows
     }
 }
