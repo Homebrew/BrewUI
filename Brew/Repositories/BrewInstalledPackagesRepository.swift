@@ -56,19 +56,29 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
     }
 
     private static func formulaInfo(from formula: BrewInfoFormula) -> InstalledPackageInfo {
-        InstalledPackageInfo(
+        let installedVersion = formula.installed
+            .compactMap(\.version)
+            .first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
+            ?? formula.versions.stable
+        let upgrade = formula.outdated
+            ? InstalledBrewVersionFormatting.upgradeDisplayLabel(from: formula.versions.stable)
+            : nil
+        return InstalledPackageInfo(
             name: formula.name,
-            version: formula.installed
-                .compactMap(\.version)
-                .first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
-                ?? formula.versions.stable,
+            version: installedVersion,
+            upgradeToVersion: upgrade,
         )
     }
 
     private static func caskInfo(from cask: BrewInfoCask) -> InstalledPackageInfo {
-        InstalledPackageInfo(
+        let tapStable = cask.versions.stable ?? cask.version
+        let upgrade = cask.outdated
+            ? InstalledBrewVersionFormatting.upgradeDisplayLabel(from: tapStable)
+            : nil
+        return InstalledPackageInfo(
             name: cask.token,
             version: cask.installedVersions.first ?? cask.version,
+            upgradeToVersion: upgrade,
         )
     }
 

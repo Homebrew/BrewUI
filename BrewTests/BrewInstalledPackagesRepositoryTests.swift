@@ -35,6 +35,87 @@ struct BrewInstalledPackagesRepositoryTests {
         #expect(snap == expected)
     }
 
+    @Test @MainActor func `load maps outdated formulae to upgradeToVersion when stable exists`() async throws {
+        let json = """
+        {
+          "formulae": [
+            {
+              "name": "wget",
+              "outdated": true,
+              "versions": { "stable": "1.26.0" },
+              "installed": [{ "version": "1.24.5" }]
+            },
+            {
+              "name": "fresh",
+              "outdated": false,
+              "versions": { "stable": "9.9.9" },
+              "installed": [{ "version": "9.9.9" }]
+            },
+            {
+              "name": "edge",
+              "outdated": true,
+              "versions": { },
+              "installed": [{ "version": "1.0.0" }]
+            },
+            {
+              "name": "already-v-prefix",
+              "outdated": true,
+              "versions": { "stable": "v2.5" },
+              "installed": [{ "version": "2.0" }]
+            }
+          ],
+          "casks": []
+        }
+        """
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
+        )
+        let snap = try await InstalledPackagesTestSupport.repository(commandRunner: runner).loadInstalledPackages()
+
+        func info(_ name: String) -> InstalledPackageInfo? {
+            snap.formulae.first { $0.name == name }
+        }
+
+        #expect(info("wget")?.upgradeToVersion == "v1.26.0")
+        #expect(info("fresh")?.upgradeToVersion == nil)
+        #expect(info("edge")?.upgradeToVersion == nil)
+        #expect(info("already-v-prefix")?.upgradeToVersion == "v2.5")
+    }
+
+    @Test @MainActor func `load maps outdated casks to upgrade tap version or nested stable`() async throws {
+        let json = """
+        {
+          "formulae": [],
+          "casks": [
+            {
+              "token": "zed",
+              "outdated": true,
+              "version": "1.3.0",
+              "installed": "1.2.4"
+            },
+            {
+              "token": "nested-stable",
+              "outdated": true,
+              "version": "1.0",
+              "versions": { "stable": "9.9" },
+              "installed": "1.0"
+            }
+          ]
+        }
+        """
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
+        )
+        let snap = try await InstalledPackagesTestSupport.repository(commandRunner: runner).loadInstalledPackages()
+
+        func cask(_ token: String) -> InstalledPackageInfo? {
+            snap.casks.first { $0.name == token }
+        }
+
+        #expect(cask("zed")?.upgradeToVersion == "v1.3.0")
+        #expect(cask("nested-stable")?.upgradeToVersion == "v9.9")
+    }
+
     @Test @MainActor func `load handles mixed payload version fallback rules`() async throws {
         let json = """
         {
