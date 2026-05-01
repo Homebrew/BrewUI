@@ -47,6 +47,7 @@ final class InstalledViewModel {
             isSearchSelected = true
         }
     }
+
     private(set) var selectedPackageID: InstalledPackageRow.ID?
     private(set) var detailsViewModel: InstalledDetailsViewModel?
     var isSearchSelected: Bool = false
