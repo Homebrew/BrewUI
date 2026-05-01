@@ -75,6 +75,15 @@ See `ARCHITECTURE.md` for full design detail.
    - PR/review ready
 4. **End of session:** Update local `.ai/progress.md` if useful for continuity. If anything belongs in long-term shared memory, update `.ai/memory.md`.
 
+### Swift quality (local parity with CI)
+
+When you change Swift sources or anything that affects Swift formatting or linting (`.swiftlint.yml`, `.swiftformat`, `Mintfile`, `Brewfile`, `scripts/pre-commit`, `scripts/bootstrap`), run the same commands as `.github/workflows/swift_quality.yml` from the repo root after `scripts/bootstrap` / `mint bootstrap` (so Mint resolves tools from `Mintfile`):
+
+1. `mint run swiftformat --lint .`
+2. `mint run swiftlint lint --strict`
+
+The pre-commit hook formats and lints **staged** files only; these two commands validate the **whole** tree like CI and catch drift in unstaged paths.
+
 ---
 
 ## What Lives Where
