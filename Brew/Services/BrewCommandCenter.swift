@@ -1,0 +1,29 @@
+//
+//  BrewCommandCenter.swift
+//  Brew
+//
+
+import Foundation
+
+/// Coordinates mutating `brew` operations and cross-surface visibility (`ARCHITECTURE.md` — command execution).
+protocol BrewCommandCenter: Actor {
+    /// Snapshot for UI — ``BrewOperationPhase/idle`` when no state is tracked for `id`.
+    func phase(for id: BrewOperationID) async -> BrewOperationPhase
+
+    /// All tracked phases keyed by ``BrewOperationID``. Missing keys are equivalent to ``BrewOperationPhase/idle``.
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase]
+
+    /// `true` while work for `id` is actively running (not failed-only).
+    func isActive(id: BrewOperationID) async -> Bool
+
+    /// Enqueue mutating work keyed by `id`.
+    ///
+    /// **Concurrency:** Conforming types such as ``SerialBrewCommandCenter`` run work **serially** (one mutating operation at a time).
+    /// **Idempotence:** A second `submit` for the same `id` while the first is in flight awaits the same result;
+    /// the command runs once.
+    /// **Phase:** Running visibility uses ``BrewMutatingCommand/operationKind`` from `command` (no separate kind argument).
+    func submit(
+        id: BrewOperationID,
+        command: any BrewMutatingCommand,
+    ) async throws
+}

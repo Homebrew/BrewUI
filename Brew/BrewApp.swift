@@ -9,6 +9,12 @@ import SwiftUI
 
 @main
 struct BrewApp: App {
+    private let commandCenter: SerialBrewCommandCenter
+
+    init() {
+        commandCenter = SerialBrewCommandCenter(executionContext: .live())
+    }
+
     var body: some Scene {
         WindowGroup {
             MainWindowView(

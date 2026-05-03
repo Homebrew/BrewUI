@@ -155,4 +155,15 @@
 ## 2026-04-27 — Brew command pipe-drain fix
 
 - `BrewCommandService` now starts concurrent stdout/stderr readers immediately after process launch and only then waits for process termination, avoiding wait-before-read deadlocks on large command output.
-- Added `BrewCommandServiceTests` including a large output regression case (250k chars on each stream) to protect command execution paths used by installed list and details loading.
+- Added `BrewCommandServiceTests` including a large output regression case (250k chars on each stream) to protect command execution paths used for installed list and details loading.
+
+## 2026-05-03 — BrewCommandCenter + operation IDs
+
+- **Protocol `BrewCommandCenter`:** `actor` protocol — `submit(id:command:)`, `phase(for:)`, `phaseByID()` (full snapshot map), `isActive(id:)` (all `async` from callers).
+- **`BrewMutatingCommand`:** `Sendable` command pattern — `var operationKind`, `func run(in: BrewCommandExecutionContext) async throws` (no caller closures; kind is not duplicated at `submit`).
+- **`BrewCommandExecutionContext`:** `commandRunner` (`BrewCommandRunning`) + `brewExecutableURL()` via `locator` (`BrewExecutableLocating`).
+- **`SerialBrewCommandCenter`:** `actor`; **`SerialBrewWorkQueue`** inner actor ensures **one mutating command at a time** across `await`; duplicate **`BrewOperationID`** coalesces via shared **`Task`** handle.
+- **`OperationFailure`:** `Sendable` `enum` (`.brewCommand`, `.brewLaunchFailed`, `.brewExecutableNotFound`, `.generic`) for **`BrewOperationPhase.failed(reason:)`**; `init(catching:)` maps `BrewCommandError`, `BrewLookupError`, and other errors to cases; **`userFacingMessage`** is a derived line for UI.
+- **Transport types (`BrewOperationModels.swift`):** `BrewOperationKind`, `BrewOperationID`, `BrewOperationPhase`.
+- **Domain package discriminator:** `HomebrewPackageKind`; `InstalledPackageKind` typealias; **`BrewOperationID.init(kind:name:)`** in **`BrewOperationID+Homebrew.swift`**.
+- **Composition:** **`SerialBrewCommandCenter`** is not wired in **`BrewApp`** yet — shell view models (**`MainWindowViewModel`**, **`InstalledViewModel`**) omit **`BrewCommandCenter`** until upgrade/mutating UX injects it at the composition root. Command-center unit tests construct **`SerialBrewCommandCenter`** or **`NoopBrewCommandCenter.forTesting()`** directly; previews that need a noop center use **`NoopBrewCommandCenter.preview()`** (both noop factories wire **`BrewCommandExecutionContext.noopForTestingAndPreviews()`**).
