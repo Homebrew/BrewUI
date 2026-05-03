@@ -46,7 +46,9 @@ struct NoopBrewCommandCenterTests {
 private struct IncrementOnceCommand: BrewMutatingCommand {
     let counter: InvocationCounter
 
-    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeFormula
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         _ = context
@@ -57,7 +59,9 @@ private struct IncrementOnceCommand: BrewMutatingCommand {
 private struct NoopThrowingCommand: BrewMutatingCommand {
     struct TestError: Error {}
 
-    nonisolated var operationKind: BrewOperationKind { .upgradeCask }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeCask
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         _ = context

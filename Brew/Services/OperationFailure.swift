@@ -6,7 +6,7 @@
 import Foundation
 
 /// User-visible and diagnostic failure surfaced through ``BrewOperationPhase/failed(reason:)`` (`Sendable` for actor-isolated state).
-enum OperationFailure: Equatable, Sendable {
+enum OperationFailure: Equatable {
     /// `brew` ran but exited non-zero; stderr is the primary user-visible detail when present.
     case brewCommand(exitCode: Int32, stderr: String)
 
@@ -27,13 +27,19 @@ enum OperationFailure: Equatable, Sendable {
             if !trimmed.isEmpty {
                 return trimmed
             }
-            return String(localized: "Homebrew command failed.", comment: "Shown when brew exits non-zero with no stderr")
+            return String(
+                localized: "Homebrew command failed.",
+                comment: "Shown when brew exits non-zero with no stderr",
+            )
 
         case let .brewLaunchFailed(diagnostic):
             return diagnostic
 
         case .brewExecutableNotFound:
-            return String(localized: "Could not find the brew executable.", comment: "Shown when brew binary is missing")
+            return String(
+                localized: "Could not find the brew executable.",
+                comment: "Shown when brew binary is missing",
+            )
 
         case let .generic(userFacing, _):
             return userFacing

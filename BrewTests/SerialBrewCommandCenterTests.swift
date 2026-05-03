@@ -160,7 +160,9 @@ struct SerialBrewCommandCenterTests {
 // MARK: - Test commands
 
 private struct EmptyMutatingCommand: BrewMutatingCommand {
-    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeFormula
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         _ = context
@@ -170,7 +172,9 @@ private struct EmptyMutatingCommand: BrewMutatingCommand {
 private struct ThrowingMutatingCommand: BrewMutatingCommand {
     struct TestError: Error {}
 
-    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeFormula
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         _ = context
@@ -194,7 +198,9 @@ private struct OrderingSleepCommand: BrewMutatingCommand {
     let collector: OrderCollector
     let prefix: String
 
-    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeFormula
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         _ = context
@@ -208,7 +214,9 @@ private struct AppendTokenCommand: BrewMutatingCommand {
     let collector: OrderCollector
     let token: String
 
-    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeFormula
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         _ = context
@@ -227,7 +235,9 @@ private actor InvocationCounter {
 private struct SlowIncrementCommand: BrewMutatingCommand {
     let counter: InvocationCounter
 
-    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeFormula
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         _ = context
@@ -239,7 +249,9 @@ private struct SlowIncrementCommand: BrewMutatingCommand {
 private struct RunMockedArgvCommand: BrewMutatingCommand {
     let arguments: [String]
 
-    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+    nonisolated var operationKind: BrewOperationKind {
+        .upgradeFormula
+    }
 
     func run(in context: BrewCommandExecutionContext) async throws {
         let url = try context.brewExecutableURL()
