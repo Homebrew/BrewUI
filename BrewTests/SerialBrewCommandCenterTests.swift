@@ -106,6 +106,55 @@ struct SerialBrewCommandCenterTests {
         #expect(map[id] != nil)
         #expect(await center.phase(for: id) == map[id])
     }
+
+    @Test func `mutating command uses injected mock runner not real brew`() async throws {
+        let argv = ["upgrade", "demo-formula"]
+        let runner = MockBrewCommandRunner(responses: [
+            argv: CommandOutput(standardOutput: "mock-ok", standardError: "", terminationStatus: 0),
+        ])
+        let ctx = BrewCommandExecutionContext(
+            commandRunner: runner,
+            locator: BrewExecutableLocator(overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL),
+        )
+        let center = SerialBrewCommandCenter(executionContext: ctx)
+        let id = BrewOperationID(rawValue: "formula:demo-formula")
+
+        try await center.submit(id: id, command: RunMockedArgvCommand(arguments: argv))
+
+        #expect(await center.phase(for: id) == .idle)
+    }
+
+    @Test func `recording wrapper logs each submit while duplicate id coalesces body`() async throws {
+        let ctx = BrewCommandExecutionContext(
+            commandRunner: MockBrewCommandRunner(responses: [:]),
+            locator: BrewExecutableLocator(overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL),
+        )
+        let center = RecordingSerialBrewCommandCenter(executionContext: ctx)
+        let id = BrewOperationID(kind: .formula, name: "git")
+        let counter = InvocationCounter()
+
+        let first = Task {
+            try await center.submit(
+                id: id,
+                command: SlowIncrementCommand(counter: counter),
+            )
+        }
+        try await Task.sleep(for: .milliseconds(5))
+        let second = Task {
+            try await center.submit(
+                id: id,
+                command: SlowIncrementCommand(counter: counter),
+            )
+        }
+
+        try await first.value
+        try await second.value
+
+        let log = await center.recordedSubmitEntries
+        #expect(log.count == 2)
+        #expect(log.allSatisfy { $0.id == id && $0.kind == .upgradeFormula })
+        #expect(await counter.value == 1)
+    }
 }
 
 // MARK: - Test commands
@@ -184,5 +233,18 @@ private struct SlowIncrementCommand: BrewMutatingCommand {
         _ = context
         await counter.increment()
         try await Task.sleep(for: .milliseconds(30))
+    }
+}
+
+private struct RunMockedArgvCommand: BrewMutatingCommand {
+    let arguments: [String]
+
+    nonisolated var operationKind: BrewOperationKind { .upgradeFormula }
+
+    func run(in context: BrewCommandExecutionContext) async throws {
+        let url = try context.brewExecutableURL()
+        let out = try await context.commandRunner.run(executableURL: url, arguments: arguments)
+        #expect(out.standardOutput == "mock-ok")
+        #expect(out.terminationStatus == 0)
     }
 }

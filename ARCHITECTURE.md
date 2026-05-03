@@ -45,6 +45,7 @@ Guiding patterns:
 - **Repositories:** CRUD-shaped access to a **data source** (CLI output, API, storage, in-memory). Swap the implementation, keep the contract.
 - **Interactors:** One **use case** each — not generic CRUD (e.g. doctor run, config snapshot). Prefer protocols + real/mock impls for tests.
 - **Services:** Infrastructure — e.g. `BrewCommandService` (subprocess, streaming, cancellation), `JSONAPIService` (fetch/decode).
+- **Command center:** `BrewCommandCenter` (actor protocol; app default `SerialBrewCommandCenter`) — **serializes** mutating `brew` work, tracks **in-flight / failed** **operation** state (`BrewOperationID` + `BrewOperationPhase`) for UI across surfaces, and runs **small `BrewMutatingCommand` types** that call `BrewCommandRunning` + the brew locator. It does **not** own **read/parsing** of `brew list` / `brew info` output — that stays in **repositories**. Feature-scoped executors (e.g. upgrade helpers) should stay **thin** and be invoked **from** commands the center schedules, not as a second parallel pipeline.
 - **Models:** Shared types (`Formula`, jobs, config, …) and pure parsing/helpers where it keeps UI layers thin.
 
 ## File organisation
