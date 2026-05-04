@@ -19,7 +19,7 @@ struct InstalledColumns {
                             alignment: .topLeading,
                         )
 
-                    InstalledPackageDetailView(viewModel: detailsViewModel)
+                    InstalledPackageDetailWiringView(viewModel: detailsViewModel)
                         .frame(
                             minWidth: BrewLayout.inspectorWidth,
                             idealWidth: BrewLayout.installedDetailColumnIdealWidth,
