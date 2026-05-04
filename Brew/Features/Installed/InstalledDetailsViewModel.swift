@@ -23,10 +23,19 @@ final class InstalledDetailsViewModel {
     private var requestID: Int = 0
 
     private(set) var state: InstalledDetailsLoadState = .loading
-    /// True while `brew upgrade` is running (`CONVENTIONS.md` — transparency / guardrails).
-    private(set) var isUpgrading = false
+    /// Snapshot from ``BrewCommandCenter/phase(for:)`` for this row’s ``BrewOperationID``, refreshed on detail load
+    /// and around ``BrewCommandCenter/submit`` (plus a brief optimistic ``BrewOperationPhase/running(_:)`` while awaiting submit).
+    private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
+
+    /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
+    var isUpgrading: Bool {
+        if case .running = upgradeOperationPhase {
+            return true
+        }
+        return false
+    }
 
     var packageName: String {
         if case let .loaded(details) = state {
@@ -107,6 +116,7 @@ final class InstalledDetailsViewModel {
                     return
                 }
                 applyResult(requestID: activeRequestID, state: .loaded(details))
+                await syncUpgradePhaseFromCommandCenter()
             } catch {
                 guard !Task.isCancelled else {
                     return
@@ -115,22 +125,35 @@ final class InstalledDetailsViewModel {
                     requestID: activeRequestID,
                     state: .error(Self.userMessage(for: error, context: .loadDetails)),
                 )
+                await syncUpgradePhaseFromCommandCenter()
             }
         }
     }
 
     func upgradeSelectedPackage() async {
         upgradeErrorMessage = nil
-        isUpgrading = true
-        defer { isUpgrading = false }
         let operationID = BrewOperationID(row: selectedRow)
         let command = PackageUpgradeCommand(row: selectedRow)
+
+        upgradeOperationPhase = .running(command.operationKind)
+
         do {
             try await brewCommandCenter.submit(id: operationID, command: command)
             await onUpgradeSuccess?()
+            upgradeOperationPhase = await brewCommandCenter.phase(for: operationID)
         } catch {
-            upgradeErrorMessage = Self.userMessage(for: error, context: .runUpgrade)
+            upgradeOperationPhase = await brewCommandCenter.phase(for: operationID)
+            if case let .failed(reason: failure) = upgradeOperationPhase {
+                upgradeErrorMessage = failure.userFacingMessage
+            } else {
+                upgradeErrorMessage = Self.userMessage(for: error, context: .runUpgrade)
+            }
         }
+    }
+
+    private func syncUpgradePhaseFromCommandCenter() async {
+        let operationID = BrewOperationID(row: selectedRow)
+        upgradeOperationPhase = await brewCommandCenter.phase(for: operationID)
     }
 
     private func applyResult(requestID: Int, state: InstalledDetailsLoadState) {

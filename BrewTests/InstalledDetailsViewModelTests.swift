@@ -253,6 +253,24 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.upgradeErrorMessage == nil)
     }
 
+    @Test @MainActor func `load syncs upgradeOperationPhase from command center`() async {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let center = ConstantPhaseCommandCenter(phase: .running(.upgradeFormula))
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: center,
+        )
+        viewModel.load()
+        await waitForState(on: viewModel, toSatisfy: isLoaded)
+        await waitForUpgradePhase(on: viewModel) { phase in
+            if case .running(.upgradeFormula) = phase {
+                return true
+            }
+            return false
+        }
+    }
+
     @Test @MainActor func `upgrade failure sets upgrade error message`() async {
         let row = InstalledPackageRow(
             name: "wget",
@@ -271,6 +289,39 @@ struct InstalledDetailsViewModelTests {
 
         await viewModel.upgradeSelectedPackage()
         #expect(viewModel.upgradeErrorMessage == "upgrade blocked")
+    }
+}
+
+private actor ConstantPhaseCommandCenter: BrewCommandCenter {
+    private let fixedPhase: BrewOperationPhase
+
+    init(phase: BrewOperationPhase) {
+        fixedPhase = phase
+    }
+
+    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+        _ = id
+        return fixedPhase
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id: BrewOperationID) async -> Bool {
+        _ = id
+        if case .running = fixedPhase {
+            return true
+        }
+        return false
+    }
+
+    func submit(
+        id: BrewOperationID,
+        command: any BrewMutatingCommand,
+    ) async throws {
+        _ = id
+        _ = command
     }
 }
 
@@ -381,6 +432,20 @@ private func waitForState(
         await Task.yield()
     }
     Issue.record("timed out waiting for expected details state")
+}
+
+@MainActor
+private func waitForUpgradePhase(
+    on viewModel: InstalledDetailsViewModel,
+    toSatisfy predicate: @escaping (BrewOperationPhase) -> Bool,
+) async {
+    for _ in 0 ..< 100 {
+        if predicate(viewModel.upgradeOperationPhase) {
+            return
+        }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for expected upgradeOperationPhase")
 }
 
 private func details(name: String, kind: InstalledPackageKind = .formula) -> InstalledPackageDetails {
