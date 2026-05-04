@@ -5,10 +5,20 @@
 
 import Foundation
 
-/// Schedules `brew upgrade <name>` or `brew upgrade --cask <name>` via ``BrewCommandCenter/submit``.
+/// Schedules `brew upgrade <name>` or `brew upgrade --cask <name>` via ``BrewCommandCenter/submit``,
+/// using ``BrewCommandExecutionContext`` for subprocess execution and `brew` resolution.
+///
+/// Pair with ``BrewOperationID/init(row:)`` so the command center’s operation id matches the
+/// `kind:name` identity in ``InstalledPackageRow/id``.
 struct PackageUpgradeCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
+
+    /// Upgrade the package identified by the list row; same name/kind as ``InstalledPackageRow/id``.
+    init(row: InstalledPackageRow) {
+        packageName = row.name
+        kind = row.kind
+    }
 
     nonisolated var operationKind: BrewOperationKind {
         switch kind {

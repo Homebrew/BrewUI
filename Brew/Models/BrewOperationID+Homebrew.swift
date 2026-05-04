@@ -10,4 +10,9 @@ extension BrewOperationID {
     init(kind: HomebrewPackageKind, name: String) {
         rawValue = "\(kind.rawValue):\(name)"
     }
+
+    /// Same string as ``InstalledPackageRow/id`` — use with ``PackageUpgradeCommand/init(row:)`` for `submit`.
+    init(row: InstalledPackageRow) {
+        self.init(kind: row.kind, name: row.name)
+    }
 }

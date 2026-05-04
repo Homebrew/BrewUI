@@ -170,5 +170,5 @@
 
 ## 2026-05-04 — Installed package upgrades via command center
 
-- **Upgrade path:** **`InstalledDetailsViewModel`** calls **`await brewCommandCenter.submit(id:command:)`** with **`BrewOperationID(rawValue: selectedRow.id)`** (same string as **`kind:name`**) and **`PackageUpgradeCommand`** (implements **`BrewMutatingCommand`**; mirrors former **`brew upgrade` / `brew upgrade --cask`** argv split).
+- **Upgrade path:** **`InstalledDetailsViewModel`** calls **`await brewCommandCenter.submit(id:command:)`** with **`BrewOperationID(row: selectedRow)`** and **`PackageUpgradeCommand(row: selectedRow)`** (same **`kind:name`** as **`InstalledPackageRow/id`**; **`PackageUpgradeCommand`** implements **`BrewMutatingCommand`** with **`BrewCommandExecutionContext`**; mirrors **`brew upgrade` / `brew upgrade --cask`** argv split). **`BrewOperationID.init(row:)`** delegates to **`init(kind:name:)`**.
 - **`InstalledViewModel`** takes **`brewCommandCenter: any BrewCommandCenter`** (default **`NoopBrewCommandCenter.forTesting()`** for tests); **`BrewApp`** passes the same **`SerialBrewCommandCenter`** instance as for **`.environment(\.brewCommandCenter, …)`**. Removed **`PackageUpgradeRunning`** / **`BrewPackageUpgradeService`**.

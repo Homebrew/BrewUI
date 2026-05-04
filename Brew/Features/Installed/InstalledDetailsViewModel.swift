@@ -123,11 +123,8 @@ final class InstalledDetailsViewModel {
         upgradeErrorMessage = nil
         isUpgrading = true
         defer { isUpgrading = false }
-        let operationID = BrewOperationID(rawValue: selectedRow.id)
-        let command = PackageUpgradeCommand(
-            packageName: packageName,
-            kind: packageKind,
-        )
+        let operationID = BrewOperationID(row: selectedRow)
+        let command = PackageUpgradeCommand(row: selectedRow)
         do {
             try await brewCommandCenter.submit(id: operationID, command: command)
             await onUpgradeSuccess?()
