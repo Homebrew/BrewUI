@@ -270,9 +270,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
             if let title = viewModel.upgradePrimaryButtonTitle {
                 HStack(spacing: BrewSpacing.sm) {
                     Button {
-                        Task {
-                            await viewModel.upgradeSelectedPackage()
-                        }
+                        viewModel.upgradeSelectedPackage()
                     } label: {
                         if viewModel.isUpgrading {
                             ProgressView()

@@ -20,6 +20,7 @@ final class InstalledDetailsViewModel {
     private let brewCommandCenter: any BrewCommandCenter
     private let onUpgradeSuccess: (@MainActor () async -> Void)?
     private var loadTask: Task<Void, Never>?
+    private var upgradeTask: Task<Void, Never>?
     private var requestID: Int = 0
 
     private(set) var state: InstalledDetailsLoadState = .loading
@@ -130,23 +131,36 @@ final class InstalledDetailsViewModel {
         }
     }
 
-    func upgradeSelectedPackage() async {
+    func upgradeSelectedPackage() {
+        guard !isUpgrading else {
+            return
+        }
+
         upgradeErrorMessage = nil
         let operationID = BrewOperationID(row: selectedRow)
         let command = PackageUpgradeCommand(row: selectedRow)
 
         upgradeOperationPhase = .running(command.operationKind)
 
-        do {
-            try await brewCommandCenter.submit(id: operationID, command: command)
-            await onUpgradeSuccess?()
-            upgradeOperationPhase = await brewCommandCenter.phase(for: operationID)
-        } catch {
-            upgradeOperationPhase = await brewCommandCenter.phase(for: operationID)
-            if case let .failed(reason: failure) = upgradeOperationPhase {
-                upgradeErrorMessage = failure.userFacingMessage
-            } else {
-                upgradeErrorMessage = Self.userMessage(for: error, context: .runUpgrade)
+        upgradeTask?.cancel()
+        upgradeTask = Task { [self, brewCommandCenter, onUpgradeSuccess] in
+            do {
+                try await brewCommandCenter.submit(id: operationID, command: command)
+                await onUpgradeSuccess?()
+                let latestPhase = await brewCommandCenter.phase(for: operationID)
+                await MainActor.run {
+                    upgradeOperationPhase = latestPhase
+                }
+            } catch {
+                let latestPhase = await brewCommandCenter.phase(for: operationID)
+                await MainActor.run {
+                    upgradeOperationPhase = latestPhase
+                    if case let .failed(reason: failure) = latestPhase {
+                        upgradeErrorMessage = failure.userFacingMessage
+                    } else {
+                        upgradeErrorMessage = Self.userMessage(for: error, context: .runUpgrade)
+                    }
+                }
             }
         }
     }

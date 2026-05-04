@@ -232,27 +232,6 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.upgradePrimaryButtonTitle?.contains("v9.9.9") == true)
     }
 
-    @Test @MainActor func `upgrade invokes onUpgradeSuccess`() async {
-        let spy = UpgradeCallbackSpy()
-        let row = InstalledPackageRow(
-            name: "wget",
-            kind: .formula,
-            description: "",
-            installedVersion: "v1",
-            updateVersion: "v2",
-        )
-        let viewModel = InstalledDetailsViewModel(
-            selectedRow: row,
-            repository: SuccessDetailsRepository(details: details(name: "wget")),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
-            onUpgradeSuccess: { await spy.record() },
-        )
-
-        await viewModel.upgradeSelectedPackage()
-        #expect(await spy.invocationCount == 1)
-        #expect(viewModel.upgradeErrorMessage == nil)
-    }
-
     @Test @MainActor func `load syncs upgradeOperationPhase from command center`() async {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
         let center = ConstantPhaseCommandCenter(phase: .running(.upgradeFormula))
@@ -269,6 +248,30 @@ struct InstalledDetailsViewModelTests {
             }
             return false
         }
+    }
+}
+
+struct InstalledDetailsViewModelUpgradeTests {
+    @Test @MainActor func `upgrade invokes onUpgradeSuccess`() async {
+        let spy = UpgradeCallbackSpy()
+        let row = InstalledPackageRow(
+            name: "wget",
+            kind: .formula,
+            description: "",
+            installedVersion: "v1",
+            updateVersion: "v2",
+        )
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            onUpgradeSuccess: { await spy.record() },
+        )
+
+        viewModel.upgradeSelectedPackage()
+        await waitForUpgradeCallback(spy: spy, expectedCount: 1)
+        #expect(await spy.invocationCount == 1)
+        #expect(viewModel.upgradeErrorMessage == nil)
     }
 
     @Test @MainActor func `upgrade failure sets upgrade error message`() async {
@@ -287,8 +290,41 @@ struct InstalledDetailsViewModelTests {
             ),
         )
 
-        await viewModel.upgradeSelectedPackage()
+        viewModel.upgradeSelectedPackage()
+        await waitForUpgradeError(on: viewModel)
         #expect(viewModel.upgradeErrorMessage == "upgrade blocked")
+    }
+
+    @Test @MainActor func `upgrade submit continues after caller task cancellation`() async {
+        let row = InstalledPackageRow(
+            name: "wget",
+            kind: .formula,
+            description: "",
+            installedVersion: "v1",
+            updateVersion: "v2",
+        )
+        let center = DeferredSubmitCommandCenter()
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: center,
+        )
+
+        let callerTask = Task { @MainActor in
+            viewModel.upgradeSelectedPackage()
+        }
+        callerTask.cancel()
+        _ = await callerTask.result
+
+        await center.waitForSubmitCallCount(1)
+        #expect(await center.submitCallCount == 1)
+        await center.resolveSubmit()
+        await waitForUpgradePhase(on: viewModel) { phase in
+            if case .idle = phase {
+                return true
+            }
+            return false
+        }
     }
 }
 
@@ -356,12 +392,68 @@ private actor ThrowingSubmitCommandCenter: BrewCommandCenter {
     }
 }
 
+private actor DeferredSubmitCommandCenter: BrewCommandCenter {
+    private(set) var submitCallCount: Int = 0
+    private var continuation: CheckedContinuation<Void, Never>?
+
+    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+        _ = id
+        return .idle
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id: BrewOperationID) async -> Bool {
+        _ = id
+        return submitCallCount > 0
+    }
+
+    func submit(
+        id: BrewOperationID,
+        command: any BrewMutatingCommand,
+    ) async throws {
+        _ = id
+        _ = command
+        submitCallCount += 1
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+        }
+    }
+
+    func resolveSubmit() {
+        continuation?.resume()
+        continuation = nil
+    }
+
+    func waitForSubmitCallCount(_ expected: Int) async {
+        while submitCallCount < expected {
+            await Task.yield()
+        }
+    }
+}
+
 private actor UpgradeCallbackSpy {
     private(set) var invocationCount = 0
 
     func record() {
         invocationCount += 1
     }
+}
+
+@MainActor
+private func waitForUpgradeCallback(
+    spy: UpgradeCallbackSpy,
+    expectedCount: Int,
+) async {
+    for _ in 0 ..< 100 {
+        if await spy.invocationCount == expectedCount {
+            return
+        }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for upgrade callback")
 }
 
 private struct StubDetailsRepository: PackageDetailsRepository {
@@ -446,6 +538,17 @@ private func waitForUpgradePhase(
         await Task.yield()
     }
     Issue.record("timed out waiting for expected upgradeOperationPhase")
+}
+
+@MainActor
+private func waitForUpgradeError(on viewModel: InstalledDetailsViewModel) async {
+    for _ in 0 ..< 100 {
+        if viewModel.upgradeErrorMessage != nil {
+            return
+        }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for upgradeErrorMessage")
 }
 
 private func details(name: String, kind: InstalledPackageKind = .formula) -> InstalledPackageDetails {
