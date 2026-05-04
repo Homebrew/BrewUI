@@ -22,9 +22,11 @@ struct BrewApp: App {
                     installedViewModel: InstalledViewModel(
                         repository: BrewInstalledPackagesRepository.live(),
                         detailsRepository: BrewPackageDetailsRepository.live(),
+                        upgradeRunner: BrewPackageUpgradeService.live(),
                     ),
                 ),
             )
+            .environment(\.brewCommandCenter, commandCenter)
         }
         .defaultSize(
             width: BrewLayout.minWindowWidth,

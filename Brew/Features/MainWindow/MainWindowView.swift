@@ -40,7 +40,9 @@ struct MainWindowView: View {
             installedViewModel: InstalledViewModel(
                 repository: PreviewInstalledPackagesRepository(),
                 detailsRepository: PreviewPackageDetailsRepository(),
+                upgradeRunner: PreviewPackageUpgradeRunner(),
             ),
         ),
     )
+    .environment(\.brewCommandCenter, NoopBrewCommandCenter.preview())
 }
