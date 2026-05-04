@@ -22,7 +22,7 @@ struct BrewApp: App {
                     installedViewModel: InstalledViewModel(
                         repository: BrewInstalledPackagesRepository.live(),
                         detailsRepository: BrewPackageDetailsRepository.live(),
-                        upgradeRunner: BrewPackageUpgradeService.live(),
+                        brewCommandCenter: commandCenter,
                     ),
                 ),
             )

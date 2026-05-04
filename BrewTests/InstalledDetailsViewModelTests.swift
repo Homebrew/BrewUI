@@ -13,6 +13,7 @@ struct InstalledDetailsViewModelTests {
         let viewModel = InstalledDetailsViewModel(
             selectedRow: row,
             repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.displayCommand == "brew info wget")
     }
@@ -22,6 +23,7 @@ struct InstalledDetailsViewModelTests {
         let viewModel = InstalledDetailsViewModel(
             selectedRow: row,
             repository: SuccessDetailsRepository(details: details(name: "wget@2")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.load()
         await waitForState(on: viewModel, toSatisfy: isLoaded)
@@ -35,6 +37,7 @@ struct InstalledDetailsViewModelTests {
         let viewModel = InstalledDetailsViewModel(
             selectedRow: row,
             repository: SuccessDetailsRepository(details: loadedDetails),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.load()
         await waitForState(on: viewModel, toSatisfy: isLoaded)
@@ -49,6 +52,7 @@ struct InstalledDetailsViewModelTests {
         let viewModel = InstalledDetailsViewModel(
             selectedRow: row,
             repository: SuccessDetailsRepository(details: loadedDetails),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.load()
         await waitForState(on: viewModel, toSatisfy: isLoaded)
@@ -61,6 +65,7 @@ struct InstalledDetailsViewModelTests {
         let viewModel = InstalledDetailsViewModel(
             selectedRow: row,
             repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.homepageURL == nil)
@@ -69,7 +74,11 @@ struct InstalledDetailsViewModelTests {
     @Test @MainActor func `load maps package not found to user-facing error`() async {
         let row = InstalledPackageRow(name: "ghost", kind: .formula, description: "", installedVersion: "v1")
         let repository = StubDetailsRepository(error: PackageDetailsRepositoryError.packageNotFound(name: "ghost"))
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: repository)
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: repository,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
         viewModel.load()
         await waitForState(on: viewModel, toSatisfy: {
             if case .error = $0 {
@@ -88,7 +97,11 @@ struct InstalledDetailsViewModelTests {
     @Test @MainActor func `load maps stderr from brew command failure`() async {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
         let repository = StubDetailsRepository(error: BrewCommandError.failed(exitCode: 1, stderr: "permission denied"))
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: repository)
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: repository,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
         viewModel.load()
         await waitForState(on: viewModel, toSatisfy: {
             if case .error = $0 {
@@ -103,7 +116,11 @@ struct InstalledDetailsViewModelTests {
     @Test @MainActor func `later load result wins when previous request finishes last`() async {
         let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
         let repository = DeferredDetailsRepository()
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: repository)
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: repository,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
 
         viewModel.load()
         await repository.waitForCallCount(1)
@@ -126,6 +143,173 @@ struct InstalledDetailsViewModelTests {
             return
         }
         #expect(loadedDetails.name == "wget-second")
+    }
+
+    @Test @MainActor func `upgradeDisplayCommand reflects formula name`() {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade wget")
+    }
+
+    @Test @MainActor func `upgradeDisplayCommand uses cask terminal flags`() {
+        let row = InstalledPackageRow(
+            name: "docker",
+            kind: .cask,
+            description: "",
+            installedVersion: "v1",
+        )
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "docker", kind: .cask)),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade --cask docker")
+    }
+
+    @Test @MainActor func `upgradeDisplayCommand prefers loaded details package name`() async {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget@2")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        viewModel.load()
+        await waitForState(on: viewModel, toSatisfy: isLoaded)
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade wget@2")
+    }
+
+    @Test @MainActor func `showsUpgradeChrome follows selected row update flag`() {
+        let outdated = InstalledPackageRow(
+            name: "wget",
+            kind: .formula,
+            description: "",
+            installedVersion: "v1",
+            updateVersion: "v2",
+        )
+        let outdatedVM = InstalledDetailsViewModel(
+            selectedRow: outdated,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(outdatedVM.showsUpgradeChrome)
+
+        let current = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let currentVM = InstalledDetailsViewModel(
+            selectedRow: current,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(!currentVM.showsUpgradeChrome)
+    }
+
+    @Test @MainActor func `upgradePrimaryButtonTitle is nil when package is current`() {
+        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradePrimaryButtonTitle == nil)
+    }
+
+    @Test @MainActor func `upgradePrimaryButtonTitle includes update version label`() {
+        let row = InstalledPackageRow(
+            name: "wget",
+            kind: .formula,
+            description: "",
+            installedVersion: "v1",
+            updateVersion: "v9.9.9",
+        )
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradePrimaryButtonTitle?.contains("v9.9.9") == true)
+    }
+
+    @Test @MainActor func `upgrade invokes onUpgradeSuccess`() async {
+        let spy = UpgradeCallbackSpy()
+        let row = InstalledPackageRow(
+            name: "wget",
+            kind: .formula,
+            description: "",
+            installedVersion: "v1",
+            updateVersion: "v2",
+        )
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            onUpgradeSuccess: { await spy.record() },
+        )
+
+        await viewModel.upgradeSelectedPackage()
+        #expect(await spy.invocationCount == 1)
+        #expect(viewModel.upgradeErrorMessage == nil)
+    }
+
+    @Test @MainActor func `upgrade failure sets upgrade error message`() async {
+        let row = InstalledPackageRow(
+            name: "wget",
+            kind: .formula,
+            description: "",
+            installedVersion: "v1",
+            updateVersion: "v2",
+        )
+        let viewModel = InstalledDetailsViewModel(
+            selectedRow: row,
+            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewCommandError.failed(exitCode: 1, stderr: "upgrade blocked"),
+            ),
+        )
+
+        await viewModel.upgradeSelectedPackage()
+        #expect(viewModel.upgradeErrorMessage == "upgrade blocked")
+    }
+}
+
+private actor ThrowingSubmitCommandCenter: BrewCommandCenter {
+    let error: Error
+
+    init(error: BrewCommandError) {
+        self.error = error
+    }
+
+    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+        _ = id
+        return .idle
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id: BrewOperationID) async -> Bool {
+        _ = id
+        return false
+    }
+
+    func submit(
+        id: BrewOperationID,
+        command: any BrewMutatingCommand,
+    ) async throws {
+        _ = id
+        _ = command
+        throw error
+    }
+}
+
+private actor UpgradeCallbackSpy {
+    private(set) var invocationCount = 0
+
+    func record() {
+        invocationCount += 1
     }
 }
 
@@ -199,10 +383,10 @@ private func waitForState(
     Issue.record("timed out waiting for expected details state")
 }
 
-private func details(name: String) -> InstalledPackageDetails {
+private func details(name: String, kind: InstalledPackageKind = .formula) -> InstalledPackageDetails {
     InstalledPackageDetails(
         name: name,
-        kind: .formula,
+        kind: kind,
         description: "desc",
         version: "1.0.0",
         installedVersions: ["1.0.0"],

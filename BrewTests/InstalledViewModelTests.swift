@@ -156,7 +156,10 @@ struct InstalledViewModelTests {
 
     @Test @MainActor func `load surfaces generic message for unknown repository errors`() async {
         let repo = StubThrowingRepository(error: OddRepositoryError())
-        let vm = InstalledViewModel(repository: repo, detailsRepository: StubPackageDetailsRepository())
+        let vm = InstalledViewModel(
+            repository: repo,
+            detailsRepository: StubPackageDetailsRepository(),
+        )
         await vm.load()
         #expect(vm.state == .error(InstalledPackagesTestSupport.localizedGenericLoadFailureMessage()))
     }

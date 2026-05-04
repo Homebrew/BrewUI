@@ -17,10 +17,16 @@ enum InstalledDetailsLoadState: Equatable {
 final class InstalledDetailsViewModel {
     private let repository: PackageDetailsRepository
     private let selectedRow: InstalledPackageRow
+    private let brewCommandCenter: any BrewCommandCenter
+    private let onUpgradeSuccess: (@MainActor () async -> Void)?
     private var loadTask: Task<Void, Never>?
     private var requestID: Int = 0
 
     private(set) var state: InstalledDetailsLoadState = .loading
+    /// True while `brew upgrade` is running (`CONVENTIONS.md` — transparency / guardrails).
+    private(set) var isUpgrading = false
+    /// Inline message when upgrade fails; cleared when a new upgrade starts.
+    private(set) var upgradeErrorMessage: String?
 
     var packageName: String {
         if case let .loaded(details) = state {
@@ -41,6 +47,26 @@ final class InstalledDetailsViewModel {
         "brew info \(packageName)"
     }
 
+    /// Copyable Terminal command for upgrading this package (`CONVENTIONS.md` — transparency).
+    var upgradeDisplayCommand: String {
+        Self.userFacingUpgradeCommand(name: packageName, kind: packageKind)
+    }
+
+    /// Shown beside the upgrade affordance whenever the list reports an outdated row.
+    var showsUpgradeChrome: Bool {
+        selectedRow.updateVersion != nil
+    }
+
+    var upgradePrimaryButtonTitle: String? {
+        guard let label = selectedRow.updateVersion else {
+            return nil
+        }
+        return String(
+            localized: "Update to \(label)",
+            comment: "Installed detail upgrade button; interpolated label shows target tap version.",
+        )
+    }
+
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
         guard case let .loaded(details) = state else {
@@ -49,9 +75,16 @@ final class InstalledDetailsViewModel {
         return Self.validWebURL(from: details.homepage)
     }
 
-    init(selectedRow: InstalledPackageRow, repository: any PackageDetailsRepository) {
+    init(
+        selectedRow: InstalledPackageRow,
+        repository: any PackageDetailsRepository,
+        brewCommandCenter: any BrewCommandCenter,
+        onUpgradeSuccess: (@MainActor () async -> Void)? = nil,
+    ) {
         self.selectedRow = selectedRow
         self.repository = repository
+        self.brewCommandCenter = brewCommandCenter
+        self.onUpgradeSuccess = onUpgradeSuccess
     }
 
     func load() {
@@ -78,8 +111,28 @@ final class InstalledDetailsViewModel {
                 guard !Task.isCancelled else {
                     return
                 }
-                applyResult(requestID: activeRequestID, state: .error(Self.userMessage(for: error)))
+                applyResult(
+                    requestID: activeRequestID,
+                    state: .error(Self.userMessage(for: error, context: .loadDetails)),
+                )
             }
+        }
+    }
+
+    func upgradeSelectedPackage() async {
+        upgradeErrorMessage = nil
+        isUpgrading = true
+        defer { isUpgrading = false }
+        let operationID = BrewOperationID(rawValue: selectedRow.id)
+        let command = PackageUpgradeCommand(
+            packageName: packageName,
+            kind: packageKind,
+        )
+        do {
+            try await brewCommandCenter.submit(id: operationID, command: command)
+            await onUpgradeSuccess?()
+        } catch {
+            upgradeErrorMessage = Self.userMessage(for: error, context: .runUpgrade)
         }
     }
 
@@ -90,7 +143,21 @@ final class InstalledDetailsViewModel {
         self.state = state
     }
 
-    private static func userMessage(for error: Error) -> String {
+    private static func userFacingUpgradeCommand(name: String, kind: InstalledPackageKind) -> String {
+        switch kind {
+        case .formula:
+            "brew upgrade \(name)"
+        case .cask:
+            "brew upgrade --cask \(name)"
+        }
+    }
+
+    private enum UserMessageContext {
+        case loadDetails
+        case runUpgrade
+    }
+
+    private static func userMessage(for error: Error, context: UserMessageContext) -> String {
         switch error {
         case PackageDetailsRepositoryError.packageNotFound:
             return String(
@@ -116,10 +183,18 @@ final class InstalledDetailsViewModel {
         case let BrewCommandError.launchFailed(underlying):
             return underlying
         default:
-            return String(
-                localized: "Something went wrong loading package details.",
-                comment: "Installed detail generic load error",
-            )
+            switch context {
+            case .loadDetails:
+                return String(
+                    localized: "Something went wrong loading package details.",
+                    comment: "Installed detail generic load error",
+                )
+            case .runUpgrade:
+                return String(
+                    localized: "Something went wrong while upgrading this package.",
+                    comment: "Installed detail generic upgrade error",
+                )
+            }
         }
     }
 

@@ -30,6 +30,7 @@ enum InstalledLoadState: Equatable {
 final class InstalledViewModel {
     private let repository: InstalledPackagesRepository
     private let detailsRepository: any PackageDetailsRepository
+    private let brewCommandCenter: any BrewCommandCenter
 
     private var loadedContent: InstalledPackagesContent?
     private var preSearchSelectedPackageID: InstalledPackageRow.ID?
@@ -83,9 +84,14 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: InstalledPackagesRepository, detailsRepository: PackageDetailsRepository) {
+    init(
+        repository: InstalledPackagesRepository,
+        detailsRepository: PackageDetailsRepository,
+        brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
+    ) {
         self.repository = repository
         self.detailsRepository = detailsRepository
+        self.brewCommandCenter = brewCommandCenter
     }
 
     func load() async {
@@ -210,6 +216,13 @@ final class InstalledViewModel {
         let detailsViewModel = InstalledDetailsViewModel(
             selectedRow: selectedRow,
             repository: detailsRepository,
+            brewCommandCenter: brewCommandCenter,
+            onUpgradeSuccess: { [weak self] in
+                guard let self else {
+                    return
+                }
+                await load()
+            },
         )
         self.detailsViewModel = detailsViewModel
         detailsViewModel.load()

@@ -35,14 +35,15 @@ struct MainWindowView: View {
 }
 
 #Preview {
+    let commandCenter = NoopBrewCommandCenter.preview()
     MainWindowView(
         viewModel: MainWindowViewModel(
             installedViewModel: InstalledViewModel(
                 repository: PreviewInstalledPackagesRepository(),
                 detailsRepository: PreviewPackageDetailsRepository(),
-                upgradeRunner: PreviewPackageUpgradeRunner(),
+                brewCommandCenter: commandCenter,
             ),
         ),
     )
-    .environment(\.brewCommandCenter, NoopBrewCommandCenter.preview())
+    .environment(\.brewCommandCenter, commandCenter)
 }
