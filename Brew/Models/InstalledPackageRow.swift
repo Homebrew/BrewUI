@@ -5,12 +5,6 @@
 
 import Foundation
 
-/// Homebrew package kind for installed list presentation.
-enum InstalledPackageKind: String, Hashable {
-    case formula
-    case cask
-}
-
 /// One row in the Installed list (presentation model; map from domain later).
 struct InstalledPackageRow: Identifiable, Hashable {
     /// Stable across reloads so list identity stays predictable.
