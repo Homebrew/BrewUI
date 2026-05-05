@@ -12,6 +12,11 @@ private actor SerialBrewWorkQueue {
     }
 }
 
+private struct PhaseStreamListener {
+    let token: UUID
+    let continuation: AsyncStream<BrewOperationPhase>.Continuation
+}
+
 /// Default app implementation: serializes mutating `brew` subprocess work and exposes per-operation phase for UI.
 actor SerialBrewCommandCenter: BrewCommandCenter {
     private let executionContext: BrewCommandExecutionContext
@@ -19,6 +24,7 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
 
     private var trackedPhasesByID: [BrewOperationID: BrewOperationPhase] = [:]
     private var inflightByID: [BrewOperationID: Task<Void, Error>] = [:]
+    private var phaseListenersByID: [BrewOperationID: [PhaseStreamListener]] = [:]
 
     init(executionContext: BrewCommandExecutionContext) {
         self.executionContext = executionContext
@@ -37,6 +43,20 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
             return true
         }
         return false
+    }
+
+    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            let token = UUID()
+            continuation.onTermination = { @Sendable (_: AsyncStream<BrewOperationPhase>.Continuation.Termination) in
+                Task {
+                    await self.removePhaseListener(id: id, token: token)
+                }
+            }
+            Task {
+                await self.registerPhaseListener(id: id, token: token, continuation: continuation)
+            }
+        }
     }
 
     func submit(
@@ -61,12 +81,48 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         defer { inflightByID[id] = nil }
 
         trackedPhasesByID[id] = .running(kind)
+        notifyPhaseListeners(for: id)
         do {
             try await task.value
             trackedPhasesByID[id] = nil
+            notifyPhaseListeners(for: id)
         } catch {
             trackedPhasesByID[id] = .failed(reason: OperationFailure(catching: error))
+            notifyPhaseListeners(for: id)
             throw error
+        }
+    }
+
+    private func registerPhaseListener(
+        id: BrewOperationID,
+        token: UUID,
+        continuation: AsyncStream<BrewOperationPhase>.Continuation,
+    ) {
+        let listener = PhaseStreamListener(token: token, continuation: continuation)
+        phaseListenersByID[id, default: []].append(listener)
+        let snapshot = trackedPhasesByID[id] ?? .idle
+        continuation.yield(snapshot)
+    }
+
+    private func removePhaseListener(id: BrewOperationID, token: UUID) {
+        guard var listeners = phaseListenersByID[id] else {
+            return
+        }
+        listeners.removeAll { $0.token == token }
+        if listeners.isEmpty {
+            phaseListenersByID[id] = nil
+        } else {
+            phaseListenersByID[id] = listeners
+        }
+    }
+
+    private func notifyPhaseListeners(for id: BrewOperationID) {
+        let phase = trackedPhasesByID[id] ?? .idle
+        guard let listeners = phaseListenersByID[id] else {
+            return
+        }
+        for listener in listeners {
+            listener.continuation.yield(phase)
         }
     }
 }

@@ -177,3 +177,8 @@
 
 - `InstalledDetailsViewModel.upgradeSelectedPackage()` now starts and owns an unstructured task (`upgradeTask`) so upgrade execution via `brewCommandCenter.submit` is not canceled by a view-scoped caller task when navigating away from detail UI.
 - `InstalledPackageDetailView` invokes `upgradeSelectedPackage()` directly (no view-level `Task { ... }` wrapper), keeping task-lifetime policy in the view model.
+
+## 2026-05-05 — Per-ID `phaseChanges` + list row VM
+
+- **`BrewCommandCenter`:** added **`phaseChanges(for: BrewOperationID) async -> AsyncStream<BrewOperationPhase>`** — multicast per id in **`SerialBrewCommandCenter`** with **`continuation.onTermination`** cleanup; **`NoopBrewCommandCenter`** yields **`BrewOperationPhase.idle`** once; **`RecordingSerialBrewCommandCenter`** forwards to **`inner`**.
+- **Use `AsyncStream<Element>(bufferingPolicy: .unbounded) { … }`** to pick the continuation-based initializer (plain **`AsyncStream { … }`** can resolve to **`unfolding`** under default actor isolation).

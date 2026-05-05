@@ -7,6 +7,14 @@
 import Foundation
 import Testing
 
+private actor PhaseStreamCollector {
+    private(set) var phases: [BrewOperationPhase] = []
+
+    func append(_ phase: BrewOperationPhase) {
+        phases.append(phase)
+    }
+}
+
 struct SerialBrewCommandCenterTests {
     private func makeCenter() -> SerialBrewCommandCenter {
         let ctx = BrewCommandExecutionContext(
@@ -122,6 +130,59 @@ struct SerialBrewCommandCenterTests {
         try await center.submit(id: id, command: RunMockedArgvCommand(arguments: argv))
 
         #expect(await center.phase(for: id) == .idle)
+    }
+
+    @Test func `phaseChanges streams initial idle then running and idle on success`() async throws {
+        let center = makeCenter()
+        let id = BrewOperationID(rawValue: "formula:stream-success")
+        let stream = await center.phaseChanges(for: id)
+        let collector = PhaseStreamCollector()
+        let collect = Task {
+            for await phase in stream {
+                await collector.append(phase)
+            }
+        }
+        defer { collect.cancel() }
+
+        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await Task.sleep(for: .milliseconds(80))
+        let values = await collector.phases
+        #expect(values.count >= 3)
+        #expect(values.first == .idle)
+        if case .running = values[1] {} else {
+            Issue.record("expected running after initial idle")
+        }
+        #expect(values.last == .idle)
+    }
+
+    @Test func `phaseChanges multicast delivers to two subscribers`() async throws {
+        let center = makeCenter()
+        let id = BrewOperationID(rawValue: "formula:multi-stream")
+        let streamA = await center.phaseChanges(for: id)
+        let streamB = await center.phaseChanges(for: id)
+        let collectorA = PhaseStreamCollector()
+        let collectorB = PhaseStreamCollector()
+        let taskA = Task {
+            for await phase in streamA {
+                await collectorA.append(phase)
+            }
+        }
+        let taskB = Task {
+            for await phase in streamB {
+                await collectorB.append(phase)
+            }
+        }
+        defer {
+            taskA.cancel()
+            taskB.cancel()
+        }
+
+        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await Task.sleep(for: .milliseconds(80))
+        let countA = await collectorA.phases.count
+        let countB = await collectorB.phases.count
+        #expect(countA >= 3)
+        #expect(countB >= 3)
     }
 
     @Test func `recording wrapper logs each submit while duplicate id coalesces body`() async throws {

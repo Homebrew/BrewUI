@@ -28,6 +28,10 @@ actor RecordingSerialBrewCommandCenter: BrewCommandCenter {
         await inner.isActive(id: id)
     }
 
+    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        await inner.phaseChanges(for: id)
+    }
+
     func submit(
         id: BrewOperationID,
         command: any BrewMutatingCommand,
