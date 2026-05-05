@@ -359,6 +359,13 @@ private actor ConstantPhaseCommandCenter: BrewCommandCenter {
         _ = id
         _ = command
     }
+
+    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        _ = id
+        return AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            continuation.yield(fixedPhase)
+        }
+    }
 }
 
 private actor ThrowingSubmitCommandCenter: BrewCommandCenter {
@@ -389,6 +396,13 @@ private actor ThrowingSubmitCommandCenter: BrewCommandCenter {
         _ = id
         _ = command
         throw error
+    }
+
+    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        _ = id
+        return AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            continuation.yield(BrewOperationPhase.idle)
+        }
     }
 }
 
@@ -430,6 +444,13 @@ private actor DeferredSubmitCommandCenter: BrewCommandCenter {
     func waitForSubmitCallCount(_ expected: Int) async {
         while submitCallCount < expected {
             await Task.yield()
+        }
+    }
+
+    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        _ = id
+        return AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            continuation.yield(BrewOperationPhase.idle)
         }
     }
 }

@@ -182,3 +182,4 @@
 
 - **`BrewCommandCenter`:** added **`phaseChanges(for: BrewOperationID) async -> AsyncStream<BrewOperationPhase>`** — multicast per id in **`SerialBrewCommandCenter`** with **`continuation.onTermination`** cleanup; **`NoopBrewCommandCenter`** yields **`BrewOperationPhase.idle`** once; **`RecordingSerialBrewCommandCenter`** forwards to **`inner`**.
 - **Use `AsyncStream<Element>(bufferingPolicy: .unbounded) { … }`** to pick the continuation-based initializer (plain **`AsyncStream { … }`** can resolve to **`unfolding`** under default actor isolation).
+- **Installed list:** **`InstalledListRowViewModel`** (`observeRowUpdates`) + **`InstalledListRowRoot`** with **`.task(id: row.id)`**; removed parent **`upgradeBusyRowIDs`** polling loop from **`InstalledViewModel`** / **`InstalledPackagesView`**.

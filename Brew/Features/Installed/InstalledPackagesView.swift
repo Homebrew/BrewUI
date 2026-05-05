@@ -8,6 +8,7 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -47,7 +48,7 @@ struct InstalledPackagesView: View {
             if content.shouldShowFormulaeSection {
                 Section("Formulae") {
                     ForEach(content.formulaRows) { row in
-                        InstalledListRowView(row: row)
+                        listRow(for: row)
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 viewModel.toggleSelection(for: row.id)
@@ -62,7 +63,7 @@ struct InstalledPackagesView: View {
             if content.shouldShowCasksSection {
                 Section("Casks") {
                     ForEach(content.caskRows) { row in
-                        InstalledListRowView(row: row)
+                        listRow(for: row)
                             .contentShape(Rectangle())
                             .onTapGesture {
                                 viewModel.toggleSelection(for: row.id)
@@ -81,12 +82,25 @@ struct InstalledPackagesView: View {
         }
     }
 
+    @ViewBuilder
+    private func listRow(for row: InstalledPackageRow) -> some View {
+        if let center = brewCommandCenter {
+            InstalledListRowRoot(row: row, brewCommandCenter: center)
+        } else {
+            InstalledListRowView(
+                viewModel: InstalledListRowViewModel(row: row),
+            )
+        }
+    }
+
     private var loadingSkeletonList: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 InstalledSectionHeader(title: "Formulae", count: 3)
                 ForEach(loadingFormulaeRows) { row in
-                    InstalledListRowView(row: row)
+                    InstalledListRowView(
+                        viewModel: InstalledListRowViewModel(row: row),
+                    )
                 }
             }
             .padding(.horizontal, BrewSpacing.lg)

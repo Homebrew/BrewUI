@@ -20,7 +20,11 @@ struct InstalledSectionHeader: View {
 }
 
 struct InstalledListRowView: View {
-    let row: InstalledPackageRow
+    @Bindable var viewModel: InstalledListRowViewModel
+
+    private var row: InstalledPackageRow {
+        viewModel.row
+    }
 
     private var chrome: PackageKindChrome {
         row.kind.chrome
@@ -51,6 +55,12 @@ struct InstalledListRowView: View {
                     Text(row.name)
                         .font(.brewBody)
                         .foregroundStyle(Color.brewTextPrimary)
+
+                    if viewModel.showsUpgradeBusy {
+                        ProgressView()
+                            .controlSize(.small)
+                            .accessibilityHidden(true)
+                    }
 
                     Image(systemName: statusIconName)
                         .font(.body)
@@ -86,7 +96,15 @@ struct InstalledListRowView: View {
         }
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(row.listRowAccessibilitySummary)
+        .accessibilityLabel(listAccessibilityLabel)
+    }
+
+    private var listAccessibilityLabel: String {
+        if viewModel.showsUpgradeBusy {
+            let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
+            return "\(row.listRowAccessibilitySummary), \(upgrading)"
+        }
+        return row.listRowAccessibilitySummary
     }
 
     @ViewBuilder
@@ -129,14 +147,39 @@ struct InstalledListRowView: View {
     }
 }
 
+/// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
+struct InstalledListRowRoot: View {
+    let row: InstalledPackageRow
+    let brewCommandCenter: any BrewCommandCenter
+
+    @State private var viewModel: InstalledListRowViewModel
+
+    init(row: InstalledPackageRow, brewCommandCenter: any BrewCommandCenter) {
+        self.row = row
+        self.brewCommandCenter = brewCommandCenter
+        _viewModel = State(
+            wrappedValue: InstalledListRowViewModel(row: row),
+        )
+    }
+
+    var body: some View {
+        InstalledListRowView(viewModel: viewModel)
+            .task(id: row.id) {
+                await viewModel.observeRowUpdates(using: brewCommandCenter)
+            }
+    }
+}
+
 #Preview("Formula with update") {
     InstalledListRowView(
-        row: InstalledPackageRow(
-            name: "Git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            installedVersion: "v2.45.0",
-            updateVersion: "v2.45.1",
+        viewModel: InstalledListRowViewModel(
+            row: InstalledPackageRow(
+                name: "Git",
+                kind: .formula,
+                description: "Distributed revision control system",
+                installedVersion: "v2.45.0",
+                updateVersion: "v2.45.1",
+            ),
         ),
     )
     .padding()
@@ -145,11 +188,29 @@ struct InstalledListRowView: View {
 
 #Preview("Cask") {
     InstalledListRowView(
-        row: InstalledPackageRow(
-            name: "Docker",
-            kind: .cask,
-            description: "App to build and share containerized applications",
-            installedVersion: "v4.39.0",
+        viewModel: InstalledListRowViewModel(
+            row: InstalledPackageRow(
+                name: "Docker",
+                kind: .cask,
+                description: "App to build and share containerized applications",
+                installedVersion: "v4.39.0",
+            ),
+        ),
+    )
+    .padding()
+    .frame(width: 400)
+}
+
+#Preview("Upgrade in progress (list)") {
+    InstalledListRowView(
+        viewModel: InstalledListRowViewModel.previewBusyUpgrade(
+            row: InstalledPackageRow(
+                name: "Git",
+                kind: .formula,
+                description: "Distributed revision control system",
+                installedVersion: "v2.45.0",
+                updateVersion: "v2.45.1",
+            ),
         ),
     )
     .padding()
