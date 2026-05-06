@@ -15,6 +15,8 @@ disabled_rules:
   - trailing_newline
   - trailing_semicolon
   - trailing_whitespace
+  # Allow explicit empty init/deinit declarations when used to carry isolation intent.
+  - unneeded_synthesized_initializer
   - vertical_whitespace
   - void_return
 

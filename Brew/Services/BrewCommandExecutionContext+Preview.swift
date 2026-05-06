@@ -15,7 +15,7 @@ extension BrewCommandExecutionContext {
     }
 }
 
-private struct ImmediateSuccessCommandRunner: BrewCommandRunning {
+private nonisolated struct ImmediateSuccessCommandRunner: BrewCommandRunning {
     func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
         CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }

@@ -204,3 +204,9 @@
 - Upgrade completion now uses `InstalledViewModel.refreshInstalledPackagesPreservingUI()` as the single refresh path (full snapshot, no `.loading` transition), preserving smooth list UX without skeleton flicker.
 - Kept DI/wiring improvements: view-layer wiring still creates/injects child VMs (`InstalledColumns` for details VM, `InstalledPackagesView` for row roots / command-center environment injection); list VM does not create child VMs.
 - Removed narrow single-package repository API (`loadInstalledPackage(kind:named:)`) and dedicated lookup tests introduced solely for the abandoned row-refresh approach.
+
+## 2026-05-06 — Concurrency isolation policy (Swift 6 default actor isolation)
+
+- Project build setting `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` is enabled for the app target, so non-UI infra code can require explicit actor-neutral annotations.
+- `SwiftLint` rule `unneeded_synthesized_initializer` is disabled in `.swiftlint.yml` to allow intentional explicit empty `init`/`deinit` declarations when carrying concurrency-isolation intent.
+- Preferred style: use member-level `nonisolated` first (for initializers/factories/helpers/protocol requirements), and avoid type-level `nonisolated` unless a full type-level actor-neutral contract is clearly needed.

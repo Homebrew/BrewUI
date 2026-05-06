@@ -9,7 +9,7 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
     private let commandRunner: BrewCommandRunning
     private let locator: any BrewExecutableLocating
 
-    init(commandRunner: BrewCommandRunning, locator: any BrewExecutableLocating) {
+    nonisolated init(commandRunner: BrewCommandRunning, locator: any BrewExecutableLocating) {
         self.commandRunner = commandRunner
         self.locator = locator
     }
