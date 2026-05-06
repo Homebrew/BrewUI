@@ -183,3 +183,17 @@
 - **`BrewCommandCenter`:** added **`phaseChanges(for: BrewOperationID) async -> AsyncStream<BrewOperationPhase>`** — multicast per id in **`SerialBrewCommandCenter`** with **`continuation.onTermination`** cleanup; **`NoopBrewCommandCenter`** yields **`BrewOperationPhase.idle`** once; **`RecordingSerialBrewCommandCenter`** forwards to **`inner`**.
 - **Use `AsyncStream<Element>(bufferingPolicy: .unbounded) { … }`** to pick the continuation-based initializer (plain **`AsyncStream { … }`** can resolve to **`unfolding`** under default actor isolation).
 - **Installed list:** **`InstalledListRowViewModel`** (`observeRowUpdates`) + **`InstalledListRowRoot`** with **`.task(id: row.id)`**; removed parent **`upgradeBusyRowIDs`** polling loop from **`InstalledViewModel`** / **`InstalledPackagesView`**.
+
+## 2026-05-06 — Installed repository narrow single-package read
+
+- **`InstalledPackagesRepository`:** added **`loadInstalledPackage(kind:named:) async throws -> InstalledPackageInfo`** plus shared error **`InstalledPackagesRepositoryError.packageNotFound(kind:name:)`**.
+- **Default protocol behavior:** repository extension falls back to `loadInstalledPackages()` + section/name lookup so existing test doubles remain source-compatible until they adopt specialized implementations.
+- **`BrewInstalledPackagesRepository`:** narrow read now executes `brew info --json=v2 --formula|--cask <name>` and maps only the requested section (`formulae` or `casks`) by exact name/token.
+- **Tests:** added dedicated lookup coverage in `BrewInstalledPackagesRepositorySinglePackageTests` and new command-fixture helper `InstalledPackagesTestSupport.packageInfoJSONResponse(...)`.
+
+## 2026-05-06 — Installed row-driven catalog patch after upgrades
+
+- **Row ownership:** `InstalledListRowViewModel` now owns mutable `InstalledPackageRow` snapshot state (beyond phase) so UI labels can update from narrow refreshes without full-list reloads.
+- **Refresh trigger:** Row VM watches `phaseChanges(for:)` and performs a narrow repository refresh when a row operation transitions `running -> idle`, then emits `onRowUpdated` for parent catalog merge.
+- **View wiring:** `InstalledPackagesView` wires `InstalledListRowRoot` with explicit closures (`refreshedInstalledRow`, `mergeInstalledRow`) so row refresh coordination remains in view/view-model boundaries rather than nested VM factories.
+- **Detail upgrade path:** `InstalledViewModel` `onUpgradeSuccess` now refreshes and merges only the selected row instead of calling full-list `refreshInstalledPackagesPreservingUI()`.

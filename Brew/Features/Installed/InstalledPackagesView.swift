@@ -85,7 +85,16 @@ struct InstalledPackagesView: View {
     @ViewBuilder
     private func listRow(for row: InstalledPackageRow) -> some View {
         if let center = brewCommandCenter {
-            InstalledListRowRoot(row: row, brewCommandCenter: center)
+            InstalledListRowRoot(
+                row: row,
+                brewCommandCenter: center,
+                refreshRow: { row in
+                    await viewModel.refreshedInstalledRow(row)
+                },
+                onCatalogRowPatched: { updatedRow in
+                    viewModel.mergeInstalledRow(updatedRow)
+                },
+            )
         } else {
             InstalledListRowView(
                 viewModel: InstalledListRowViewModel(row: row),

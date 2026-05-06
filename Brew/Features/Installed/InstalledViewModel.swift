@@ -267,7 +267,10 @@ final class InstalledViewModel {
                 guard let self else {
                     return
                 }
-                await refreshInstalledPackagesPreservingUI()
+                guard let refreshedRow = await refreshedInstalledRow(selectedRow) else {
+                    return
+                }
+                mergeInstalledRow(refreshedRow)
             },
         )
         self.detailsViewModel = detailsViewModel
@@ -322,6 +325,21 @@ final class InstalledViewModel {
             return underlying
         default:
             return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
+        }
+    }
+}
+
+extension InstalledViewModel {
+    func refreshedInstalledRow(_ row: InstalledPackageRow) async -> InstalledPackageRow? {
+        do {
+            let info = try await repository.loadInstalledPackage(kind: row.kind, named: row.name)
+            return Self.rowForInstalledPackageInfo(info, kind: row.kind)
+        } catch {
+            let message = error.localizedDescription
+            installedPackagesRefreshLogger.error(
+                "Refresh installed row failed for \(row.id, privacy: .public): \(message, privacy: .public)",
+            )
+            return nil
         }
     }
 }

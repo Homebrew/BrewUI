@@ -22,20 +22,16 @@ struct InstalledSectionHeader: View {
 struct InstalledListRowView: View {
     @Bindable var viewModel: InstalledListRowViewModel
 
-    private var row: InstalledPackageRow {
-        viewModel.row
-    }
-
     private var chrome: PackageKindChrome {
-        row.kind.chrome
+        viewModel.row.kind.chrome
     }
 
     private var statusIconName: String {
-        row.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+        viewModel.row.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
     }
 
     private var statusIconColor: Color {
-        row.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
+        viewModel.row.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
     }
 
     var body: some View {
@@ -52,7 +48,7 @@ struct InstalledListRowView: View {
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 HStack(spacing: BrewSpacing.sm) {
-                    Text(row.name)
+                    Text(viewModel.row.name)
                         .font(.brewBody)
                         .foregroundStyle(Color.brewTextPrimary)
 
@@ -84,8 +80,8 @@ struct InstalledListRowView: View {
                     Spacer(minLength: 0)
                 }
 
-                if row.hasDescription {
-                    Text(row.description)
+                if viewModel.row.hasDescription {
+                    Text(viewModel.row.description)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewTextSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -102,14 +98,14 @@ struct InstalledListRowView: View {
     private var listAccessibilityLabel: String {
         if viewModel.showsUpgradeBusy {
             let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
-            return "\(row.listRowAccessibilitySummary), \(upgrading)"
+            return "\(viewModel.row.listRowAccessibilitySummary), \(upgrading)"
         }
-        return row.listRowAccessibilitySummary
+        return viewModel.row.listRowAccessibilitySummary
     }
 
     @ViewBuilder
     private var versionLine: some View {
-        switch row.versionPresentation {
+        switch viewModel.row.versionPresentation {
         case let .installed(version):
             Text(version)
                 .font(.brewCaption)
@@ -154,18 +150,27 @@ struct InstalledListRowRoot: View {
 
     @State private var viewModel: InstalledListRowViewModel
 
-    init(row: InstalledPackageRow, brewCommandCenter: any BrewCommandCenter) {
+    init(
+        row: InstalledPackageRow,
+        brewCommandCenter: any BrewCommandCenter,
+        refreshRow: @escaping @MainActor (InstalledPackageRow) async -> InstalledPackageRow?,
+        onCatalogRowPatched: @escaping @MainActor (InstalledPackageRow) -> Void,
+    ) {
         self.row = row
         self.brewCommandCenter = brewCommandCenter
         _viewModel = State(
-            wrappedValue: InstalledListRowViewModel(row: row),
+            wrappedValue: InstalledListRowViewModel(
+                row: row,
+                refreshRow: refreshRow,
+                onRowUpdated: onCatalogRowPatched,
+            ),
         )
     }
 
     var body: some View {
         InstalledListRowView(viewModel: viewModel)
             .task(id: row.id) {
-                await viewModel.observeRowUpdates(using: brewCommandCenter)
+                await viewModel.observeRowUpdates(for: row, using: brewCommandCenter)
             }
     }
 }
@@ -203,15 +208,7 @@ struct InstalledListRowRoot: View {
 
 #Preview("Upgrade in progress (list)") {
     InstalledListRowView(
-        viewModel: InstalledListRowViewModel.previewBusyUpgrade(
-            row: InstalledPackageRow(
-                name: "Git",
-                kind: .formula,
-                description: "Distributed revision control system",
-                installedVersion: "v2.45.0",
-                updateVersion: "v2.45.1",
-            ),
-        ),
+        viewModel: InstalledListRowViewModel.previewBusyUpgrade(),
     )
     .padding()
     .frame(width: 400)
