@@ -32,8 +32,45 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
         )
     }
 
+    func loadInstalledPackage(kind: InstalledPackageKind, named name: String) async throws -> InstalledPackageInfo {
+        let brew = try locator.findBrewExecutable()
+        let output = try await runSinglePackageInfoJSON(executable: brew, kind: kind, name: name)
+        let payload = try decodeInfoJSON(from: output)
+        switch kind {
+        case .formula:
+            guard let formula = payload.formulae.first(where: { $0.name == name }) else {
+                throw InstalledPackagesRepositoryError.packageNotFound(kind: .formula, name: name)
+            }
+            return Self.formulaInfo(from: formula)
+        case .cask:
+            guard let cask = payload.casks.first(where: { $0.token == name }) else {
+                throw InstalledPackagesRepositoryError.packageNotFound(kind: .cask, name: name)
+            }
+            return Self.caskInfo(from: cask)
+        }
+    }
+
     private func runInstalledInfoJSON(executable: URL) async throws -> String {
         let arguments = ["info", "--installed", "--json=v2"]
+        let output = try await commandRunner.run(executableURL: executable, arguments: arguments)
+        guard output.terminationStatus == 0 else {
+            throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
+        }
+        return output.standardOutput
+    }
+
+    private func runSinglePackageInfoJSON(
+        executable: URL,
+        kind: InstalledPackageKind,
+        name: String,
+    ) async throws -> String {
+        let kindFlag = switch kind {
+        case .formula:
+            "--formula"
+        case .cask:
+            "--cask"
+        }
+        let arguments = ["info", "--json=v2", kindFlag, name]
         let output = try await commandRunner.run(executableURL: executable, arguments: arguments)
         guard output.terminationStatus == 0 else {
             throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)

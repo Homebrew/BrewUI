@@ -118,4 +118,24 @@ enum InstalledPackagesTestSupport {
             ),
         ]
     }
+
+    static func packageInfoJSONResponse(
+        kind: InstalledPackageKind,
+        name: String,
+        standardOutput: String,
+        terminationStatus: Int32 = 0,
+        standardError: String = "",
+    ) -> [[String]: CommandOutput] {
+        let kindFlag = switch kind {
+        case .formula: "--formula"
+        case .cask: "--cask"
+        }
+        return [
+            ["info", "--json=v2", kindFlag, name]: CommandOutput(
+                standardOutput: standardOutput,
+                standardError: standardError,
+                terminationStatus: terminationStatus,
+            ),
+        ]
+    }
 }
