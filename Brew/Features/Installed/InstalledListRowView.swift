@@ -20,18 +20,19 @@ struct InstalledSectionHeader: View {
 }
 
 struct InstalledListRowView: View {
+    let row: InstalledPackageRow
     @Bindable var viewModel: InstalledListRowViewModel
 
     private var chrome: PackageKindChrome {
-        viewModel.row.kind.chrome
+        row.kind.chrome
     }
 
     private var statusIconName: String {
-        viewModel.row.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+        row.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
     }
 
     private var statusIconColor: Color {
-        viewModel.row.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
+        row.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
     }
 
     var body: some View {
@@ -48,7 +49,7 @@ struct InstalledListRowView: View {
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 HStack(spacing: BrewSpacing.sm) {
-                    Text(viewModel.row.name)
+                    Text(row.name)
                         .font(.brewBody)
                         .foregroundStyle(Color.brewTextPrimary)
 
@@ -80,8 +81,8 @@ struct InstalledListRowView: View {
                     Spacer(minLength: 0)
                 }
 
-                if viewModel.row.hasDescription {
-                    Text(viewModel.row.description)
+                if row.hasDescription {
+                    Text(row.description)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewTextSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -98,14 +99,14 @@ struct InstalledListRowView: View {
     private var listAccessibilityLabel: String {
         if viewModel.showsUpgradeBusy {
             let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
-            return "\(viewModel.row.listRowAccessibilitySummary), \(upgrading)"
+            return "\(row.listRowAccessibilitySummary), \(upgrading)"
         }
-        return viewModel.row.listRowAccessibilitySummary
+        return row.listRowAccessibilitySummary
     }
 
     @ViewBuilder
     private var versionLine: some View {
-        switch viewModel.row.versionPresentation {
+        switch row.versionPresentation {
         case let .installed(version):
             Text(version)
                 .font(.brewCaption)
@@ -150,25 +151,14 @@ struct InstalledListRowRoot: View {
 
     @State private var viewModel: InstalledListRowViewModel
 
-    init(
-        row: InstalledPackageRow,
-        brewCommandCenter: any BrewCommandCenter,
-        refreshRow: @escaping @MainActor (InstalledPackageRow) async -> InstalledPackageRow?,
-        onCatalogRowPatched: @escaping @MainActor (InstalledPackageRow) -> Void,
-    ) {
+    init(row: InstalledPackageRow, brewCommandCenter: any BrewCommandCenter) {
         self.row = row
         self.brewCommandCenter = brewCommandCenter
-        _viewModel = State(
-            wrappedValue: InstalledListRowViewModel(
-                row: row,
-                refreshRow: refreshRow,
-                onRowUpdated: onCatalogRowPatched,
-            ),
-        )
+        _viewModel = State(wrappedValue: InstalledListRowViewModel())
     }
 
     var body: some View {
-        InstalledListRowView(viewModel: viewModel)
+        InstalledListRowView(row: row, viewModel: viewModel)
             .task(id: row.id) {
                 await viewModel.observeRowUpdates(for: row, using: brewCommandCenter)
             }
@@ -177,15 +167,14 @@ struct InstalledListRowRoot: View {
 
 #Preview("Formula with update") {
     InstalledListRowView(
-        viewModel: InstalledListRowViewModel(
-            row: InstalledPackageRow(
-                name: "Git",
-                kind: .formula,
-                description: "Distributed revision control system",
-                installedVersion: "v2.45.0",
-                updateVersion: "v2.45.1",
-            ),
+        row: InstalledPackageRow(
+            name: "Git",
+            kind: .formula,
+            description: "Distributed revision control system",
+            installedVersion: "v2.45.0",
+            updateVersion: "v2.45.1",
         ),
+        viewModel: InstalledListRowViewModel(),
     )
     .padding()
     .frame(width: 400)
@@ -193,14 +182,13 @@ struct InstalledListRowRoot: View {
 
 #Preview("Cask") {
     InstalledListRowView(
-        viewModel: InstalledListRowViewModel(
-            row: InstalledPackageRow(
-                name: "Docker",
-                kind: .cask,
-                description: "App to build and share containerized applications",
-                installedVersion: "v4.39.0",
-            ),
+        row: InstalledPackageRow(
+            name: "Docker",
+            kind: .cask,
+            description: "App to build and share containerized applications",
+            installedVersion: "v4.39.0",
         ),
+        viewModel: InstalledListRowViewModel(),
     )
     .padding()
     .frame(width: 400)
@@ -208,6 +196,13 @@ struct InstalledListRowRoot: View {
 
 #Preview("Upgrade in progress (list)") {
     InstalledListRowView(
+        row: InstalledPackageRow(
+            name: "Git",
+            kind: .formula,
+            description: "Distributed revision control system",
+            installedVersion: "v2.45.0",
+            updateVersion: "v2.45.1",
+        ),
         viewModel: InstalledListRowViewModel.previewBusyUpgrade(),
     )
     .padding()

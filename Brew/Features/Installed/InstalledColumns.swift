@@ -60,10 +60,7 @@ struct InstalledColumns: View {
             repository: detailsRepository,
             brewCommandCenter: brewCommandCenter,
             onUpgradeSuccess: { [viewModel] in
-                guard let refreshedRow = await viewModel.refreshedInstalledRow(selectedRow) else {
-                    return
-                }
-                viewModel.mergeInstalledRow(refreshedRow)
+                await viewModel.refreshInstalledPackagesPreservingUI()
             },
         )
         detailsSelectionID = selectedRow.id

@@ -270,33 +270,6 @@ struct InstalledViewModelTests {
         #expect(vm.loadedFormulaRows.first?.installedVersion == "v2.0")
     }
 
-    @Test @MainActor func `mergeInstalledRow replaces matching loaded row and keeps loaded state`() async {
-        let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
-        )
-        let originalState = vm.state
-        guard let existingRow = vm.loadedFormulaRows.first else {
-            return
-        }
-        let patchedRow = InstalledPackageRow(
-            name: existingRow.name,
-            kind: existingRow.kind,
-            description: "patched description",
-            installedVersion: "v3.0",
-            updateVersion: nil,
-        )
-
-        vm.mergeInstalledRow(patchedRow)
-
-        #expect(vm.state.isLoaded)
-        #expect(vm.loadedFormulaRows.count == 1)
-        #expect(vm.loadedFormulaRows.first?.id == existingRow.id)
-        #expect(vm.loadedFormulaRows.first?.installedVersion == "v3.0")
-        #expect(vm.loadedFormulaRows.first?.description == "patched description")
-        #expect(vm.loadedCaskRows.isEmpty)
-        #expect(vm.state != originalState)
-    }
-
     @Test @MainActor func `rowForInstalledPackageInfo maps version and upgrade labels consistently`() {
         let info = InstalledPackageInfo(
             name: "wget",

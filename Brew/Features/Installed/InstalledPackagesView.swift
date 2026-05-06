@@ -85,19 +85,11 @@ struct InstalledPackagesView: View {
     @ViewBuilder
     private func listRow(for row: InstalledPackageRow) -> some View {
         if let center = brewCommandCenter {
-            InstalledListRowRoot(
-                row: row,
-                brewCommandCenter: center,
-                refreshRow: { row in
-                    await viewModel.refreshedInstalledRow(row)
-                },
-                onCatalogRowPatched: { updatedRow in
-                    viewModel.mergeInstalledRow(updatedRow)
-                },
-            )
+            InstalledListRowRoot(row: row, brewCommandCenter: center)
         } else {
             InstalledListRowView(
-                viewModel: InstalledListRowViewModel(row: row),
+                row: row,
+                viewModel: InstalledListRowViewModel(),
             )
         }
     }
@@ -108,7 +100,8 @@ struct InstalledPackagesView: View {
                 InstalledSectionHeader(title: "Formulae", count: 3)
                 ForEach(loadingFormulaeRows) { row in
                     InstalledListRowView(
-                        viewModel: InstalledListRowViewModel(row: row),
+                        row: row,
+                        viewModel: InstalledListRowViewModel(),
                     )
                 }
             }

@@ -197,3 +197,10 @@
 - **Refresh trigger:** Row VM watches `phaseChanges(for:)` and performs a narrow repository refresh when a row operation transitions `running -> idle`, then emits `onRowUpdated` for parent catalog merge.
 - **View wiring:** `InstalledPackagesView` wires `InstalledListRowRoot` with explicit closures (`refreshedInstalledRow`, `mergeInstalledRow`) so row refresh coordination remains in view/view-model boundaries rather than nested VM factories.
 - **Detail upgrade path:** `InstalledViewModel` `onUpgradeSuccess` now refreshes and merges only the selected row instead of calling full-list `refreshInstalledPackagesPreservingUI()`.
+
+## 2026-05-06 — Installed refresh simplification (full background snapshot)
+
+- Reverted the row-level refresh/patch architecture to reduce complexity: `InstalledListRowViewModel` now observes `phaseChanges(for:)` for progress only, and no longer owns row-refresh callbacks or repository fetch logic.
+- Upgrade completion now uses `InstalledViewModel.refreshInstalledPackagesPreservingUI()` as the single refresh path (full snapshot, no `.loading` transition), preserving smooth list UX without skeleton flicker.
+- Kept DI/wiring improvements: view-layer wiring still creates/injects child VMs (`InstalledColumns` for details VM, `InstalledPackagesView` for row roots / command-center environment injection); list VM does not create child VMs.
+- Removed narrow single-package repository API (`loadInstalledPackage(kind:named:)`) and dedicated lookup tests introduced solely for the abandoned row-refresh approach.

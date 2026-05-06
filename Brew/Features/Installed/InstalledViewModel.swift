@@ -133,23 +133,6 @@ final class InstalledViewModel {
         }
     }
 
-    /// Applies a single row update to the currently loaded catalog without a full repository reload.
-    func mergeInstalledRow(_ row: InstalledPackageRow) {
-        guard var loadedContent else {
-            return
-        }
-
-        var didReplace = false
-        didReplace = replaceRow(withID: row.id, in: &loadedContent.formulaRows, using: row) || didReplace
-        didReplace = replaceRow(withID: row.id, in: &loadedContent.caskRows, using: row) || didReplace
-        guard didReplace else {
-            return
-        }
-
-        self.loadedContent = loadedContent
-        applyLoadedStateForCurrentQuery()
-    }
-
     func toggleSelection(for rowID: InstalledPackageRow.ID) {
         if isSearchActive {
             didCommitSelectionDuringSearch = true
@@ -290,31 +273,4 @@ final class InstalledViewModel {
             return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
         }
     }
-}
-
-extension InstalledViewModel {
-    func refreshedInstalledRow(_ row: InstalledPackageRow) async -> InstalledPackageRow? {
-        do {
-            let info = try await repository.loadInstalledPackage(kind: row.kind, named: row.name)
-            return Self.rowForInstalledPackageInfo(info, kind: row.kind)
-        } catch {
-            let message = error.localizedDescription
-            installedPackagesRefreshLogger.error(
-                "Refresh installed row failed for \(row.id, privacy: .public): \(message, privacy: .public)",
-            )
-            return nil
-        }
-    }
-}
-
-private func replaceRow(
-    withID rowID: InstalledPackageRow.ID,
-    in rows: inout [InstalledPackageRow],
-    using updatedRow: InstalledPackageRow,
-) -> Bool {
-    guard let index = rows.firstIndex(where: { $0.id == rowID }) else {
-        return false
-    }
-    rows[index] = updatedRow
-    return true
 }
