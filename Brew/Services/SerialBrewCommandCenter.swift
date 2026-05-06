@@ -53,9 +53,7 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
                     await self.removePhaseListener(id: id, token: token)
                 }
             }
-            Task {
-                await self.registerPhaseListener(id: id, token: token, continuation: continuation)
-            }
+            registerPhaseListener(id: id, token: token, continuation: continuation)
         }
     }
 
