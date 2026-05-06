@@ -21,9 +21,8 @@ struct BrewApp: App {
                 viewModel: MainWindowViewModel(
                     installedViewModel: InstalledViewModel(
                         repository: BrewInstalledPackagesRepository.live(),
-                        detailsRepository: BrewPackageDetailsRepository.live(),
-                        brewCommandCenter: commandCenter,
                     ),
+                    installedDetailsRepository: BrewPackageDetailsRepository.live(),
                 ),
             )
             .environment(\.brewCommandCenter, commandCenter)

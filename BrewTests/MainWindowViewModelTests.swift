@@ -13,7 +13,10 @@ struct MainWindowViewModelTests {
             repository: countingRepository,
             detailsRepository: StubPackageDetailsRepository(),
         )
-        let vm = MainWindowViewModel(installedViewModel: installed)
+        let vm = MainWindowViewModel(
+            installedViewModel: installed,
+            installedDetailsRepository: StubPackageDetailsRepository(),
+        )
         await vm.loadForCurrentSelection()
         let callCount = await countingRepository.loadCallCount
         #expect(callCount == 1)
@@ -24,7 +27,10 @@ struct MainWindowViewModelTests {
             repository: StubInstalledPackagesRepository(snapshot: .empty),
             detailsRepository: StubPackageDetailsRepository(),
         )
-        let vm = MainWindowViewModel(installedViewModel: installed)
+        let vm = MainWindowViewModel(
+            installedViewModel: installed,
+            installedDetailsRepository: StubPackageDetailsRepository(),
+        )
         #expect(vm.selectedSidebarItem == .installed)
     }
 }

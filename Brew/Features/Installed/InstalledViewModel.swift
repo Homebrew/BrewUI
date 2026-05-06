@@ -42,8 +42,6 @@ private let installedPackagesRefreshLogger = Logger(
 @MainActor
 final class InstalledViewModel {
     private let repository: InstalledPackagesRepository
-    private let detailsRepository: any PackageDetailsRepository
-    private let brewCommandCenter: any BrewCommandCenter
 
     private var loadedContent: InstalledPackagesContent?
     private var preSearchSelectedPackageID: InstalledPackageRow.ID?
@@ -52,18 +50,13 @@ final class InstalledViewModel {
     private(set) var state: InstalledLoadState = .loading
     var searchQuery: String = "" {
         didSet {
-            let previousActiveSelectionID = activeSelectedPackageID
             applyLoadedStateForCurrentQuery()
             updateSelectionForSearchQueryChange(from: oldValue, to: searchQuery)
-            if previousActiveSelectionID != activeSelectedPackageID {
-                startDetailsLoadForCurrentSelection()
-            }
             isSearchSelected = true
         }
     }
 
     private(set) var selectedPackageID: InstalledPackageRow.ID?
-    private(set) var detailsViewModel: InstalledDetailsViewModel?
     var isSearchSelected: Bool = false
 
     var activeSelectedPackageID: InstalledPackageRow.ID? {
@@ -97,14 +90,17 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
+    init(repository: InstalledPackagesRepository) {
+        self.repository = repository
+    }
+
+    /// Transitional initializer to preserve existing call sites while details-VM ownership moves to the view layer.
     init(
         repository: InstalledPackagesRepository,
-        detailsRepository: PackageDetailsRepository,
-        brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
+        detailsRepository _: PackageDetailsRepository,
+        brewCommandCenter _: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
     ) {
         self.repository = repository
-        self.detailsRepository = detailsRepository
-        self.brewCommandCenter = brewCommandCenter
     }
 
     func load() async {
@@ -114,11 +110,9 @@ final class InstalledViewModel {
             let snapshot = try await repository.loadInstalledPackages()
             loadedContent = Self.packagesContent(from: snapshot)
             applyLoadedStateForCurrentQuery()
-            startDetailsLoadForCurrentSelection()
         } catch {
             state = .error(Self.userMessage(for: error))
             selectedPackageID = nil
-            clearDetailsState()
         }
     }
 
@@ -132,7 +126,6 @@ final class InstalledViewModel {
             let snapshot = try await repository.loadInstalledPackages()
             loadedContent = Self.packagesContent(from: snapshot)
             applyLoadedStateForCurrentQuery()
-            startDetailsLoadForCurrentSelection()
         } catch {
             installedPackagesRefreshLogger.error(
                 "Refresh installed packages failed: \(error.localizedDescription, privacy: .public)",
@@ -167,13 +160,11 @@ final class InstalledViewModel {
         } else {
             selectedPackageID = rowID
         }
-        startDetailsLoadForCurrentSelection()
     }
 
     func clearSelection() {
         selectedPackageID = nil
         searchPreviewSelectedPackageID = nil
-        startDetailsLoadForCurrentSelection()
     }
 
     private var isSearchActive: Bool {
@@ -251,34 +242,6 @@ final class InstalledViewModel {
 
     private static func normalizedSearchQuery(_ query: String) -> String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private func startDetailsLoadForCurrentSelection() {
-        guard let selectedRow = selectedPackageRow else {
-            detailsViewModel = nil
-            return
-        }
-
-        let detailsViewModel = InstalledDetailsViewModel(
-            selectedRow: selectedRow,
-            repository: detailsRepository,
-            brewCommandCenter: brewCommandCenter,
-            onUpgradeSuccess: { [weak self] in
-                guard let self else {
-                    return
-                }
-                guard let refreshedRow = await refreshedInstalledRow(selectedRow) else {
-                    return
-                }
-                mergeInstalledRow(refreshedRow)
-            },
-        )
-        self.detailsViewModel = detailsViewModel
-        detailsViewModel.load()
-    }
-
-    private func clearDetailsState() {
-        detailsViewModel = nil
     }
 
     private static func packagesContent(from snapshot: InstalledPackagesSnapshot) -> InstalledPackagesContent {

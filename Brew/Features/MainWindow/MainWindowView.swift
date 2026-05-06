@@ -29,7 +29,10 @@ struct MainWindowView: View {
     private var featureColumn: some View {
         switch viewModel.selectedSidebarItem {
         case .installed:
-            InstalledColumns(viewModel: viewModel.installedViewModel).featureView
+            InstalledColumns(
+                viewModel: viewModel.installedViewModel,
+                detailsRepository: viewModel.installedDetailsRepository,
+            )
         }
     }
 }
@@ -40,9 +43,8 @@ struct MainWindowView: View {
         viewModel: MainWindowViewModel(
             installedViewModel: InstalledViewModel(
                 repository: PreviewInstalledPackagesRepository(),
-                detailsRepository: PreviewPackageDetailsRepository(),
-                brewCommandCenter: commandCenter,
             ),
+            installedDetailsRepository: PreviewPackageDetailsRepository(),
         ),
     )
     .environment(\.brewCommandCenter, commandCenter)

@@ -5,7 +5,6 @@ import SwiftUI
     let viewModel = InstalledViewModel(
         repository: PreviewInstalledPackagesRepository(),
         detailsRepository: PreviewPackageDetailsRepository(),
-        brewCommandCenter: commandCenter,
     )
     InstalledPackagesView(
         viewModel: viewModel,
