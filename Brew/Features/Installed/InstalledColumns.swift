@@ -6,7 +6,7 @@ struct InstalledColumns: View {
     let detailsRepository: any PackageDetailsRepository
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @State private var detailsViewModel: InstalledDetailsViewModel?
-    @State private var detailsSelectionID: InstalledPackageRow.ID?
+    @State private var detailsSelectionRow: InstalledPackageRow?
 
     var body: some View {
         Group {
@@ -34,7 +34,7 @@ struct InstalledColumns: View {
                 InstalledPackagesView(viewModel: viewModel)
             }
         }
-        .task(id: viewModel.activeSelectedPackageID) {
+        .task(id: viewModel.selectedPackageRow) {
             rebuildDetailsViewModelIfNeeded()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -42,15 +42,15 @@ struct InstalledColumns: View {
 
     private func rebuildDetailsViewModelIfNeeded() {
         guard let selectedRow = viewModel.selectedPackageRow else {
-            detailsSelectionID = nil
+            detailsSelectionRow = nil
             detailsViewModel = nil
             return
         }
-        guard detailsSelectionID != selectedRow.id else {
+        guard detailsSelectionRow != selectedRow else {
             return
         }
         guard let brewCommandCenter else {
-            detailsSelectionID = nil
+            detailsSelectionRow = nil
             detailsViewModel = nil
             return
         }
@@ -63,7 +63,7 @@ struct InstalledColumns: View {
                 await viewModel.refreshInstalledPackagesPreservingUI()
             },
         )
-        detailsSelectionID = selectedRow.id
+        detailsSelectionRow = selectedRow
         detailsViewModel = nextDetailsViewModel
         nextDetailsViewModel.load()
     }
