@@ -7,6 +7,44 @@
 import Foundation
 import Testing
 
+// MARK: - Repository stubs
+
+private actor TwoSnapshotInstalledPackagesRepository: InstalledPackagesRepository {
+    private let firstSnapshot: InstalledPackagesSnapshot
+    private let secondSnapshot: InstalledPackagesSnapshot
+    private var invocationCount = 0
+
+    init(first: InstalledPackagesSnapshot, second: InstalledPackagesSnapshot) {
+        firstSnapshot = first
+        secondSnapshot = second
+    }
+
+    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+        invocationCount += 1
+        if invocationCount == 1 {
+            return firstSnapshot
+        }
+        return secondSnapshot
+    }
+}
+
+private actor RefreshRetryFailsRepository: InstalledPackagesRepository {
+    private let successSnapshot: InstalledPackagesSnapshot
+    private var invocationCount = 0
+
+    init(successSnapshot: InstalledPackagesSnapshot) {
+        self.successSnapshot = successSnapshot
+    }
+
+    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+        invocationCount += 1
+        if invocationCount == 1 {
+            return successSnapshot
+        }
+        throw OddRepositoryError()
+    }
+}
+
 // MARK: - Tests
 
 struct InstalledViewModelTests {
@@ -187,5 +225,90 @@ struct InstalledViewModelTests {
         vm.toggleSelection(for: selectedID)
         vm.clearSelection()
         #expect(vm.detailsViewModel == nil)
+    }
+
+    @Test @MainActor func `refreshInstalledPackagesPreservingUI updates content without loading state`() async {
+        let firstSnapshot = InstalledPackagesSnapshot(
+            formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
+            casks: [],
+        )
+        let secondSnapshot = InstalledPackagesSnapshot(
+            formulae: [InstalledPackageInfo(name: "git", version: "3.0")],
+            casks: [],
+        )
+        let repo = TwoSnapshotInstalledPackagesRepository(first: firstSnapshot, second: secondSnapshot)
+        let vm = InstalledViewModel(
+            repository: repo,
+            detailsRepository: StubPackageDetailsRepository(),
+        )
+        await vm.load()
+        #expect(vm.state.isLoaded)
+        #expect(vm.loadedFormulaRows.first?.installedVersion == "v2.0")
+
+        await vm.refreshInstalledPackagesPreservingUI()
+
+        #expect(vm.state.isLoaded)
+        #expect(vm.loadedFormulaRows.first?.installedVersion == "v3.0")
+    }
+
+    @Test @MainActor func `refreshInstalledPackagesPreservingUI keeps loaded state when refresh fails`() async {
+        let snapshot = InstalledPackagesSnapshot(
+            formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
+            casks: [],
+        )
+        let repo = RefreshRetryFailsRepository(successSnapshot: snapshot)
+        let vm = InstalledViewModel(
+            repository: repo,
+            detailsRepository: StubPackageDetailsRepository(),
+        )
+        await vm.load()
+        #expect(vm.loadedFormulaRows.first?.installedVersion == "v2.0")
+
+        await vm.refreshInstalledPackagesPreservingUI()
+
+        #expect(vm.state.isLoaded)
+        #expect(vm.loadedFormulaRows.first?.installedVersion == "v2.0")
+    }
+
+    @Test @MainActor func `mergeInstalledRow replaces matching loaded row and keeps loaded state`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
+        )
+        let originalState = vm.state
+        guard let existingRow = vm.loadedFormulaRows.first else {
+            return
+        }
+        let patchedRow = InstalledPackageRow(
+            name: existingRow.name,
+            kind: existingRow.kind,
+            description: "patched description",
+            installedVersion: "v3.0",
+            updateVersion: nil,
+        )
+
+        vm.mergeInstalledRow(patchedRow)
+
+        #expect(vm.state.isLoaded)
+        #expect(vm.loadedFormulaRows.count == 1)
+        #expect(vm.loadedFormulaRows.first?.id == existingRow.id)
+        #expect(vm.loadedFormulaRows.first?.installedVersion == "v3.0")
+        #expect(vm.loadedFormulaRows.first?.description == "patched description")
+        #expect(vm.loadedCaskRows.isEmpty)
+        #expect(vm.state != originalState)
+    }
+
+    @Test @MainActor func `rowForInstalledPackageInfo maps version and upgrade labels consistently`() {
+        let info = InstalledPackageInfo(
+            name: "wget",
+            version: "1.24.5",
+            upgradeToVersion: "1.26.0",
+        )
+
+        let row = InstalledViewModel.rowForInstalledPackageInfo(info, kind: .formula)
+
+        #expect(row.name == "wget")
+        #expect(row.kind == .formula)
+        #expect(row.installedVersion == "v1.24.5")
+        #expect(row.updateVersion == "v1.26.0")
     }
 }

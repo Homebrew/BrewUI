@@ -5,6 +5,7 @@
 
 import Foundation
 import Observation
+import OSLog
 
 struct InstalledPackagesContent: Equatable {
     var formulaRows: [InstalledPackageRow]
@@ -23,7 +24,19 @@ enum InstalledLoadState: Equatable {
     case loading
     case loaded(InstalledPackagesContent)
     case error(String)
+
+    var isLoaded: Bool {
+        if case .loaded = self {
+            return true
+        }
+        return false
+    }
 }
+
+private let installedPackagesRefreshLogger = Logger(
+    subsystem: "Homebrew.BrewUI",
+    category: "InstalledViewModel",
+)
 
 @Observable
 @MainActor
@@ -99,9 +112,7 @@ final class InstalledViewModel {
         state = .loading
         do {
             let snapshot = try await repository.loadInstalledPackages()
-            let formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
-            let caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
-            loadedContent = InstalledPackagesContent(formulaRows: formulaRows, caskRows: caskRows)
+            loadedContent = Self.packagesContent(from: snapshot)
             applyLoadedStateForCurrentQuery()
             startDetailsLoadForCurrentSelection()
         } catch {
@@ -109,6 +120,41 @@ final class InstalledViewModel {
             selectedPackageID = nil
             clearDetailsState()
         }
+    }
+
+    /// Reloads installed packages without clearing the list UI (no `.loading` state).
+    func refreshInstalledPackagesPreservingUI() async {
+        guard state.isLoaded else {
+            await load()
+            return
+        }
+        do {
+            let snapshot = try await repository.loadInstalledPackages()
+            loadedContent = Self.packagesContent(from: snapshot)
+            applyLoadedStateForCurrentQuery()
+            startDetailsLoadForCurrentSelection()
+        } catch {
+            installedPackagesRefreshLogger.error(
+                "Refresh installed packages failed: \(error.localizedDescription, privacy: .public)",
+            )
+        }
+    }
+
+    /// Applies a single row update to the currently loaded catalog without a full repository reload.
+    func mergeInstalledRow(_ row: InstalledPackageRow) {
+        guard var loadedContent else {
+            return
+        }
+
+        var didReplace = false
+        didReplace = replaceRow(withID: row.id, in: &loadedContent.formulaRows, using: row) || didReplace
+        didReplace = replaceRow(withID: row.id, in: &loadedContent.caskRows, using: row) || didReplace
+        guard didReplace else {
+            return
+        }
+
+        self.loadedContent = loadedContent
+        applyLoadedStateForCurrentQuery()
     }
 
     func toggleSelection(for rowID: InstalledPackageRow.ID) {
@@ -221,7 +267,7 @@ final class InstalledViewModel {
                 guard let self else {
                     return
                 }
-                await load()
+                await refreshInstalledPackagesPreservingUI()
             },
         )
         self.detailsViewModel = detailsViewModel
@@ -232,7 +278,18 @@ final class InstalledViewModel {
         detailsViewModel = nil
     }
 
-    private static func row(from info: InstalledPackageInfo, kind: InstalledPackageKind) -> InstalledPackageRow {
+    private static func packagesContent(from snapshot: InstalledPackagesSnapshot) -> InstalledPackagesContent {
+        InstalledPackagesContent(
+            formulaRows: snapshot.formulae.map { Self.rowForInstalledPackageInfo($0, kind: .formula) },
+            caskRows: snapshot.casks.map { Self.rowForInstalledPackageInfo($0, kind: .cask) },
+        )
+    }
+
+    /// Shared mapper for converting repository package info into a list-row presentation model.
+    static func rowForInstalledPackageInfo(
+        _ info: InstalledPackageInfo,
+        kind: InstalledPackageKind,
+    ) -> InstalledPackageRow {
         let trimmed = info.version?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let versionLabel: String = if trimmed.isEmpty {
             "—"
@@ -267,4 +324,16 @@ final class InstalledViewModel {
             return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
         }
     }
+}
+
+private func replaceRow(
+    withID rowID: InstalledPackageRow.ID,
+    in rows: inout [InstalledPackageRow],
+    using updatedRow: InstalledPackageRow,
+) -> Bool {
+    guard let index = rows.firstIndex(where: { $0.id == rowID }) else {
+        return false
+    }
+    rows[index] = updatedRow
+    return true
 }
