@@ -1,14 +1,16 @@
 import SwiftUI
 
 /// Feature-owned content/detail columns for the main window.
-struct InstalledColumns {
+struct InstalledColumns: View {
     @Bindable var viewModel: InstalledViewModel
+    let detailsRepository: any PackageDetailsRepository
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
+    @State private var detailsViewModel: InstalledDetailsViewModel?
+    @State private var detailsSelectionID: InstalledPackageRow.ID?
 
-    /// Right-side feature surface in the main window.
-    /// Uses a two-pane internal split only when a row is selected.
-    var featureView: some View {
+    var body: some View {
         Group {
-            if let detailsViewModel = viewModel.detailsViewModel {
+            if let detailsViewModel {
                 HSplitView {
                     InstalledPackagesView(viewModel: viewModel)
                         .frame(
@@ -32,6 +34,40 @@ struct InstalledColumns {
                 InstalledPackagesView(viewModel: viewModel)
             }
         }
+        .task(id: viewModel.activeSelectedPackageID) {
+            rebuildDetailsViewModelIfNeeded()
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private func rebuildDetailsViewModelIfNeeded() {
+        guard let selectedRow = viewModel.selectedPackageRow else {
+            detailsSelectionID = nil
+            detailsViewModel = nil
+            return
+        }
+        guard detailsSelectionID != selectedRow.id else {
+            return
+        }
+        guard let brewCommandCenter else {
+            detailsSelectionID = nil
+            detailsViewModel = nil
+            return
+        }
+
+        let nextDetailsViewModel = InstalledDetailsViewModel(
+            selectedRow: selectedRow,
+            repository: detailsRepository,
+            brewCommandCenter: brewCommandCenter,
+            onUpgradeSuccess: { [viewModel] in
+                guard let refreshedRow = await viewModel.refreshedInstalledRow(selectedRow) else {
+                    return
+                }
+                viewModel.mergeInstalledRow(refreshedRow)
+            },
+        )
+        detailsSelectionID = selectedRow.id
+        detailsViewModel = nextDetailsViewModel
+        nextDetailsViewModel.load()
     }
 }

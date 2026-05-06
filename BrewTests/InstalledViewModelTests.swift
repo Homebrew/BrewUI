@@ -202,7 +202,7 @@ struct InstalledViewModelTests {
         #expect(vm.state == .error(InstalledPackagesTestSupport.localizedGenericLoadFailureMessage()))
     }
 
-    @Test @MainActor func `toggleSelection with details repository creates details view model`() async {
+    @Test @MainActor func `toggleSelection updates selected row`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
         )
@@ -211,10 +211,10 @@ struct InstalledViewModelTests {
             return
         }
         vm.toggleSelection(for: selectedID)
-        #expect(vm.detailsViewModel != nil)
+        #expect(vm.selectedPackageRow?.id == selectedID)
     }
 
-    @Test @MainActor func `clearSelection clears details view model`() async {
+    @Test @MainActor func `clearSelection clears selected row`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [InstalledPackageInfo(name: "git", version: "2.0")],
         )
@@ -224,7 +224,7 @@ struct InstalledViewModelTests {
         }
         vm.toggleSelection(for: selectedID)
         vm.clearSelection()
-        #expect(vm.detailsViewModel == nil)
+        #expect(vm.selectedPackageRow == nil)
     }
 
     @Test @MainActor func `refreshInstalledPackagesPreservingUI updates content without loading state`() async {

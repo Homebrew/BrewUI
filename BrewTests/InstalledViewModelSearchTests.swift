@@ -121,12 +121,12 @@ struct InstalledViewModelSearchTests {
         }
         vm.toggleSelection(for: selectedID)
         #expect(vm.selectedPackageID == selectedID)
-        #expect(vm.detailsViewModel != nil)
+        #expect(vm.selectedPackageRow?.id == selectedID)
 
         vm.searchQuery = "g"
 
         #expect(vm.selectedPackageID == selectedID)
-        #expect(vm.detailsViewModel != nil)
+        #expect(vm.selectedPackageRow?.id == selectedID)
     }
 
     @Test @MainActor func `searchQuery didSet does not clear selection during active search`() async {
@@ -208,14 +208,14 @@ struct InstalledViewModelSearchSelectionTests {
             return
         }
         vm.toggleSelection(for: selectedID)
-        #expect(vm.detailsViewModel != nil)
+        #expect(vm.selectedPackageRow?.id == selectedID)
         #expect(vm.selectedPackageID == selectedID)
 
         vm.searchQuery = "a"
         let previewID = vm.loadedFormulaRows.first?.id
         #expect(vm.activeSelectedPackageID == previewID)
         #expect(vm.selectedPackageID == selectedID)
-        #expect(vm.detailsViewModel != nil)
+        #expect(vm.selectedPackageRow?.id == previewID)
     }
 
     @Test @MainActor func `searchQuery didSet whitespace only query does not hide details`() async {
@@ -227,10 +227,10 @@ struct InstalledViewModelSearchSelectionTests {
             return
         }
         vm.toggleSelection(for: selectedID)
-        #expect(vm.detailsViewModel != nil)
+        #expect(vm.selectedPackageRow?.id == selectedID)
 
         vm.searchQuery = "   "
-        #expect(vm.detailsViewModel != nil)
+        #expect(vm.selectedPackageRow?.id == selectedID)
         #expect(vm.selectedPackageID == selectedID)
     }
 
@@ -280,7 +280,7 @@ struct InstalledViewModelSearchSelectionTests {
         #expect(vm.activeSelectedPackageID == clickedRowID)
     }
 
-    @Test @MainActor func `searchQuery typing keeps same details VM when active selection unchanged`() async {
+    @Test @MainActor func `searchQuery typing keeps active selection when preview row is unchanged`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [
                 InstalledPackageInfo(name: "alpha", version: "1.0"),
@@ -295,21 +295,15 @@ struct InstalledViewModelSearchSelectionTests {
         vm.toggleSelection(for: preSearchSelectionID)
 
         vm.searchQuery = "a"
-        guard let firstSearchDetailsViewModel = vm.detailsViewModel else {
-            Issue.record("expected details view model after search starts")
-            return
-        }
+        let firstActiveSelectionID = vm.activeSelectedPackageID
 
         vm.searchQuery = "al"
-        guard let secondSearchDetailsViewModel = vm.detailsViewModel else {
-            Issue.record("expected details view model while searching")
-            return
-        }
+        let secondActiveSelectionID = vm.activeSelectedPackageID
 
-        #expect(ObjectIdentifier(firstSearchDetailsViewModel) == ObjectIdentifier(secondSearchDetailsViewModel))
+        #expect(firstActiveSelectionID == secondActiveSelectionID)
     }
 
-    @Test @MainActor func `searchQuery typing replaces details VM when active selection changes`() async {
+    @Test @MainActor func `searchQuery typing changes active selection when filtered preview row changes`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [
                 InstalledPackageInfo(name: "alpha", version: "1.0"),
@@ -324,18 +318,12 @@ struct InstalledViewModelSearchSelectionTests {
         vm.toggleSelection(for: preSearchSelectionID)
 
         vm.searchQuery = "a"
-        guard let firstSearchDetailsViewModel = vm.detailsViewModel else {
-            Issue.record("expected details view model after search starts")
-            return
-        }
+        let firstActiveSelectionID = vm.activeSelectedPackageID
 
         vm.searchQuery = "alpi"
-        guard let secondSearchDetailsViewModel = vm.detailsViewModel else {
-            Issue.record("expected details view model after active selection changes")
-            return
-        }
+        let secondActiveSelectionID = vm.activeSelectedPackageID
 
-        #expect(ObjectIdentifier(firstSearchDetailsViewModel) != ObjectIdentifier(secondSearchDetailsViewModel))
+        #expect(firstActiveSelectionID != secondActiveSelectionID)
     }
 
     @Test @MainActor func `searchQuery didSet marks search as presented`() async {
