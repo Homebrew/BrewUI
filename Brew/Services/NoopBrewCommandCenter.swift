@@ -14,12 +14,12 @@ actor NoopBrewCommandCenter: BrewCommandCenter {
     }
 
     /// Preconfigured noop center for SwiftUI previews (immediate execution, standard noop context).
-    static func preview() -> NoopBrewCommandCenter {
+    nonisolated static func preview() -> NoopBrewCommandCenter {
         NoopBrewCommandCenter(executionContext: .noopForTestingAndPreviews())
     }
 
     /// Preconfigured noop center for unit tests (same wiring as ``preview()``).
-    static func forTesting() -> NoopBrewCommandCenter {
+    nonisolated static func forTesting() -> NoopBrewCommandCenter {
         NoopBrewCommandCenter(executionContext: .noopForTestingAndPreviews())
     }
 

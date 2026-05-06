@@ -15,7 +15,7 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
     }
 
     /// Production wiring: real subprocess + default `brew` lookup.
-    static func live() -> BrewPackageDetailsRepository {
+    nonisolated static func live() -> BrewPackageDetailsRepository {
         BrewPackageDetailsRepository(
             commandRunner: BrewCommandService(),
             locator: BrewExecutableLocator(),
@@ -102,7 +102,7 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
         )
     }
 
-    private static func uniqueNonEmpty(_ values: [String]) -> [String] {
+    private nonisolated static func uniqueNonEmpty(_ values: [String]) -> [String] {
         var seen: Set<String> = []
         var result: [String] = []
         for value in values {
@@ -115,7 +115,7 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
         return result
     }
 
-    private static func trimmedOrNil(_ value: String?) -> String? {
+    private nonisolated static func trimmedOrNil(_ value: String?) -> String? {
         guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
             return nil
         }
