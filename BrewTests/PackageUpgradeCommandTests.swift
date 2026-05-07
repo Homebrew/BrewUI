@@ -8,9 +8,9 @@ import Foundation
 import Testing
 
 struct PackageUpgradeCommandTests {
-    @Test func `operation id from row matches InstalledPackageRow id`() {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        #expect(BrewOperationID(row: row).rawValue == row.id)
+    @Test func `operation id from package matches package id`() {
+        let package = BrewPackage.fixture(name: "wget", kind: .formula)
+        #expect(BrewOperationID(package: package).rawValue == package.id)
     }
 
     @Test func `formula run invokes brew upgrade name`() async throws {
@@ -20,8 +20,8 @@ struct PackageUpgradeCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
-        let row = InstalledPackageRow(name: "git", kind: .formula, description: "", installedVersion: "v2")
-        try await PackageUpgradeCommand(row: row).run(in: ctx)
+        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        try await PackageUpgradeCommand(package: package).run(in: ctx)
 
         #expect(await runner.lastExecutable == brewURL)
         #expect(await runner.lastArguments == ["upgrade", "git"])
@@ -34,8 +34,8 @@ struct PackageUpgradeCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
-        let row = InstalledPackageRow(name: "Slack", kind: .cask, description: "", installedVersion: "v1")
-        try await PackageUpgradeCommand(row: row).run(in: ctx)
+        let package = BrewPackage.fixture(name: "Slack", kind: .cask)
+        try await PackageUpgradeCommand(package: package).run(in: ctx)
 
         #expect(await runner.lastArguments == ["upgrade", "--cask", "Slack"])
     }
@@ -49,9 +49,9 @@ struct PackageUpgradeCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew")),
         )
-        let row = InstalledPackageRow(name: "x", kind: .formula, description: "", installedVersion: "v1")
+        let package = BrewPackage.fixture(name: "x", kind: .formula)
         await #expect(throws: BrewCommandError.self) {
-            try await PackageUpgradeCommand(row: row).run(in: ctx)
+            try await PackageUpgradeCommand(package: package).run(in: ctx)
         }
     }
 }

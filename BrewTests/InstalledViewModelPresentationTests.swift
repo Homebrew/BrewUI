@@ -40,7 +40,7 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is false after successful load`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "a", version: "1")],
+            formulae: [.fixture(name: "a", kind: .formula)],
         )
         #expect(!vm.shouldShowInitialLoadingIndicator)
     }
@@ -55,15 +55,15 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `section visibility shows both sections when formulae and casks present`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "f", version: "1")],
-            casks: [InstalledPackageInfo(name: "c", version: "1")],
+            formulae: [.fixture(name: "f", kind: .formula)],
+            casks: [.fixture(name: "c", kind: .cask)],
         )
         #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: true))
     }
 
     @Test @MainActor func `section visibility shows only formulae when no casks`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "f", version: "1")],
+            formulae: [.fixture(name: "f", kind: .formula)],
         )
         #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: false))
     }
@@ -75,8 +75,8 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `totalPackageCount sums formula and cask rows`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "f", version: "1")],
-            casks: [InstalledPackageInfo(name: "c", version: "1")],
+            formulae: [.fixture(name: "f", kind: .formula)],
+            casks: [.fixture(name: "c", kind: .cask)],
         )
         #expect(vm.totalPackageCount == 2)
     }
@@ -91,7 +91,7 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `packageCountSubtitle is singular for one package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "a", version: "1")],
+            formulae: [.fixture(name: "a", kind: .formula)],
         )
         #expect(vm.packageCountSubtitle == "1 package")
     }
@@ -99,8 +99,8 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `packageCountSubtitle is plural for multiple packages`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [
-                InstalledPackageInfo(name: "a", version: "1"),
-                InstalledPackageInfo(name: "b", version: "1"),
+                .fixture(name: "a", kind: .formula),
+                .fixture(name: "b", kind: .formula),
             ],
         )
         #expect(vm.packageCountSubtitle == "2 packages")
@@ -108,7 +108,7 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `toggleSelection selects row when nothing selected`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "a", version: "1")],
+            formulae: [.fixture(name: "a", kind: .formula)],
         )
         guard let row = selectedFormulaRow(from: vm) else {
             Issue.record("expected row in loaded state")
@@ -120,7 +120,7 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `toggleSelection clears selection when tapping selected row`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "a", version: "1")],
+            formulae: [.fixture(name: "a", kind: .formula)],
         )
         guard let row = selectedFormulaRow(from: vm) else {
             Issue.record("expected row in loaded state")
@@ -133,7 +133,7 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `clearSelection clears selected package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [InstalledPackageInfo(name: "a", version: "1")],
+            formulae: [.fixture(name: "a", kind: .formula)],
         )
         guard let row = selectedFormulaRow(from: vm) else {
             Issue.record("expected row in loaded state")
@@ -148,15 +148,15 @@ struct InstalledViewModelPresentationTests {
 private struct FailingInstalledRepository: InstalledPackagesRepository {
     let error: Error
 
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+    func loadInstalledPackages() async throws -> [BrewPackage] {
         throw error
     }
 }
 
 @MainActor
-private func selectedFormulaRow(from vm: InstalledViewModel) -> InstalledPackageRow? {
+private func selectedFormulaRow(from vm: InstalledViewModel) -> BrewPackage? {
     guard case let .loaded(content) = vm.state else {
         return nil
     }
-    return content.formulaRows.first
+    return content.formulaPackages.first
 }

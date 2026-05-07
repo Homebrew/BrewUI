@@ -4,14 +4,14 @@ import Foundation
 enum InstalledFeatureTestSupport {
     @MainActor
     static func loadedViewModel(
-        formulae: [InstalledPackageInfo] = [],
-        casks: [InstalledPackageInfo] = [],
-        details: InstalledPackageDetails? = nil,
+        formulae: [BrewPackage] = [],
+        casks: [BrewPackage] = [],
+        details: BrewPackage? = nil,
     ) async -> InstalledViewModel {
         _ = details
         let viewModel = InstalledViewModel(
             repository: StubInstalledPackagesRepository(
-                snapshot: InstalledPackagesSnapshot(formulae: formulae, casks: casks),
+                snapshot: formulae + casks,
             ),
         )
         await viewModel.load()
@@ -20,37 +20,36 @@ enum InstalledFeatureTestSupport {
 }
 
 struct StubInstalledPackagesRepository: InstalledPackagesRepository {
-    let snapshot: InstalledPackagesSnapshot
+    let snapshot: [BrewPackage]
 
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+    func loadInstalledPackages() async throws -> [BrewPackage] {
         snapshot
     }
 }
 
 struct StubPackageDetailsRepository: PackageDetailsRepository {
-    let details: InstalledPackageDetails?
+    let details: BrewPackage?
 
-    init(details: InstalledPackageDetails? = nil) {
+    init(details: BrewPackage? = nil) {
         self.details = details
     }
 
     func loadPackageDetails(
         named name: String,
         preferredKind: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
+    ) async throws -> BrewPackage {
         if let details {
             return details
         }
-        return InstalledPackageDetails(
+        return BrewPackage(
             name: name,
             kind: preferredKind ?? .formula,
             description: "desc",
-            version: "1.0.0",
-            installedVersions: ["1.0.0"],
             homepage: nil,
+            latestVersion: "1.0.0",
+            installedVersions: ["1.0.0"],
             dependencies: [],
             outdated: false,
-            availableVersion: nil,
         )
     }
 }

@@ -1,0 +1,93 @@
+//
+//  BrewInfoJSON+Mapping.swift
+//  Brew
+//
+
+import Foundation
+
+extension BrewInfoJSON {
+    func installedPackages() -> [BrewPackage] {
+        let formulaPackages = formulae.map(\.asBrewPackage)
+        let caskPackages = casks.map(\.asBrewPackage)
+        return (formulaPackages + caskPackages).sorted(by: Self.sortByName)
+    }
+
+    func packageDetails(named name: String, preferredKind: HomebrewPackageKind?) -> BrewPackage? {
+        if preferredKind != .cask,
+           let formulaMatch = formulae.first(where: { $0.name == name }) ?? formulae.first
+        {
+            return formulaMatch.asBrewPackage
+        }
+        if preferredKind != .formula,
+           let caskMatch = casks.first(where: { $0.token == name }) ?? casks.first
+        {
+            return caskMatch.asBrewPackage
+        }
+        return nil
+    }
+
+    private static func sortByName(_ lhs: BrewPackage, _ rhs: BrewPackage) -> Bool {
+        lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+    }
+}
+
+private extension BrewInfoFormula {
+    var asBrewPackage: BrewPackage {
+        let installedVersions = installed
+            .compactMap(\.version)
+            .compactMap(BrewInfoJSON.trimmedOrNil(_:))
+        let allDependencies = dependencies +
+            buildDependencies +
+            recommendedDependencies +
+            optionalDependencies
+        return BrewPackage(
+            name: name,
+            kind: .formula,
+            description: BrewInfoJSON.trimmedOrNil(desc),
+            homepage: BrewInfoJSON.trimmedOrNil(homepage),
+            latestVersion: BrewInfoJSON.trimmedOrNil(versions.stable),
+            installedVersions: installedVersions,
+            dependencies: BrewInfoJSON.uniqueNonEmpty(allDependencies),
+            outdated: outdated,
+        )
+    }
+}
+
+private extension BrewInfoCask {
+    var asBrewPackage: BrewPackage {
+        let installed = BrewInfoJSON.uniqueNonEmpty(installedVersions)
+        let latest = BrewInfoJSON.trimmedOrNil(versions.stable) ?? BrewInfoJSON.trimmedOrNil(version)
+        return BrewPackage(
+            name: token,
+            kind: .cask,
+            description: BrewInfoJSON.trimmedOrNil(desc),
+            homepage: BrewInfoJSON.trimmedOrNil(homepage),
+            latestVersion: latest,
+            installedVersions: installed,
+            dependencies: BrewInfoJSON.uniqueNonEmpty(dependencies),
+            outdated: outdated,
+        )
+    }
+}
+
+private extension BrewInfoJSON {
+    static func uniqueNonEmpty(_ values: [String]) -> [String] {
+        var seen: Set<String> = []
+        var result: [String] = []
+        for value in values {
+            guard let trimmed = trimmedOrNil(value), !seen.contains(trimmed) else {
+                continue
+            }
+            seen.insert(trimmed)
+            result.append(trimmed)
+        }
+        return result
+    }
+
+    static func trimmedOrNil(_ value: String?) -> String? {
+        guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
+            return nil
+        }
+        return trimmed
+    }
+}

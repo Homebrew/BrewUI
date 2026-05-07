@@ -8,15 +8,22 @@ import Observation
 import OSLog
 
 struct InstalledPackagesContent: Equatable {
-    var formulaRows: [InstalledPackageRow]
-    var caskRows: [InstalledPackageRow]
+    var packages: [BrewPackage]
 
     var shouldShowFormulaeSection: Bool {
-        !formulaRows.isEmpty
+        !formulaPackages.isEmpty
     }
 
     var shouldShowCasksSection: Bool {
-        !caskRows.isEmpty
+        !caskPackages.isEmpty
+    }
+
+    var formulaPackages: [BrewPackage] {
+        packages.filter { $0.kind == .formula }
+    }
+
+    var caskPackages: [BrewPackage] {
+        packages.filter { $0.kind == .cask }
     }
 }
 
@@ -44,8 +51,8 @@ final class InstalledViewModel {
     private let repository: InstalledPackagesRepository
 
     private var loadedContent: InstalledPackagesContent?
-    private var preSearchSelectedPackageID: InstalledPackageRow.ID?
-    private var searchPreviewSelectedPackageID: InstalledPackageRow.ID?
+    private var preSearchSelectedPackageID: BrewPackage.ID?
+    private var searchPreviewSelectedPackageID: BrewPackage.ID?
     private var didCommitSelectionDuringSearch = false
     private(set) var state: InstalledLoadState = .loading
     var searchQuery: String = "" {
@@ -56,10 +63,10 @@ final class InstalledViewModel {
         }
     }
 
-    private(set) var selectedPackageID: InstalledPackageRow.ID?
+    private(set) var selectedPackageID: BrewPackage.ID?
     var isSearchSelected: Bool = false
 
-    var activeSelectedPackageID: InstalledPackageRow.ID? {
+    var activeSelectedPackageID: BrewPackage.ID? {
         searchPreviewSelectedPackageID ?? selectedPackageID
     }
 
@@ -85,7 +92,7 @@ final class InstalledViewModel {
         return "\(totalPackageCount) packages"
     }
 
-    var selectedPackageRow: InstalledPackageRow? {
+    var selectedPackage: BrewPackage? {
         allRows.first(where: { $0.id == activeSelectedPackageID })
     }
 
@@ -124,15 +131,15 @@ final class InstalledViewModel {
         }
     }
 
-    func toggleSelection(for rowID: InstalledPackageRow.ID) {
+    func toggleSelection(for packageID: BrewPackage.ID) {
         if isSearchActive {
             didCommitSelectionDuringSearch = true
             searchPreviewSelectedPackageID = nil
         }
-        if selectedPackageID == rowID {
+        if selectedPackageID == packageID {
             selectedPackageID = nil
         } else {
-            selectedPackageID = rowID
+            selectedPackageID = packageID
         }
     }
 
@@ -145,11 +152,11 @@ final class InstalledViewModel {
         !Self.normalizedSearchQuery(searchQuery).isEmpty
     }
 
-    private var allRows: [InstalledPackageRow] {
+    private var allRows: [BrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }
-        return content.formulaRows + content.caskRows
+        return content.packages
     }
 
     private func applyLoadedStateForCurrentQuery() {
@@ -189,7 +196,7 @@ final class InstalledViewModel {
         }
     }
 
-    private func firstVisibleRowID() -> InstalledPackageRow.ID? {
+    private func firstVisibleRowID() -> BrewPackage.ID? {
         allRows.first?.id
     }
 
@@ -202,15 +209,14 @@ final class InstalledViewModel {
             return content
         }
 
-        let filteredFormulaRows = content.formulaRows.filter {
+        let filteredFormulaRows = content.formulaPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
-        let filteredCaskRows = content.caskRows.filter {
+        let filteredCaskRows = content.caskPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
         return InstalledPackagesContent(
-            formulaRows: filteredFormulaRows,
-            caskRows: filteredCaskRows,
+            packages: filteredFormulaRows + filteredCaskRows,
         )
     }
 
@@ -218,31 +224,8 @@ final class InstalledViewModel {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static func packagesContent(from snapshot: InstalledPackagesSnapshot) -> InstalledPackagesContent {
-        InstalledPackagesContent(
-            formulaRows: snapshot.formulae.map { Self.rowForInstalledPackageInfo($0, kind: .formula) },
-            caskRows: snapshot.casks.map { Self.rowForInstalledPackageInfo($0, kind: .cask) },
-        )
-    }
-
-    /// Shared mapper for converting repository package info into a list-row presentation model.
-    static func rowForInstalledPackageInfo(
-        _ info: InstalledPackageInfo,
-        kind: InstalledPackageKind,
-    ) -> InstalledPackageRow {
-        let trimmed = info.version?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let versionLabel: String = if trimmed.isEmpty {
-            "—"
-        } else {
-            InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: trimmed)
-        }
-        return InstalledPackageRow(
-            name: info.name,
-            kind: kind,
-            description: "",
-            installedVersion: versionLabel,
-            updateVersion: InstalledBrewVersionFormatting.upgradeDisplayLabel(from: info.upgradeToVersion),
-        )
+    private static func packagesContent(from snapshot: [BrewPackage]) -> InstalledPackagesContent {
+        InstalledPackagesContent(packages: snapshot)
     }
 
     private static func userMessage(for error: Error) -> String {

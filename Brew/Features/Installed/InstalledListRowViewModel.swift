@@ -6,14 +6,73 @@
 import Foundation
 import Observation
 
-/// Per-row `$Observable` state for the installed list — subscribes to
-/// ``BrewCommandCenter/phaseChanges(for:)`` so upgrade spinners do not churn the parent
-/// ``InstalledViewModel``.
+enum RowVersionPresentation: Equatable {
+    case installed(String)
+    case upgrade(current: String, latest: String)
+}
+
 @Observable
 @MainActor
 final class InstalledListRowViewModel {
+    let package: BrewPackage
     private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
     private let brewCommandCenter: BrewCommandCenter
+
+    var id: String {
+        package.id
+    }
+
+    var name: String {
+        package.name
+    }
+
+    var kind: InstalledPackageKind {
+        package.kind
+    }
+
+    var hasDescription: Bool {
+        !(package.description?.isEmpty ?? true)
+    }
+
+    var descriptionText: String {
+        package.description ?? ""
+    }
+
+    var installedVersionLabel: String {
+        guard let raw = package.installedVersions.first else {
+            return "—"
+        }
+        return InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
+    }
+
+    var availableVersionLabel: String? {
+        InstalledBrewVersionFormatting.upgradeDisplayLabel(from: package.latestVersion)
+    }
+
+    var showsUpdateAvailable: Bool {
+        package.outdated && availableVersionLabel != nil
+    }
+
+    var versionPresentation: RowVersionPresentation {
+        if showsUpdateAvailable, let latest = availableVersionLabel {
+            return .upgrade(current: installedVersionLabel, latest: latest)
+        }
+        return .installed(installedVersionLabel)
+    }
+
+    var accessibilitySummary: String {
+        var parts = [name]
+        if hasDescription {
+            parts.append(descriptionText)
+        }
+        parts.append(installedVersionLabel)
+        if showsUpdateAvailable, let latest = availableVersionLabel {
+            parts.append("Update available to \(latest)")
+        } else {
+            parts.append("Installed and up to date")
+        }
+        return parts.joined(separator: ", ")
+    }
 
     var showsUpgradeBusy: Bool {
         if case .running = upgradeOperationPhase {
@@ -22,13 +81,13 @@ final class InstalledListRowViewModel {
         return false
     }
 
-    init(brewCommandCenter: BrewCommandCenter) {
+    init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
+        self.package = package
         self.brewCommandCenter = brewCommandCenter
     }
 
-    /// Subscribe until the SwiftUI `.task` that calls this is cancelled (row leaves the list or is torn down).
-    func observeRowUpdates(for row: InstalledPackageRow) async {
-        let operationID = BrewOperationID(row: row)
+    func observeRowUpdates() async {
+        let operationID = BrewOperationID(package: package)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
         for await phase in stream {
             upgradeOperationPhase = phase

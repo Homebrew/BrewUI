@@ -46,14 +46,14 @@ struct InstalledPackagesView: View {
         List {
             if content.shouldShowFormulaeSection {
                 Section("Formulae") {
-                    ForEach(content.formulaRows) { row in
-                        listRow(for: row)
+                    ForEach(content.formulaPackages) { package in
+                        listRow(for: package)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                viewModel.toggleSelection(for: row.id)
+                                viewModel.toggleSelection(for: package.id)
                             }
                             .listRowBackground(
-                                viewModel.activeSelectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
+                                viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
                 }
@@ -61,14 +61,14 @@ struct InstalledPackagesView: View {
 
             if content.shouldShowCasksSection {
                 Section("Casks") {
-                    ForEach(content.caskRows) { row in
-                        listRow(for: row)
+                    ForEach(content.caskPackages) { package in
+                        listRow(for: package)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                viewModel.toggleSelection(for: row.id)
+                                viewModel.toggleSelection(for: package.id)
                             }
                             .listRowBackground(
-                                viewModel.activeSelectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
+                                viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
                 }
@@ -81,16 +81,16 @@ struct InstalledPackagesView: View {
         }
     }
 
-    private func listRow(for row: InstalledPackageRow) -> some View {
-        InstalledListRowRoot(row: row)
+    private func listRow(for package: BrewPackage) -> some View {
+        InstalledListRowRoot(package: package)
     }
 
     private var loadingSkeletonList: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 InstalledSectionHeader(title: "Formulae", count: 3)
-                ForEach(loadingFormulaeRows) { row in
-                    InstalledListRowRoot(row: row)
+                ForEach(loadingFormulaeRows) { package in
+                    InstalledListRowRoot(package: package)
                 }
             }
             .padding(.horizontal, BrewSpacing.lg)
@@ -101,25 +101,34 @@ struct InstalledPackagesView: View {
         .accessibilityLabel("Loading package list")
     }
 
-    private var loadingFormulaeRows: [InstalledPackageRow] {
+    private var loadingFormulaeRows: [BrewPackage] {
         [
-            InstalledPackageRow(
+            BrewPackage(
                 name: "Placeholder Formula",
                 kind: .formula,
                 description: "Placeholder description text for loading row.",
-                installedVersion: "v0.0.0",
+                latestVersion: "0.0.0",
+                installedVersions: ["0.0.0"],
+                dependencies: [],
+                outdated: false,
             ),
-            InstalledPackageRow(
+            BrewPackage(
                 name: "Placeholder Formula",
                 kind: .formula,
                 description: "Placeholder description text for loading row.",
-                installedVersion: "v0.0.0",
+                latestVersion: "0.0.0",
+                installedVersions: ["0.0.0"],
+                dependencies: [],
+                outdated: false,
             ),
-            InstalledPackageRow(
+            BrewPackage(
                 name: "Placeholder Formula",
                 kind: .formula,
                 description: "Placeholder description text for loading row.",
-                installedVersion: "v0.0.0",
+                latestVersion: "0.0.0",
+                installedVersions: ["0.0.0"],
+                dependencies: [],
+                outdated: false,
             ),
         ]
     }

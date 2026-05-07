@@ -7,32 +7,30 @@ import SwiftUI
 
 /// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
 struct InstalledListRowRoot: View {
-    let row: InstalledPackageRow
+    let package: BrewPackage
     @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
         InstalledListRowView(
-            row: row,
-            viewModel: InstalledListRowViewModel(brewCommandCenter: brewCommandCenter),
+            viewModel: InstalledListRowViewModel(package: package, brewCommandCenter: brewCommandCenter),
         )
-        .id(row.id)
+        .id(package.id)
     }
 }
 
 struct InstalledListRowView: View {
-    let row: InstalledPackageRow
     @State var viewModel: InstalledListRowViewModel
 
     private var chrome: PackageKindChrome {
-        row.kind.chrome
+        viewModel.kind.chrome
     }
 
     private var statusIconName: String {
-        row.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+        viewModel.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
     }
 
     private var statusIconColor: Color {
-        row.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
+        viewModel.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
     }
 
     var body: some View {
@@ -49,7 +47,7 @@ struct InstalledListRowView: View {
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 HStack(spacing: BrewSpacing.sm) {
-                    Text(row.name)
+                    Text(viewModel.name)
                         .font(.brewBody)
                         .foregroundStyle(Color.brewTextPrimary)
 
@@ -81,8 +79,8 @@ struct InstalledListRowView: View {
                     Spacer(minLength: 0)
                 }
 
-                if row.hasDescription {
-                    Text(row.description)
+                if viewModel.hasDescription {
+                    Text(viewModel.descriptionText)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewTextSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -94,22 +92,22 @@ struct InstalledListRowView: View {
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(listAccessibilityLabel)
-        .task(id: row.id) {
-            await viewModel.observeRowUpdates(for: row)
+        .task(id: viewModel.id) {
+            await viewModel.observeRowUpdates()
         }
     }
 
     private var listAccessibilityLabel: String {
         if viewModel.showsUpgradeBusy {
             let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
-            return "\(row.listRowAccessibilitySummary), \(upgrading)"
+            return "\(viewModel.accessibilitySummary), \(upgrading)"
         }
-        return row.listRowAccessibilitySummary
+        return viewModel.accessibilitySummary
     }
 
     @ViewBuilder
     private var versionLine: some View {
-        switch row.versionPresentation {
+        switch viewModel.versionPresentation {
         case let .installed(version):
             Text(version)
                 .font(.brewCaption)

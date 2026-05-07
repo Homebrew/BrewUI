@@ -36,8 +36,8 @@ struct MainWindowViewModelTests {
 private actor CountingInstalledRepository: InstalledPackagesRepository {
     private(set) var loadCallCount: Int = 0
 
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+    func loadInstalledPackages() async throws -> [BrewPackage] {
         loadCallCount += 1
-        return .empty
+        return []
     }
 }

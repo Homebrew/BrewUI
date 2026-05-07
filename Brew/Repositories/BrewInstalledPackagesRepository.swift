@@ -22,14 +22,11 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
         )
     }
 
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+    func loadInstalledPackages() async throws -> [BrewPackage] {
         let brew = try locator.findBrewExecutable()
         let output = try await runInstalledInfoJSON(executable: brew)
         let payload = try decodeInfoJSON(from: output)
-        return InstalledPackagesSnapshot(
-            formulae: payload.formulae.map(Self.formulaInfo).sorted(by: Self.sortByName),
-            casks: payload.casks.map(Self.caskInfo).sorted(by: Self.sortByName),
-        )
+        return payload.installedPackages()
     }
 
     private func runInstalledInfoJSON(executable: URL) async throws -> String {
@@ -53,41 +50,5 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
                 ),
             )
         }
-    }
-
-    private static func formulaInfo(from formula: BrewInfoFormula) -> InstalledPackageInfo {
-        let installedVersion = formula.installed
-            .compactMap(\.version)
-            .first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty })
-            ?? formula.versions.stable
-        let upgradeRaw = formula.outdated ? trimmedNonEmpty(formula.versions.stable) : nil
-        return InstalledPackageInfo(
-            name: formula.name,
-            version: installedVersion,
-            upgradeToVersion: upgradeRaw,
-        )
-    }
-
-    private static func caskInfo(from cask: BrewInfoCask) -> InstalledPackageInfo {
-        let tapStable = cask.versions.stable ?? cask.version
-        let upgradeRaw = cask.outdated ? trimmedNonEmpty(tapStable) : nil
-        return InstalledPackageInfo(
-            name: cask.token,
-            version: cask.installedVersions.first ?? cask.version,
-            upgradeToVersion: upgradeRaw,
-        )
-    }
-
-    /// Trims whitespace; returns nil when empty — boundary cleanup only (no presentation rules).
-    private static func trimmedNonEmpty(_ raw: String?) -> String? {
-        let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        guard !trimmed.isEmpty else {
-            return nil
-        }
-        return trimmed
-    }
-
-    private static func sortByName(_ lhs: InstalledPackageInfo, _ rhs: InstalledPackageInfo) -> Bool {
-        lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
     }
 }

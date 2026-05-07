@@ -18,16 +18,15 @@ struct BrewPackageDetailsRepositoryTests {
         ])
         let repo = repository(commandRunner: runner)
         let details = try await repo.loadPackageDetails(named: "wget")
-        let expected = InstalledPackageDetails(
+        let expected = BrewPackage(
             name: "wget",
             kind: .formula,
             description: "Internet file retriever",
-            version: "1.24.5",
-            installedVersions: ["1.24.5", "1.24.4"],
             homepage: "https://www.gnu.org/software/wget/",
+            latestVersion: "1.24.5",
+            installedVersions: ["1.24.5", "1.24.4"],
             dependencies: ["libidn2", "openssl@3", "pkgconf"],
             outdated: true,
-            availableVersion: "1.24.5",
         )
         #expect(details == expected)
     }
@@ -45,12 +44,12 @@ struct BrewPackageDetailsRepositoryTests {
         #expect(details.name == "slack")
         #expect(details.kind == .cask)
         #expect(details.description == "Team communication and collaboration software")
-        #expect(details.version == "4.41.105")
+        #expect(details.latestVersion == "4.41.105")
         #expect(details.installedVersions == ["4.41.105"])
         #expect(details.homepage == "https://slack.com/")
         #expect(Set(details.dependencies) == Set(["mas", "microsoft-auto-update", "ventura"]))
         #expect(details.outdated)
-        #expect(details.availableVersion == "4.41.105")
+        #expect(details.latestVersion == "4.41.105")
     }
 
     @Test @MainActor func `load honors preferred kind when payload includes formula and cask`() async throws {

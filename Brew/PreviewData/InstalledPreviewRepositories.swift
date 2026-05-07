@@ -1,62 +1,100 @@
 import Foundation
 
 enum InstalledPreviewData {
-    static let snapshot = InstalledPackagesSnapshot(
-        formulae: [
-            InstalledPackageInfo(name: "git", version: "2.45.0"),
-            InstalledPackageInfo(name: "node", version: "22.14.0"),
-            InstalledPackageInfo(name: "python", version: "3.13.2"),
-        ],
-        casks: [
-            InstalledPackageInfo(name: "visual-studio-code", version: "1.99.0"),
-            InstalledPackageInfo(name: "docker", version: "4.39.0"),
-        ],
-    )
+    static let snapshot: [BrewPackage] = [
+        BrewPackage(
+            name: "git",
+            kind: .formula,
+            description: nil,
+            homepage: nil,
+            latestVersion: "2.46.1",
+            installedVersions: ["2.45.0"],
+            dependencies: [],
+            outdated: true,
+        ),
+        BrewPackage(
+            name: "node",
+            kind: .formula,
+            description: nil,
+            homepage: nil,
+            latestVersion: "22.14.0",
+            installedVersions: ["22.14.0"],
+            dependencies: [],
+            outdated: false,
+        ),
+        BrewPackage(
+            name: "python",
+            kind: .formula,
+            description: nil,
+            homepage: nil,
+            latestVersion: "3.13.2",
+            installedVersions: ["3.13.2"],
+            dependencies: [],
+            outdated: false,
+        ),
+        BrewPackage(
+            name: "visual-studio-code",
+            kind: .cask,
+            description: nil,
+            homepage: nil,
+            latestVersion: "1.99.0",
+            installedVersions: ["1.99.0"],
+            dependencies: [],
+            outdated: false,
+        ),
+        BrewPackage(
+            name: "docker",
+            kind: .cask,
+            description: nil,
+            homepage: nil,
+            latestVersion: "4.39.0",
+            installedVersions: ["4.39.0"],
+            dependencies: [],
+            outdated: false,
+        ),
+    ]
 
-    static func details(for name: String, preferredKind: InstalledPackageKind?) -> InstalledPackageDetails {
+    static func details(for name: String, preferredKind: InstalledPackageKind?) -> BrewPackage {
         switch (name, preferredKind) {
         case ("docker", .cask):
-            InstalledPackageDetails(
+            BrewPackage(
                 name: "docker",
                 kind: .cask,
                 description: "App to build and share containerized applications",
-                version: "4.39.0",
-                installedVersions: ["4.39.0"],
                 homepage: "https://www.docker.com",
+                latestVersion: "4.39.0",
+                installedVersions: ["4.39.0"],
                 dependencies: [],
                 outdated: false,
-                availableVersion: nil,
             )
         case ("visual-studio-code", .cask):
-            InstalledPackageDetails(
+            BrewPackage(
                 name: "visual-studio-code",
                 kind: .cask,
                 description: "Code editing redefined",
-                version: "1.99.0",
-                installedVersions: ["1.99.0"],
                 homepage: "https://code.visualstudio.com",
+                latestVersion: "1.99.0",
+                installedVersions: ["1.99.0"],
                 dependencies: [],
                 outdated: false,
-                availableVersion: nil,
             )
         default:
-            InstalledPackageDetails(
+            BrewPackage(
                 name: "git",
                 kind: .formula,
                 description: "Distributed revision control system",
-                version: "2.45.0",
-                installedVersions: ["2.45.0"],
                 homepage: "https://git-scm.com",
+                latestVersion: "2.46.1",
+                installedVersions: ["2.45.0"],
                 dependencies: ["gettext", "pcre2"],
                 outdated: true,
-                availableVersion: "2.46.1",
             )
         }
     }
 }
 
 struct PreviewInstalledPackagesRepository: InstalledPackagesRepository {
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+    func loadInstalledPackages() async throws -> [BrewPackage] {
         InstalledPreviewData.snapshot
     }
 }
@@ -65,7 +103,7 @@ struct PreviewPackageDetailsRepository: PackageDetailsRepository {
     func loadPackageDetails(
         named name: String,
         preferredKind: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
+    ) async throws -> BrewPackage {
         InstalledPreviewData.details(for: name, preferredKind: preferredKind)
     }
 }

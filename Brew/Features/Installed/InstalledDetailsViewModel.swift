@@ -8,7 +8,7 @@ import Observation
 
 enum InstalledDetailsLoadState: Equatable {
     case loading
-    case loaded(InstalledPackageDetails)
+    case loaded(BrewPackage)
     case error(String)
 }
 
@@ -29,7 +29,9 @@ final class InstalledDetailsViewModel {
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
 
-    let selection: PackageSelection
+    let selectedPackageID: BrewPackage.ID
+    private let packageNameSeed: String
+    private let packageKindSeed: InstalledPackageKind
 
     /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
     var isUpgrading: Bool {
@@ -43,14 +45,14 @@ final class InstalledDetailsViewModel {
         if case let .loaded(details) = state {
             return details.name
         }
-        return selection.name
+        return packageNameSeed
     }
 
     var packageKind: InstalledPackageKind {
         if case let .loaded(details) = state {
             return details.kind
         }
-        return selection.kind
+        return packageKindSeed
     }
 
     /// User-facing command for the currently selected package details.
@@ -78,7 +80,7 @@ final class InstalledDetailsViewModel {
         guard details.outdated else {
             return nil
         }
-        guard let label = InstalledBrewVersionFormatting.upgradeDisplayLabel(from: details.availableVersion) else {
+        guard let label = InstalledBrewVersionFormatting.upgradeDisplayLabel(from: details.latestVersion) else {
             return nil
         }
         return String(
@@ -96,12 +98,14 @@ final class InstalledDetailsViewModel {
     }
 
     init(
-        selection: PackageSelection,
+        selectedPackage: BrewPackage,
         repository: any PackageDetailsRepository,
         brewCommandCenter: any BrewCommandCenter,
         onUpgradeSuccess: (@MainActor () async -> Void)? = nil,
     ) {
-        self.selection = selection
+        selectedPackageID = selectedPackage.id
+        packageNameSeed = selectedPackage.name
+        packageKindSeed = selectedPackage.kind
         self.repository = repository
         self.brewCommandCenter = brewCommandCenter
         self.onUpgradeSuccess = onUpgradeSuccess
@@ -120,8 +124,8 @@ final class InstalledDetailsViewModel {
             }
             do {
                 let details = try await repository.loadPackageDetails(
-                    named: selection.name,
-                    preferredKind: selection.kind,
+                    named: packageNameSeed,
+                    preferredKind: packageKindSeed,
                 )
                 guard !Task.isCancelled else {
                     return
@@ -147,8 +151,8 @@ final class InstalledDetailsViewModel {
         }
 
         upgradeErrorMessage = nil
-        let operationID = BrewOperationID(kind: selection.kind, name: selection.name)
-        let command = PackageUpgradeCommand(kind: selection.kind, name: selection.name)
+        let operationID = BrewOperationID(kind: packageKindSeed, name: packageNameSeed)
+        let command = PackageUpgradeCommand(kind: packageKindSeed, name: packageNameSeed)
 
         upgradeOperationPhase = .running(command.operationKind)
 
@@ -177,7 +181,7 @@ final class InstalledDetailsViewModel {
     }
 
     private func syncUpgradePhaseFromCommandCenter() async {
-        let operationID = BrewOperationID(kind: selection.kind, name: selection.name)
+        let operationID = BrewOperationID(kind: packageKindSeed, name: packageNameSeed)
         upgradeOperationPhase = await brewCommandCenter.phase(for: operationID)
     }
 
@@ -187,8 +191,8 @@ final class InstalledDetailsViewModel {
 
         do {
             let details = try await repository.loadPackageDetails(
-                named: selection.name,
-                preferredKind: selection.kind,
+                named: packageNameSeed,
+                preferredKind: packageKindSeed,
             )
             guard !Task.isCancelled else {
                 return

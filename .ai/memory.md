@@ -210,3 +210,10 @@
 - Project build setting `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` is enabled for the app target, so non-UI infra code can require explicit actor-neutral annotations.
 - `SwiftLint` rule `unneeded_synthesized_initializer` is disabled in `.swiftlint.yml` to allow intentional explicit empty `init`/`deinit` declarations when carrying concurrency-isolation intent.
 - Preferred style: use member-level `nonisolated` first (for initializers/factories/helpers/protocol requirements), and avoid type-level `nonisolated` unless a full type-level actor-neutral contract is clearly needed.
+
+## 2026-05-07 — Installed model unification to BrewPackage
+
+- Collapsed Installed feature data models into a single domain model: `BrewPackage` now backs list rows, detail payloads, and repository contracts.
+- Repositories now map `brew info --json=v2` through shared `BrewInfoJSON+Mapping` helpers and return `BrewPackage` values (`InstalledPackagesRepository` returns `[BrewPackage]`, `PackageDetailsRepository` returns `BrewPackage`).
+- Installed list/detail presentation formatting moved to feature view models (`InstalledListRowViewModel`, `InstalledDetailsViewModel`) plus `InstalledBrewVersionFormatting`; models are now presentation-agnostic.
+- Removed legacy Installed models (`InstalledPackageInfo`, `InstalledPackageRow`, `InstalledPackageDetails`) and dead parser path (`InstalledPackagesParser` + parser tests).

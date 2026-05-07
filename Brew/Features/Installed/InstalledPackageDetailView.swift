@@ -8,14 +8,14 @@ import SwiftUI
 /// Root view that reads ``EnvironmentValues/brewCommandCenter`` and creates
 /// ``InstalledDetailsViewModel`` for the selected row.
 struct InstalledPackageDetailRoot: View {
-    let selection: PackageSelection
+    let selectedPackage: BrewPackage
     let onUpgradeSuccess: @MainActor () async -> Void
     @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
         InstalledPackageDetailView(
             viewModel: InstalledDetailsViewModel(
-                selection: selection,
+                selectedPackage: selectedPackage,
                 repository: BrewPackageDetailsRepository(
                     commandRunner: BrewCommandService(),
                     locator: BrewExecutableLocator(),
@@ -24,7 +24,7 @@ struct InstalledPackageDetailRoot: View {
                 onUpgradeSuccess: onUpgradeSuccess,
             ),
         )
-        .id(selection.id)
+        .id(selectedPackage.id)
     }
 }
 
@@ -44,8 +44,8 @@ struct InstalledPackageDetailView: View {
                     Text(detailsUserFacingError)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewStatusError)
-                case let .loaded(details):
-                    packageDetailsSections(details: details)
+                case let .loaded(package):
+                    packageDetailsSections(package: package)
                 }
 
                 if viewModel.showsUpgradeChrome {
@@ -56,7 +56,7 @@ struct InstalledPackageDetailView: View {
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task(id: viewModel.selection.id) {
+        .task(id: viewModel.selectedPackageID) {
             viewModel.load()
         }
     }
@@ -87,48 +87,48 @@ struct InstalledPackageDetailView: View {
     }
 
     @ViewBuilder
-    private func packageDetailsSections(details: InstalledPackageDetails) -> some View {
-        descriptionSection(details: details)
-        detailsSection(details: details)
-        dependenciesSection(details: details)
+    private func packageDetailsSections(package: BrewPackage) -> some View {
+        descriptionSection(package: package)
+        detailsSection(package: package)
+        dependenciesSection(package: package)
         commandSection
     }
 
-    private func descriptionSection(details: InstalledPackageDetails) -> some View {
+    private func descriptionSection(package: BrewPackage) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Description")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewTextSecondary)
-            Text(descriptionText(details))
+            Text(descriptionText(package))
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextPrimary)
         }
     }
 
-    private func detailsSection(details: InstalledPackageDetails) -> some View {
+    private func detailsSection(package: BrewPackage) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Details")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewTextSecondary)
-            detailRow(label: "Version", value: details.version ?? "—")
-            detailRow(label: "Installed", value: installedValue(details))
+            detailRow(label: "Version", value: package.latestVersion ?? "—")
+            detailRow(label: "Installed", value: installedValue(package))
             if let homepageURL = viewModel.homepageURL {
                 homepageRow(url: homepageURL)
             }
         }
     }
 
-    private func dependenciesSection(details: InstalledPackageDetails) -> some View {
+    private func dependenciesSection(package: BrewPackage) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Dependencies")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewTextSecondary)
-            if details.dependencies.isEmpty {
+            if package.dependencies.isEmpty {
                 Text("No dependencies")
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
-                dependencyGrid(details.dependencies)
+                dependencyGrid(package.dependencies)
             }
         }
     }
@@ -203,20 +203,20 @@ struct InstalledPackageDetailView: View {
             .textSelection(.enabled)
     }
 
-    private func descriptionText(_ details: InstalledPackageDetails) -> String {
+    private func descriptionText(_ package: BrewPackage) -> String {
         let fallback = String(
             localized: "No description available.",
             comment: "Installed detail fallback description when no summary is available",
         )
-        let trimmed = details.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let trimmed = package.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         return trimmed.isEmpty ? fallback : trimmed
     }
 
-    private func installedValue(_ details: InstalledPackageDetails) -> String {
-        if details.installedVersions.isEmpty {
+    private func installedValue(_ package: BrewPackage) -> String {
+        if package.installedVersions.isEmpty {
             return "—"
         }
-        return details.installedVersions.joined(separator: ", ")
+        return package.installedVersions.joined(separator: ", ")
     }
 
     private var loadingSkeletonDetails: some View {

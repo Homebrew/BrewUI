@@ -10,17 +10,12 @@ import Testing
 @MainActor
 struct InstalledListRowViewModelTests {
     @Test func `observeRowUpdates applies first phase from noop center`() async {
-        let row = InstalledPackageRow(
-            name: "git",
-            kind: .formula,
-            description: "",
-            installedVersion: "v1",
-        )
+        let package = BrewPackage.fixture(name: "git", kind: .formula)
         let center = NoopBrewCommandCenter.forTesting()
-        let viewModel = InstalledListRowViewModel(brewCommandCenter: center)
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
         #expect(viewModel.upgradeOperationPhase == .idle)
 
-        await viewModel.observeRowUpdates(for: row)
+        await viewModel.observeRowUpdates()
 
         #expect(viewModel.upgradeOperationPhase == .idle)
     }

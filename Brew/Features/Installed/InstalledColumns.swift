@@ -7,7 +7,7 @@ struct InstalledColumns: View {
 
     var body: some View {
         Group {
-            if let selectedRow = viewModel.selectedPackageRow {
+            if let selectedPackage = viewModel.selectedPackage {
                 HSplitView {
                     InstalledPackagesView(viewModel: viewModel)
                         .frame(
@@ -19,7 +19,7 @@ struct InstalledColumns: View {
                         )
 
                     InstalledPackageDetailRoot(
-                        selection: PackageSelection(name: selectedRow.name, kind: selectedRow.kind),
+                        selectedPackage: selectedPackage,
                         onUpgradeSuccess: { [viewModel] in
                             await viewModel.refreshInstalledPackagesPreservingUI()
                         },

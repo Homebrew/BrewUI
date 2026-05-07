@@ -117,28 +117,28 @@ struct StubDetailsRepository: PackageDetailsRepository {
     func loadPackageDetails(
         named _: String,
         preferredKind _: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
+    ) async throws -> BrewPackage {
         throw error
     }
 }
 
 struct SuccessDetailsRepository: PackageDetailsRepository {
-    let details: InstalledPackageDetails
+    let details: BrewPackage
     func loadPackageDetails(
         named _: String,
         preferredKind _: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
+    ) async throws -> BrewPackage {
         details
     }
 }
 
 actor DeferredDetailsRepository: PackageDetailsRepository {
-    private var continuations: [CheckedContinuation<InstalledPackageDetails, Error>] = []
+    private var continuations: [CheckedContinuation<BrewPackage, Error>] = []
     private var callCount: Int = 0
     func loadPackageDetails(
         named _: String,
         preferredKind _: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
+    ) async throws -> BrewPackage {
         callCount += 1
         return try await withCheckedThrowingContinuation { continuation in continuations.append(continuation) }
     }
@@ -149,7 +149,7 @@ actor DeferredDetailsRepository: PackageDetailsRepository {
         }
     }
 
-    func resolve(callIndex: Int, with result: Result<InstalledPackageDetails, Error>) {
+    func resolve(callIndex: Int, with result: Result<BrewPackage, Error>) {
         guard continuations.indices.contains(callIndex) else { return }
         switch result {
         case let .success(details): continuations[callIndex].resume(returning: details)
@@ -159,16 +159,16 @@ actor DeferredDetailsRepository: PackageDetailsRepository {
 }
 
 actor SequencedDetailsRepository: PackageDetailsRepository {
-    private let results: [Result<InstalledPackageDetails, Error>]
+    private let results: [Result<BrewPackage, Error>]
     private(set) var callCount: Int = 0
-    init(results: [Result<InstalledPackageDetails, Error>]) {
+    init(results: [Result<BrewPackage, Error>]) {
         self.results = results
     }
 
     func loadPackageDetails(
         named _: String,
         preferredKind _: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
+    ) async throws -> BrewPackage {
         let index = callCount
         callCount += 1
         guard results.indices.contains(index) else {
@@ -222,17 +222,16 @@ func details(
     name: String,
     kind: InstalledPackageKind = .formula,
     version: String = "1.0.0",
-) -> InstalledPackageDetails {
-    InstalledPackageDetails(
+) -> BrewPackage {
+    BrewPackage(
         name: name,
         kind: kind,
         description: "desc",
-        version: version,
-        installedVersions: [version],
         homepage: nil,
+        latestVersion: version,
+        installedVersions: [version],
         dependencies: [],
         outdated: false,
-        availableVersion: nil,
     )
 }
 
