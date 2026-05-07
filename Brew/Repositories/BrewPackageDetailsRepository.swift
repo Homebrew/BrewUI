@@ -76,6 +76,8 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
             installedVersions: installedVersions,
             homepage: Self.trimmedOrNil(formula.homepage),
             dependencies: dependencies,
+            outdated: formula.outdated,
+            availableVersion: Self.trimmedOrNil(formula.versions.stable),
         )
     }
 
@@ -99,6 +101,8 @@ struct BrewPackageDetailsRepository: PackageDetailsRepository {
             installedVersions: installedVersions,
             homepage: Self.trimmedOrNil(cask.homepage),
             dependencies: Self.uniqueNonEmpty(cask.dependencies),
+            outdated: cask.outdated,
+            availableVersion: Self.trimmedOrNil(cask.version),
         )
     }
 

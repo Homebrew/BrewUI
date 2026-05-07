@@ -13,7 +13,7 @@ struct InstalledListRowRoot: View {
     var body: some View {
         InstalledListRowView(
             row: row,
-            viewModel: InstalledListRowViewModel(brewCommandCenter: brewCommandCenter)
+            viewModel: InstalledListRowViewModel(brewCommandCenter: brewCommandCenter),
         )
         .id(row.id)
     }

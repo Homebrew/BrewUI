@@ -20,6 +20,11 @@ struct PackageUpgradeCommand: BrewMutatingCommand {
         kind = row.kind
     }
 
+    init(kind: InstalledPackageKind, name: String) {
+        packageName = name
+        self.kind = kind
+    }
+
     nonisolated var operationKind: BrewOperationKind {
         switch kind {
         case .formula:

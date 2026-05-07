@@ -24,6 +24,8 @@ enum InstalledPreviewData {
                 installedVersions: ["4.39.0"],
                 homepage: "https://www.docker.com",
                 dependencies: [],
+                outdated: false,
+                availableVersion: nil,
             )
         case ("visual-studio-code", .cask):
             InstalledPackageDetails(
@@ -34,6 +36,8 @@ enum InstalledPreviewData {
                 installedVersions: ["1.99.0"],
                 homepage: "https://code.visualstudio.com",
                 dependencies: [],
+                outdated: false,
+                availableVersion: nil,
             )
         default:
             InstalledPackageDetails(
@@ -44,6 +48,8 @@ enum InstalledPreviewData {
                 installedVersions: ["2.45.0"],
                 homepage: "https://git-scm.com",
                 dependencies: ["gettext", "pcre2"],
+                outdated: true,
+                availableVersion: "2.46.1",
             )
         }
     }

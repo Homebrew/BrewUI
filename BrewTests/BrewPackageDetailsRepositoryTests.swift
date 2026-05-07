@@ -26,6 +26,8 @@ struct BrewPackageDetailsRepositoryTests {
             installedVersions: ["1.24.5", "1.24.4"],
             homepage: "https://www.gnu.org/software/wget/",
             dependencies: ["libidn2", "openssl@3", "pkgconf"],
+            outdated: true,
+            availableVersion: "1.24.5",
         )
         #expect(details == expected)
     }
@@ -47,6 +49,8 @@ struct BrewPackageDetailsRepositoryTests {
         #expect(details.installedVersions == ["4.41.105"])
         #expect(details.homepage == "https://slack.com/")
         #expect(Set(details.dependencies) == Set(["mas", "microsoft-auto-update", "ventura"]))
+        #expect(details.outdated)
+        #expect(details.availableVersion == "4.41.105")
     }
 
     @Test @MainActor func `load honors preferred kind when payload includes formula and cask`() async throws {
@@ -131,6 +135,7 @@ private let formulaJSON = #"""
       "name": "wget",
       "desc": "Internet file retriever",
       "homepage": "https://www.gnu.org/software/wget/",
+      "outdated": true,
       "versions": { "stable": "1.24.5" },
       "installed": [{ "version": "1.24.5" }, { "version": "1.24.4" }],
       "dependencies": ["libidn2", "openssl@3"],
@@ -149,6 +154,7 @@ private let caskJSON = #"""
       "token": "slack",
       "desc": "Team communication and collaboration software",
       "homepage": "https://slack.com/",
+      "outdated": true,
       "version": "4.41.105",
       "installed": "4.41.105",
       "dependencies": {

@@ -18,13 +18,7 @@ import SwiftUI
 #Preview("Detail") {
     let commandCenter = NoopBrewCommandCenter.preview()
     let detailsViewModel = InstalledDetailsViewModel(
-        selectedRow: InstalledPackageRow(
-            name: "git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            installedVersion: "v2.45.0",
-            updateVersion: "v2.46.1",
-        ),
+        selection: PackageSelection(name: "git", kind: .formula),
         repository: PreviewPackageDetailsRepository(),
         brewCommandCenter: commandCenter,
     )

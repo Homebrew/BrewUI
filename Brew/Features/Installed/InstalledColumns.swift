@@ -9,7 +9,6 @@ struct InstalledColumns: View {
         Group {
             if let selectedRow = viewModel.selectedPackageRow {
                 HSplitView {
-                    // TODO: Completion here for when the selectedPackage changes
                     InstalledPackagesView(viewModel: viewModel)
                         .frame(
                             minWidth: BrewLayout.installedListColumnMinWidth,
@@ -20,9 +19,8 @@ struct InstalledColumns: View {
                         )
 
                     InstalledPackageDetailRoot(
-                        selectedRow: selectedRow,
+                        selection: PackageSelection(name: selectedRow.name, kind: selectedRow.kind),
                         onUpgradeSuccess: { [viewModel] in
-                            // TODO: This could just be an observation of upgrades by the list view
                             await viewModel.refreshInstalledPackagesPreservingUI()
                         },
                     )

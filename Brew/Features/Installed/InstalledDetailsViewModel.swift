@@ -17,7 +17,7 @@ enum InstalledDetailsLoadState: Equatable {
 final class InstalledDetailsViewModel {
     private let repository: PackageDetailsRepository
     private let brewCommandCenter: any BrewCommandCenter
-    private let onUpgradeSuccess: (@Sendable @MainActor () async -> Void)?
+    private let onUpgradeSuccess: (@MainActor () async -> Void)?
     private var loadTask: Task<Void, Never>?
     private var upgradeTask: Task<Void, Never>?
     private var requestID: Int = 0
@@ -29,7 +29,7 @@ final class InstalledDetailsViewModel {
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
 
-    let selectedRow: InstalledPackageRow
+    let selection: PackageSelection
 
     /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
     var isUpgrading: Bool {
@@ -43,14 +43,14 @@ final class InstalledDetailsViewModel {
         if case let .loaded(details) = state {
             return details.name
         }
-        return selectedRow.name
+        return selection.name
     }
 
     var packageKind: InstalledPackageKind {
         if case let .loaded(details) = state {
             return details.kind
         }
-        return selectedRow.kind
+        return selection.kind
     }
 
     /// User-facing command for the currently selected package details.
@@ -63,13 +63,22 @@ final class InstalledDetailsViewModel {
         Self.userFacingUpgradeCommand(name: packageName, kind: packageKind)
     }
 
-    /// Shown beside the upgrade affordance whenever the list reports an outdated row.
+    /// Shown beside the upgrade affordance whenever loaded details report an outdated package.
     var showsUpgradeChrome: Bool {
-        selectedRow.updateVersion != nil
+        if case let .loaded(details) = state {
+            return details.outdated
+        }
+        return false
     }
 
     var upgradePrimaryButtonTitle: String? {
-        guard let label = selectedRow.updateVersion else {
+        guard case let .loaded(details) = state else {
+            return nil
+        }
+        guard details.outdated else {
+            return nil
+        }
+        guard let label = InstalledBrewVersionFormatting.upgradeDisplayLabel(from: details.availableVersion) else {
             return nil
         }
         return String(
@@ -87,12 +96,12 @@ final class InstalledDetailsViewModel {
     }
 
     init(
-        selectedRow: InstalledPackageRow,
+        selection: PackageSelection,
         repository: any PackageDetailsRepository,
         brewCommandCenter: any BrewCommandCenter,
-        onUpgradeSuccess: (@Sendable @MainActor () async -> Void)? = nil,
+        onUpgradeSuccess: (@MainActor () async -> Void)? = nil,
     ) {
-        self.selectedRow = selectedRow
+        self.selection = selection
         self.repository = repository
         self.brewCommandCenter = brewCommandCenter
         self.onUpgradeSuccess = onUpgradeSuccess
@@ -111,8 +120,8 @@ final class InstalledDetailsViewModel {
             }
             do {
                 let details = try await repository.loadPackageDetails(
-                    named: selectedRow.name,
-                    preferredKind: selectedRow.kind,
+                    named: selection.name,
+                    preferredKind: selection.kind,
                 )
                 guard !Task.isCancelled else {
                     return
@@ -138,8 +147,8 @@ final class InstalledDetailsViewModel {
         }
 
         upgradeErrorMessage = nil
-        let operationID = BrewOperationID(row: selectedRow)
-        let command = PackageUpgradeCommand(row: selectedRow)
+        let operationID = BrewOperationID(kind: selection.kind, name: selection.name)
+        let command = PackageUpgradeCommand(kind: selection.kind, name: selection.name)
 
         upgradeOperationPhase = .running(command.operationKind)
 
@@ -148,6 +157,7 @@ final class InstalledDetailsViewModel {
             do {
                 try await brewCommandCenter.submit(id: operationID, command: command)
                 await onUpgradeSuccess?()
+                await refresh()
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 await MainActor.run {
                     upgradeOperationPhase = latestPhase
@@ -167,8 +177,30 @@ final class InstalledDetailsViewModel {
     }
 
     private func syncUpgradePhaseFromCommandCenter() async {
-        let operationID = BrewOperationID(row: selectedRow)
+        let operationID = BrewOperationID(kind: selection.kind, name: selection.name)
         upgradeOperationPhase = await brewCommandCenter.phase(for: operationID)
+    }
+
+    private func refresh() async {
+        requestID += 1
+        let activeRequestID = requestID
+
+        do {
+            let details = try await repository.loadPackageDetails(
+                named: selection.name,
+                preferredKind: selection.kind,
+            )
+            guard !Task.isCancelled else {
+                return
+            }
+            applyResult(requestID: activeRequestID, state: .loaded(details))
+            await syncUpgradePhaseFromCommandCenter()
+        } catch {
+            guard !Task.isCancelled else {
+                return
+            }
+            // Keep current loaded state visible; refresh errors are non-blocking.
+        }
     }
 
     private func applyResult(requestID: Int, state: InstalledDetailsLoadState) {

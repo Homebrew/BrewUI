@@ -49,6 +49,8 @@ struct StubPackageDetailsRepository: PackageDetailsRepository {
             installedVersions: ["1.0.0"],
             homepage: nil,
             dependencies: [],
+            outdated: false,
+            availableVersion: nil,
         )
     }
 }

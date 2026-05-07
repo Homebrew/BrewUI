@@ -8,23 +8,23 @@ import SwiftUI
 /// Root view that reads ``EnvironmentValues/brewCommandCenter`` and creates
 /// ``InstalledDetailsViewModel`` for the selected row.
 struct InstalledPackageDetailRoot: View {
-    let selectedRow: InstalledPackageRow
-    let onUpgradeSuccess: @Sendable @MainActor () async -> Void
+    let selection: PackageSelection
+    let onUpgradeSuccess: @MainActor () async -> Void
     @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
         InstalledPackageDetailView(
             viewModel: InstalledDetailsViewModel(
-                selectedRow: selectedRow,
+                selection: selection,
                 repository: BrewPackageDetailsRepository(
                     commandRunner: BrewCommandService(),
-                    locator: BrewExecutableLocator()
+                    locator: BrewExecutableLocator(),
                 ),
                 brewCommandCenter: brewCommandCenter,
-                onUpgradeSuccess: onUpgradeSuccess
-            )
+                onUpgradeSuccess: onUpgradeSuccess,
+            ),
         )
-        .id(selectedRow.id)
+        .id(selection.id)
     }
 }
 
@@ -56,7 +56,7 @@ struct InstalledPackageDetailView: View {
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task(id: viewModel.selectedRow.id) {
+        .task(id: viewModel.selection.id) {
             viewModel.load()
         }
     }

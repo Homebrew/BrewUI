@@ -14,4 +14,6 @@ struct InstalledPackageDetails: Equatable {
     var installedVersions: [String]
     var homepage: String?
     var dependencies: [String]
+    var outdated: Bool
+    var availableVersion: String?
 }
