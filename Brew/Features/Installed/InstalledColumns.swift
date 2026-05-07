@@ -4,14 +4,12 @@ import SwiftUI
 struct InstalledColumns: View {
     @Bindable var viewModel: InstalledViewModel
     let detailsRepository: any PackageDetailsRepository
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
-    @State private var detailsViewModel: InstalledDetailsViewModel?
-    @State private var detailsSelectionRow: InstalledPackageRow?
 
     var body: some View {
         Group {
-            if let detailsViewModel {
+            if let selectedRow = viewModel.selectedPackageRow {
                 HSplitView {
+                    // TODO: Completion here for when the selectedPackage changes
                     InstalledPackagesView(viewModel: viewModel)
                         .frame(
                             minWidth: BrewLayout.installedListColumnMinWidth,
@@ -21,50 +19,25 @@ struct InstalledColumns: View {
                             alignment: .topLeading,
                         )
 
-                    InstalledPackageDetailWiringView(viewModel: detailsViewModel)
-                        .frame(
-                            minWidth: BrewLayout.inspectorWidth,
-                            idealWidth: BrewLayout.installedDetailColumnIdealWidth,
-                            maxWidth: BrewLayout.installedDetailColumnMaxWidth,
-                            maxHeight: .infinity,
-                            alignment: .topLeading,
-                        )
+                    InstalledPackageDetailRoot(
+                        selectedRow: selectedRow,
+                        onUpgradeSuccess: { [viewModel] in
+                            // TODO: This could just be an observation of upgrades by the list view
+                            await viewModel.refreshInstalledPackagesPreservingUI()
+                        },
+                    )
+                    .frame(
+                        minWidth: BrewLayout.inspectorWidth,
+                        idealWidth: BrewLayout.installedDetailColumnIdealWidth,
+                        maxWidth: BrewLayout.installedDetailColumnMaxWidth,
+                        maxHeight: .infinity,
+                        alignment: .topLeading,
+                    )
                 }
             } else {
                 InstalledPackagesView(viewModel: viewModel)
             }
         }
-        .task(id: viewModel.selectedPackageRow) {
-            rebuildDetailsViewModelIfNeeded()
-        }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    private func rebuildDetailsViewModelIfNeeded() {
-        guard let selectedRow = viewModel.selectedPackageRow else {
-            detailsSelectionRow = nil
-            detailsViewModel = nil
-            return
-        }
-        guard detailsSelectionRow != selectedRow else {
-            return
-        }
-        guard let brewCommandCenter else {
-            detailsSelectionRow = nil
-            detailsViewModel = nil
-            return
-        }
-
-        let nextDetailsViewModel = InstalledDetailsViewModel(
-            selectedRow: selectedRow,
-            repository: detailsRepository,
-            brewCommandCenter: brewCommandCenter,
-            onUpgradeSuccess: { [viewModel] in
-                await viewModel.refreshInstalledPackagesPreservingUI()
-            },
-        )
-        detailsSelectionRow = selectedRow
-        detailsViewModel = nextDetailsViewModel
-        nextDetailsViewModel.load()
     }
 }

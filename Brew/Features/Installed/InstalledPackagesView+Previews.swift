@@ -4,7 +4,6 @@ import SwiftUI
     let commandCenter = NoopBrewCommandCenter.preview()
     let viewModel = InstalledViewModel(
         repository: PreviewInstalledPackagesRepository(),
-        detailsRepository: PreviewPackageDetailsRepository(),
     )
     InstalledPackagesView(
         viewModel: viewModel,

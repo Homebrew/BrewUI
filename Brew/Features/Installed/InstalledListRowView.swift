@@ -5,23 +5,23 @@
 
 import SwiftUI
 
-struct InstalledSectionHeader: View {
-    let title: String
-    let count: Int
+/// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
+struct InstalledListRowRoot: View {
+    let row: InstalledPackageRow
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
-        Text("\(title) (\(count))")
-            .font(.brewCaption2)
-            .foregroundStyle(Color.brewTextTertiary)
-            .textCase(.uppercase)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityAddTraits(.isHeader)
+        InstalledListRowView(
+            row: row,
+            viewModel: InstalledListRowViewModel(brewCommandCenter: brewCommandCenter)
+        )
+        .id(row.id)
     }
 }
 
 struct InstalledListRowView: View {
     let row: InstalledPackageRow
-    @Bindable var viewModel: InstalledListRowViewModel
+    @State var viewModel: InstalledListRowViewModel
 
     private var chrome: PackageKindChrome {
         row.kind.chrome
@@ -94,6 +94,9 @@ struct InstalledListRowView: View {
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(listAccessibilityLabel)
+        .task(id: row.id) {
+            await viewModel.observeRowUpdates(for: row)
+        }
     }
 
     private var listAccessibilityLabel: String {
@@ -144,67 +147,60 @@ struct InstalledListRowView: View {
     }
 }
 
-/// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
-struct InstalledListRowRoot: View {
-    let row: InstalledPackageRow
-    let brewCommandCenter: any BrewCommandCenter
-
-    @State private var viewModel: InstalledListRowViewModel
-
-    init(row: InstalledPackageRow, brewCommandCenter: any BrewCommandCenter) {
-        self.row = row
-        self.brewCommandCenter = brewCommandCenter
-        _viewModel = State(wrappedValue: InstalledListRowViewModel())
-    }
+struct InstalledSectionHeader: View {
+    let title: String
+    let count: Int
 
     var body: some View {
-        InstalledListRowView(row: row, viewModel: viewModel)
-            .task(id: row.id) {
-                await viewModel.observeRowUpdates(for: row, using: brewCommandCenter)
-            }
+        Text("\(title) (\(count))")
+            .font(.brewCaption2)
+            .foregroundStyle(Color.brewTextTertiary)
+            .textCase(.uppercase)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 
-#Preview("Formula with update") {
-    InstalledListRowView(
-        row: InstalledPackageRow(
-            name: "Git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            installedVersion: "v2.45.0",
-            updateVersion: "v2.45.1",
-        ),
-        viewModel: InstalledListRowViewModel(),
-    )
-    .padding()
-    .frame(width: 400)
-}
+// #Preview("Formula with update") {
+//    InstalledListRowView(
+//        row: InstalledPackageRow(
+//            name: "Git",
+//            kind: .formula,
+//            description: "Distributed revision control system",
+//            installedVersion: "v2.45.0",
+//            updateVersion: "v2.45.1",
+//        ),
+//        viewModel: InstalledListRowViewModel(),
+//    )
+//    .padding()
+//    .frame(width: 400)
+// }
 
-#Preview("Cask") {
-    InstalledListRowView(
-        row: InstalledPackageRow(
-            name: "Docker",
-            kind: .cask,
-            description: "App to build and share containerized applications",
-            installedVersion: "v4.39.0",
-        ),
-        viewModel: InstalledListRowViewModel(),
-    )
-    .padding()
-    .frame(width: 400)
-}
+// #Preview("Cask") {
+//    InstalledListRowView(
+//        row: InstalledPackageRow(
+//            name: "Docker",
+//            kind: .cask,
+//            description: "App to build and share containerized applications",
+//            installedVersion: "v4.39.0",
+//        ),
+//        viewModel: InstalledListRowViewModel(),
+//    )
+//    .padding()
+//    .frame(width: 400)
+// }
 
-#Preview("Upgrade in progress (list)") {
-    InstalledListRowView(
-        row: InstalledPackageRow(
-            name: "Git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            installedVersion: "v2.45.0",
-            updateVersion: "v2.45.1",
-        ),
-        viewModel: InstalledListRowViewModel.previewBusyUpgrade(),
-    )
-    .padding()
-    .frame(width: 400)
-}
+// #Preview("Upgrade in progress (list)") {
+//    InstalledListRowView(
+//        row: InstalledPackageRow(
+//            name: "Git",
+//            kind: .formula,
+//            description: "Distributed revision control system",
+//            installedVersion: "v2.45.0",
+//            updateVersion: "v2.45.1",
+//        ),
+//        viewModel: InstalledListRowViewModel.previewBusyUpgrade(),
+//    )
+//    .padding()
+//    .frame(width: 400)
+// }

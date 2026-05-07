@@ -16,9 +16,8 @@ enum InstalledDetailsLoadState: Equatable {
 @MainActor
 final class InstalledDetailsViewModel {
     private let repository: PackageDetailsRepository
-    private let selectedRow: InstalledPackageRow
     private let brewCommandCenter: any BrewCommandCenter
-    private let onUpgradeSuccess: (@MainActor () async -> Void)?
+    private let onUpgradeSuccess: (@Sendable @MainActor () async -> Void)?
     private var loadTask: Task<Void, Never>?
     private var upgradeTask: Task<Void, Never>?
     private var requestID: Int = 0
@@ -29,6 +28,8 @@ final class InstalledDetailsViewModel {
     private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
+
+    let selectedRow: InstalledPackageRow
 
     /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
     var isUpgrading: Bool {
@@ -89,7 +90,7 @@ final class InstalledDetailsViewModel {
         selectedRow: InstalledPackageRow,
         repository: any PackageDetailsRepository,
         brewCommandCenter: any BrewCommandCenter,
-        onUpgradeSuccess: (@MainActor () async -> Void)? = nil,
+        onUpgradeSuccess: (@Sendable @MainActor () async -> Void)? = nil,
     ) {
         self.selectedRow = selectedRow
         self.repository = repository

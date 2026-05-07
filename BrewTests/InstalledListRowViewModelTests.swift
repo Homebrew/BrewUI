@@ -17,10 +17,10 @@ struct InstalledListRowViewModelTests {
             installedVersion: "v1",
         )
         let center = NoopBrewCommandCenter.forTesting()
-        let viewModel = InstalledListRowViewModel()
+        let viewModel = InstalledListRowViewModel(brewCommandCenter: center)
         #expect(viewModel.upgradeOperationPhase == .idle)
 
-        await viewModel.observeRowUpdates(for: row, using: center)
+        await viewModel.observeRowUpdates(for: row)
 
         #expect(viewModel.upgradeOperationPhase == .idle)
     }

@@ -11,7 +11,6 @@ struct MainWindowViewModelTests {
         let countingRepository = CountingInstalledRepository()
         let installed = InstalledViewModel(
             repository: countingRepository,
-            detailsRepository: StubPackageDetailsRepository(),
         )
         let vm = MainWindowViewModel(
             installedViewModel: installed,
@@ -25,7 +24,6 @@ struct MainWindowViewModelTests {
     @Test @MainActor func `main window defaults to installed sidebar selection`() {
         let installed = InstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            detailsRepository: StubPackageDetailsRepository(),
         )
         let vm = MainWindowViewModel(
             installedViewModel: installed,

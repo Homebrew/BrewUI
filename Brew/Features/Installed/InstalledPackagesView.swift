@@ -8,7 +8,6 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -82,16 +81,8 @@ struct InstalledPackagesView: View {
         }
     }
 
-    @ViewBuilder
     private func listRow(for row: InstalledPackageRow) -> some View {
-        if let center = brewCommandCenter {
-            InstalledListRowRoot(row: row, brewCommandCenter: center)
-        } else {
-            InstalledListRowView(
-                row: row,
-                viewModel: InstalledListRowViewModel(),
-            )
-        }
+        InstalledListRowRoot(row: row)
     }
 
     private var loadingSkeletonList: some View {
@@ -99,10 +90,7 @@ struct InstalledPackagesView: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 InstalledSectionHeader(title: "Formulae", count: 3)
                 ForEach(loadingFormulaeRows) { row in
-                    InstalledListRowView(
-                        row: row,
-                        viewModel: InstalledListRowViewModel(),
-                    )
+                    InstalledListRowRoot(row: row)
                 }
             }
             .padding(.horizontal, BrewSpacing.lg)

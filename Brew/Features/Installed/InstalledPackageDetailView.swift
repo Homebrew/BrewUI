@@ -5,9 +5,32 @@
 
 import SwiftUI
 
+/// Root view that reads ``EnvironmentValues/brewCommandCenter`` and creates
+/// ``InstalledDetailsViewModel`` for the selected row.
+struct InstalledPackageDetailRoot: View {
+    let selectedRow: InstalledPackageRow
+    let onUpgradeSuccess: @Sendable @MainActor () async -> Void
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
+
+    var body: some View {
+        InstalledPackageDetailView(
+            viewModel: InstalledDetailsViewModel(
+                selectedRow: selectedRow,
+                repository: BrewPackageDetailsRepository(
+                    commandRunner: BrewCommandService(),
+                    locator: BrewExecutableLocator()
+                ),
+                brewCommandCenter: brewCommandCenter,
+                onUpgradeSuccess: onUpgradeSuccess
+            )
+        )
+        .id(selectedRow.id)
+    }
+}
+
 /// Right-hand column: detail for the selected installed package.
 struct InstalledPackageDetailView: View {
-    @Bindable var viewModel: InstalledDetailsViewModel
+    @State var viewModel: InstalledDetailsViewModel
 
     var body: some View {
         ScrollView {
@@ -33,6 +56,9 @@ struct InstalledPackageDetailView: View {
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .task(id: viewModel.selectedRow.id) {
+            viewModel.load()
+        }
     }
 
     private var upgradeFooter: some View {

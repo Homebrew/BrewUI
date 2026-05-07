@@ -94,15 +94,6 @@ final class InstalledViewModel {
         self.repository = repository
     }
 
-    /// Transitional initializer to preserve existing call sites while details-VM ownership moves to the view layer.
-    init(
-        repository: InstalledPackagesRepository,
-        detailsRepository _: PackageDetailsRepository,
-        brewCommandCenter _: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
-    ) {
-        self.repository = repository
-    }
-
     func load() async {
         loadedContent = nil
         state = .loading

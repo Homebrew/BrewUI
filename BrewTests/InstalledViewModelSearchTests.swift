@@ -152,7 +152,6 @@ struct InstalledViewModelSearchTests {
     @Test @MainActor func `searchQuery didSet before load keeps loading state`() {
         let vm = InstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            detailsRepository: StubPackageDetailsRepository(),
         )
         vm.searchQuery = "git"
         #expect(
@@ -170,7 +169,6 @@ struct InstalledViewModelSearchTests {
     @Test @MainActor func `searchQuery didSet after load failure preserves error state`() async {
         let vm = InstalledViewModel(
             repository: StubThrowingRepository(error: OddRepositoryError()),
-            detailsRepository: StubPackageDetailsRepository(),
         )
         await vm.load()
         let beforeQuerySnapshot = snapshot(vm)

@@ -45,7 +45,7 @@ func loadViewModel(
     locator: (any BrewExecutableLocating)? = nil,
 ) async -> InstalledViewModel {
     let repo = InstalledPackagesTestSupport.repository(commandRunner: commandRunner, locator: locator)
-    let vm = InstalledViewModel(repository: repo, detailsRepository: StubPackageDetailsRepository())
+    let vm = InstalledViewModel(repository: repo)
     await vm.load()
     return vm
 }

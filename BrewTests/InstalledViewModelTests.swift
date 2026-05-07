@@ -196,7 +196,6 @@ struct InstalledViewModelTests {
         let repo = StubThrowingRepository(error: OddRepositoryError())
         let vm = InstalledViewModel(
             repository: repo,
-            detailsRepository: StubPackageDetailsRepository(),
         )
         await vm.load()
         #expect(vm.state == .error(InstalledPackagesTestSupport.localizedGenericLoadFailureMessage()))
@@ -239,7 +238,6 @@ struct InstalledViewModelTests {
         let repo = TwoSnapshotInstalledPackagesRepository(first: firstSnapshot, second: secondSnapshot)
         let vm = InstalledViewModel(
             repository: repo,
-            detailsRepository: StubPackageDetailsRepository(),
         )
         await vm.load()
         #expect(vm.state.isLoaded)
@@ -259,7 +257,6 @@ struct InstalledViewModelTests {
         let repo = RefreshRetryFailsRepository(successSnapshot: snapshot)
         let vm = InstalledViewModel(
             repository: repo,
-            detailsRepository: StubPackageDetailsRepository(),
         )
         await vm.load()
         #expect(vm.loadedFormulaRows.first?.installedVersion == "v2.0")

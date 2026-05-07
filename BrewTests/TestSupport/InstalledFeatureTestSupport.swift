@@ -8,11 +8,11 @@ enum InstalledFeatureTestSupport {
         casks: [InstalledPackageInfo] = [],
         details: InstalledPackageDetails? = nil,
     ) async -> InstalledViewModel {
+        _ = details
         let viewModel = InstalledViewModel(
             repository: StubInstalledPackagesRepository(
                 snapshot: InstalledPackagesSnapshot(formulae: formulae, casks: casks),
             ),
-            detailsRepository: StubPackageDetailsRepository(details: details),
         )
         await viewModel.load()
         return viewModel

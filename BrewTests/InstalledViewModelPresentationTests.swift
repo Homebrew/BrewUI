@@ -27,7 +27,6 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `selectedPackageID is nil for initial loading state`() {
         let vm = InstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            detailsRepository: StubPackageDetailsRepository(),
         )
         #expect(vm.selectedPackageID == nil)
     }
@@ -35,7 +34,6 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `shouldShowInitialLoadingIndicator is true when loading with no rows and no error`() {
         let vm = InstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            detailsRepository: StubPackageDetailsRepository(),
         )
         #expect(vm.shouldShowInitialLoadingIndicator)
     }
@@ -50,7 +48,6 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `shouldShowInitialLoadingIndicator is false when load has user error`() async {
         let vm = InstalledViewModel(
             repository: FailingInstalledRepository(error: BrewLookupError.executableNotFound),
-            detailsRepository: StubPackageDetailsRepository(),
         )
         await vm.load()
         #expect(!vm.shouldShowInitialLoadingIndicator)
@@ -87,7 +84,6 @@ struct InstalledViewModelPresentationTests {
     @Test @MainActor func `packageCountSubtitle shows localized loading text when initial loading`() {
         let vm = InstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            detailsRepository: StubPackageDetailsRepository(),
         )
         let expected = String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
         #expect(vm.packageCountSubtitle == expected)
