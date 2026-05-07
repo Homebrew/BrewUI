@@ -227,7 +227,7 @@ func details(
         name: name,
         kind: kind,
         description: "desc",
-        homepage: nil,
+        homepage: "",
         latestVersion: version,
         installedVersions: [version],
         dependencies: [],

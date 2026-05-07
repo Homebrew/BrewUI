@@ -208,7 +208,7 @@ struct InstalledPackageDetailView: View {
             localized: "No description available.",
             comment: "Installed detail fallback description when no summary is available",
         )
-        let trimmed = package.description?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let trimmed = package.description.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? fallback : trimmed
     }
 

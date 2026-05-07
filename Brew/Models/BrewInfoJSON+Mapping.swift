@@ -43,9 +43,9 @@ private extension BrewInfoFormula {
         return BrewPackage(
             name: name,
             kind: .formula,
-            description: BrewInfoJSON.trimmedOrNil(desc),
-            homepage: BrewInfoJSON.trimmedOrNil(homepage),
-            latestVersion: BrewInfoJSON.trimmedOrNil(versions.stable),
+            description: BrewInfoJSON.trimmedOrEmpty(desc),
+            homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
+            latestVersion: BrewInfoJSON.trimmedOrEmpty(versions.stable),
             installedVersions: installedVersions,
             dependencies: BrewInfoJSON.uniqueNonEmpty(allDependencies),
             outdated: outdated,
@@ -56,12 +56,12 @@ private extension BrewInfoFormula {
 private extension BrewInfoCask {
     var asBrewPackage: BrewPackage {
         let installed = BrewInfoJSON.uniqueNonEmpty(installedVersions)
-        let latest = BrewInfoJSON.trimmedOrNil(versions.stable) ?? BrewInfoJSON.trimmedOrNil(version)
+        let latest = BrewInfoJSON.trimmedOrNil(versions.stable) ?? BrewInfoJSON.trimmedOrNil(version) ?? ""
         return BrewPackage(
             name: token,
             kind: .cask,
-            description: BrewInfoJSON.trimmedOrNil(desc),
-            homepage: BrewInfoJSON.trimmedOrNil(homepage),
+            description: BrewInfoJSON.trimmedOrEmpty(desc),
+            homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
             latestVersion: latest,
             installedVersions: installed,
             dependencies: BrewInfoJSON.uniqueNonEmpty(dependencies),
@@ -89,5 +89,9 @@ private extension BrewInfoJSON {
             return nil
         }
         return trimmed
+    }
+
+    static func trimmedOrEmpty(_ value: String?) -> String {
+        trimmedOrNil(value) ?? ""
     }
 }

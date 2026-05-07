@@ -45,7 +45,7 @@ struct StubPackageDetailsRepository: PackageDetailsRepository {
             name: name,
             kind: preferredKind ?? .formula,
             description: "desc",
-            homepage: nil,
+            homepage: "",
             latestVersion: "1.0.0",
             installedVersions: ["1.0.0"],
             dependencies: [],

@@ -31,11 +31,11 @@ final class InstalledListRowViewModel {
     }
 
     var hasDescription: Bool {
-        !(package.description?.isEmpty ?? true)
+        !package.description.isEmpty
     }
 
     var descriptionText: String {
-        package.description ?? ""
+        package.description
     }
 
     var installedVersionLabel: String {

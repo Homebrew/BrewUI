@@ -21,8 +21,8 @@ import SwiftUI
         selectedPackage: BrewPackage(
             name: "git",
             kind: .formula,
-            description: nil,
-            homepage: nil,
+            description: "",
+            homepage: "",
             latestVersion: "2.46.1",
             installedVersions: ["2.45.0"],
             dependencies: [],

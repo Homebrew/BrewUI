@@ -4,9 +4,9 @@ extension BrewPackage {
     static func fixture(
         name: String = "git",
         kind: HomebrewPackageKind = .formula,
-        description: String? = nil,
-        homepage: String? = nil,
-        latestVersion: String? = nil,
+        description: String = "",
+        homepage: String = "",
+        latestVersion: String = "",
         installedVersions: [String] = [],
         dependencies: [String] = [],
         outdated: Bool = false,
