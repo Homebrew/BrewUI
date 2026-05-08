@@ -20,12 +20,7 @@ final class InstalledDetailsViewModel {
     private(set) var upgradeErrorMessage: String?
 
     /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
-    var isUpgrading: Bool {
-        if case .running = upgradeOperationPhase {
-            return true
-        }
-        return false
-    }
+    private(set) var isUpgrading: Bool = false
 
     var packageName: String {
         package.name
@@ -67,17 +62,30 @@ final class InstalledDetailsViewModel {
         self.brewCommandCenter = brewCommandCenter
     }
 
-    func load() async {
+    func update(package newPackage: BrewPackage) async {
+        guard newPackage != package else {
+            return
+        }
+        package = newPackage
         upgradeOperationPhase = await Task {
             await brewCommandCenter.phase(for: .init(kind: package.kind, name: package.name))
         }.value
     }
 
-    func update(package newPackage: BrewPackage) {
-        guard newPackage != package else {
-            return
+    func observeRowUpdates() async {
+        let operationID = BrewOperationID(package: package)
+        let stream = await brewCommandCenter.phaseChanges(for: operationID)
+        for await phase in stream {
+            let oldPhase = upgradeOperationPhase
+            upgradeOperationPhase = phase
+            if case .running = phase {
+                isUpgrading = true
+            } else if case .running = oldPhase, case .idle = phase, package.outdated {
+                isUpgrading = true
+            } else {
+                isUpgrading = false
+            }
         }
-        package = newPackage
     }
 
     func upgradeSelectedPackage() {

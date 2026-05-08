@@ -16,6 +16,7 @@ enum RowVersionPresentation: Equatable {
 final class InstalledListRowViewModel {
     private(set) var package: BrewPackage
     private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
+    private(set) var showsUpgradeBusy: Bool = false
     private let brewCommandCenter: BrewCommandCenter
 
     var id: String {
@@ -74,13 +75,6 @@ final class InstalledListRowViewModel {
         return parts.joined(separator: ", ")
     }
 
-    var showsUpgradeBusy: Bool {
-        if case .running = upgradeOperationPhase {
-            return true
-        }
-        return false
-    }
-
     init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
         self.package = package
         self.brewCommandCenter = brewCommandCenter
@@ -91,13 +85,22 @@ final class InstalledListRowViewModel {
             return
         }
         package = newPackage
+        showsUpgradeBusy = false
     }
 
     func observeRowUpdates() async {
         let operationID = BrewOperationID(package: package)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
         for await phase in stream {
+            let oldPhase = upgradeOperationPhase
             upgradeOperationPhase = phase
+            if case .running = phase {
+                showsUpgradeBusy = true
+            } else if case .running = oldPhase, case .idle = phase, package.outdated {
+                showsUpgradeBusy = true
+            } else {
+                showsUpgradeBusy = false
+            }
         }
     }
 }

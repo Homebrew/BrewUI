@@ -39,11 +39,8 @@ struct InstalledPackageDetailView: View {
             detailScrollContent(viewModel: viewModel)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .onChange(of: package) { _, new in
-            viewModel.update(package: new)
-        }
-        .task {
-            await viewModel.load()
+        .task(id: package) {
+            await viewModel.update(package: package)
         }
     }
 
