@@ -12,20 +12,6 @@ extension BrewInfoJSON {
         return (formulaPackages + caskPackages).sorted(by: Self.sortByName)
     }
 
-    func packageDetails(named name: String, preferredKind: HomebrewPackageKind?) -> BrewPackage? {
-        if preferredKind != .cask,
-           let formulaMatch = formulae.first(where: { $0.name == name }) ?? formulae.first
-        {
-            return formulaMatch.asBrewPackage
-        }
-        if preferredKind != .formula,
-           let caskMatch = casks.first(where: { $0.token == name }) ?? casks.first
-        {
-            return caskMatch.asBrewPackage
-        }
-        return nil
-    }
-
     private static func sortByName(_ lhs: BrewPackage, _ rhs: BrewPackage) -> Bool {
         lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
     }
