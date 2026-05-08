@@ -21,7 +21,7 @@ struct InstalledColumns: View {
                     InstalledPackageDetailRoot(
                         selectedPackage: selectedPackage,
                         onUpgradeSuccess: { [viewModel] in
-                            await viewModel.refreshInstalledPackagesPreservingUI()
+                            await viewModel.refresh()
                         },
                     )
                     .frame(

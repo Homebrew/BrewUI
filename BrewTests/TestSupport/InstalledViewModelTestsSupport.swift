@@ -45,7 +45,10 @@ func loadViewModel(
     locator: (any BrewExecutableLocating)? = nil,
 ) async -> InstalledViewModel {
     let repo = InstalledPackagesTestSupport.repository(commandRunner: commandRunner, locator: locator)
-    let vm = InstalledViewModel(repository: repo)
+    let vm = InstalledViewModel(
+        repository: repo,
+        brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+    )
     await vm.load()
     return vm
 }
