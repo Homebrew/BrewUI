@@ -67,6 +67,12 @@ final class InstalledDetailsViewModel {
         self.brewCommandCenter = brewCommandCenter
     }
 
+    func load() async {
+        upgradeOperationPhase = await Task {
+            await brewCommandCenter.phase(for: .init(kind: package.kind, name: package.name))
+        }.value
+    }
+
     func update(package newPackage: BrewPackage) {
         guard newPackage != package else {
             return

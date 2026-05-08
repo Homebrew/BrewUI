@@ -42,6 +42,9 @@ struct InstalledPackageDetailView: View {
         .onChange(of: package) { _, new in
             viewModel.update(package: new)
         }
+        .task {
+            await viewModel.load()
+        }
     }
 
     private func detailScrollContent(viewModel: InstalledDetailsViewModel) -> some View {
