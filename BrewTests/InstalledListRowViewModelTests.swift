@@ -19,6 +19,56 @@ struct InstalledListRowViewModelTests {
 
         #expect(viewModel.upgradeOperationPhase == .idle)
     }
+
+    @Test func `observeRowUpdates ends on last phased stream emission`() async {
+        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.upgradeOperationPhase == .idle)
+    }
+
+    @Test func `update package flips row version presentation when outdated changes`() {
+        let current = BrewPackage.fixture(
+            name: "git",
+            kind: .formula,
+            description: "VCS",
+            latestVersion: "2.47.1",
+            installedVersions: ["2.46.0"],
+            outdated: false,
+        )
+        let viewModel = InstalledListRowViewModel(
+            package: current,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        #expect(!viewModel.showsUpdateAvailable)
+        if case let .installed(label) = viewModel.versionPresentation {
+            #expect(!label.isEmpty)
+        } else {
+            Issue.record("expected installed versionPresentation before update")
+        }
+
+        let outdated = BrewPackage.fixture(
+            name: "git",
+            kind: .formula,
+            description: "VCS",
+            latestVersion: "2.47.1",
+            installedVersions: ["2.46.0"],
+            outdated: true,
+        )
+        viewModel.update(package: outdated)
+
+        #expect(viewModel.showsUpdateAvailable)
+        if case .upgrade = viewModel.versionPresentation {
+            ()
+        } else {
+            Issue.record("expected upgrade versionPresentation after update")
+        }
+
+        viewModel.update(package: outdated)
+        #expect(viewModel.showsUpdateAvailable)
+    }
 }
 
 private actor PhaseSequenceCommandCenter: BrewCommandCenter {
