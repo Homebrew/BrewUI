@@ -15,13 +15,25 @@ private actor PhaseStreamCollector {
     }
 }
 
+private actor AllPhaseStreamCollector {
+    private(set) var events: [(BrewOperationID, BrewOperationPhase)] = []
+
+    func append(id: BrewOperationID, phase: BrewOperationPhase) {
+        events.append((id, phase))
+    }
+}
+
+private func makeSerialCommandCenterForTests() -> SerialBrewCommandCenter {
+    let ctx = BrewCommandExecutionContext(
+        commandRunner: MockBrewCommandRunner(responses: [:]),
+        locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
+    )
+    return SerialBrewCommandCenter(executionContext: ctx)
+}
+
 struct SerialBrewCommandCenterTests {
     private func makeCenter() -> SerialBrewCommandCenter {
-        let ctx = BrewCommandExecutionContext(
-            commandRunner: MockBrewCommandRunner(responses: [:]),
-            locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
-        )
-        return SerialBrewCommandCenter(executionContext: ctx)
+        makeSerialCommandCenterForTests()
     }
 
     @Test func `serializes operations so second runs after first`() async throws {
@@ -215,6 +227,107 @@ struct SerialBrewCommandCenterTests {
         #expect(log.count == 2)
         #expect(log.allSatisfy { $0.id == id && $0.kind == .upgradeFormula })
         #expect(await counter.value == 1)
+    }
+}
+
+struct SerialBrewAllPhaseStreamTests {
+    @Test func `allPhaseChanges emits transitions across multiple ids without per id subscriber`() async throws {
+        let center = makeSerialCommandCenterForTests()
+        let idA = BrewOperationID(rawValue: "formula:all-phase-a")
+        let idB = BrewOperationID(rawValue: "formula:all-phase-b")
+        let stream = await center.allPhaseChanges()
+        let collector = AllPhaseStreamCollector()
+        let collect = Task {
+            for await pair in stream {
+                await collector.append(id: pair.0, phase: pair.1)
+            }
+        }
+        defer { collect.cancel() }
+
+        try await center.submit(id: idA, command: EmptyMutatingCommand())
+        try await center.submit(id: idB, command: EmptyMutatingCommand())
+        try await Task.sleep(for: .milliseconds(80))
+        let events = await collector.events
+        let eventsForA = events.filter { $0.0 == idA }.map(\.1)
+        let eventsForB = events.filter { $0.0 == idB }.map(\.1)
+        #expect(eventsForA.count >= 2)
+        #expect(eventsForB.count >= 2)
+        if case .running = eventsForA[0] {} else {
+            Issue.record("expected running as first all-phase event for id A")
+        }
+        #expect(eventsForA.last == .idle)
+        if case .running = eventsForB[0] {} else {
+            Issue.record("expected running as first all-phase event for id B")
+        }
+        #expect(eventsForB.last == .idle)
+    }
+
+    @Test func `allPhaseChanges multicast delivers same events to two subscribers`() async throws {
+        let center = makeSerialCommandCenterForTests()
+        let id = BrewOperationID(rawValue: "formula:all-phase-multi")
+        let streamA = await center.allPhaseChanges()
+        let streamB = await center.allPhaseChanges()
+        let collectorA = AllPhaseStreamCollector()
+        let collectorB = AllPhaseStreamCollector()
+        let taskA = Task {
+            for await pair in streamA {
+                await collectorA.append(id: pair.0, phase: pair.1)
+            }
+        }
+        let taskB = Task {
+            for await pair in streamB {
+                await collectorB.append(id: pair.0, phase: pair.1)
+            }
+        }
+        defer {
+            taskA.cancel()
+            taskB.cancel()
+        }
+
+        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await Task.sleep(for: .milliseconds(80))
+        let eventsA = await collectorA.events
+        let eventsB = await collectorB.events
+        #expect(eventsA.count == eventsB.count)
+        for (left, right) in zip(eventsA, eventsB) {
+            #expect(left.0 == right.0)
+            #expect(left.1 == right.1)
+        }
+        #expect(eventsA.count >= 2)
+    }
+
+    @Test func `allPhaseChanges removes listener on stream termination`() async throws {
+        let center = makeSerialCommandCenterForTests()
+        let id = BrewOperationID(rawValue: "formula:all-phase-cleanup")
+        let stream = await center.allPhaseChanges()
+        let collector = AllPhaseStreamCollector()
+        let collect = Task {
+            for await pair in stream {
+                await collector.append(id: pair.0, phase: pair.1)
+            }
+        }
+        collect.cancel()
+        try await Task.sleep(for: .milliseconds(20))
+
+        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await Task.sleep(for: .milliseconds(80))
+        let eventsAfterCancel = await collector.events
+        #expect(eventsAfterCancel.isEmpty)
+
+        let stream2 = await center.allPhaseChanges()
+        let collector2 = AllPhaseStreamCollector()
+        let collect2 = Task {
+            for await pair in stream2 {
+                await collector2.append(id: pair.0, phase: pair.1)
+            }
+        }
+        defer { collect2.cancel() }
+
+        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await Task.sleep(for: .milliseconds(80))
+        let eventsFresh = await collector2.events
+        #expect(eventsFresh.count >= 2)
+        #expect(eventsFresh.first?.0 == id)
     }
 }
 
