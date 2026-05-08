@@ -40,6 +40,10 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **MVVM boundary:** Keep views as passive as practical. Put view-facing UI policy, derived flags, and decision/branching logic in ViewModels (for example, split/detail visibility booleans and action-routing decisions). Views should primarily bind/render and forward actions. Keep view-layer branching limited to simple presentation branches (for example, loading/error/empty content blocks) and avoid embedding cross-state decision trees in views. Add unit tests for non-trivial ViewModel-derived UI state.
 
+**Root view dependency ownership:** When a feature defines a `*Root` view wrapper, the root is the dependency-composition boundary for that surface. Root views must read app-level dependencies (for example `@Environment` values), construct and inject content-view dependencies, and own view-model lifecycle boundaries. Content views must focus on rendering and behavior and must not acquire those app-level dependencies directly when a root exists.
+
+**Anti-pattern to avoid:** Do not make a content view model optional only to work around dependency acquisition inside the content view. Keep dependency resolution in the root and inject non-optional dependencies into the content view.
+
 **URL presentation:** Any user-facing web URL (`http`/`https`) shown in the UI should be rendered as a tappable `Link` that opens the default browser, while still showing the literal URL text for transparency.
 
 **Loadable UI state:** For screens/panels that are expected to load asynchronously and can fail, model presentation state as a single enum on the ViewModel (for example: `.loading`, `.loaded(Data)`, `.error(String)`) instead of separate `isLoading`/`data`/`error` fields. This keeps states mutually exclusive, reduces invalid combinations, and gives views a single `switch`-based rendering path.

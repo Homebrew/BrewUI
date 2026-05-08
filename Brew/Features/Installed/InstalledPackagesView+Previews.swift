@@ -28,7 +28,6 @@ import SwiftUI
         dependencies: [],
         outdated: true,
     )
-    InstalledPackageDetailView(package: package)
-        .environment(\.brewCommandCenter, commandCenter)
+    InstalledPackageDetailView(package: package, brewCommandCenter: commandCenter)
         .frame(minWidth: 280, minHeight: 200)
 }

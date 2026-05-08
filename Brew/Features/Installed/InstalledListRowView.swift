@@ -8,32 +8,40 @@ import SwiftUI
 /// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
 struct InstalledListRowRoot: View {
     let package: BrewPackage
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
-        InstalledListRowView(package: package)
-            .id(package.id)
+        InstalledListRowView(
+            package: package,
+            brewCommandCenter: brewCommandCenter
+        )
+        .id(package.id)
     }
 }
 
 struct InstalledListRowView: View {
     let package: BrewPackage
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
-    @State private var viewModel: InstalledListRowViewModel?
+    @State private var viewModel: InstalledListRowViewModel
+
+    init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
+        _viewModel = State(
+            initialValue: InstalledListRowViewModel(
+                package: package,
+                brewCommandCenter: brewCommandCenter
+            )
+        )
+        self.package = package
+    }
 
     var body: some View {
         Group {
-            if let viewModel {
-                rowContent(viewModel: viewModel)
-            }
+            rowContent(viewModel: viewModel)
         }
         .task(id: package.id) {
-            if viewModel == nil {
-                viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: brewCommandCenter)
-            }
-            await viewModel?.observeRowUpdates()
+            await viewModel.observeRowUpdates()
         }
         .onChange(of: package) { _, new in
-            viewModel?.update(package: new)
+            viewModel.update(package: new)
         }
     }
 

@@ -224,3 +224,9 @@
 - **Detail and row view models** no longer fetch from a repository; **`PackageDetailsRepository`** and related infrastructure are removed.
 - **Detail and list rows** stay in sync by propagating injected **`BrewPackage`** from the parent via **`onChange(of: package)`** → **`update(package:)`** on the child view models.
 - **Detail-upgrade phase observer caveat:** the detail VM still polls phase around submit rather than subscribing to a stream for concurrent operations on the same id; acceptable for now.
+
+## 2026-05-08 — Root-view dependency ownership policy
+
+- Feature `*Root` views are the dependency composition boundary for that surface: they read app-level dependencies (for example `@Environment`), construct/inject content-view dependencies, and own view-model lifecycle boundaries.
+- Content views should receive dependencies from their root and focus on rendering and behavior; avoid direct app-level dependency acquisition in content views when a root wrapper exists.
+- Treat optional content view models introduced solely to compensate for misplaced dependency acquisition as an anti-pattern.

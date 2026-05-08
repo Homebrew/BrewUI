@@ -49,6 +49,8 @@ private let installedPackagesRefreshLogger = Logger(
 @MainActor
 final class InstalledViewModel {
     private let repository: InstalledPackagesRepository
+    private let brewCommandCenter: any BrewCommandCenter
+    private var observerTask: Task<Void, Never>?
 
     private var loadedContent: InstalledPackagesContent?
     private var preSearchSelectedPackageID: BrewPackage.ID?
@@ -97,8 +99,16 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: InstalledPackagesRepository) {
+    init(repository: InstalledPackagesRepository, brewCommandCenter: any BrewCommandCenter) {
         self.repository = repository
+        self.brewCommandCenter = brewCommandCenter
+        observerTask = Task { @MainActor [weak self] in
+            await self?.observeOperationCompletions()
+        }
+    }
+
+    isolated deinit {
+        observerTask?.cancel()
     }
 
     func load() async {
@@ -115,7 +125,7 @@ final class InstalledViewModel {
     }
 
     /// Reloads installed packages without clearing the list UI (no `.loading` state).
-    func refreshInstalledPackagesPreservingUI() async {
+    func refresh() async {
         guard state.isLoaded else {
             await load()
             return
@@ -128,6 +138,18 @@ final class InstalledViewModel {
             installedPackagesRefreshLogger.error(
                 "Refresh installed packages failed: \(error.localizedDescription, privacy: .public)",
             )
+        }
+    }
+
+    private func observeOperationCompletions() async {
+        var lastPhase: [BrewOperationID: BrewOperationPhase] = [:]
+        let stream = await brewCommandCenter.allPhaseChanges()
+        for await (id, phase) in stream {
+            let previous = lastPhase[id] ?? .idle
+            lastPhase[id] = phase
+            if case .running = previous, case .idle = phase {
+                await refresh()
+            }
         }
     }
 

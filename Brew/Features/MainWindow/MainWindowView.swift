@@ -44,7 +44,6 @@ struct MainWindowView: View {
                 repository: PreviewInstalledPackagesRepository(),
                 brewCommandCenter: commandCenter,
             ),
-            installedDetailsRepository: PreviewPackageDetailsRepository(),
         ),
     )
     .environment(\.brewCommandCenter, commandCenter)

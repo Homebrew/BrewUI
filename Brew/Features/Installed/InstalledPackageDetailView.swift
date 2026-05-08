@@ -8,33 +8,39 @@ import SwiftUI
 /// Root view for the selected row; detail content reads ``EnvironmentValues/brewCommandCenter`` to build its view model.
 struct InstalledPackageDetailRoot: View {
     let selectedPackage: BrewPackage
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
-        InstalledPackageDetailView(package: selectedPackage)
-            .id(selectedPackage.id)
+        InstalledPackageDetailView(
+            package: selectedPackage,
+            brewCommandCenter: brewCommandCenter
+        )
+        .id(selectedPackage.id)
     }
 }
 
 /// Right-hand column: detail for the selected installed package.
 struct InstalledPackageDetailView: View {
     let package: BrewPackage
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
-    @State private var viewModel: InstalledDetailsViewModel?
+    @State private var viewModel: InstalledDetailsViewModel
+
+    init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
+        self.package = package
+        _viewModel = State(
+            initialValue: InstalledDetailsViewModel(
+                package: package,
+                brewCommandCenter: brewCommandCenter
+            )
+        )
+    }
 
     var body: some View {
         Group {
-            if let viewModel {
-                detailScrollContent(viewModel: viewModel)
-            }
+            detailScrollContent(viewModel: viewModel)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task(id: package.id) {
-            if viewModel == nil {
-                viewModel = InstalledDetailsViewModel(package: package, brewCommandCenter: brewCommandCenter)
-            }
-        }
         .onChange(of: package) { _, new in
-            viewModel?.update(package: new)
+            viewModel.update(package: new)
         }
     }
 

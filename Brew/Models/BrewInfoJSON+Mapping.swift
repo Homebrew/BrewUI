@@ -12,7 +12,7 @@ extension BrewInfoJSON {
         return (formulaPackages + caskPackages).sorted(by: Self.sortByName)
     }
 
-    private static func sortByName(_ lhs: BrewPackage, _ rhs: BrewPackage) -> Bool {
+    nonisolated private static func sortByName(_ lhs: BrewPackage, _ rhs: BrewPackage) -> Bool {
         lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
     }
 }
@@ -57,7 +57,7 @@ private extension BrewInfoCask {
 }
 
 private extension BrewInfoJSON {
-    static func uniqueNonEmpty(_ values: [String]) -> [String] {
+    nonisolated static func uniqueNonEmpty(_ values: [String]) -> [String] {
         var seen: Set<String> = []
         var result: [String] = []
         for value in values {
@@ -70,14 +70,14 @@ private extension BrewInfoJSON {
         return result
     }
 
-    static func trimmedOrNil(_ value: String?) -> String? {
+    nonisolated static func trimmedOrNil(_ value: String?) -> String? {
         guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
             return nil
         }
         return trimmed
     }
 
-    static func trimmedOrEmpty(_ value: String?) -> String {
+    nonisolated static func trimmedOrEmpty(_ value: String?) -> String {
         trimmedOrNil(value) ?? ""
     }
 }

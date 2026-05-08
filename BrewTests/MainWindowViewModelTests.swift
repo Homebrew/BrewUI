@@ -11,10 +11,10 @@ struct MainWindowViewModelTests {
         let countingRepository = CountingInstalledRepository()
         let installed = InstalledViewModel(
             repository: countingRepository,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         let vm = MainWindowViewModel(
             installedViewModel: installed,
-            installedDetailsRepository: StubPackageDetailsRepository(),
         )
         await vm.loadForCurrentSelection()
         let callCount = await countingRepository.loadCallCount
@@ -24,10 +24,10 @@ struct MainWindowViewModelTests {
     @Test @MainActor func `main window defaults to installed sidebar selection`() {
         let installed = InstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         let vm = MainWindowViewModel(
             installedViewModel: installed,
-            installedDetailsRepository: StubPackageDetailsRepository(),
         )
         #expect(vm.selectedSidebarItem == .installed)
     }
