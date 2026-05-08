@@ -45,6 +45,12 @@ actor NoopBrewCommandCenter: BrewCommandCenter {
         }
     }
 
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
     func submit(
         id: BrewOperationID,
         command: any BrewMutatingCommand,

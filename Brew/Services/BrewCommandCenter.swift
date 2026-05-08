@@ -20,6 +20,10 @@ protocol BrewCommandCenter: Actor {
     /// Cancel the consuming task (e.g. end of a SwiftUI ``View/task``) and unregister via ``AsyncStream/Continuation/onTermination``.
     func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase>
 
+    /// Push-based phase updates for **any** operation id — yields each phase transition `(id, phase)` with **no** initial replay.
+    /// Cancel the consuming task and unregister via ``AsyncStream/Continuation/onTermination``.
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)>
+
     /// Enqueue mutating work keyed by `id`.
     ///
     /// **Concurrency:** Conforming types such as ``SerialBrewCommandCenter`` run work **serially** (one mutating operation at a time).

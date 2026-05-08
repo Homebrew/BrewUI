@@ -61,4 +61,10 @@ private actor PhaseSequenceCommandCenter: BrewCommandCenter {
             continuation.finish()
         }
     }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
 }
