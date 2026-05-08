@@ -1,21 +1,47 @@
 import SwiftUI
 
+struct InstalledColumnsRoot: View {
+    @Environment(\.brewCommandCenter) var brewCommandCenter
+    @State var repository: BrewInstalledPackagesRepository = .init(
+        commandRunner: BrewCommandService(),
+        locator: BrewExecutableLocator()
+    )
+
+    var body: some View {
+        InstalledColumns(
+            repository: repository,
+            brewCommandCenter: brewCommandCenter
+        )
+    }
+}
+
 /// Feature-owned content/detail columns for the main window.
 struct InstalledColumns: View {
-    @Bindable var viewModel: InstalledViewModel
+    @State var viewModel: InstalledViewModel
+
+    init(repository: InstalledPackagesRepository, brewCommandCenter: BrewCommandCenter) {
+        _viewModel = State(
+            initialValue: .init(
+                repository: repository,
+                brewCommandCenter: brewCommandCenter
+            )
+        )
+    }
 
     var body: some View {
         Group {
             if let selectedPackage = viewModel.selectedPackage {
                 HSplitView {
-                    InstalledPackagesView(viewModel: viewModel)
-                        .frame(
-                            minWidth: BrewLayout.installedListColumnMinWidth,
-                            idealWidth: BrewLayout.installedListColumnIdealWidth,
-                            maxWidth: BrewLayout.installedListColumnMaxWidth,
-                            maxHeight: .infinity,
-                            alignment: .topLeading,
-                        )
+                    InstalledPackagesView(
+                        viewModel: viewModel
+                    )
+                    .frame(
+                        minWidth: BrewLayout.installedListColumnMinWidth,
+                        idealWidth: BrewLayout.installedListColumnIdealWidth,
+                        maxWidth: BrewLayout.installedListColumnMaxWidth,
+                        maxHeight: .infinity,
+                        alignment: .topLeading,
+                    )
 
                     InstalledPackageDetailRoot(
                         selectedPackage: selectedPackage,
@@ -33,5 +59,8 @@ struct InstalledColumns: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .task {
+            await viewModel.load()
+        }
     }
 }
