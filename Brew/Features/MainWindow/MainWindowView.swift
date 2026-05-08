@@ -31,7 +31,6 @@ struct MainWindowView: View {
         case .installed:
             InstalledColumns(
                 viewModel: viewModel.installedViewModel,
-                detailsRepository: viewModel.installedDetailsRepository,
             )
         }
     }
@@ -43,6 +42,7 @@ struct MainWindowView: View {
         viewModel: MainWindowViewModel(
             installedViewModel: InstalledViewModel(
                 repository: PreviewInstalledPackagesRepository(),
+                brewCommandCenter: commandCenter,
             ),
             installedDetailsRepository: PreviewPackageDetailsRepository(),
         ),
