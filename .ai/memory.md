@@ -217,3 +217,10 @@
 - Repositories now map `brew info --json=v2` through shared `BrewInfoJSON+Mapping` helpers and return `BrewPackage` values (`InstalledPackagesRepository` returns `[BrewPackage]`, `PackageDetailsRepository` returns `BrewPackage`).
 - Installed list/detail presentation formatting moved to feature view models (`InstalledListRowViewModel`, `InstalledDetailsViewModel`) plus `InstalledBrewVersionFormatting`; models are now presentation-agnostic.
 - Removed legacy Installed models (`InstalledPackageInfo`, `InstalledPackageRow`, `InstalledPackageDetails`) and dead parser path (`InstalledPackagesParser` + parser tests).
+
+## 2026-05-08 — Installed feature single-source-of-truth
+
+- **`InstalledViewModel` owns the catalog** and observes **`BrewCommandCenter.allPhaseChanges()`** to refresh after mutating operations complete (`running → idle`).
+- **Detail and row view models** no longer fetch from a repository; **`PackageDetailsRepository`** and related infrastructure are removed.
+- **Detail and list rows** stay in sync by propagating injected **`BrewPackage`** from the parent via **`onChange(of: package)`** → **`update(package:)`** on the child view models.
+- **Detail-upgrade phase observer caveat:** the detail VM still polls phase around submit rather than subscribing to a stream for concurrent operations on the same id; acceptable for now.
