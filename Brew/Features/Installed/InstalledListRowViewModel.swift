@@ -14,7 +14,7 @@ enum RowVersionPresentation: Equatable {
 @Observable
 @MainActor
 final class InstalledListRowViewModel {
-    let package: BrewPackage
+    private(set) var package: BrewPackage
     private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
     private let brewCommandCenter: BrewCommandCenter
 
@@ -84,6 +84,13 @@ final class InstalledListRowViewModel {
     init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
         self.package = package
         self.brewCommandCenter = brewCommandCenter
+    }
+
+    func update(package newPackage: BrewPackage) {
+        guard newPackage != package else {
+            return
+        }
+        package = newPackage
     }
 
     func observeRowUpdates() async {

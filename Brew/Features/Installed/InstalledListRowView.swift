@@ -8,96 +8,110 @@ import SwiftUI
 /// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
 struct InstalledListRowRoot: View {
     let package: BrewPackage
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
-        InstalledListRowView(
-            viewModel: InstalledListRowViewModel(package: package, brewCommandCenter: brewCommandCenter),
-        )
-        .id(package.id)
+        InstalledListRowView(package: package)
+            .id(package.id)
     }
 }
 
 struct InstalledListRowView: View {
-    @State var viewModel: InstalledListRowViewModel
-
-    private var chrome: PackageKindChrome {
-        viewModel.kind.chrome
-    }
-
-    private var statusIconName: String {
-        viewModel.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
-    }
-
-    private var statusIconColor: Color {
-        viewModel.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
-    }
+    let package: BrewPackage
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
+    @State private var viewModel: InstalledListRowViewModel?
 
     var body: some View {
-        HStack(alignment: .top, spacing: BrewSpacing.md) {
-            ZStack {
-                Circle()
-                    .fill(iconBackgroundColor(chrome.iconBackground))
-                    .frame(width: 36, height: 36)
-                Image(systemName: "cube.box.fill")
-                    .font(.body)
-                    .foregroundStyle(accentColor(chrome.accent))
+        Group {
+            if let viewModel {
+                rowContent(viewModel: viewModel)
             }
-            .accessibilityHidden(true)
+        }
+        .task(id: package.id) {
+            if viewModel == nil {
+                viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: brewCommandCenter)
+            }
+            await viewModel?.observeRowUpdates()
+        }
+        .onChange(of: package) { _, new in
+            viewModel?.update(package: new)
+        }
+    }
 
+    private func rowContent(viewModel: InstalledListRowViewModel) -> some View {
+        HStack(alignment: .top, spacing: BrewSpacing.md) {
+            iconBadge(viewModel: viewModel)
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                HStack(spacing: BrewSpacing.sm) {
-                    Text(viewModel.name)
-                        .font(.brewBody)
-                        .foregroundStyle(Color.brewTextPrimary)
-
-                    if viewModel.showsUpgradeBusy {
-                        ProgressView()
-                            .controlSize(.small)
-                            .accessibilityHidden(true)
-                    }
-
-                    Image(systemName: statusIconName)
-                        .font(.body)
-                        .foregroundStyle(statusIconColor)
-                        .accessibilityHidden(true)
-
-                    Text(chrome.badgeLabel)
-                        .font(.brewCaption2)
-                        .foregroundStyle(accentColor(chrome.accent))
-                        .padding(.horizontal, BrewSpacing.xs)
-                        .padding(.vertical, BrewSpacing.xxs)
-                        .background {
-                            Capsule()
-                                .fill(Color.brewSurfaceElevated)
-                        }
-                        .overlay {
-                            Capsule()
-                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
-                        }
-
-                    Spacer(minLength: 0)
-                }
-
+                titleRow(viewModel: viewModel)
                 if viewModel.hasDescription {
                     Text(viewModel.descriptionText)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewTextSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-
-                versionLine
+                versionLine(viewModel: viewModel)
             }
         }
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(listAccessibilityLabel)
-        .task(id: viewModel.id) {
-            await viewModel.observeRowUpdates()
+        .accessibilityLabel(listAccessibilityLabel(viewModel: viewModel))
+    }
+
+    private func iconBadge(viewModel: InstalledListRowViewModel) -> some View {
+        ZStack {
+            Circle()
+                .fill(iconBackgroundColor(viewModel.kind.chrome.iconBackground))
+                .frame(width: 36, height: 36)
+            Image(systemName: "cube.box.fill")
+                .font(.body)
+                .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func titleRow(viewModel: InstalledListRowViewModel) -> some View {
+        HStack(spacing: BrewSpacing.sm) {
+            Text(viewModel.name)
+                .font(.brewBody)
+                .foregroundStyle(Color.brewTextPrimary)
+
+            if viewModel.showsUpgradeBusy {
+                ProgressView()
+                    .controlSize(.small)
+                    .accessibilityHidden(true)
+            }
+
+            Image(systemName: statusIconName(viewModel: viewModel))
+                .font(.body)
+                .foregroundStyle(statusIconColor(viewModel: viewModel))
+                .accessibilityHidden(true)
+
+            Text(viewModel.kind.chrome.badgeLabel)
+                .font(.brewCaption2)
+                .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
+                .padding(.horizontal, BrewSpacing.xs)
+                .padding(.vertical, BrewSpacing.xxs)
+                .background {
+                    Capsule()
+                        .fill(Color.brewSurfaceElevated)
+                }
+                .overlay {
+                    Capsule()
+                        .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                }
+
+            Spacer(minLength: 0)
         }
     }
 
-    private var listAccessibilityLabel: String {
+    private func statusIconName(viewModel: InstalledListRowViewModel) -> String {
+        viewModel.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+    }
+
+    private func statusIconColor(viewModel: InstalledListRowViewModel) -> Color {
+        viewModel.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
+    }
+
+    private func listAccessibilityLabel(viewModel: InstalledListRowViewModel) -> String {
         if viewModel.showsUpgradeBusy {
             let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
             return "\(viewModel.accessibilitySummary), \(upgrading)"
@@ -106,7 +120,7 @@ struct InstalledListRowView: View {
     }
 
     @ViewBuilder
-    private var versionLine: some View {
+    private func versionLine(viewModel: InstalledListRowViewModel) -> some View {
         switch viewModel.versionPresentation {
         case let .installed(version):
             Text(version)
