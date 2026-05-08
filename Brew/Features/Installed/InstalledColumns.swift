@@ -3,7 +3,6 @@ import SwiftUI
 /// Feature-owned content/detail columns for the main window.
 struct InstalledColumns: View {
     @Bindable var viewModel: InstalledViewModel
-    let detailsRepository: any PackageDetailsRepository
 
     var body: some View {
         Group {
@@ -20,9 +19,6 @@ struct InstalledColumns: View {
 
                     InstalledPackageDetailRoot(
                         selectedPackage: selectedPackage,
-                        onUpgradeSuccess: { [viewModel] in
-                            await viewModel.refresh()
-                        },
                     )
                     .frame(
                         minWidth: BrewLayout.inspectorWidth,

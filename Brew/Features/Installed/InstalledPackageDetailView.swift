@@ -5,63 +5,57 @@
 
 import SwiftUI
 
-/// Root view that reads ``EnvironmentValues/brewCommandCenter`` and creates
-/// ``InstalledDetailsViewModel`` for the selected row.
+/// Root view for the selected row; detail content reads ``EnvironmentValues/brewCommandCenter`` to build its view model.
 struct InstalledPackageDetailRoot: View {
     let selectedPackage: BrewPackage
-    let onUpgradeSuccess: @MainActor () async -> Void
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
-        InstalledPackageDetailView(
-            viewModel: InstalledDetailsViewModel(
-                selectedPackage: selectedPackage,
-                repository: BrewPackageDetailsRepository(
-                    commandRunner: BrewCommandService(),
-                    locator: BrewExecutableLocator(),
-                ),
-                brewCommandCenter: brewCommandCenter,
-                onUpgradeSuccess: onUpgradeSuccess,
-            ),
-        )
-        .id(selectedPackage.id)
+        InstalledPackageDetailView(package: selectedPackage)
+            .id(selectedPackage.id)
     }
 }
 
 /// Right-hand column: detail for the selected installed package.
 struct InstalledPackageDetailView: View {
-    @State var viewModel: InstalledDetailsViewModel
+    let package: BrewPackage
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
+    @State private var viewModel: InstalledDetailsViewModel?
 
     var body: some View {
+        Group {
+            if let viewModel {
+                detailScrollContent(viewModel: viewModel)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .task(id: package.id) {
+            if viewModel == nil {
+                viewModel = InstalledDetailsViewModel(package: package, brewCommandCenter: brewCommandCenter)
+            }
+        }
+        .onChange(of: package) { _, new in
+            viewModel?.update(package: new)
+        }
+    }
+
+    private func detailScrollContent(viewModel: InstalledDetailsViewModel) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.xl) {
-                packageHeader
+                packageHeader(viewModel: viewModel)
 
-                switch viewModel.state {
-                case .loading:
-                    loadingSkeletonDetails
-                case let .error(detailsUserFacingError):
-                    Text(detailsUserFacingError)
-                        .font(.brewCallout)
-                        .foregroundStyle(Color.brewStatusError)
-                case let .loaded(package):
-                    packageDetailsSections(package: package)
-                }
+                packageDetailsSections(viewModel: viewModel)
 
                 if viewModel.showsUpgradeChrome {
-                    upgradeFooter
+                    upgradeFooter(viewModel: viewModel)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task(id: viewModel.selectedPackageID) {
-            viewModel.load()
-        }
     }
 
-    private var upgradeFooter: some View {
+    private func upgradeFooter(viewModel: InstalledDetailsViewModel) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
             Divider()
                 .overlay(Color.brewBorderSeparator)
@@ -70,7 +64,7 @@ struct InstalledPackageDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var packageHeader: some View {
+    private func packageHeader(viewModel: InstalledDetailsViewModel) -> some View {
         HStack(alignment: .center, spacing: BrewSpacing.sm) {
             Text(viewModel.packageName)
                 .font(.brewTitle1)
@@ -87,11 +81,12 @@ struct InstalledPackageDetailView: View {
     }
 
     @ViewBuilder
-    private func packageDetailsSections(package: BrewPackage) -> some View {
+    private func packageDetailsSections(viewModel: InstalledDetailsViewModel) -> some View {
+        let package = viewModel.package
         descriptionSection(package: package)
         detailsSection(package: package)
         dependenciesSection(package: package)
-        commandSection
+        commandSection(viewModel: viewModel)
     }
 
     private func descriptionSection(package: BrewPackage) -> some View {
@@ -110,9 +105,9 @@ struct InstalledPackageDetailView: View {
             Text("Details")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewTextSecondary)
-            detailRow(label: "Version", value: package.latestVersion ?? "—")
+            detailRow(label: "Version", value: versionColumnValue(package.latestVersion))
             detailRow(label: "Installed", value: installedValue(package))
-            if let homepageURL = viewModel.homepageURL {
+            if let homepageURL = package.homepageURL {
                 homepageRow(url: homepageURL)
             }
         }
@@ -155,7 +150,7 @@ struct InstalledPackageDetailView: View {
         }
     }
 
-    private var commandSection: some View {
+    private func commandSection(viewModel: InstalledDetailsViewModel) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Command")
                 .font(.brewSubheadline)
@@ -169,6 +164,11 @@ struct InstalledPackageDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
                 .textSelection(.enabled)
         }
+    }
+
+    private func versionColumnValue(_ raw: String) -> String {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "—" : trimmed
     }
 
     private func detailRow(label: String, value: String) -> some View {
@@ -217,69 +217,6 @@ struct InstalledPackageDetailView: View {
             return "—"
         }
         return package.installedVersions.joined(separator: ", ")
-    }
-
-    private var loadingSkeletonDetails: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.xl) {
-            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-                Text("Description")
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-                Text("Placeholder description for package details loading state.")
-                    .font(.brewBody)
-                    .foregroundStyle(Color.brewTextPrimary)
-            }
-
-            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-                Text("Details")
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-                detailRow(label: "Version", value: "v0.0.0")
-                detailRow(label: "Installed", value: "v0.0.0")
-                detailRow(label: "Homepage", value: "https://example.com")
-            }
-
-            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-                Text("Dependencies")
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-                LazyVGrid(
-                    columns: [GridItem(.adaptive(minimum: 120), spacing: BrewSpacing.sm)],
-                    spacing: BrewSpacing.sm,
-                ) {
-                    ForEach(0 ..< 3, id: \.self) { _ in
-                        Text("placeholder-dependency")
-                            .font(.brewCaption)
-                            .foregroundStyle(Color.brewTextPrimary)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, BrewSpacing.sm)
-                            .padding(.vertical, BrewSpacing.xs)
-                            .background(Color.brewSurfaceElevated)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: BrewRadius.sm)
-                                    .stroke(Color.brewBorderDefault, lineWidth: 1),
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
-                    }
-                }
-            }
-
-            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-                Text("Command")
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-                Text("brew info placeholder")
-                    .font(.brewCode)
-                    .foregroundStyle(Color.brewCodeDefault)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(BrewSpacing.md)
-                    .background(Color.brewTerminal)
-                    .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
-            }
-        }
-        .redacted(reason: .placeholder)
-        .allowsHitTesting(false)
-        .accessibilityLabel("Loading package details")
     }
 }
 

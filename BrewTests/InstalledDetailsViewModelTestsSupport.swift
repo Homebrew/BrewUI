@@ -114,107 +114,6 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
     }
 }
 
-actor UpgradeCallbackSpy {
-    private(set) var invocationCount = 0
-    func record() {
-        invocationCount += 1
-    }
-}
-
-@MainActor
-func waitForUpgradeCallback(spy: UpgradeCallbackSpy, expectedCount: Int) async {
-    for _ in 0 ..< 100 {
-        if await spy.invocationCount == expectedCount { return }
-        await Task.yield()
-    }
-    Issue.record("timed out waiting for upgrade callback")
-}
-
-struct StubDetailsRepository: PackageDetailsRepository {
-    var error: Error
-    func loadPackageDetails(
-        named _: String,
-        preferredKind _: InstalledPackageKind?,
-    ) async throws -> BrewPackage {
-        throw error
-    }
-}
-
-struct SuccessDetailsRepository: PackageDetailsRepository {
-    let details: BrewPackage
-    func loadPackageDetails(
-        named _: String,
-        preferredKind _: InstalledPackageKind?,
-    ) async throws -> BrewPackage {
-        details
-    }
-}
-
-actor DeferredDetailsRepository: PackageDetailsRepository {
-    private var continuations: [CheckedContinuation<BrewPackage, Error>] = []
-    private var callCount: Int = 0
-    func loadPackageDetails(
-        named _: String,
-        preferredKind _: InstalledPackageKind?,
-    ) async throws -> BrewPackage {
-        callCount += 1
-        return try await withCheckedThrowingContinuation { continuation in continuations.append(continuation) }
-    }
-
-    func waitForCallCount(_ expected: Int) async {
-        while callCount < expected {
-            await Task.yield()
-        }
-    }
-
-    func resolve(callIndex: Int, with result: Result<BrewPackage, Error>) {
-        guard continuations.indices.contains(callIndex) else { return }
-        switch result {
-        case let .success(details): continuations[callIndex].resume(returning: details)
-        case let .failure(error): continuations[callIndex].resume(throwing: error)
-        }
-    }
-}
-
-actor SequencedDetailsRepository: PackageDetailsRepository {
-    private let results: [Result<BrewPackage, Error>]
-    private(set) var callCount: Int = 0
-    init(results: [Result<BrewPackage, Error>]) {
-        self.results = results
-    }
-
-    func loadPackageDetails(
-        named _: String,
-        preferredKind _: InstalledPackageKind?,
-    ) async throws -> BrewPackage {
-        let index = callCount
-        callCount += 1
-        guard results.indices.contains(index) else {
-            Issue.record("missing stubbed details result for call \(index)")
-            throw PackageDetailsRepositoryError.packageNotFound(name: "missing")
-        }
-        return try results[index].get()
-    }
-
-    func waitForCallCount(_ expected: Int) async {
-        while callCount < expected {
-            await Task.yield()
-        }
-    }
-}
-
-@MainActor
-func waitForState(
-    on viewModel: InstalledDetailsViewModel,
-    toSatisfy predicate: @escaping (InstalledDetailsLoadState) -> Bool,
-) async {
-    for _ in 0 ..< 100 {
-        if predicate(viewModel.state) { return }
-        await Task.yield()
-    }
-    Issue.record("timed out waiting for expected details state")
-}
-
 @MainActor
 func waitForUpgradePhase(
     on viewModel: InstalledDetailsViewModel,
@@ -251,9 +150,4 @@ func details(
         dependencies: [],
         outdated: false,
     )
-}
-
-func isLoaded(_ state: InstalledDetailsLoadState) -> Bool {
-    if case .loaded = state { return true }
-    return false
 }

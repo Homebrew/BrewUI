@@ -18,26 +18,17 @@ import SwiftUI
 
 #Preview("Detail") {
     let commandCenter = NoopBrewCommandCenter.preview()
-    let detailsViewModel = InstalledDetailsViewModel(
-        selectedPackage: BrewPackage(
-            name: "git",
-            kind: .formula,
-            description: "",
-            homepage: "",
-            latestVersion: "2.46.1",
-            installedVersions: ["2.45.0"],
-            dependencies: [],
-            outdated: true,
-        ),
-        repository: PreviewPackageDetailsRepository(),
-        brewCommandCenter: commandCenter,
+    let package = BrewPackage(
+        name: "git",
+        kind: .formula,
+        description: "",
+        homepage: "",
+        latestVersion: "2.46.1",
+        installedVersions: ["2.45.0"],
+        dependencies: [],
+        outdated: true,
     )
-    InstalledPackageDetailView(
-        viewModel: detailsViewModel,
-    )
-    .environment(\.brewCommandCenter, commandCenter)
-    .task {
-        detailsViewModel.load()
-    }
-    .frame(minWidth: 280, minHeight: 200)
+    InstalledPackageDetailView(package: package)
+        .environment(\.brewCommandCenter, commandCenter)
+        .frame(minWidth: 280, minHeight: 200)
 }
