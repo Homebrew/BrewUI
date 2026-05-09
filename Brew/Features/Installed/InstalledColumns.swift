@@ -4,13 +4,13 @@ struct InstalledColumnsRoot: View {
     @Environment(\.brewCommandCenter) var brewCommandCenter
     @State var repository: BrewInstalledPackagesRepository = .init(
         commandRunner: BrewCommandService(),
-        locator: BrewExecutableLocator()
+        locator: BrewExecutableLocator(),
     )
 
     var body: some View {
         InstalledColumns(
             repository: repository,
-            brewCommandCenter: brewCommandCenter
+            brewCommandCenter: brewCommandCenter,
         )
     }
 }
@@ -23,40 +23,40 @@ struct InstalledColumns: View {
         _viewModel = State(
             initialValue: .init(
                 repository: repository,
-                brewCommandCenter: brewCommandCenter
-            )
+                brewCommandCenter: brewCommandCenter,
+            ),
         )
     }
 
     var body: some View {
-        Group {
-            if let selectedPackage = viewModel.selectedPackage {
-                HSplitView {
-                    InstalledPackagesView(
-                        viewModel: viewModel
-                    )
-                    .frame(
-                        minWidth: BrewLayout.installedListColumnMinWidth,
-                        idealWidth: BrewLayout.installedListColumnIdealWidth,
-                        maxWidth: BrewLayout.installedListColumnMaxWidth,
-                        maxHeight: .infinity,
-                        alignment: .topLeading,
-                    )
+        HSplitView {
+            InstalledPackagesView(
+                viewModel: viewModel,
+            )
+            .frame(
+                minWidth: BrewLayout.installedListColumnMinWidth,
+                idealWidth: BrewLayout.installedListColumnIdealWidth,
+                maxWidth: BrewLayout.installedListColumnMaxWidth,
+                maxHeight: .infinity,
+                alignment: .topLeading,
+            )
 
+            Group {
+                if let selectedPackage = viewModel.selectedPackage {
                     InstalledPackageDetailRoot(
                         selectedPackage: selectedPackage,
                     )
-                    .frame(
-                        minWidth: BrewLayout.inspectorWidth,
-                        idealWidth: BrewLayout.installedDetailColumnIdealWidth,
-                        maxWidth: BrewLayout.installedDetailColumnMaxWidth,
-                        maxHeight: .infinity,
-                        alignment: .topLeading,
-                    )
+                } else {
+                    InstalledPackageDetailPlaceholder()
                 }
-            } else {
-                InstalledPackagesView(viewModel: viewModel)
             }
+            .frame(
+                minWidth: BrewLayout.inspectorWidth,
+                idealWidth: BrewLayout.installedDetailColumnIdealWidth,
+                maxWidth: BrewLayout.installedDetailColumnMaxWidth,
+                maxHeight: .infinity,
+                alignment: .topLeading,
+            )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .task {

@@ -154,19 +154,27 @@ final class InstalledViewModel {
     }
 
     func toggleSelection(for packageID: BrewPackage.ID) {
+        if selectedPackageID == packageID {
+            setSelection(nil)
+            return
+        }
+        setSelection(packageID)
+    }
+
+    func setSelection(_ selection: BrewPackage.ID?) {
         if isSearchActive {
             didCommitSelectionDuringSearch = true
             searchPreviewSelectedPackageID = nil
         }
-        if selectedPackageID == packageID {
-            selectedPackageID = nil
+        if let selection {
+            selectedPackageID = selection
         } else {
-            selectedPackageID = packageID
+            selectedPackageID = firstVisibleRowID()
         }
     }
 
     func clearSelection() {
-        selectedPackageID = nil
+        selectedPackageID = firstVisibleRowID()
         searchPreviewSelectedPackageID = nil
     }
 
@@ -185,7 +193,24 @@ final class InstalledViewModel {
         guard let loadedContent else {
             return
         }
+        synchronizeSelectionWithLoadedContent(loadedContent)
         state = .loaded(Self.filteredContent(loadedContent, query: searchQuery))
+    }
+
+    private func synchronizeSelectionWithLoadedContent(_ content: InstalledPackagesContent) {
+        let availableIDs = Set(content.packages.map(\.id))
+        if let selectedPackageID, !availableIDs.contains(selectedPackageID) {
+            self.selectedPackageID = nil
+        }
+        if selectedPackageID == nil {
+            selectedPackageID = content.packages.first?.id
+        }
+        if let searchPreviewSelectedPackageID, !availableIDs.contains(searchPreviewSelectedPackageID) {
+            self.searchPreviewSelectedPackageID = nil
+        }
+        if let preSearchSelectedPackageID, !availableIDs.contains(preSearchSelectedPackageID) {
+            self.preSearchSelectedPackageID = nil
+        }
     }
 
     private func updateSelectionForSearchQueryChange(from oldQuery: String, to newQuery: String) {

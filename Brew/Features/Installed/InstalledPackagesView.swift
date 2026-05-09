@@ -50,7 +50,7 @@ struct InstalledPackagesView: View {
                         listRow(for: package)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                viewModel.toggleSelection(for: package.id)
+                                viewModel.setSelection(package.id)
                             }
                             .listRowBackground(
                                 viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
@@ -65,7 +65,7 @@ struct InstalledPackagesView: View {
                         listRow(for: package)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                viewModel.toggleSelection(for: package.id)
+                                viewModel.setSelection(package.id)
                             }
                             .listRowBackground(
                                 viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,

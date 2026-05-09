@@ -31,6 +31,18 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
+    @Test @MainActor func `setSelection updates and clears selected package`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [.fixture(name: "git", kind: .formula)],
+        )
+        guard let selectedID = vm.loadedFormulaPackages.first?.id else { return }
+        vm.setSelection(selectedID)
+        #expect(vm.selectedPackage?.id == selectedID)
+
+        vm.setSelection(nil)
+        #expect(vm.selectedPackage == nil)
+    }
+
     @Test @MainActor func `clearSelection clears selected package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git", kind: .formula)],
@@ -95,6 +107,53 @@ struct InstalledViewModelTests {
         await expectLoadCount(atLeast: 3, repo: repo)
         #expect(await repo.loadCallCount == 3)
     }
+
+    @Test @MainActor func `refresh preserves selection when package still exists`() async {
+        let firstSnapshot: [BrewPackage] = [
+            .fixture(name: "git", kind: .formula, latestVersion: "1.0.0", installedVersions: ["1.0.0"]),
+            .fixture(name: "wget", kind: .formula, latestVersion: "1.0.0", installedVersions: ["1.0.0"]),
+        ]
+        let secondSnapshot: [BrewPackage] = [
+            .fixture(name: "git", kind: .formula, latestVersion: "2.0.0", installedVersions: ["2.0.0"]),
+            .fixture(name: "wget", kind: .formula, latestVersion: "1.0.0", installedVersions: ["1.0.0"]),
+        ]
+        let repo = SequentialSnapshotsInstalledRepository(snapshots: [firstSnapshot, secondSnapshot])
+        let vm = InstalledViewModel(
+            repository: repo,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        await vm.load()
+        guard let selectedID = vm.loadedFormulaPackages.first?.id else { return }
+        vm.setSelection(selectedID)
+
+        await vm.refresh()
+
+        #expect(vm.selectedPackageID == selectedID)
+        #expect(vm.selectedPackage?.id == selectedID)
+    }
+
+    @Test @MainActor func `refresh clears selection when selected package disappears`() async {
+        let firstSnapshot: [BrewPackage] = [
+            .fixture(name: "git", kind: .formula),
+            .fixture(name: "wget", kind: .formula),
+        ]
+        let secondSnapshot: [BrewPackage] = [
+            .fixture(name: "wget", kind: .formula),
+        ]
+        let repo = SequentialSnapshotsInstalledRepository(snapshots: [firstSnapshot, secondSnapshot])
+        let vm = InstalledViewModel(
+            repository: repo,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        await vm.load()
+        let removedSelectionID: BrewPackage.ID = "formula:git"
+        vm.setSelection(removedSelectionID)
+
+        await vm.refresh()
+
+        #expect(vm.selectedPackageID == nil)
+        #expect(vm.selectedPackage == nil)
+    }
 }
 
 @MainActor
@@ -135,6 +194,27 @@ private actor CountingInstalledRepository: InstalledPackagesRepository {
     func loadInstalledPackages() async throws -> [BrewPackage] {
         loadCallCount += 1
         return packages
+    }
+}
+
+private actor SequentialSnapshotsInstalledRepository: InstalledPackagesRepository {
+    private var snapshots: [[BrewPackage]]
+    private var index = 0
+
+    init(snapshots: [[BrewPackage]]) {
+        self.snapshots = snapshots
+    }
+
+    func loadInstalledPackages() async throws -> [BrewPackage] {
+        guard !snapshots.isEmpty else {
+            return []
+        }
+        defer {
+            if index < snapshots.count - 1 {
+                index += 1
+            }
+        }
+        return snapshots[index]
     }
 }
 

@@ -230,3 +230,8 @@
 - Feature `*Root` views are the dependency composition boundary for that surface: they read app-level dependencies (for example `@Environment`), construct/inject content-view dependencies, and own view-model lifecycle boundaries.
 - Content views should receive dependencies from their root and focus on rendering and behavior; avoid direct app-level dependency acquisition in content views when a root wrapper exists.
 - Treat optional content view models introduced solely to compensate for misplaced dependency acquisition as an anti-pattern.
+
+## 2026-05-08 — Installed list scroll preservation policy
+
+- Keep the Installed list mounted under a stable parent container (`HSplitView`) across selection changes; switching between list-only and split layouts can remount the list and reset scroll position.
+- Prefer native `List(selection:)` for Installed row selection state, with view-model-backed selection binding (`setSelection(_:)`) and row tags by stable package id.
