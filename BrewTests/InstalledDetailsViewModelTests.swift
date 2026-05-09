@@ -145,14 +145,16 @@ struct InstalledDetailsViewModelUpgradeTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
-        viewModel.upgradeSelectedPackage()
-        await waitForUpgradePhase(on: viewModel) { phase in
-            if case .idle = phase {
-                return true
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradePhase(on: viewModel) { phase in
+                if case .idle = phase {
+                    return true
+                }
+                return false
             }
-            return false
+            #expect(viewModel.upgradeErrorMessage == nil)
         }
-        #expect(viewModel.upgradeErrorMessage == nil)
     }
 
     @Test @MainActor func `upgrade failure sets upgrade error message`() async {
@@ -163,9 +165,11 @@ struct InstalledDetailsViewModelUpgradeTests {
             ),
         )
 
-        viewModel.upgradeSelectedPackage()
-        await waitForUpgradeError(on: viewModel)
-        #expect(viewModel.upgradeErrorMessage == "upgrade blocked")
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(viewModel.upgradeErrorMessage == "upgrade blocked")
+        }
     }
 
     @Test @MainActor func `upgrade submit continues after caller task cancellation`() async {
@@ -175,20 +179,22 @@ struct InstalledDetailsViewModelUpgradeTests {
             brewCommandCenter: center,
         )
 
-        let callerTask = Task { @MainActor in
-            viewModel.upgradeSelectedPackage()
-        }
-        callerTask.cancel()
-        _ = await callerTask.result
-
-        await center.waitForSubmitCallCount(1)
-        #expect(await center.submitCallCount == 1)
-        await center.resolveSubmit()
-        await waitForUpgradePhase(on: viewModel) { phase in
-            if case .idle = phase {
-                return true
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            let callerTask = Task { @MainActor in
+                viewModel.upgradeSelectedPackage()
             }
-            return false
+            callerTask.cancel()
+            _ = await callerTask.result
+
+            await center.waitForSubmitCallCount(1)
+            #expect(await center.submitCallCount == 1)
+            await center.resolveSubmit()
+            await waitForUpgradePhase(on: viewModel) { phase in
+                if case .idle = phase {
+                    return true
+                }
+                return false
+            }
         }
     }
 }

@@ -13,8 +13,8 @@ final class InstalledDetailsViewModel {
     private var upgradeTask: Task<Void, Never>?
 
     private(set) var package: BrewPackage
-    /// Snapshot from ``BrewCommandCenter/phase(for:)`` for this row’s ``BrewOperationID``, refreshed
-    /// around ``BrewCommandCenter/submit`` (plus a brief optimistic ``BrewOperationPhase/running(_:)`` while awaiting submit).
+    /// Snapshot from ``BrewCommandCenter/phase(for:)`` for this row’s ``BrewOperationID``,
+    /// updated from ``observeRowUpdates()`` (initial yield plus each phase transition from the command center).
     private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
@@ -62,16 +62,40 @@ final class InstalledDetailsViewModel {
         self.brewCommandCenter = brewCommandCenter
     }
 
-    func update(package newPackage: BrewPackage) async {
+    /// Syncs snapshot data for this row (`InstalledListRowViewModel/update(package:)` pattern).
+    func update(package newPackage: BrewPackage) {
         guard newPackage != package else {
             return
         }
         package = newPackage
-        upgradeOperationPhase = await Task {
-            await brewCommandCenter.phase(for: .init(kind: package.kind, name: package.name))
-        }.value
+        upgradeErrorMessage = nil
     }
 
+    func upgradeSelectedPackage() {
+        guard !isUpgrading else {
+            return
+        }
+
+        upgradeErrorMessage = nil
+        let operationID = BrewOperationID(kind: package.kind, name: package.name)
+        let command = PackageUpgradeCommand(kind: package.kind, name: package.name)
+
+        upgradeTask?.cancel()
+        upgradeTask = Task { @MainActor [self] in
+            do {
+                try await brewCommandCenter.submit(id: operationID, command: command)
+            } catch {
+                let latestPhase = await brewCommandCenter.phase(for: operationID)
+                if case let .failed(reason: failure) = latestPhase {
+                    upgradeErrorMessage = failure.userFacingMessage
+                } else {
+                    upgradeErrorMessage = Self.userMessage(for: error)
+                }
+            }
+        }
+    }
+
+    /// Run while the installed detail column shows this ``package/id`` (`InstalledListRowView` pattern).
     func observeRowUpdates() async {
         let operationID = BrewOperationID(package: package)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
@@ -84,39 +108,6 @@ final class InstalledDetailsViewModel {
                 isUpgrading = true
             } else {
                 isUpgrading = false
-            }
-        }
-    }
-
-    func upgradeSelectedPackage() {
-        guard !isUpgrading else {
-            return
-        }
-
-        upgradeErrorMessage = nil
-        let operationID = BrewOperationID(kind: package.kind, name: package.name)
-        let command = PackageUpgradeCommand(kind: package.kind, name: package.name)
-
-        upgradeOperationPhase = .running(command.operationKind)
-
-        upgradeTask?.cancel()
-        upgradeTask = Task { [self] in
-            do {
-                try await brewCommandCenter.submit(id: operationID, command: command)
-                let latestPhase = await brewCommandCenter.phase(for: operationID)
-                await MainActor.run {
-                    upgradeOperationPhase = latestPhase
-                }
-            } catch {
-                let latestPhase = await brewCommandCenter.phase(for: operationID)
-                await MainActor.run {
-                    upgradeOperationPhase = latestPhase
-                    if case let .failed(reason: failure) = latestPhase {
-                        upgradeErrorMessage = failure.userFacingMessage
-                    } else {
-                        upgradeErrorMessage = Self.userMessage(for: error)
-                    }
-                }
             }
         }
     }

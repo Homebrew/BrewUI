@@ -13,7 +13,7 @@ struct InstalledPackageDetailRoot: View {
     var body: some View {
         InstalledPackageDetailView(
             package: selectedPackage,
-            brewCommandCenter: brewCommandCenter
+            brewCommandCenter: brewCommandCenter,
         )
         .id(selectedPackage.id)
     }
@@ -29,8 +29,8 @@ struct InstalledPackageDetailView: View {
         _viewModel = State(
             initialValue: InstalledDetailsViewModel(
                 package: package,
-                brewCommandCenter: brewCommandCenter
-            )
+                brewCommandCenter: brewCommandCenter,
+            ),
         )
     }
 
@@ -39,8 +39,11 @@ struct InstalledPackageDetailView: View {
             detailScrollContent(viewModel: viewModel)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task(id: package) {
-            await viewModel.update(package: package)
+        .task(id: package.id) {
+            await viewModel.observeRowUpdates()
+        }
+        .onChange(of: package) { _, newPackage in
+            viewModel.update(package: newPackage)
         }
     }
 

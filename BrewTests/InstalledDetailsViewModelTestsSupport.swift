@@ -135,6 +135,18 @@ func waitForUpgradeError(on viewModel: InstalledDetailsViewModel) async {
     Issue.record("timed out waiting for upgradeErrorMessage")
 }
 
+/// Runs ``InstalledDetailsViewModel/observeRowUpdates()`` concurrently — required for upgrades to mirror the detail column lifecycle.
+@MainActor
+func withInstalledDetailPhaseObservation(
+    on viewModel: InstalledDetailsViewModel,
+    _ body: () async -> Void,
+) async {
+    let observer = Task { await viewModel.observeRowUpdates() }
+    defer { observer.cancel() }
+    await Task.yield()
+    await body()
+}
+
 func details(
     name: String,
     kind: InstalledPackageKind = .formula,
