@@ -41,6 +41,7 @@ actor NoopBrewCommandCenter: BrewCommandCenter {
         _ = id
         return AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             continuation.yield(BrewOperationPhase.idle)
+            continuation.finish()
         }
     }
 

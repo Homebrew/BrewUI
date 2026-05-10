@@ -122,7 +122,7 @@ struct InstalledViewModelPresentationTests {
         #expect(vm.selectedPackageID == row.id)
     }
 
-    @Test @MainActor func `toggleSelection clears selection when tapping selected row`() async {
+    @Test @MainActor func `toggleSelection on sole selected row resets to first visible row`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "a", kind: .formula)],
         )
@@ -132,10 +132,11 @@ struct InstalledViewModelPresentationTests {
         }
         vm.toggleSelection(for: row.id)
         vm.toggleSelection(for: row.id)
-        #expect(vm.selectedPackageID == nil)
+        // Deselecting maps to the first visible row; with a single row that is still `row.id`.
+        #expect(vm.selectedPackageID == row.id)
     }
 
-    @Test @MainActor func `clearSelection clears selected package`() async {
+    @Test @MainActor func `clearSelection resets to first visible row`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "a", kind: .formula)],
         )
@@ -145,7 +146,7 @@ struct InstalledViewModelPresentationTests {
         }
         vm.toggleSelection(for: row.id)
         vm.clearSelection()
-        #expect(vm.selectedPackageID == nil)
+        #expect(vm.selectedPackageID == row.id)
     }
 }
 

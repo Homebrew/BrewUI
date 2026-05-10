@@ -31,7 +31,7 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
-    @Test @MainActor func `setSelection updates and clears selected package`() async {
+    @Test @MainActor func `setSelection nil resolves to first visible package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git", kind: .formula)],
         )
@@ -40,17 +40,18 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == selectedID)
 
         vm.setSelection(nil)
-        #expect(vm.selectedPackage == nil)
+        // `nil` selection resolves to the first visible row (always-on list selection).
+        #expect(vm.selectedPackage?.id == selectedID)
     }
 
-    @Test @MainActor func `clearSelection clears selected package`() async {
+    @Test @MainActor func `clearSelection resets to first visible package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git", kind: .formula)],
         )
         guard let selectedID = vm.loadedFormulaPackages.first?.id else { return }
         vm.toggleSelection(for: selectedID)
         vm.clearSelection()
-        #expect(vm.selectedPackage == nil)
+        #expect(vm.selectedPackage?.id == selectedID)
     }
 
     @Test @MainActor func `command center running to idle triggers installed refresh`() async {
@@ -132,7 +133,7 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
-    @Test @MainActor func `refresh clears selection when selected package disappears`() async {
+    @Test @MainActor func `refresh repoints selection when selected package disappears`() async {
         let firstSnapshot: [BrewPackage] = [
             .fixture(name: "git", kind: .formula),
             .fixture(name: "wget", kind: .formula),
@@ -151,8 +152,9 @@ struct InstalledViewModelTests {
 
         await vm.refresh()
 
-        #expect(vm.selectedPackageID == nil)
-        #expect(vm.selectedPackage == nil)
+        let expectedFallbackID: BrewPackage.ID = "formula:wget"
+        #expect(vm.selectedPackageID == expectedFallbackID)
+        #expect(vm.selectedPackage?.id == expectedFallbackID)
     }
 }
 
