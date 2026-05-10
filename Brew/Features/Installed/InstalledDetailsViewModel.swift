@@ -102,13 +102,11 @@ final class InstalledDetailsViewModel {
         for await phase in stream {
             let oldPhase = upgradeOperationPhase
             upgradeOperationPhase = phase
-            if case .running = phase {
-                isUpgrading = true
-            } else if case .running = oldPhase, case .idle = phase, package.outdated {
-                isUpgrading = true
-            } else {
-                isUpgrading = false
-            }
+            isUpgrading = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+                isPackageOutdated: package.outdated,
+            )
         }
     }
 

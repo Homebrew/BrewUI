@@ -94,13 +94,11 @@ final class InstalledListRowViewModel {
         for await phase in stream {
             let oldPhase = upgradeOperationPhase
             upgradeOperationPhase = phase
-            if case .running = phase {
-                showsUpgradeBusy = true
-            } else if case .running = oldPhase, case .idle = phase, package.outdated {
-                showsUpgradeBusy = true
-            } else {
-                showsUpgradeBusy = false
-            }
+            showsUpgradeBusy = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+                isPackageOutdated: package.outdated,
+            )
         }
     }
 }
