@@ -12,7 +12,7 @@ extension BrewInfoJSON {
         return (formulaPackages + caskPackages).sorted(by: Self.sortByName)
     }
 
-    nonisolated private static func sortByName(_ lhs: BrewPackage, _ rhs: BrewPackage) -> Bool {
+    private nonisolated static func sortByName(_ lhs: BrewPackage, _ rhs: BrewPackage) -> Bool {
         lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
     }
 }

@@ -13,7 +13,7 @@ struct InstalledListRowRoot: View {
     var body: some View {
         InstalledListRowView(
             package: package,
-            brewCommandCenter: brewCommandCenter
+            brewCommandCenter: brewCommandCenter,
         )
         .id(package.id)
     }
@@ -27,8 +27,8 @@ struct InstalledListRowView: View {
         _viewModel = State(
             initialValue: InstalledListRowViewModel(
                 package: package,
-                brewCommandCenter: brewCommandCenter
-            )
+                brewCommandCenter: brewCommandCenter,
+            ),
         )
         self.package = package
     }
