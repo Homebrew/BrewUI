@@ -15,7 +15,6 @@ struct InstalledPackageDetailRoot: View {
             package: selectedPackage,
             brewCommandCenter: brewCommandCenter,
         )
-        .id(selectedPackage.id)
     }
 }
 
