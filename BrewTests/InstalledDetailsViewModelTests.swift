@@ -167,6 +167,71 @@ struct InstalledDetailsViewModelUpgradeTests {
         }
     }
 
+    @Test @MainActor func `upgrade ignores reentry while already upgrading`() async {
+        let center = RunningSubmitCountingCommandCenter()
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+
+        viewModel.upgradeSelectedPackage()
+        let observer = Task { await viewModel.observeRowUpdates() }
+        defer { observer.cancel() }
+
+        await waitForUpgrading(on: viewModel)
+        viewModel.upgradeSelectedPackage()
+
+        #expect(await center.submitCallCount == 1)
+    }
+
+    @Test @MainActor func `upgrade failure maps missing brew to user facing message`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewLookupError.executableNotFound,
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(
+                viewModel.upgradeErrorMessage ==
+                    "Could not find Homebrew. Install it or ensure brew is in the default location.",
+            )
+        }
+    }
+
+    @Test @MainActor func `upgrade failure maps launch failure to underlying message`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewCommandError.launchFailed(underlying: "spawn failed"),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(viewModel.upgradeErrorMessage == "spawn failed")
+        }
+    }
+
+    @Test @MainActor func `upgrade failure maps unknown errors to generic message`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: GenericUpgradeError(),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(viewModel.upgradeErrorMessage == "Something went wrong while upgrading this package.")
+        }
+    }
+
     @Test @MainActor func `upgrade submit continues after caller task cancellation`() async {
         let center = DeferredSubmitCommandCenter()
         let viewModel = InstalledDetailsViewModel(
@@ -188,3 +253,5 @@ struct InstalledDetailsViewModelUpgradeTests {
         }
     }
 }
+
+private struct GenericUpgradeError: Error {}

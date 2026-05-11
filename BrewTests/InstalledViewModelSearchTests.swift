@@ -49,4 +49,77 @@ struct InstalledViewModelSearchTests {
         #expect(vm.loadedFormulaPackages.isEmpty)
         #expect(vm.loadedCaskPackages.isEmpty)
     }
+
+    @Test @MainActor
+    func `searchQuery previews first visible result and restores prior selection when cleared`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                .fixture(name: "git", kind: .formula),
+                .fixture(name: "wget", kind: .formula),
+            ],
+            casks: [
+                .fixture(name: "github", kind: .cask),
+            ],
+        )
+        vm.setSelection("formula:wget")
+
+        vm.searchQuery = "git"
+        #expect(vm.activeSelectedPackageID == "formula:git")
+        #expect(vm.selectedPackage?.id == "formula:git")
+
+        vm.searchQuery = ""
+        #expect(vm.activeSelectedPackageID == "formula:wget")
+        #expect(vm.selectedPackage?.id == "formula:wget")
+    }
+
+    @Test @MainActor func `searchQuery commit keeps selected result after clearing search`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                .fixture(name: "git", kind: .formula),
+                .fixture(name: "wget", kind: .formula),
+            ],
+            casks: [
+                .fixture(name: "github", kind: .cask),
+            ],
+        )
+        vm.setSelection("formula:wget")
+
+        vm.searchQuery = "git"
+        vm.setSelection("cask:github")
+        #expect(vm.activeSelectedPackageID == "cask:github")
+
+        vm.searchQuery = ""
+        #expect(vm.activeSelectedPackageID == "cask:github")
+        #expect(vm.selectedPackage?.id == "cask:github")
+    }
+
+    @Test @MainActor
+    func `searchQuery updates preview selection as query changes when no selection is committed`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                .fixture(name: "git", kind: .formula),
+                .fixture(name: "wget", kind: .formula),
+            ],
+            casks: [
+                .fixture(name: "github", kind: .cask),
+            ],
+        )
+
+        vm.searchQuery = "git"
+        #expect(vm.activeSelectedPackageID == "formula:git")
+
+        vm.searchQuery = "github"
+        #expect(vm.activeSelectedPackageID == "cask:github")
+        #expect(vm.selectedPackage?.id == "cask:github")
+    }
+
+    @Test @MainActor func `searchQuery marks search as selected when query changes`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [.fixture(name: "git", kind: .formula)],
+        )
+
+        #expect(!vm.isSearchSelected)
+        vm.searchQuery = "git"
+        #expect(vm.isSearchSelected)
+    }
 }

@@ -25,7 +25,18 @@ struct BrewInstalledPackagesRepositoryTests {
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
         let packages = try await repo.loadInstalledPackages()
-        #expect(packages.count == 3)
+
+        #expect(packages.map(\.name) == ["aria2", "wget", "zed"])
+
+        let aria2 = try #require(package(named: "aria2", in: packages))
+        #expect(aria2.kind == .formula)
+        #expect(aria2.latestVersion == "2.0.0")
+        #expect(aria2.installedVersions.isEmpty)
+
+        let zed = try #require(package(named: "zed", in: packages))
+        #expect(zed.kind == .cask)
+        #expect(zed.latestVersion == "1.2.3")
+        #expect(zed.installedVersions == ["1.2.4"])
     }
 
     @Test @MainActor func `load handles mixed payload version fallback rules`() async throws {
@@ -59,7 +70,81 @@ struct BrewInstalledPackagesRepositoryTests {
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
         let packages = try await repo.loadInstalledPackages()
-        #expect(packages.count == 6)
+
+        #expect(packages.map(\.name) == ["alpha", "beta", "charlie", "delta", "echo", "gamma"])
+
+        let alpha = try #require(package(named: "alpha", in: packages))
+        #expect(alpha.latestVersion == "9.9.9")
+        #expect(alpha.installedVersions == ["1.2.3"])
+
+        let beta = try #require(package(named: "beta", in: packages))
+        #expect(beta.latestVersion == "2.0.0")
+        #expect(beta.installedVersions.isEmpty)
+
+        let gamma = try #require(package(named: "gamma", in: packages))
+        #expect(gamma.latestVersion.isEmpty)
+        #expect(gamma.installedVersions == ["3.1.0"])
+
+        let echo = try #require(package(named: "echo", in: packages))
+        #expect(echo.latestVersion == "4.0.0")
+        #expect(echo.installedVersions == ["4.0.1"])
+
+        let delta = try #require(package(named: "delta", in: packages))
+        #expect(delta.latestVersion == "5.0.0")
+        #expect(delta.installedVersions.isEmpty)
+
+        let charlie = try #require(package(named: "charlie", in: packages))
+        #expect(charlie.latestVersion.isEmpty)
+        #expect(charlie.installedVersions == ["6.0.0"])
+    }
+
+    @Test @MainActor func `load trims strings and deduplicates mapped dependencies`() async throws {
+        let json = """
+        {
+          "formulae": [
+            {
+              "name": "deps-formula",
+              "desc": "  formula desc  ",
+              "homepage": " https://example.com ",
+              "dependencies": ["openssl", ""],
+              "build_dependencies": ["make", "openssl"],
+              "recommended_dependencies": ["curl", " make "],
+              "optional_dependencies": ["  sqlite ", ""],
+              "versions": { "stable": "1.0.0" },
+              "installed": [{ "version": "1.0.0" }]
+            }
+          ],
+          "casks": [
+            {
+              "token": "deps-cask",
+              "desc": "  cask desc  ",
+              "homepage": " https://example.org ",
+              "version": "2.0.0",
+              "installed": ["2.0.0"],
+              "dependencies": {
+                "formula": [" git ", ""],
+                "cask": ["docker", "git"]
+              }
+            }
+          ]
+        }
+        """
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
+        let packages = try await repo.loadInstalledPackages()
+
+        let formula = try #require(package(named: "deps-formula", in: packages))
+        #expect(formula.description == "formula desc")
+        #expect(formula.homepage == "https://example.com")
+        #expect(formula.dependencies == ["openssl", "make", "curl", "sqlite"])
+
+        let cask = try #require(package(named: "deps-cask", in: packages))
+        #expect(cask.description == "cask desc")
+        #expect(cask.homepage == "https://example.org")
+        #expect(Set(cask.dependencies) == Set(["git", "docker"]))
+        #expect(cask.dependencies.count == 2)
     }
 
     @Test @MainActor func `load tolerates optional and missing fields in json payload`() async throws {
@@ -133,4 +218,9 @@ struct BrewInstalledPackagesRepositoryTests {
             try await repo.loadInstalledPackages()
         }
     }
+}
+
+@MainActor
+private func package(named name: String, in packages: [BrewPackage]) -> BrewPackage? {
+    packages.first { $0.name == name }
 }

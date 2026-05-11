@@ -38,7 +38,7 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
 
 actor ThrowingSubmitCommandCenter: BrewCommandCenter {
     let error: Error
-    init(error: BrewCommandError) {
+    init(error: Error) {
         self.error = error
     }
 
@@ -61,6 +61,43 @@ actor ThrowingSubmitCommandCenter: BrewCommandCenter {
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             continuation.yield(.idle)
+        }
+    }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+}
+
+actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
+    private(set) var submitCallCount: Int = 0
+    private let runningPhase: BrewOperationPhase
+
+    init(phase: BrewOperationPhase = .running(.upgradeFormula)) {
+        runningPhase = phase
+    }
+
+    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
+        runningPhase
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id _: BrewOperationID) async -> Bool {
+        true
+    }
+
+    func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
+        submitCallCount += 1
+    }
+
+    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            continuation.yield(runningPhase)
         }
     }
 
@@ -133,6 +170,15 @@ func waitForUpgradeError(on viewModel: InstalledDetailsViewModel) async {
         await Task.yield()
     }
     Issue.record("timed out waiting for upgradeErrorMessage")
+}
+
+@MainActor
+func waitForUpgrading(on viewModel: InstalledDetailsViewModel) async {
+    for _ in 0 ..< 100 {
+        if viewModel.isUpgrading { return }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for isUpgrading")
 }
 
 /// Runs ``InstalledDetailsViewModel/observeRowUpdates()`` concurrently — required for upgrades to mirror the detail column lifecycle.

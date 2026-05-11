@@ -154,6 +154,70 @@ struct InstalledViewModelTests {
         let expectedFallbackID: BrewPackage.ID = "formula:wget"
         #expect(vm.selectedPackage?.id == expectedFallbackID)
     }
+
+    @Test @MainActor func `load preserves brew stderr in user facing error state`() async {
+        let vm = InstalledViewModel(
+            repository: StubThrowingRepository(
+                error: BrewCommandError.failed(exitCode: 1, stderr: "formula conflict"),
+            ),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await vm.load()
+
+        guard case let .error(message) = vm.state else {
+            Issue.record("expected error state")
+            return
+        }
+        #expect(message == "formula conflict")
+    }
+
+    @Test @MainActor func `load maps brew lookup failure to missing Homebrew copy`() async {
+        let vm = InstalledViewModel(
+            repository: StubThrowingRepository(error: BrewLookupError.executableNotFound),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await vm.load()
+
+        guard case let .error(message) = vm.state else {
+            Issue.record("expected error state")
+            return
+        }
+        #expect(message == InstalledPackagesTestSupport.localizedBrewExecutableNotFoundMessage())
+    }
+
+    @Test @MainActor func `load maps launch failure to underlying message`() async {
+        let vm = InstalledViewModel(
+            repository: StubThrowingRepository(
+                error: BrewCommandError.launchFailed(underlying: "spawn failed"),
+            ),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await vm.load()
+
+        guard case let .error(message) = vm.state else {
+            Issue.record("expected error state")
+            return
+        }
+        #expect(message == "spawn failed")
+    }
+
+    @Test @MainActor func `load maps unknown failure to generic load message`() async {
+        let vm = InstalledViewModel(
+            repository: StubThrowingRepository(error: OddRepositoryError()),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await vm.load()
+
+        guard case let .error(message) = vm.state else {
+            Issue.record("expected error state")
+            return
+        }
+        #expect(message == InstalledPackagesTestSupport.localizedGenericLoadFailureMessage())
+    }
 }
 
 @MainActor
