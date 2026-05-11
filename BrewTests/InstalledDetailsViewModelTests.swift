@@ -58,7 +58,7 @@ struct InstalledDetailsViewModelTests {
             package: .fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.upgradeDisplayCommand == "brew upgrade wget")
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade --formula wget")
     }
 
     @Test @MainActor func `upgradeDisplayCommand uses cask terminal flags`() {
@@ -75,7 +75,7 @@ struct InstalledDetailsViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.update(package: details(name: "wget@2"))
-        #expect(viewModel.upgradeDisplayCommand == "brew upgrade wget@2")
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade --formula wget@2")
     }
 
     @Test @MainActor func `showsUpgradeChrome follows package outdated flag`() {

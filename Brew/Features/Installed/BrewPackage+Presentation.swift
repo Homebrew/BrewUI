@@ -20,7 +20,7 @@ extension BrewPackage {
     var upgradeCommand: String {
         switch kind {
         case .formula:
-            "brew upgrade \(name)"
+            "brew upgrade --formula \(name)"
         case .cask:
             "brew upgrade --cask \(name)"
         }

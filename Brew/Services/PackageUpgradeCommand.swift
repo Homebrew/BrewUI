@@ -35,7 +35,7 @@ struct PackageUpgradeCommand: BrewMutatingCommand {
         let brew = try context.brewExecutableURL()
         let arguments: [String] = switch kind {
         case .formula:
-            ["upgrade", packageName]
+            ["upgrade", "--formula", packageName]
         case .cask:
             ["upgrade", "--cask", packageName]
         }

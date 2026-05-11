@@ -24,7 +24,7 @@ struct PackageUpgradeCommandTests {
         try await PackageUpgradeCommand(package: package).run(in: ctx)
 
         #expect(await runner.lastExecutable == brewURL)
-        #expect(await runner.lastArguments == ["upgrade", "git"])
+        #expect(await runner.lastArguments == ["upgrade", "--formula", "git"])
     }
 
     @Test func `cask run invokes brew upgrade cask name`() async throws {
