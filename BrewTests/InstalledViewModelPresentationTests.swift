@@ -24,12 +24,12 @@ private func sectionVisibility(_ vm: InstalledViewModel) -> SectionVisibilitySna
 }
 
 struct InstalledViewModelPresentationTests {
-    @Test @MainActor func `selectedPackageID is nil for initial loading state`() {
+    @Test @MainActor func `selectedPackage is nil for initial loading state`() {
         let vm = InstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(vm.selectedPackageID == nil)
+        #expect(vm.selectedPackage == nil)
     }
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is true when loading with no rows and no error`() {
@@ -110,7 +110,7 @@ struct InstalledViewModelPresentationTests {
         #expect(vm.packageCountSubtitle == "2 packages")
     }
 
-    @Test @MainActor func `toggleSelection selects row when nothing selected`() async {
+    @Test @MainActor func `setSelection selects row when nothing selected`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "a", kind: .formula)],
         )
@@ -118,11 +118,11 @@ struct InstalledViewModelPresentationTests {
             Issue.record("expected row in loaded state")
             return
         }
-        vm.toggleSelection(for: row.id)
-        #expect(vm.selectedPackageID == row.id)
+        vm.setSelection(row.id)
+        #expect(vm.selectedPackage?.id == row.id)
     }
 
-    @Test @MainActor func `toggleSelection on sole selected row resets to first visible row`() async {
+    @Test @MainActor func `setSelection nil on sole selected row resolves to first visible row`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "a", kind: .formula)],
         )
@@ -130,10 +130,9 @@ struct InstalledViewModelPresentationTests {
             Issue.record("expected row in loaded state")
             return
         }
-        vm.toggleSelection(for: row.id)
-        vm.toggleSelection(for: row.id)
-        // Deselecting maps to the first visible row; with a single row that is still `row.id`.
-        #expect(vm.selectedPackageID == row.id)
+        vm.setSelection(row.id)
+        vm.setSelection(nil)
+        #expect(vm.selectedPackage?.id == row.id)
     }
 
     @Test @MainActor func `clearSelection resets to first visible row`() async {
@@ -144,9 +143,9 @@ struct InstalledViewModelPresentationTests {
             Issue.record("expected row in loaded state")
             return
         }
-        vm.toggleSelection(for: row.id)
+        vm.setSelection(row.id)
         vm.clearSelection()
-        #expect(vm.selectedPackageID == row.id)
+        #expect(vm.selectedPackage?.id == row.id)
     }
 }
 

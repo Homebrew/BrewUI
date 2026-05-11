@@ -22,12 +22,12 @@ struct InstalledViewModelTests {
         #expect(vm.totalPackageCount == 2)
     }
 
-    @Test @MainActor func `toggleSelection updates selected package`() async {
+    @Test @MainActor func `setSelection updates selected package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git", kind: .formula)],
         )
         guard let selectedID = vm.loadedFormulaPackages.first?.id else { return }
-        vm.toggleSelection(for: selectedID)
+        vm.setSelection(selectedID)
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
@@ -49,7 +49,7 @@ struct InstalledViewModelTests {
             formulae: [.fixture(name: "git", kind: .formula)],
         )
         guard let selectedID = vm.loadedFormulaPackages.first?.id else { return }
-        vm.toggleSelection(for: selectedID)
+        vm.setSelection(selectedID)
         vm.clearSelection()
         #expect(vm.selectedPackage?.id == selectedID)
     }
@@ -129,7 +129,6 @@ struct InstalledViewModelTests {
 
         await vm.refresh()
 
-        #expect(vm.selectedPackageID == selectedID)
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
@@ -153,7 +152,6 @@ struct InstalledViewModelTests {
         await vm.refresh()
 
         let expectedFallbackID: BrewPackage.ID = "formula:wget"
-        #expect(vm.selectedPackageID == expectedFallbackID)
         #expect(vm.selectedPackage?.id == expectedFallbackID)
     }
 }

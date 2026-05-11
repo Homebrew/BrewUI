@@ -34,7 +34,7 @@ func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
         state: vm.state,
         formulaPackages: vm.loadedFormulaPackages,
         caskPackages: vm.loadedCaskPackages,
-        selectedPackageID: vm.selectedPackageID,
+        selectedPackageID: vm.selectedPackage?.id,
         totalPackageCount: vm.totalPackageCount,
     )
 }

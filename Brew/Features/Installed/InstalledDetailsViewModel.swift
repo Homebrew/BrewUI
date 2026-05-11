@@ -13,9 +13,8 @@ final class InstalledDetailsViewModel {
     private var upgradeTask: Task<Void, Never>?
 
     private(set) var package: BrewPackage
-    /// Snapshot from ``BrewCommandCenter/phase(for:)`` for this row’s ``BrewOperationID``,
-    /// updated from ``observeRowUpdates()`` (initial yield plus each phase transition from the command center).
-    private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
+    /// Latest phase from the command center stream (see ``observeRowUpdates()``); drives ``isUpgrading`` only.
+    private var upgradeOperationPhase: BrewOperationPhase = .idle
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
 

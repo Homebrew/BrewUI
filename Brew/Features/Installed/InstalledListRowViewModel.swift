@@ -15,7 +15,7 @@ enum RowVersionPresentation: Equatable {
 @MainActor
 final class InstalledListRowViewModel {
     private(set) var package: BrewPackage
-    private(set) var upgradeOperationPhase: BrewOperationPhase = .idle
+    private var upgradeOperationPhase: BrewOperationPhase = .idle
     private(set) var showsUpgradeBusy: Bool = false
     private let brewCommandCenter: BrewCommandCenter
 

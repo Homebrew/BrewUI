@@ -114,16 +114,16 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
     }
 }
 
+/// Waits until upgrade busy chrome clears (``InstalledDetailsViewModel/isUpgrading``), after a short yield budget so async submit work can run.
 @MainActor
-func waitForUpgradePhase(
-    on viewModel: InstalledDetailsViewModel,
-    toSatisfy predicate: @escaping (BrewOperationPhase) -> Bool,
-) async {
-    for _ in 0 ..< 100 {
-        if predicate(viewModel.upgradeOperationPhase) { return }
+func waitForUpgradeAttemptToFinish(on viewModel: InstalledDetailsViewModel) async {
+    for step in 0 ..< 300 {
         await Task.yield()
+        if step >= 10, !viewModel.isUpgrading {
+            return
+        }
     }
-    Issue.record("timed out waiting for expected upgradeOperationPhase")
+    Issue.record("timed out waiting for isUpgrading to clear")
 }
 
 @MainActor

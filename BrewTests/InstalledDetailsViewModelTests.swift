@@ -129,12 +129,12 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.upgradePrimaryButtonTitle?.contains("v2.0.0") == true)
     }
 
-    @Test @MainActor func `upgradeOperationPhase starts idle without syncing command center`() {
+    @Test @MainActor func `detail row is not upgrading before observeRowUpdates runs`() {
         let viewModel = InstalledDetailsViewModel(
             package: details(name: "wget"),
             brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.upgradeFormula)),
         )
-        #expect(viewModel.upgradeOperationPhase == .idle)
+        #expect(!viewModel.isUpgrading)
     }
 }
 
@@ -147,12 +147,7 @@ struct InstalledDetailsViewModelUpgradeTests {
 
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.upgradeSelectedPackage()
-            await waitForUpgradePhase(on: viewModel) { phase in
-                if case .idle = phase {
-                    return true
-                }
-                return false
-            }
+            await waitForUpgradeAttemptToFinish(on: viewModel)
             #expect(viewModel.upgradeErrorMessage == nil)
         }
     }
@@ -189,12 +184,7 @@ struct InstalledDetailsViewModelUpgradeTests {
             await center.waitForSubmitCallCount(1)
             #expect(await center.submitCallCount == 1)
             await center.resolveSubmit()
-            await waitForUpgradePhase(on: viewModel) { phase in
-                if case .idle = phase {
-                    return true
-                }
-                return false
-            }
+            await waitForUpgradeAttemptToFinish(on: viewModel)
         }
     }
 }

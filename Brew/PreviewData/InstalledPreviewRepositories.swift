@@ -1,6 +1,6 @@
 import Foundation
 
-enum InstalledPreviewData {
+private enum InstalledPreviewData {
     static let snapshot: [BrewPackage] = [
         BrewPackage(
             name: "git",

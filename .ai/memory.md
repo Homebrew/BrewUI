@@ -157,6 +157,13 @@
 - `BrewCommandService` now starts concurrent stdout/stderr readers immediately after process launch and only then waits for process termination, avoiding wait-before-read deadlocks on large command output.
 - Added `BrewCommandServiceTests` including a large output regression case (250k chars on each stream) to protect command execution paths used for installed list and details loading.
 
+## 2026-05-11 — Noop command center + main window VM wiring
+
+- **`NoopBrewCommandCenter`:** keep the existing **`preview()`** and **`forTesting()`** helpers; avoid renaming preview/test helpers during visibility-only sweeps.
+- **`BrewCommandExecutionContext`:** keep **`noopForTestingAndPreviews()`** for existing noop subprocess wiring.
+- **Main window:** keep sidebar selection as local `@State` in **`MainWindowView`**; **`InstalledColumnsRoot`** remains the dependency-composition boundary per `CONVENTIONS.md`.
+- **Encapsulation:** **`upgradeOperationPhase`** is **`private`** on list/detail VMs where only **`isUpgrading`** / **`showsUpgradeBusy`** are user-facing.
+
 ## 2026-05-03 — BrewCommandCenter + operation IDs
 
 - **Protocol `BrewCommandCenter`:** `actor` protocol — `submit(id:command:)`, `phase(for:)`, `phaseByID()` (full snapshot map), `isActive(id:)` (all `async` from callers).
@@ -166,12 +173,12 @@
 - **`OperationFailure`:** `Sendable` `enum` (`.brewCommand`, `.brewLaunchFailed`, `.brewExecutableNotFound`, `.generic`) for **`BrewOperationPhase.failed(reason:)`**; `init(catching:)` maps `BrewCommandError`, `BrewLookupError`, and other errors to cases; **`userFacingMessage`** is a derived line for UI.
 - **Transport types (`BrewOperationModels.swift`):** `BrewOperationKind`, `BrewOperationID`, `BrewOperationPhase`.
 - **Domain package discriminator:** `HomebrewPackageKind`; `InstalledPackageKind` typealias; **`BrewOperationID.init(kind:name:)`** in **`BrewOperationID+Homebrew.swift`**.
-- **Composition:** **`BrewApp`** holds **`SerialBrewCommandCenter(executionContext: .live())`** and applies **`.environment(\.brewCommandCenter, center)`** (SwiftUI **`@Entry`** on **`EnvironmentValues.brewCommandCenter`**, type **`(any BrewCommandCenter)?`**, default `nil`) to **`MainWindowView`**. Feature views and view models that need the center should read **`@Environment(\.brewCommandCenter)`** (or take it in **`init`** from a parent that reads the environment). Previews use **`.environment(\.brewCommandCenter, NoopBrewCommandCenter.preview())`**; command-center unit tests still construct **`SerialBrewCommandCenter`**, **`NoopBrewCommandCenter.forTesting()`**, or **`RecordingSerialBrewCommandCenter`** directly (or the same **`.environment`** when hosting SwiftUI).
+- **Composition:** **`BrewApp`** holds **`SerialBrewCommandCenter(executionContext: .live())`** and applies **`.environment(\.brewCommandCenter, center)`** to **`MainWindowView`**. **`MainWindowView`** keeps sidebar selection in local `@State` and embeds **`InstalledColumnsRoot()`**. The root view owns dependency composition for the Installed surface by reading **`@Environment(\.brewCommandCenter)`** and constructing **`InstalledColumns(repository:brewCommandCenter:)`**. Previews use **`NoopBrewCommandCenter.preview()`** and **`.environment(\.brewCommandCenter, …)`**; unit tests construct **`SerialBrewCommandCenter`**, **`NoopBrewCommandCenter.forTesting()`**, or **`RecordingSerialBrewCommandCenter`** as needed.
 
 ## 2026-05-04 — Installed package upgrades via command center
 
 - **Upgrade path:** **`InstalledDetailsViewModel`** calls **`await brewCommandCenter.submit(id:command:)`** with **`BrewOperationID(row: selectedRow)`** and **`PackageUpgradeCommand(row: selectedRow)`** (same **`kind:name`** as **`InstalledPackageRow/id`**; **`PackageUpgradeCommand`** implements **`BrewMutatingCommand`** with **`BrewCommandExecutionContext`**; mirrors **`brew upgrade` / `brew upgrade --cask`** argv split). **`BrewOperationID.init(row:)`** delegates to **`init(kind:name:)`**.
-- **`InstalledViewModel`** takes **`brewCommandCenter: any BrewCommandCenter`** (default **`NoopBrewCommandCenter.forTesting()`** for tests); **`BrewApp`** passes the same **`SerialBrewCommandCenter`** instance as for **`.environment(\.brewCommandCenter, …)`**. Removed **`PackageUpgradeRunning`** / **`BrewPackageUpgradeService`**.
+- **`InstalledViewModel`** takes **`brewCommandCenter: any BrewCommandCenter`** in **`init(repository:brewCommandCenter:)`**; **`BrewApp`** passes the same **`SerialBrewCommandCenter`** instance as for **`.environment(\.brewCommandCenter, …)`**. Removed **`PackageUpgradeRunning`** / **`BrewPackageUpgradeService`**.
 
 ## 2026-05-04 — Detail-upgrade task lifetime
 

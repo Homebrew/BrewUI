@@ -65,7 +65,7 @@ final class InstalledViewModel {
         }
     }
 
-    private(set) var selectedPackageID: BrewPackage.ID?
+    private var selectedPackageID: BrewPackage.ID?
     var isSearchSelected: Bool = false
 
     var activeSelectedPackageID: BrewPackage.ID? {
@@ -151,14 +151,6 @@ final class InstalledViewModel {
                 await refresh()
             }
         }
-    }
-
-    func toggleSelection(for packageID: BrewPackage.ID) {
-        if selectedPackageID == packageID {
-            setSelection(nil)
-            return
-        }
-        setSelection(packageID)
     }
 
     func setSelection(_ selection: BrewPackage.ID?) {

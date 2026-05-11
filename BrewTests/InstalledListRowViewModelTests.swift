@@ -13,11 +13,11 @@ struct InstalledListRowViewModelTests {
         let package = BrewPackage.fixture(name: "git", kind: .formula)
         let center = NoopBrewCommandCenter.forTesting()
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
-        #expect(viewModel.upgradeOperationPhase == .idle)
+        #expect(!viewModel.showsUpgradeBusy)
 
         await viewModel.observeRowUpdates()
 
-        #expect(viewModel.upgradeOperationPhase == .idle)
+        #expect(!viewModel.showsUpgradeBusy)
     }
 
     @Test func `observeRowUpdates ends on last phased stream emission`() async {
@@ -25,7 +25,7 @@ struct InstalledListRowViewModelTests {
         let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .idle])
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
         await viewModel.observeRowUpdates()
-        #expect(viewModel.upgradeOperationPhase == .idle)
+        #expect(!viewModel.showsUpgradeBusy)
     }
 
     @Test func `update package flips row version presentation when outdated changes`() {
