@@ -181,46 +181,38 @@ struct InstalledSectionHeader: View {
     }
 }
 
-// #Preview("Formula with update") {
-//    InstalledListRowView(
-//        row: InstalledPackageRow(
-//            name: "Git",
-//            kind: .formula,
-//            description: "Distributed revision control system",
-//            installedVersion: "v2.45.0",
-//            updateVersion: "v2.45.1",
-//        ),
-//        viewModel: InstalledListRowViewModel(),
-//    )
-//    .padding()
-//    .frame(width: 400)
-// }
+#Preview("Formula with update") {
+    InstalledListRowView(
+        package: BrewPackage(
+            name: "git",
+            kind: .formula,
+            description: "Distributed revision control system",
+            homepage: "https://git-scm.com",
+            latestVersion: "2.45.1",
+            installedVersions: ["2.45.0"],
+            dependencies: [],
+            outdated: true,
+        ),
+        brewCommandCenter: NoopBrewCommandCenter.preview(),
+    )
+    .padding()
+    .frame(width: 400)
+}
 
-// #Preview("Cask") {
-//    InstalledListRowView(
-//        row: InstalledPackageRow(
-//            name: "Docker",
-//            kind: .cask,
-//            description: "App to build and share containerized applications",
-//            installedVersion: "v4.39.0",
-//        ),
-//        viewModel: InstalledListRowViewModel(),
-//    )
-//    .padding()
-//    .frame(width: 400)
-// }
-
-// #Preview("Upgrade in progress (list)") {
-//    InstalledListRowView(
-//        row: InstalledPackageRow(
-//            name: "Git",
-//            kind: .formula,
-//            description: "Distributed revision control system",
-//            installedVersion: "v2.45.0",
-//            updateVersion: "v2.45.1",
-//        ),
-//        viewModel: InstalledListRowViewModel.previewBusyUpgrade(),
-//    )
-//    .padding()
-//    .frame(width: 400)
-// }
+#Preview("Cask") {
+    InstalledListRowView(
+        package: BrewPackage(
+            name: "docker",
+            kind: .cask,
+            description: "App to build and share containerized applications",
+            homepage: "https://www.docker.com",
+            latestVersion: "4.39.0",
+            installedVersions: ["4.39.0"],
+            dependencies: [],
+            outdated: false,
+        ),
+        brewCommandCenter: NoopBrewCommandCenter.preview(),
+    )
+    .padding()
+    .frame(width: 400)
+}
