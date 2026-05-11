@@ -2,6 +2,22 @@
 ---
 version: 2
 updates:
+- package-ecosystem: bundler
+  directories:
+  - "/docs"
+  schedule:
+    interval: weekly
+    day: friday
+    time: '08:00'
+    timezone: Etc/UTC
+  groups:
+    bundler:
+      patterns:
+      - "*"
+  allow:
+  - dependency-type: all
+  cooldown:
+    default-days: 7
 - package-ecosystem: github-actions
   directories:
   - "/"
