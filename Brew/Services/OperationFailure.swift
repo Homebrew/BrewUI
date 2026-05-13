@@ -6,7 +6,7 @@
 import Foundation
 
 /// User-visible and diagnostic failure surfaced through ``BrewOperationPhase/failed(reason:)`` (`Sendable` for actor-isolated state).
-enum OperationFailure: Equatable {
+nonisolated enum OperationFailure: Equatable {
     /// `brew` ran but exited non-zero; stderr is the primary user-visible detail when present.
     case brewCommand(exitCode: Int32, stderr: String)
 

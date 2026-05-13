@@ -4,15 +4,14 @@ import Foundation
 enum InstalledFeatureTestSupport {
     @MainActor
     static func loadedViewModel(
-        formulae: [InstalledPackageInfo] = [],
-        casks: [InstalledPackageInfo] = [],
-        details: InstalledPackageDetails? = nil,
+        formulae: [BrewPackage] = [],
+        casks: [BrewPackage] = [],
     ) async -> InstalledViewModel {
         let viewModel = InstalledViewModel(
             repository: StubInstalledPackagesRepository(
-                snapshot: InstalledPackagesSnapshot(formulae: formulae, casks: casks),
+                snapshot: formulae + casks,
             ),
-            detailsRepository: StubPackageDetailsRepository(details: details),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         await viewModel.load()
         return viewModel
@@ -20,35 +19,9 @@ enum InstalledFeatureTestSupport {
 }
 
 struct StubInstalledPackagesRepository: InstalledPackagesRepository {
-    let snapshot: InstalledPackagesSnapshot
+    let snapshot: [BrewPackage]
 
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+    func loadInstalledPackages() async throws -> [BrewPackage] {
         snapshot
-    }
-}
-
-struct StubPackageDetailsRepository: PackageDetailsRepository {
-    let details: InstalledPackageDetails?
-
-    init(details: InstalledPackageDetails? = nil) {
-        self.details = details
-    }
-
-    func loadPackageDetails(
-        named name: String,
-        preferredKind: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
-        if let details {
-            return details
-        }
-        return InstalledPackageDetails(
-            name: name,
-            kind: preferredKind ?? .formula,
-            description: "desc",
-            version: "1.0.0",
-            installedVersions: ["1.0.0"],
-            homepage: nil,
-            dependencies: [],
-        )
     }
 }

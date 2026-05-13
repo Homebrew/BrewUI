@@ -39,6 +39,16 @@ struct NoopBrewCommandCenterTests {
         }
         #expect(await center.phase(for: id) == .idle)
     }
+
+    @Test func `allPhaseChanges finishes immediately with no events`() async {
+        let center = NoopBrewCommandCenter.forTesting()
+        let stream = await center.allPhaseChanges()
+        var eventCount = 0
+        for await _ in stream {
+            eventCount += 1
+        }
+        #expect(eventCount == 0)
+    }
 }
 
 // MARK: - Commands

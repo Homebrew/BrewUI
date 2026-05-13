@@ -11,17 +11,17 @@ import Testing
 
 struct VMStateSnapshot: Equatable {
     var state: InstalledLoadState
-    var formulaRows: [InstalledPackageRow]
-    var caskRows: [InstalledPackageRow]
-    var selectedPackageID: InstalledPackageRow.ID?
+    var formulaPackages: [BrewPackage]
+    var caskPackages: [BrewPackage]
+    var selectedPackageID: BrewPackage.ID?
     var totalPackageCount: Int
 
     /// Rows cleared, load finished, after a failed `load()`.
     static func emptyAfterLoad(userFacingError: String) -> VMStateSnapshot {
         VMStateSnapshot(
             state: .error(userFacingError),
-            formulaRows: [],
-            caskRows: [],
+            formulaPackages: [],
+            caskPackages: [],
             selectedPackageID: nil,
             totalPackageCount: 0,
         )
@@ -32,9 +32,9 @@ struct VMStateSnapshot: Equatable {
 func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
     VMStateSnapshot(
         state: vm.state,
-        formulaRows: vm.loadedFormulaRows,
-        caskRows: vm.loadedCaskRows,
-        selectedPackageID: vm.selectedPackageID,
+        formulaPackages: vm.loadedFormulaPackages,
+        caskPackages: vm.loadedCaskPackages,
+        selectedPackageID: vm.selectedPackage?.id,
         totalPackageCount: vm.totalPackageCount,
     )
 }
@@ -45,7 +45,10 @@ func loadViewModel(
     locator: (any BrewExecutableLocating)? = nil,
 ) async -> InstalledViewModel {
     let repo = InstalledPackagesTestSupport.repository(commandRunner: commandRunner, locator: locator)
-    let vm = InstalledViewModel(repository: repo, detailsRepository: StubPackageDetailsRepository())
+    let vm = InstalledViewModel(
+        repository: repo,
+        brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+    )
     await vm.load()
     return vm
 }
@@ -55,23 +58,23 @@ struct OddRepositoryError: Error {}
 struct StubThrowingRepository: InstalledPackagesRepository {
     let error: Error
 
-    func loadInstalledPackages() async throws -> InstalledPackagesSnapshot {
+    func loadInstalledPackages() async throws -> [BrewPackage] {
         throw error
     }
 }
 
 extension InstalledViewModel {
-    var loadedFormulaRows: [InstalledPackageRow] {
+    var loadedFormulaPackages: [BrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }
-        return content.formulaRows
+        return content.formulaPackages
     }
 
-    var loadedCaskRows: [InstalledPackageRow] {
+    var loadedCaskPackages: [BrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }
-        return content.caskRows
+        return content.caskPackages
     }
 }

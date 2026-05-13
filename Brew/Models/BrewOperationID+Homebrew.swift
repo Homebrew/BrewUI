@@ -10,4 +10,8 @@ extension BrewOperationID {
     init(kind: HomebrewPackageKind, name: String) {
         rawValue = "\(kind.rawValue):\(name)"
     }
+
+    init(package: BrewPackage) {
+        self.init(kind: package.kind, name: package.name)
+    }
 }

@@ -5,17 +5,25 @@
 
 import Foundation
 import Observation
+import OSLog
 
 struct InstalledPackagesContent: Equatable {
-    var formulaRows: [InstalledPackageRow]
-    var caskRows: [InstalledPackageRow]
+    var packages: [BrewPackage]
 
     var shouldShowFormulaeSection: Bool {
-        !formulaRows.isEmpty
+        !formulaPackages.isEmpty
     }
 
     var shouldShowCasksSection: Bool {
-        !caskRows.isEmpty
+        !caskPackages.isEmpty
+    }
+
+    var formulaPackages: [BrewPackage] {
+        packages.filter { $0.kind == .formula }
+    }
+
+    var caskPackages: [BrewPackage] {
+        packages.filter { $0.kind == .cask }
     }
 }
 
@@ -23,36 +31,44 @@ enum InstalledLoadState: Equatable {
     case loading
     case loaded(InstalledPackagesContent)
     case error(String)
+
+    var isLoaded: Bool {
+        if case .loaded = self {
+            return true
+        }
+        return false
+    }
 }
+
+private let installedPackagesRefreshLogger = Logger(
+    subsystem: "Homebrew.BrewUI",
+    category: "InstalledViewModel",
+)
 
 @Observable
 @MainActor
 final class InstalledViewModel {
     private let repository: InstalledPackagesRepository
-    private let detailsRepository: any PackageDetailsRepository
+    private let brewCommandCenter: any BrewCommandCenter
+    private var observerTask: Task<Void, Never>?
 
     private var loadedContent: InstalledPackagesContent?
-    private var preSearchSelectedPackageID: InstalledPackageRow.ID?
-    private var searchPreviewSelectedPackageID: InstalledPackageRow.ID?
+    private var preSearchSelectedPackageID: BrewPackage.ID?
+    private var searchPreviewSelectedPackageID: BrewPackage.ID?
     private var didCommitSelectionDuringSearch = false
     private(set) var state: InstalledLoadState = .loading
     var searchQuery: String = "" {
         didSet {
-            let previousActiveSelectionID = activeSelectedPackageID
             applyLoadedStateForCurrentQuery()
             updateSelectionForSearchQueryChange(from: oldValue, to: searchQuery)
-            if previousActiveSelectionID != activeSelectedPackageID {
-                startDetailsLoadForCurrentSelection()
-            }
             isSearchSelected = true
         }
     }
 
-    private(set) var selectedPackageID: InstalledPackageRow.ID?
-    private(set) var detailsViewModel: InstalledDetailsViewModel?
+    private var selectedPackageID: BrewPackage.ID?
     var isSearchSelected: Bool = false
 
-    var activeSelectedPackageID: InstalledPackageRow.ID? {
+    var activeSelectedPackageID: BrewPackage.ID? {
         searchPreviewSelectedPackageID ?? selectedPackageID
     }
 
@@ -78,14 +94,21 @@ final class InstalledViewModel {
         return "\(totalPackageCount) packages"
     }
 
-    var selectedPackageRow: InstalledPackageRow? {
+    var selectedPackage: BrewPackage? {
         allRows.first(where: { $0.id == activeSelectedPackageID })
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: InstalledPackagesRepository, detailsRepository: PackageDetailsRepository) {
+    init(repository: InstalledPackagesRepository, brewCommandCenter: any BrewCommandCenter) {
         self.repository = repository
-        self.detailsRepository = detailsRepository
+        self.brewCommandCenter = brewCommandCenter
+        observerTask = Task { @MainActor [weak self] in
+            await self?.observeOperationCompletions()
+        }
+    }
+
+    isolated deinit {
+        observerTask?.cancel()
     }
 
     func load() async {
@@ -93,53 +116,93 @@ final class InstalledViewModel {
         state = .loading
         do {
             let snapshot = try await repository.loadInstalledPackages()
-            let formulaRows = snapshot.formulae.map { Self.row(from: $0, kind: .formula) }
-            let caskRows = snapshot.casks.map { Self.row(from: $0, kind: .cask) }
-            loadedContent = InstalledPackagesContent(formulaRows: formulaRows, caskRows: caskRows)
+            loadedContent = Self.packagesContent(from: snapshot)
             applyLoadedStateForCurrentQuery()
-            startDetailsLoadForCurrentSelection()
         } catch {
             state = .error(Self.userMessage(for: error))
             selectedPackageID = nil
-            clearDetailsState()
         }
     }
 
-    func toggleSelection(for rowID: InstalledPackageRow.ID) {
+    /// Reloads installed packages without clearing the list UI (no `.loading` state).
+    func refresh() async {
+        guard state.isLoaded else {
+            await load()
+            return
+        }
+        do {
+            let snapshot = try await repository.loadInstalledPackages()
+            loadedContent = Self.packagesContent(from: snapshot)
+            applyLoadedStateForCurrentQuery()
+        } catch {
+            installedPackagesRefreshLogger.error(
+                "Refresh installed packages failed: \(error.localizedDescription, privacy: .public)",
+            )
+        }
+    }
+
+    private func observeOperationCompletions() async {
+        var lastPhase: [BrewOperationID: BrewOperationPhase] = [:]
+        let stream = await brewCommandCenter.allPhaseChanges()
+        for await (id, phase) in stream {
+            let previous = lastPhase[id] ?? .idle
+            lastPhase[id] = phase
+            if case .running = previous, case .idle = phase {
+                await refresh()
+            }
+        }
+    }
+
+    func setSelection(_ selection: BrewPackage.ID?) {
         if isSearchActive {
             didCommitSelectionDuringSearch = true
             searchPreviewSelectedPackageID = nil
         }
-        if selectedPackageID == rowID {
-            selectedPackageID = nil
+        if let selection {
+            selectedPackageID = selection
         } else {
-            selectedPackageID = rowID
+            selectedPackageID = firstVisibleRowID()
         }
-        startDetailsLoadForCurrentSelection()
     }
 
     func clearSelection() {
-        selectedPackageID = nil
+        selectedPackageID = firstVisibleRowID()
         searchPreviewSelectedPackageID = nil
-        startDetailsLoadForCurrentSelection()
     }
 
     private var isSearchActive: Bool {
         !Self.normalizedSearchQuery(searchQuery).isEmpty
     }
 
-    private var allRows: [InstalledPackageRow] {
+    private var allRows: [BrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }
-        return content.formulaRows + content.caskRows
+        return content.packages
     }
 
     private func applyLoadedStateForCurrentQuery() {
         guard let loadedContent else {
             return
         }
+        synchronizeSelectionWithLoadedContent(loadedContent)
         state = .loaded(Self.filteredContent(loadedContent, query: searchQuery))
+    }
+
+    private func synchronizeSelectionWithLoadedContent(_ content: InstalledPackagesContent) {
+        let availableIDs = Set(content.packages.map(\.id))
+        if let selectedPackageID, !availableIDs.contains(selectedPackageID) {
+            self.selectedPackageID = nil
+        }
+        if selectedPackageID == nil {
+            selectedPackageID = content.packages.first?.id
+        }
+        if let searchPreviewSelectedPackageID, !availableIDs.contains(searchPreviewSelectedPackageID) {
+            self.searchPreviewSelectedPackageID = nil
+        }
+        if let preSearchSelectedPackageID, !availableIDs.contains(preSearchSelectedPackageID) {
+            self.preSearchSelectedPackageID = nil
+        }
     }
 
     private func updateSelectionForSearchQueryChange(from oldQuery: String, to newQuery: String) {
@@ -172,7 +235,7 @@ final class InstalledViewModel {
         }
     }
 
-    private func firstVisibleRowID() -> InstalledPackageRow.ID? {
+    private func firstVisibleRowID() -> BrewPackage.ID? {
         allRows.first?.id
     }
 
@@ -185,15 +248,14 @@ final class InstalledViewModel {
             return content
         }
 
-        let filteredFormulaRows = content.formulaRows.filter {
+        let filteredFormulaRows = content.formulaPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
-        let filteredCaskRows = content.caskRows.filter {
+        let filteredCaskRows = content.caskPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
         return InstalledPackagesContent(
-            formulaRows: filteredFormulaRows,
-            caskRows: filteredCaskRows,
+            packages: filteredFormulaRows + filteredCaskRows,
         )
     }
 
@@ -201,45 +263,8 @@ final class InstalledViewModel {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private func startDetailsLoadForCurrentSelection() {
-        guard let selectedRow = selectedPackageRow else {
-            detailsViewModel = nil
-            return
-        }
-
-        let detailsViewModel = InstalledDetailsViewModel(
-            selectedRow: selectedRow,
-            repository: detailsRepository,
-        )
-        self.detailsViewModel = detailsViewModel
-        detailsViewModel.load()
-    }
-
-    private func clearDetailsState() {
-        detailsViewModel = nil
-    }
-
-    private static func row(from info: InstalledPackageInfo, kind: InstalledPackageKind) -> InstalledPackageRow {
-        let trimmed = info.version?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let versionLabel: String = if trimmed.isEmpty {
-            "—"
-        } else {
-            displayVersion(trimmed)
-        }
-        return InstalledPackageRow(
-            name: info.name,
-            kind: kind,
-            description: "",
-            installedVersion: versionLabel,
-            updateVersion: nil,
-        )
-    }
-
-    private static func displayVersion(_ raw: String) -> String {
-        if raw.hasPrefix("v") || raw.hasPrefix("V") {
-            return raw
-        }
-        return "v\(raw)"
+    private static func packagesContent(from snapshot: [BrewPackage]) -> InstalledPackagesContent {
+        InstalledPackagesContent(packages: snapshot)
     }
 
     private static func userMessage(for error: Error) -> String {

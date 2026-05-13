@@ -14,12 +14,12 @@ actor NoopBrewCommandCenter: BrewCommandCenter {
     }
 
     /// Preconfigured noop center for SwiftUI previews (immediate execution, standard noop context).
-    static func preview() -> NoopBrewCommandCenter {
+    nonisolated static func preview() -> NoopBrewCommandCenter {
         NoopBrewCommandCenter(executionContext: .noopForTestingAndPreviews())
     }
 
     /// Preconfigured noop center for unit tests (same wiring as ``preview()``).
-    static func forTesting() -> NoopBrewCommandCenter {
+    nonisolated static func forTesting() -> NoopBrewCommandCenter {
         NoopBrewCommandCenter(executionContext: .noopForTestingAndPreviews())
     }
 
@@ -35,6 +35,20 @@ actor NoopBrewCommandCenter: BrewCommandCenter {
     func isActive(id: BrewOperationID) async -> Bool {
         _ = id
         return false
+    }
+
+    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        _ = id
+        return AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            continuation.yield(BrewOperationPhase.idle)
+            continuation.finish()
+        }
+    }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
     }
 
     func submit(

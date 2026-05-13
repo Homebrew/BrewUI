@@ -16,6 +16,14 @@ protocol BrewCommandCenter: Actor {
     /// `true` while work for `id` is actively running (not failed-only).
     func isActive(id: BrewOperationID) async -> Bool
 
+    /// Push-based phase updates for `id` — yields the current phase once when subscribed, then each subsequent phase transition.
+    /// Cancel the consuming task (e.g. end of a SwiftUI ``View/task``) and unregister via ``AsyncStream/Continuation/onTermination``.
+    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase>
+
+    /// Push-based phase updates for **any** operation id — yields each phase transition `(id, phase)` with **no** initial replay.
+    /// Cancel the consuming task and unregister via ``AsyncStream/Continuation/onTermination``.
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)>
+
     /// Enqueue mutating work keyed by `id`.
     ///
     /// **Concurrency:** Conforming types such as ``SerialBrewCommandCenter`` run work **serially** (one mutating operation at a time).

@@ -36,4 +36,22 @@ struct BrewCommandServiceTests {
         #expect(output.standardOutput.count == 250_000)
         #expect(output.standardError.count == 250_000)
     }
+
+    @Test func `run throws CancellationError when caller task is cancelled`() async throws {
+        let service = BrewCommandService()
+        let executable = URL(fileURLWithPath: "/bin/zsh")
+        let task = Task {
+            try await service.run(
+                executableURL: executable,
+                arguments: ["-lc", "sleep 30"],
+            )
+        }
+
+        try await Task.sleep(for: .milliseconds(100))
+        task.cancel()
+
+        await #expect(throws: CancellationError.self) {
+            _ = try await task.value
+        }
+    }
 }

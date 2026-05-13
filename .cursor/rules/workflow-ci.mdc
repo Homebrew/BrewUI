@@ -1,5 +1,6 @@
 ---
 description: Testing and verification workflow expectations.
+globs: **/*.swift
 alwaysApply: false
 ---
 
@@ -9,3 +10,7 @@ alwaysApply: false
 - Run relevant checks for modified scope before concluding work.
 - Treat repository git hooks and CI workflows in `.github/workflows/` as the mandatory enforcement layer.
 - Keep local progress tracking out of PR diffs; use local `.ai/progress.md` only when needed.
+
+## Swift quality (parity with `swift_quality.yml`)
+
+Canonical instructions: **`AGENTS.md` → Workflow → Swift quality (local parity with CI)**. Same commands as `.github/workflows/swift_quality.yml`; this rule is a Cursor-scoped reminder when `**/*.swift` is in context.

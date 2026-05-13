@@ -1,13 +1,15 @@
 import SwiftUI
 
 #Preview("List column") {
+    let commandCenter = NoopBrewCommandCenter.preview()
     let viewModel = InstalledViewModel(
         repository: PreviewInstalledPackagesRepository(),
-        detailsRepository: PreviewPackageDetailsRepository(),
+        brewCommandCenter: commandCenter,
     )
     InstalledPackagesView(
         viewModel: viewModel,
     )
+    .environment(\.brewCommandCenter, commandCenter)
     .task {
         await viewModel.load()
     }
@@ -15,20 +17,17 @@ import SwiftUI
 }
 
 #Preview("Detail") {
-    let detailsViewModel = InstalledDetailsViewModel(
-        selectedRow: InstalledPackageRow(
-            name: "git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            installedVersion: "v2.45.0",
-        ),
-        repository: PreviewPackageDetailsRepository(),
+    let commandCenter = NoopBrewCommandCenter.preview()
+    let package = BrewPackage(
+        name: "git",
+        kind: .formula,
+        description: "",
+        homepage: "",
+        latestVersion: "2.46.1",
+        installedVersions: ["2.45.0"],
+        dependencies: [],
+        outdated: true,
     )
-    InstalledPackageDetailView(
-        viewModel: detailsViewModel,
-    )
-    .task {
-        detailsViewModel.load()
-    }
-    .frame(minWidth: 280, minHeight: 200)
+    InstalledPackageDetailView(package: package, brewCommandCenter: commandCenter)
+        .frame(minWidth: 280, minHeight: 200)
 }

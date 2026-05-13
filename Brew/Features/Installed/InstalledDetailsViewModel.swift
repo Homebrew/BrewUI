@@ -6,102 +6,111 @@
 import Foundation
 import Observation
 
-enum InstalledDetailsLoadState: Equatable {
-    case loading
-    case loaded(InstalledPackageDetails)
-    case error(String)
-}
-
 @Observable
 @MainActor
 final class InstalledDetailsViewModel {
-    private let repository: PackageDetailsRepository
-    private let selectedRow: InstalledPackageRow
-    private var loadTask: Task<Void, Never>?
-    private var requestID: Int = 0
+    private let brewCommandCenter: any BrewCommandCenter
+    private var upgradeTask: Task<Void, Never>?
 
-    private(set) var state: InstalledDetailsLoadState = .loading
+    private(set) var package: BrewPackage
+    /// Latest phase from the command center stream (see ``observeRowUpdates()``); drives ``isUpgrading`` only.
+    private var upgradeOperationPhase: BrewOperationPhase = .idle
+    /// Inline message when upgrade fails; cleared when a new upgrade starts.
+    private(set) var upgradeErrorMessage: String?
+
+    /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
+    private(set) var isUpgrading: Bool = false
 
     var packageName: String {
-        if case let .loaded(details) = state {
-            return details.name
-        }
-        return selectedRow.name
+        package.name
     }
 
     var packageKind: InstalledPackageKind {
-        if case let .loaded(details) = state {
-            return details.kind
-        }
-        return selectedRow.kind
+        package.kind
     }
 
     /// User-facing command for the currently selected package details.
     var displayCommand: String {
-        "brew info \(packageName)"
+        package.infoCommand
+    }
+
+    /// Copyable Terminal command for upgrading this package (`CONVENTIONS.md` — transparency).
+    var upgradeDisplayCommand: String {
+        package.upgradeCommand
+    }
+
+    /// Shown beside the upgrade affordance whenever the package is outdated.
+    var showsUpgradeChrome: Bool {
+        package.outdated
+    }
+
+    var upgradePrimaryButtonTitle: String? {
+        package.upgradeButtonTitle
     }
 
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
-        guard case let .loaded(details) = state else {
-            return nil
-        }
-        return Self.validWebURL(from: details.homepage)
+        package.homepageURL
     }
 
-    init(selectedRow: InstalledPackageRow, repository: any PackageDetailsRepository) {
-        self.selectedRow = selectedRow
-        self.repository = repository
+    init(
+        package: BrewPackage,
+        brewCommandCenter: any BrewCommandCenter,
+    ) {
+        self.package = package
+        self.brewCommandCenter = brewCommandCenter
     }
 
-    func load() {
-        loadTask?.cancel()
-        requestID += 1
-        let activeRequestID = requestID
-
-        state = .loading
-
-        loadTask = Task { [weak self] in
-            guard let self else {
-                return
-            }
-            do {
-                let details = try await repository.loadPackageDetails(
-                    named: selectedRow.name,
-                    preferredKind: selectedRow.kind,
-                )
-                guard !Task.isCancelled else {
-                    return
-                }
-                applyResult(requestID: activeRequestID, state: .loaded(details))
-            } catch {
-                guard !Task.isCancelled else {
-                    return
-                }
-                applyResult(requestID: activeRequestID, state: .error(Self.userMessage(for: error)))
-            }
-        }
-    }
-
-    private func applyResult(requestID: Int, state: InstalledDetailsLoadState) {
-        guard self.requestID == requestID else {
+    /// Syncs snapshot data for this row (`InstalledListRowViewModel/update(package:)` pattern).
+    func update(package newPackage: BrewPackage) {
+        guard newPackage != package else {
             return
         }
-        self.state = state
+        package = newPackage
+        upgradeErrorMessage = nil
+    }
+
+    func upgradeSelectedPackage() {
+        guard !isUpgrading else {
+            return
+        }
+
+        upgradeErrorMessage = nil
+        let operationID = BrewOperationID(kind: package.kind, name: package.name)
+        let command = PackageUpgradeCommand(kind: package.kind, name: package.name)
+
+        upgradeTask?.cancel()
+        upgradeTask = Task { @MainActor [self] in
+            do {
+                try await brewCommandCenter.submit(id: operationID, command: command)
+            } catch {
+                let latestPhase = await brewCommandCenter.phase(for: operationID)
+                if case let .failed(reason: failure) = latestPhase {
+                    upgradeErrorMessage = failure.userFacingMessage
+                } else {
+                    upgradeErrorMessage = Self.userMessage(for: error)
+                }
+            }
+        }
+    }
+
+    /// Run while the installed detail column shows this ``package/id`` (`InstalledListRowView` pattern).
+    func observeRowUpdates() async {
+        let operationID = BrewOperationID(package: package)
+        let stream = await brewCommandCenter.phaseChanges(for: operationID)
+        for await phase in stream {
+            let oldPhase = upgradeOperationPhase
+            upgradeOperationPhase = phase
+            isUpgrading = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+                isPackageOutdated: package.outdated,
+            )
+        }
     }
 
     private static func userMessage(for error: Error) -> String {
         switch error {
-        case PackageDetailsRepositoryError.packageNotFound:
-            return String(
-                localized: "Could not load package details from Homebrew.",
-                comment: "Installed detail error when package is missing in brew info JSON response",
-            )
-        case PackageDetailsRepositoryError.invalidJSONOutput:
-            return String(
-                localized: "Homebrew returned invalid package details.",
-                comment: "Installed detail error when brew info JSON cannot be decoded",
-            )
         case BrewLookupError.executableNotFound:
             return String(
                 localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
@@ -117,24 +126,9 @@ final class InstalledDetailsViewModel {
             return underlying
         default:
             return String(
-                localized: "Something went wrong loading package details.",
-                comment: "Installed detail generic load error",
+                localized: "Something went wrong while upgrading this package.",
+                comment: "Installed detail generic upgrade error",
             )
         }
-    }
-
-    private static func validWebURL(from rawValue: String?) -> URL? {
-        guard let rawValue else {
-            return nil
-        }
-        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard
-            let url = URL(string: trimmed),
-            let scheme = url.scheme?.lowercased(),
-            ["http", "https"].contains(scheme)
-        else {
-            return nil
-        }
-        return url
     }
 }

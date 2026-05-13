@@ -1,37 +1,66 @@
 import SwiftUI
 
+struct InstalledColumnsRoot: View {
+    @Environment(\.brewCommandCenter) var brewCommandCenter
+    @State var repository: BrewInstalledPackagesRepository = .init(
+        commandRunner: BrewCommandService(),
+        locator: BrewExecutableLocator(),
+    )
+
+    var body: some View {
+        InstalledColumns(
+            repository: repository,
+            brewCommandCenter: brewCommandCenter,
+        )
+    }
+}
+
 /// Feature-owned content/detail columns for the main window.
-struct InstalledColumns {
-    @Bindable var viewModel: InstalledViewModel
+struct InstalledColumns: View {
+    @State var viewModel: InstalledViewModel
 
-    /// Right-side feature surface in the main window.
-    /// Uses a two-pane internal split only when a row is selected.
-    var featureView: some View {
-        Group {
-            if let detailsViewModel = viewModel.detailsViewModel {
-                HSplitView {
-                    InstalledPackagesView(viewModel: viewModel)
-                        .frame(
-                            minWidth: BrewLayout.installedListColumnMinWidth,
-                            idealWidth: BrewLayout.installedListColumnIdealWidth,
-                            maxWidth: BrewLayout.installedListColumnMaxWidth,
-                            maxHeight: .infinity,
-                            alignment: .topLeading,
-                        )
+    init(repository: InstalledPackagesRepository, brewCommandCenter: BrewCommandCenter) {
+        _viewModel = State(
+            initialValue: .init(
+                repository: repository,
+                brewCommandCenter: brewCommandCenter,
+            ),
+        )
+    }
 
-                    InstalledPackageDetailView(viewModel: detailsViewModel)
-                        .frame(
-                            minWidth: BrewLayout.inspectorWidth,
-                            idealWidth: BrewLayout.installedDetailColumnIdealWidth,
-                            maxWidth: BrewLayout.installedDetailColumnMaxWidth,
-                            maxHeight: .infinity,
-                            alignment: .topLeading,
-                        )
+    var body: some View {
+        HSplitView {
+            InstalledPackagesView(
+                viewModel: viewModel,
+            )
+            .frame(
+                minWidth: BrewLayout.installedListColumnMinWidth,
+                idealWidth: BrewLayout.installedListColumnIdealWidth,
+                maxWidth: BrewLayout.installedListColumnMaxWidth,
+                maxHeight: .infinity,
+                alignment: .topLeading,
+            )
+
+            Group {
+                if let selectedPackage = viewModel.selectedPackage {
+                    InstalledPackageDetailRoot(
+                        selectedPackage: selectedPackage,
+                    )
+                } else {
+                    InstalledPackageDetailPlaceholder()
                 }
-            } else {
-                InstalledPackagesView(viewModel: viewModel)
             }
+            .frame(
+                minWidth: BrewLayout.inspectorWidth,
+                idealWidth: BrewLayout.installedDetailColumnIdealWidth,
+                maxWidth: BrewLayout.installedDetailColumnMaxWidth,
+                maxHeight: .infinity,
+                alignment: .topLeading,
+            )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .task {
+            await viewModel.load()
+        }
     }
 }

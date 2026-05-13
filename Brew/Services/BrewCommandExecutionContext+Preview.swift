@@ -7,7 +7,7 @@ import Foundation
 
 extension BrewCommandExecutionContext {
     /// Runner returns empty success without touching disk; locator yields a dummy `brew` URL for callers that resolve it.
-    static func noopForTestingAndPreviews() -> BrewCommandExecutionContext {
+    nonisolated static func noopForTestingAndPreviews() -> BrewCommandExecutionContext {
         BrewCommandExecutionContext(
             commandRunner: ImmediateSuccessCommandRunner(),
             locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew")),
@@ -15,7 +15,7 @@ extension BrewCommandExecutionContext {
     }
 }
 
-private struct ImmediateSuccessCommandRunner: BrewCommandRunning {
+private nonisolated struct ImmediateSuccessCommandRunner: BrewCommandRunning {
     func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
         CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }

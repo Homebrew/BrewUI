@@ -157,6 +157,13 @@
 - `BrewCommandService` now starts concurrent stdout/stderr readers immediately after process launch and only then waits for process termination, avoiding wait-before-read deadlocks on large command output.
 - Added `BrewCommandServiceTests` including a large output regression case (250k chars on each stream) to protect command execution paths used for installed list and details loading.
 
+## 2026-05-11 — Noop command center + main window VM wiring
+
+- **`NoopBrewCommandCenter`:** keep the existing **`preview()`** and **`forTesting()`** helpers; avoid renaming preview/test helpers during visibility-only sweeps.
+- **`BrewCommandExecutionContext`:** keep **`noopForTestingAndPreviews()`** for existing noop subprocess wiring.
+- **Main window:** keep sidebar selection as local `@State` in **`MainWindowView`**; **`InstalledColumnsRoot`** remains the dependency-composition boundary per `CONVENTIONS.md`.
+- **Encapsulation:** **`upgradeOperationPhase`** is **`private`** on list/detail VMs where only **`isUpgrading`** / **`showsUpgradeBusy`** are user-facing.
+
 ## 2026-05-03 — BrewCommandCenter + operation IDs
 
 - **Protocol `BrewCommandCenter`:** `actor` protocol — `submit(id:command:)`, `phase(for:)`, `phaseByID()` (full snapshot map), `isActive(id:)` (all `async` from callers).
@@ -166,4 +173,78 @@
 - **`OperationFailure`:** `Sendable` `enum` (`.brewCommand`, `.brewLaunchFailed`, `.brewExecutableNotFound`, `.generic`) for **`BrewOperationPhase.failed(reason:)`**; `init(catching:)` maps `BrewCommandError`, `BrewLookupError`, and other errors to cases; **`userFacingMessage`** is a derived line for UI.
 - **Transport types (`BrewOperationModels.swift`):** `BrewOperationKind`, `BrewOperationID`, `BrewOperationPhase`.
 - **Domain package discriminator:** `HomebrewPackageKind`; `InstalledPackageKind` typealias; **`BrewOperationID.init(kind:name:)`** in **`BrewOperationID+Homebrew.swift`**.
-- **Composition:** **`SerialBrewCommandCenter`** is not wired in **`BrewApp`** yet — shell view models (**`MainWindowViewModel`**, **`InstalledViewModel`**) omit **`BrewCommandCenter`** until upgrade/mutating UX injects it at the composition root. Command-center unit tests construct **`SerialBrewCommandCenter`** or **`NoopBrewCommandCenter.forTesting()`** directly; previews that need a noop center use **`NoopBrewCommandCenter.preview()`** (both noop factories wire **`BrewCommandExecutionContext.noopForTestingAndPreviews()`**).
+- **Composition:** **`BrewApp`** holds **`SerialBrewCommandCenter(executionContext: .live())`** and applies **`.environment(\.brewCommandCenter, center)`** to **`MainWindowView`**. **`MainWindowView`** keeps sidebar selection in local `@State` and embeds **`InstalledColumnsRoot()`**. The root view owns dependency composition for the Installed surface by reading **`@Environment(\.brewCommandCenter)`** and constructing **`InstalledColumns(repository:brewCommandCenter:)`**. Previews use **`NoopBrewCommandCenter.preview()`** and **`.environment(\.brewCommandCenter, …)`**; unit tests construct **`SerialBrewCommandCenter`**, **`NoopBrewCommandCenter.forTesting()`**, or **`RecordingSerialBrewCommandCenter`** as needed.
+
+## 2026-05-04 — Installed package upgrades via command center
+
+- **Upgrade path:** **`InstalledDetailsViewModel`** calls **`await brewCommandCenter.submit(id:command:)`** with **`BrewOperationID(row: selectedRow)`** and **`PackageUpgradeCommand(row: selectedRow)`** (same **`kind:name`** as **`InstalledPackageRow/id`**; **`PackageUpgradeCommand`** implements **`BrewMutatingCommand`** with **`BrewCommandExecutionContext`**; mirrors **`brew upgrade` / `brew upgrade --cask`** argv split). **`BrewOperationID.init(row:)`** delegates to **`init(kind:name:)`**.
+- **`InstalledViewModel`** takes **`brewCommandCenter: any BrewCommandCenter`** in **`init(repository:brewCommandCenter:)`**; **`BrewApp`** passes the same **`SerialBrewCommandCenter`** instance as for **`.environment(\.brewCommandCenter, …)`**. Removed **`PackageUpgradeRunning`** / **`BrewPackageUpgradeService`**.
+
+## 2026-05-04 — Detail-upgrade task lifetime
+
+- `InstalledDetailsViewModel.upgradeSelectedPackage()` now starts and owns an unstructured task (`upgradeTask`) so upgrade execution via `brewCommandCenter.submit` is not canceled by a view-scoped caller task when navigating away from detail UI.
+- `InstalledPackageDetailView` invokes `upgradeSelectedPackage()` directly (no view-level `Task { ... }` wrapper), keeping task-lifetime policy in the view model.
+
+## 2026-05-05 — Per-ID `phaseChanges` + list row VM
+
+- **`BrewCommandCenter`:** added **`phaseChanges(for: BrewOperationID) async -> AsyncStream<BrewOperationPhase>`** — multicast per id in **`SerialBrewCommandCenter`** with **`continuation.onTermination`** cleanup; **`NoopBrewCommandCenter`** yields **`BrewOperationPhase.idle`** once; **`RecordingSerialBrewCommandCenter`** forwards to **`inner`**.
+- **Use `AsyncStream<Element>(bufferingPolicy: .unbounded) { … }`** to pick the continuation-based initializer (plain **`AsyncStream { … }`** can resolve to **`unfolding`** under default actor isolation).
+- **Installed list:** **`InstalledListRowViewModel`** (`observeRowUpdates`) + **`InstalledListRowRoot`** with **`.task(id: row.id)`**; removed parent **`upgradeBusyRowIDs`** polling loop from **`InstalledViewModel`** / **`InstalledPackagesView`**.
+
+## 2026-05-06 — Installed repository narrow single-package read
+
+- **`InstalledPackagesRepository`:** added **`loadInstalledPackage(kind:named:) async throws -> InstalledPackageInfo`** plus shared error **`InstalledPackagesRepositoryError.packageNotFound(kind:name:)`**.
+- **Default protocol behavior:** repository extension falls back to `loadInstalledPackages()` + section/name lookup so existing test doubles remain source-compatible until they adopt specialized implementations.
+- **`BrewInstalledPackagesRepository`:** narrow read now executes `brew info --json=v2 --formula|--cask <name>` and maps only the requested section (`formulae` or `casks`) by exact name/token.
+- **Tests:** added dedicated lookup coverage in `BrewInstalledPackagesRepositorySinglePackageTests` and new command-fixture helper `InstalledPackagesTestSupport.packageInfoJSONResponse(...)`.
+
+## 2026-05-06 — Installed row-driven catalog patch after upgrades
+
+- **Row ownership:** `InstalledListRowViewModel` now owns mutable `InstalledPackageRow` snapshot state (beyond phase) so UI labels can update from narrow refreshes without full-list reloads.
+- **Refresh trigger:** Row VM watches `phaseChanges(for:)` and performs a narrow repository refresh when a row operation transitions `running -> idle`, then emits `onRowUpdated` for parent catalog merge.
+- **View wiring:** `InstalledPackagesView` wires `InstalledListRowRoot` with explicit closures (`refreshedInstalledRow`, `mergeInstalledRow`) so row refresh coordination remains in view/view-model boundaries rather than nested VM factories.
+- **Detail upgrade path:** `InstalledViewModel` `onUpgradeSuccess` now refreshes and merges only the selected row instead of calling full-list `refreshInstalledPackagesPreservingUI()`.
+
+## 2026-05-06 — Installed refresh simplification (full background snapshot)
+
+- Reverted the row-level refresh/patch architecture to reduce complexity: `InstalledListRowViewModel` now observes `phaseChanges(for:)` for progress only, and no longer owns row-refresh callbacks or repository fetch logic.
+- Upgrade completion now uses `InstalledViewModel.refreshInstalledPackagesPreservingUI()` as the single refresh path (full snapshot, no `.loading` transition), preserving smooth list UX without skeleton flicker.
+- Kept DI/wiring improvements: view-layer wiring still creates/injects child VMs (`InstalledColumns` for details VM, `InstalledPackagesView` for row roots / command-center environment injection); list VM does not create child VMs.
+- Removed narrow single-package repository API (`loadInstalledPackage(kind:named:)`) and dedicated lookup tests introduced solely for the abandoned row-refresh approach.
+
+## 2026-05-06 — Concurrency isolation policy (Swift 6 default actor isolation)
+
+- Project build setting `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` is enabled for the app target, so non-UI infra code can require explicit actor-neutral annotations.
+- `SwiftLint` rule `unneeded_synthesized_initializer` is disabled in `.swiftlint.yml` to allow intentional explicit empty `init`/`deinit` declarations when carrying concurrency-isolation intent.
+- Preferred style: use member-level `nonisolated` first (for initializers/factories/helpers/protocol requirements), and avoid type-level `nonisolated` unless a full type-level actor-neutral contract is clearly needed.
+
+## 2026-05-07 — Installed model unification to BrewPackage
+
+- Collapsed Installed feature data models into a single domain model: `BrewPackage` now backs list rows, detail payloads, and repository contracts.
+- Repositories now map `brew info --json=v2` through shared `BrewInfoJSON+Mapping` helpers and return `BrewPackage` values (`InstalledPackagesRepository` returns `[BrewPackage]`, `PackageDetailsRepository` returns `BrewPackage`).
+- Installed list/detail presentation formatting moved to feature view models (`InstalledListRowViewModel`, `InstalledDetailsViewModel`) plus `InstalledBrewVersionFormatting`; models are now presentation-agnostic.
+- Removed legacy Installed models (`InstalledPackageInfo`, `InstalledPackageRow`, `InstalledPackageDetails`) and dead parser path (`InstalledPackagesParser` + parser tests).
+
+## 2026-05-08 — Installed feature single-source-of-truth
+
+- **`InstalledViewModel` owns the catalog** and observes **`BrewCommandCenter.allPhaseChanges()`** to refresh after mutating operations complete (`running → idle`).
+- **Detail and row view models** no longer fetch from a repository; **`PackageDetailsRepository`** and related infrastructure are removed.
+- **Detail and list rows** stay in sync by propagating injected **`BrewPackage`** from the parent via **`onChange(of: package)`** → **`update(package:)`** on the child view models.
+- **Detail-upgrade phase observer caveat:** the detail VM still polls phase around submit rather than subscribing to a stream for concurrent operations on the same id; acceptable for now.
+
+## 2026-05-08 — Root-view dependency ownership policy
+
+- Feature `*Root` views are the dependency composition boundary for that surface: they read app-level dependencies (for example `@Environment`), construct/inject content-view dependencies, and own view-model lifecycle boundaries.
+- Content views should receive dependencies from their root and focus on rendering and behavior; avoid direct app-level dependency acquisition in content views when a root wrapper exists.
+- Treat optional content view models introduced solely to compensate for misplaced dependency acquisition as an anti-pattern.
+
+## 2026-05-08 — Installed list scroll preservation policy
+
+- Keep the Installed list mounted under a stable parent container (`HSplitView`) across selection changes; switching between list-only and split layouts can remount the list and reset scroll position.
+- Prefer native `List(selection:)` for Installed row selection state, with view-model-backed selection binding (`setSelection(_:)`) and row tags by stable package id.
+
+## 2026-05-13 — Vale docs job and `docs/Gemfile`
+
+- **Symptom:** `vale docs/` fails with `lstat docs/../Gemfile: no such file or directory` when `docs/Gemfile` is missing.
+- **Cause:** Vale 3 treats `Rakefile` and `Brewfile` (among others) as Ruby-format prose under `[formats] rb = md` in `.vale.ini`. For those paths it expects a resolvable `Gemfile` next to the Ruby project layout; this repo had `docs/Gemfile.lock` and Jekyll binstubs but no `docs/Gemfile`, unlike `Homebrew/brew` where `docs/` is a full Jekyll tree including `Gemfile`.
+- **Fix:** Commit `docs/Gemfile` (matching upstream brew docs, consistent with the lockfile) and `docs/.ruby-version` so Vale and later `bundle exec` steps in `.github/workflows/docs.yml` both succeed.

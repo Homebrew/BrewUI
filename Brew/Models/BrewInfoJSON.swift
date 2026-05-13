@@ -32,6 +32,7 @@ struct BrewInfoFormula: Decodable {
     var optionalDependencies: [String]
     var versions: BrewInfoFormulaVersions
     var installed: [BrewInfoFormulaInstalled]
+    var outdated: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -46,6 +47,7 @@ struct BrewInfoFormula: Decodable {
             ?? BrewInfoFormulaVersions(stable: nil)
         installed = (try? container.decode([BrewInfoFormulaInstalled].self, forKey: .installed))
             ?? []
+        outdated = (try? container.decode(Bool.self, forKey: .outdated)) ?? false
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -58,6 +60,7 @@ struct BrewInfoFormula: Decodable {
         case optionalDependencies = "optional_dependencies"
         case versions
         case installed
+        case outdated
     }
 }
 
@@ -73,9 +76,13 @@ struct BrewInfoCask: Decodable {
     var token: String
     var desc: String?
     var homepage: String?
+    /// Tap / current cask version string (upgrade target analogue to formula `versions.stable`).
     var version: String?
+    /// Nested stable when present in JSON (current Homebrew `--json=v2` casks omit this; formulae-style mirror).
+    var versions: BrewInfoFormulaVersions
     var installedVersions: [String]
     var dependencies: [String]
+    var outdated: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -83,8 +90,11 @@ struct BrewInfoCask: Decodable {
         desc = try? container.decode(String.self, forKey: .desc)
         homepage = try? container.decode(String.self, forKey: .homepage)
         version = try? container.decode(String.self, forKey: .version)
+        versions = (try? container.decode(BrewInfoFormulaVersions.self, forKey: .versions))
+            ?? BrewInfoFormulaVersions(stable: nil)
         installedVersions = container.decodeInstalledVersions(forKey: .installed)
         dependencies = container.decodeCaskDependencies(forKey: .dependencies)
+        outdated = (try? container.decode(Bool.self, forKey: .outdated)) ?? false
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -92,8 +102,10 @@ struct BrewInfoCask: Decodable {
         case desc
         case homepage
         case version
+        case versions
         case installed
         case dependencies
+        case outdated
     }
 }
 

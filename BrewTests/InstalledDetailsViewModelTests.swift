@@ -8,212 +8,250 @@ import Foundation
 import Testing
 
 struct InstalledDetailsViewModelTests {
-    @Test @MainActor func `displayCommand uses selected row name before load`() {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+    @Test @MainActor func `displayCommand uses package name`() {
         let viewModel = InstalledDetailsViewModel(
-            selectedRow: row,
-            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.displayCommand == "brew info wget")
     }
 
-    @Test @MainActor func `displayCommand uses loaded details name after load`() async {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+    @Test @MainActor func `displayCommand updates when package changes via update`() {
         let viewModel = InstalledDetailsViewModel(
-            selectedRow: row,
-            repository: SuccessDetailsRepository(details: details(name: "wget@2")),
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        viewModel.load()
-        await waitForState(on: viewModel, toSatisfy: isLoaded)
+        viewModel.update(package: details(name: "wget@2"))
         #expect(viewModel.displayCommand == "brew info wget@2")
     }
 
-    @Test @MainActor func `homepageURL returns valid http URL from loaded details`() async {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+    @Test @MainActor func `homepageURL returns valid http URL from package`() {
         var loadedDetails = details(name: "wget")
         loadedDetails.homepage = "https://example.com"
         let viewModel = InstalledDetailsViewModel(
-            selectedRow: row,
-            repository: SuccessDetailsRepository(details: loadedDetails),
+            package: loadedDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        viewModel.load()
-        await waitForState(on: viewModel, toSatisfy: isLoaded)
-
         #expect(viewModel.homepageURL?.absoluteString == "https://example.com")
     }
 
-    @Test @MainActor func `homepageURL returns nil for invalid homepage`() async {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+    @Test @MainActor func `homepageURL returns nil for invalid homepage`() {
         var loadedDetails = details(name: "wget")
         loadedDetails.homepage = "not-a-url"
         let viewModel = InstalledDetailsViewModel(
-            selectedRow: row,
-            repository: SuccessDetailsRepository(details: loadedDetails),
+            package: loadedDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        viewModel.load()
-        await waitForState(on: viewModel, toSatisfy: isLoaded)
-
         #expect(viewModel.homepageURL == nil)
     }
 
-    @Test @MainActor func `homepageURL returns nil outside loaded state`() {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
+    @Test @MainActor func `homepageURL returns nil when homepage empty`() {
         let viewModel = InstalledDetailsViewModel(
-            selectedRow: row,
-            repository: SuccessDetailsRepository(details: details(name: "wget")),
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-
         #expect(viewModel.homepageURL == nil)
     }
 
-    @Test @MainActor func `load maps package not found to user-facing error`() async {
-        let row = InstalledPackageRow(name: "ghost", kind: .formula, description: "", installedVersion: "v1")
-        let repository = StubDetailsRepository(error: PackageDetailsRepositoryError.packageNotFound(name: "ghost"))
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: repository)
-        viewModel.load()
-        await waitForState(on: viewModel, toSatisfy: {
-            if case .error = $0 {
-                return true
-            }
-            return false
-        })
-
-        let expected = String(
-            localized: "Could not load package details from Homebrew.",
-            comment: "Installed detail error when package is missing in brew info JSON response",
+    @Test @MainActor func `upgradeDisplayCommand reflects formula name`() {
+        let viewModel = InstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.state == .error(expected))
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade --formula wget")
     }
 
-    @Test @MainActor func `load maps stderr from brew command failure`() async {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        let repository = StubDetailsRepository(error: BrewCommandError.failed(exitCode: 1, stderr: "permission denied"))
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: repository)
-        viewModel.load()
-        await waitForState(on: viewModel, toSatisfy: {
-            if case .error = $0 {
-                return true
+    @Test @MainActor func `upgradeDisplayCommand uses cask terminal flags`() {
+        let viewModel = InstalledDetailsViewModel(
+            package: .fixture(name: "docker", kind: .cask),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade --cask docker")
+    }
+
+    @Test @MainActor func `upgradeDisplayCommand updates when package name changes`() {
+        let viewModel = InstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        viewModel.update(package: details(name: "wget@2"))
+        #expect(viewModel.upgradeDisplayCommand == "brew upgrade --formula wget@2")
+    }
+
+    @Test @MainActor func `showsUpgradeChrome follows package outdated flag`() {
+        var outdatedDetails = details(name: "wget")
+        outdatedDetails.outdated = true
+        let outdatedVM = InstalledDetailsViewModel(
+            package: outdatedDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(outdatedVM.showsUpgradeChrome)
+
+        var currentDetails = details(name: "wget")
+        currentDetails.outdated = false
+        let currentVM = InstalledDetailsViewModel(
+            package: currentDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(!currentVM.showsUpgradeChrome)
+    }
+
+    @Test @MainActor func `upgradePrimaryButtonTitle is nil when package is current`() {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradePrimaryButtonTitle == nil)
+    }
+
+    @Test @MainActor func `upgradePrimaryButtonTitle includes available version label`() {
+        var outdatedDetails = details(name: "wget")
+        outdatedDetails.outdated = true
+        outdatedDetails.latestVersion = "9.9.9"
+        let viewModel = InstalledDetailsViewModel(
+            package: outdatedDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradePrimaryButtonTitle?.contains("v9.9.9") == true)
+    }
+
+    @Test @MainActor func `update package mutates derived presentation for upgrade button`() {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget", version: "1.0.0"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.upgradePrimaryButtonTitle == nil)
+
+        var newer = details(name: "wget", version: "2.0.0")
+        newer.outdated = true
+        newer.latestVersion = "2.0.0"
+        viewModel.update(package: newer)
+        #expect(viewModel.upgradePrimaryButtonTitle?.contains("v2.0.0") == true)
+    }
+
+    @Test @MainActor func `detail row is not upgrading before observeRowUpdates runs`() {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.upgradeFormula)),
+        )
+        #expect(!viewModel.isUpgrading)
+    }
+}
+
+struct InstalledDetailsViewModelUpgradeTests {
+    @Test @MainActor func `upgrade completes with idle phase and no error using noop center`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeAttemptToFinish(on: viewModel)
+            #expect(viewModel.upgradeErrorMessage == nil)
+        }
+    }
+
+    @Test @MainActor func `upgrade failure sets upgrade error message`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewCommandError.failed(exitCode: 1, stderr: "upgrade blocked"),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(viewModel.upgradeErrorMessage == "upgrade blocked")
+        }
+    }
+
+    @Test @MainActor func `upgrade ignores reentry while already upgrading`() async {
+        let center = RunningSubmitCountingCommandCenter()
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+
+        viewModel.upgradeSelectedPackage()
+        let observer = Task { await viewModel.observeRowUpdates() }
+        defer { observer.cancel() }
+
+        await waitForUpgrading(on: viewModel)
+        viewModel.upgradeSelectedPackage()
+
+        #expect(await center.submitCallCount == 1)
+    }
+
+    @Test @MainActor func `upgrade failure maps missing brew to user facing message`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewLookupError.executableNotFound,
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(
+                viewModel.upgradeErrorMessage ==
+                    "Could not find Homebrew. Install it or ensure brew is in the default location.",
+            )
+        }
+    }
+
+    @Test @MainActor func `upgrade failure maps launch failure to underlying message`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewCommandError.launchFailed(underlying: "spawn failed"),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(viewModel.upgradeErrorMessage == "spawn failed")
+        }
+    }
+
+    @Test @MainActor func `upgrade failure maps unknown errors to generic message`() async {
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: GenericUpgradeError(),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.upgradeSelectedPackage()
+            await waitForUpgradeError(on: viewModel)
+            #expect(viewModel.upgradeErrorMessage == "Something went wrong while upgrading this package.")
+        }
+    }
+
+    @Test @MainActor func `upgrade submit continues after caller task cancellation`() async {
+        let center = DeferredSubmitCommandCenter()
+        let viewModel = InstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            let callerTask = Task { @MainActor in
+                viewModel.upgradeSelectedPackage()
             }
-            return false
-        })
+            callerTask.cancel()
+            _ = await callerTask.result
 
-        #expect(viewModel.state == .error("permission denied"))
-    }
-
-    @Test @MainActor func `later load result wins when previous request finishes last`() async {
-        let row = InstalledPackageRow(name: "wget", kind: .formula, description: "", installedVersion: "v1")
-        let repository = DeferredDetailsRepository()
-        let viewModel = InstalledDetailsViewModel(selectedRow: row, repository: repository)
-
-        viewModel.load()
-        await repository.waitForCallCount(1)
-        viewModel.load()
-        await repository.waitForCallCount(2)
-
-        await repository.resolve(callIndex: 1, with: .success(details(name: "wget-second")))
-        await waitForState(on: viewModel, toSatisfy: {
-            if case let .loaded(details) = $0 {
-                return details.name == "wget-second"
-            }
-            return false
-        })
-
-        await repository.resolve(callIndex: 0, with: .success(details(name: "wget-first")))
-        await Task.yield()
-
-        guard case let .loaded(loadedDetails) = viewModel.state else {
-            Issue.record("expected loaded state after second request result")
-            return
-        }
-        #expect(loadedDetails.name == "wget-second")
-    }
-}
-
-private struct StubDetailsRepository: PackageDetailsRepository {
-    var error: Error
-
-    func loadPackageDetails(
-        named _: String,
-        preferredKind _: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
-        throw error
-    }
-}
-
-private struct SuccessDetailsRepository: PackageDetailsRepository {
-    let details: InstalledPackageDetails
-
-    func loadPackageDetails(
-        named _: String,
-        preferredKind _: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
-        details
-    }
-}
-
-private actor DeferredDetailsRepository: PackageDetailsRepository {
-    private var continuations: [CheckedContinuation<InstalledPackageDetails, Error>] = []
-    private var callCount: Int = 0
-
-    func loadPackageDetails(
-        named _: String,
-        preferredKind _: InstalledPackageKind?,
-    ) async throws -> InstalledPackageDetails {
-        callCount += 1
-        return try await withCheckedThrowingContinuation { continuation in
-            continuations.append(continuation)
-        }
-    }
-
-    func waitForCallCount(_ expected: Int) async {
-        while callCount < expected {
-            await Task.yield()
-        }
-    }
-
-    func resolve(callIndex: Int, with result: Result<InstalledPackageDetails, Error>) {
-        guard continuations.indices.contains(callIndex) else {
-            return
-        }
-        let continuation = continuations[callIndex]
-        switch result {
-        case let .success(details):
-            continuation.resume(returning: details)
-        case let .failure(error):
-            continuation.resume(throwing: error)
+            await center.waitForSubmitCallCount(1)
+            #expect(await center.submitCallCount == 1)
+            await center.resolveSubmit()
+            await waitForUpgradeAttemptToFinish(on: viewModel)
         }
     }
 }
 
-@MainActor
-private func waitForState(
-    on viewModel: InstalledDetailsViewModel,
-    toSatisfy predicate: @escaping (InstalledDetailsLoadState) -> Bool,
-) async {
-    for _ in 0 ..< 100 {
-        if predicate(viewModel.state) {
-            return
-        }
-        await Task.yield()
-    }
-    Issue.record("timed out waiting for expected details state")
-}
-
-private func details(name: String) -> InstalledPackageDetails {
-    InstalledPackageDetails(
-        name: name,
-        kind: .formula,
-        description: "desc",
-        version: "1.0.0",
-        installedVersions: ["1.0.0"],
-        homepage: nil,
-        dependencies: [],
-    )
-}
-
-private func isLoaded(_ state: InstalledDetailsLoadState) -> Bool {
-    if case .loaded = state {
-        return true
-    }
-    return false
-}
+private struct GenericUpgradeError: Error {}

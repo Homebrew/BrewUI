@@ -17,14 +17,8 @@ struct BrewApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainWindowView(
-                viewModel: MainWindowViewModel(
-                    installedViewModel: InstalledViewModel(
-                        repository: BrewInstalledPackagesRepository.live(),
-                        detailsRepository: BrewPackageDetailsRepository.live(),
-                    ),
-                ),
-            )
+            MainWindowView()
+                .environment(\.brewCommandCenter, commandCenter)
         }
         .defaultSize(
             width: BrewLayout.minWindowWidth,

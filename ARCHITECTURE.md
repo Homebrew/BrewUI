@@ -41,6 +41,7 @@ Guiding patterns:
 ## Core components
 
 - **Views:** SwiftUI; thin — bind state, forward actions. Shared pieces in `Views/`.
+- **Feature root views (`*Root`):** Composition boundaries that bridge app-level dependencies into feature content. Root wrappers read environment-level dependencies and construct/inject content-view dependencies while managing view-model lifecycle boundaries.
 - **ViewModels:** Presentation state and mapping; delegate work downward. Keep domain rules in Interactors or Models, not here.
 - **Repositories:** CRUD-shaped access to a **data source** (CLI output, API, storage, in-memory). Swap the implementation, keep the contract.
 - **Interactors:** One **use case** each — not generic CRUD (e.g. doctor run, config snapshot). Prefer protocols + real/mock impls for tests.
