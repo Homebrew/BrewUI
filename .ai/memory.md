@@ -242,3 +242,9 @@
 
 - Keep the Installed list mounted under a stable parent container (`HSplitView`) across selection changes; switching between list-only and split layouts can remount the list and reset scroll position.
 - Prefer native `List(selection:)` for Installed row selection state, with view-model-backed selection binding (`setSelection(_:)`) and row tags by stable package id.
+
+## 2026-05-13 — Vale docs job and `docs/Gemfile`
+
+- **Symptom:** `vale docs/` fails with `lstat docs/../Gemfile: no such file or directory` when `docs/Gemfile` is missing.
+- **Cause:** Vale 3 treats `Rakefile` and `Brewfile` (among others) as Ruby-format prose under `[formats] rb = md` in `.vale.ini`. For those paths it expects a resolvable `Gemfile` next to the Ruby project layout; this repo had `docs/Gemfile.lock` and Jekyll binstubs but no `docs/Gemfile`, unlike `Homebrew/brew` where `docs/` is a full Jekyll tree including `Gemfile`.
+- **Fix:** Commit `docs/Gemfile` (matching upstream brew docs, consistent with the lockfile) and `docs/.ruby-version` so Vale and later `bundle exec` steps in `.github/workflows/docs.yml` both succeed.
