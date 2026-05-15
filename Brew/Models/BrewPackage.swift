@@ -12,7 +12,7 @@ struct BrewPackage: Identifiable, Hashable {
     var homepage: String
     var latestVersion: String
     var installedVersions: [String]
-    var dependencies: [String]
+    var dependencies: [HomebrewPackageReference]
     var outdated: Bool
 
     var id: String {

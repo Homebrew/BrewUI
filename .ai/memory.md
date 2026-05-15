@@ -254,3 +254,15 @@
 - **Cache:** In-memory `InstalledInventoryCache` actor stores `InstalledInventorySnapshot` (packages + `PackageDependencyGraph`) populated by `BrewInstalledPackagesRepository` after successful `brew info --installed --json=v2`. `BrewApp` creates one cache per app lifetime and injects it via SwiftUI environment (`InstalledInventoryEnvironment.swift`); feature roots construct `BrewInstalledPackagesRepository` / `BrewInstalledDependentsRepository` from that shared cache. Previews and tests construct isolated caches with `InstalledInventoryCache()` when needed.
 - **TTL:** Snapshots are stale after 3600 seconds; `load()` may return cached packages when fresh; `refresh()` passes `forceRefresh: true` to bypass TTL after mutating brew work.
 - **Used by:** Detail dependents come from reverse dependency edges among installed packages; per-selection `brew uses` was removed.
+
+## 2026-05-15 — Installed inventory visibility (tests-only pass)
+
+- **Visibility:** New inventory types are module-internal; graph storage and JSON mapping helpers are `private`. Protocols `InstalledDependentsRepository` / `InstalledInventoryReading` stay internal as DI boundaries.
+- **Follow-up (production, separate PR):** `InstalledInventoryCache.packages()` has no call sites (prefer `cachedPackages()`). `EmptyInstalledDependentsRepository` / `EmptyInstalledInventoryReading` are unused in production — used only from `makeInstalledDetailsViewModel` in BrewTests; decide whether to delete, wire in previews, or keep for tests only.
+- **Tests:** `makeInstalledDetailsViewModel` in `InstalledDetailsViewModelTestsSupport` supplies empty repo defaults for non-inventory tests; production inits remain four explicit parameters.
+
+## 2026-05-15 — Dead-symbol cleanup applied
+
+- Removed dead installed-inventory API surface from app target: `InstalledInventoryCache.packages()`, `InstalledInventoryReading.installedPackages(for:)`, `BrewInstalledPackagesRepository.installedPackages(for:)`, and `BrewPackage.reference`.
+- Moved test-only empty inventory/dependents stubs out of `Brew/Repositories` into `BrewTests/TestSupport` (`EmptyInstalledInventoryReading`, `EmptyInstalledDependentsRepository`) so production DI paths remain explicit.
+- Pruned unused test support helpers `localizedHomebrewCommandFailedMessage()` and `packageInfoJSONResponse(...)` from `InstalledPackagesRepositoryTestSupport`.

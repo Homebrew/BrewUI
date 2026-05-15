@@ -8,7 +8,7 @@ extension BrewPackage {
         homepage: String = "",
         latestVersion: String = "",
         installedVersions: [String] = [],
-        dependencies: [String] = [],
+        dependencies: [HomebrewPackageReference] = [],
         outdated: Bool = false,
     ) -> BrewPackage {
         BrewPackage(

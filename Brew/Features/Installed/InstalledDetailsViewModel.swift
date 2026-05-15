@@ -10,6 +10,8 @@ import Observation
 @MainActor
 final class InstalledDetailsViewModel {
     private let brewCommandCenter: any BrewCommandCenter
+    private let installedDependentsRepository: any InstalledDependentsRepository
+    private let installedInventoryReading: any InstalledInventoryReading
     private var upgradeTask: Task<Void, Never>?
 
     private(set) var package: BrewPackage
@@ -28,6 +30,10 @@ final class InstalledDetailsViewModel {
     var packageKind: InstalledPackageKind {
         package.kind
     }
+
+    private(set) var dependencyRelationships: [PackageRelationshipItem] = []
+
+    private(set) var dependentRelationships: [PackageRelationshipItem] = []
 
     /// User-facing command for the currently selected package details.
     var displayCommand: String {
@@ -56,9 +62,26 @@ final class InstalledDetailsViewModel {
     init(
         package: BrewPackage,
         brewCommandCenter: any BrewCommandCenter,
+        installedDependentsRepository: any InstalledDependentsRepository,
+        installedInventoryReading: any InstalledInventoryReading,
     ) {
         self.package = package
         self.brewCommandCenter = brewCommandCenter
+        self.installedDependentsRepository = installedDependentsRepository
+        self.installedInventoryReading = installedInventoryReading
+    }
+
+    func refreshDependents() async {
+        let dependents = await installedDependentsRepository.installedDependents(for: package.id)
+        dependentRelationships = PackageRelationshipItem.dependents(dependents)
+    }
+
+    func refreshDependencies() async {
+        let installedPackageIDs = await installedInventoryReading.installedPackageIDs()
+        dependencyRelationships = PackageRelationshipItem.dependencies(
+            package.dependencies,
+            installedPackageIDs: installedPackageIDs,
+        )
     }
 
     /// Syncs snapshot data for this row (`InstalledListRowViewModel/update(package:)` pattern).
@@ -67,6 +90,8 @@ final class InstalledDetailsViewModel {
             return
         }
         package = newPackage
+        dependencyRelationships = []
+        dependentRelationships = []
         upgradeErrorMessage = nil
     }
 

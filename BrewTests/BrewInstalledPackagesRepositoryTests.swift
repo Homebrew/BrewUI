@@ -138,13 +138,50 @@ struct BrewInstalledPackagesRepositoryTests {
         let formula = try #require(package(named: "deps-formula", in: packages))
         #expect(formula.description == "formula desc")
         #expect(formula.homepage == "https://example.com")
-        #expect(formula.dependencies == ["openssl", "make", "curl", "sqlite"])
+        #expect(formula.dependencies == [.formula(name: "openssl")])
 
         let cask = try #require(package(named: "deps-cask", in: packages))
         #expect(cask.description == "cask desc")
         #expect(cask.homepage == "https://example.org")
-        #expect(Set(cask.dependencies) == Set(["git", "docker"]))
-        #expect(cask.dependencies.count == 2)
+        #expect(Set(cask.dependencies) == Set([.formula(name: "git"), .cask(token: "docker"), .cask(token: "git")]))
+        #expect(cask.dependencies.count == 3)
+    }
+
+    @Test @MainActor func `load maps cask depends_on formula and cask keys and ignores macos`() async throws {
+        let json = """
+        {
+          "formulae": [],
+          "casks": [
+            {
+              "token": "beid-viewer",
+              "installed": ["1.0.0"],
+              "depends_on": {
+                "macos": {},
+                "cask": ["beid-token"]
+              }
+            },
+            {
+              "token": "beutl",
+              "installed": ["2.0.0"],
+              "depends_on": {
+                "macos": { ">=": ["12"] },
+                "formula": ["ffmpeg@6"]
+              }
+            }
+          ]
+        }
+        """
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
+        let packages = try await repo.loadInstalledPackages()
+
+        let beidViewer = try #require(package(named: "beid-viewer", in: packages))
+        #expect(beidViewer.dependencies == [.cask(token: "beid-token")])
+
+        let beutl = try #require(package(named: "beutl", in: packages))
+        #expect(beutl.dependencies == [.formula(name: "ffmpeg@6")])
     }
 
     @Test @MainActor func `load tolerates optional and missing fields in json payload`() async throws {

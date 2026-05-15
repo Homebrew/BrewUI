@@ -193,6 +193,21 @@ func withInstalledDetailPhaseObservation(
     await body()
 }
 
+@MainActor
+func makeInstalledDetailsViewModel(
+    package: BrewPackage,
+    brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
+    installedDependentsRepository: (any InstalledDependentsRepository)? = nil,
+    installedInventoryReading: (any InstalledInventoryReading)? = nil,
+) -> InstalledDetailsViewModel {
+    InstalledDetailsViewModel(
+        package: package,
+        brewCommandCenter: brewCommandCenter,
+        installedDependentsRepository: installedDependentsRepository ?? EmptyInstalledDependentsRepository(),
+        installedInventoryReading: installedInventoryReading ?? EmptyInstalledInventoryReading(),
+    )
+}
+
 func details(
     name: String,
     kind: InstalledPackageKind = .formula,

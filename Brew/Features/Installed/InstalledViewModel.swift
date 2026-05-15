@@ -99,7 +99,10 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: InstalledPackagesRepository, brewCommandCenter: any BrewCommandCenter) {
+    init(
+        repository: InstalledPackagesRepository,
+        brewCommandCenter: any BrewCommandCenter,
+    ) {
         self.repository = repository
         self.brewCommandCenter = brewCommandCenter
         observerTask = Task { @MainActor [weak self] in
@@ -131,7 +134,7 @@ final class InstalledViewModel {
             return
         }
         do {
-            let snapshot = try await repository.loadInstalledPackages()
+            let snapshot = try await repository.loadInstalledPackages(forceRefresh: true)
             loadedContent = Self.packagesContent(from: snapshot)
             applyLoadedStateForCurrentQuery()
         } catch {
@@ -168,6 +171,13 @@ final class InstalledViewModel {
     func clearSelection() {
         selectedPackageID = firstVisibleRowID()
         searchPreviewSelectedPackageID = nil
+    }
+
+    func selectInstalledPackage(id: BrewPackage.ID) {
+        guard allRows.contains(where: { $0.id == id }) else {
+            return
+        }
+        setSelection(id)
     }
 
     private var isSearchActive: Bool {
