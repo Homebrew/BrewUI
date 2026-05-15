@@ -248,3 +248,9 @@
 - **Symptom:** `vale docs/` fails with `lstat docs/../Gemfile: no such file or directory` when `docs/Gemfile` is missing.
 - **Cause:** Vale 3 treats `Rakefile` and `Brewfile` (among others) as Ruby-format prose under `[formats] rb = md` in `.vale.ini`. For those paths it expects a resolvable `Gemfile` next to the Ruby project layout; this repo had `docs/Gemfile.lock` and Jekyll binstubs but no `docs/Gemfile`, unlike `Homebrew/brew` where `docs/` is a full Jekyll tree including `Gemfile`.
 - **Fix:** Commit `docs/Gemfile` (matching upstream brew docs, consistent with the lockfile) and `docs/.ruby-version` so Vale and later `bundle exec` steps in `.github/workflows/docs.yml` both succeed.
+
+## 2026-05-13 — Installed inventory cache
+
+- **Cache:** In-memory `InstalledInventoryCache` actor stores `InstalledInventorySnapshot` (packages + `PackageDependencyGraph`) populated by `BrewInstalledPackagesRepository` after successful `brew info --installed --json=v2`. `BrewApp` creates one cache per app lifetime and injects it via SwiftUI environment (`InstalledInventoryEnvironment.swift`); feature roots construct `BrewInstalledPackagesRepository` / `BrewInstalledDependentsRepository` from that shared cache. Previews and tests construct isolated caches with `InstalledInventoryCache()` when needed.
+- **TTL:** Snapshots are stale after 3600 seconds; `load()` may return cached packages when fresh; `refresh()` passes `forceRefresh: true` to bypass TTL after mutating brew work.
+- **Used by:** Detail dependents come from reverse dependency edges among installed packages; per-selection `brew uses` was removed.
