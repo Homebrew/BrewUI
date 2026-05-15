@@ -25,17 +25,15 @@ private func sectionVisibility(_ vm: InstalledViewModel) -> SectionVisibilitySna
 
 struct InstalledViewModelPresentationTests {
     @Test @MainActor func `selectedPackage is nil for initial loading state`() {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(vm.selectedPackage == nil)
     }
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is true when loading with no rows and no error`() {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(vm.shouldShowInitialLoadingIndicator)
     }
@@ -48,9 +46,8 @@ struct InstalledViewModelPresentationTests {
     }
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is false when load has user error`() async {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: FailingInstalledRepository(error: BrewLookupError.executableNotFound),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         await vm.load()
         #expect(!vm.shouldShowInitialLoadingIndicator)
@@ -85,9 +82,8 @@ struct InstalledViewModelPresentationTests {
     }
 
     @Test @MainActor func `packageCountSubtitle shows localized loading text when initial loading`() {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: StubInstalledPackagesRepository(snapshot: .empty),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         let expected = String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
         #expect(vm.packageCountSubtitle == expected)
@@ -152,7 +148,7 @@ struct InstalledViewModelPresentationTests {
 private struct FailingInstalledRepository: InstalledPackagesRepository {
     let error: Error
 
-    func loadInstalledPackages() async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
         throw error
     }
 }

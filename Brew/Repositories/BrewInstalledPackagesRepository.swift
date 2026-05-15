@@ -5,28 +5,58 @@
 
 import Foundation
 
-struct BrewInstalledPackagesRepository: InstalledPackagesRepository {
+struct BrewInstalledPackagesRepository: InstalledPackagesRepository, InstalledInventoryReading {
     private let commandRunner: BrewCommandRunning
     private let locator: any BrewExecutableLocating
+    private let cache: InstalledInventoryCache
 
-    init(commandRunner: BrewCommandRunning, locator: any BrewExecutableLocating) {
+    init(
+        commandRunner: BrewCommandRunning,
+        locator: any BrewExecutableLocating,
+        cache: InstalledInventoryCache,
+    ) {
         self.commandRunner = commandRunner
         self.locator = locator
+        self.cache = cache
     }
 
     /// Production wiring: real subprocess + default `brew` lookup.
-    static func live() -> BrewInstalledPackagesRepository {
+    static func live(cache: InstalledInventoryCache) -> BrewInstalledPackagesRepository {
         BrewInstalledPackagesRepository(
             commandRunner: BrewCommandService(),
             locator: BrewExecutableLocator(),
+            cache: cache,
         )
     }
 
-    func loadInstalledPackages() async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh: Bool = false) async throws -> [BrewPackage] {
+        guard !forceRefresh else {
+            return try await fetchInstalledPackages()
+        }
+
+        switch await cache.cachedPackages() {
+        case let .fresh(packages):
+            return packages
+        case .stale, .empty:
+            return try await fetchInstalledPackages()
+        }
+    }
+
+    func installedPackageIDs() async -> Set<BrewPackage.ID> {
+        guard let snapshot = await cache.currentSnapshot() else {
+            return []
+        }
+        return Set(snapshot.packages.map(\.id))
+    }
+
+    private func fetchInstalledPackages() async throws -> [BrewPackage] {
         let brew = try locator.findBrewExecutable()
         let output = try await runInstalledInfoJSON(executable: brew)
         let payload = try decodeInfoJSON(from: output)
-        return payload.installedPackages()
+        let packages = payload.installedPackages()
+        let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: packages)
+        await cache.replace(snapshot)
+        return packages
     }
 
     private func runInstalledInfoJSON(executable: URL) async throws -> String {

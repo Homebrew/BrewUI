@@ -58,12 +58,19 @@ enum InstalledPackagesTestSupport {
     static let fakeBrewExecutableURL = URL(fileURLWithPath: "/fake/brew")
 
     /// Wired like production slice tests: default locator is [`fakeBrewExecutableURL`](fakeBrewExecutableURL).
+    @MainActor
     static func repository(
         commandRunner: BrewCommandRunning,
         locator: (any BrewExecutableLocating)? = nil,
+        cache: InstalledInventoryCache? = nil,
     ) -> BrewInstalledPackagesRepository {
+        let resolvedCache = cache ?? InstalledInventoryCache()
         let resolvedLocator = locator ?? BrewExecutableLocator(overrideURL: fakeBrewExecutableURL)
-        return BrewInstalledPackagesRepository(commandRunner: commandRunner, locator: resolvedLocator)
+        return BrewInstalledPackagesRepository(
+            commandRunner: commandRunner,
+            locator: resolvedLocator,
+            cache: resolvedCache,
+        )
     }
 
     // MARK: Localized copy (must match `InstalledViewModel.userMessage`)
@@ -72,13 +79,6 @@ enum InstalledPackagesTestSupport {
         String(
             localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
             comment: "Installed tab error when brew binary missing",
-        )
-    }
-
-    static func localizedHomebrewCommandFailedMessage() -> String {
-        String(
-            localized: "Homebrew command failed.",
-            comment: "Installed tab error generic brew failure",
         )
     }
 
@@ -112,26 +112,6 @@ enum InstalledPackagesTestSupport {
     ) -> [[String]: CommandOutput] {
         [
             ["info", "--installed", "--json=v2"]: CommandOutput(
-                standardOutput: standardOutput,
-                standardError: standardError,
-                terminationStatus: terminationStatus,
-            ),
-        ]
-    }
-
-    static func packageInfoJSONResponse(
-        kind: InstalledPackageKind,
-        name: String,
-        standardOutput: String,
-        terminationStatus: Int32 = 0,
-        standardError: String = "",
-    ) -> [[String]: CommandOutput] {
-        let kindFlag = switch kind {
-        case .formula: "--formula"
-        case .cask: "--cask"
-        }
-        return [
-            ["info", "--json=v2", kindFlag, name]: CommandOutput(
                 standardOutput: standardOutput,
                 standardError: standardError,
                 terminationStatus: terminationStatus,
