@@ -9,6 +9,8 @@ import Foundation
 nonisolated enum BrewOperationKind: String, Hashable {
     case upgradeFormula
     case upgradeCask
+    case uninstallFormula
+    case uninstallCask
 }
 
 /// Stable opaque identity for in-flight mutating work (e.g. upgrades). Conventionally `formula:<name>` or `cask:<name>` to align with Homebrew package identity strings — see ``BrewOperationID`` helpers in the Models layer.
