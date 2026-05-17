@@ -39,12 +39,12 @@ enum BrewLayout {
     static let inspectorWidth: CGFloat = 280
 
     /// Installed list column (middle pane of `NavigationSplitView`).
-    static let installedListColumnMinWidth: CGFloat = 220
-    static let installedListColumnIdealWidth: CGFloat = 300
+    static let installedListColumnMinWidth: CGFloat = 300
+    static let installedListColumnIdealWidth: CGFloat = 400
     static let installedListColumnMaxWidth: CGFloat = 800
 
     /// Third column (package detail).
-    static let installedDetailColumnIdealWidth: CGFloat = 320
+    static let installedDetailColumnIdealWidth: CGFloat = 400
     static let installedDetailColumnMaxWidth: CGFloat = 1200
     static let installedThreePaneMinWindowWidth: CGFloat = 960
 
