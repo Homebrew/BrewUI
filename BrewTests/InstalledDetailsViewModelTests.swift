@@ -181,7 +181,7 @@ struct InstalledDetailsViewModelTests {
                 packageID == package.id ? [.fixture(name: "curl")] : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         #expect(viewModel.showsUninstallBlockedPrimaryButtonChrome)
         #expect(viewModel.uninstallPrimaryButtonAction == .revealBlockedExplanation)
         #expect(viewModel.uninstallBlockedCalloutContent != nil)
@@ -499,7 +499,7 @@ extension InstalledDetailsViewModelTests {
                 packageID == package.id ? [.fixture(name: "curl")] : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         viewModel.handleUninstallPrimaryButtonTapped()
         #expect(viewModel.showUninstallBlockedCallout)
         #expect(!viewModel.showUninstallConfirmation)
@@ -514,7 +514,7 @@ extension InstalledDetailsViewModelTests {
                 packageID == package.id ? [.fixture(name: "curl")] : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         viewModel.handleUninstallPrimaryButtonTapped()
         #expect(viewModel.showUninstallBlockedCallout)
         viewModel.update(package: .fixture(name: "wget", kind: .formula))

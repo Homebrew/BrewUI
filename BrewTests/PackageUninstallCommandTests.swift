@@ -49,6 +49,19 @@ struct PackageUninstallCommandTests {
             try await PackageUninstallCommand(package: package).run(in: ctx)
         }
     }
+
+    @Test func `kind and name initializer matches uninstall argv`() async throws {
+        let runner = CapturingUninstallCommandRunner()
+        let brewURL = URL(fileURLWithPath: "/opt/homebrew/bin/brew")
+        let ctx = BrewCommandExecutionContext(
+            commandRunner: runner,
+            locator: BrewExecutableLocator(overrideURL: brewURL),
+        )
+
+        try await PackageUninstallCommand(kind: .formula, name: "wget").run(in: ctx)
+        #expect(await runner.lastExecutable == brewURL)
+        #expect(await runner.lastArguments == ["uninstall", "--formula", "wget"])
+    }
 }
 
 private actor CapturingUninstallCommandRunner: BrewCommandRunning {
