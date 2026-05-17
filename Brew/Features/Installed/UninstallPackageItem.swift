@@ -20,6 +20,27 @@ struct UninstallPackageItem {
         blockingDependentCount > 0
     }
 
+    /// VoiceOver hint for the primary uninstall control when dependents block removal.
+    var blockedPrimaryButtonAccessibilityHint: String? {
+        guard isBlockedByDependents else {
+            return nil
+        }
+        return String(
+            localized: "Blocked by installed dependents. Activate to see why.",
+            comment: "Installed detail uninstall button accessibility hint when blocked",
+        )
+    }
+
+    /// Lead and body for the uninstall-blocked callout, when shown.
+    var blockedCalloutContent: UninstallBlockedCalloutContent? {
+        guard let lead = uninstallBlockedBannerLead,
+              let body = uninstallBlockedBannerBody
+        else {
+            return nil
+        }
+        return UninstallBlockedCalloutContent(lead: lead, body: body)
+    }
+
     /// Badge beside the Used by heading when uninstall is blocked.
     var usedByBlockingBadgeTitle: String? {
         guard isBlockedByDependents else {
@@ -94,4 +115,16 @@ struct UninstallPackageItem {
             comment: "Installed detail uninstall confirmation message; interpolated package name",
         )
     }
+}
+
+/// Copy shown in the uninstall-blocked warning callout.
+struct UninstallBlockedCalloutContent: Equatable {
+    let lead: String
+    let body: String
+}
+
+/// Result of activating the primary uninstall control in Installed detail.
+enum UninstallPrimaryButtonAction: Equatable {
+    case presentConfirmation
+    case revealBlockedExplanation
 }

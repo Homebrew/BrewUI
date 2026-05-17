@@ -172,6 +172,21 @@ struct InstalledDetailsViewModelTests {
         #expect(!viewModel.isUpgrading)
     }
 
+    @Test @MainActor func `blocked uninstall primary button presentation`() async {
+        let package = details(name: "ada-url")
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            installedDependentsRepository: StubInstalledDependentsRepository { packageID in
+                packageID == package.id ? [.fixture(name: "curl")] : []
+            },
+        )
+        await viewModel.refreshDependents()
+        #expect(viewModel.showsUninstallBlockedPrimaryButtonChrome)
+        #expect(viewModel.uninstallPrimaryButtonAction == .revealBlockedExplanation)
+        #expect(viewModel.uninstallBlockedCalloutContent != nil)
+    }
+
     @Test @MainActor func `dependents uses injected repository for current package`() async {
         let package = details(name: "openssl@3")
         let viewModel = makeInstalledDetailsViewModel(
@@ -461,3 +476,49 @@ struct InstalledDetailsViewModelUpgradeTests {
 }
 
 private struct GenericUpgradeError: Error {}
+
+// MARK: - Uninstall presentation state
+
+extension InstalledDetailsViewModelTests {
+    @Test @MainActor func `handleUninstallPrimaryButtonTapped sets showUninstallConfirmation when not blocked`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        viewModel.handleUninstallPrimaryButtonTapped()
+        #expect(viewModel.showUninstallConfirmation)
+        #expect(!viewModel.showUninstallBlockedCallout)
+    }
+
+    @Test @MainActor func `handleUninstallPrimaryButtonTapped sets showUninstallBlockedCallout when blocked`() async {
+        let package = details(name: "ada-url")
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            installedDependentsRepository: StubInstalledDependentsRepository { packageID in
+                packageID == package.id ? [.fixture(name: "curl")] : []
+            },
+        )
+        await viewModel.refreshDependents()
+        viewModel.handleUninstallPrimaryButtonTapped()
+        #expect(viewModel.showUninstallBlockedCallout)
+        #expect(!viewModel.showUninstallConfirmation)
+    }
+
+    @Test @MainActor func `update package clears uninstall presentation flags`() async {
+        let package = details(name: "ada-url")
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            installedDependentsRepository: StubInstalledDependentsRepository { packageID in
+                packageID == package.id ? [.fixture(name: "curl")] : []
+            },
+        )
+        await viewModel.refreshDependents()
+        viewModel.handleUninstallPrimaryButtonTapped()
+        #expect(viewModel.showUninstallBlockedCallout)
+        viewModel.update(package: .fixture(name: "wget", kind: .formula))
+        #expect(!viewModel.showUninstallBlockedCallout)
+        #expect(!viewModel.showUninstallConfirmation)
+    }
+}

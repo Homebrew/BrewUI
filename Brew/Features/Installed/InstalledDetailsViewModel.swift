@@ -29,6 +29,11 @@ final class InstalledDetailsViewModel {
     /// Disables both mutation affordances while a package mutation is in progress.
     private(set) var isMutatingPackage: Bool = false
 
+    /// Drives the uninstall confirmation dialog.
+    var showUninstallConfirmation: Bool = false
+    /// Drives the uninstall-blocked explanation callout.
+    var showUninstallBlockedCallout: Bool = false
+
     var packageName: String {
         package.name
     }
@@ -98,6 +103,33 @@ final class InstalledDetailsViewModel {
         uninstallItem.uninstallBlockedBannerBody
     }
 
+    /// Muted, reduced-opacity uninstall button styling while blocked and not actively uninstalling.
+    var showsUninstallBlockedPrimaryButtonChrome: Bool {
+        isUninstallBlockedByDependents && !isUninstalling
+    }
+
+    /// What the primary uninstall control should do when activated.
+    var uninstallPrimaryButtonAction: UninstallPrimaryButtonAction {
+        isUninstallBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
+    }
+
+    func handleUninstallPrimaryButtonTapped() {
+        switch uninstallPrimaryButtonAction {
+        case .presentConfirmation:
+            showUninstallConfirmation = true
+        case .revealBlockedExplanation:
+            showUninstallBlockedCallout = true
+        }
+    }
+
+    var uninstallPrimaryButtonAccessibilityHint: String? {
+        uninstallItem.blockedPrimaryButtonAccessibilityHint
+    }
+
+    var uninstallBlockedCalloutContent: UninstallBlockedCalloutContent? {
+        uninstallItem.blockedCalloutContent
+    }
+
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
         package.homepageURL
@@ -128,6 +160,9 @@ final class InstalledDetailsViewModel {
     private func refreshDependents() async {
         let dependents = await installedDependentsRepository.installedDependents(for: package.id)
         dependentRelationships = PackageRelationshipItem.dependents(dependents)
+        if !isUninstallBlockedByDependents {
+            showUninstallBlockedCallout = false
+        }
     }
 
     private func refreshDependencies() async {
@@ -146,6 +181,8 @@ final class InstalledDetailsViewModel {
         package = newPackage
         dependencyRelationships = []
         dependentRelationships = []
+        showUninstallConfirmation = false
+        showUninstallBlockedCallout = false
         clearMutationErrors()
     }
 
@@ -183,6 +220,9 @@ final class InstalledDetailsViewModel {
             )
             isUninstalling = phase.isRunningUninstall
             isMutatingPackage = isUpgrading || isUninstalling
+            if isUninstalling {
+                showUninstallBlockedCallout = false
+            }
         }
     }
 

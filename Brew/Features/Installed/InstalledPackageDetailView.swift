@@ -31,7 +31,6 @@ struct InstalledPackageDetailView: View {
     @State private var viewModel: InstalledDetailsViewModel
     @State private var expandedDependencies = false
     @State private var expandedDependents = false
-    @State private var showUninstallConfirmation = false
 
     private let collapsedRelationshipCount = 3
 
@@ -67,7 +66,6 @@ struct InstalledPackageDetailView: View {
             viewModel.update(package: newPackage)
             expandedDependencies = false
             expandedDependents = false
-            showUninstallConfirmation = false
             Task {
                 await viewModel.refreshRelationships()
             }
@@ -94,10 +92,7 @@ struct InstalledPackageDetailView: View {
                 InstalledPackageDetailUpgradeChrome(viewModel: viewModel)
                 InstalledPackageDetailSectionDivider()
             }
-            InstalledPackageDetailUninstallChrome(
-                viewModel: viewModel,
-                showConfirmation: $showUninstallConfirmation,
-            )
+            InstalledPackageDetailUninstallChrome(viewModel: viewModel)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -128,7 +123,6 @@ struct InstalledPackageDetailView: View {
 /// Uninstall affordance and copyable `brew uninstall` command (`CONVENTIONS.md` — transparency).
 private struct InstalledPackageDetailUninstallChrome: View {
     @Bindable var viewModel: InstalledDetailsViewModel
-    @Binding var showConfirmation: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
@@ -143,7 +137,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                 )
 
                 Button {
-                    showConfirmation = true
+                    viewModel.handleUninstallPrimaryButtonTapped()
                 } label: {
                     if viewModel.isUninstalling {
                         ProgressView()
@@ -152,18 +146,20 @@ private struct InstalledPackageDetailUninstallChrome: View {
                     } else {
                         Text(viewModel.uninstallPrimaryButtonTitle)
                             .foregroundStyle(
-                                viewModel.isUninstallBlockedByDependents
+                                viewModel.showsUninstallBlockedPrimaryButtonChrome
                                     ? Color.brewTextTertiary
                                     : Color.brewTextSecondary,
                             )
                     }
                 }
                 .buttonStyle(.bordered)
-                .disabled(viewModel.isMutatingPackage || viewModel.isUninstallBlockedByDependents)
+                .opacity(viewModel.showsUninstallBlockedPrimaryButtonChrome ? 0.65 : 1)
+                .disabled(viewModel.isMutatingPackage)
                 .accessibilityLabel(viewModel.uninstallPrimaryButtonTitle)
+                .accessibilityHint(viewModel.uninstallPrimaryButtonAccessibilityHint ?? "")
                 .confirmationDialog(
                     viewModel.uninstallConfirmationTitle,
-                    isPresented: $showConfirmation,
+                    isPresented: $viewModel.showUninstallConfirmation,
                 ) {
                     Button(viewModel.uninstallPrimaryButtonTitle, role: .destructive) {
                         viewModel.uninstallSelectedPackage()
@@ -173,10 +169,10 @@ private struct InstalledPackageDetailUninstallChrome: View {
                     Text(viewModel.uninstallConfirmationMessage)
                 }
 
-                if let lead = viewModel.uninstallBlockedBannerLead,
-                   let body = viewModel.uninstallBlockedBannerBody
+                if viewModel.showUninstallBlockedCallout,
+                   let callout = viewModel.uninstallBlockedCalloutContent
                 {
-                    UninstallBlockedCallout(lead: lead, bodyText: body)
+                    UninstallBlockedCallout(lead: callout.lead, bodyText: callout.body)
                 }
 
                 if let uninstallError = viewModel.uninstallErrorMessage {

@@ -43,6 +43,21 @@ struct UninstallPackageItemTests {
         )
     }
 
+    @Test func `blocked accessibility hint and callout content`() {
+        let item = UninstallPackageItem(
+            package: .fixture(name: "ada-url", kind: .formula),
+            blockingDependentCount: 2,
+        )
+        #expect(
+            item.blockedPrimaryButtonAccessibilityHint ==
+                "Blocked by installed dependents. Activate to see why.",
+        )
+        #expect(item.blockedCalloutContent == UninstallBlockedCalloutContent(
+            lead: "Can't uninstall yet.",
+            body: "2 packages above depend on ada-url. Uninstall them first.",
+        ))
+    }
+
     @Test func `blocked copy uses plural grammar for multiple dependents`() {
         let item = UninstallPackageItem(
             package: .fixture(name: "ada-url", kind: .formula),
