@@ -289,64 +289,6 @@ struct InstalledPackageDetailRelationshipList: View {
     }
 }
 
-struct InstalledPackageDetailInfoCommandSection: View {
-    let title: String
-    let command: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            InstalledPackageDetailSectionHeading(title: title)
-            commandConsole
-        }
-    }
-
-    private var commandConsole: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Label("Terminal command", systemImage: "terminal")
-                    .font(.brewCaption)
-                    .foregroundStyle(Color.brewTextSecondary)
-                Spacer()
-                Button("Copy", systemImage: "doc.on.doc") {
-                    copyCommandToPasteboard(command)
-                }
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextSecondary)
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, BrewSpacing.md)
-            .padding(.vertical, BrewSpacing.sm)
-            .background(Color.brewSurfaceRecessed)
-
-            Text(command)
-                .font(.brewCode)
-                .foregroundStyle(Color.brewCodeDefault)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(BrewSpacing.md)
-                .background(Color.brewTerminal)
-                .textSelection(.enabled)
-
-            Text("Shows detailed information about this package")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, BrewSpacing.md)
-                .padding(.vertical, BrewSpacing.sm)
-                .background(Color.brewSurfaceRecessed)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
-        .overlay(
-            RoundedRectangle(cornerRadius: BrewRadius.md)
-                .stroke(Color.brewBorderDefault, lineWidth: 1),
-        )
-    }
-
-    private func copyCommandToPasteboard(_ command: String) {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(command, forType: .string)
-    }
-}
-
 enum PackageRelationshipDotStyle {
     case neutral
     case warning

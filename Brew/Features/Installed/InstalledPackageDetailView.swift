@@ -31,6 +31,7 @@ struct InstalledPackageDetailView: View {
     @State private var viewModel: InstalledDetailsViewModel
     @State private var expandedDependencies = false
     @State private var expandedDependents = false
+    @State private var showUninstallConfirmation = false
 
     private let collapsedRelationshipCount = 3
 
@@ -66,6 +67,7 @@ struct InstalledPackageDetailView: View {
             viewModel.update(package: newPackage)
             expandedDependencies = false
             expandedDependents = false
+            showUninstallConfirmation = false
             Task {
                 await viewModel.refreshRelationships()
             }
@@ -77,10 +79,7 @@ struct InstalledPackageDetailView: View {
             VStack(alignment: .leading, spacing: BrewSpacing.xl) {
                 InstalledPackageDetailHeroSection(viewModel: viewModel)
                 packageDetailsSections(viewModel: viewModel)
-
-                if viewModel.showsUpgradeChrome {
-                    upgradeFooter(viewModel: viewModel)
-                }
+                packageActionsFooter(viewModel: viewModel)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
@@ -88,10 +87,17 @@ struct InstalledPackageDetailView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private func upgradeFooter(viewModel: InstalledDetailsViewModel) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
+    private func packageActionsFooter(viewModel: InstalledDetailsViewModel) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xl) {
             InstalledPackageDetailSectionDivider()
-            InstalledPackageDetailUpgradeChrome(viewModel: viewModel)
+            if viewModel.showsUpgradeChrome {
+                InstalledPackageDetailUpgradeChrome(viewModel: viewModel)
+                InstalledPackageDetailSectionDivider()
+            }
+            InstalledPackageDetailUninstallChrome(
+                viewModel: viewModel,
+                showConfirmation: $showUninstallConfirmation,
+            )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -116,8 +122,60 @@ struct InstalledPackageDetailView: View {
             onSelectInstalledPackage: onSelectInstalledPackage,
             isExpanded: $expandedDependents,
         )
-        InstalledPackageDetailSectionDivider()
-        InstalledPackageDetailInfoCommandSection(title: "Command", command: viewModel.displayCommand)
+    }
+}
+
+/// Uninstall affordance and copyable `brew uninstall` command (`CONVENTIONS.md` — transparency).
+private struct InstalledPackageDetailUninstallChrome: View {
+    @Bindable var viewModel: InstalledDetailsViewModel
+    @Binding var showConfirmation: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            Text("Uninstall")
+                .font(.brewSubheadline.weight(.semibold))
+                .foregroundStyle(Color.brewTextPrimary)
+
+            VStack(alignment: .leading, spacing: BrewSpacing.md) {
+                MutationCommandConsole(
+                    command: viewModel.uninstallDisplayCommand,
+                    summaryText: "Uninstalls this package from this Mac",
+                )
+
+                Button {
+                    showConfirmation = true
+                } label: {
+                    if viewModel.isUninstalling {
+                        ProgressView()
+                            .controlSize(.small)
+                            .frame(minWidth: 120)
+                    } else {
+                        Text(viewModel.uninstallPrimaryButtonTitle).foregroundStyle(Color.brewTextSecondary)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(viewModel.isMutatingPackage)
+                .accessibilityLabel(viewModel.uninstallPrimaryButtonTitle)
+                .confirmationDialog(
+                    viewModel.uninstallConfirmationTitle,
+                    isPresented: $showConfirmation,
+                ) {
+                    Button(viewModel.uninstallPrimaryButtonTitle, role: .destructive) {
+                        viewModel.uninstallSelectedPackage()
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text(viewModel.uninstallConfirmationMessage)
+                }
+
+                if let uninstallError = viewModel.uninstallErrorMessage {
+                    Text(uninstallError)
+                        .font(.brewCallout)
+                        .foregroundStyle(Color.brewStatusError)
+                        .textSelection(.enabled)
+                }
+            }
+        }
     }
 }
 
@@ -132,7 +190,10 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                upgradeCommandConsole
+                MutationCommandConsole(
+                    command: viewModel.upgradeDisplayCommand,
+                    summaryText: "Upgrades this package to the latest available version",
+                )
 
                 if let title = viewModel.upgradePrimaryButtonTitle {
                     HStack(spacing: BrewSpacing.sm) {
@@ -161,8 +222,14 @@ private struct InstalledPackageDetailUpgradeChrome: View {
             }
         }
     }
+}
 
-    private var upgradeCommandConsole: some View {
+/// Shared terminal-command card used by Installed mutation sections (upgrade/uninstall).
+private struct MutationCommandConsole: View {
+    let command: String
+    let summaryText: String
+
+    var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Label("Terminal command", systemImage: "terminal")
@@ -171,7 +238,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                 Spacer()
                 Button("Copy", systemImage: "doc.on.doc") {
                     NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(viewModel.upgradeDisplayCommand, forType: .string)
+                    NSPasteboard.general.setString(command, forType: .string)
                 }
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextSecondary)
@@ -181,7 +248,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
             .padding(.vertical, BrewSpacing.sm)
             .background(Color.brewSurfaceRecessed)
 
-            Text(viewModel.upgradeDisplayCommand)
+            Text(command)
                 .font(.brewCode)
                 .foregroundStyle(Color.brewCodeDefault)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -189,7 +256,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                 .background(Color.brewTerminal)
                 .textSelection(.enabled)
 
-            Text("Upgrades this package to the latest available version")
+            Text(summaryText)
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
