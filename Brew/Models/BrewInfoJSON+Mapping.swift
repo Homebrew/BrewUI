@@ -22,10 +22,7 @@ private extension BrewInfoFormula {
         let installedVersions = installed
             .compactMap(\.version)
             .compactMap(BrewInfoJSON.trimmedOrNil(_:))
-        let allDependencies = dependencies +
-            buildDependencies +
-            recommendedDependencies +
-            optionalDependencies
+        let runtimeDependencies = dependencies
         return BrewPackage(
             name: name,
             kind: .formula,
@@ -33,7 +30,7 @@ private extension BrewInfoFormula {
             homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
             latestVersion: BrewInfoJSON.trimmedOrEmpty(versions.stable),
             installedVersions: installedVersions,
-            dependencies: BrewInfoJSON.uniqueNonEmpty(allDependencies),
+            dependencies: HomebrewPackageReference.formulaDependencies(from: runtimeDependencies),
             outdated: outdated,
         )
     }
@@ -50,7 +47,7 @@ private extension BrewInfoCask {
             homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
             latestVersion: latest,
             installedVersions: installed,
-            dependencies: BrewInfoJSON.uniqueNonEmpty(dependencies),
+            dependencies: HomebrewPackageReference.uniqueReferences(dependencies),
             outdated: outdated,
         )
     }

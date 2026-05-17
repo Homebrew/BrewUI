@@ -43,46 +43,72 @@ struct InstalledPackagesView: View {
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
-        List {
-            if content.shouldShowFormulaeSection {
-                Section("Formulae") {
-                    ForEach(content.formulaPackages) { package in
-                        listRow(for: package)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                viewModel.setSelection(package.id)
-                            }
-                            .listRowBackground(
-                                viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                            )
+        ScrollViewReader { proxy in
+            List {
+                if content.shouldShowFormulaeSection {
+                    Section("Formulae") {
+                        ForEach(content.formulaPackages) { package in
+                            listRow(for: package)
+                                .id(package.id)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    viewModel.setSelection(package.id)
+                                }
+                                .listRowBackground(
+                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                                )
+                        }
                     }
                 }
-            }
 
-            if content.shouldShowCasksSection {
-                Section("Casks") {
-                    ForEach(content.caskPackages) { package in
-                        listRow(for: package)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                viewModel.setSelection(package.id)
-                            }
-                            .listRowBackground(
-                                viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                            )
+                if content.shouldShowCasksSection {
+                    Section("Casks") {
+                        ForEach(content.caskPackages) { package in
+                            listRow(for: package)
+                                .id(package.id)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    viewModel.setSelection(package.id)
+                                }
+                                .listRowBackground(
+                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                                )
+                        }
                     }
                 }
             }
-        }
-        .listStyle(.plain)
-        .accessibilityLabel("Installed packages")
-        .onExitCommand {
-            viewModel.clearSelection()
+            .listStyle(.plain)
+            .accessibilityLabel("Installed packages")
+            .onAppear {
+                scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
+            }
+            .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
+                scrollToSelection(selectedID, in: content, with: proxy)
+            }
+            .onChange(of: content.packages.map(\.id)) { _, _ in
+                scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
+            }
+            .onExitCommand {
+                viewModel.clearSelection()
+            }
         }
     }
 
     private func listRow(for package: BrewPackage) -> some View {
         InstalledListRowRoot(package: package)
+    }
+
+    private func scrollToSelection(
+        _ selectedID: BrewPackage.ID?,
+        in content: InstalledPackagesContent,
+        with proxy: ScrollViewProxy,
+    ) {
+        guard let selectedID, content.packages.contains(where: { $0.id == selectedID }) else {
+            return
+        }
+        withAnimation(.brewFast) {
+            proxy.scrollTo(selectedID, anchor: .center)
+        }
     }
 
     private var loadingSkeletonList: some View {

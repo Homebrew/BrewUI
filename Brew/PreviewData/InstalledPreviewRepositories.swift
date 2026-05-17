@@ -56,7 +56,7 @@ private enum InstalledPreviewData {
 }
 
 struct PreviewInstalledPackagesRepository: InstalledPackagesRepository {
-    func loadInstalledPackages() async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
         InstalledPreviewData.snapshot
     }
 }

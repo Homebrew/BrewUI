@@ -7,10 +7,15 @@ enum InstalledFeatureTestSupport {
         formulae: [BrewPackage] = [],
         casks: [BrewPackage] = [],
     ) async -> InstalledViewModel {
+        let cache = InstalledInventoryCache()
+        let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: formulae + casks)
+        await cache.replace(snapshot)
+        let repository = InstalledPackagesTestSupport.repository(
+            commandRunner: MockBrewCommandRunner(responses: [:]),
+            cache: cache,
+        )
         let viewModel = InstalledViewModel(
-            repository: StubInstalledPackagesRepository(
-                snapshot: formulae + casks,
-            ),
+            repository: repository,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         await viewModel.load()
@@ -21,7 +26,23 @@ enum InstalledFeatureTestSupport {
 struct StubInstalledPackagesRepository: InstalledPackagesRepository {
     let snapshot: [BrewPackage]
 
-    func loadInstalledPackages() async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
         snapshot
+    }
+}
+
+struct StubInstalledDependentsRepository: InstalledDependentsRepository {
+    let provider: @Sendable (BrewPackage.ID) -> [BrewPackage]
+
+    func installedDependents(for packageID: BrewPackage.ID) async -> [BrewPackage] {
+        provider(packageID)
+    }
+}
+
+struct StubInstalledInventoryReading: InstalledInventoryReading {
+    let installedIDs: Set<BrewPackage.ID>
+
+    func installedPackageIDs() async -> Set<BrewPackage.ID> {
+        installedIDs
     }
 }

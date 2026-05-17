@@ -40,13 +40,24 @@ func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
 }
 
 @MainActor
+func makeInstalledViewModel(
+    repository: InstalledPackagesRepository,
+    brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
+) -> InstalledViewModel {
+    InstalledViewModel(
+        repository: repository,
+        brewCommandCenter: brewCommandCenter,
+    )
+}
+
+@MainActor
 func loadViewModel(
     commandRunner: BrewCommandRunning,
     locator: (any BrewExecutableLocating)? = nil,
 ) async -> InstalledViewModel {
-    let repo = InstalledPackagesTestSupport.repository(commandRunner: commandRunner, locator: locator)
+    let repository = InstalledPackagesTestSupport.repository(commandRunner: commandRunner, locator: locator)
     let vm = InstalledViewModel(
-        repository: repo,
+        repository: repository,
         brewCommandCenter: NoopBrewCommandCenter.forTesting(),
     )
     await vm.load()
@@ -58,7 +69,7 @@ struct OddRepositoryError: Error {}
 struct StubThrowingRepository: InstalledPackagesRepository {
     let error: Error
 
-    func loadInstalledPackages() async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
         throw error
     }
 }

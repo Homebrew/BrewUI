@@ -81,7 +81,7 @@ struct BrewInfoCask: Decodable {
     /// Nested stable when present in JSON (current Homebrew `--json=v2` casks omit this; formulae-style mirror).
     var versions: BrewInfoFormulaVersions
     var installedVersions: [String]
-    var dependencies: [String]
+    var dependencies: [HomebrewPackageReference]
     var outdated: Bool
 
     init(from decoder: Decoder) throws {
@@ -93,7 +93,9 @@ struct BrewInfoCask: Decodable {
         versions = (try? container.decode(BrewInfoFormulaVersions.self, forKey: .versions))
             ?? BrewInfoFormulaVersions(stable: nil)
         installedVersions = container.decodeInstalledVersions(forKey: .installed)
-        dependencies = container.decodeCaskDependencies(forKey: .dependencies)
+        dependencies = container.decodeCaskDependencyReferences(
+            forKeys: [.dependencies, .dependsOn],
+        )
         outdated = (try? container.decode(Bool.self, forKey: .outdated)) ?? false
     }
 
@@ -105,6 +107,7 @@ struct BrewInfoCask: Decodable {
         case versions
         case installed
         case dependencies
+        case dependsOn = "depends_on"
         case outdated
     }
 }
@@ -130,23 +133,44 @@ private extension KeyedDecodingContainer {
         return []
     }
 
-    func decodeCaskDependencies(forKey key: Key) -> [String] {
+    func decodeCaskDependencyReferences(forKeys keys: [Key]) -> [HomebrewPackageReference] {
+        for key in keys {
+            let references = decodeCaskDependencyReferences(forKey: key)
+            if !references.isEmpty {
+                return references
+            }
+        }
+        return []
+    }
+
+    func decodeCaskDependencyReferences(forKey key: Key) -> [HomebrewPackageReference] {
         if let array = try? decode([String].self, forKey: key) {
-            return array
+            return HomebrewPackageReference.formulaDependencies(from: array)
         }
         if let single = try? decode(String.self, forKey: key), !single.isEmpty {
-            return [single]
+            return HomebrewPackageReference.formulaDependencies(from: [single])
         }
         guard let nested = try? nestedContainer(keyedBy: AnyCodingKey.self, forKey: key) else {
             return []
         }
 
-        var merged: [String] = []
+        var merged: [HomebrewPackageReference] = []
         for nestedKey in nested.allKeys {
-            let values = nested.decodeStringArray(forKey: nestedKey)
-            merged.append(contentsOf: values)
+            switch nestedKey.stringValue {
+            case "formula":
+                merged.append(
+                    contentsOf: HomebrewPackageReference.formulaDependencies(
+                        from: nested.decodeStringArray(forKey: nestedKey),
+                    ),
+                )
+            case "cask":
+                let caskTokens = nested.decodeStringArray(forKey: nestedKey)
+                merged.append(contentsOf: caskTokens.map { HomebrewPackageReference.cask(token: $0) })
+            default:
+                continue
+            }
         }
-        return merged
+        return HomebrewPackageReference.uniqueReferences(merged)
     }
 }
 

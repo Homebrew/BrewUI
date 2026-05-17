@@ -2,14 +2,16 @@ import SwiftUI
 
 #Preview("List column") {
     let commandCenter = NoopBrewCommandCenter.preview()
+    let inventoryCache = InstalledInventoryCache()
     let viewModel = InstalledViewModel(
-        repository: PreviewInstalledPackagesRepository(),
+        repository: BrewInstalledPackagesRepository.live(cache: inventoryCache),
         brewCommandCenter: commandCenter,
     )
     InstalledPackagesView(
         viewModel: viewModel,
     )
     .environment(\.brewCommandCenter, commandCenter)
+    .environment(\.installedInventoryCache, inventoryCache)
     .task {
         await viewModel.load()
     }
@@ -18,6 +20,7 @@ import SwiftUI
 
 #Preview("Detail") {
     let commandCenter = NoopBrewCommandCenter.preview()
+    let inventoryCache = InstalledInventoryCache()
     let package = BrewPackage(
         name: "git",
         kind: .formula,
@@ -28,6 +31,11 @@ import SwiftUI
         dependencies: [],
         outdated: true,
     )
-    InstalledPackageDetailView(package: package, brewCommandCenter: commandCenter)
-        .frame(minWidth: 280, minHeight: 200)
+    InstalledPackageDetailView(
+        package: package,
+        brewCommandCenter: commandCenter,
+        installedDependentsRepository: BrewInstalledDependentsRepository(cache: inventoryCache),
+        installedInventoryReading: BrewInstalledPackagesRepository.live(cache: inventoryCache),
+    )
+    .frame(minWidth: 280, minHeight: 200)
 }

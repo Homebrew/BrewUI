@@ -57,7 +57,7 @@ struct InstalledViewModelTests {
     @Test @MainActor func `command center running to idle triggers installed refresh`() async {
         let commandCenter = ControllableAllPhasesCommandCenter()
         let repo = CountingInstalledRepository()
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: repo,
             brewCommandCenter: commandCenter,
         )
@@ -75,7 +75,7 @@ struct InstalledViewModelTests {
     @Test @MainActor func `command center running to failed does not trigger installed refresh`() async {
         let commandCenter = ControllableAllPhasesCommandCenter()
         let repo = CountingInstalledRepository()
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: repo,
             brewCommandCenter: commandCenter,
         )
@@ -93,7 +93,7 @@ struct InstalledViewModelTests {
     @Test @MainActor func `multiple running to idle completions trigger multiple refreshes`() async {
         let commandCenter = ControllableAllPhasesCommandCenter()
         let repo = CountingInstalledRepository()
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: repo,
             brewCommandCenter: commandCenter,
         )
@@ -119,7 +119,7 @@ struct InstalledViewModelTests {
             .fixture(name: "wget", kind: .formula, latestVersion: "1.0.0", installedVersions: ["1.0.0"]),
         ]
         let repo = SequentialSnapshotsInstalledRepository(snapshots: [firstSnapshot, secondSnapshot])
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: repo,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
@@ -141,7 +141,7 @@ struct InstalledViewModelTests {
             .fixture(name: "wget", kind: .formula),
         ]
         let repo = SequentialSnapshotsInstalledRepository(snapshots: [firstSnapshot, secondSnapshot])
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: repo,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
@@ -156,11 +156,10 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `load preserves brew stderr in user facing error state`() async {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: StubThrowingRepository(
                 error: BrewCommandError.failed(exitCode: 1, stderr: "formula conflict"),
             ),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         await vm.load()
@@ -173,9 +172,8 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `load maps brew lookup failure to missing Homebrew copy`() async {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: StubThrowingRepository(error: BrewLookupError.executableNotFound),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         await vm.load()
@@ -188,11 +186,10 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `load maps launch failure to underlying message`() async {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: StubThrowingRepository(
                 error: BrewCommandError.launchFailed(underlying: "spawn failed"),
             ),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         await vm.load()
@@ -205,9 +202,8 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `load maps unknown failure to generic load message`() async {
-        let vm = InstalledViewModel(
+        let vm = makeInstalledViewModel(
             repository: StubThrowingRepository(error: OddRepositoryError()),
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         await vm.load()
@@ -240,14 +236,15 @@ private func settleAsync() async {
 @MainActor
 private func expectLoadCount(atLeast target: Int, repo: CountingInstalledRepository) async {
     for _ in 0 ..< 200 {
-        if await repo.loadCallCount >= target {
+        if repo.loadCallCount >= target {
             return
         }
         await Task.yield()
     }
 }
 
-private actor CountingInstalledRepository: InstalledPackagesRepository {
+@MainActor
+private final class CountingInstalledRepository: InstalledPackagesRepository {
     private(set) var loadCallCount = 0
     private let packages: [BrewPackage]
 
@@ -255,13 +252,14 @@ private actor CountingInstalledRepository: InstalledPackagesRepository {
         self.packages = packages
     }
 
-    func loadInstalledPackages() async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
         loadCallCount += 1
         return packages
     }
 }
 
-private actor SequentialSnapshotsInstalledRepository: InstalledPackagesRepository {
+@MainActor
+private final class SequentialSnapshotsInstalledRepository: InstalledPackagesRepository {
     private var snapshots: [[BrewPackage]]
     private var index = 0
 
@@ -269,7 +267,7 @@ private actor SequentialSnapshotsInstalledRepository: InstalledPackagesRepositor
         self.snapshots = snapshots
     }
 
-    func loadInstalledPackages() async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
         guard !snapshots.isEmpty else {
             return []
         }
