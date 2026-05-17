@@ -12,16 +12,27 @@ final class InstalledDetailsViewModel {
     private let brewCommandCenter: any BrewCommandCenter
     private let installedDependentsRepository: any InstalledDependentsRepository
     private let installedInventoryReading: any InstalledInventoryReading
-    private var upgradeTask: Task<Void, Never>?
+    private var mutationTask: Task<Void, Never>?
 
     private(set) var package: BrewPackage
-    /// Latest phase from the command center stream (see ``observeRowUpdates()``); drives ``isUpgrading`` only.
-    private var upgradeOperationPhase: BrewOperationPhase = .idle
+    /// Latest phase from the command center stream (see ``observeRowUpdates()``); drives mutation chrome.
+    private var operationPhase: BrewOperationPhase = .idle
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
+    /// Inline message when uninstall fails; cleared when a new uninstall starts.
+    private(set) var uninstallErrorMessage: String?
 
     /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
     private(set) var isUpgrading: Bool = false
+    /// True while uninstall work is in flight.
+    private(set) var isUninstalling: Bool = false
+    /// Disables both mutation affordances while a package mutation is in progress.
+    private(set) var isMutatingPackage: Bool = false
+
+    /// Drives the uninstall confirmation dialog.
+    var showUninstallConfirmation: Bool = false
+    /// Drives the uninstall-blocked explanation callout.
+    var showUninstallBlockedCallout: Bool = false
 
     var packageName: String {
         package.name
@@ -45,6 +56,11 @@ final class InstalledDetailsViewModel {
         package.upgradeCommand
     }
 
+    /// Copyable Terminal command for uninstalling this package (`CONVENTIONS.md` — transparency).
+    var uninstallDisplayCommand: String {
+        uninstallItem.displayCommand
+    }
+
     /// Shown beside the upgrade affordance whenever the package is outdated.
     var showsUpgradeChrome: Bool {
         package.outdated
@@ -54,9 +70,73 @@ final class InstalledDetailsViewModel {
         package.upgradeButtonTitle
     }
 
+    var uninstallPrimaryButtonTitle: String {
+        uninstallItem.primaryButtonTitle
+    }
+
+    var uninstallConfirmationTitle: String {
+        uninstallItem.confirmationTitle
+    }
+
+    var uninstallConfirmationMessage: String {
+        uninstallItem.confirmationMessage
+    }
+
+    /// True when installed dependents prevent uninstalling this package alone.
+    var isUninstallBlockedByDependents: Bool {
+        uninstallItem.isBlockedByDependents
+    }
+
+    var uninstallBlockingDependentCount: Int {
+        dependentRelationships.count
+    }
+
+    var usedByBlockingBadgeTitle: String? {
+        uninstallItem.usedByBlockingBadgeTitle
+    }
+
+    var uninstallBlockedBannerLead: String? {
+        uninstallItem.uninstallBlockedBannerLead
+    }
+
+    var uninstallBlockedBannerBody: String? {
+        uninstallItem.uninstallBlockedBannerBody
+    }
+
+    /// Muted, reduced-opacity uninstall button styling while blocked and not actively uninstalling.
+    var showsUninstallBlockedPrimaryButtonChrome: Bool {
+        isUninstallBlockedByDependents && !isUninstalling
+    }
+
+    /// What the primary uninstall control should do when activated.
+    var uninstallPrimaryButtonAction: UninstallPrimaryButtonAction {
+        isUninstallBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
+    }
+
+    func handleUninstallPrimaryButtonTapped() {
+        switch uninstallPrimaryButtonAction {
+        case .presentConfirmation:
+            showUninstallConfirmation = true
+        case .revealBlockedExplanation:
+            showUninstallBlockedCallout = true
+        }
+    }
+
+    var uninstallPrimaryButtonAccessibilityHint: String? {
+        uninstallItem.blockedPrimaryButtonAccessibilityHint
+    }
+
+    var uninstallBlockedCalloutContent: UninstallBlockedCalloutContent? {
+        uninstallItem.blockedCalloutContent
+    }
+
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
         package.homepageURL
+    }
+
+    private var uninstallItem: UninstallPackageItem {
+        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
     }
 
     init(
@@ -71,12 +151,21 @@ final class InstalledDetailsViewModel {
         self.installedInventoryReading = installedInventoryReading
     }
 
-    func refreshDependents() async {
-        let dependents = await installedDependentsRepository.installedDependents(for: package.id)
-        dependentRelationships = PackageRelationshipItem.dependents(dependents)
+    /// Refreshes both dependency and dependent relationships for the current package.
+    func refreshRelationships() async {
+        await refreshDependencies()
+        await refreshDependents()
     }
 
-    func refreshDependencies() async {
+    private func refreshDependents() async {
+        let dependents = await installedDependentsRepository.installedDependents(for: package.id)
+        dependentRelationships = PackageRelationshipItem.dependents(dependents)
+        if !isUninstallBlockedByDependents {
+            showUninstallBlockedCallout = false
+        }
+    }
+
+    private func refreshDependencies() async {
         let installedPackageIDs = await installedInventoryReading.installedPackageIDs()
         dependencyRelationships = PackageRelationshipItem.dependencies(
             package.dependencies,
@@ -90,33 +179,32 @@ final class InstalledDetailsViewModel {
             return
         }
         package = newPackage
+        operationPhase = .idle
         dependencyRelationships = []
         dependentRelationships = []
-        upgradeErrorMessage = nil
+        showUninstallConfirmation = false
+        showUninstallBlockedCallout = false
+        clearMutationErrors()
     }
 
     func upgradeSelectedPackage() {
-        guard !isUpgrading else {
-            return
-        }
-
-        upgradeErrorMessage = nil
         let operationID = BrewOperationID(kind: package.kind, name: package.name)
         let command = PackageUpgradeCommand(kind: package.kind, name: package.name)
+        submitMutation(
+            action: .upgrade,
+            operationID: operationID,
+            command: command,
+        )
+    }
 
-        upgradeTask?.cancel()
-        upgradeTask = Task { @MainActor [self] in
-            do {
-                try await brewCommandCenter.submit(id: operationID, command: command)
-            } catch {
-                let latestPhase = await brewCommandCenter.phase(for: operationID)
-                if case let .failed(reason: failure) = latestPhase {
-                    upgradeErrorMessage = failure.userFacingMessage
-                } else {
-                    upgradeErrorMessage = Self.userMessage(for: error)
-                }
-            }
-        }
+    func uninstallSelectedPackage() {
+        let operationID = BrewOperationID(kind: package.kind, name: package.name)
+        let command = PackageUninstallCommand(kind: package.kind, name: package.name)
+        submitMutation(
+            action: .uninstall,
+            operationID: operationID,
+            command: command,
+        )
     }
 
     /// Run while the installed detail column shows this ``package/id`` (`InstalledListRowView` pattern).
@@ -124,17 +212,64 @@ final class InstalledDetailsViewModel {
         let operationID = BrewOperationID(package: package)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
         for await phase in stream {
-            let oldPhase = upgradeOperationPhase
-            upgradeOperationPhase = phase
+            let oldPhase = operationPhase
+            operationPhase = phase
             isUpgrading = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
                 oldPhase: oldPhase,
                 newPhase: phase,
                 isPackageOutdated: package.outdated,
             )
+            isUninstalling = InstalledUninstallBusyPresentation.showsUninstallBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+            )
+            isMutatingPackage = isUpgrading || isUninstalling
+            if isUninstalling {
+                showUninstallBlockedCallout = false
+            }
         }
     }
 
-    private static func userMessage(for error: Error) -> String {
+    private func submitMutation(
+        action: PackageMutationAction,
+        operationID: BrewOperationID,
+        command: any BrewMutatingCommand,
+    ) {
+        guard !isMutatingPackage else {
+            return
+        }
+
+        clearMutationErrors()
+        mutationTask?.cancel()
+        mutationTask = Task { @MainActor [self] in
+            do {
+                try await brewCommandCenter.submit(id: operationID, command: command)
+            } catch {
+                let latestPhase = await brewCommandCenter.phase(for: operationID)
+                if case let .failed(reason: failure) = latestPhase {
+                    setErrorMessage(failure.userFacingMessage, for: action)
+                } else {
+                    setErrorMessage(Self.userMessage(for: error, fallback: action.genericFailureMessage), for: action)
+                }
+            }
+        }
+    }
+
+    private func clearMutationErrors() {
+        upgradeErrorMessage = nil
+        uninstallErrorMessage = nil
+    }
+
+    private func setErrorMessage(_ message: String, for action: PackageMutationAction) {
+        switch action {
+        case .upgrade:
+            upgradeErrorMessage = message
+        case .uninstall:
+            uninstallErrorMessage = message
+        }
+    }
+
+    private static func userMessage(for error: Error, fallback: String) -> String {
         switch error {
         case BrewLookupError.executableNotFound:
             return String(
@@ -150,9 +285,26 @@ final class InstalledDetailsViewModel {
         case let BrewCommandError.launchFailed(underlying):
             return underlying
         default:
-            return String(
+            return fallback
+        }
+    }
+}
+
+private enum PackageMutationAction {
+    case upgrade
+    case uninstall
+
+    var genericFailureMessage: String {
+        switch self {
+        case .upgrade:
+            String(
                 localized: "Something went wrong while upgrading this package.",
                 comment: "Installed detail generic upgrade error",
+            )
+        case .uninstall:
+            String(
+                localized: "Something went wrong while uninstalling this package.",
+                comment: "Installed detail generic uninstall error",
             )
         }
     }

@@ -243,6 +243,11 @@
 - Keep the Installed list mounted under a stable parent container (`HSplitView`) across selection changes; switching between list-only and split layouts can remount the list and reset scroll position.
 - Prefer native `List(selection:)` for Installed row selection state, with view-model-backed selection binding (`setSelection(_:)`) and row tags by stable package id.
 
+## 2026-05-11 — Installed detail uninstall actions
+
+- Installed detail mutations now support both **upgrade** and **uninstall** through the shared `BrewCommandCenter` pipeline; uninstall uses `PackageUninstallCommand` with new `BrewOperationKind` cases (`uninstallFormula`, `uninstallCask`).
+- `InstalledPackageDetailView` now treats the footer as a general package-actions area: show upgrade chrome only when `package.outdated`, but always show uninstall chrome with a native confirmation dialog and copyable user-facing `brew uninstall ...` command.
+
 ## 2026-05-13 — Vale docs job and `docs/Gemfile`
 
 - **Symptom:** `vale docs/` fails with `lstat docs/../Gemfile: no such file or directory` when `docs/Gemfile` is missing.
@@ -266,3 +271,13 @@
 - Removed dead installed-inventory API surface from app target: `InstalledInventoryCache.packages()`, `InstalledInventoryReading.installedPackages(for:)`, `BrewInstalledPackagesRepository.installedPackages(for:)`, and `BrewPackage.reference`.
 - Moved test-only empty inventory/dependents stubs out of `Brew/Repositories` into `BrewTests/TestSupport` (`EmptyInstalledInventoryReading`, `EmptyInstalledDependentsRepository`) so production DI paths remain explicit.
 - Pruned unused test support helpers `localizedHomebrewCommandFailedMessage()` and `packageInfoJSONResponse(...)` from `InstalledPackagesRepositoryTestSupport`.
+
+## 2026-05-16 — Domain/presentation mapping boundary
+
+- Installed uninstall presentation mapping now uses a feature-layer `UninstallPackageItem` initialized from `BrewPackage`, instead of adding uninstall UI properties directly on `BrewPackage`.
+- Team convention clarified: domain model types stay presentation-agnostic; map to UI properties through feature ViewModels (top-level surfaces) or feature `*Item` types (subview/action presentation).
+
+## 2026-05-17 — Passive view enforcement for presentation state
+
+- Strengthened `CONVENTIONS.md` and `.cursor/rules/swift-implementation.mdc` with an explicit MVVM guardrail: views must not compose multiple ViewModel state primitives inline to derive a single presentation decision.
+- Preferred pattern: expose one derived ViewModel property per UI concern (for example one spinner-driving busy flag), and have the view bind directly to it.

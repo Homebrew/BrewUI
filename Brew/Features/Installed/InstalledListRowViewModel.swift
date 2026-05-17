@@ -15,8 +15,9 @@ enum RowVersionPresentation: Equatable {
 @MainActor
 final class InstalledListRowViewModel {
     private(set) var package: BrewPackage
-    private var upgradeOperationPhase: BrewOperationPhase = .idle
+    private var operationPhase: BrewOperationPhase = .idle
     private(set) var showsUpgradeBusy: Bool = false
+    private(set) var showsUninstallBusy: Bool = false
     private let brewCommandCenter: BrewCommandCenter
 
     var id: String {
@@ -75,6 +76,24 @@ final class InstalledListRowViewModel {
         return parts.joined(separator: ", ")
     }
 
+    /// Single busy presentation state for row chrome.
+    var showsOperationBusy: Bool {
+        showsUpgradeBusy || showsUninstallBusy
+    }
+
+    /// Full VoiceOver summary, including transient mutation state when present.
+    var rowAccessibilityLabel: String {
+        if showsUpgradeBusy {
+            let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
+            return "\(accessibilitySummary), \(upgrading)"
+        }
+        if showsUninstallBusy {
+            let uninstalling = String(localized: "Uninstalling", comment: "VoiceOver: package uninstalling")
+            return "\(accessibilitySummary), \(uninstalling)"
+        }
+        return accessibilitySummary
+    }
+
     init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
         self.package = package
         self.brewCommandCenter = brewCommandCenter
@@ -85,19 +104,25 @@ final class InstalledListRowViewModel {
             return
         }
         package = newPackage
+        operationPhase = .idle
         showsUpgradeBusy = false
+        showsUninstallBusy = false
     }
 
     func observeRowUpdates() async {
         let operationID = BrewOperationID(package: package)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
         for await phase in stream {
-            let oldPhase = upgradeOperationPhase
-            upgradeOperationPhase = phase
+            let oldPhase = operationPhase
+            operationPhase = phase
             showsUpgradeBusy = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
                 oldPhase: oldPhase,
                 newPhase: phase,
                 isPackageOutdated: package.outdated,
+            )
+            showsUninstallBusy = InstalledUninstallBusyPresentation.showsUninstallBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
             )
         }
     }

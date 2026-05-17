@@ -181,6 +181,35 @@ func waitForUpgrading(on viewModel: InstalledDetailsViewModel) async {
     Issue.record("timed out waiting for isUpgrading")
 }
 
+@MainActor
+func waitForUninstallAttemptToFinish(on viewModel: InstalledDetailsViewModel) async {
+    for step in 0 ..< 300 {
+        await Task.yield()
+        if step >= 10, !viewModel.isUninstalling {
+            return
+        }
+    }
+    Issue.record("timed out waiting for isUninstalling to clear")
+}
+
+@MainActor
+func waitForUninstallError(on viewModel: InstalledDetailsViewModel) async {
+    for _ in 0 ..< 100 {
+        if viewModel.uninstallErrorMessage != nil { return }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for uninstallErrorMessage")
+}
+
+@MainActor
+func waitForUninstalling(on viewModel: InstalledDetailsViewModel) async {
+    for _ in 0 ..< 100 {
+        if viewModel.isUninstalling { return }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for isUninstalling")
+}
+
 /// Runs ``InstalledDetailsViewModel/observeRowUpdates()`` concurrently — required for upgrades to mirror the detail column lifecycle.
 @MainActor
 func withInstalledDetailPhaseObservation(

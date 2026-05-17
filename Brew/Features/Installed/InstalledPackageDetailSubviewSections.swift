@@ -149,7 +149,7 @@ struct InstalledPackageDetailUsedBySection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            InstalledPackageDetailSectionHeading(title: "Used by")
+            usedByHeading
             if viewModel.dependentRelationships.isEmpty {
                 Text("No installed packages use this package.")
                     .font(.brewCallout)
@@ -164,24 +164,44 @@ struct InstalledPackageDetailUsedBySection: View {
                     collapsedRelationshipCount: collapsedRelationshipCount,
                     onSelectInstalledPackage: onSelectInstalledPackage,
                 )
-                if !viewModel.dependentRelationships.isEmpty {
-                    usedByCallout
-                }
             }
         }
     }
 
-    private var usedByCallout: some View {
+    private var usedByHeading: some View {
+        HStack(spacing: BrewSpacing.sm) {
+            InstalledPackageDetailSectionHeading(title: "Used by")
+            if let badgeTitle = viewModel.usedByBlockingBadgeTitle {
+                Text(badgeTitle)
+                    .font(.brewCaption2.weight(.semibold))
+                    .foregroundStyle(Color.brewStatusWarning)
+                    .padding(.horizontal, BrewSpacing.xs)
+                    .padding(.vertical, BrewSpacing.xxs)
+                    .background(Color.brewStatusWarningSubtle)
+                    .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+            }
+        }
+    }
+}
+
+struct UninstallBlockedCallout: View {
+    let lead: String
+    let bodyText: String
+
+    var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.brewSubheadline)
-                .foregroundStyle(Color.brewBrandPrimary)
-            Text("Other installed packages depend on this. Removing it may break them.")
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewTextPrimary)
+                .foregroundStyle(Color.brewStatusWarning)
+            (
+                Text(lead).fontWeight(.semibold)
+                    + Text(" \(bodyText)"),
+            )
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewTextPrimary)
         }
         .padding(BrewSpacing.sm)
-        .background(Color.brewBrandTint)
+        .background(Color.brewStatusWarningSubtle)
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
     }
 }
@@ -286,64 +306,6 @@ struct InstalledPackageDetailRelationshipList: View {
             return relationships
         }
         return Array(relationships.prefix(collapsedRelationshipCount))
-    }
-}
-
-struct InstalledPackageDetailInfoCommandSection: View {
-    let title: String
-    let command: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            InstalledPackageDetailSectionHeading(title: title)
-            commandConsole
-        }
-    }
-
-    private var commandConsole: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Label("Terminal command", systemImage: "terminal")
-                    .font(.brewCaption)
-                    .foregroundStyle(Color.brewTextSecondary)
-                Spacer()
-                Button("Copy", systemImage: "doc.on.doc") {
-                    copyCommandToPasteboard(command)
-                }
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextSecondary)
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, BrewSpacing.md)
-            .padding(.vertical, BrewSpacing.sm)
-            .background(Color.brewSurfaceRecessed)
-
-            Text(command)
-                .font(.brewCode)
-                .foregroundStyle(Color.brewCodeDefault)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(BrewSpacing.md)
-                .background(Color.brewTerminal)
-                .textSelection(.enabled)
-
-            Text("Shows detailed information about this package")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, BrewSpacing.md)
-                .padding(.vertical, BrewSpacing.sm)
-                .background(Color.brewSurfaceRecessed)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
-        .overlay(
-            RoundedRectangle(cornerRadius: BrewRadius.md)
-                .stroke(Color.brewBorderDefault, lineWidth: 1),
-        )
-    }
-
-    private func copyCommandToPasteboard(_ command: String) {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(command, forType: .string)
     }
 }
 

@@ -78,6 +78,31 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.upgradeDisplayCommand == "brew upgrade --formula wget@2")
     }
 
+    @Test @MainActor func `uninstallDisplayCommand reflects formula name`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.uninstallDisplayCommand == "brew uninstall --formula wget")
+    }
+
+    @Test @MainActor func `uninstallDisplayCommand uses cask terminal flags`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "docker", kind: .cask),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.uninstallDisplayCommand == "brew uninstall --cask docker")
+    }
+
+    @Test @MainActor func `uninstallDisplayCommand updates when package name changes`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        viewModel.update(package: details(name: "wget@2"))
+        #expect(viewModel.uninstallDisplayCommand == "brew uninstall --formula wget@2")
+    }
+
     @Test @MainActor func `showsUpgradeChrome follows package outdated flag`() {
         var outdatedDetails = details(name: "wget")
         outdatedDetails.outdated = true
@@ -129,12 +154,37 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.upgradePrimaryButtonTitle?.contains("v2.0.0") == true)
     }
 
+    @Test @MainActor func `uninstall presentation uses package name`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.uninstallPrimaryButtonTitle == "Uninstall")
+        #expect(viewModel.uninstallConfirmationTitle == "Uninstall wget?")
+        #expect(viewModel.uninstallConfirmationMessage == "This will remove wget from this Mac using Homebrew.")
+    }
+
     @Test @MainActor func `detail row is not upgrading before observeRowUpdates runs`() {
         let viewModel = makeInstalledDetailsViewModel(
             package: details(name: "wget"),
             brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.upgradeFormula)),
         )
         #expect(!viewModel.isUpgrading)
+    }
+
+    @Test @MainActor func `blocked uninstall primary button presentation`() async {
+        let package = details(name: "ada-url")
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            installedDependentsRepository: StubInstalledDependentsRepository { packageID in
+                packageID == package.id ? [.fixture(name: "curl")] : []
+            },
+        )
+        await viewModel.refreshRelationships()
+        #expect(viewModel.showsUninstallBlockedPrimaryButtonChrome)
+        #expect(viewModel.uninstallPrimaryButtonAction == .revealBlockedExplanation)
+        #expect(viewModel.uninstallBlockedCalloutContent != nil)
     }
 
     @Test @MainActor func `dependents uses injected repository for current package`() async {
@@ -148,7 +198,7 @@ struct InstalledDetailsViewModelTests {
                     : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependentRelationships.map(\.displayName) == ["curl", "node"])
         #expect(viewModel.dependentRelationships.map(\.packageKind) == [.formula, .formula])
         #expect(viewModel.dependentRelationships.map(\.isInstalledInInventory) == [true, true])
@@ -164,13 +214,13 @@ struct InstalledDetailsViewModelTests {
                 packageID == wget.id ? [.fixture(name: "curl")] : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         viewModel.update(package: wget)
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependentRelationships.map(\.displayName) == ["curl"])
     }
 
-    @Test @MainActor func `refreshDependencies marks installed and missing dependency refs`() async {
+    @Test @MainActor func `refreshRelationships marks installed and missing dependency refs`() async {
         let package = BrewPackage.fixture(
             name: "wget",
             kind: .formula,
@@ -182,7 +232,7 @@ struct InstalledDetailsViewModelTests {
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: ["formula:openssl@3"]),
         )
 
-        await viewModel.refreshDependencies()
+        await viewModel.refreshRelationships()
 
         #expect(viewModel.dependencyRelationships.count == 2)
         #expect(viewModel.dependencyRelationships[0].displayName == "openssl@3")
@@ -203,7 +253,7 @@ struct InstalledDetailsViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: ["formula:openssl@3"]),
         )
-        await viewModel.refreshDependencies()
+        await viewModel.refreshRelationships()
         viewModel.update(package: BrewPackage.fixture(name: "curl", kind: .formula))
         #expect(viewModel.dependencyRelationships.isEmpty)
     }
@@ -217,9 +267,17 @@ struct InstalledDetailsViewModelTests {
                 packageID == package.id ? [.fixture(name: "curl")] : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         viewModel.update(package: BrewPackage.fixture(name: "wget", kind: .formula))
         #expect(viewModel.dependentRelationships.isEmpty)
+    }
+
+    @Test @MainActor func `detail row is not uninstalling before observeRowUpdates runs`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.uninstallFormula)),
+        )
+        #expect(!viewModel.isUninstalling)
     }
 }
 
@@ -337,6 +395,130 @@ struct InstalledDetailsViewModelUpgradeTests {
             await waitForUpgradeAttemptToFinish(on: viewModel)
         }
     }
+
+    @Test @MainActor func `uninstall completes with idle phase and no error using noop center`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallAttemptToFinish(on: viewModel)
+            #expect(viewModel.uninstallErrorMessage == nil)
+        }
+    }
+
+    @Test @MainActor func `uninstall failure sets uninstall error message`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewCommandError.failed(exitCode: 1, stderr: "uninstall blocked"),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallError(on: viewModel)
+            #expect(viewModel.uninstallErrorMessage == "uninstall blocked")
+        }
+    }
+
+    @Test @MainActor func `uninstall ignores reentry while already uninstalling`() async {
+        let center = RunningSubmitCountingCommandCenter(phase: .running(.uninstallFormula))
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+
+        viewModel.uninstallSelectedPackage()
+        let observer = Task { await viewModel.observeRowUpdates() }
+        defer { observer.cancel() }
+
+        await waitForUninstalling(on: viewModel)
+        viewModel.uninstallSelectedPackage()
+
+        #expect(await center.submitCallCount == 1)
+    }
+
+    @Test @MainActor func `uninstall failure maps missing brew to user facing message`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewLookupError.executableNotFound,
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallError(on: viewModel)
+            #expect(
+                viewModel.uninstallErrorMessage ==
+                    "Could not find Homebrew. Install it or ensure brew is in the default location.",
+            )
+        }
+    }
+
+    @Test @MainActor func `uninstall failure maps unknown errors to generic message`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: GenericUpgradeError(),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallError(on: viewModel)
+            #expect(viewModel.uninstallErrorMessage == "Something went wrong while uninstalling this package.")
+        }
+    }
 }
 
 private struct GenericUpgradeError: Error {}
+
+// MARK: - Uninstall presentation state
+
+extension InstalledDetailsViewModelTests {
+    @Test @MainActor func `handleUninstallPrimaryButtonTapped sets showUninstallConfirmation when not blocked`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        viewModel.handleUninstallPrimaryButtonTapped()
+        #expect(viewModel.showUninstallConfirmation)
+        #expect(!viewModel.showUninstallBlockedCallout)
+    }
+
+    @Test @MainActor func `handleUninstallPrimaryButtonTapped sets showUninstallBlockedCallout when blocked`() async {
+        let package = details(name: "ada-url")
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            installedDependentsRepository: StubInstalledDependentsRepository { packageID in
+                packageID == package.id ? [.fixture(name: "curl")] : []
+            },
+        )
+        await viewModel.refreshRelationships()
+        viewModel.handleUninstallPrimaryButtonTapped()
+        #expect(viewModel.showUninstallBlockedCallout)
+        #expect(!viewModel.showUninstallConfirmation)
+    }
+
+    @Test @MainActor func `update package clears uninstall presentation flags`() async {
+        let package = details(name: "ada-url")
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            installedDependentsRepository: StubInstalledDependentsRepository { packageID in
+                packageID == package.id ? [.fixture(name: "curl")] : []
+            },
+        )
+        await viewModel.refreshRelationships()
+        viewModel.handleUninstallPrimaryButtonTapped()
+        #expect(viewModel.showUninstallBlockedCallout)
+        viewModel.update(package: .fixture(name: "wget", kind: .formula))
+        #expect(!viewModel.showUninstallBlockedCallout)
+        #expect(!viewModel.showUninstallConfirmation)
+    }
+}

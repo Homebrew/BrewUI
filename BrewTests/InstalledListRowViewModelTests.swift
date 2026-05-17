@@ -21,11 +21,60 @@ struct InstalledListRowViewModelTests {
     }
 
     @Test func `observeRowUpdates ends on last phased stream emission`() async {
-        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        var package = BrewPackage.fixture(name: "git", kind: .formula)
+        package.outdated = true
         let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .idle])
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
         await viewModel.observeRowUpdates()
+        #expect(viewModel.showsUpgradeBusy)
+        #expect(viewModel.showsOperationBusy)
+        #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
+    }
+
+    @Test func `observeRowUpdates latches uninstall busy after running to idle`() async {
+        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        let center = PhaseSequenceCommandCenter(phases: [.running(.uninstallFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
         #expect(!viewModel.showsUpgradeBusy)
+        #expect(viewModel.showsUninstallBusy)
+        #expect(viewModel.showsOperationBusy)
+        #expect(viewModel.rowAccessibilityLabel.contains("Uninstalling"))
+    }
+
+    @Test func `update package clears upgrade busy latch and operation busy`() async {
+        var package = BrewPackage.fixture(name: "git", kind: .formula)
+        package.outdated = true
+        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsUpgradeBusy)
+        #expect(viewModel.showsOperationBusy)
+
+        let refreshedPackage = BrewPackage.fixture(name: "git", kind: .formula)
+        viewModel.update(package: refreshedPackage)
+
+        #expect(!viewModel.showsUpgradeBusy)
+        #expect(!viewModel.showsUninstallBusy)
+        #expect(!viewModel.showsOperationBusy)
+        #expect(!viewModel.rowAccessibilityLabel.contains("Upgrading"))
+    }
+
+    @Test func `update package clears uninstall busy latch and operation busy`() async {
+        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        let center = PhaseSequenceCommandCenter(phases: [.running(.uninstallFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsUninstallBusy)
+        #expect(viewModel.showsOperationBusy)
+
+        let refreshedPackage = BrewPackage.fixture(name: "git", kind: .formula, description: "Updated")
+        viewModel.update(package: refreshedPackage)
+
+        #expect(!viewModel.showsUpgradeBusy)
+        #expect(!viewModel.showsUninstallBusy)
+        #expect(!viewModel.showsOperationBusy)
+        #expect(!viewModel.rowAccessibilityLabel.contains("Uninstalling"))
     }
 
     @Test func `update package flips row version presentation when outdated changes`() {

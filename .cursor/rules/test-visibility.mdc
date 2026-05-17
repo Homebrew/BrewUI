@@ -1,0 +1,38 @@
+---
+description: Never widen symbol visibility just to enable test access.
+alwaysApply: false
+---
+
+# Do Not Expose Symbols for Test Access
+
+Never widen the visibility of a method, property, computed var, or type beyond what production code requires just to make it reachable from a test target.
+
+**Why:** Leaking implementation details as `internal` (or wider) under test pressure pollutes the API surface and makes future refactoring harder. Tests should exercise behaviour through the same entry points callers actually use.
+
+**Rule:**
+
+- If a symbol would naturally be `private` but a test wants to call it, **do not make it `internal`**. Instead, update the test to go through the public/internal method that composes it (the same surface production callers use).
+- If no such composed entry point exists yet, **create one** (following the temporal cohesion rule where applicable), then test through that.
+- The one permitted exception is **`init`**: initialisers may be given wider visibility than strictly needed so tests can construct types in isolation. This is standard practice and does not leak behaviour.
+
+**Example (wrong):**
+
+```swift
+// Made internal only so tests can call it — wrong
+func refreshDependencies() async { … }
+func refreshDependents() async { … }
+```
+
+**Example (correct):**
+
+```swift
+// Private implementation details
+private func refreshDependencies() async { … }
+private func refreshDependents() async { … }
+
+// Tests call the composed public entry point instead
+func refreshRelationships() async {
+    await refreshDependencies()
+    await refreshDependents()
+}
+```

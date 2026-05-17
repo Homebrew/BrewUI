@@ -65,4 +65,21 @@ struct InstalledUpgradeBusyPresentationTests {
             ),
         )
     }
+
+    @Test func `running uninstall phase does not show upgrade busy`() {
+        #expect(
+            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: .idle,
+                newPhase: .running(.uninstallFormula),
+                isPackageOutdated: true,
+            ),
+        )
+        #expect(
+            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: .running(.uninstallCask),
+                newPhase: .idle,
+                isPackageOutdated: true,
+            ),
+        )
+    }
 }
