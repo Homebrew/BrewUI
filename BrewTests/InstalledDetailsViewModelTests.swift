@@ -148,7 +148,7 @@ struct InstalledDetailsViewModelTests {
                     : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependentRelationships.map(\.displayName) == ["curl", "node"])
         #expect(viewModel.dependentRelationships.map(\.packageKind) == [.formula, .formula])
         #expect(viewModel.dependentRelationships.map(\.isInstalledInInventory) == [true, true])
@@ -164,13 +164,13 @@ struct InstalledDetailsViewModelTests {
                 packageID == wget.id ? [.fixture(name: "curl")] : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         viewModel.update(package: wget)
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependentRelationships.map(\.displayName) == ["curl"])
     }
 
-    @Test @MainActor func `refreshDependencies marks installed and missing dependency refs`() async {
+    @Test @MainActor func `refreshRelationships marks installed and missing dependency refs`() async {
         let package = BrewPackage.fixture(
             name: "wget",
             kind: .formula,
@@ -182,7 +182,7 @@ struct InstalledDetailsViewModelTests {
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: ["formula:openssl@3"]),
         )
 
-        await viewModel.refreshDependencies()
+        await viewModel.refreshRelationships()
 
         #expect(viewModel.dependencyRelationships.count == 2)
         #expect(viewModel.dependencyRelationships[0].displayName == "openssl@3")
@@ -203,7 +203,7 @@ struct InstalledDetailsViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: ["formula:openssl@3"]),
         )
-        await viewModel.refreshDependencies()
+        await viewModel.refreshRelationships()
         viewModel.update(package: BrewPackage.fixture(name: "curl", kind: .formula))
         #expect(viewModel.dependencyRelationships.isEmpty)
     }
@@ -217,7 +217,7 @@ struct InstalledDetailsViewModelTests {
                 packageID == package.id ? [.fixture(name: "curl")] : []
             },
         )
-        await viewModel.refreshDependents()
+        await viewModel.refreshRelationships()
         viewModel.update(package: BrewPackage.fixture(name: "wget", kind: .formula))
         #expect(viewModel.dependentRelationships.isEmpty)
     }

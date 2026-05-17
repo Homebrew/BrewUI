@@ -1,0 +1,46 @@
+---
+description: Wrap temporally cohesive calls — things that always need to happen together — into a single named function.
+alwaysApply: false
+---
+
+# Temporal Cohesion: Wrap Co-Occurring Calls
+
+When two or more calls always appear together at every call site, extract them into a single named function. This applies everywhere: ViewModels, actors, services, repositories, test helpers — sync or async, same type or across types.
+
+**Why:** Repeated call sequences are brittle. Any new call site can silently omit one half. The composed name also communicates intent ("refresh relationships") rather than mechanism ("refresh dependencies, then dependents").
+
+**Rule:**
+
+- If `foo()` + `bar()` appear together at two or more call sites with no intervening logic that varies between sites, extract a function that calls both and replace every call site with it.
+- Name the function after the **shared intent**, not after the individual operations (e.g. `refreshRelationships()`, not `refreshDependenciesAndDependents()`).
+- Make the individual functions `private` where they have no independent callers — they become implementation details of the composed function. See `test-visibility.mdc` for the testing corollary.
+- Do **not** collapse calls whose co-occurrence is coincidental or that carry genuinely distinct purposes at each call site. Only group when the pair represents a single coherent operation from the caller's point of view.
+
+**Examples:**
+
+```swift
+// Before — async ViewModel
+await viewModel.refreshDependencies()
+await viewModel.refreshDependents()
+
+// After
+await viewModel.refreshRelationships()
+```
+
+```swift
+// Before — sync setup
+cache.invalidate()
+cache.preload()
+
+// After
+cache.reset()
+```
+
+```swift
+// Before — actor coordination
+await center.submit(id: id, command: command)
+await logger.record(id: id)
+
+// After — composed on the coordinating type
+await coordinator.submitAndRecord(id: id, command: command)
+```

@@ -59,8 +59,7 @@ struct InstalledPackageDetailView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .task(id: package.id) {
-            await viewModel.refreshDependencies()
-            await viewModel.refreshDependents()
+            await viewModel.refreshRelationships()
             await viewModel.observeRowUpdates()
         }
         .onChange(of: package) { _, newPackage in
@@ -68,8 +67,7 @@ struct InstalledPackageDetailView: View {
             expandedDependencies = false
             expandedDependents = false
             Task {
-                await viewModel.refreshDependencies()
-                await viewModel.refreshDependents()
+                await viewModel.refreshRelationships()
             }
         }
     }

@@ -71,12 +71,18 @@ final class InstalledDetailsViewModel {
         self.installedInventoryReading = installedInventoryReading
     }
 
-    func refreshDependents() async {
+    /// Refreshes both dependency and dependent relationships for the current package.
+    func refreshRelationships() async {
+        await refreshDependencies()
+        await refreshDependents()
+    }
+
+    private func refreshDependents() async {
         let dependents = await installedDependentsRepository.installedDependents(for: package.id)
         dependentRelationships = PackageRelationshipItem.dependents(dependents)
     }
 
-    func refreshDependencies() async {
+    private func refreshDependencies() async {
         let installedPackageIDs = await installedInventoryReading.installedPackageIDs()
         dependencyRelationships = PackageRelationshipItem.dependencies(
             package.dependencies,
