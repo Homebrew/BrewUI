@@ -78,6 +78,31 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.upgradeDisplayCommand == "brew upgrade --formula wget@2")
     }
 
+    @Test @MainActor func `uninstallDisplayCommand reflects formula name`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.uninstallDisplayCommand == "brew uninstall --formula wget")
+    }
+
+    @Test @MainActor func `uninstallDisplayCommand uses cask terminal flags`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "docker", kind: .cask),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.uninstallDisplayCommand == "brew uninstall --cask docker")
+    }
+
+    @Test @MainActor func `uninstallDisplayCommand updates when package name changes`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        viewModel.update(package: details(name: "wget@2"))
+        #expect(viewModel.uninstallDisplayCommand == "brew uninstall --formula wget@2")
+    }
+
     @Test @MainActor func `showsUpgradeChrome follows package outdated flag`() {
         var outdatedDetails = details(name: "wget")
         outdatedDetails.outdated = true
@@ -127,6 +152,16 @@ struct InstalledDetailsViewModelTests {
         newer.latestVersion = "2.0.0"
         viewModel.update(package: newer)
         #expect(viewModel.upgradePrimaryButtonTitle?.contains("v2.0.0") == true)
+    }
+
+    @Test @MainActor func `uninstall presentation uses package name`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.uninstallPrimaryButtonTitle == "Uninstall")
+        #expect(viewModel.uninstallConfirmationTitle == "Uninstall wget?")
+        #expect(viewModel.uninstallConfirmationMessage == "This will remove wget from this Mac using Homebrew.")
     }
 
     @Test @MainActor func `detail row is not upgrading before observeRowUpdates runs`() {
@@ -220,6 +255,14 @@ struct InstalledDetailsViewModelTests {
         await viewModel.refreshRelationships()
         viewModel.update(package: BrewPackage.fixture(name: "wget", kind: .formula))
         #expect(viewModel.dependentRelationships.isEmpty)
+    }
+
+    @Test @MainActor func `detail row is not uninstalling before observeRowUpdates runs`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.uninstallFormula)),
+        )
+        #expect(!viewModel.isUninstalling)
     }
 }
 
@@ -335,6 +378,84 @@ struct InstalledDetailsViewModelUpgradeTests {
             #expect(await center.submitCallCount == 1)
             await center.resolveSubmit()
             await waitForUpgradeAttemptToFinish(on: viewModel)
+        }
+    }
+
+    @Test @MainActor func `uninstall completes with idle phase and no error using noop center`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallAttemptToFinish(on: viewModel)
+            #expect(viewModel.uninstallErrorMessage == nil)
+        }
+    }
+
+    @Test @MainActor func `uninstall failure sets uninstall error message`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewCommandError.failed(exitCode: 1, stderr: "uninstall blocked"),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallError(on: viewModel)
+            #expect(viewModel.uninstallErrorMessage == "uninstall blocked")
+        }
+    }
+
+    @Test @MainActor func `uninstall ignores reentry while already uninstalling`() async {
+        let center = RunningSubmitCountingCommandCenter(phase: .running(.uninstallFormula))
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+
+        viewModel.uninstallSelectedPackage()
+        let observer = Task { await viewModel.observeRowUpdates() }
+        defer { observer.cancel() }
+
+        await waitForUninstalling(on: viewModel)
+        viewModel.uninstallSelectedPackage()
+
+        #expect(await center.submitCallCount == 1)
+    }
+
+    @Test @MainActor func `uninstall failure maps missing brew to user facing message`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewLookupError.executableNotFound,
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallError(on: viewModel)
+            #expect(
+                viewModel.uninstallErrorMessage ==
+                    "Could not find Homebrew. Install it or ensure brew is in the default location.",
+            )
+        }
+    }
+
+    @Test @MainActor func `uninstall failure maps unknown errors to generic message`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: GenericUpgradeError(),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.uninstallSelectedPackage()
+            await waitForUninstallError(on: viewModel)
+            #expect(viewModel.uninstallErrorMessage == "Something went wrong while uninstalling this package.")
         }
     }
 }
