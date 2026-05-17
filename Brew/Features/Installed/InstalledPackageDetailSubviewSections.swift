@@ -149,7 +149,7 @@ struct InstalledPackageDetailUsedBySection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            InstalledPackageDetailSectionHeading(title: "Used by")
+            usedByHeading
             if viewModel.dependentRelationships.isEmpty {
                 Text("No installed packages use this package.")
                     .font(.brewCallout)
@@ -164,24 +164,44 @@ struct InstalledPackageDetailUsedBySection: View {
                     collapsedRelationshipCount: collapsedRelationshipCount,
                     onSelectInstalledPackage: onSelectInstalledPackage,
                 )
-                if !viewModel.dependentRelationships.isEmpty {
-                    usedByCallout
-                }
             }
         }
     }
 
-    private var usedByCallout: some View {
+    private var usedByHeading: some View {
+        HStack(spacing: BrewSpacing.sm) {
+            InstalledPackageDetailSectionHeading(title: "Used by")
+            if let badgeTitle = viewModel.usedByBlockingBadgeTitle {
+                Text(badgeTitle)
+                    .font(.brewCaption2.weight(.semibold))
+                    .foregroundStyle(Color.brewStatusWarning)
+                    .padding(.horizontal, BrewSpacing.xs)
+                    .padding(.vertical, BrewSpacing.xxs)
+                    .background(Color.brewStatusWarningSubtle)
+                    .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+            }
+        }
+    }
+}
+
+struct UninstallBlockedCallout: View {
+    let lead: String
+    let bodyText: String
+
+    var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.brewSubheadline)
-                .foregroundStyle(Color.brewBrandPrimary)
-            Text("Other installed packages depend on this. Removing it may break them.")
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewTextPrimary)
+                .foregroundStyle(Color.brewStatusWarning)
+            (
+                Text(lead).fontWeight(.semibold)
+                    + Text(" \(bodyText)"),
+            )
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewTextPrimary)
         }
         .padding(BrewSpacing.sm)
-        .background(Color.brewBrandTint)
+        .background(Color.brewStatusWarningSubtle)
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
     }
 }

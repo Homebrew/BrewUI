@@ -77,13 +77,34 @@ final class InstalledDetailsViewModel {
         uninstallItem.confirmationMessage
     }
 
+    /// True when installed dependents prevent uninstalling this package alone.
+    var isUninstallBlockedByDependents: Bool {
+        uninstallItem.isBlockedByDependents
+    }
+
+    var uninstallBlockingDependentCount: Int {
+        dependentRelationships.count
+    }
+
+    var usedByBlockingBadgeTitle: String? {
+        uninstallItem.usedByBlockingBadgeTitle
+    }
+
+    var uninstallBlockedBannerLead: String? {
+        uninstallItem.uninstallBlockedBannerLead
+    }
+
+    var uninstallBlockedBannerBody: String? {
+        uninstallItem.uninstallBlockedBannerBody
+    }
+
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
         package.homepageURL
     }
 
     private var uninstallItem: UninstallPackageItem {
-        UninstallPackageItem(package: package)
+        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
     }
 
     init(

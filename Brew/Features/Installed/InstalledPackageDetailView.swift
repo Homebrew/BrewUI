@@ -150,11 +150,16 @@ private struct InstalledPackageDetailUninstallChrome: View {
                             .controlSize(.small)
                             .frame(minWidth: 120)
                     } else {
-                        Text(viewModel.uninstallPrimaryButtonTitle).foregroundStyle(Color.brewTextSecondary)
+                        Text(viewModel.uninstallPrimaryButtonTitle)
+                            .foregroundStyle(
+                                viewModel.isUninstallBlockedByDependents
+                                    ? Color.brewTextTertiary
+                                    : Color.brewTextSecondary,
+                            )
                     }
                 }
                 .buttonStyle(.bordered)
-                .disabled(viewModel.isMutatingPackage)
+                .disabled(viewModel.isMutatingPackage || viewModel.isUninstallBlockedByDependents)
                 .accessibilityLabel(viewModel.uninstallPrimaryButtonTitle)
                 .confirmationDialog(
                     viewModel.uninstallConfirmationTitle,
@@ -166,6 +171,12 @@ private struct InstalledPackageDetailUninstallChrome: View {
                     Button("Cancel", role: .cancel) {}
                 } message: {
                     Text(viewModel.uninstallConfirmationMessage)
+                }
+
+                if let lead = viewModel.uninstallBlockedBannerLead,
+                   let body = viewModel.uninstallBlockedBannerBody
+                {
+                    UninstallBlockedCallout(lead: lead, bodyText: body)
                 }
 
                 if let uninstallError = viewModel.uninstallErrorMessage {
