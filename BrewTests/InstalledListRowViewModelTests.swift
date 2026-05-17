@@ -28,6 +28,15 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
     }
 
+    @Test func `observeRowUpdates latches uninstall busy after running to idle`() async {
+        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        let center = PhaseSequenceCommandCenter(phases: [.running(.uninstallFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(!viewModel.showsUpgradeBusy)
+        #expect(viewModel.showsUninstallBusy)
+    }
+
     @Test func `update package flips row version presentation when outdated changes`() {
         let current = BrewPackage.fixture(
             name: "git",

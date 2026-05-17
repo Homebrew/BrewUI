@@ -61,7 +61,7 @@ struct InstalledListRowView: View {
         }
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(listAccessibilityLabel(viewModel: viewModel))
+        .accessibilityLabel(viewModel.rowAccessibilityLabel)
     }
 
     private func iconBadge(viewModel: InstalledListRowViewModel) -> some View {
@@ -82,7 +82,7 @@ struct InstalledListRowView: View {
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextPrimary)
 
-            if viewModel.showsUpgradeBusy {
+            if viewModel.showsOperationBusy {
                 ProgressView()
                     .controlSize(.small)
                     .accessibilityHidden(true)
@@ -117,14 +117,6 @@ struct InstalledListRowView: View {
 
     private func statusIconColor(viewModel: InstalledListRowViewModel) -> Color {
         viewModel.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
-    }
-
-    private func listAccessibilityLabel(viewModel: InstalledListRowViewModel) -> String {
-        if viewModel.showsUpgradeBusy {
-            let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
-            return "\(viewModel.accessibilitySummary), \(upgrading)"
-        }
-        return viewModel.accessibilitySummary
     }
 
     @ViewBuilder

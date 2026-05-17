@@ -276,3 +276,8 @@
 
 - Installed uninstall presentation mapping now uses a feature-layer `UninstallPackageItem` initialized from `BrewPackage`, instead of adding uninstall UI properties directly on `BrewPackage`.
 - Team convention clarified: domain model types stay presentation-agnostic; map to UI properties through feature ViewModels (top-level surfaces) or feature `*Item` types (subview/action presentation).
+
+## 2026-05-17 — Passive view enforcement for presentation state
+
+- Strengthened `CONVENTIONS.md` and `.cursor/rules/swift-implementation.mdc` with an explicit MVVM guardrail: views must not compose multiple ViewModel state primitives inline to derive a single presentation decision.
+- Preferred pattern: expose one derived ViewModel property per UI concern (for example one spinner-driving busy flag), and have the view bind directly to it.

@@ -9,3 +9,4 @@ alwaysApply: false
 - Include required imports and provide compilable code updates.
 - Use `@MainActor` where UI state is mutated.
 - Avoid force unwraps/`try!`; use safe handling patterns and test helpers (`#require`, `XCTUnwrap`) in tests.
+- Keep SwiftUI views passive: do not combine multiple ViewModel flags inline to drive one UI presentation decision. Add a single derived ViewModel property (or item) and bind the view to that.

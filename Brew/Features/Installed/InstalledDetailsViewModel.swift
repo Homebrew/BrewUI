@@ -179,6 +179,7 @@ final class InstalledDetailsViewModel {
             return
         }
         package = newPackage
+        operationPhase = .idle
         dependencyRelationships = []
         dependentRelationships = []
         showUninstallConfirmation = false
@@ -218,7 +219,10 @@ final class InstalledDetailsViewModel {
                 newPhase: phase,
                 isPackageOutdated: package.outdated,
             )
-            isUninstalling = phase.isRunningUninstall
+            isUninstalling = InstalledUninstallBusyPresentation.showsUninstallBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+            )
             isMutatingPackage = isUpgrading || isUninstalling
             if isUninstalling {
                 showUninstallBlockedCallout = false
@@ -302,17 +306,6 @@ private enum PackageMutationAction {
                 localized: "Something went wrong while uninstalling this package.",
                 comment: "Installed detail generic uninstall error",
             )
-        }
-    }
-}
-
-private extension BrewOperationPhase {
-    var isRunningUninstall: Bool {
-        switch self {
-        case .running(.uninstallFormula), .running(.uninstallCask):
-            true
-        default:
-            false
         }
     }
 }
