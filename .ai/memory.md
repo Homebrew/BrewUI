@@ -34,7 +34,7 @@
 
 - **Sandboxing:** App is unsandboxed. No entitlements needed for subprocess execution.
 - **Homebrew detection:** Check `/opt/homebrew/bin/brew` (Apple Silicon) then `/usr/local/bin/brew` (Intel). Degrade gracefully if neither found.
-- **JSON API schema drift:** Handle via optional decoding — never crash on unknown fields.
+- **JSON API schema drift:** Prefer tolerant handling for unknown fields; required-field policy is endpoint-specific (see 2026-05-18 strict catalogue decoding entry).
 
 ## 2026-03-11 — Developer Hook Workflow
 
@@ -379,3 +379,8 @@
 - Installed search still filters on canonical `BrewPackage.name` rather than `displayName`.
 - User requested this remain unchanged for now and be revisited during discovery search work.
 - Keep this as an explicit follow-up so label-search behavior can be aligned intentionally later.
+
+## 2026-05-18 — Catalogue decode strictness
+
+- Catalogue transport decoding (`FormulaCatalogueJSON` / `CaskCatalogueJSON`) now treats `desc`, `homepage`, `versions.stable`, and `analytics.install["30d"]` as required fields.
+- Catalogue array decoding is now lossy per item: invalid entries are skipped, and decode failures are captured with item index + error string so callers can handle partial failures without dropping valid items.

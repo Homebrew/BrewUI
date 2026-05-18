@@ -177,7 +177,3 @@ private enum Endpoint {
         }
     }
 }
-
-struct FormulaCatalogueJSON: Decodable {}
-
-struct CaskCatalogueJSON: Decodable {}

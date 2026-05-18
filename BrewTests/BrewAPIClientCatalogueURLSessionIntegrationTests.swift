@@ -41,7 +41,21 @@ struct BrewAPICatalogueIntegrationTests {
         try StubURLProtocol.register(
             [
                 .successWithStatus(
-                    data: Data("{}".utf8),
+                    data: Data(
+                        """
+                        [
+                          {
+                            "name": "iterm2",
+                            "desc": "Terminal emulator",
+                            "homepage": "https://iterm2.com",
+                            "versions": { "stable": "3.5.0" },
+                            "analytics": {
+                              "install": { "30d": 1234 }
+                            }
+                          }
+                        ]
+                        """.utf8,
+                    ),
                     statusCode: 200,
                     headers: ["ETag": returnedETag],
                 ),
@@ -60,8 +74,90 @@ struct BrewAPICatalogueIntegrationTests {
         switch response {
         case .notModified:
             Issue.record("Expected .updated for 200 response")
-        case let .updated(data: _, etag):
+        case let .updated(data: data, etag):
+            #expect(data.items.count == 1)
+            #expect(data.decodeFailures.isEmpty)
+            #expect(data.items.first?.name == "iterm2")
+            #expect(data.items.first?.description == "Terminal emulator")
+            #expect(data.items.first?.homepage == "https://iterm2.com")
+            #expect(data.items.first?.stableVersion == "3.5.0")
+            #expect(data.items.first?.analyticsInstall30d == 1234)
             #expect(etag == returnedETag)
+        }
+    }
+
+    @Test @MainActor func `fetch formula catalogue collects decode failure on missing required fields`() async throws {
+        let baseURL = makeStubBaseURL()
+        try StubURLProtocol.register(
+            [
+                .successWithStatus(
+                    data: Data(
+                        """
+                        [
+                          {
+                            "name": "wget"
+                          }
+                        ]
+                        """.utf8,
+                    ),
+                    statusCode: 200,
+                    headers: ["ETag": #""catalogue-etag-789""#],
+                ),
+            ],
+            forHost: #require(baseURL.host),
+        )
+        let session = makeStubbedSession()
+        let client = URLSessionBrewAPIClient(session: session, baseURL: baseURL)
+
+        let response = try await client.fetchFormulaCatalogue(etag: nil)
+        switch response {
+        case .notModified:
+            Issue.record("Expected .updated for 200 response")
+        case let .updated(data: data, etag: _):
+            #expect(data.items.isEmpty)
+            #expect(data.decodeFailures.count == 1)
+            #expect(data.decodeFailures.first?.index == 0)
+        }
+    }
+
+    @Test @MainActor func `fetch formula catalogue keeps valid items when one item fails decoding`() async throws {
+        let baseURL = makeStubBaseURL()
+        try StubURLProtocol.register(
+            [
+                .successWithStatus(
+                    data: Data(
+                        """
+                        [
+                          {
+                            "name": "wget",
+                            "desc": "Network downloader",
+                            "homepage": "https://www.gnu.org/software/wget/",
+                            "versions": { "stable": "1.24.5" },
+                            "analytics": { "install": { "30d": 5000 } }
+                          },
+                          {
+                            "name": "broken-item"
+                          }
+                        ]
+                        """.utf8,
+                    ),
+                    statusCode: 200,
+                ),
+            ],
+            forHost: #require(baseURL.host),
+        )
+        let session = makeStubbedSession()
+        let client = URLSessionBrewAPIClient(session: session, baseURL: baseURL)
+
+        let response = try await client.fetchFormulaCatalogue(etag: nil)
+        switch response {
+        case .notModified:
+            Issue.record("Expected .updated for 200 response")
+        case let .updated(data: data, etag: _):
+            #expect(data.items.count == 1)
+            #expect(data.items.first?.name == "wget")
+            #expect(data.decodeFailures.count == 1)
+            #expect(data.decodeFailures.first?.index == 1)
         }
     }
 }
