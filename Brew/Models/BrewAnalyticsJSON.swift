@@ -79,7 +79,7 @@ struct BrewAnalyticsPackageCount: Hashable {
     let count: Int
 
     var name: String {
-        reference.displayName
+        reference.name
     }
 }
 

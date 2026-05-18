@@ -19,7 +19,7 @@ enum HomebrewPackageReference: Hashable {
         }
     }
 
-    var displayName: String {
+    var name: String {
         switch self {
         case let .formula(name):
             name

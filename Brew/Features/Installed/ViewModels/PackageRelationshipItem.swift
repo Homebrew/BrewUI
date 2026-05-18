@@ -28,7 +28,7 @@ extension PackageRelationshipItem {
         installedPackageIDs: Set<BrewPackage.ID>,
     ) -> PackageRelationshipItem {
         PackageRelationshipItem(
-            displayName: reference.displayName,
+            displayName: reference.name,
             packageKind: reference.kind,
             targetPackageID: reference.packageID,
             installedPackageID: installedPackageIDs.contains(reference.packageID) ? reference.packageID : nil,
