@@ -19,4 +19,8 @@ struct BrewPackage: Identifiable, Hashable {
     var id: String {
         "\(kind.rawValue):\(name)"
     }
+
+    var reference: HomebrewPackageReference {
+        HomebrewPackageReference(package: self)
+    }
 }
