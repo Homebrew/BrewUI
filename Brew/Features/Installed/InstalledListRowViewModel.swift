@@ -6,7 +6,7 @@
 import Foundation
 import Observation
 
-enum RowVersionPresentation: Equatable {
+enum InstalledListRowVersionPresentation: Equatable {
     case installed(String)
     case upgrade(current: String, latest: String)
 }
@@ -55,7 +55,7 @@ final class InstalledListRowViewModel {
         package.outdated && availableVersionLabel != nil
     }
 
-    var versionPresentation: RowVersionPresentation {
+    var versionPresentation: InstalledListRowVersionPresentation {
         if showsUpdateAvailable, let latest = availableVersionLabel {
             return .upgrade(current: installedVersionLabel, latest: latest)
         }

@@ -28,7 +28,7 @@ struct InstalledPackageDetailRoot: View {
 struct InstalledPackageDetailView: View {
     let package: BrewPackage
     let onSelectInstalledPackage: (BrewPackage.ID) -> Void
-    @State private var viewModel: InstalledDetailsViewModel
+    @State private var viewModel: InstalledPackageDetailViewModel
     @State private var expandedDependencies = false
     @State private var expandedDependents = false
 
@@ -44,7 +44,7 @@ struct InstalledPackageDetailView: View {
         self.package = package
         self.onSelectInstalledPackage = onSelectInstalledPackage
         _viewModel = State(
-            initialValue: InstalledDetailsViewModel(
+            initialValue: InstalledPackageDetailViewModel(
                 package: package,
                 brewCommandCenter: brewCommandCenter,
                 installedDependentsRepository: installedDependentsRepository,
@@ -72,7 +72,7 @@ struct InstalledPackageDetailView: View {
         }
     }
 
-    private func detailScrollContent(viewModel: InstalledDetailsViewModel) -> some View {
+    private func detailScrollContent(viewModel: InstalledPackageDetailViewModel) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.xl) {
                 InstalledPackageDetailHeroSection(viewModel: viewModel)
@@ -85,7 +85,7 @@ struct InstalledPackageDetailView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    private func packageActionsFooter(viewModel: InstalledDetailsViewModel) -> some View {
+    private func packageActionsFooter(viewModel: InstalledPackageDetailViewModel) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xl) {
             InstalledPackageDetailSectionDivider()
             if viewModel.upgradeItem.showsUpgradeChrome {
@@ -98,7 +98,7 @@ struct InstalledPackageDetailView: View {
     }
 
     @ViewBuilder
-    private func packageDetailsSections(viewModel: InstalledDetailsViewModel) -> some View {
+    private func packageDetailsSections(viewModel: InstalledPackageDetailViewModel) -> some View {
         InstalledPackageDetailMetadataSection(viewModel: viewModel)
         InstalledPackageDetailSectionDivider()
         InstalledPackageDetailRelationshipList(
@@ -121,7 +121,7 @@ struct InstalledPackageDetailView: View {
 
 /// Uninstall affordance and copyable `brew uninstall` command (`CONVENTIONS.md` — transparency).
 private struct InstalledPackageDetailUninstallChrome: View {
-    @Bindable var viewModel: InstalledDetailsViewModel
+    @Bindable var viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
         let uninstall = viewModel.uninstallItem
@@ -131,7 +131,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                MutationCommandConsole(
+                InstalledDetailMutationConsole(
                     command: uninstall.displayCommand,
                     summaryText: "Uninstalls this package from this Mac",
                 )
@@ -188,7 +188,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
 
 /// Upgrade affordance and copyable `brew upgrade` command (`CONVENTIONS.md` — transparency).
 private struct InstalledPackageDetailUpgradeChrome: View {
-    @Bindable var viewModel: InstalledDetailsViewModel
+    @Bindable var viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
         let upgrade = viewModel.upgradeItem
@@ -198,7 +198,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                MutationCommandConsole(
+                InstalledDetailMutationConsole(
                     command: upgrade.displayCommand,
                     summaryText: "Upgrades this package to the latest available version",
                 )
@@ -233,7 +233,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
 }
 
 /// Shared terminal-command card used by Installed mutation sections (upgrade/uninstall).
-private struct MutationCommandConsole: View {
+private struct InstalledDetailMutationConsole: View {
     let command: String
     let summaryText: String
 

@@ -24,7 +24,7 @@ struct InstalledPackageDetailSectionDivider: View {
 }
 
 struct InstalledPackageDetailHeroSection: View {
-    let viewModel: InstalledDetailsViewModel
+    let viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.md) {
@@ -74,7 +74,7 @@ struct InstalledPackageDetailHeroSection: View {
 }
 
 struct InstalledPackageDetailMetadataSection: View {
-    let viewModel: InstalledDetailsViewModel
+    let viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
         let metadata = viewModel.metadataItem
@@ -124,7 +124,7 @@ struct InstalledPackageDetailMetadataSection: View {
 }
 
 struct InstalledPackageDetailUsedBySection: View {
-    let viewModel: InstalledDetailsViewModel
+    let viewModel: InstalledPackageDetailViewModel
     let collapsedRelationshipCount: Int
     let onSelectInstalledPackage: (BrewPackage.ID) -> Void
     @Binding var isExpanded: Bool

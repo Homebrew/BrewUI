@@ -151,9 +151,9 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
     }
 }
 
-/// Waits until upgrade busy chrome clears (``InstalledDetailsViewModel/isUpgrading``), after a short yield budget so async submit work can run.
+/// Waits until upgrade busy chrome clears (``InstalledPackageDetailViewModel/isUpgrading``), after a short yield budget so async submit work can run.
 @MainActor
-func waitForUpgradeAttemptToFinish(on viewModel: InstalledDetailsViewModel) async {
+func waitForUpgradeAttemptToFinish(on viewModel: InstalledPackageDetailViewModel) async {
     for step in 0 ..< 300 {
         await Task.yield()
         if step >= 10, !viewModel.isUpgrading {
@@ -164,7 +164,7 @@ func waitForUpgradeAttemptToFinish(on viewModel: InstalledDetailsViewModel) asyn
 }
 
 @MainActor
-func waitForUpgradeError(on viewModel: InstalledDetailsViewModel) async {
+func waitForUpgradeError(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
         if viewModel.upgradeErrorMessage != nil { return }
         await Task.yield()
@@ -173,7 +173,7 @@ func waitForUpgradeError(on viewModel: InstalledDetailsViewModel) async {
 }
 
 @MainActor
-func waitForUpgrading(on viewModel: InstalledDetailsViewModel) async {
+func waitForUpgrading(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
         if viewModel.isUpgrading { return }
         await Task.yield()
@@ -182,7 +182,7 @@ func waitForUpgrading(on viewModel: InstalledDetailsViewModel) async {
 }
 
 @MainActor
-func waitForUninstallAttemptToFinish(on viewModel: InstalledDetailsViewModel) async {
+func waitForUninstallAttemptToFinish(on viewModel: InstalledPackageDetailViewModel) async {
     for step in 0 ..< 300 {
         await Task.yield()
         if step >= 10, !viewModel.isUninstalling {
@@ -193,7 +193,7 @@ func waitForUninstallAttemptToFinish(on viewModel: InstalledDetailsViewModel) as
 }
 
 @MainActor
-func waitForUninstallError(on viewModel: InstalledDetailsViewModel) async {
+func waitForUninstallError(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
         if viewModel.uninstallErrorMessage != nil { return }
         await Task.yield()
@@ -202,7 +202,7 @@ func waitForUninstallError(on viewModel: InstalledDetailsViewModel) async {
 }
 
 @MainActor
-func waitForUninstalling(on viewModel: InstalledDetailsViewModel) async {
+func waitForUninstalling(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
         if viewModel.isUninstalling { return }
         await Task.yield()
@@ -210,10 +210,10 @@ func waitForUninstalling(on viewModel: InstalledDetailsViewModel) async {
     Issue.record("timed out waiting for isUninstalling")
 }
 
-/// Runs ``InstalledDetailsViewModel/observeRowUpdates()`` concurrently — required for upgrades to mirror the detail column lifecycle.
+/// Runs ``InstalledPackageDetailViewModel/observeRowUpdates()`` concurrently — required for upgrades to mirror the detail column lifecycle.
 @MainActor
 func withInstalledDetailPhaseObservation(
-    on viewModel: InstalledDetailsViewModel,
+    on viewModel: InstalledPackageDetailViewModel,
     _ body: () async -> Void,
 ) async {
     let observer = Task { await viewModel.observeRowUpdates() }
@@ -228,8 +228,8 @@ func makeInstalledDetailsViewModel(
     brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
     installedDependentsRepository: (any InstalledDependentsRepository)? = nil,
     installedInventoryReading: (any InstalledInventoryReading)? = nil,
-) -> InstalledDetailsViewModel {
-    InstalledDetailsViewModel(
+) -> InstalledPackageDetailViewModel {
+    InstalledPackageDetailViewModel(
         package: package,
         brewCommandCenter: brewCommandCenter,
         installedDependentsRepository: installedDependentsRepository ?? EmptyInstalledDependentsRepository(),

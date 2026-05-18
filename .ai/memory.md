@@ -287,3 +287,9 @@
 - Installed detail now uses feature-layer item mappings for co-changing presentation groups: `PackageDetailMetadataItem`, `UpgradePackageItem`, and `UninstallPackageItem`, all exposed from `InstalledDetailsViewModel` for VM-driven subviews.
 - For this surface, independently changing async state streams (`isUpgrading`, `isUninstalling`, `isMutatingPackage`) remain on the top-level ViewModel and are not folded into item types.
 - Detail-presentation extensions on `BrewPackage` were removed (`BrewPackage+Presentation.swift` deleted); presentation mapping lives in ViewModel/feature item types only.
+
+## 2026-05-18 — Installed naming consistency (minimal pass)
+
+- Installed detail ViewModel naming now aligns with the package-detail view family: `InstalledDetailsViewModel` was renamed to `InstalledPackageDetailViewModel` and moved to `InstalledPackageDetailViewModel.swift`.
+- Feature-local helper names should stay scoped but respect lint type-length limits (`SwiftLint` `type_name` max 40): renamed detail command console helper to `InstalledDetailMutationConsole` and mutation-parity test suite/file to `InstalledDetailMutationParityTests`.
+- Installed list row presentation value type renamed from `RowVersionPresentation` to `InstalledListRowVersionPresentation` to keep local naming explicit.

@@ -1,5 +1,5 @@
 //
-//  InstalledDetailsViewModel.swift
+//  InstalledPackageDetailViewModel.swift
 //  Brew
 //
 
@@ -8,7 +8,7 @@ import Observation
 
 @Observable
 @MainActor
-final class InstalledDetailsViewModel {
+final class InstalledPackageDetailViewModel {
     private let brewCommandCenter: any BrewCommandCenter
     private let installedDependentsRepository: any InstalledDependentsRepository
     private let installedInventoryReading: any InstalledInventoryReading

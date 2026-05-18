@@ -13,7 +13,7 @@ import Foundation
 ///
 /// The latch releases when:
 /// - The phase transitions to ``BrewOperationPhase/failed(reason:)`` (error is surfaced instead), or
-/// - ``InstalledListRowViewModel/update(package:)`` / ``InstalledDetailsViewModel/update(package:)``
+/// - ``InstalledListRowViewModel/update(package:)`` / ``InstalledPackageDetailViewModel/update(package:)``
 ///   resets `operationPhase` to ``BrewOperationPhase/idle`` after the catalog refresh propagates.
 enum InstalledUninstallBusyPresentation {
     static func showsUninstallBusy(
