@@ -25,6 +25,7 @@ private extension BrewInfoFormula {
         let runtimeDependencies = dependencies
         return BrewPackage(
             name: name,
+            displayName: BrewInfoJSON.trimmedOrNil(fullName) ?? name,
             kind: .formula,
             description: BrewInfoJSON.trimmedOrEmpty(desc),
             homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
@@ -42,6 +43,7 @@ private extension BrewInfoCask {
         let latest = BrewInfoJSON.trimmedOrNil(versions.stable) ?? BrewInfoJSON.trimmedOrNil(version) ?? ""
         return BrewPackage(
             name: token,
+            displayName: BrewInfoJSON.trimmedOrNil(firstDisplayName) ?? token,
             kind: .cask,
             description: BrewInfoJSON.trimmedOrEmpty(desc),
             homepage: BrewInfoJSON.trimmedOrEmpty(homepage),

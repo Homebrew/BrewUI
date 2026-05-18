@@ -8,6 +8,14 @@ import Foundation
 import Testing
 
 struct InstalledDetailsViewModelTests {
+    @Test @MainActor func `packageName uses package display name`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: .fixture(name: "visual-studio-code", displayName: "Visual Studio Code", kind: .cask),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.packageName == "Visual Studio Code")
+    }
+
     @Test @MainActor func `homepageURL returns valid http URL from package`() {
         var loadedDetails = details(name: "wget")
         loadedDetails.homepage = "https://example.com"
