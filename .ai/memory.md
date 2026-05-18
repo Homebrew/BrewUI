@@ -281,3 +281,32 @@
 
 - Strengthened `CONVENTIONS.md` and `.cursor/rules/swift-implementation.mdc` with an explicit MVVM guardrail: views must not compose multiple ViewModel state primitives inline to derive a single presentation decision.
 - Preferred pattern: expose one derived ViewModel property per UI concern (for example one spinner-driving busy flag), and have the view bind directly to it.
+
+## 2026-05-18 — Installed detail itemization boundary
+
+- Installed detail now uses feature-layer item mappings for co-changing presentation groups: `PackageDetailMetadataItem`, `UpgradePackageItem`, and `UninstallPackageItem`, all exposed from `InstalledDetailsViewModel` for VM-driven subviews.
+- For this surface, independently changing async state streams (`isUpgrading`, `isUninstalling`, `isMutatingPackage`) remain on the top-level ViewModel and are not folded into item types.
+- Detail-presentation extensions on `BrewPackage` were removed (`BrewPackage+Presentation.swift` deleted); presentation mapping lives in ViewModel/feature item types only.
+
+## 2026-05-18 — Installed naming consistency (minimal pass)
+
+- Installed detail ViewModel naming now aligns with the package-detail view family: `InstalledDetailsViewModel` was renamed to `InstalledPackageDetailViewModel` and moved to `InstalledPackageDetailViewModel.swift`.
+- Feature-local helper names should stay scoped but respect lint type-length limits (`SwiftLint` `type_name` max 40): renamed detail command console helper to `InstalledDetailMutationConsole` and mutation-parity test suite/file to `InstalledDetailMutationParityTests`.
+- Installed list row presentation value type renamed from `RowVersionPresentation` to `InstalledListRowVersionPresentation` to keep local naming explicit.
+
+## 2026-05-18 — Folder boundary reorganization
+
+- Feature folders now use explicit subdirectories: `Features/<Feature>/Views` and `Features/<Feature>/ViewModels`.
+- `Models/` is now enforced as domain-only; non-domain types moved out:
+  - Installed presentation/UI types moved to `Features/Installed/ViewModels`.
+  - Brew command JSON/operation helpers moved to `Services/BrewCommand` (with command JSON under `Services/BrewCommand/JSON`).
+  - Installed inventory snapshot moved to `Services/InstalledInventory`.
+- Service infra is now grouped by boundary: brew command layer in `Services/BrewCommand`, inventory infra in `Services/InstalledInventory`.
+- Added durable guidance in `CONVENTIONS.md`, `ARCHITECTURE.md`, and `.cursor/rules/folder-boundaries.mdc` so future agents keep the same placement policy.
+
+## 2026-05-18 — Centralized preview support policy
+
+- Shared preview samples and lightweight preview fakes now live in a single source of truth: `Brew/PreviewSupport/AppPreviewSupport.swift`.
+- Previews should consume centralized support types (`AppPreviewSupport`, preview fakes) instead of defining one-off inline mock services/repositories per view.
+- Preview blocks are colocated at the bottom of their view files; standalone `+Previews.swift` files for those views were removed.
+- Enforcement guidance is documented in `CONVENTIONS.md` and `.cursor/rules/previews-centralized.mdc` (linked from `swift-implementation.mdc`).

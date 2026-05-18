@@ -32,7 +32,7 @@ struct MainWindowView: View {
 }
 
 #Preview {
-    let commandCenter = NoopBrewCommandCenter.preview()
     MainWindowView()
-        .environment(\.brewCommandCenter, commandCenter)
+        .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+        .environment(\.installedInventoryCache, AppPreviewSupport.installedInventoryCache)
 }

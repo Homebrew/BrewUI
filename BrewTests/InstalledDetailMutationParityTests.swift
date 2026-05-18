@@ -1,5 +1,5 @@
 //
-//  InstalledDetailsViewModelMutationParityTests.swift
+//  InstalledDetailMutationParityTests.swift
 //  BrewTests
 //
 
@@ -7,7 +7,7 @@
 import Testing
 
 @MainActor
-struct InstalledDetailsMutationTests {
+struct InstalledDetailMutationParityTests {
     @Test func `uninstall failure maps launch failure to underlying message`() async {
         let viewModel = makeInstalledDetailsViewModel(
             package: details(name: "wget"),

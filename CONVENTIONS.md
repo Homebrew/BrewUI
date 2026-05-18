@@ -17,6 +17,15 @@ Follow [Swift API Design Guidelines](https://www.swift.org/documentation/api-des
 - **Interactors:** protocol `…Interacting`; type `…Interactor`; mock `Mock…Interactor`. Skip a `Brew` prefix when the name is already clear.
 - **ViewModels:** named for screen or tab (e.g. `InstalledViewModel`).
 
+## Folder boundaries
+
+- **Feature layout:** Each feature folder uses `Views/` and `ViewModels/`. Place feature `*Item` types and viewmodel-local presentation helpers in `ViewModels/`.
+- **Domain models only:** `Models/` is for domain value types/relationships only. Do not place UI/presentation helpers, command/API transport payloads, or infrastructure cache snapshots there.
+- **UI-related types:** Put feature-specific UI/presentation types in the relevant feature folder (`Features/<Feature>/Views` or `Features/<Feature>/ViewModels`), not in `Models/`.
+- **Brew command transport/state:** Keep brew command execution, command-center types, command operation models, and `brew info` command JSON decoding under `Services/BrewCommand/`.
+- **Networking transport:** Keep API client and its transport payloads/errors grouped together under a dedicated services networking boundary (for example `Services/API/` when introduced).
+- **DB transport:** Keep DB models/mappers alongside DB access layer types under one DB boundary folder (for example `Services/Database/` or `Repositories/Database/`), not in `Models/`.
+
 ## Code style
 
 - **Formatting / lint:** `.swiftformat`, `.swiftlint.yml` are authoritative for mechanical rules.
@@ -42,6 +51,8 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Passive view enforcement:** A view must not compose multiple ViewModel booleans (or other raw state primitives) inline to derive a single UI concern. If a UI element has one presentation state (for example, showing one spinner), expose one ViewModel property for that state and bind directly to it.
 
+**ViewModel itemization:** When a ViewModel grows with mapped presentation fields that broadly change together, extract that co-changing mapping into feature-layer `*Item` types and expose those items from the ViewModel for subviews to consume. Keep independently-changing async stream state (for example, `isUpgrading` / `isUninstalling`) on the top-level ViewModel.
+
 **Domain-to-presentation mapping boundary:** Do not add UI-facing presentation properties/extensions directly on domain model types. Map domain models into presentation in one of two places only: (1) feature ViewModels for top-level surfaces, or (2) feature `*Item` types for subview/action-specific presentation data.
 
 **Root view dependency ownership:** When a feature defines a `*Root` view wrapper, the root is the dependency-composition boundary for that surface. Root views must read app-level dependencies (for example `@Environment` values), construct and inject content-view dependencies, and own view-model lifecycle boundaries. Content views must focus on rendering and behavior and must not acquire those app-level dependencies directly when a root exists.
@@ -51,6 +62,10 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 **URL presentation:** Any user-facing web URL (`http`/`https`) shown in the UI should be rendered as a tappable `Link` that opens the default browser, while still showing the literal URL text for transparency.
 
 **Loadable UI state:** For screens/panels that are expected to load asynchronously and can fail, model presentation state as a single enum on the ViewModel (for example: `.loading`, `.loaded(Data)`, `.error(String)`) instead of separate `isLoading`/`data`/`error` fields. This keeps states mutually exclusive, reduces invalid combinations, and gives views a single `switch`-based rendering path.
+
+**Previews:** Use centralized preview data/mocks from `Brew/PreviewSupport/AppPreviewSupport.swift`; do not define one-off inline mock repositories/services in preview blocks. Add new preview sample data and lightweight preview fakes to that file so it remains the single source of truth.
+
+**Preview placement:** Keep each view’s `#Preview` blocks at the bottom of the same file as that view, not in standalone `+Previews.swift` files.
 
 **Documentation:** Use [DocC](https://www.swift.org/documentation/docc/) / Xcode doc comments for non-obvious `public` / `internal` API. Inline `//` explains **why**, not **what**.
 
