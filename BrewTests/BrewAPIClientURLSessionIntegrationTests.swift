@@ -252,19 +252,19 @@ struct BrewAPIClientURLSessionIntegrationTests {
     }
 }
 
-private func makeStubbedSession() -> URLSession {
+func makeStubbedSession() -> URLSession {
     let configuration = URLSessionConfiguration.ephemeral
     configuration.protocolClasses = [StubURLProtocol.self]
     return URLSession(configuration: configuration)
 }
 
-private func makeStubBaseURL() -> URL {
+func makeStubBaseURL() -> URL {
     URL(string: "https://stub-\(UUID().uuidString).local") ?? URL(fileURLWithPath: "/")
 }
 
-private final class StubURLProtocol: URLProtocol {
+final class StubURLProtocol: URLProtocol {
     enum StubbedResult {
-        case successWithStatus(data: Data, statusCode: Int)
+        case successWithStatus(data: Data, statusCode: Int, headers: [String: String] = [:])
         case successWithResponse(data: Data, response: URLResponse)
         case failure(Error)
     }
@@ -316,9 +316,9 @@ private final class StubURLProtocol: URLProtocol {
         Self.lock.unlock()
 
         switch result {
-        case let .successWithStatus(data, statusCode):
+        case let .successWithStatus(data, statusCode, headers):
             if let url = request.url,
-               let response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: nil)
+               let response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: headers)
             {
                 client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
                 client?.urlProtocol(self, didLoad: data)

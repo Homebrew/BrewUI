@@ -151,6 +151,14 @@ private struct MockBrewAPIClient: BrewAPIClient {
     func fetchCaskInstallAnalytics(window _: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
         caskAnalytics
     }
+
+    func fetchFormulaCatalogue(etag _: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON> {
+        .notModified
+    }
+
+    func fetchCaskCatalogue(etag _: String?) async throws -> CatalogueResponse<CaskCatalogueJSON> {
+        .notModified
+    }
 }
 
 @MainActor
@@ -160,6 +168,14 @@ private struct ThrowingBrewAPIClient: BrewAPIClient {
     }
 
     func fetchCaskInstallAnalytics(window _: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
+        throw BrewAPIClientError.transport(underlying: "offline")
+    }
+
+    func fetchFormulaCatalogue(etag _: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON> {
+        throw BrewAPIClientError.transport(underlying: "offline")
+    }
+
+    func fetchCaskCatalogue(etag _: String?) async throws -> CatalogueResponse<CaskCatalogueJSON> {
         throw BrewAPIClientError.transport(underlying: "offline")
     }
 }
