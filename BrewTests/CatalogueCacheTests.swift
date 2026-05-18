@@ -1,0 +1,133 @@
+//
+//  CatalogueCacheTests.swift
+//  BrewTests
+//
+
+@testable import Brew
+import Foundation
+import Testing
+
+struct CatalogueCacheTests {
+    @Test @MainActor func `init loads formula and cask cache from disk`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let formulaRawData = fixture.formulaCacheJSON(name: "wget", installs: 100)
+        let caskRawData = fixture.caskCacheJSON(name: "iterm2", installs: 200)
+        try fixture.writeFormulaCache(formulaRawData)
+        try fixture.writeCaskCache(caskRawData)
+        fixture.userDefaults.set(#""formula-etag""#, forKey: fixture.formulaETagKey)
+        fixture.userDefaults.set(#""cask-etag""#, forKey: fixture.caskETagKey)
+
+        let cache = await CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+
+        #expect(await cache.formulaCatalogue()?.items.first?.name == "wget")
+        #expect(await cache.caskCatalogue()?.items.first?.name == "iterm2")
+        #expect(await cache.etag(for: .formula) == #""formula-etag""#)
+        #expect(await cache.etag(for: .cask) == #""cask-etag""#)
+    }
+
+    @Test @MainActor func `first read returns preloaded cache`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+        let formulaRawData = fixture.formulaCacheJSON(name: "curl", installs: 321)
+        try fixture.writeFormulaCache(formulaRawData)
+
+        let cache = await CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+
+        #expect(await cache.formulaCatalogue()?.items.first?.name == "curl")
+    }
+
+    @Test @MainActor func `update formula cache persists raw body and etag`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+        let cache = await CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+        let updatedRawData = fixture.formulaCacheJSON(name: "git", installs: 999)
+
+        try await cache.updateFormulaCatalogue(with: updatedRawData, etag: #""formula-new""#)
+
+        #expect(await cache.formulaCatalogue()?.items.first?.name == "git")
+        #expect(await cache.etag(for: .formula) == #""formula-new""#)
+
+        let persistedRawData = try Data(contentsOf: fixture.formulaCacheURL)
+        #expect(persistedRawData == updatedRawData)
+    }
+}
+
+private struct TestFixture {
+    let cacheDirectoryURL: URL
+    let formulaCacheURL: URL
+    let caskCacheURL: URL
+    let userDefaults: UserDefaults
+    let userDefaultsSuiteName: String
+
+    let formulaETagKey = "CatalogueCache.formula.etag"
+    let caskETagKey = "CatalogueCache.cask.etag"
+
+    init() {
+        let id = UUID().uuidString
+        cacheDirectoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CatalogueCacheTests-\(id)", isDirectory: true)
+        formulaCacheURL = cacheDirectoryURL.appendingPathComponent("formula-cache.json")
+        caskCacheURL = cacheDirectoryURL.appendingPathComponent("cask-cache.json")
+        userDefaultsSuiteName = "CatalogueCacheTests.\(id)"
+        userDefaults = UserDefaults(suiteName: userDefaultsSuiteName) ?? .standard
+        userDefaults.removePersistentDomain(forName: userDefaultsSuiteName)
+    }
+
+    func cleanup() {
+        try? FileManager.default.removeItem(at: cacheDirectoryURL)
+        userDefaults.removePersistentDomain(forName: userDefaultsSuiteName)
+    }
+
+    func writeFormulaCache(_ data: Data) throws {
+        try FileManager.default.createDirectory(at: cacheDirectoryURL, withIntermediateDirectories: true)
+        try data.write(to: formulaCacheURL, options: .atomic)
+    }
+
+    func writeCaskCache(_ data: Data) throws {
+        try FileManager.default.createDirectory(at: cacheDirectoryURL, withIntermediateDirectories: true)
+        try data.write(to: caskCacheURL, options: .atomic)
+    }
+
+    func formulaCacheJSON(name: String, installs: Int) -> Data {
+        Data(
+            """
+            [
+              {
+                "name": "\(name)",
+                "desc": "Formula \(name)",
+                "homepage": "https://example.com/\(name)",
+                "versions": { "stable": "1.0.0" },
+                "analytics": { "install": { "30d": \(installs) } }
+              }
+            ]
+            """.utf8,
+        )
+    }
+
+    func caskCacheJSON(name: String, installs: Int) -> Data {
+        Data(
+            """
+            [
+              {
+                "name": "\(name)",
+                "desc": "Cask \(name)",
+                "homepage": "https://example.com/\(name)",
+                "versions": { "stable": "2.0.0" },
+                "analytics": { "install": { "30d": \(installs) } }
+              }
+            ]
+            """.utf8,
+        )
+    }
+}

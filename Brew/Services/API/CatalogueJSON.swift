@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct FormulaCatalogueJSON: Decodable {
+nonisolated struct FormulaCatalogueJSON: Codable {
     let items: [FormulaCatalogueItemJSON]
     let decodeFailures: [CatalogueItemDecodeFailure]
 
@@ -14,7 +14,7 @@ struct FormulaCatalogueJSON: Decodable {
     }
 }
 
-struct CaskCatalogueJSON: Decodable {
+nonisolated struct CaskCatalogueJSON: Codable {
     let items: [CaskCatalogueItemJSON]
     let decodeFailures: [CatalogueItemDecodeFailure]
 
@@ -23,12 +23,12 @@ struct CaskCatalogueJSON: Decodable {
     }
 }
 
-struct CatalogueItemDecodeFailure: Equatable {
+nonisolated struct CatalogueItemDecodeFailure: Codable, Equatable {
     let index: Int
     let underlying: String
 }
 
-struct FormulaCatalogueItemJSON: Decodable {
+nonisolated struct FormulaCatalogueItemJSON: Codable {
     let name: String
     let desc: String
     let homepage: String
@@ -36,7 +36,7 @@ struct FormulaCatalogueItemJSON: Decodable {
     let analytics: CatalogueAnalyticsJSON
 }
 
-struct CaskCatalogueItemJSON: Decodable {
+nonisolated struct CaskCatalogueItemJSON: Codable {
     let name: String
     let desc: String
     let homepage: String
@@ -44,15 +44,15 @@ struct CaskCatalogueItemJSON: Decodable {
     let analytics: CatalogueAnalyticsJSON
 }
 
-struct CatalogueVersionsJSON: Decodable {
+nonisolated struct CatalogueVersionsJSON: Codable {
     let stable: String
 }
 
-struct CatalogueAnalyticsJSON: Decodable {
+nonisolated struct CatalogueAnalyticsJSON: Codable {
     let install: CatalogueInstallAnalyticsJSON
 }
 
-struct CatalogueInstallAnalyticsJSON: Decodable {
+nonisolated struct CatalogueInstallAnalyticsJSON: Codable {
     let days30: Int
 
     private enum CodingKeys: String, CodingKey {
@@ -88,7 +88,7 @@ extension CaskCatalogueItemJSON {
     }
 }
 
-private func decodeCatalogueItems<Item: Decodable>(
+private nonisolated func decodeCatalogueItems<Item: Decodable>(
     from decoder: Decoder,
     as _: Item.Type,
 ) throws -> ([Item], [CatalogueItemDecodeFailure]) {

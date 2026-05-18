@@ -1,0 +1,123 @@
+//
+//  CatalogueCache.swift
+//  Brew
+//
+
+import Foundation
+
+actor CatalogueCache {
+    enum CatalogueKind: String {
+        case formula
+        case cask
+    }
+
+    private enum DefaultsKey {
+        static let formulaETag = "CatalogueCache.formula.etag"
+        static let caskETag = "CatalogueCache.cask.etag"
+    }
+
+    private let fileManager: FileManager
+    private let userDefaults: UserDefaults
+    private let cacheDirectoryURL: URL
+    private let decoder = JSONDecoder()
+
+    private var formulaData: FormulaCatalogueJSON?
+    private var caskData: CaskCatalogueJSON?
+
+    init(
+        fileManager: FileManager = .default,
+        userDefaults: UserDefaults = .standard,
+        cacheDirectoryURL: URL? = nil,
+    ) async {
+        self.fileManager = fileManager
+        self.userDefaults = userDefaults
+        let resolvedURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL(fileManager: fileManager)
+        self.cacheDirectoryURL = resolvedURL
+        async let formula = Task.detached {
+            Self.loadCache(at: Self.formulaCacheURL(in: resolvedURL), as: FormulaCatalogueJSON.self)
+        }.value
+        async let cask = Task.detached {
+            Self.loadCache(at: Self.caskCacheURL(in: resolvedURL), as: CaskCatalogueJSON.self)
+        }.value
+        (formulaData, caskData) = await (formula, cask)
+    }
+
+    func formulaCatalogue() async -> FormulaCatalogueJSON? {
+        formulaData
+    }
+
+    func caskCatalogue() async -> CaskCatalogueJSON? {
+        caskData
+    }
+
+    func etag(for kind: CatalogueKind) async -> String? {
+        userDefaults.string(forKey: etagKey(for: kind))
+    }
+
+    func updateFormulaCatalogue(with rawData: Data, etag: String?) async throws {
+        let decoded = try decoder.decode(FormulaCatalogueJSON.self, from: rawData)
+        try writeCache(rawData, to: formulaCacheFileURL)
+        formulaData = decoded
+        persistETag(etag, for: .formula)
+    }
+
+    func updateCaskCatalogue(with rawData: Data, etag: String?) async throws {
+        let decoded = try decoder.decode(CaskCatalogueJSON.self, from: rawData)
+        try writeCache(rawData, to: caskCacheFileURL)
+        caskData = decoded
+        persistETag(etag, for: .cask)
+    }
+
+    private func writeCache(_ data: Data, to url: URL) throws {
+        try fileManager.createDirectory(at: cacheDirectoryURL, withIntermediateDirectories: true)
+        try data.write(to: url, options: .atomic)
+    }
+
+    private func persistETag(_ etag: String?, for kind: CatalogueKind) {
+        let key = etagKey(for: kind)
+        if let etag {
+            userDefaults.set(etag, forKey: key)
+        } else {
+            userDefaults.removeObject(forKey: key)
+        }
+    }
+
+    private func etagKey(for kind: CatalogueKind) -> String {
+        switch kind {
+        case .formula:
+            DefaultsKey.formulaETag
+        case .cask:
+            DefaultsKey.caskETag
+        }
+    }
+
+    private var formulaCacheFileURL: URL {
+        Self.formulaCacheURL(in: cacheDirectoryURL)
+    }
+
+    private var caskCacheFileURL: URL {
+        Self.caskCacheURL(in: cacheDirectoryURL)
+    }
+}
+
+private extension CatalogueCache {
+    nonisolated static func defaultCacheDirectoryURL(fileManager: FileManager) -> URL {
+        if let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
+            return appSupportURL.appendingPathComponent("Brew", isDirectory: true)
+        }
+        return fileManager.temporaryDirectory.appendingPathComponent("Brew", isDirectory: true)
+    }
+
+    nonisolated static func formulaCacheURL(in directoryURL: URL) -> URL {
+        directoryURL.appendingPathComponent("formula-cache.json")
+    }
+
+    nonisolated static func caskCacheURL(in directoryURL: URL) -> URL {
+        directoryURL.appendingPathComponent("cask-cache.json")
+    }
+
+    nonisolated static func loadCache<T: Decodable>(at url: URL, as type: T.Type) -> T? {
+        guard let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
+    }
+}
