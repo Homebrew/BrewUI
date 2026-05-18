@@ -327,3 +327,55 @@
 
 - Added project skill at `.cursor/skills/pr-description-to-scratchpad/SKILL.md`.
 - Skill contract: build PR bodies from `main...HEAD`, follow `.github/PULL_REQUEST_TEMPLATE.md`, and append to `.ai/scratchpad.md`.
+
+## 2026-05-18 — Discover analytics data-access slice
+
+- Added a dedicated Homebrew analytics network boundary:
+  - `BrewAPIClient` protocol + `URLSessionBrewAPIClient` in `Brew/Services/BrewAPIClient.swift`.
+  - Endpoint-specific APIs for Discover:
+    - `fetchFormulaInstallOnRequestAnalytics(window:)`
+    - `fetchCaskInstallAnalytics(window:)`
+- Added resilient analytics decoding model `BrewAnalyticsJSON`:
+  - tolerant top-level decode with `formulae`/`casks` bucket fallback
+  - count parsing supports both numeric and comma-separated string forms
+  - normalized `BrewAnalyticsPackageCount` output for repository mapping
+- Added `DiscoverPackagesRepository` + `BrewDiscoverPackagesRepository` returning one combined `DiscoverTopPackagesSnapshot` (`topFormulae` + `topCasks`) with limit/window parameters (defaults: top 10, 30d).
+
+## 2026-05-18 — Package-domain lookup identity rule
+
+- Package-domain representations should expose `HomebrewPackageReference` as their lookup identity (formulae map to `.formula(name:)`, casks map to `.cask(token:)`).
+- `BrewPackage` now exposes `reference` again as a computed property from `kind` + `name`.
+- Discover models now carry typed references:
+  - `BrewAnalyticsPackageCount.reference`
+  - `DiscoverTopPackage.reference`
+- Added `.cursor/rules/package-domain-reference.mdc` and mirrored the rule in `CONVENTIONS.md` to keep the requirement persistent for future domain models.
+
+## 2026-05-18 — URLSessionProtocol testing seam for API client
+
+- Added `URLSessionProtocol` (`data(for:)`) in `Brew/Services/URLSessionProtocol.swift` with `URLSession` conformance.
+- `URLSessionBrewAPIClient` now supports dependency injection via `init(session: any URLSessionProtocol, ...)`, enabling deterministic unit tests with a mock session implementation instead of closure-only stubbing.
+
+## 2026-05-18 — Discover analytics strict decoding policy
+
+- Discover analytics decoding now fails fast for required non-optional fields rather than defaulting to empty/zero values.
+- `BrewAnalyticsJSON` requires valid `category`, `total_items`, `total_count`, `start_date`, `end_date`, and at least one analytics bucket container (`formulae` or `casks`).
+- Malformed per-entry `count` values now throw during decode (no fallback `0`), and unresolved package references are treated as decode failures instead of being silently filtered out.
+
+## 2026-05-18 — Discover analytics decoder simplification
+
+- Simplified `BrewAnalyticsJSON` strict decoder by removing fallback identity inference:
+  - no fallback from bucket key
+  - no fallback from `category` inferred kind
+- Analytics rows now require explicit identity in payload (`formula` xor `cask`), which keeps failure behavior deterministic when server payloads are incomplete/ambiguous.
+
+## 2026-05-18 — API client tests use URLProtocol stubs
+
+- Replaced `URLSessionProtocol` abstraction tests with integration-style tests that use a real `URLSession` configured with `URLProtocol` stubbing.
+- `URLSessionBrewAPIClient` session init now takes concrete `URLSession`.
+- `BrewAPIClientTests` use host-scoped stub queues/recording in `StubURLProtocol` to keep tests deterministic under concurrent execution.
+
+## 2026-05-18 — Deferred Installed search adaptation
+
+- Installed search still filters on canonical `BrewPackage.name` rather than `displayName`.
+- User requested this remain unchanged for now and be revisited during discovery search work.
+- Keep this as an explicit follow-up so label-search behavior can be aligned intentionally later.
