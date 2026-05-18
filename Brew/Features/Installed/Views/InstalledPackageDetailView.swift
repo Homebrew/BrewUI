@@ -296,3 +296,13 @@ struct InstalledPackageDetailPlaceholder: View {
         .padding(BrewSpacing.xl)
     }
 }
+
+#Preview("Installed detail") {
+    InstalledPackageDetailView(
+        package: AppPreviewSupport.outdatedFormula,
+        brewCommandCenter: AppPreviewSupport.commandCenter,
+        installedDependentsRepository: AppPreviewSupport.makeInstalledDependentsRepository(),
+        installedInventoryReading: AppPreviewSupport.makeInstalledInventoryReading(),
+    )
+    .frame(minWidth: 340, minHeight: 320)
+}

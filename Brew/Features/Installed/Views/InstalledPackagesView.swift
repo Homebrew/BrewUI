@@ -172,3 +172,29 @@ struct InstalledPackagesView: View {
             .accessibilityLabel(message)
     }
 }
+
+#Preview("Installed list - loaded") {
+    let viewModel = AppPreviewSupport.makeInstalledViewModel()
+    InstalledPackagesView(
+        viewModel: viewModel,
+    )
+    .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+    .task {
+        await viewModel.load()
+    }
+    .frame(minWidth: 360, minHeight: 500)
+}
+
+#Preview("Installed list - empty") {
+    let viewModel = AppPreviewSupport.makeInstalledViewModel(
+        packages: AppPreviewSupport.emptyPackages,
+    )
+    InstalledPackagesView(
+        viewModel: viewModel,
+    )
+    .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+    .task {
+        await viewModel.load()
+    }
+    .frame(minWidth: 360, minHeight: 500)
+}

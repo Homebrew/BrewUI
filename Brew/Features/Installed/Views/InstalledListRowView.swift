@@ -175,17 +175,8 @@ struct InstalledSectionHeader: View {
 
 #Preview("Formula with update") {
     InstalledListRowView(
-        package: BrewPackage(
-            name: "git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            homepage: "https://git-scm.com",
-            latestVersion: "2.45.1",
-            installedVersions: ["2.45.0"],
-            dependencies: [],
-            outdated: true,
-        ),
-        brewCommandCenter: NoopBrewCommandCenter.preview(),
+        package: AppPreviewSupport.outdatedFormula,
+        brewCommandCenter: AppPreviewSupport.commandCenter,
     )
     .padding()
     .frame(width: 400)
@@ -193,17 +184,8 @@ struct InstalledSectionHeader: View {
 
 #Preview("Cask") {
     InstalledListRowView(
-        package: BrewPackage(
-            name: "docker",
-            kind: .cask,
-            description: "App to build and share containerized applications",
-            homepage: "https://www.docker.com",
-            latestVersion: "4.39.0",
-            installedVersions: ["4.39.0"],
-            dependencies: [],
-            outdated: false,
-        ),
-        brewCommandCenter: NoopBrewCommandCenter.preview(),
+        package: AppPreviewSupport.currentCask,
+        brewCommandCenter: AppPreviewSupport.commandCenter,
     )
     .padding()
     .frame(width: 400)

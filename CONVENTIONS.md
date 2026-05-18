@@ -63,6 +63,10 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Loadable UI state:** For screens/panels that are expected to load asynchronously and can fail, model presentation state as a single enum on the ViewModel (for example: `.loading`, `.loaded(Data)`, `.error(String)`) instead of separate `isLoading`/`data`/`error` fields. This keeps states mutually exclusive, reduces invalid combinations, and gives views a single `switch`-based rendering path.
 
+**Previews:** Use centralized preview data/mocks from `Brew/PreviewSupport/AppPreviewSupport.swift`; do not define one-off inline mock repositories/services in preview blocks. Add new preview sample data and lightweight preview fakes to that file so it remains the single source of truth.
+
+**Preview placement:** Keep each view’s `#Preview` blocks at the bottom of the same file as that view, not in standalone `+Previews.swift` files.
+
 **Documentation:** Use [DocC](https://www.swift.org/documentation/docc/) / Xcode doc comments for non-obvious `public` / `internal` API. Inline `//` explains **why**, not **what**.
 
 **Accessibility:** Meaningful labels (and hints where needed) on interactive controls; keyboard shortcuts where it matters. **UI test IDs:** shared constants in `Utilities/AccessibilityIdentifiers.swift` — see [`ARCHITECTURE.md`](ARCHITECTURE.md) — **File organisation**; do not duplicate strings in the test target.

@@ -303,3 +303,10 @@
   - Installed inventory snapshot moved to `Services/InstalledInventory`.
 - Service infra is now grouped by boundary: brew command layer in `Services/BrewCommand`, inventory infra in `Services/InstalledInventory`.
 - Added durable guidance in `CONVENTIONS.md`, `ARCHITECTURE.md`, and `.cursor/rules/folder-boundaries.mdc` so future agents keep the same placement policy.
+
+## 2026-05-18 — Centralized preview support policy
+
+- Shared preview samples and lightweight preview fakes now live in a single source of truth: `Brew/PreviewSupport/AppPreviewSupport.swift`.
+- Previews should consume centralized support types (`AppPreviewSupport`, preview fakes) instead of defining one-off inline mock services/repositories per view.
+- Preview blocks are colocated at the bottom of their view files; standalone `+Previews.swift` files for those views were removed.
+- Enforcement guidance is documented in `CONVENTIONS.md` and `.cursor/rules/previews-centralized.mdc` (linked from `swift-implementation.mdc`).

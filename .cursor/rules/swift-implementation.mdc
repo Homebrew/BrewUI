@@ -12,3 +12,4 @@ alwaysApply: false
 - Keep SwiftUI views passive: do not combine multiple ViewModel flags inline to drive one UI presentation decision. Add a single derived ViewModel property (or item) and bind the view to that.
 - When a ViewModel grows with presentation mappings that mostly change together, extract them into feature-layer `*Item` types and expose those items from the ViewModel. Keep independently changing async state streams on the top-level ViewModel (for example, independent operation busy flags).
 - Follow folder placement boundaries from `CONVENTIONS.md` and `.cursor/rules/folder-boundaries.mdc` (`Features/<Feature>/Views`, `Features/<Feature>/ViewModels`, command transport under `Services/BrewCommand/`, and domain-only `Models/`).
+- Follow centralized preview guidance from `.cursor/rules/previews-centralized.mdc` and keep preview blocks colocated with their view files.
