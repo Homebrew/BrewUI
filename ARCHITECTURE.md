@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-> High-level system design for BrewUI. Update when structure changes. **Owns:** layers, data flow, folder layout, integrations (Homebrew CLI / JSON API), and product constraints. **Defers** naming and day-to-day coding patterns to [`CONVENTIONS.md`](CONVENTIONS.md). Record durable rationale in [`.ai/memory.md`](.ai/memory.md).
+> High-level system design for BrewUI. Update when structure changes. **Owns:** layers, data flow, integrations (Homebrew CLI / JSON API), and product constraints. **Defers** naming and day-to-day coding patterns to [`CONVENTIONS.md`](CONVENTIONS.md). Record durable rationale in [`.ai/memory.md`](.ai/memory.md).
 
 ## Tech Stack
 
@@ -40,28 +40,15 @@ Guiding patterns:
 
 ## Core components
 
-- **Views:** SwiftUI; thin — bind state, forward actions. Shared pieces in `Views/`.
+- **Views:** SwiftUI; thin — bind state, forward actions.
 - **Feature root views (`*Root`):** Composition boundaries that bridge app-level dependencies into feature content. Root wrappers read environment-level dependencies and construct/inject content-view dependencies while managing view-model lifecycle boundaries.
 - **ViewModels:** Presentation state and mapping; delegate work downward. Keep domain rules in Interactors or Models, not here.
 - **Presentation boundary:** Domain models remain UI-agnostic. Map domain values to UI-ready properties through feature ViewModels for top-level surfaces, or dedicated feature Item types for subview/action-level presentation needs.
 - **Repositories:** CRUD-shaped access to a **data source** (CLI output, API, storage, in-memory). Swap the implementation, keep the contract.
 - **Interactors:** One **use case** each — not generic CRUD (e.g. doctor run, config snapshot). Prefer protocols + real/mock impls for tests.
-- **Services:** Infrastructure — e.g. `BrewCommandService` (subprocess, streaming, cancellation), `JSONAPIService` (fetch/decode).
+- **Services:** Infrastructure grouped by integration boundaries.
 - **Command center:** `BrewCommandCenter` (actor protocol; app default `SerialBrewCommandCenter`) — **serializes** mutating `brew` work, tracks **in-flight / failed** **operation** state (`BrewOperationID` + `BrewOperationPhase`) for UI across surfaces, and runs **small `BrewMutatingCommand` types** that call `BrewCommandRunning` + the brew locator. It does **not** own **read/parsing** of `brew list` / `brew info` output — that stays in **repositories**. Feature-scoped executors (e.g. upgrade helpers) should stay **thin** and be invoked **from** commands the center schedules, not as a second parallel pipeline.
-- **Models:** Shared types (`Formula`, jobs, config, …) and pure parsing/helpers where it keeps UI layers thin.
-
-## File organisation
-
-```
-Features/          ← per feature: View, ViewModel, optional local Interactor
-Models/
-Repositories/
-Interactors/
-Services/
-Views/             ← reusable UI across features
-Utilities/
-└── AccessibilityIdentifiers.swift  ← shared with UI tests; single source for IDs
-```
+- **Models:** Domain-only value types and relationships shared across layers. Keep UI/presentation helpers, transport decoding models, and infrastructure-state containers out of domain models.
 
 ## Command execution
 
@@ -98,4 +85,4 @@ Use the [Homebrew JSON API](https://formulae.brew.sh/docs/api/) where it helps. 
 
 ## Updating this file
 
-Change when layers, folders, or major assumptions shift. Put **why** in `.ai/memory.md` when it is non-obvious or contentious.
+Change when layers or major assumptions shift. Put **why** in `.ai/memory.md` when it is non-obvious or contentious.

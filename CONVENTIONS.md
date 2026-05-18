@@ -17,6 +17,15 @@ Follow [Swift API Design Guidelines](https://www.swift.org/documentation/api-des
 - **Interactors:** protocol `…Interacting`; type `…Interactor`; mock `Mock…Interactor`. Skip a `Brew` prefix when the name is already clear.
 - **ViewModels:** named for screen or tab (e.g. `InstalledViewModel`).
 
+## Folder boundaries
+
+- **Feature layout:** Each feature folder uses `Views/` and `ViewModels/`. Place feature `*Item` types and viewmodel-local presentation helpers in `ViewModels/`.
+- **Domain models only:** `Models/` is for domain value types/relationships only. Do not place UI/presentation helpers, command/API transport payloads, or infrastructure cache snapshots there.
+- **UI-related types:** Put feature-specific UI/presentation types in the relevant feature folder (`Features/<Feature>/Views` or `Features/<Feature>/ViewModels`), not in `Models/`.
+- **Brew command transport/state:** Keep brew command execution, command-center types, command operation models, and `brew info` command JSON decoding under `Services/BrewCommand/`.
+- **Networking transport:** Keep API client and its transport payloads/errors grouped together under a dedicated services networking boundary (for example `Services/API/` when introduced).
+- **DB transport:** Keep DB models/mappers alongside DB access layer types under one DB boundary folder (for example `Services/Database/` or `Repositories/Database/`), not in `Models/`.
+
 ## Code style
 
 - **Formatting / lint:** `.swiftformat`, `.swiftlint.yml` are authoritative for mechanical rules.

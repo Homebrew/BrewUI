@@ -293,3 +293,13 @@
 - Installed detail ViewModel naming now aligns with the package-detail view family: `InstalledDetailsViewModel` was renamed to `InstalledPackageDetailViewModel` and moved to `InstalledPackageDetailViewModel.swift`.
 - Feature-local helper names should stay scoped but respect lint type-length limits (`SwiftLint` `type_name` max 40): renamed detail command console helper to `InstalledDetailMutationConsole` and mutation-parity test suite/file to `InstalledDetailMutationParityTests`.
 - Installed list row presentation value type renamed from `RowVersionPresentation` to `InstalledListRowVersionPresentation` to keep local naming explicit.
+
+## 2026-05-18 — Folder boundary reorganization
+
+- Feature folders now use explicit subdirectories: `Features/<Feature>/Views` and `Features/<Feature>/ViewModels`.
+- `Models/` is now enforced as domain-only; non-domain types moved out:
+  - Installed presentation/UI types moved to `Features/Installed/ViewModels`.
+  - Brew command JSON/operation helpers moved to `Services/BrewCommand` (with command JSON under `Services/BrewCommand/JSON`).
+  - Installed inventory snapshot moved to `Services/InstalledInventory`.
+- Service infra is now grouped by boundary: brew command layer in `Services/BrewCommand`, inventory infra in `Services/InstalledInventory`.
+- Added durable guidance in `CONVENTIONS.md`, `ARCHITECTURE.md`, and `.cursor/rules/folder-boundaries.mdc` so future agents keep the same placement policy.
