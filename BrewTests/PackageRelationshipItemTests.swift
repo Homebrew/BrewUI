@@ -46,13 +46,15 @@ struct PackageRelationshipItemTests {
     }
 
     @Test @MainActor func `dependent and dependents always mark installed`() {
-        let package = BrewPackage.fixture(name: "curl", kind: .formula)
+        let package = BrewPackage.fixture(name: "curl", displayName: "cURL", kind: .formula)
         let dependent = PackageRelationshipItem.dependent(package)
         let dependents = PackageRelationshipItem.dependents([package])
 
+        #expect(dependent.displayName == "cURL")
         #expect(dependent.installedPackageID == package.id)
         #expect(dependent.isInstalledInInventory)
         #expect(dependents.count == 1)
+        #expect(dependents[0].displayName == "cURL")
         #expect(dependents[0].id == package.id)
     }
 }

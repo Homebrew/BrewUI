@@ -244,6 +244,7 @@ func details(
 ) -> BrewPackage {
     BrewPackage(
         name: name,
+        displayName: name,
         kind: kind,
         description: "desc",
         homepage: "",

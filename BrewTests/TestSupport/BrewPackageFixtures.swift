@@ -3,6 +3,7 @@
 extension BrewPackage {
     static func fixture(
         name: String = "git",
+        displayName: String? = nil,
         kind: HomebrewPackageKind = .formula,
         description: String = "",
         homepage: String = "",
@@ -13,6 +14,7 @@ extension BrewPackage {
     ) -> BrewPackage {
         BrewPackage(
             name: name,
+            displayName: displayName ?? name,
             kind: kind,
             description: description,
             homepage: homepage,

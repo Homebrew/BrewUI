@@ -37,7 +37,7 @@ extension PackageRelationshipItem {
 
     static func dependent(_ package: BrewPackage) -> PackageRelationshipItem {
         PackageRelationshipItem(
-            displayName: package.name,
+            displayName: package.displayName,
             packageKind: package.kind,
             targetPackageID: package.id,
             installedPackageID: package.id,

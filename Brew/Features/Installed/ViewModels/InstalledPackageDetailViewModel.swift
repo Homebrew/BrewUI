@@ -35,7 +35,7 @@ final class InstalledPackageDetailViewModel {
     var showUninstallBlockedCallout: Bool = false
 
     var packageName: String {
-        package.name
+        package.displayName
     }
 
     var packageKind: InstalledPackageKind {

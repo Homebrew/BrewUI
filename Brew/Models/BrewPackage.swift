@@ -7,6 +7,7 @@ import Foundation
 
 struct BrewPackage: Identifiable, Hashable {
     let name: String
+    let displayName: String
     let kind: HomebrewPackageKind
     var description: String
     var homepage: String

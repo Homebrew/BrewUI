@@ -11,6 +11,7 @@ enum AppPreviewSupport {
 
     static let outdatedFormula = BrewPackage(
         name: "git",
+        displayName: "git",
         kind: .formula,
         description: "Distributed revision control system.",
         homepage: "https://git-scm.com",
@@ -22,6 +23,7 @@ enum AppPreviewSupport {
 
     static let currentFormula = BrewPackage(
         name: "node",
+        displayName: "node",
         kind: .formula,
         description: "JavaScript runtime built on V8.",
         homepage: "https://nodejs.org",
@@ -33,6 +35,7 @@ enum AppPreviewSupport {
 
     static let currentCask = BrewPackage(
         name: "docker",
+        displayName: "Docker",
         kind: .cask,
         description: "Build and share containerized applications.",
         homepage: "https://www.docker.com",
@@ -47,6 +50,7 @@ enum AppPreviewSupport {
         currentFormula,
         BrewPackage(
             name: "python",
+            displayName: "python",
             kind: .formula,
             description: "Interpreted, interactive, object-oriented programming language.",
             homepage: "https://www.python.org",
@@ -57,6 +61,7 @@ enum AppPreviewSupport {
         ),
         BrewPackage(
             name: "visual-studio-code",
+            displayName: "Visual Studio Code",
             kind: .cask,
             description: "Open-source code editor.",
             homepage: "https://code.visualstudio.com",
@@ -74,6 +79,7 @@ enum AppPreviewSupport {
         outdatedFormula.id: [
             BrewPackage(
                 name: "gh",
+                displayName: "gh",
                 kind: .formula,
                 description: "GitHub's official command line tool.",
                 homepage: "https://cli.github.com",

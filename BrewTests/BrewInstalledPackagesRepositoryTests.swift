@@ -12,11 +12,16 @@ struct BrewInstalledPackagesRepositoryTests {
         let json = """
         {
           "formulae": [
-            { "name": "wget", "versions": { "stable": "1.0.0" }, "installed": [{ "version": "1.24.5" }] },
+            {
+              "name": "wget",
+              "full_name": "homebrew/core/wget",
+              "versions": { "stable": "1.0.0" },
+              "installed": [{ "version": "1.24.5" }]
+            },
             { "name": "aria2", "versions": { "stable": "2.0.0" }, "installed": [] }
           ],
           "casks": [
-            { "token": "zed", "version": "1.2.3", "installed": "1.2.4" }
+            { "token": "zed", "name": ["Zed"], "version": "1.2.3", "installed": "1.2.4" }
           ]
         }
         """
@@ -30,11 +35,16 @@ struct BrewInstalledPackagesRepositoryTests {
 
         let aria2 = try #require(package(named: "aria2", in: packages))
         #expect(aria2.kind == .formula)
+        #expect(aria2.displayName == "aria2")
         #expect(aria2.latestVersion == "2.0.0")
         #expect(aria2.installedVersions.isEmpty)
 
+        let wget = try #require(package(named: "wget", in: packages))
+        #expect(wget.displayName == "homebrew/core/wget")
+
         let zed = try #require(package(named: "zed", in: packages))
         #expect(zed.kind == .cask)
+        #expect(zed.displayName == "Zed")
         #expect(zed.latestVersion == "1.2.3")
         #expect(zed.installedVersions == ["1.2.4"])
     }
@@ -260,4 +270,35 @@ struct BrewInstalledPackagesRepositoryTests {
 @MainActor
 private func package(named name: String, in packages: [BrewPackage]) -> BrewPackage? {
     packages.first { $0.name == name }
+}
+
+extension BrewInstalledPackagesRepositoryTests {
+    @Test @MainActor
+    func `load falls back to canonical names when display fields are missing or invalid`() async throws {
+        let json = """
+        {
+          "formulae": [
+            { "name": "wget", "full_name": "   ", "installed": [{ "version": "1.24.5" }] }
+          ],
+          "casks": [
+            { "token": "visual-studio-code", "name": [], "installed": "1.99.0" },
+            { "token": "docker", "name": "Docker", "installed": "4.39.0" }
+          ]
+        }
+        """
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
+        let packages = try await repo.loadInstalledPackages()
+
+        let wget = try #require(package(named: "wget", in: packages))
+        #expect(wget.displayName == "wget")
+
+        let vscode = try #require(package(named: "visual-studio-code", in: packages))
+        #expect(vscode.displayName == "visual-studio-code")
+
+        let docker = try #require(package(named: "docker", in: packages))
+        #expect(docker.displayName == "Docker")
+    }
 }

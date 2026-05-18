@@ -9,6 +9,15 @@ import Testing
 
 @MainActor
 struct InstalledListRowViewModelTests {
+    @Test func `name uses package display name`() {
+        let package = BrewPackage.fixture(name: "visual-studio-code", displayName: "Visual Studio Code", kind: .cask)
+        let viewModel = InstalledListRowViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.name == "Visual Studio Code")
+    }
+
     @Test func `observeRowUpdates applies first phase from noop center`() async {
         let package = BrewPackage.fixture(name: "git", kind: .formula)
         let center = NoopBrewCommandCenter.forTesting()

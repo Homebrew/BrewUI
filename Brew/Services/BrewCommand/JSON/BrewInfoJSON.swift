@@ -24,6 +24,7 @@ struct BrewInfoJSON: Decodable {
 
 struct BrewInfoFormula: Decodable {
     var name: String
+    var fullName: String?
     var desc: String?
     var homepage: String?
     var dependencies: [String]
@@ -37,6 +38,7 @@ struct BrewInfoFormula: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = (try? container.decode(String.self, forKey: .name)) ?? ""
+        fullName = try? container.decode(String.self, forKey: .fullName)
         desc = try? container.decode(String.self, forKey: .desc)
         homepage = try? container.decode(String.self, forKey: .homepage)
         dependencies = container.decodeStringArray(forKey: .dependencies)
@@ -52,6 +54,7 @@ struct BrewInfoFormula: Decodable {
 
     private enum CodingKeys: String, CodingKey {
         case name
+        case fullName = "full_name"
         case desc
         case homepage
         case dependencies
@@ -74,6 +77,7 @@ struct BrewInfoFormulaInstalled: Decodable {
 
 struct BrewInfoCask: Decodable {
     var token: String
+    var names: [String]
     var desc: String?
     var homepage: String?
     /// Tap / current cask version string (upgrade target analogue to formula `versions.stable`).
@@ -87,6 +91,7 @@ struct BrewInfoCask: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         token = (try? container.decode(String.self, forKey: .token)) ?? ""
+        names = container.decodeStringArrayOrSingle(forKey: .name)
         desc = try? container.decode(String.self, forKey: .desc)
         homepage = try? container.decode(String.self, forKey: .homepage)
         version = try? container.decode(String.self, forKey: .version)
@@ -101,6 +106,7 @@ struct BrewInfoCask: Decodable {
 
     private enum CodingKeys: String, CodingKey {
         case token
+        case name
         case desc
         case homepage
         case version
@@ -109,6 +115,10 @@ struct BrewInfoCask: Decodable {
         case dependencies
         case dependsOn = "depends_on"
         case outdated
+    }
+
+    var firstDisplayName: String? {
+        names.first
     }
 }
 
@@ -129,6 +139,16 @@ private extension KeyedDecodingContainer {
         }
         if let values = try? decode([String].self, forKey: key) {
             return values.filter { !$0.isEmpty }
+        }
+        return []
+    }
+
+    func decodeStringArrayOrSingle(forKey key: Key) -> [String] {
+        if let values = try? decode([String].self, forKey: key) {
+            return values.filter { !$0.isEmpty }
+        }
+        if let value = try? decode(String.self, forKey: key), !value.isEmpty {
+            return [value]
         }
         return []
     }

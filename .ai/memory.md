@@ -310,3 +310,20 @@
 - Previews should consume centralized support types (`AppPreviewSupport`, preview fakes) instead of defining one-off inline mock services/repositories per view.
 - Preview blocks are colocated at the bottom of their view files; standalone `+Previews.swift` files for those views were removed.
 - Enforcement guidance is documented in `CONVENTIONS.md` and `.cursor/rules/previews-centralized.mdc` (linked from `swift-implementation.mdc`).
+
+## 2026-05-18 — Package display labels vs canonical IDs
+
+- `BrewPackage` now carries `displayName` for UI labels while keeping `name` as the canonical Homebrew identifier used for IDs and CLI commands.
+- Installed mapping from `brew info --json=v2` now uses richer display fields with fallback:
+  - formula: `full_name` (fallback `name`)
+  - cask: first `name` entry (fallback `token`)
+- `HomebrewPackageReference` remains identity-first (`.formula(name:)` / `.cask(token:)`) and still uses canonical values for `packageID`; dependency-only contexts may continue showing token/name when richer metadata is not present.
+
+## 2026-05-18 — PR descriptions location preference
+
+- User preference: place generated PR descriptions in `.ai/scratchpad.md` by default.
+
+## 2026-05-18 — PR description project skill
+
+- Added project skill at `.cursor/skills/pr-description-to-scratchpad/SKILL.md`.
+- Skill contract: build PR bodies from `main...HEAD`, follow `.github/PULL_REQUEST_TEMPLATE.md`, and append to `.ai/scratchpad.md`.

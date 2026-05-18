@@ -131,6 +131,7 @@ struct InstalledPackagesView: View {
         [
             BrewPackage(
                 name: "Placeholder Formula",
+                displayName: "Placeholder Formula",
                 kind: .formula,
                 description: "Placeholder description text for loading row.",
                 homepage: "",
@@ -141,6 +142,7 @@ struct InstalledPackagesView: View {
             ),
             BrewPackage(
                 name: "Placeholder Formula",
+                displayName: "Placeholder Formula",
                 kind: .formula,
                 description: "Placeholder description text for loading row.",
                 homepage: "",
@@ -151,6 +153,7 @@ struct InstalledPackagesView: View {
             ),
             BrewPackage(
                 name: "Placeholder Formula",
+                displayName: "Placeholder Formula",
                 kind: .formula,
                 description: "Placeholder description text for loading row.",
                 homepage: "",

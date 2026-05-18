@@ -25,7 +25,7 @@ final class InstalledListRowViewModel {
     }
 
     var name: String {
-        package.name
+        package.displayName
     }
 
     var kind: InstalledPackageKind {
