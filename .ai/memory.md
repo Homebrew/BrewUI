@@ -281,3 +281,9 @@
 
 - Strengthened `CONVENTIONS.md` and `.cursor/rules/swift-implementation.mdc` with an explicit MVVM guardrail: views must not compose multiple ViewModel state primitives inline to derive a single presentation decision.
 - Preferred pattern: expose one derived ViewModel property per UI concern (for example one spinner-driving busy flag), and have the view bind directly to it.
+
+## 2026-05-18 — Installed detail itemization boundary
+
+- Installed detail now uses feature-layer item mappings for co-changing presentation groups: `PackageDetailMetadataItem`, `UpgradePackageItem`, and `UninstallPackageItem`, all exposed from `InstalledDetailsViewModel` for VM-driven subviews.
+- For this surface, independently changing async state streams (`isUpgrading`, `isUninstalling`, `isMutatingPackage`) remain on the top-level ViewModel and are not folded into item types.
+- Detail-presentation extensions on `BrewPackage` were removed (`BrewPackage+Presentation.swift` deleted); presentation mapping lives in ViewModel/feature item types only.

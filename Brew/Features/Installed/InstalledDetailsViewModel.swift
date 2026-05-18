@@ -46,71 +46,29 @@ final class InstalledDetailsViewModel {
 
     private(set) var dependentRelationships: [PackageRelationshipItem] = []
 
-    /// User-facing command for the currently selected package details.
-    var displayCommand: String {
-        package.infoCommand
+    /// Presentation mapping for the Details section metadata.
+    var metadataItem: PackageDetailMetadataItem {
+        PackageDetailMetadataItem(package: package)
     }
 
-    /// Copyable Terminal command for upgrading this package (`CONVENTIONS.md` — transparency).
-    var upgradeDisplayCommand: String {
-        package.upgradeCommand
+    /// Presentation mapping for the Upgrade section.
+    var upgradeItem: UpgradePackageItem {
+        UpgradePackageItem(package: package)
     }
 
-    /// Copyable Terminal command for uninstalling this package (`CONVENTIONS.md` — transparency).
-    var uninstallDisplayCommand: String {
-        uninstallItem.displayCommand
-    }
-
-    /// Shown beside the upgrade affordance whenever the package is outdated.
-    var showsUpgradeChrome: Bool {
-        package.outdated
-    }
-
-    var upgradePrimaryButtonTitle: String? {
-        package.upgradeButtonTitle
-    }
-
-    var uninstallPrimaryButtonTitle: String {
-        uninstallItem.primaryButtonTitle
-    }
-
-    var uninstallConfirmationTitle: String {
-        uninstallItem.confirmationTitle
-    }
-
-    var uninstallConfirmationMessage: String {
-        uninstallItem.confirmationMessage
-    }
-
-    /// True when installed dependents prevent uninstalling this package alone.
-    var isUninstallBlockedByDependents: Bool {
-        uninstallItem.isBlockedByDependents
-    }
-
-    var uninstallBlockingDependentCount: Int {
-        dependentRelationships.count
-    }
-
-    var usedByBlockingBadgeTitle: String? {
-        uninstallItem.usedByBlockingBadgeTitle
-    }
-
-    var uninstallBlockedBannerLead: String? {
-        uninstallItem.uninstallBlockedBannerLead
-    }
-
-    var uninstallBlockedBannerBody: String? {
-        uninstallItem.uninstallBlockedBannerBody
+    /// Presentation mapping for the Uninstall section.
+    var uninstallItem: UninstallPackageItem {
+        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
     }
 
     /// Muted, reduced-opacity uninstall button styling while blocked and not actively uninstalling.
     var showsUninstallBlockedPrimaryButtonChrome: Bool {
-        isUninstallBlockedByDependents && !isUninstalling
+        uninstallItem.isBlockedByDependents && !isUninstalling
     }
 
     /// What the primary uninstall control should do when activated.
     var uninstallPrimaryButtonAction: UninstallPrimaryButtonAction {
-        isUninstallBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
+        uninstallItem.isBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
     }
 
     func handleUninstallPrimaryButtonTapped() {
@@ -122,21 +80,9 @@ final class InstalledDetailsViewModel {
         }
     }
 
-    var uninstallPrimaryButtonAccessibilityHint: String? {
-        uninstallItem.blockedPrimaryButtonAccessibilityHint
-    }
-
-    var uninstallBlockedCalloutContent: UninstallBlockedCalloutContent? {
-        uninstallItem.blockedCalloutContent
-    }
-
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
-        package.homepageURL
-    }
-
-    private var uninstallItem: UninstallPackageItem {
-        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
+        metadataItem.homepageURL
     }
 
     init(
@@ -160,7 +106,7 @@ final class InstalledDetailsViewModel {
     private func refreshDependents() async {
         let dependents = await installedDependentsRepository.installedDependents(for: package.id)
         dependentRelationships = PackageRelationshipItem.dependents(dependents)
-        if !isUninstallBlockedByDependents {
+        if !uninstallItem.isBlockedByDependents {
             showUninstallBlockedCallout = false
         }
     }

@@ -42,6 +42,8 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Passive view enforcement:** A view must not compose multiple ViewModel booleans (or other raw state primitives) inline to derive a single UI concern. If a UI element has one presentation state (for example, showing one spinner), expose one ViewModel property for that state and bind directly to it.
 
+**ViewModel itemization:** When a ViewModel grows with mapped presentation fields that broadly change together, extract that co-changing mapping into feature-layer `*Item` types and expose those items from the ViewModel for subviews to consume. Keep independently-changing async stream state (for example, `isUpgrading` / `isUninstalling`) on the top-level ViewModel.
+
 **Domain-to-presentation mapping boundary:** Do not add UI-facing presentation properties/extensions directly on domain model types. Map domain models into presentation in one of two places only: (1) feature ViewModels for top-level surfaces, or (2) feature `*Item` types for subview/action-specific presentation data.
 
 **Root view dependency ownership:** When a feature defines a `*Root` view wrapper, the root is the dependency-composition boundary for that surface. Root views must read app-level dependencies (for example `@Environment` values), construct and inject content-view dependencies, and own view-model lifecycle boundaries. Content views must focus on rendering and behavior and must not acquire those app-level dependencies directly when a root exists.

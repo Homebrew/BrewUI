@@ -74,29 +74,18 @@ struct InstalledPackageDetailHeroSection: View {
 }
 
 struct InstalledPackageDetailMetadataSection: View {
-    let package: BrewPackage
+    let viewModel: InstalledDetailsViewModel
 
     var body: some View {
+        let metadata = viewModel.metadataItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             InstalledPackageDetailSectionHeading(title: "Details")
-            detailRow(label: "Version", value: versionColumnValue(package.latestVersion))
-            detailRow(label: "Installed", value: installedValue(package))
-            if let homepageURL = package.homepageURL {
-                homepageRow(url: homepageURL)
+            detailRow(label: "Version", value: metadata.latestVersionValue)
+            detailRow(label: "Installed", value: metadata.installedVersionsValue)
+            if let homepageURL = metadata.homepageURL {
+                homepageRow(url: homepageURL, title: metadata.homepageDisplayTitle ?? homepageURL.absoluteString)
             }
         }
-    }
-
-    private func versionColumnValue(_ raw: String) -> String {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "—" : trimmed
-    }
-
-    private func installedValue(_ package: BrewPackage) -> String {
-        if package.installedVersions.isEmpty {
-            return "—"
-        }
-        return package.installedVersions.joined(separator: ", ")
     }
 
     private func detailRow(label: String, value: String) -> some View {
@@ -113,7 +102,7 @@ struct InstalledPackageDetailMetadataSection: View {
         }
     }
 
-    private func homepageRow(url: URL) -> some View {
+    private func homepageRow(url: URL, title: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text("Homepage")
                 .font(.brewCallout)
@@ -121,7 +110,7 @@ struct InstalledPackageDetailMetadataSection: View {
                 .frame(width: 100, alignment: .leading)
             Link(destination: url) {
                 HStack(spacing: BrewSpacing.xxs) {
-                    Text(homepageLinkTitle(for: url))
+                    Text(title)
                         .font(.brewCallout.weight(.medium))
                     Image(systemName: "arrow.up.right")
                         .font(.brewCaption2)
@@ -131,13 +120,6 @@ struct InstalledPackageDetailMetadataSection: View {
             Spacer(minLength: 0)
         }
         .padding(.vertical, BrewSpacing.xs)
-    }
-
-    private func homepageLinkTitle(for url: URL) -> String {
-        if let host = url.host?.trimmingCharacters(in: .whitespacesAndNewlines), !host.isEmpty {
-            return host
-        }
-        return url.absoluteString
     }
 }
 
@@ -171,7 +153,7 @@ struct InstalledPackageDetailUsedBySection: View {
     private var usedByHeading: some View {
         HStack(spacing: BrewSpacing.sm) {
             InstalledPackageDetailSectionHeading(title: "Used by")
-            if let badgeTitle = viewModel.usedByBlockingBadgeTitle {
+            if let badgeTitle = viewModel.uninstallItem.usedByBlockingBadgeTitle {
                 Text(badgeTitle)
                     .font(.brewCaption2.weight(.semibold))
                     .foregroundStyle(Color.brewStatusWarning)
