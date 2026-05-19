@@ -399,3 +399,11 @@
   - cold start (no cache) blocks on refresh and surfaces errors;
   - `304` updates only last-refresh timestamp;
   - background refresh failures are swallowed.
+
+## 2026-05-19 — Transport models must not cross repo/service APIs
+
+- `CatalogueRepository` now maps cached/network catalogue transport payloads to domain `BrewPackage` arrays before returning.
+- Durable rule: `Codable` transport types (`*JSON`, DTO/wire models) must stay behind service/repository boundaries and not appear in service/repository protocol return types.
+- Enforcement/docs:
+  - Added `CONVENTIONS.md` note under **Transport boundary**.
+  - Added `.cursor/rules/codable-boundary.mdc` (always apply) and linked guidance in `.cursor/rules/swift-implementation.mdc`.

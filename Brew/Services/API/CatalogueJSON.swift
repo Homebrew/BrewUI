@@ -34,6 +34,26 @@ nonisolated struct FormulaCatalogueItemJSON: Codable {
     let homepage: String
     let versions: CatalogueVersionsJSON
     let analytics: CatalogueAnalyticsJSON
+    let dependencies: [String]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        desc = try container.decode(String.self, forKey: .desc)
+        homepage = try container.decode(String.self, forKey: .homepage)
+        versions = try container.decode(CatalogueVersionsJSON.self, forKey: .versions)
+        analytics = try container.decode(CatalogueAnalyticsJSON.self, forKey: .analytics)
+        dependencies = container.decodeStringArray(forKey: .dependencies)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case desc
+        case homepage
+        case versions
+        case analytics
+        case dependencies
+    }
 }
 
 nonisolated struct CaskCatalogueItemJSON: Codable {
@@ -42,6 +62,29 @@ nonisolated struct CaskCatalogueItemJSON: Codable {
     let homepage: String
     let versions: CatalogueVersionsJSON
     let analytics: CatalogueAnalyticsJSON
+    let dependencies: [String]
+    let dependsOn: CatalogueDependsOnJSON?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        desc = try container.decode(String.self, forKey: .desc)
+        homepage = try container.decode(String.self, forKey: .homepage)
+        versions = try container.decode(CatalogueVersionsJSON.self, forKey: .versions)
+        analytics = try container.decode(CatalogueAnalyticsJSON.self, forKey: .analytics)
+        dependencies = container.decodeStringArray(forKey: .dependencies)
+        dependsOn = try? container.decode(CatalogueDependsOnJSON.self, forKey: .dependsOn)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case desc
+        case homepage
+        case versions
+        case analytics
+        case dependencies
+        case dependsOn = "depends_on"
+    }
 }
 
 nonisolated struct CatalogueVersionsJSON: Codable {
@@ -60,6 +103,22 @@ nonisolated struct CatalogueInstallAnalyticsJSON: Codable {
     }
 }
 
+nonisolated struct CatalogueDependsOnJSON: Codable {
+    let formula: [String]
+    let cask: [String]
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        formula = container.decodeStringArray(forKey: .formula)
+        cask = container.decodeStringArray(forKey: .cask)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case formula
+        case cask
+    }
+}
+
 extension FormulaCatalogueItemJSON {
     var description: String {
         desc
@@ -71,6 +130,10 @@ extension FormulaCatalogueItemJSON {
 
     var analyticsInstall30d: Int {
         analytics.install.days30
+    }
+
+    var dependencyReferences: [HomebrewPackageReference] {
+        HomebrewPackageReference.formulaDependencies(from: dependencies)
     }
 }
 
@@ -85,6 +148,17 @@ extension CaskCatalogueItemJSON {
 
     var analyticsInstall30d: Int {
         analytics.install.days30
+    }
+
+    var dependencyReferences: [HomebrewPackageReference] {
+        let formulaDependencies = HomebrewPackageReference.formulaDependencies(
+            from: dependencies + (dependsOn?.formula ?? []),
+        )
+        let caskDependencies = (dependsOn?.cask ?? []).compactMap { token -> HomebrewPackageReference? in
+            let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : .cask(token: trimmed)
+        }
+        return HomebrewPackageReference.uniqueReferences(formulaDependencies + caskDependencies)
     }
 }
 
@@ -114,4 +188,20 @@ private nonisolated func decodeCatalogueItems<Item: Decodable>(
     }
 
     return (decodedItems, failures)
+}
+
+private extension KeyedDecodingContainer {
+    func decodeStringArray(forKey key: Key) -> [String] {
+        if let values = try? decode([String].self, forKey: key) {
+            return values.compactMap { value in
+                let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                return trimmed.isEmpty ? nil : trimmed
+            }
+        }
+        if let value = try? decode(String.self, forKey: key) {
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? [] : [trimmed]
+        }
+        return []
+    }
 }

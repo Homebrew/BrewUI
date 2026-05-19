@@ -40,7 +40,11 @@ struct BrewCatalogueRepositoryTests {
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
-        let staleData = fixture.formulaCacheJSON(name: "stale", installs: 123)
+        let staleData = fixture.formulaCacheJSON(
+            name: "stale",
+            installs: 123,
+            dependencies: ["openssl@3"],
+        )
         try await cache.updateFormulaCatalogue(with: staleData, etag: #""etag-stale""#)
         fixture.userDefaults.set(Date(timeIntervalSinceReferenceDate: 0), forKey: fixture.formulaLastRefreshKey)
 
@@ -62,14 +66,15 @@ struct BrewCatalogueRepositoryTests {
         )
 
         let first = try await repository.loadFormulaCatalogue()
-        #expect(first.items.first?.name == "stale")
+        #expect(first.first?.name == "stale")
+        #expect(first.first?.dependencies == [.formula(name: "openssl@3")])
 
         #expect(await waitUntil {
             await apiClient.formulaCallCount() == 1
         })
         #expect(await waitUntil {
             let latest = try await repository.loadFormulaCatalogue()
-            return latest.items.first?.name == "fresh"
+            return latest.first?.name == "fresh"
         })
         let etags = await apiClient.recordedFormulaETags()
         #expect(etags.first == #""etag-stale""#)
@@ -84,7 +89,11 @@ struct BrewCatalogueRepositoryTests {
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
-        let staleData = fixture.formulaCacheJSON(name: "cached", installs: 5)
+        let staleData = fixture.formulaCacheJSON(
+            name: "cached",
+            installs: 5,
+            dependencies: ["pkg-config", "openssl@3"],
+        )
         try await cache.updateFormulaCatalogue(with: staleData, etag: #""etag-current""#)
         let staleDate = Date(timeIntervalSinceReferenceDate: 0)
         fixture.userDefaults.set(staleDate, forKey: fixture.formulaLastRefreshKey)
@@ -102,7 +111,8 @@ struct BrewCatalogueRepositoryTests {
         )
 
         let refreshed = try await repository.loadFormulaCatalogue(forceRefresh: true)
-        #expect(refreshed.items.first?.name == "cached")
+        #expect(refreshed.first?.name == "cached")
+        #expect(refreshed.first?.dependencies == [.formula(name: "pkg-config"), .formula(name: "openssl@3")])
         #expect(await apiClient.recordedFormulaETags() == [#""etag-current""#])
 
         let updatedDate = fixture.userDefaults.object(forKey: fixture.formulaLastRefreshKey) as? Date
@@ -144,8 +154,8 @@ struct BrewCatalogueRepositoryTests {
 
         let firstResult = try await first
         let secondResult = try await second
-        #expect(firstResult.items.first?.name == "deduped")
-        #expect(secondResult.items.first?.name == "deduped")
+        #expect(firstResult.first?.name == "deduped")
+        #expect(secondResult.first?.name == "deduped")
         #expect(await apiClient.formulaCallCount() == 1)
     }
 
@@ -198,11 +208,50 @@ struct BrewCatalogueRepositoryTests {
 
         let refreshed = try await repository.loadFormulaCatalogue(forceRefresh: true)
 
-        #expect(refreshed.items.first?.name == "wget")
+        #expect(refreshed.first?.name == "wget")
         #expect(await apiClient.recordedFormulaETags() == [#""etag-prev""#])
         #expect(await cache.formulaUpdateCount() == 1)
         #expect(await cache.latestFormulaETag() == #""etag-next""#)
         #expect(await cache.formulaCatalogue()?.items.first?.name == "wget")
+    }
+
+    @Test @MainActor func `load cask catalogue maps formula and cask dependencies`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let cache = CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+        let rawData = fixture.caskCacheJSON(
+            name: "docker-desktop",
+            installs: 420,
+            dependencies: ["colima"],
+            formulaDependsOn: ["docker"],
+            caskDependsOn: ["iterm2"],
+        )
+        let payload = try JSONDecoder().decode(CaskCatalogueJSON.self, from: rawData)
+        let apiClient = StubCatalogueAPIClient(
+            formulaHandler: { _ in .notModified },
+            caskHandler: { _ in .updated(data: payload, etag: #""cask-etag""#) },
+        )
+        let repository = BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: cache,
+            userDefaults: fixture.userDefaults,
+            now: Date.init,
+        )
+
+        let packages = try await repository.loadCaskCatalogue(forceRefresh: true)
+        let cask = try #require(packages.first)
+        #expect(cask.name == "docker-desktop")
+        #expect(
+            cask.dependencies == [
+                .formula(name: "colima"),
+                .formula(name: "docker"),
+                .cask(token: "iterm2"),
+            ],
+        )
     }
 }
 
@@ -355,8 +404,9 @@ private struct TestFixture {
         userDefaults.removePersistentDomain(forName: userDefaultsSuiteName)
     }
 
-    func formulaCacheJSON(name: String, installs: Int) -> Data {
-        Data(
+    func formulaCacheJSON(name: String, installs: Int, dependencies: [String] = []) -> Data {
+        let dependenciesJSON = dependenciesJSONLiteral(from: dependencies)
+        return Data(
             """
             [
               {
@@ -364,11 +414,47 @@ private struct TestFixture {
                 "desc": "Formula \(name)",
                 "homepage": "https://example.com/\(name)",
                 "versions": { "stable": "1.0.0" },
-                "analytics": { "install": { "30d": \(installs) } }
+                "analytics": { "install": { "30d": \(installs) } },
+                "dependencies": \(dependenciesJSON)
               }
             ]
             """.utf8,
         )
+    }
+
+    func caskCacheJSON(
+        name: String,
+        installs: Int,
+        dependencies: [String] = [],
+        formulaDependsOn: [String] = [],
+        caskDependsOn: [String] = [],
+    ) -> Data {
+        let dependenciesJSON = dependenciesJSONLiteral(from: dependencies)
+        let formulaDependsOnJSON = dependenciesJSONLiteral(from: formulaDependsOn)
+        let caskDependsOnJSON = dependenciesJSONLiteral(from: caskDependsOn)
+        return Data(
+            """
+            [
+              {
+                "name": "\(name)",
+                "desc": "Cask \(name)",
+                "homepage": "https://example.com/\(name)",
+                "versions": { "stable": "2.0.0" },
+                "analytics": { "install": { "30d": \(installs) } },
+                "dependencies": \(dependenciesJSON),
+                "depends_on": {
+                  "formula": \(formulaDependsOnJSON),
+                  "cask": \(caskDependsOnJSON)
+                }
+              }
+            ]
+            """.utf8,
+        )
+    }
+
+    private func dependenciesJSONLiteral(from dependencies: [String]) -> String {
+        let quoted = dependencies.map { "\"\($0)\"" }.joined(separator: ", ")
+        return "[\(quoted)]"
     }
 }
 

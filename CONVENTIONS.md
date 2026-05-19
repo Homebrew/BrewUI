@@ -45,6 +45,8 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Repository boundary:** Repositories are data-access adapters. They fetch/parse/map source data and expose that data to the app, but they do not invent extra informational or presentation values beyond what the source provides. Any hardcoded informational text, user guidance, or display-only derived strings belong in ViewModel/View layers (or another presentation-oriented layer), not repositories.
 
+**Transport boundary:** Do not expose `Codable` transport payload types (`*JSON`, DTOs, wire models) from service or repository APIs. Decode transport payloads at the boundary, then map to app-facing domain models (`Models/`) or explicit feature-layer data contracts before returning.
+
 **Command transparency:** When the UI exposes a Homebrew command, render a **copyable, user-facing command** that a person can run in Terminal (for example, `brew info <name>`). Do not display internal implementation flags used only for app parsing/workflow (for example, `--json=v2`) in user-visible command text.
 
 **MVVM boundary:** Keep views as passive as practical. Put view-facing UI policy, derived flags, and decision/branching logic in ViewModels (for example, split/detail visibility booleans and action-routing decisions). Views should primarily bind/render and forward actions. Keep view-layer branching limited to simple presentation branches (for example, loading/error/empty content blocks) and avoid embedding cross-state decision trees in views. Add unit tests for non-trivial ViewModel-derived UI state.
