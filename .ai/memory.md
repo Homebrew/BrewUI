@@ -384,3 +384,18 @@
 
 - Catalogue transport decoding (`FormulaCatalogueJSON` / `CaskCatalogueJSON`) now treats `desc`, `homepage`, `versions.stable`, and `analytics.install["30d"]` as required fields.
 - Catalogue array decoding is now lossy per item: invalid entries are skipped, and decode failures are captured with item index + error string so callers can handle partial failures without dropping valid items.
+
+## 2026-05-19 — Catalogue cache + repository split
+
+- Split catalogue responsibilities into two boundaries:
+  - `CatalogueCache` actor owns only in-memory state, disk persistence, and ETag storage.
+  - `BrewCatalogueRepository` owns TTL, stale-while-revalidate policy, refresh orchestration, and in-flight task deduplication.
+- `CatalogueCache` currently preloads cache on async init:
+  - `init(...) async` loads formula/cask cache files immediately (missing/corrupt files are swallowed);
+  - read/write methods operate on preloaded in-memory state (no separate warm-up method).
+- `BrewCatalogueRepository` behavior:
+  - one refresh `Task` per catalogue kind is shared across concurrent callers;
+  - stale cached data returns immediately while background refresh runs;
+  - cold start (no cache) blocks on refresh and surfaces errors;
+  - `304` updates only last-refresh timestamp;
+  - background refresh failures are swallowed.
