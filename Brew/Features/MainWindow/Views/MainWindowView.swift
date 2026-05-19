@@ -27,6 +27,8 @@ struct MainWindowView: View {
         switch selectedSidebarItem {
         case .installed:
             InstalledColumnsRoot()
+        case .discover:
+            DiscoverColumnsRoot()
         }
     }
 }
