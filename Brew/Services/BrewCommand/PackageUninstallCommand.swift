@@ -10,7 +10,7 @@ struct PackageUninstallCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
-    init(package: BrewPackage) {
+    init(package: InstalledBrewPackage) {
         packageName = package.name
         kind = package.kind
     }

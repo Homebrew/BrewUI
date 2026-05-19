@@ -407,3 +407,17 @@
 - Enforcement/docs:
   - Added `CONVENTIONS.md` note under **Transport boundary**.
   - Added `.cursor/rules/codable-boundary.mdc` (always apply) and linked guidance in `.cursor/rules/swift-implementation.mdc`.
+
+## 2026-05-19 — Installed model split (`InstalledBrewPackage` vs `BrewPackage`)
+
+- Installed-only state moved out of shared package domain:
+  - `InstalledBrewPackage` composes a `BrewPackage` (`package`) plus `installedVersions` and `outdated`.
+  - Public fields shared with `BrewPackage` are exposed as wrapper properties; identity (`id`, `reference`) derives from `package`.
+  - `BrewPackage` is slim/shared for catalogue/discover-prep fields only.
+- Boundary rule:
+  - installed repositories/inventory/graph/view-model surfaces use `InstalledBrewPackage`,
+  - catalogue repository surfaces remain `[BrewPackage]` and must not reintroduce installed-only fields.
+- Command/convenience identity behavior remains stable via `kind:name` IDs:
+  - `BrewOperationID(package:)` now takes `InstalledBrewPackage`,
+  - `HomebrewPackageReference` gained `init(installedPackage:)` (delegates to `init(package:)`),
+  - package ID/reference semantics remain canonical and unchanged.

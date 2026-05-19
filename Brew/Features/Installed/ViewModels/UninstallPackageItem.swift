@@ -7,10 +7,10 @@ import Foundation
 
 /// Presentation mapping for uninstall actions shown in Installed package detail subviews.
 struct UninstallPackageItem {
-    private let package: BrewPackage
+    private let package: InstalledBrewPackage
     private let blockingDependentCount: Int
 
-    init(package: BrewPackage, blockingDependentCount: Int = 0) {
+    init(package: InstalledBrewPackage, blockingDependentCount: Int = 0) {
         self.package = package
         self.blockingDependentCount = max(0, blockingDependentCount)
     }

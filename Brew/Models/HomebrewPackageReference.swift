@@ -45,6 +45,10 @@ enum HomebrewPackageReference: Hashable {
             self = .cask(token: package.name)
         }
     }
+
+    init(installedPackage: InstalledBrewPackage) {
+        self.init(package: installedPackage.package)
+    }
 }
 
 extension HomebrewPackageReference {

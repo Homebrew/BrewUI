@@ -110,11 +110,11 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `refresh preserves selection when package still exists`() async {
-        let firstSnapshot: [BrewPackage] = [
+        let firstSnapshot: [InstalledBrewPackage] = [
             .fixture(name: "git", kind: .formula, latestVersion: "1.0.0", installedVersions: ["1.0.0"]),
             .fixture(name: "wget", kind: .formula, latestVersion: "1.0.0", installedVersions: ["1.0.0"]),
         ]
-        let secondSnapshot: [BrewPackage] = [
+        let secondSnapshot: [InstalledBrewPackage] = [
             .fixture(name: "git", kind: .formula, latestVersion: "2.0.0", installedVersions: ["2.0.0"]),
             .fixture(name: "wget", kind: .formula, latestVersion: "1.0.0", installedVersions: ["1.0.0"]),
         ]
@@ -133,11 +133,11 @@ struct InstalledViewModelTests {
     }
 
     @Test @MainActor func `refresh repoints selection when selected package disappears`() async {
-        let firstSnapshot: [BrewPackage] = [
+        let firstSnapshot: [InstalledBrewPackage] = [
             .fixture(name: "git", kind: .formula),
             .fixture(name: "wget", kind: .formula),
         ]
-        let secondSnapshot: [BrewPackage] = [
+        let secondSnapshot: [InstalledBrewPackage] = [
             .fixture(name: "wget", kind: .formula),
         ]
         let repo = SequentialSnapshotsInstalledRepository(snapshots: [firstSnapshot, secondSnapshot])
@@ -146,12 +146,12 @@ struct InstalledViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         await vm.load()
-        let removedSelectionID: BrewPackage.ID = "formula:git"
+        let removedSelectionID: InstalledBrewPackage.ID = "formula:git"
         vm.setSelection(removedSelectionID)
 
         await vm.refresh()
 
-        let expectedFallbackID: BrewPackage.ID = "formula:wget"
+        let expectedFallbackID: InstalledBrewPackage.ID = "formula:wget"
         #expect(vm.selectedPackage?.id == expectedFallbackID)
     }
 
@@ -246,13 +246,13 @@ private func expectLoadCount(atLeast target: Int, repo: CountingInstalledReposit
 @MainActor
 private final class CountingInstalledRepository: InstalledPackagesRepository {
     private(set) var loadCallCount = 0
-    private let packages: [BrewPackage]
+    private let packages: [InstalledBrewPackage]
 
-    init(packages: [BrewPackage] = [.fixture(name: "git", kind: .formula)]) {
+    init(packages: [InstalledBrewPackage] = [.fixture(name: "git", kind: .formula)]) {
         self.packages = packages
     }
 
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
         loadCallCount += 1
         return packages
     }
@@ -260,14 +260,14 @@ private final class CountingInstalledRepository: InstalledPackagesRepository {
 
 @MainActor
 private final class SequentialSnapshotsInstalledRepository: InstalledPackagesRepository {
-    private var snapshots: [[BrewPackage]]
+    private var snapshots: [[InstalledBrewPackage]]
     private var index = 0
 
-    init(snapshots: [[BrewPackage]]) {
+    init(snapshots: [[InstalledBrewPackage]]) {
         self.snapshots = snapshots
     }
 
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
         guard !snapshots.isEmpty else {
             return []
         }

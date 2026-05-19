@@ -4,8 +4,8 @@ import Foundation
 enum InstalledFeatureTestSupport {
     @MainActor
     static func loadedViewModel(
-        formulae: [BrewPackage] = [],
-        casks: [BrewPackage] = [],
+        formulae: [InstalledBrewPackage] = [],
+        casks: [InstalledBrewPackage] = [],
     ) async -> InstalledViewModel {
         let cache = InstalledInventoryCache()
         let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: formulae + casks)
@@ -24,25 +24,25 @@ enum InstalledFeatureTestSupport {
 }
 
 struct StubInstalledPackagesRepository: InstalledPackagesRepository {
-    let snapshot: [BrewPackage]
+    let snapshot: [InstalledBrewPackage]
 
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
         snapshot
     }
 }
 
 struct StubInstalledDependentsRepository: InstalledDependentsRepository {
-    let provider: @Sendable (BrewPackage.ID) -> [BrewPackage]
+    let provider: @Sendable (InstalledBrewPackage.ID) -> [InstalledBrewPackage]
 
-    func installedDependents(for packageID: BrewPackage.ID) async -> [BrewPackage] {
+    func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         provider(packageID)
     }
 }
 
 struct StubInstalledInventoryReading: InstalledInventoryReading {
-    let installedIDs: Set<BrewPackage.ID>
+    let installedIDs: Set<InstalledBrewPackage.ID>
 
-    func installedPackageIDs() async -> Set<BrewPackage.ID> {
+    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         installedIDs
     }
 }

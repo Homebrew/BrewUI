@@ -8,8 +8,8 @@ import SwiftUI
 
 /// Root view for the selected row; detail content reads ``EnvironmentValues/brewCommandCenter`` and builds relationship repositories from ``EnvironmentValues/installedInventoryCache``.
 struct InstalledPackageDetailRoot: View {
-    let selectedPackage: BrewPackage
-    let onSelectInstalledPackage: (BrewPackage.ID) -> Void
+    let selectedPackage: InstalledBrewPackage
+    let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.installedInventoryCache) private var installedInventoryCache
 
@@ -26,8 +26,8 @@ struct InstalledPackageDetailRoot: View {
 
 /// Right-hand column: detail for the selected installed package.
 struct InstalledPackageDetailView: View {
-    let package: BrewPackage
-    let onSelectInstalledPackage: (BrewPackage.ID) -> Void
+    let package: InstalledBrewPackage
+    let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @State private var viewModel: InstalledPackageDetailViewModel
     @State private var expandedDependencies = false
     @State private var expandedDependents = false
@@ -35,11 +35,11 @@ struct InstalledPackageDetailView: View {
     private let collapsedRelationshipCount = 3
 
     init(
-        package: BrewPackage,
+        package: InstalledBrewPackage,
         brewCommandCenter: BrewCommandCenter,
         installedDependentsRepository: any InstalledDependentsRepository,
         installedInventoryReading: any InstalledInventoryReading,
-        onSelectInstalledPackage: @escaping (BrewPackage.ID) -> Void = { _ in },
+        onSelectInstalledPackage: @escaping (InstalledBrewPackage.ID) -> Void = { _ in },
     ) {
         self.package = package
         self.onSelectInstalledPackage = onSelectInstalledPackage

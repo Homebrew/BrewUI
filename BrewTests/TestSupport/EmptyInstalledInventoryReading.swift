@@ -2,7 +2,7 @@
 import Foundation
 
 struct EmptyInstalledInventoryReading: InstalledInventoryReading {
-    func installedPackageIDs() async -> Set<BrewPackage.ID> {
+    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         []
     }
 }

@@ -15,7 +15,7 @@ struct PackageUninstallCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
-        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         try await PackageUninstallCommand(package: package).run(in: ctx)
 
         #expect(await runner.lastExecutable == brewURL)
@@ -29,7 +29,7 @@ struct PackageUninstallCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
-        let package = BrewPackage.fixture(name: "Slack", kind: .cask)
+        let package = InstalledBrewPackage.fixture(name: "Slack", kind: .cask)
         try await PackageUninstallCommand(package: package).run(in: ctx)
 
         #expect(await runner.lastArguments == ["uninstall", "--cask", "Slack"])
@@ -44,7 +44,7 @@ struct PackageUninstallCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew")),
         )
-        let package = BrewPackage.fixture(name: "x", kind: .formula)
+        let package = InstalledBrewPackage.fixture(name: "x", kind: .formula)
         await #expect(throws: BrewCommandError.self) {
             try await PackageUninstallCommand(package: package).run(in: ctx)
         }

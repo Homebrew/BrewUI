@@ -46,7 +46,7 @@ struct PackageRelationshipItemTests {
     }
 
     @Test @MainActor func `dependent and dependents always mark installed`() {
-        let package = BrewPackage.fixture(name: "curl", displayName: "cURL", kind: .formula)
+        let package = InstalledBrewPackage.fixture(name: "curl", displayName: "cURL", kind: .formula)
         let dependent = PackageRelationshipItem.dependent(package)
         let dependents = PackageRelationshipItem.dependents([package])
 

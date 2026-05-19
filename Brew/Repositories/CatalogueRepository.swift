@@ -215,9 +215,7 @@ final class BrewCatalogueRepository: CatalogueRepository {
                 description: $0.description,
                 homepage: $0.homepage,
                 latestVersion: $0.stableVersion,
-                installedVersions: [],
                 dependencies: $0.dependencyReferences,
-                outdated: false,
             )
         }
     }
@@ -231,9 +229,7 @@ final class BrewCatalogueRepository: CatalogueRepository {
                 description: $0.description,
                 homepage: $0.homepage,
                 latestVersion: $0.stableVersion,
-                installedVersions: [],
                 dependencies: $0.dependencyReferences,
-                outdated: false,
             )
         }
     }

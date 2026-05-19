@@ -10,7 +10,11 @@ import Testing
 struct InstalledDetailsViewModelTests {
     @Test @MainActor func `packageName uses package display name`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "visual-studio-code", displayName: "Visual Studio Code", kind: .cask),
+            package: InstalledBrewPackage.fixture(
+                name: "visual-studio-code",
+                displayName: "Visual Studio Code",
+                kind: .cask,
+            ),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.packageName == "Visual Studio Code")
@@ -46,7 +50,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `upgradeDisplayCommand reflects formula name`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "wget", kind: .formula),
+            package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.upgradeItem.displayCommand == "brew upgrade --formula wget")
@@ -54,7 +58,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `upgradeDisplayCommand uses cask terminal flags`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "docker", kind: .cask),
+            package: InstalledBrewPackage.fixture(name: "docker", kind: .cask),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.upgradeItem.displayCommand == "brew upgrade --cask docker")
@@ -62,7 +66,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `upgradeDisplayCommand updates when package name changes`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "wget", kind: .formula),
+            package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.update(package: details(name: "wget@2"))
@@ -71,7 +75,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `uninstallDisplayCommand reflects formula name`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "wget", kind: .formula),
+            package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.uninstallItem.displayCommand == "brew uninstall --formula wget")
@@ -79,7 +83,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `uninstallDisplayCommand uses cask terminal flags`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "docker", kind: .cask),
+            package: InstalledBrewPackage.fixture(name: "docker", kind: .cask),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.uninstallItem.displayCommand == "brew uninstall --cask docker")
@@ -87,7 +91,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `uninstallDisplayCommand updates when package name changes`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "wget", kind: .formula),
+            package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.update(package: details(name: "wget@2"))
@@ -147,7 +151,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `uninstall presentation uses package name`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "wget", kind: .formula),
+            package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         #expect(viewModel.uninstallItem.primaryButtonTitle == "Uninstall")
@@ -169,7 +173,7 @@ struct InstalledDetailsViewModelTests {
             package: package,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
-                packageID == package.id ? [.fixture(name: "curl")] : []
+                packageID == package.id ? [InstalledBrewPackage.fixture(name: "curl")] : []
             },
         )
         await viewModel.refreshRelationships()
@@ -185,7 +189,7 @@ struct InstalledDetailsViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
                 packageID == package.id
-                    ? [.fixture(name: "curl"), .fixture(name: "node")]
+                    ? [InstalledBrewPackage.fixture(name: "curl"), InstalledBrewPackage.fixture(name: "node")]
                     : []
             },
         )
@@ -202,7 +206,7 @@ struct InstalledDetailsViewModelTests {
             package: openssl,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
-                packageID == wget.id ? [.fixture(name: "curl")] : []
+                packageID == wget.id ? [InstalledBrewPackage.fixture(name: "curl")] : []
             },
         )
         await viewModel.refreshRelationships()
@@ -212,7 +216,7 @@ struct InstalledDetailsViewModelTests {
     }
 
     @Test @MainActor func `refreshRelationships marks installed and missing dependency refs`() async {
-        let package = BrewPackage.fixture(
+        let package = InstalledBrewPackage.fixture(
             name: "wget",
             kind: .formula,
             dependencies: [.formula(name: "openssl@3"), .formula(name: "zlib")],
@@ -236,7 +240,7 @@ struct InstalledDetailsViewModelTests {
 
     @Test @MainActor func `update package clears dependency relationships`() async {
         let viewModel = makeInstalledDetailsViewModel(
-            package: BrewPackage.fixture(
+            package: InstalledBrewPackage.fixture(
                 name: "wget",
                 kind: .formula,
                 dependencies: [.formula(name: "openssl@3")],
@@ -245,7 +249,7 @@ struct InstalledDetailsViewModelTests {
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: ["formula:openssl@3"]),
         )
         await viewModel.refreshRelationships()
-        viewModel.update(package: BrewPackage.fixture(name: "curl", kind: .formula))
+        viewModel.update(package: InstalledBrewPackage.fixture(name: "curl", kind: .formula))
         #expect(viewModel.dependencyRelationships.isEmpty)
     }
 
@@ -255,11 +259,11 @@ struct InstalledDetailsViewModelTests {
             package: package,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
-                packageID == package.id ? [.fixture(name: "curl")] : []
+                packageID == package.id ? [InstalledBrewPackage.fixture(name: "curl")] : []
             },
         )
         await viewModel.refreshRelationships()
-        viewModel.update(package: BrewPackage.fixture(name: "wget", kind: .formula))
+        viewModel.update(package: InstalledBrewPackage.fixture(name: "wget", kind: .formula))
         #expect(viewModel.dependentRelationships.isEmpty)
     }
 
@@ -473,7 +477,7 @@ private struct GenericUpgradeError: Error {}
 extension InstalledDetailsViewModelTests {
     @Test @MainActor func `handleUninstallPrimaryButtonTapped sets showUninstallConfirmation when not blocked`() {
         let viewModel = makeInstalledDetailsViewModel(
-            package: .fixture(name: "wget", kind: .formula),
+            package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.handleUninstallPrimaryButtonTapped()
@@ -487,7 +491,7 @@ extension InstalledDetailsViewModelTests {
             package: package,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
-                packageID == package.id ? [.fixture(name: "curl")] : []
+                packageID == package.id ? [InstalledBrewPackage.fixture(name: "curl")] : []
             },
         )
         await viewModel.refreshRelationships()
@@ -502,13 +506,13 @@ extension InstalledDetailsViewModelTests {
             package: package,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
-                packageID == package.id ? [.fixture(name: "curl")] : []
+                packageID == package.id ? [InstalledBrewPackage.fixture(name: "curl")] : []
             },
         )
         await viewModel.refreshRelationships()
         viewModel.handleUninstallPrimaryButtonTapped()
         #expect(viewModel.showUninstallBlockedCallout)
-        viewModel.update(package: .fixture(name: "wget", kind: .formula))
+        viewModel.update(package: InstalledBrewPackage.fixture(name: "wget", kind: .formula))
         #expect(!viewModel.showUninstallBlockedCallout)
         #expect(!viewModel.showUninstallConfirmation)
     }

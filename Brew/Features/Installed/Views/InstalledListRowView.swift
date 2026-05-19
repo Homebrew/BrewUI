@@ -7,7 +7,7 @@ import SwiftUI
 
 /// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
 struct InstalledListRowRoot: View {
-    let package: BrewPackage
+    let package: InstalledBrewPackage
     @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
@@ -20,10 +20,10 @@ struct InstalledListRowRoot: View {
 }
 
 struct InstalledListRowView: View {
-    let package: BrewPackage
+    let package: InstalledBrewPackage
     @State private var viewModel: InstalledListRowViewModel
 
-    init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
+    init(package: InstalledBrewPackage, brewCommandCenter: BrewCommandCenter) {
         _viewModel = State(
             initialValue: InstalledListRowViewModel(
                 package: package,

@@ -9,10 +9,10 @@ struct InstalledInventorySnapshot: Equatable {
     nonisolated static let defaultTTL: TimeInterval = 3600
 
     var fetchedAt: Date
-    let packages: [BrewPackage]
+    let packages: [InstalledBrewPackage]
     let graph: PackageDependencyGraph
 
-    init(fetchedAt: Date, packages: [BrewPackage]) {
+    init(fetchedAt: Date, packages: [InstalledBrewPackage]) {
         self.fetchedAt = fetchedAt
         self.packages = packages
         graph = PackageDependencyGraph(packages: packages)

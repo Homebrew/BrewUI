@@ -126,7 +126,7 @@ struct InstalledPackageDetailMetadataSection: View {
 struct InstalledPackageDetailUsedBySection: View {
     let viewModel: InstalledPackageDetailViewModel
     let collapsedRelationshipCount: Int
-    let onSelectInstalledPackage: (BrewPackage.ID) -> Void
+    let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @Binding var isExpanded: Bool
 
     var body: some View {
@@ -193,7 +193,7 @@ struct InstalledPackageDetailRelationshipList: View {
     let relationships: [PackageRelationshipItem]
     let dotStyle: PackageRelationshipDotStyle
     let collapsedRelationshipCount: Int
-    let onSelectInstalledPackage: (BrewPackage.ID) -> Void
+    let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     let showsHeading: Bool
     @Binding var isExpanded: Bool
 
@@ -204,7 +204,7 @@ struct InstalledPackageDetailRelationshipList: View {
         isExpanded: Binding<Bool>,
         showsHeading: Bool = true,
         collapsedRelationshipCount: Int,
-        onSelectInstalledPackage: @escaping (BrewPackage.ID) -> Void,
+        onSelectInstalledPackage: @escaping (InstalledBrewPackage.ID) -> Void,
     ) {
         self.title = title
         self.relationships = relationships

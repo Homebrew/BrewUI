@@ -7,12 +7,12 @@ import Foundation
 
 /// Reverse dependency lookups over one installed-inventory snapshot.
 struct PackageDependencyGraph: Equatable {
-    private let packagesByID: [BrewPackage.ID: BrewPackage]
-    private let dependentsByDependencyPackageID: [BrewPackage.ID: [BrewPackage.ID]]
+    private let packagesByID: [InstalledBrewPackage.ID: InstalledBrewPackage]
+    private let dependentsByDependencyPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage.ID]]
 
-    init(packages: [BrewPackage]) {
-        var byID: [BrewPackage.ID: BrewPackage] = [:]
-        var reverse: [BrewPackage.ID: [BrewPackage.ID]] = [:]
+    init(packages: [InstalledBrewPackage]) {
+        var byID: [InstalledBrewPackage.ID: InstalledBrewPackage] = [:]
+        var reverse: [InstalledBrewPackage.ID: [InstalledBrewPackage.ID]] = [:]
 
         for package in packages {
             byID[package.id] = package
@@ -25,7 +25,7 @@ struct PackageDependencyGraph: Equatable {
         dependentsByDependencyPackageID = reverse
     }
 
-    func installedDependents(for packageID: BrewPackage.ID) -> [BrewPackage] {
+    func installedDependents(for packageID: InstalledBrewPackage.ID) -> [InstalledBrewPackage] {
         (dependentsByDependencyPackageID[packageID] ?? [])
             .compactMap { packagesByID[$0] }
             .sorted {

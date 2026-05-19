@@ -6,50 +6,53 @@
 import Foundation
 
 extension BrewInfoJSON {
-    func installedPackages() -> [BrewPackage] {
+    func installedPackages() -> [InstalledBrewPackage] {
         let formulaPackages = formulae.map(\.asBrewPackage)
         let caskPackages = casks.map(\.asBrewPackage)
         return (formulaPackages + caskPackages).sorted(by: Self.sortByName)
     }
 
-    private nonisolated static func sortByName(_ lhs: BrewPackage, _ rhs: BrewPackage) -> Bool {
-        lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+    private nonisolated static func sortByName(_ lhs: InstalledBrewPackage, _ rhs: InstalledBrewPackage) -> Bool {
+        lhs.package.name.localizedCaseInsensitiveCompare(rhs.package.name) == .orderedAscending
     }
 }
 
 private extension BrewInfoFormula {
-    var asBrewPackage: BrewPackage {
+    var asBrewPackage: InstalledBrewPackage {
         let installedVersions = installed
             .compactMap(\.version)
             .compactMap(BrewInfoJSON.trimmedOrNil(_:))
-        let runtimeDependencies = dependencies
-        return BrewPackage(
-            name: name,
-            displayName: BrewInfoJSON.trimmedOrNil(fullName) ?? name,
-            kind: .formula,
-            description: BrewInfoJSON.trimmedOrEmpty(desc),
-            homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
-            latestVersion: BrewInfoJSON.trimmedOrEmpty(versions.stable),
+        return InstalledBrewPackage(
+            package: BrewPackage(
+                name: name,
+                displayName: BrewInfoJSON.trimmedOrNil(fullName) ?? name,
+                kind: .formula,
+                description: BrewInfoJSON.trimmedOrEmpty(desc),
+                homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
+                latestVersion: BrewInfoJSON.trimmedOrEmpty(versions.stable),
+                dependencies: HomebrewPackageReference.formulaDependencies(from: dependencies),
+            ),
             installedVersions: installedVersions,
-            dependencies: HomebrewPackageReference.formulaDependencies(from: runtimeDependencies),
             outdated: outdated,
         )
     }
 }
 
 private extension BrewInfoCask {
-    var asBrewPackage: BrewPackage {
+    var asBrewPackage: InstalledBrewPackage {
         let installed = BrewInfoJSON.uniqueNonEmpty(installedVersions)
         let latest = BrewInfoJSON.trimmedOrNil(versions.stable) ?? BrewInfoJSON.trimmedOrNil(version) ?? ""
-        return BrewPackage(
-            name: token,
-            displayName: BrewInfoJSON.trimmedOrNil(firstDisplayName) ?? token,
-            kind: .cask,
-            description: BrewInfoJSON.trimmedOrEmpty(desc),
-            homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
-            latestVersion: latest,
+        return InstalledBrewPackage(
+            package: BrewPackage(
+                name: token,
+                displayName: BrewInfoJSON.trimmedOrNil(firstDisplayName) ?? token,
+                kind: .cask,
+                description: BrewInfoJSON.trimmedOrEmpty(desc),
+                homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
+                latestVersion: latest,
+                dependencies: HomebrewPackageReference.uniqueReferences(dependencies),
+            ),
             installedVersions: installed,
-            dependencies: HomebrewPackageReference.uniqueReferences(dependencies),
             outdated: outdated,
         )
     }

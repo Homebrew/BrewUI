@@ -7,9 +7,9 @@ import Foundation
 
 /// Presentation mapping for upgrade actions shown in Installed package detail.
 struct UpgradePackageItem {
-    private let package: BrewPackage
+    private let package: InstalledBrewPackage
 
-    init(package: BrewPackage) {
+    init(package: InstalledBrewPackage) {
         self.package = package
     }
 
