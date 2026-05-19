@@ -15,7 +15,7 @@ struct BrewCatalogueRepositoryTests {
             formulaHandler: { _ in throw BrewAPIClientError.transport(underlying: "offline") },
             caskHandler: { _ in .notModified },
         )
-        let cache = await CatalogueCache(
+        let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
@@ -36,7 +36,7 @@ struct BrewCatalogueRepositoryTests {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
-        let cache = await CatalogueCache(
+        let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
@@ -80,7 +80,7 @@ struct BrewCatalogueRepositoryTests {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
-        let cache = await CatalogueCache(
+        let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
@@ -113,7 +113,7 @@ struct BrewCatalogueRepositoryTests {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
-        let cache = await CatalogueCache(
+        let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
@@ -147,6 +147,62 @@ struct BrewCatalogueRepositoryTests {
         #expect(firstResult.items.first?.name == "deduped")
         #expect(secondResult.items.first?.name == "deduped")
         #expect(await apiClient.formulaCallCount() == 1)
+    }
+
+    @Test @MainActor func `force refresh not modified throws when cache has no formula payload`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let cache = MockCatalogueCache(formulaETag: #""etag-current""#)
+        let apiClient = StubCatalogueAPIClient(
+            formulaHandler: { _ in .notModified },
+            caskHandler: { _ in .notModified },
+        )
+        let repository = BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: cache,
+            userDefaults: fixture.userDefaults,
+            now: Date.init,
+            ttl: 60,
+        )
+
+        do {
+            _ = try await repository.loadFormulaCatalogue(forceRefresh: true)
+            #expect(Bool(false), "Expected cache-missing error for not-modified response.")
+        } catch let error as CatalogueRepositoryError {
+            #expect(error == .cacheMissingAfterNotModified(kind: .formula))
+        }
+        #expect(await apiClient.recordedFormulaETags() == [#""etag-current""#])
+    }
+
+    @Test @MainActor func `force refresh updated response persists through cache protocol`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let cache = MockCatalogueCache(formulaETag: #""etag-prev""#)
+        let rawData = fixture.formulaCacheJSON(name: "wget", installs: 777)
+        let payload = try JSONDecoder().decode(FormulaCatalogueJSON.self, from: rawData)
+        let apiClient = StubCatalogueAPIClient(
+            formulaHandler: { _ in
+                .updated(data: payload, etag: #""etag-next""#)
+            },
+            caskHandler: { _ in .notModified },
+        )
+        let repository = BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: cache,
+            userDefaults: fixture.userDefaults,
+            now: Date.init,
+            ttl: 60,
+        )
+
+        let refreshed = try await repository.loadFormulaCatalogue(forceRefresh: true)
+
+        #expect(refreshed.items.first?.name == "wget")
+        #expect(await apiClient.recordedFormulaETags() == [#""etag-prev""#])
+        #expect(await cache.formulaUpdateCount() == 1)
+        #expect(await cache.latestFormulaETag() == #""etag-next""#)
+        #expect(await cache.formulaCatalogue()?.items.first?.name == "wget")
     }
 }
 
@@ -219,6 +275,63 @@ private actor DeferredFormulaStubCatalogueAPIClient: BrewAPIClient {
     func resumeFormula(with response: CatalogueResponse<FormulaCatalogueJSON>) {
         continuation?.resume(returning: response)
         continuation = nil
+    }
+}
+
+private actor MockCatalogueCache: CatalogueCaching {
+    private let decoder = JSONDecoder()
+    private var formulaData: FormulaCatalogueJSON?
+    private var caskData: CaskCatalogueJSON?
+    private var formulaETag: String?
+    private var caskETag: String?
+    private var formulaUpdates: [(etag: String?, rawData: Data)] = []
+
+    init(
+        formulaData: FormulaCatalogueJSON? = nil,
+        caskData: CaskCatalogueJSON? = nil,
+        formulaETag: String? = nil,
+        caskETag: String? = nil,
+    ) {
+        self.formulaData = formulaData
+        self.caskData = caskData
+        self.formulaETag = formulaETag
+        self.caskETag = caskETag
+    }
+
+    func formulaCatalogue() async -> FormulaCatalogueJSON? {
+        formulaData
+    }
+
+    func caskCatalogue() async -> CaskCatalogueJSON? {
+        caskData
+    }
+
+    func etag(for kind: CatalogueCache.CatalogueKind) async -> String? {
+        switch kind {
+        case .formula:
+            formulaETag
+        case .cask:
+            caskETag
+        }
+    }
+
+    func updateFormulaCatalogue(with rawData: Data, etag: String?) async throws {
+        formulaData = try decoder.decode(FormulaCatalogueJSON.self, from: rawData)
+        formulaETag = etag
+        formulaUpdates.append((etag: etag, rawData: rawData))
+    }
+
+    func updateCaskCatalogue(with rawData: Data, etag: String?) async throws {
+        caskData = try decoder.decode(CaskCatalogueJSON.self, from: rawData)
+        caskETag = etag
+    }
+
+    func formulaUpdateCount() -> Int {
+        formulaUpdates.count
+    }
+
+    func latestFormulaETag() -> String? {
+        formulaUpdates.last?.etag
     }
 }
 

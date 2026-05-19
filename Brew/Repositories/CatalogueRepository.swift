@@ -36,7 +36,7 @@ final class BrewCatalogueRepository: CatalogueRepository {
     }
 
     private let apiClient: any BrewAPIClient
-    private let cache: CatalogueCache
+    private let cache: any CatalogueCaching
     private let userDefaults: UserDefaults
     private let now: @Sendable () -> Date
     private let ttl: TimeInterval
@@ -46,7 +46,7 @@ final class BrewCatalogueRepository: CatalogueRepository {
 
     init(
         apiClient: any BrewAPIClient,
-        cache: CatalogueCache,
+        cache: any CatalogueCaching,
         userDefaults: UserDefaults = .standard,
         now: @escaping @Sendable () -> Date = Date.init,
         ttl: TimeInterval = BrewCatalogueRepository.defaultTTL,
@@ -56,14 +56,6 @@ final class BrewCatalogueRepository: CatalogueRepository {
         self.userDefaults = userDefaults
         self.now = now
         self.ttl = ttl
-    }
-
-    static func live(
-        apiClient: any BrewAPIClient = URLSessionBrewAPIClient.live(),
-        userDefaults: UserDefaults = .standard,
-    ) async -> BrewCatalogueRepository {
-        let cache = await CatalogueCache()
-        return BrewCatalogueRepository(apiClient: apiClient, cache: cache, userDefaults: userDefaults)
     }
 
     func loadFormulaCatalogue(forceRefresh: Bool = false) async throws -> FormulaCatalogueJSON {

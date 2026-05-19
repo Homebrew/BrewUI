@@ -5,7 +5,7 @@
 
 import Foundation
 
-actor CatalogueCache {
+actor CatalogueCache: CatalogueCaching {
     enum CatalogueKind: String {
         case formula
         case cask
@@ -23,23 +23,45 @@ actor CatalogueCache {
 
     private var formulaData: FormulaCatalogueJSON?
     private var caskData: CaskCatalogueJSON?
+    private var hasPrepared = false
+    private var prepareTask: Task<(FormulaCatalogueJSON?, CaskCatalogueJSON?), Never>?
 
     init(
         fileManager: FileManager = .default,
         userDefaults: UserDefaults = .standard,
         cacheDirectoryURL: URL? = nil,
-    ) async {
+    ) {
         self.fileManager = fileManager
         self.userDefaults = userDefaults
         let resolvedURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL(fileManager: fileManager)
         self.cacheDirectoryURL = resolvedURL
-        async let formula = Task.detached {
-            Self.loadCache(at: Self.formulaCacheURL(in: resolvedURL), as: FormulaCatalogueJSON.self)
-        }.value
-        async let cask = Task.detached {
-            Self.loadCache(at: Self.caskCacheURL(in: resolvedURL), as: CaskCatalogueJSON.self)
-        }.value
-        (formulaData, caskData) = await (formula, cask)
+    }
+
+    func prepare() async {
+        if hasPrepared {
+            return
+        }
+
+        if let inFlightTask = prepareTask {
+            let (loadedFormula, loadedCask) = await inFlightTask.value
+            applyPreparedData(formula: loadedFormula, cask: loadedCask)
+            hasPrepared = true
+            return
+        }
+
+        let formulaCacheURL = Self.formulaCacheURL(in: cacheDirectoryURL)
+        let caskCacheURL = Self.caskCacheURL(in: cacheDirectoryURL)
+
+        let task = Task(priority: .utility) {
+            async let formula = Self.loadCache(at: formulaCacheURL, as: FormulaCatalogueJSON.self)
+            async let cask = Self.loadCache(at: caskCacheURL, as: CaskCatalogueJSON.self)
+            return await (formula, cask)
+        }
+        prepareTask = task
+        let (loadedFormula, loadedCask) = await task.value
+        prepareTask = nil
+        applyPreparedData(formula: loadedFormula, cask: loadedCask)
+        hasPrepared = true
     }
 
     func formulaCatalogue() async -> FormulaCatalogueJSON? {
@@ -97,6 +119,15 @@ actor CatalogueCache {
 
     private var caskCacheFileURL: URL {
         Self.caskCacheURL(in: cacheDirectoryURL)
+    }
+
+    private func applyPreparedData(formula: FormulaCatalogueJSON?, cask: CaskCatalogueJSON?) {
+        if formulaData == nil, let formula {
+            formulaData = formula
+        }
+        if caskData == nil, let cask {
+            caskData = cask
+        }
     }
 }
 
