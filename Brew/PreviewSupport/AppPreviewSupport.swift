@@ -127,7 +127,9 @@ enum AppPreviewSupport {
 
     @MainActor
     static func makeInstalledInventoryReading() -> any InstalledInventoryReading {
-        PreviewInstalledInventoryReading(knownInstalledPackageIDs: installedInventoryIDs)
+        PreviewInstalledInventoryReading(
+            packages: installedPackages,
+        )
     }
 }
 
@@ -180,9 +182,13 @@ struct PreviewInstalledDependentsRepository: InstalledDependentsRepository {
 }
 
 struct PreviewInstalledInventoryReading: InstalledInventoryReading {
-    let knownInstalledPackageIDs: Set<InstalledBrewPackage.ID>
+    let packages: [InstalledBrewPackage]
 
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
-        knownInstalledPackageIDs
+        Set(packages.map(\.id))
+    }
+
+    func installedPackages() async -> [InstalledBrewPackage] {
+        packages
     }
 }

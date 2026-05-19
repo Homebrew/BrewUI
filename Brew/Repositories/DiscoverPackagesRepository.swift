@@ -29,10 +29,6 @@ struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         self.apiClient = apiClient
     }
 
-    static func live() -> BrewDiscoverPackagesRepository {
-        BrewDiscoverPackagesRepository(apiClient: URLSessionBrewAPIClient.live())
-    }
-
     func loadTopPackages(
         limit: Int = 10,
         window: BrewAnalyticsWindow = .days30,

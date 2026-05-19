@@ -9,4 +9,5 @@ import Foundation
 @MainActor
 protocol InstalledInventoryReading: Sendable {
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID>
+    func installedPackages() async -> [InstalledBrewPackage]
 }

@@ -43,10 +43,15 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository, InstalledIn
     }
 
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
+        let packages = await installedPackages()
+        return Set(packages.map(\.id))
+    }
+
+    func installedPackages() async -> [InstalledBrewPackage] {
         guard let snapshot = await cache.currentSnapshot() else {
             return []
         }
-        return Set(snapshot.packages.map(\.id))
+        return snapshot.packages
     }
 
     private func fetchInstalledPackages() async throws -> [InstalledBrewPackage] {
