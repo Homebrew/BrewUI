@@ -8,7 +8,7 @@ import Foundation
 import Testing
 
 struct CatalogueCacheTests {
-    @Test @MainActor func `init loads formula and cask cache from disk`() async throws {
+    @Test @MainActor func `prepare loads formula and cask cache from disk`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
@@ -19,10 +19,11 @@ struct CatalogueCacheTests {
         fixture.userDefaults.set(#""formula-etag""#, forKey: fixture.formulaETagKey)
         fixture.userDefaults.set(#""cask-etag""#, forKey: fixture.caskETagKey)
 
-        let cache = await CatalogueCache(
+        let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
+        await cache.prepare()
 
         #expect(await cache.formulaCatalogue()?.items.first?.name == "wget")
         #expect(await cache.caskCatalogue()?.items.first?.name == "iterm2")
@@ -30,16 +31,17 @@ struct CatalogueCacheTests {
         #expect(await cache.etag(for: .cask) == #""cask-etag""#)
     }
 
-    @Test @MainActor func `first read returns preloaded cache`() async throws {
+    @Test @MainActor func `first read returns prepared cache`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
         let formulaRawData = fixture.formulaCacheJSON(name: "curl", installs: 321)
         try fixture.writeFormulaCache(formulaRawData)
 
-        let cache = await CatalogueCache(
+        let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
+        await cache.prepare()
 
         #expect(await cache.formulaCatalogue()?.items.first?.name == "curl")
     }
@@ -47,7 +49,7 @@ struct CatalogueCacheTests {
     @Test @MainActor func `update formula cache persists raw body and etag`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
-        let cache = await CatalogueCache(
+        let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
@@ -60,6 +62,24 @@ struct CatalogueCacheTests {
 
         let persistedRawData = try Data(contentsOf: fixture.formulaCacheURL)
         #expect(persistedRawData == updatedRawData)
+    }
+
+    @Test @MainActor func `prepare does not overwrite in memory updates`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        try fixture.writeFormulaCache(fixture.formulaCacheJSON(name: "stale", installs: 1))
+        let cache = CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+        let updatedRawData = fixture.formulaCacheJSON(name: "fresh", installs: 500)
+        try await cache.updateFormulaCatalogue(with: updatedRawData, etag: #""formula-fresh""#)
+
+        await cache.prepare()
+
+        #expect(await cache.formulaCatalogue()?.items.first?.name == "fresh")
+        #expect(await cache.etag(for: .formula) == #""formula-fresh""#)
     }
 }
 
