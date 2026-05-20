@@ -35,7 +35,7 @@ final class DiscoverViewModel {
             guard selectedSegment != oldValue else {
                 return
             }
-            synchronizeSelectionForVisibleRows()
+            synchronizeSelectionWithLoadedRows()
             refreshDetailViewModel()
         }
     }
@@ -83,11 +83,11 @@ final class DiscoverViewModel {
             let installedPackages = await installedInventoryReading.installedPackages()
 
             rows = Self.makeRows(
-                snapshot: topPackages,
+                from: topPackages.topFormulae + topPackages.topCasks,
                 installedPackages: installedPackages,
             )
             state = .loaded
-            synchronizeSelectionForVisibleRows()
+            synchronizeSelectionWithLoadedRows()
             refreshDetailViewModel()
         } catch {
             state = .error(Self.userMessage(for: error))
@@ -104,17 +104,23 @@ final class DiscoverViewModel {
             }
             selectedPackageID = packageID
         } else {
-            selectedPackageID = visibleRows.first?.id
+            selectedPackageID = firstVisibleRowID()
         }
         refreshDetailViewModel()
     }
 
-    private func synchronizeSelectionForVisibleRows() {
+    private func synchronizeSelectionWithLoadedRows() {
         let visibleIDs = Set(visibleRows.map(\.id))
-        if let selectedPackageID, visibleIDs.contains(selectedPackageID) {
-            return
+        if let selectedPackageID, !visibleIDs.contains(selectedPackageID) {
+            self.selectedPackageID = nil
         }
-        selectedPackageID = visibleRows.first?.id
+        if selectedPackageID == nil {
+            selectedPackageID = firstVisibleRowID()
+        }
+    }
+
+    private func firstVisibleRowID() -> BrewPackage.ID? {
+        visibleRows.first?.id
     }
 
     private func refreshDetailViewModel() {
@@ -130,21 +136,20 @@ final class DiscoverViewModel {
     }
 
     private static func makeRows(
-        snapshot: DiscoverTopPackagesSnapshot,
+        from discoveryPackages: [DiscoveryPackage],
         installedPackages: [InstalledBrewPackage],
     ) -> [DiscoverListRowViewModel] {
         let installedByID = Dictionary(uniqueKeysWithValues: installedPackages.map { ($0.id, $0) })
 
-        let topPackages = snapshot.topFormulae + snapshot.topCasks
-        let rowViewModels = topPackages.map { topPackage in
-            let packageID = topPackage.reference.packageID
-            return DiscoverListRowViewModel(
-                package: topPackage.package,
-                analyticsInstallCount: topPackage.thirtyDayInstallCount,
-                installedPackage: installedByID[packageID],
-            )
-        }
-        return rowViewModels.sorted(by: sortRowsByPopularityThenName)
+        return discoveryPackages
+            .map { discoveryPackage in
+                DiscoverListRowViewModel(
+                    package: discoveryPackage.package,
+                    analyticsInstallCount: discoveryPackage.thirtyDayInstallCount,
+                    installedPackage: installedByID[discoveryPackage.package.id],
+                )
+            }
+            .sorted(by: sortRowsByPopularityThenName)
     }
 
     private static func sortRowsByPopularityThenName(

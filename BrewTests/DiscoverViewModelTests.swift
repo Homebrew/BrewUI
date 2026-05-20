@@ -137,11 +137,137 @@ struct DiscoverViewModelTests {
 
         #expect(viewModel.selectedRow?.id == "formula:git")
     }
+
+    @Test @MainActor func `load selects first visible row by popularity`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
+                ),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.selectedRow?.id == "formula:git")
+    }
+
+    @Test @MainActor func `setSelection nil resolves to first visible row`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                    ],
+                    topCasks: [],
+                ),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+        viewModel.setSelection("formula:node")
+        #expect(viewModel.selectedRow?.id == "formula:node")
+
+        viewModel.setSelection(nil)
+
+        #expect(viewModel.selectedRow?.id == "formula:git")
+    }
+
+    @Test @MainActor func `segment change preserves selection when row remains visible`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                    ],
+                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
+                ),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+        viewModel.setSelection("formula:node")
+        viewModel.selectedSegment = .formula
+
+        #expect(viewModel.selectedRow?.id == "formula:node")
+    }
+
+    @Test @MainActor func `reload preserves selection when package still exists`() async {
+        let repository = MutableDiscoverPackagesRepository(
+            snapshot: DiscoverTopPackagesSnapshot(
+                topFormulae: [
+                    discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                    discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                ],
+                topCasks: [],
+            ),
+        )
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: repository,
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+        viewModel.setSelection("formula:node")
+
+        await viewModel.load()
+
+        #expect(viewModel.selectedRow?.id == "formula:node")
+    }
+
+    @Test @MainActor func `reload repoints selection when selected package disappears`() async {
+        let repository = MutableDiscoverPackagesRepository(
+            snapshot: DiscoverTopPackagesSnapshot(
+                topFormulae: [
+                    discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                    discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                ],
+                topCasks: [],
+            ),
+        )
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: repository,
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+        viewModel.setSelection("formula:node")
+
+        repository.snapshot = DiscoverTopPackagesSnapshot(
+            topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+            topCasks: [],
+        )
+        await viewModel.load()
+
+        #expect(viewModel.selectedRow?.id == "formula:git")
+    }
 }
 
 @MainActor
 private struct StubDiscoverPackagesRepository: DiscoverPackagesRepository {
     let snapshot: DiscoverTopPackagesSnapshot
+
+    func loadTopPackages(
+        limit _: Int,
+        window _: BrewAnalyticsWindow,
+    ) async throws -> DiscoverTopPackagesSnapshot {
+        snapshot
+    }
+}
+
+@MainActor
+private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepository {
+    var snapshot: DiscoverTopPackagesSnapshot
+
+    init(snapshot: DiscoverTopPackagesSnapshot) {
+        self.snapshot = snapshot
+    }
 
     func loadTopPackages(
         limit _: Int,
