@@ -89,6 +89,61 @@ struct BrewAPIClientURLSessionIntegrationTests {
         #expect(requests.first?.url == expectedURL)
     }
 
+    @Test @MainActor func `fetch formula and cask analytics concurrently`() async throws {
+        let baseURL = makeStubBaseURL()
+        try StubURLProtocol.register(
+            [
+                .successWithStatus(
+                    data: Data(
+                        """
+                        {
+                          "category": "formula_install_on_request",
+                          "total_items": 1,
+                          "total_count": 100,
+                          "start_date": "2026-04-17",
+                          "end_date": "2026-05-17",
+                          "formulae": {
+                            "wget": [{ "formula": "wget", "count": "100" }]
+                          }
+                        }
+                        """.utf8,
+                    ),
+                    statusCode: 200,
+                ),
+                .successWithStatus(
+                    data: Data(
+                        """
+                        {
+                          "category": "cask_install",
+                          "total_items": 1,
+                          "total_count": 50,
+                          "start_date": "2026-04-17",
+                          "end_date": "2026-05-17",
+                          "formulae": {
+                            "iterm2": [{ "cask": "iterm2", "count": "50" }]
+                          }
+                        }
+                        """.utf8,
+                    ),
+                    statusCode: 200,
+                ),
+            ],
+            forHost: #require(baseURL.host),
+        )
+        let session = makeStubbedSession()
+        let client = URLSessionBrewAPIClient(session: session, baseURL: baseURL)
+
+        async let formulaAnalytics = client.fetchFormulaInstallOnRequestAnalytics(window: .days30)
+        async let caskAnalytics = client.fetchCaskInstallAnalytics(window: .days30)
+
+        let formulaResult = try await formulaAnalytics
+        let caskResult = try await caskAnalytics
+
+        #expect(formulaResult.packageCounts.first?.name == "wget")
+        #expect(caskResult.packageCounts.first?.name == "iterm2")
+        #expect(try StubURLProtocol.requests(forHost: #require(baseURL.host)).count == 2)
+    }
+
     @Test @MainActor func `fetch throws http status error for non success response`() async throws {
         let baseURL = makeStubBaseURL()
         try StubURLProtocol.register(
@@ -271,11 +326,35 @@ final class StubURLProtocol: URLProtocol {
 
     private static let lock = NSLock()
     private static var queuedResultsByHost: [String: [StubbedResult]] = [:]
+    private static var queuedResultsByHostAndPath: [String: [String: [StubbedResult]]] = [:]
+    private static var repeatingResultsByHostAndPath: [String: [String: StubbedResult]] = [:]
     private static var requestsByHost: [String: [URLRequest]] = [:]
 
     static func register(_ results: [StubbedResult], forHost host: String) {
         lock.lock()
         queuedResultsByHost[host] = results
+        queuedResultsByHostAndPath[host] = [:]
+        repeatingResultsByHostAndPath[host] = [:]
+        requestsByHost[host] = []
+        lock.unlock()
+    }
+
+    /// Registers one stub per URL path so concurrent requests get the correct payload regardless of completion order.
+    static func registerByPath(_ resultsByPath: [String: StubbedResult], forHost host: String) {
+        lock.lock()
+        queuedResultsByHost[host] = []
+        queuedResultsByHostAndPath[host] = resultsByPath.mapValues { [$0] }
+        repeatingResultsByHostAndPath[host] = [:]
+        requestsByHost[host] = []
+        lock.unlock()
+    }
+
+    /// Same as `registerByPath`, but stubs are reused for every matching request (for stress tests).
+    static func registerRepeatingByPath(_ resultsByPath: [String: StubbedResult], forHost host: String) {
+        lock.lock()
+        queuedResultsByHost[host] = []
+        queuedResultsByHostAndPath[host] = [:]
+        repeatingResultsByHostAndPath[host] = resultsByPath
         requestsByHost[host] = []
         lock.unlock()
     }
@@ -306,12 +385,27 @@ final class StubURLProtocol: URLProtocol {
         let result: StubbedResult
         Self.lock.lock()
         Self.requestsByHost[host, default: []].append(request)
-        var queuedResults = Self.queuedResultsByHost[host] ?? []
-        if queuedResults.isEmpty {
-            result = .failure(URLError(.badServerResponse))
+        if let path = request.url?.path,
+           let repeatingResults = Self.repeatingResultsByHostAndPath[host],
+           let repeatingResult = repeatingResults[path]
+        {
+            result = repeatingResult
+        } else if let path = request.url?.path,
+                  var pathQueues = Self.queuedResultsByHostAndPath[host],
+                  var pathQueue = pathQueues[path],
+                  !pathQueue.isEmpty
+        {
+            result = pathQueue.removeFirst()
+            pathQueues[path] = pathQueue.isEmpty ? nil : pathQueue
+            Self.queuedResultsByHostAndPath[host] = pathQueues
         } else {
-            result = queuedResults.removeFirst()
-            Self.queuedResultsByHost[host] = queuedResults
+            var queuedResults = Self.queuedResultsByHost[host] ?? []
+            if queuedResults.isEmpty {
+                result = .failure(URLError(.badServerResponse))
+            } else {
+                result = queuedResults.removeFirst()
+                Self.queuedResultsByHost[host] = queuedResults
+            }
         }
         Self.lock.unlock()
 

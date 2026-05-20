@@ -27,27 +27,15 @@ enum BrewAPIClientError: Error, Equatable {
 
 struct URLSessionBrewAPIClient: BrewAPIClient {
     private let baseURL: URL
-    private let fetchData: @Sendable (URLRequest) async throws -> (Data, URLResponse)
-    private let decoder: JSONDecoder
+    private let session: URLSession
 
-    init(
-        baseURL: URL = Self.defaultBaseURL,
-        decoder: JSONDecoder = JSONDecoder(),
-        fetchData: @escaping @Sendable (URLRequest) async throws -> (Data, URLResponse),
-    ) {
-        self.baseURL = baseURL
-        self.decoder = decoder
-        self.fetchData = fetchData
-    }
-
-    init(session: URLSession, baseURL: URL = Self.defaultBaseURL, decoder: JSONDecoder = JSONDecoder()) {
-        self.init(baseURL: baseURL, decoder: decoder) { request in
-            try await session.data(for: request)
-        }
+    init(session: URLSession, baseURL: URL? = nil) {
+        self.session = session
+        self.baseURL = baseURL ?? URL(string: "https://formulae.brew.sh") ?? URL(fileURLWithPath: "/")
     }
 
     static func live() -> URLSessionBrewAPIClient {
-        URLSessionBrewAPIClient(session: URLSession.shared)
+        URLSessionBrewAPIClient(session: .shared)
     }
 
     func fetchFormulaInstallOnRequestAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
@@ -72,7 +60,7 @@ struct URLSessionBrewAPIClient: BrewAPIClient {
         let data: Data
         let response: URLResponse
         do {
-            (data, response) = try await fetchData(request)
+            (data, response) = try await session.data(for: request)
         } catch {
             throw BrewAPIClientError.transport(underlying: String(describing: error))
         }
@@ -88,7 +76,7 @@ struct URLSessionBrewAPIClient: BrewAPIClient {
         }
 
         do {
-            return try decoder.decode(BrewAnalyticsJSON.self, from: data)
+            return try JSONDecoder().decode(BrewAnalyticsJSON.self, from: data)
         } catch {
             throw BrewAPIClientError.decoding(underlying: String(describing: error))
         }
@@ -108,7 +96,7 @@ struct URLSessionBrewAPIClient: BrewAPIClient {
         let data: Data
         let response: URLResponse
         do {
-            (data, response) = try await fetchData(request)
+            (data, response) = try await session.data(for: request)
         } catch {
             throw BrewAPIClientError.transport(underlying: String(describing: error))
         }
@@ -122,7 +110,7 @@ struct URLSessionBrewAPIClient: BrewAPIClient {
             return .notModified
         case 200:
             do {
-                let payload = try decoder.decode(type, from: data)
+                let payload = try JSONDecoder().decode(type, from: data)
                 let responseETag = httpResponse.value(forHTTPHeaderField: "ETag")
                 return .updated(data: payload, etag: responseETag)
             } catch {
@@ -151,10 +139,6 @@ struct URLSessionBrewAPIClient: BrewAPIClient {
             request.setValue(value, forHTTPHeaderField: header)
         }
         return request
-    }
-
-    private nonisolated static var defaultBaseURL: URL {
-        URL(string: "https://formulae.brew.sh") ?? URL(fileURLWithPath: "/")
     }
 }
 
