@@ -2,16 +2,18 @@
 import Testing
 
 struct DiscoverListRowViewModelTests {
-    @Test @MainActor func `labels use placeholders when catalogue fields are empty`() {
+    @Test @MainActor func `labels reflect empty catalogue metadata without version placeholder`() {
         let viewModel = DiscoverListRowViewModel(
-            package: .fixture(description: "", latestVersion: ""),
-            analyticsInstallCount: 12345,
+            discoveryPackage: DiscoveryPackage(
+                package: .fixture(description: "", latestVersion: ""),
+                thirtyDayInstallCount: 12345,
+            ),
             installedPackage: nil,
         )
 
         #expect(viewModel.descriptionText.isEmpty)
         #expect(!viewModel.hasDescription)
-        #expect(viewModel.stableVersionLabel == "—")
+        #expect(viewModel.stableVersionLabel.isEmpty)
         #expect(viewModel.installs30DayLabel == "12,345")
         #expect(viewModel.installedStatusLabel == "Not installed")
         #expect(viewModel.installedVersionLabel == nil)
@@ -19,8 +21,10 @@ struct DiscoverListRowViewModelTests {
 
     @Test @MainActor func `labels expose installed version when inventory has a match`() {
         let viewModel = DiscoverListRowViewModel(
-            package: .fixture(name: "git", latestVersion: "2.46.1"),
-            analyticsInstallCount: 100,
+            discoveryPackage: DiscoveryPackage(
+                package: .fixture(name: "git", latestVersion: "2.46.1"),
+                thirtyDayInstallCount: 100,
+            ),
             installedPackage: .fixture(name: "git", installedVersions: ["2.45.0"]),
         )
 
@@ -31,13 +35,22 @@ struct DiscoverListRowViewModelTests {
 
     @Test @MainActor func `update replaces derived row values`() {
         let viewModel = DiscoverListRowViewModel(
-            package: .fixture(name: "wget", kind: .formula),
-            analyticsInstallCount: 10,
+            discoveryPackage: DiscoveryPackage(
+                package: .fixture(name: "wget", kind: .formula),
+                thirtyDayInstallCount: 10,
+            ),
             installedPackage: nil,
         )
         viewModel.update(
-            package: .fixture(name: "iterm2", kind: .cask, description: "Terminal emulator", latestVersion: "3.5.0"),
-            analyticsInstallCount: 99,
+            discoveryPackage: DiscoveryPackage(
+                package: .fixture(
+                    name: "iterm2",
+                    kind: .cask,
+                    description: "Terminal emulator",
+                    latestVersion: "3.5.0",
+                ),
+                thirtyDayInstallCount: 99,
+            ),
             installedPackage: .fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"]),
         )
 

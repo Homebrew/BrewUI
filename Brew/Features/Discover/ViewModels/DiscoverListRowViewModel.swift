@@ -4,51 +4,51 @@ import Observation
 @Observable
 @MainActor
 final class DiscoverListRowViewModel: Identifiable {
-    private(set) var package: BrewPackage
-    private(set) var analyticsInstallCount: Int
+    private(set) var discoveryPackage: DiscoveryPackage
     private(set) var installedPackage: InstalledBrewPackage?
 
     init(
-        package: BrewPackage,
-        analyticsInstallCount: Int,
+        discoveryPackage: DiscoveryPackage,
         installedPackage: InstalledBrewPackage?,
     ) {
-        self.package = package
-        self.analyticsInstallCount = analyticsInstallCount
+        self.discoveryPackage = discoveryPackage
         self.installedPackage = installedPackage
     }
 
     var id: BrewPackage.ID {
-        package.id
+        discoveryPackage.id
     }
 
     var name: String {
-        package.displayName
+        discoveryPackage.displayName
     }
 
     var packageKind: HomebrewPackageKind {
-        package.kind
+        discoveryPackage.kind
     }
 
     var packageKindChrome: PackageKindChrome {
-        package.kind.chrome
+        discoveryPackage.kind.chrome
     }
 
     var descriptionText: String {
-        package.description
+        discoveryPackage.description
     }
 
     var hasDescription: Bool {
         !descriptionText.isEmpty
     }
 
+    var thirtyDayInstallCount: Int {
+        discoveryPackage.thirtyDayInstallCount
+    }
+
     var installs30DayLabel: String {
-        analyticsInstallCount.formatted()
+        thirtyDayInstallCount.formatted()
     }
 
     var stableVersionLabel: String {
-        let trimmed = package.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "—" : trimmed
+        discoveryPackage.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     var isInstalled: Bool {
@@ -70,19 +70,16 @@ final class DiscoverListRowViewModel: Identifiable {
     }
 
     func update(
-        package newPackage: BrewPackage,
-        analyticsInstallCount newAnalyticsInstallCount: Int,
+        discoveryPackage newDiscoveryPackage: DiscoveryPackage,
         installedPackage newInstalledPackage: InstalledBrewPackage?,
     ) {
-        package = newPackage
-        analyticsInstallCount = newAnalyticsInstallCount
+        discoveryPackage = newDiscoveryPackage
         installedPackage = newInstalledPackage
     }
 
     func update(row: DiscoverListRowViewModel) {
         update(
-            package: row.package,
-            analyticsInstallCount: row.analyticsInstallCount,
+            discoveryPackage: row.discoveryPackage,
             installedPackage: row.installedPackage,
         )
     }

@@ -117,8 +117,10 @@ struct DiscoverListRowView: View {
     )
     DiscoverListRowView(
         viewModel: DiscoverListRowViewModel(
-            package: previewPackage,
-            analyticsInstallCount: 420_000,
+            discoveryPackage: DiscoveryPackage(
+                package: previewPackage,
+                thirtyDayInstallCount: 420_000,
+            ),
             installedPackage: AppPreviewSupport.outdatedFormula,
         ),
     )

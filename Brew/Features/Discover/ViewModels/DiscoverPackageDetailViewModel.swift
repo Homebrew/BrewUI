@@ -4,39 +4,36 @@ import Observation
 @Observable
 @MainActor
 final class DiscoverPackageDetailViewModel {
-    private(set) var package: BrewPackage
-    private(set) var analyticsInstallCount: Int
+    private(set) var discoveryPackage: DiscoveryPackage
     private(set) var installedPackage: InstalledBrewPackage?
 
     init(row: DiscoverListRowViewModel) {
-        package = row.package
-        analyticsInstallCount = row.analyticsInstallCount
+        discoveryPackage = row.discoveryPackage
         installedPackage = row.installedPackage
     }
 
     var name: String {
-        package.displayName
+        discoveryPackage.displayName
     }
 
     var packageKind: HomebrewPackageKind {
-        package.kind
+        discoveryPackage.kind
     }
 
     var packageKindChrome: PackageKindChrome {
-        package.kind.chrome
+        discoveryPackage.kind.chrome
     }
 
     var stableVersionLabel: String {
-        let trimmed = package.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmed.isEmpty ? "—" : trimmed
+        discoveryPackage.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     var installs30DayLabel: String {
-        analyticsInstallCount.formatted()
+        discoveryPackage.thirtyDayInstallCount.formatted()
     }
 
     var homepageURL: URL? {
-        let trimmed = package.homepage.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = discoveryPackage.homepage.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             return nil
         }
@@ -44,11 +41,11 @@ final class DiscoverPackageDetailViewModel {
     }
 
     var installCommand: String {
-        switch package.kind {
+        switch discoveryPackage.kind {
         case .formula:
-            "brew install \(package.name)"
+            "brew install \(discoveryPackage.name)"
         case .cask:
-            "brew install --cask \(package.name)"
+            "brew install --cask \(discoveryPackage.name)"
         }
     }
 
@@ -71,8 +68,7 @@ final class DiscoverPackageDetailViewModel {
     }
 
     func update(row: DiscoverListRowViewModel) {
-        package = row.package
-        analyticsInstallCount = row.analyticsInstallCount
+        discoveryPackage = row.discoveryPackage
         installedPackage = row.installedPackage
     }
 }

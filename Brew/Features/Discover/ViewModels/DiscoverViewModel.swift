@@ -144,9 +144,8 @@ final class DiscoverViewModel {
         return discoveryPackages
             .map { discoveryPackage in
                 DiscoverListRowViewModel(
-                    package: discoveryPackage.package,
-                    analyticsInstallCount: discoveryPackage.thirtyDayInstallCount,
-                    installedPackage: installedByID[discoveryPackage.package.id],
+                    discoveryPackage: discoveryPackage,
+                    installedPackage: installedByID[discoveryPackage.id],
                 )
             }
             .sorted(by: sortRowsByPopularityThenName)
@@ -156,10 +155,10 @@ final class DiscoverViewModel {
         _ lhs: DiscoverListRowViewModel,
         _ rhs: DiscoverListRowViewModel,
     ) -> Bool {
-        if lhs.analyticsInstallCount == rhs.analyticsInstallCount {
+        if lhs.thirtyDayInstallCount == rhs.thirtyDayInstallCount {
             return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
         }
-        return lhs.analyticsInstallCount > rhs.analyticsInstallCount
+        return lhs.thirtyDayInstallCount > rhs.thirtyDayInstallCount
     }
 
     private static func userMessage(for error: Error) -> String {

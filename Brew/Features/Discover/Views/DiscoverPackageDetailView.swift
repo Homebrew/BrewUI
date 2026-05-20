@@ -168,16 +168,18 @@ struct DiscoverPackageDetailPlaceholder: View {
 
 #Preview {
     let row = DiscoverListRowViewModel(
-        package: AppPreviewSupport.discoverFormulaeCatalogue.first ?? BrewPackage(
-            name: "git",
-            displayName: "git",
-            kind: .formula,
-            description: "Distributed revision control system",
-            homepage: "https://git-scm.com",
-            latestVersion: "2.46.1",
-            dependencies: [],
+        discoveryPackage: DiscoveryPackage(
+            package: AppPreviewSupport.discoverFormulaeCatalogue.first ?? BrewPackage(
+                name: "git",
+                displayName: "git",
+                kind: .formula,
+                description: "Distributed revision control system",
+                homepage: "https://git-scm.com",
+                latestVersion: "2.46.1",
+                dependencies: [],
+            ),
+            thirtyDayInstallCount: 420_000,
         ),
-        analyticsInstallCount: 420_000,
         installedPackage: AppPreviewSupport.outdatedFormula,
     )
     DiscoverPackageDetailView(viewModel: DiscoverPackageDetailViewModel(row: row))
