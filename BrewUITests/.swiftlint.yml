@@ -1,0 +1,5 @@
+# Same rationale as BrewTests/.swiftlint.yml — bulky test scaffolding.
+parent_config: ../.swiftlint.yml
+
+disabled_rules:
+  - type_body_length
