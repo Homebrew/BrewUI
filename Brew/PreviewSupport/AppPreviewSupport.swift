@@ -8,6 +8,56 @@ import Foundation
 enum AppPreviewSupport {
     static let commandCenter = PreviewBrewCommandCenter()
     static let installedInventoryCache = InstalledInventoryCache()
+    static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(
+        topFormulae: [
+            DiscoverTopPackage(reference: .formula(name: "git"), installCount: 420_000),
+            DiscoverTopPackage(reference: .formula(name: "node"), installCount: 360_000),
+        ],
+        topCasks: [
+            DiscoverTopPackage(reference: .cask(token: "iterm2"), installCount: 180_000),
+            DiscoverTopPackage(reference: .cask(token: "docker"), installCount: 160_000),
+        ],
+    )
+    static let discoverFormulaeCatalogue: [BrewPackage] = [
+        BrewPackage(
+            name: "git",
+            displayName: "git",
+            kind: .formula,
+            description: "Distributed revision control system",
+            homepage: "https://git-scm.com",
+            latestVersion: "2.46.1",
+            dependencies: [],
+        ),
+        BrewPackage(
+            name: "node",
+            displayName: "node",
+            kind: .formula,
+            description: "JavaScript runtime built on V8",
+            homepage: "https://nodejs.org",
+            latestVersion: "22.14.0",
+            dependencies: [],
+        ),
+    ]
+    static let discoverCasksCatalogue: [BrewPackage] = [
+        BrewPackage(
+            name: "iterm2",
+            displayName: "iTerm2",
+            kind: .cask,
+            description: "Terminal emulator and shell replacement",
+            homepage: "https://iterm2.com",
+            latestVersion: "3.5.0",
+            dependencies: [],
+        ),
+        BrewPackage(
+            name: "docker",
+            displayName: "Docker",
+            kind: .cask,
+            description: "Build and share containerized applications",
+            homepage: "https://www.docker.com",
+            latestVersion: "4.39.0",
+            dependencies: [],
+        ),
+    ]
 
     static let outdatedFormula = InstalledBrewPackage(
         package: BrewPackage(
@@ -131,6 +181,19 @@ enum AppPreviewSupport {
             packages: installedPackages,
         )
     }
+
+    @MainActor
+    static func makeDiscoverPackagesRepository() -> any DiscoverPackagesRepository {
+        PreviewDiscoverPackagesRepository(snapshot: discoverTopPackagesSnapshot)
+    }
+
+    @MainActor
+    static func makeDiscoverCatalogueRepository() -> any CatalogueRepository {
+        PreviewDiscoverCatalogueRepository(
+            formulaCatalogue: discoverFormulaeCatalogue,
+            caskCatalogue: discoverCasksCatalogue,
+        )
+    }
 }
 
 actor PreviewBrewCommandCenter: BrewCommandCenter {
@@ -190,5 +253,29 @@ struct PreviewInstalledInventoryReading: InstalledInventoryReading {
 
     func installedPackages() async -> [InstalledBrewPackage] {
         packages
+    }
+}
+
+struct PreviewDiscoverPackagesRepository: DiscoverPackagesRepository {
+    let snapshot: DiscoverTopPackagesSnapshot
+
+    func loadTopPackages(
+        limit _: Int,
+        window _: BrewAnalyticsWindow,
+    ) async throws -> DiscoverTopPackagesSnapshot {
+        snapshot
+    }
+}
+
+struct PreviewDiscoverCatalogueRepository: CatalogueRepository {
+    let formulaCatalogue: [BrewPackage]
+    let caskCatalogue: [BrewPackage]
+
+    func loadFormulaCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
+        formulaCatalogue
+    }
+
+    func loadCaskCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
+        caskCatalogue
     }
 }
