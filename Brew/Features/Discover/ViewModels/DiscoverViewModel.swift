@@ -155,26 +155,14 @@ final class DiscoverViewModel {
         let topPackages = snapshot.topFormulae + snapshot.topCasks
         let rowViewModels = topPackages.map { topPackage in
             let packageID = topPackage.reference.packageID
-            let package = catalogueByID[packageID] ?? fallbackPackage(for: topPackage)
+            let package = catalogueByID[packageID] ?? topPackage.package
             return DiscoverListRowViewModel(
                 package: package,
-                analyticsInstallCount: topPackage.installCount,
+                analyticsInstallCount: topPackage.thirtyDayInstallCount,
                 installedPackage: installedByID[packageID],
             )
         }
         return rowViewModels.sorted(by: sortRowsByPopularityThenName)
-    }
-
-    private static func fallbackPackage(for topPackage: DiscoverTopPackage) -> BrewPackage {
-        BrewPackage(
-            name: topPackage.name,
-            displayName: topPackage.name,
-            kind: topPackage.reference.kind,
-            description: "",
-            homepage: "",
-            latestVersion: "",
-            dependencies: [],
-        )
     }
 
     private static func sortRowsByPopularityThenName(

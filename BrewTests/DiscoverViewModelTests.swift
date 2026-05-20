@@ -7,8 +7,8 @@ struct DiscoverViewModelTests {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [DiscoverTopPackage(reference: .formula(name: "git"), installCount: 100)],
-                    topCasks: [DiscoverTopPackage(reference: .cask(token: "iterm2"), installCount: 90)],
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
             catalogueRepository: StubCatalogueRepository(
@@ -56,7 +56,7 @@ struct DiscoverViewModelTests {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [DiscoverTopPackage(reference: .formula(name: "wget"), installCount: 55)],
+                    topFormulae: [discoveryPackage(name: "wget", thirtyDayInstallCount: 55)],
                     topCasks: [],
                 ),
             ),
@@ -84,8 +84,8 @@ struct DiscoverViewModelTests {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [DiscoverTopPackage(reference: .formula(name: "git"), installCount: 100)],
-                    topCasks: [DiscoverTopPackage(reference: .cask(token: "iterm2"), installCount: 90)],
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
             catalogueRepository: StubCatalogueRepository.empty,
@@ -106,7 +106,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
                     topFormulae: [],
-                    topCasks: [DiscoverTopPackage(reference: .cask(token: "docker"), installCount: 88)],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 88)],
                 ),
             ),
             catalogueRepository: StubCatalogueRepository.empty,
@@ -157,8 +157,8 @@ struct DiscoverViewModelTests {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [DiscoverTopPackage(reference: .formula(name: "git"), installCount: 100)],
-                    topCasks: [DiscoverTopPackage(reference: .cask(token: "iterm2"), installCount: 90)],
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
             catalogueRepository: StubCatalogueRepository.empty,
@@ -226,3 +226,14 @@ private struct ThrowingCatalogueRepository: CatalogueRepository {
 }
 
 private struct DiscoverOddError: Error {}
+
+private func discoveryPackage(
+    name: String,
+    kind: HomebrewPackageKind = .formula,
+    thirtyDayInstallCount: Int,
+) -> DiscoveryPackage {
+    DiscoveryPackage(
+        package: .fixture(name: name, kind: kind),
+        thirtyDayInstallCount: thirtyDayInstallCount,
+    )
+}

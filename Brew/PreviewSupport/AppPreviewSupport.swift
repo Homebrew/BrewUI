@@ -10,12 +10,56 @@ enum AppPreviewSupport {
     static let installedInventoryCache = InstalledInventoryCache()
     static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(
         topFormulae: [
-            DiscoverTopPackage(reference: .formula(name: "git"), installCount: 420_000),
-            DiscoverTopPackage(reference: .formula(name: "node"), installCount: 360_000),
+            DiscoveryPackage(
+                package: BrewPackage(
+                    name: "git",
+                    displayName: "git",
+                    kind: .formula,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 420_000,
+            ),
+            DiscoveryPackage(
+                package: BrewPackage(
+                    name: "node",
+                    displayName: "node",
+                    kind: .formula,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 360_000,
+            ),
         ],
         topCasks: [
-            DiscoverTopPackage(reference: .cask(token: "iterm2"), installCount: 180_000),
-            DiscoverTopPackage(reference: .cask(token: "docker"), installCount: 160_000),
+            DiscoveryPackage(
+                package: BrewPackage(
+                    name: "iterm2",
+                    displayName: "iterm2",
+                    kind: .cask,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 180_000,
+            ),
+            DiscoveryPackage(
+                package: BrewPackage(
+                    name: "docker",
+                    displayName: "docker",
+                    kind: .cask,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 160_000,
+            ),
         ],
     )
     static let discoverFormulaeCatalogue: [BrewPackage] = [

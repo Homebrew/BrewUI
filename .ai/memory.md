@@ -421,3 +421,8 @@
   - `BrewOperationID(package:)` now takes `InstalledBrewPackage`,
   - `HomebrewPackageReference` gained `init(installedPackage:)` (delegates to `init(package:)`),
   - package ID/reference semantics remain canonical and unchanged.
+
+## 2026-05-20 — Discover wrapper domain contract
+
+- Discover top-list domain rows now use `DiscoveryPackage` (`package: BrewPackage` + `thirtyDayInstallCount`) instead of reference/count-only payloads.
+- `DiscoverTopPackagesSnapshot` now carries `[DiscoveryPackage]` for formula/cask sections; downstream list/detail mapping should read package metadata from `DiscoveryPackage.package` and ranking from `DiscoveryPackage.thirtyDayInstallCount`.

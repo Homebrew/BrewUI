@@ -51,12 +51,12 @@ struct BrewDiscoverPackagesRepositoryTests {
 
         let snapshot = try await repository.loadTopPackages(limit: 2, window: .days30)
         #expect(snapshot.topFormulae == [
-            DiscoverTopPackage(reference: .formula(name: "bat"), installCount: 1500),
-            DiscoverTopPackage(reference: .formula(name: "wget"), installCount: 500),
+            discoveryPackage(name: "bat", thirtyDayInstallCount: 1500),
+            discoveryPackage(name: "wget", thirtyDayInstallCount: 500),
         ])
         #expect(snapshot.topCasks == [
-            DiscoverTopPackage(reference: .cask(token: "raycast"), installCount: 450),
-            DiscoverTopPackage(reference: .cask(token: "iterm2"), installCount: 400),
+            discoveryPackage(name: "raycast", kind: .cask, thirtyDayInstallCount: 450),
+            discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 400),
         ])
     }
 
@@ -99,8 +99,8 @@ struct BrewDiscoverPackagesRepositoryTests {
 
         let snapshot = try await repository.loadTopPackages(limit: 10, window: .days30)
         #expect(snapshot.topFormulae == [
-            DiscoverTopPackage(reference: .formula(name: "alpha"), installCount: 400),
-            DiscoverTopPackage(reference: .formula(name: "beta"), installCount: 400),
+            discoveryPackage(name: "alpha", thirtyDayInstallCount: 400),
+            discoveryPackage(name: "beta", thirtyDayInstallCount: 400),
         ])
     }
 
@@ -182,4 +182,15 @@ private struct ThrowingBrewAPIClient: BrewAPIClient {
 
 private func analytics(from json: String) throws -> BrewAnalyticsJSON {
     try JSONDecoder().decode(BrewAnalyticsJSON.self, from: Data(json.utf8))
+}
+
+private func discoveryPackage(
+    name: String,
+    kind: HomebrewPackageKind = .formula,
+    thirtyDayInstallCount: Int,
+) -> DiscoveryPackage {
+    DiscoveryPackage(
+        package: .fixture(name: name, kind: kind),
+        thirtyDayInstallCount: thirtyDayInstallCount,
+    )
 }

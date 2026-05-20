@@ -41,7 +41,7 @@ struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         return DiscoverTopPackagesSnapshot(topFormulae: formulae, topCasks: casks)
     }
 
-    private func topPackages(from analytics: BrewAnalyticsJSON, limit: Int) -> [DiscoverTopPackage] {
+    private func topPackages(from analytics: BrewAnalyticsJSON, limit: Int) -> [DiscoveryPackage] {
         let validatedLimit = max(0, limit)
         guard validatedLimit > 0 else {
             return []
@@ -50,7 +50,24 @@ struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         return analytics.packageCounts
             .sorted(by: sortByInstallCountDescendingThenNameAscending)
             .prefix(validatedLimit)
-            .map { DiscoverTopPackage(reference: $0.reference, installCount: $0.count) }
+            .map {
+                DiscoveryPackage(
+                    package: fallbackPackage(for: $0.reference),
+                    thirtyDayInstallCount: $0.count,
+                )
+            }
+    }
+
+    private func fallbackPackage(for reference: HomebrewPackageReference) -> BrewPackage {
+        BrewPackage(
+            name: reference.name,
+            displayName: reference.name,
+            kind: reference.kind,
+            description: "",
+            homepage: "",
+            latestVersion: "",
+            dependencies: [],
+        )
     }
 
     private func sortByInstallCountDescendingThenNameAscending(
