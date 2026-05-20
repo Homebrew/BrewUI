@@ -315,11 +315,8 @@ struct PreviewDiscoverCatalogueRepository: CatalogueRepository {
     let formulaCatalogue: [BrewPackage]
     let caskCatalogue: [BrewPackage]
 
-    func loadFormulaCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
-        formulaCatalogue
-    }
-
-    func loadCaskCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
-        caskCatalogue
+    func package(for reference: HomebrewPackageReference) async throws -> BrewPackage? {
+        let packages = reference.kind == .formula ? formulaCatalogue : caskCatalogue
+        return packages.first { $0.id == reference.packageID }
     }
 }

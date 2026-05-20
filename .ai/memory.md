@@ -426,3 +426,11 @@
 
 - Discover top-list domain rows now use `DiscoveryPackage` (`package: BrewPackage` + `thirtyDayInstallCount`) instead of reference/count-only payloads.
 - `DiscoverTopPackagesSnapshot` now carries `[DiscoveryPackage]` for formula/cask sections; downstream list/detail mapping should read package metadata from `DiscoveryPackage.package` and ranking from `DiscoveryPackage.thirtyDayInstallCount`.
+
+## 2026-05-20 — Discover repository owns catalogue enrichment
+
+- `BrewDiscoverPackagesRepository` fetches analytics via `BrewAPIClient`, then resolves each ranked analytics row through `CatalogueRepository.package(for:)` (per-reference lookup, not whole-catalogue loads).
+- `CatalogueRepository` public API is `package(for: HomebrewPackageReference) -> BrewPackage?`; whole-catalogue fetch/map/cache refresh stays private inside `BrewCatalogueRepository`.
+- On `package(for:)`, if the kind’s catalogue is uncached or TTL-stale, `BrewCatalogueRepository` fetches the full catalogue once, updates cache, and serves lookups from an in-memory ID index (deduped in-flight refresh preserved).
+- Analytics rows with no catalogue match are dropped silently; the limit applies to matched rows only.
+- `DiscoverViewModel` no longer loads catalogues; it consumes enriched `DiscoveryPackage` rows from the discover repository.

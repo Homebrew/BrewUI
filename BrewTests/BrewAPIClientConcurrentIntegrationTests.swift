@@ -20,7 +20,11 @@ struct BrewAPIClientConcurrentIntegrationTests {
             forHost: host,
         )
         let client = makeSharedClient(baseURL: baseURL)
-        let repository = BrewDiscoverPackagesRepository(apiClient: client)
+        let repository = try await makeDiscoverRepository(
+            apiClient: client,
+            formulaCatalogueNames: ["wget"],
+            caskCatalogueNames: ["iterm2"],
+        )
 
         let snapshot = try await repository.loadTopPackages(limit: 1, window: .days30)
 
@@ -84,11 +88,18 @@ struct BrewAPIClientConcurrentIntegrationTests {
         let host = try #require(baseURL.host)
         StubURLProtocol.registerByPath(Self.discoverEndpointStubs, forHost: host)
         let client = makeSharedClient(baseURL: baseURL)
-        let discoverRepository = BrewDiscoverPackagesRepository(apiClient: client)
+        let catalogueRepository = try await BrewCatalogueRepository(
+            apiClient: client,
+            cache: makeWarmCatalogueCache(formulaNames: ["wget"], caskNames: ["iterm2"]),
+        )
+        let discoverRepository = BrewDiscoverPackagesRepository(
+            apiClient: client,
+            catalogueRepository: catalogueRepository,
+        )
 
         async let topPackagesTask = discoverRepository.loadTopPackages(limit: 1, window: .days30)
-        async let formulaCatalogueTask = client.fetchFormulaCatalogue(etag: nil)
-        async let caskCatalogueTask = client.fetchCaskCatalogue(etag: nil)
+        async let formulaCatalogueTask = catalogueRepository.package(for: .formula(name: "wget"))
+        async let caskCatalogueTask = catalogueRepository.package(for: .cask(token: "iterm2"))
 
         let snapshot = try await topPackagesTask
         _ = try await formulaCatalogueTask
@@ -96,7 +107,7 @@ struct BrewAPIClientConcurrentIntegrationTests {
 
         #expect(snapshot.topFormulae.count == 1)
         #expect(snapshot.topCasks.count == 1)
-        #expect(StubURLProtocol.requests(forHost: host).count == 4)
+        #expect(StubURLProtocol.requests(forHost: host).count == 2)
     }
 
     @Test @MainActor func `shared client survives repeated concurrent discover bursts`() async throws {
@@ -128,6 +139,102 @@ struct BrewAPIClientConcurrentIntegrationTests {
 @MainActor
 private func makeSharedClient(baseURL: URL) -> URLSessionBrewAPIClient {
     URLSessionBrewAPIClient(session: makeStubbedSession(), baseURL: baseURL)
+}
+
+@MainActor
+private func makeDiscoverRepository(
+    apiClient: URLSessionBrewAPIClient,
+    formulaCatalogueNames: [String],
+    caskCatalogueNames: [String],
+) async throws -> BrewDiscoverPackagesRepository {
+    try await BrewDiscoverPackagesRepository(
+        apiClient: apiClient,
+        catalogueRepository: BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: makeWarmCatalogueCache(
+                formulaNames: formulaCatalogueNames,
+                caskNames: caskCatalogueNames,
+            ),
+        ),
+    )
+}
+
+@MainActor
+private func makeWarmCatalogueCache(
+    formulaNames: [String],
+    caskNames: [String],
+) async throws -> CatalogueCache {
+    let fixture = DiscoverCatalogueCacheFixture()
+    let cache = CatalogueCache(
+        userDefaults: fixture.userDefaults,
+        cacheDirectoryURL: fixture.cacheDirectoryURL,
+    )
+    if !formulaNames.isEmpty {
+        try await cache.updateFormulaCatalogue(
+            with: fixture.formulaCacheJSON(names: formulaNames),
+            etag: #""formula-etag""#,
+        )
+    }
+    if !caskNames.isEmpty {
+        try await cache.updateCaskCatalogue(
+            with: fixture.caskCacheJSON(names: caskNames),
+            etag: #""cask-etag""#,
+        )
+    }
+    return cache
+}
+
+@MainActor
+private struct DiscoverCatalogueCacheFixture {
+    let cacheDirectoryURL: URL
+    let userDefaults: UserDefaults
+
+    init() {
+        let id = UUID().uuidString
+        cacheDirectoryURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("DiscoverCatalogueCacheFixture-\(id)", isDirectory: true)
+        let suiteName = "DiscoverCatalogueCacheFixture.\(id)"
+        userDefaults = UserDefaults(suiteName: suiteName) ?? .standard
+        userDefaults.removePersistentDomain(forName: suiteName)
+    }
+
+    func formulaCacheJSON(names: [String]) -> Data {
+        catalogueCacheJSON(
+            names: names,
+            kindLabel: "Formula",
+            stableVersion: "1.0.0",
+            installs: 1,
+        )
+    }
+
+    func caskCacheJSON(names: [String]) -> Data {
+        catalogueCacheJSON(
+            names: names,
+            kindLabel: "Cask",
+            stableVersion: "2.0.0",
+            installs: 1,
+        )
+    }
+
+    private func catalogueCacheJSON(
+        names: [String],
+        kindLabel: String,
+        stableVersion: String,
+        installs: Int,
+    ) -> Data {
+        let items = names.map { name in
+            """
+              {
+                "name": "\(name)",
+                "desc": "\(kindLabel) \(name)",
+                "homepage": "https://example.com/\(name)",
+                "versions": { "stable": "\(stableVersion)" },
+                "analytics": { "install": { "30d": \(installs) } }
+              }
+            """
+        }
+        return Data("[\n\(items.joined(separator: ",\n"))\n]".utf8)
+    }
 }
 
 private extension BrewAPIClientConcurrentIntegrationTests {

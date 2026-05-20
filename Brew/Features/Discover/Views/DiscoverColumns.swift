@@ -8,15 +8,17 @@ struct DiscoverColumnsRoot: View {
 
     var body: some View {
         let apiClient = URLSessionBrewAPIClient.live()
-        let discoverPackagesRepository = BrewDiscoverPackagesRepository(apiClient: apiClient)
         let catalogueRepository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: catalogueCache,
         )
+        let discoverPackagesRepository = BrewDiscoverPackagesRepository(
+            apiClient: apiClient,
+            catalogueRepository: catalogueRepository,
+        )
         let installedInventoryReading = BrewInstalledPackagesRepository.live(cache: installedInventoryCache)
         DiscoverColumns(
             discoverPackagesRepository: discoverPackagesRepository,
-            catalogueRepository: catalogueRepository,
             installedInventoryReading: installedInventoryReading,
         )
     }
@@ -27,13 +29,11 @@ struct DiscoverColumns: View {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
-        catalogueRepository: any CatalogueRepository,
         installedInventoryReading: any InstalledInventoryReading,
     ) {
         _viewModel = State(
             initialValue: DiscoverViewModel(
                 discoverPackagesRepository: discoverPackagesRepository,
-                catalogueRepository: catalogueRepository,
                 installedInventoryReading: installedInventoryReading,
             ),
         )
@@ -75,7 +75,6 @@ struct DiscoverColumns: View {
 #Preview {
     DiscoverColumns(
         discoverPackagesRepository: AppPreviewSupport.makeDiscoverPackagesRepository(),
-        catalogueRepository: AppPreviewSupport.makeDiscoverCatalogueRepository(),
         installedInventoryReading: AppPreviewSupport.makeInstalledInventoryReading(),
     )
 }

@@ -27,12 +27,12 @@ struct BrewCatalogueRepositoryTests {
         )
 
         await #expect(throws: BrewAPIClientError.self) {
-            _ = try await repository.loadFormulaCatalogue()
+            _ = try await repository.package(for: .formula(name: "wget"))
         }
         #expect(await apiClient.formulaCallCount() == 1)
     }
 
-    @Test @MainActor func `stale formula returns cached value and refreshes in background`() async throws {
+    @Test @MainActor func `stale catalogue refreshes on package lookup`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
@@ -65,16 +65,12 @@ struct BrewCatalogueRepositoryTests {
             ttl: 60,
         )
 
-        let first = try await repository.loadFormulaCatalogue()
-        #expect(first.first?.name == "stale")
-        #expect(first.first?.dependencies == [.formula(name: "openssl@3")])
+        let package = try await repository.package(for: .formula(name: "fresh"))
+        #expect(package?.name == "fresh")
+        #expect(package?.dependencies == [])
 
         #expect(await waitUntil {
             await apiClient.formulaCallCount() == 1
-        })
-        #expect(await waitUntil {
-            let latest = try await repository.loadFormulaCatalogue()
-            return latest.first?.name == "fresh"
         })
         let etags = await apiClient.recordedFormulaETags()
         #expect(etags.first == #""etag-stale""#)
@@ -110,16 +106,16 @@ struct BrewCatalogueRepositoryTests {
             ttl: 60,
         )
 
-        let refreshed = try await repository.loadFormulaCatalogue(forceRefresh: true)
-        #expect(refreshed.first?.name == "cached")
-        #expect(refreshed.first?.dependencies == [.formula(name: "pkg-config"), .formula(name: "openssl@3")])
+        let package = try await repository.package(for: .formula(name: "cached"))
+        #expect(package?.name == "cached")
+        #expect(package?.dependencies == [.formula(name: "pkg-config"), .formula(name: "openssl@3")])
         #expect(await apiClient.recordedFormulaETags() == [#""etag-current""#])
 
         let updatedDate = fixture.userDefaults.object(forKey: fixture.formulaLastRefreshKey) as? Date
         #expect((updatedDate ?? .distantPast) > staleDate)
     }
 
-    @Test @MainActor func `force refresh deduplicates in flight request task`() async throws {
+    @Test @MainActor func `concurrent package lookups deduplicate in flight refresh task`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
@@ -135,8 +131,8 @@ struct BrewCatalogueRepositoryTests {
             now: Date.init,
         )
 
-        async let first = repository.loadFormulaCatalogue(forceRefresh: true)
-        async let second = repository.loadFormulaCatalogue(forceRefresh: true)
+        async let first = repository.package(for: .formula(name: "deduped"))
+        async let second = repository.package(for: .formula(name: "deduped"))
 
         #expect(await waitUntil {
             await apiClient.formulaCallCount() == 1
@@ -154,12 +150,12 @@ struct BrewCatalogueRepositoryTests {
 
         let firstResult = try await first
         let secondResult = try await second
-        #expect(firstResult.first?.name == "deduped")
-        #expect(secondResult.first?.name == "deduped")
+        #expect(firstResult?.name == "deduped")
+        #expect(secondResult?.name == "deduped")
         #expect(await apiClient.formulaCallCount() == 1)
     }
 
-    @Test @MainActor func `force refresh not modified throws when cache has no formula payload`() async throws {
+    @Test @MainActor func `not modified refresh throws when cache has no formula payload`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
@@ -177,7 +173,7 @@ struct BrewCatalogueRepositoryTests {
         )
 
         do {
-            _ = try await repository.loadFormulaCatalogue(forceRefresh: true)
+            _ = try await repository.package(for: .formula(name: "cached"))
             #expect(Bool(false), "Expected cache-missing error for not-modified response.")
         } catch let error as CatalogueRepositoryError {
             #expect(error == .cacheMissingAfterNotModified(kind: .formula))
@@ -185,7 +181,7 @@ struct BrewCatalogueRepositoryTests {
         #expect(await apiClient.recordedFormulaETags() == [#""etag-current""#])
     }
 
-    @Test @MainActor func `force refresh updated response persists through cache protocol`() async throws {
+    @Test @MainActor func `updated refresh persists through cache protocol`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
@@ -206,16 +202,16 @@ struct BrewCatalogueRepositoryTests {
             ttl: 60,
         )
 
-        let refreshed = try await repository.loadFormulaCatalogue(forceRefresh: true)
+        let package = try await repository.package(for: .formula(name: "wget"))
 
-        #expect(refreshed.first?.name == "wget")
+        #expect(package?.name == "wget")
         #expect(await apiClient.recordedFormulaETags() == [#""etag-prev""#])
         #expect(await cache.formulaUpdateCount() == 1)
         #expect(await cache.latestFormulaETag() == #""etag-next""#)
         #expect(await cache.formulaCatalogue()?.items.first?.name == "wget")
     }
 
-    @Test @MainActor func `load cask catalogue maps formula and cask dependencies`() async throws {
+    @Test @MainActor func `package lookup maps formula and cask dependencies`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
@@ -242,16 +238,45 @@ struct BrewCatalogueRepositoryTests {
             now: Date.init,
         )
 
-        let packages = try await repository.loadCaskCatalogue(forceRefresh: true)
-        let cask = try #require(packages.first)
-        #expect(cask.name == "docker-desktop")
+        let cask = try await repository.package(for: .cask(token: "docker-desktop"))
+        #expect(cask?.name == "docker-desktop")
         #expect(
-            cask.dependencies == [
+            cask?.dependencies == [
                 .formula(name: "colima"),
                 .formula(name: "docker"),
                 .cask(token: "iterm2"),
             ],
         )
+    }
+
+    @Test @MainActor func `package lookup returns nil when reference is absent from catalogue`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let cache = CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+        try await cache.updateFormulaCatalogue(
+            with: fixture.formulaCacheJSON(name: "wget", installs: 10),
+            etag: #""etag-formula""#,
+        )
+        fixture.userDefaults.set(Date(), forKey: fixture.formulaLastRefreshKey)
+
+        let apiClient = StubCatalogueAPIClient(
+            formulaHandler: { _ in .notModified },
+            caskHandler: { _ in .notModified },
+        )
+        let repository = BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: cache,
+            userDefaults: fixture.userDefaults,
+            now: Date.init,
+        )
+
+        let package = try await repository.package(for: .formula(name: "missing"))
+        #expect(package == nil)
+        #expect(await apiClient.formulaCallCount() == 0)
     }
 }
 

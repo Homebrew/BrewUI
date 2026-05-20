@@ -24,50 +24,71 @@ extension DiscoverPackagesRepository {
 
 struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     private let apiClient: any BrewAPIClient
+    private let catalogueRepository: any CatalogueRepository
 
-    init(apiClient: any BrewAPIClient) {
+    init(
+        apiClient: any BrewAPIClient,
+        catalogueRepository: any CatalogueRepository,
+    ) {
         self.apiClient = apiClient
+        self.catalogueRepository = catalogueRepository
     }
 
     func loadTopPackages(
         limit: Int = 10,
         window: BrewAnalyticsWindow = .days30,
     ) async throws -> DiscoverTopPackagesSnapshot {
-        async let formulaAnalytics = apiClient.fetchFormulaInstallOnRequestAnalytics(window: window)
-        async let caskAnalytics = apiClient.fetchCaskInstallAnalytics(window: window)
+        async let formulaAnalyticsTask = apiClient.fetchFormulaInstallOnRequestAnalytics(window: window)
+        async let caskAnalyticsTask = apiClient.fetchCaskInstallAnalytics(window: window)
+        let formulaAnalytics = try await formulaAnalyticsTask
+        let caskAnalytics = try await caskAnalyticsTask
 
-        let formulae = try await topPackages(from: formulaAnalytics, limit: limit)
-        let casks = try await topPackages(from: caskAnalytics, limit: limit)
-        return DiscoverTopPackagesSnapshot(topFormulae: formulae, topCasks: casks)
+        async let formulae = topPackages(
+            from: formulaAnalytics,
+            catalogueRepository: catalogueRepository,
+            limit: limit,
+        )
+        async let casks = topPackages(
+            from: caskAnalytics,
+            catalogueRepository: catalogueRepository,
+            limit: limit,
+        )
+
+        return try await DiscoverTopPackagesSnapshot(
+            topFormulae: formulae,
+            topCasks: casks,
+        )
     }
 
-    private func topPackages(from analytics: BrewAnalyticsJSON, limit: Int) -> [DiscoveryPackage] {
+    private func topPackages(
+        from analytics: BrewAnalyticsJSON,
+        catalogueRepository: any CatalogueRepository,
+        limit: Int,
+    ) async throws -> [DiscoveryPackage] {
         let validatedLimit = max(0, limit)
         guard validatedLimit > 0 else {
             return []
         }
 
-        return analytics.packageCounts
-            .sorted(by: sortByInstallCountDescendingThenNameAscending)
-            .prefix(validatedLimit)
-            .map {
-                DiscoveryPackage(
-                    package: fallbackPackage(for: $0.reference),
-                    thirtyDayInstallCount: $0.count,
-                )
-            }
-    }
+        var results: [DiscoveryPackage] = []
+        results.reserveCapacity(validatedLimit)
 
-    private func fallbackPackage(for reference: HomebrewPackageReference) -> BrewPackage {
-        BrewPackage(
-            name: reference.name,
-            displayName: reference.name,
-            kind: reference.kind,
-            description: "",
-            homepage: "",
-            latestVersion: "",
-            dependencies: [],
-        )
+        let sortedCounts = analytics.packageCounts.sorted(by: sortByInstallCountDescendingThenNameAscending)
+        for entry in sortedCounts {
+            guard let package = try await catalogueRepository.package(for: entry.reference) else {
+                continue
+            }
+            results.append(
+                DiscoveryPackage(
+                    package: package,
+                    thirtyDayInstallCount: entry.count,
+                ),
+            )
+            if results.count >= validatedLimit {
+                break
+            }
+        }
+        return results
     }
 
     private func sortByInstallCountDescendingThenNameAscending(

@@ -3,32 +3,30 @@ import Foundation
 import Testing
 
 struct DiscoverViewModelTests {
-    @Test @MainActor func `load enriches top packages from catalogue and installed inventory`() async throws {
+    @Test @MainActor func `load maps enriched discovery packages and installed inventory`() async throws {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
-                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
+                    topFormulae: [
+                        discoveryPackage(
+                            name: "git",
+                            description: "Distributed revision control",
+                            homepage: "https://git-scm.com",
+                            latestVersion: "2.46.1",
+                            thirtyDayInstallCount: 100,
+                        ),
+                    ],
+                    topCasks: [
+                        discoveryPackage(
+                            name: "iterm2",
+                            kind: .cask,
+                            description: "Terminal emulator",
+                            homepage: "https://iterm2.com",
+                            latestVersion: "3.5.0",
+                            thirtyDayInstallCount: 90,
+                        ),
+                    ],
                 ),
-            ),
-            catalogueRepository: StubCatalogueRepository(
-                formulaCatalogue: [
-                    .fixture(
-                        name: "git",
-                        description: "Distributed revision control",
-                        homepage: "https://git-scm.com",
-                        latestVersion: "2.46.1",
-                    ),
-                ],
-                caskCatalogue: [
-                    .fixture(
-                        name: "iterm2",
-                        kind: .cask,
-                        description: "Terminal emulator",
-                        homepage: "https://iterm2.com",
-                        latestVersion: "3.5.0",
-                    ),
-                ],
             ),
             installedInventoryReading: StubInstalledInventoryReading(
                 installedIDs: ["formula:git"],
@@ -52,34 +50,6 @@ struct DiscoverViewModelTests {
         #expect(git.installedVersionLabel == "v2.45.0")
     }
 
-    @Test @MainActor func `load falls back when catalogue fetch fails`() async {
-        let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [discoveryPackage(name: "wget", thirtyDayInstallCount: 55)],
-                    topCasks: [],
-                ),
-            ),
-            catalogueRepository: ThrowingCatalogueRepository(),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
-        )
-
-        await viewModel.load()
-
-        guard case .loaded = viewModel.state else {
-            Issue.record("expected loaded state")
-            return
-        }
-        guard let wget = viewModel.visibleRows.first else {
-            Issue.record("expected one visible row")
-            return
-        }
-        #expect(wget.descriptionText.isEmpty)
-        #expect(wget.stableVersionLabel == "—")
-        #expect(wget.analyticsInstallCount == 55)
-        #expect(!wget.isInstalled)
-    }
-
     @Test @MainActor func `segment filtering keeps selection scoped to visible rows`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
@@ -88,7 +58,6 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
-            catalogueRepository: StubCatalogueRepository.empty,
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
         )
 
@@ -109,7 +78,6 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 88)],
                 ),
             ),
-            catalogueRepository: StubCatalogueRepository.empty,
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
         )
 
@@ -124,7 +92,6 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(
                 error: BrewAPIClientError.transport(underlying: "offline"),
             ),
-            catalogueRepository: StubCatalogueRepository.empty,
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
         )
 
@@ -140,7 +107,6 @@ struct DiscoverViewModelTests {
     @Test @MainActor func `load maps unknown discover repository errors to generic message`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
-            catalogueRepository: StubCatalogueRepository.empty,
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
         )
 
@@ -161,7 +127,6 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
-            catalogueRepository: StubCatalogueRepository.empty,
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
         )
 
@@ -198,42 +163,24 @@ private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
     }
 }
 
-@MainActor
-private struct StubCatalogueRepository: CatalogueRepository {
-    static let empty = StubCatalogueRepository(formulaCatalogue: [], caskCatalogue: [])
-
-    let formulaCatalogue: [BrewPackage]
-    let caskCatalogue: [BrewPackage]
-
-    func loadFormulaCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
-        formulaCatalogue
-    }
-
-    func loadCaskCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
-        caskCatalogue
-    }
-}
-
-@MainActor
-private struct ThrowingCatalogueRepository: CatalogueRepository {
-    func loadFormulaCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
-        throw BrewAPIClientError.transport(underlying: "offline")
-    }
-
-    func loadCaskCatalogue(forceRefresh _: Bool) async throws -> [BrewPackage] {
-        throw BrewAPIClientError.transport(underlying: "offline")
-    }
-}
-
 private struct DiscoverOddError: Error {}
 
 private func discoveryPackage(
     name: String,
     kind: HomebrewPackageKind = .formula,
+    description: String = "",
+    homepage: String = "",
+    latestVersion: String = "",
     thirtyDayInstallCount: Int,
 ) -> DiscoveryPackage {
     DiscoveryPackage(
-        package: .fixture(name: name, kind: kind),
+        package: .fixture(
+            name: name,
+            kind: kind,
+            description: description,
+            homepage: homepage,
+            latestVersion: latestVersion,
+        ),
         thirtyDayInstallCount: thirtyDayInstallCount,
     )
 }

@@ -21,7 +21,6 @@ enum DiscoverLoadState: Equatable {
 @MainActor
 final class DiscoverViewModel {
     private let discoverPackagesRepository: any DiscoverPackagesRepository
-    private let catalogueRepository: any CatalogueRepository
     private let installedInventoryReading: any InstalledInventoryReading
     private let topPackagesLimit: Int
     private let analyticsWindow: BrewAnalyticsWindow
@@ -43,13 +42,11 @@ final class DiscoverViewModel {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
-        catalogueRepository: any CatalogueRepository,
         installedInventoryReading: any InstalledInventoryReading,
         topPackagesLimit: Int = 10,
         analyticsWindow: BrewAnalyticsWindow = .days30,
     ) {
         self.discoverPackagesRepository = discoverPackagesRepository
-        self.catalogueRepository = catalogueRepository
         self.installedInventoryReading = installedInventoryReading
         self.topPackagesLimit = topPackagesLimit
         self.analyticsWindow = analyticsWindow
@@ -83,19 +80,10 @@ final class DiscoverViewModel {
                 limit: topPackagesLimit,
                 window: analyticsWindow,
             )
-
-            async let formulaCatalogueTask = catalogueRepository.loadFormulaCatalogue()
-            async let caskCatalogueTask = catalogueRepository.loadCaskCatalogue()
             let installedPackages = await installedInventoryReading.installedPackages()
-            let formulaCatalogueResult = try? await formulaCatalogueTask
-            let caskCatalogueResult = try? await caskCatalogueTask
-            let formulaCatalogue = formulaCatalogueResult ?? []
-            let caskCatalogue = caskCatalogueResult ?? []
 
             rows = Self.makeRows(
                 snapshot: topPackages,
-                formulaCatalogue: formulaCatalogue,
-                caskCatalogue: caskCatalogue,
                 installedPackages: installedPackages,
             )
             state = .loaded
@@ -143,21 +131,15 @@ final class DiscoverViewModel {
 
     private static func makeRows(
         snapshot: DiscoverTopPackagesSnapshot,
-        formulaCatalogue: [BrewPackage],
-        caskCatalogue: [BrewPackage],
         installedPackages: [InstalledBrewPackage],
     ) -> [DiscoverListRowViewModel] {
-        let catalogueByID = Dictionary(
-            uniqueKeysWithValues: (formulaCatalogue + caskCatalogue).map { ($0.id, $0) },
-        )
         let installedByID = Dictionary(uniqueKeysWithValues: installedPackages.map { ($0.id, $0) })
 
         let topPackages = snapshot.topFormulae + snapshot.topCasks
         let rowViewModels = topPackages.map { topPackage in
             let packageID = topPackage.reference.packageID
-            let package = catalogueByID[packageID] ?? topPackage.package
             return DiscoverListRowViewModel(
-                package: package,
+                package: topPackage.package,
                 analyticsInstallCount: topPackage.thirtyDayInstallCount,
                 installedPackage: installedByID[packageID],
             )
