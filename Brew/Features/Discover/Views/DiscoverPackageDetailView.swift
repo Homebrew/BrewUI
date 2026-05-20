@@ -168,7 +168,7 @@ struct DiscoverPackageDetailPlaceholder: View {
 
 #Preview {
     let row = DiscoverListRowViewModel(
-        discoveryPackage: DiscoveryPackage(
+        discoveryPackage: DiscoveryBrewPackage(
             package: AppPreviewSupport.discoverFormulaeCatalogue.first ?? BrewPackage(
                 name: "git",
                 displayName: "git",

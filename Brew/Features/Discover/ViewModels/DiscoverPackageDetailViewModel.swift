@@ -4,7 +4,7 @@ import Observation
 @Observable
 @MainActor
 final class DiscoverPackageDetailViewModel {
-    private(set) var discoveryPackage: DiscoveryPackage
+    private(set) var discoveryPackage: DiscoveryBrewPackage
     private(set) var installedPackage: InstalledBrewPackage?
 
     init(row: DiscoverListRowViewModel) {

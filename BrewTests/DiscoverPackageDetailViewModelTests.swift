@@ -5,7 +5,7 @@ import Testing
 struct DiscoverPackageDetailViewModelTests {
     @Test @MainActor func `formula row maps install command and installed status`() {
         let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(
                     name: "wget",
                     homepage: "https://example.org",
@@ -28,7 +28,7 @@ struct DiscoverPackageDetailViewModelTests {
 
     @Test @MainActor func `cask row maps cask install command and not installed status`() {
         let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(name: "iterm2", kind: .cask, homepage: "", latestVersion: ""),
                 thirtyDayInstallCount: 500,
             ),
@@ -47,7 +47,7 @@ struct DiscoverPackageDetailViewModelTests {
 
     @Test @MainActor func `update refreshes derived detail presentation`() {
         let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(name: "wget"),
                 thirtyDayInstallCount: 1,
             ),
@@ -56,7 +56,7 @@ struct DiscoverPackageDetailViewModelTests {
         let viewModel = DiscoverPackageDetailViewModel(row: row)
         viewModel.update(
             row: DiscoverListRowViewModel(
-                discoveryPackage: DiscoveryPackage(
+                discoveryPackage: DiscoveryBrewPackage(
                     package: .fixture(
                         name: "docker",
                         kind: .cask,

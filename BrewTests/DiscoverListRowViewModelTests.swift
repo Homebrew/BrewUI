@@ -4,7 +4,7 @@ import Testing
 struct DiscoverListRowViewModelTests {
     @Test @MainActor func `labels reflect empty catalogue metadata without version placeholder`() {
         let viewModel = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(description: "", latestVersion: ""),
                 thirtyDayInstallCount: 12345,
             ),
@@ -21,7 +21,7 @@ struct DiscoverListRowViewModelTests {
 
     @Test @MainActor func `labels expose installed version when inventory has a match`() {
         let viewModel = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(name: "git", latestVersion: "2.46.1"),
                 thirtyDayInstallCount: 100,
             ),
@@ -35,14 +35,14 @@ struct DiscoverListRowViewModelTests {
 
     @Test @MainActor func `update replaces derived row values`() {
         let viewModel = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(name: "wget", kind: .formula),
                 thirtyDayInstallCount: 10,
             ),
             installedPackage: nil,
         )
         viewModel.update(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(
                     name: "iterm2",
                     kind: .cask,

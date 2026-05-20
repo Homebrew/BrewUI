@@ -1,5 +1,5 @@
 //
-//  DiscoveryPackage.swift
+//  DiscoveryBrewPackage.swift
 //  Brew
 //
 
@@ -7,11 +7,11 @@ import Foundation
 
 /// Domain output for Discover top package sections.
 struct DiscoverTopPackagesSnapshot: Equatable {
-    let topFormulae: [DiscoveryPackage]
-    let topCasks: [DiscoveryPackage]
+    let topFormulae: [DiscoveryBrewPackage]
+    let topCasks: [DiscoveryBrewPackage]
 }
 
-struct DiscoveryPackage: Identifiable, Equatable, Hashable {
+struct DiscoveryBrewPackage: Identifiable, Equatable, Hashable {
     var package: BrewPackage
     var thirtyDayInstallCount: Int
 

@@ -298,8 +298,8 @@ private func discoveryPackage(
     homepage: String = "",
     latestVersion: String = "",
     thirtyDayInstallCount: Int,
-) -> DiscoveryPackage {
-    DiscoveryPackage(
+) -> DiscoveryBrewPackage {
+    DiscoveryBrewPackage(
         package: .fixture(
             name: name,
             kind: kind,

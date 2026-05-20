@@ -10,7 +10,7 @@ enum AppPreviewSupport {
     static let installedInventoryCache = InstalledInventoryCache()
     static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(
         topFormulae: [
-            DiscoveryPackage(
+            DiscoveryBrewPackage(
                 package: BrewPackage(
                     name: "git",
                     displayName: "git",
@@ -22,7 +22,7 @@ enum AppPreviewSupport {
                 ),
                 thirtyDayInstallCount: 420_000,
             ),
-            DiscoveryPackage(
+            DiscoveryBrewPackage(
                 package: BrewPackage(
                     name: "node",
                     displayName: "node",
@@ -36,7 +36,7 @@ enum AppPreviewSupport {
             ),
         ],
         topCasks: [
-            DiscoveryPackage(
+            DiscoveryBrewPackage(
                 package: BrewPackage(
                     name: "iterm2",
                     displayName: "iterm2",
@@ -48,7 +48,7 @@ enum AppPreviewSupport {
                 ),
                 thirtyDayInstallCount: 180_000,
             ),
-            DiscoveryPackage(
+            DiscoveryBrewPackage(
                 package: BrewPackage(
                     name: "docker",
                     displayName: "docker",

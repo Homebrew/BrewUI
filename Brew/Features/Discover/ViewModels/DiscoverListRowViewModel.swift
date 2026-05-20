@@ -4,11 +4,11 @@ import Observation
 @Observable
 @MainActor
 final class DiscoverListRowViewModel: Identifiable {
-    private(set) var discoveryPackage: DiscoveryPackage
+    private(set) var discoveryPackage: DiscoveryBrewPackage
     private(set) var installedPackage: InstalledBrewPackage?
 
     init(
-        discoveryPackage: DiscoveryPackage,
+        discoveryPackage: DiscoveryBrewPackage,
         installedPackage: InstalledBrewPackage?,
     ) {
         self.discoveryPackage = discoveryPackage
@@ -70,7 +70,7 @@ final class DiscoverListRowViewModel: Identifiable {
     }
 
     func update(
-        discoveryPackage newDiscoveryPackage: DiscoveryPackage,
+        discoveryPackage newDiscoveryPackage: DiscoveryBrewPackage,
         installedPackage newInstalledPackage: InstalledBrewPackage?,
     ) {
         discoveryPackage = newDiscoveryPackage

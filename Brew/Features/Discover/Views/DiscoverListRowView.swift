@@ -117,7 +117,7 @@ struct DiscoverListRowView: View {
     )
     DiscoverListRowView(
         viewModel: DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryPackage(
+            discoveryPackage: DiscoveryBrewPackage(
                 package: previewPackage,
                 thirtyDayInstallCount: 420_000,
             ),

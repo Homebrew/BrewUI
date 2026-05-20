@@ -136,7 +136,7 @@ final class DiscoverViewModel {
     }
 
     private static func makeRows(
-        from discoveryPackages: [DiscoveryPackage],
+        from discoveryPackages: [DiscoveryBrewPackage],
         installedPackages: [InstalledBrewPackage],
     ) -> [DiscoverListRowViewModel] {
         let installedByID = Dictionary(uniqueKeysWithValues: installedPackages.map { ($0.id, $0) })

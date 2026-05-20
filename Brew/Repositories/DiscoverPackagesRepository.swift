@@ -64,13 +64,13 @@ struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         from analytics: BrewAnalyticsJSON,
         catalogueRepository: any CatalogueRepository,
         limit: Int,
-    ) async throws -> [DiscoveryPackage] {
+    ) async throws -> [DiscoveryBrewPackage] {
         let validatedLimit = max(0, limit)
         guard validatedLimit > 0 else {
             return []
         }
 
-        var results: [DiscoveryPackage] = []
+        var results: [DiscoveryBrewPackage] = []
         results.reserveCapacity(validatedLimit)
 
         let sortedCounts = analytics.packageCounts.sorted(by: sortByInstallCountDescendingThenNameAscending)
@@ -79,7 +79,7 @@ struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
                 continue
             }
             results.append(
-                DiscoveryPackage(
+                DiscoveryBrewPackage(
                     package: package,
                     thirtyDayInstallCount: entry.count,
                 ),

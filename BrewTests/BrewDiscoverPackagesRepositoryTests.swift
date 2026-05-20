@@ -341,9 +341,9 @@ private func discoveryPackage(
     kind: HomebrewPackageKind = .formula,
     thirtyDayInstallCount: Int,
     latestVersion: String,
-) -> DiscoveryPackage {
+) -> DiscoveryBrewPackage {
     let stableVersionLabel = kind == .formula ? "Formula" : "Cask"
-    return DiscoveryPackage(
+    return DiscoveryBrewPackage(
         package: BrewPackage(
             name: name,
             displayName: name,
