@@ -14,10 +14,10 @@ struct DiscoverPackagesView: View {
                 errorView(message)
             case .loaded:
                 loadedList
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.brewSurface)
     }
 
     private var header: some View {
@@ -45,40 +45,71 @@ struct DiscoverPackagesView: View {
     }
 
     private var loadedList: some View {
-        List(selection: selectionBinding) {
-            if !formulaRows.isEmpty {
-                Section("Formulae") {
-                    ForEach(formulaRows, id: \.id) { row in
-                        listRow(row)
+        ScrollViewReader { proxy in
+            List {
+                if !formulaRows.isEmpty {
+                    Section("Formulae") {
+                        ForEach(formulaRows, id: \.id) { row in
+                            listRow(row)
+                                .id(row.id)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    viewModel.setSelection(row.id)
+                                }
+                                .listRowBackground(
+                                    viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
+                                )
+                        }
+                    }
+                }
+
+                if !caskRows.isEmpty {
+                    Section("Casks") {
+                        ForEach(caskRows, id: \.id) { row in
+                            listRow(row)
+                                .id(row.id)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    viewModel.setSelection(row.id)
+                                }
+                                .listRowBackground(
+                                    viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
+                                )
+                        }
                     }
                 }
             }
-
-            if !caskRows.isEmpty {
-                Section("Casks") {
-                    ForEach(caskRows, id: \.id) { row in
-                        listRow(row)
-                    }
-                }
+            .listStyle(.plain)
+            .accessibilityLabel("Discover packages")
+            .onAppear {
+                scrollToSelection(viewModel.selectedPackageID, with: proxy)
+            }
+            .onChange(of: viewModel.selectedPackageID) { _, selectedID in
+                scrollToSelection(selectedID, with: proxy)
+            }
+            .onChange(of: viewModel.visibleRows.map(\.id)) { _, _ in
+                scrollToSelection(viewModel.selectedPackageID, with: proxy)
+            }
+            .onExitCommand {
+                viewModel.setSelection(nil)
             }
         }
-        .listStyle(.plain)
-        .accessibilityLabel("Discover packages")
     }
 
     private func listRow(_ row: DiscoverListRowViewModel) -> some View {
         DiscoverListRowView(viewModel: row)
-            .tag(row.id)
-            .listRowBackground(
-                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
-            )
     }
 
-    private var selectionBinding: Binding<BrewPackage.ID?> {
-        Binding(
-            get: { viewModel.selectedPackageID },
-            set: { viewModel.setSelection($0) },
-        )
+    private func scrollToSelection(
+        _ selectedID: BrewPackage.ID?,
+        with proxy: ScrollViewProxy,
+    ) {
+        guard let selectedID, viewModel.visibleRows.contains(where: { $0.id == selectedID }) else {
+            return
+        }
+        withAnimation(.brewFast) {
+            proxy.scrollTo(selectedID, anchor: .center)
+        }
     }
 
     private var formulaRows: [DiscoverListRowViewModel] {

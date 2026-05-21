@@ -16,7 +16,6 @@ struct DiscoverPackageDetailView: View {
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.brewSurface)
     }
 
     private var hero: some View {
@@ -161,7 +160,6 @@ struct DiscoverPackageDetailPlaceholder: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(BrewSpacing.xl)
-        .background(Color.brewSurface)
     }
 }
 

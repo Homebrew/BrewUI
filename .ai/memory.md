@@ -434,3 +434,9 @@
 - On `package(for:)`, if the kind’s catalogue is uncached or TTL-stale, `BrewCatalogueRepository` fetches the full catalogue once, updates cache, and serves lookups from an in-memory ID index (deduped in-flight refresh preserved).
 - Analytics rows with no catalogue match are dropped silently; the limit applies to matched rows only.
 - `DiscoverViewModel` no longer loads catalogues; it consumes enriched `DiscoveryBrewPackage` rows from the discover repository.
+
+## 2026-05-21 — Installed and Discover list selection UI
+
+- **Selection chrome:** Both `InstalledPackagesView` and `DiscoverPackagesView` use a plain `List` (not `List(selection:)`), row taps via `.onTapGesture` + `viewModel.setSelection`, and `.listRowBackground(selected ? Color.brewBrandTint : Color.clear)`. Avoid `List(selection:)` — it applies system accent selection on top of the brand tint.
+- **Column backgrounds:** List column header, list body, and detail inherit window/split chrome; do not wrap Discover/Installed columns in `.background(Color.brewSurface)` unless product asks for explicit surface fills everywhere.
+- **Scroll:** Both lists use `ScrollViewReader` + `scrollToSelection` on appear/selection/row-id changes (`.brewFast` animation).
