@@ -25,22 +25,31 @@ struct DiscoverPackagesView: View {
             Text("Discover")
                 .font(.brewTitle1)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text(packageCountSubtitle)
-                .font(.brewSubheadline)
-                .foregroundStyle(Color.brewTextSecondary)
+            headerSubtitle
         }
         .padding(BrewSpacing.lg)
     }
 
-    private var packageCountSubtitle: String {
+    @ViewBuilder
+    private var headerSubtitle: some View {
         switch viewModel.state {
         case .loaded:
-            let count = viewModel.visibleRows.count
-            return "\(count) package\(count == 1 ? "" : "s")"
+            HStack(spacing: BrewSpacing.xs) {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.brewSubheadline)
+                    .foregroundStyle(Color.brewBrandPrimary)
+                Text("Top 10 formulae · Top 10 casks")
+                    .font(.brewSubheadline)
+                    .foregroundStyle(Color.brewTextSecondary)
+            }
         case .loading:
-            return "Loading packages…"
+            Text("Loading packages…")
+                .font(.brewSubheadline)
+                .foregroundStyle(Color.brewTextSecondary)
         case .error:
-            return "Could not load packages"
+            Text("Could not load packages")
+                .font(.brewSubheadline)
+                .foregroundStyle(Color.brewStatusError)
         }
     }
 
