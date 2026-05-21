@@ -33,7 +33,6 @@ nonisolated struct FormulaCatalogueItemJSON: Codable {
     let desc: String
     let homepage: String
     let versions: CatalogueVersionsJSON
-    let analytics: CatalogueAnalyticsJSON
     let dependencies: [String]
 
     init(from decoder: Decoder) throws {
@@ -42,7 +41,6 @@ nonisolated struct FormulaCatalogueItemJSON: Codable {
         desc = try container.decode(String.self, forKey: .desc)
         homepage = try container.decode(String.self, forKey: .homepage)
         versions = try container.decode(CatalogueVersionsJSON.self, forKey: .versions)
-        analytics = try container.decode(CatalogueAnalyticsJSON.self, forKey: .analytics)
         dependencies = container.decodeStringArray(forKey: .dependencies)
     }
 
@@ -51,56 +49,97 @@ nonisolated struct FormulaCatalogueItemJSON: Codable {
         case desc
         case homepage
         case versions
-        case analytics
         case dependencies
     }
 }
 
 nonisolated struct CaskCatalogueItemJSON: Codable {
+    /// Cask token used for package identity and Discover catalogue joins.
     let name: String
+    let displayName: String
     let desc: String
     let homepage: String
-    let versions: CatalogueVersionsJSON
-    let analytics: CatalogueAnalyticsJSON
+    let stableVersion: String
     let dependencies: [String]
     let dependsOn: CatalogueDependsOnJSON?
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        name = try container.decode(String.self, forKey: .name)
-        desc = try container.decode(String.self, forKey: .desc)
-        homepage = try container.decode(String.self, forKey: .homepage)
-        versions = try container.decode(CatalogueVersionsJSON.self, forKey: .versions)
-        analytics = try container.decode(CatalogueAnalyticsJSON.self, forKey: .analytics)
+        let wireNames = Self.decodeWireNames(from: container)
+        if let token = try container.decodeIfPresent(String.self, forKey: .token) {
+            name = token
+            displayName = wireNames.first ?? token
+        } else if let wireName = wireNames.first {
+            name = wireName
+            displayName = wireName
+        } else {
+            throw DecodingError.keyNotFound(
+                CodingKeys.token,
+                DecodingError.Context(
+                    codingPath: container.codingPath,
+                    debugDescription: "Expected cask token or name.",
+                ),
+            )
+        }
+
+        desc = try (container.decodeIfPresent(String.self, forKey: .desc)) ?? ""
+        homepage = try (container.decodeIfPresent(String.self, forKey: .homepage)) ?? ""
+
+        if let versions = try container.decodeIfPresent(CatalogueVersionsJSON.self, forKey: .versions) {
+            stableVersion = versions.stable
+        } else if let version = try container.decodeIfPresent(String.self, forKey: .version) {
+            stableVersion = version
+        } else {
+            stableVersion = ""
+        }
+
         dependencies = container.decodeStringArray(forKey: .dependencies)
         dependsOn = try? container.decode(CatalogueDependsOnJSON.self, forKey: .dependsOn)
     }
 
     private enum CodingKeys: String, CodingKey {
+        case token
         case name
         case desc
         case homepage
+        case version
         case versions
-        case analytics
         case dependencies
         case dependsOn = "depends_on"
+    }
+
+    private static func decodeWireNames(from container: KeyedDecodingContainer<CodingKeys>) -> [String] {
+        if let names = try? container.decode([String].self, forKey: .name) {
+            return names.compactMap { value in
+                let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+                return trimmed.isEmpty ? nil : trimmed
+            }
+        }
+        if let name = try? container.decode(String.self, forKey: .name) {
+            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? [] : [trimmed]
+        }
+        return []
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .token)
+        try container.encode([displayName], forKey: .name)
+        try container.encode(desc, forKey: .desc)
+        try container.encode(homepage, forKey: .homepage)
+        if stableVersion.isEmpty {
+            try container.encode(CatalogueVersionsJSON(stable: ""), forKey: .versions)
+        } else {
+            try container.encode(stableVersion, forKey: .version)
+        }
+        try container.encode(dependencies, forKey: .dependencies)
+        try container.encodeIfPresent(dependsOn, forKey: .dependsOn)
     }
 }
 
 nonisolated struct CatalogueVersionsJSON: Codable {
     let stable: String
-}
-
-nonisolated struct CatalogueAnalyticsJSON: Codable {
-    let install: CatalogueInstallAnalyticsJSON
-}
-
-nonisolated struct CatalogueInstallAnalyticsJSON: Codable {
-    let days30: Int
-
-    private enum CodingKeys: String, CodingKey {
-        case days30 = "30d"
-    }
 }
 
 nonisolated struct CatalogueDependsOnJSON: Codable {
@@ -128,10 +167,6 @@ extension FormulaCatalogueItemJSON {
         versions.stable
     }
 
-    var analyticsInstall30d: Int {
-        analytics.install.days30
-    }
-
     var dependencyReferences: [HomebrewPackageReference] {
         HomebrewPackageReference.formulaDependencies(from: dependencies)
     }
@@ -140,14 +175,6 @@ extension FormulaCatalogueItemJSON {
 extension CaskCatalogueItemJSON {
     var description: String {
         desc
-    }
-
-    var stableVersion: String {
-        versions.stable
-    }
-
-    var analyticsInstall30d: Int {
-        analytics.install.days30
     }
 
     var dependencyReferences: [HomebrewPackageReference] {
