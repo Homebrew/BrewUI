@@ -9,7 +9,7 @@ struct DiscoverPackagesView: View {
             header
             switch viewModel.state {
             case .loading:
-                loadingView
+                loadingSkeletonList
             case let .error(message):
                 errorView(message)
             case .loaded:
@@ -129,17 +129,52 @@ struct DiscoverPackagesView: View {
         viewModel.visibleRows.filter { $0.packageKind == .cask }
     }
 
-    private var loadingView: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            ProgressView()
-                .controlSize(.small)
-            Text("Loading Discover packages…")
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewTextSecondary)
+    private var loadingSkeletonList: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                InstalledSectionHeader(title: "Formulae", count: 3)
+                ForEach(skeletonFormulaeRows, id: \.id) { row in
+                    DiscoverListRowView(viewModel: row)
+                }
+                InstalledSectionHeader(title: "Casks", count: 3)
+                ForEach(skeletonCaskRows, id: \.id) { row in
+                    DiscoverListRowView(viewModel: row)
+                }
+            }
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.xl)
         }
-        .padding(.horizontal, BrewSpacing.lg)
-        .padding(.bottom, BrewSpacing.lg)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .redacted(reason: .placeholder)
+        .allowsHitTesting(false)
+        .accessibilityLabel("Loading package list")
+    }
+
+    private var skeletonFormulaeRows: [DiscoverListRowViewModel] {
+        skeletonRows(kind: .formula, names: ["Placeholder Formula", "Another Formula", "Sample Package"])
+    }
+
+    private var skeletonCaskRows: [DiscoverListRowViewModel] {
+        skeletonRows(kind: .cask, names: ["Placeholder Application", "Sample Cask App", "Another App"])
+    }
+
+    private func skeletonRows(kind: HomebrewPackageKind, names: [String]) -> [DiscoverListRowViewModel] {
+        names.map { name in
+            DiscoverListRowViewModel(
+                discoveryPackage: DiscoveryBrewPackage(
+                    package: BrewPackage(
+                        name: name,
+                        displayName: name,
+                        kind: kind,
+                        description: "Placeholder description text for skeleton row.",
+                        homepage: "",
+                        latestVersion: "0.0.0",
+                        dependencies: [],
+                    ),
+                    thirtyDayInstallCount: 420_000,
+                ),
+                installedPackage: nil,
+            )
+        }
     }
 
     private func errorView(_ message: String) -> some View {
