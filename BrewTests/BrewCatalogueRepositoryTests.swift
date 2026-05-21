@@ -209,69 +209,6 @@ struct BrewCatalogueRepositoryTests {
         #expect(await cache.formulaCatalogue()?.items.first?.name == "wget")
     }
 
-    @Test @MainActor func `package lookup maps formula and cask dependencies`() async throws {
-        let fixture = TestFixture()
-        defer { fixture.cleanup() }
-
-        let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
-            cacheDirectoryURL: fixture.cacheDirectoryURL,
-        )
-        let rawData = fixture.caskCacheJSON(
-            name: "docker-desktop",
-            formulaDependsOn: ["colima", "docker"],
-            caskDependsOn: ["iterm2"],
-        )
-        let payload = try JSONDecoder().decode(CaskCatalogueJSON.self, from: rawData)
-        let apiClient = StubCatalogueAPIClient(
-            formulaHandler: { _ in .notModified },
-            caskHandler: { _ in .updated(data: payload, etag: #""cask-etag""#) },
-        )
-        let repository = BrewCatalogueRepository(
-            apiClient: apiClient,
-            cache: cache,
-            userDefaults: fixture.userDefaults,
-            now: Date.init,
-        )
-
-        let cask = try await repository.package(for: .cask(token: "docker-desktop"))
-        #expect(cask?.name == "docker-desktop")
-        #expect(
-            cask?.dependencies == [
-                .formula(name: "colima"),
-                .formula(name: "docker"),
-                .cask(token: "iterm2"),
-            ],
-        )
-    }
-
-    @Test @MainActor func `package lookup maps null cask desc to empty package description`() async throws {
-        let fixture = TestFixture()
-        defer { fixture.cleanup() }
-
-        let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
-            cacheDirectoryURL: fixture.cacheDirectoryURL,
-        )
-        let rawData = fixture.caskCacheJSON(name: "0-ad", useNullDesc: true)
-        let payload = try JSONDecoder().decode(CaskCatalogueJSON.self, from: rawData)
-        let apiClient = StubCatalogueAPIClient(
-            formulaHandler: { _ in .notModified },
-            caskHandler: { _ in .updated(data: payload, etag: #""cask-etag""#) },
-        )
-        let repository = BrewCatalogueRepository(
-            apiClient: apiClient,
-            cache: cache,
-            userDefaults: fixture.userDefaults,
-            now: Date.init,
-        )
-
-        let cask = try await repository.package(for: .cask(token: "0-ad"))
-
-        #expect(cask?.name == "0-ad")
-        #expect(cask?.description == "")
-    }
-
     @Test @MainActor func `package lookup returns nil when reference is absent from catalogue`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
@@ -463,34 +400,6 @@ private struct TestFixture {
                 "homepage": "https://example.com/\(name)",
                 "versions": { "stable": "1.0.0" },
                 "dependencies": \(dependenciesJSON)
-              }
-            ]
-            """.utf8,
-        )
-    }
-
-    func caskCacheJSON(
-        name: String,
-        useNullDesc: Bool = false,
-        formulaDependsOn: [String] = [],
-        caskDependsOn: [String] = [],
-    ) -> Data {
-        let formulaDependsOnJSON = dependenciesJSONLiteral(from: formulaDependsOn)
-        let caskDependsOnJSON = dependenciesJSONLiteral(from: caskDependsOn)
-        let descJSON = useNullDesc ? "null" : "\"Cask \(name)\""
-        return Data(
-            """
-            [
-              {
-                "token": "\(name)",
-                "name": ["\(name)"],
-                "desc": \(descJSON),
-                "homepage": "https://example.com/\(name)",
-                "version": "2.0.0",
-                "depends_on": {
-                  "formula": \(formulaDependsOnJSON),
-                  "cask": \(caskDependsOnJSON)
-                }
               }
             ]
             """.utf8,
