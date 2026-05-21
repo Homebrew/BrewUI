@@ -62,11 +62,11 @@ final class DiscoverListRowViewModel: Identifiable {
         return InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
     }
 
-    var installedStatusLabel: String {
-        if isInstalled {
-            return String(localized: "Installed", comment: "Discover list row installed status")
+    var installedStatusLabel: String? {
+        guard isInstalled else {
+            return nil
         }
-        return String(localized: "Not installed", comment: "Discover list row not installed status")
+        return String(localized: "Installed", comment: "Discover list row installed status")
     }
 
     func update(

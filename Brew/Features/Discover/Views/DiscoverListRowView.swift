@@ -40,26 +40,30 @@ struct DiscoverListRowView: View {
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextPrimary)
 
-            Text(viewModel.packageKindChrome.badgeLabel)
-                .font(.brewCaption2)
-                .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
-                .padding(.horizontal, BrewSpacing.xs)
-                .padding(.vertical, BrewSpacing.xxs)
-                .background {
-                    Capsule()
-                        .fill(Color.brewSurfaceElevated)
-                }
-                .overlay {
-                    Capsule()
-                        .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
-                }
+            packageKindBadge
+
+            if viewModel.isInstalled {
+                DiscoverInstalledBadge()
+            }
 
             Spacer(minLength: 0)
-
-            Text(viewModel.installedStatusLabel)
-                .font(.brewCaption)
-                .foregroundStyle(viewModel.isInstalled ? Color.brewStatusSuccess : Color.brewTextTertiary)
         }
+    }
+
+    private var packageKindBadge: some View {
+        Text(viewModel.packageKindChrome.badgeLabel)
+            .font(.brewCaption2)
+            .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
+            .padding(.horizontal, BrewSpacing.xs)
+            .padding(.vertical, BrewSpacing.xxs)
+            .background {
+                Capsule()
+                    .fill(Color.brewSurfaceElevated)
+            }
+            .overlay {
+                Capsule()
+                    .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+            }
     }
 
     private var metadataRow: some View {
@@ -78,12 +82,15 @@ struct DiscoverListRowView: View {
     }
 
     private var accessibilityLabel: String {
-        [
+        var parts = [
             viewModel.name,
             viewModel.packageKindChrome.badgeLabel,
             "\(viewModel.installs30DayLabel) installs in 30 days",
-            viewModel.installedStatusLabel,
-        ].joined(separator: ", ")
+        ]
+        if let installedStatusLabel = viewModel.installedStatusLabel {
+            parts.append(installedStatusLabel)
+        }
+        return parts.joined(separator: ", ")
     }
 
     private func accentColor(_ token: PackageKindAccentToken) -> Color {
@@ -105,7 +112,7 @@ struct DiscoverListRowView: View {
     }
 }
 
-#Preview {
+#Preview("Installed") {
     let previewPackage = AppPreviewSupport.discoverFormulaeCatalogue.first ?? BrewPackage(
         name: "git",
         displayName: "git",

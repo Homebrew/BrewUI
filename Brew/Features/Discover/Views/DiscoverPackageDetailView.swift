@@ -20,28 +20,27 @@ struct DiscoverPackageDetailView: View {
     }
 
     private var hero: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
-                Text(viewModel.name)
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageKindChrome.badgeLabel)
-                    .font(.brewCaption2)
-                    .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
-                    .padding(.horizontal, BrewSpacing.xs)
-                    .padding(.vertical, BrewSpacing.xxs)
-                    .background {
-                        Capsule().fill(Color.brewSurfaceElevated)
-                    }
-                    .overlay {
-                        Capsule()
-                            .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
-                    }
-            }
+        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
+            Text(viewModel.name)
+                .font(.brewTitle2)
+                .foregroundStyle(Color.brewTextPrimary)
 
-            Text(viewModel.installedStatusText)
-                .font(.brewSubheadline)
-                .foregroundStyle(viewModel.isInstalled ? Color.brewStatusSuccess : Color.brewTextSecondary)
+            Text(viewModel.packageKindChrome.badgeLabel)
+                .font(.brewCaption2)
+                .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
+                .padding(.horizontal, BrewSpacing.xs)
+                .padding(.vertical, BrewSpacing.xxs)
+                .background {
+                    Capsule().fill(Color.brewSurfaceElevated)
+                }
+                .overlay {
+                    Capsule()
+                        .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                }
+
+            if viewModel.isInstalled {
+                DiscoverInstalledBadge()
+            }
         }
     }
 
