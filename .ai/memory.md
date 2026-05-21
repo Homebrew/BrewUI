@@ -38,7 +38,7 @@
 
 ## 2026-03-11 — Developer Hook Workflow
 
-- **Pre-commit enforcement:** Repository-managed pre-commit hook runs staged Swift files through Mint (`mint run swiftformat`, then `mint run swiftlint` with `--fix`, then strict `mint run swiftlint`). See **2026-04-12 — Mint for SwiftFormat and SwiftLint**.
+- **Pre-commit enforcement:** Repository-managed pre-commit hook runs staged Swift files through Mint (`mint run swiftformat`, then `mint run swiftlint` with `--fix`, then strict `mint run swiftlint`). See **2026-04-12 — Mint for SwiftFormat and SwiftLint**. After format/lint it only `git add`s fully staged files whose **worktree** blob changed; partially staged files are blocked only when format/lint actually changed the file on disk (not merely because index ≠ worktree).
 - **Bootstrap integration:** `./scripts/bootstrap` installs git hooks automatically via `scripts/install-git-hooks` to minimize manual setup for contributors.
 
 ## 2026-04-12 — Mint for SwiftFormat and SwiftLint
