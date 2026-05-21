@@ -19,7 +19,7 @@ struct DiscoverPackageDetailViewModelTests {
 
         #expect(viewModel.packageKind == .formula)
         #expect(viewModel.installCommand == "brew install wget")
-        #expect(viewModel.installedStatusText == "Installed")
+        #expect(viewModel.installedStatusLabel == "Installed")
         #expect(viewModel.installedVersionLabel == "v1.9.0")
         #expect(viewModel.stableVersionLabel == "2.0.0")
         #expect(viewModel.installs30DayLabel == "3,500")
@@ -38,7 +38,7 @@ struct DiscoverPackageDetailViewModelTests {
 
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.installCommand == "brew install --cask iterm2")
-        #expect(viewModel.installedStatusText == "Not installed")
+        #expect(viewModel.installedStatusLabel == nil)
         #expect(viewModel.installedVersionLabel == nil)
         #expect(viewModel.stableVersionLabel.isEmpty)
         #expect(viewModel.installs30DayLabel == "500")
@@ -72,7 +72,7 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.name == "docker")
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.installCommand == "brew install --cask docker")
-        #expect(viewModel.installedStatusText == "Not installed")
+        #expect(viewModel.installedStatusLabel == nil)
         #expect(viewModel.installedVersionLabel == nil)
         #expect(viewModel.stableVersionLabel == "4.0.0")
         #expect(viewModel.homepageURL?.absoluteString == "https://docker.com")

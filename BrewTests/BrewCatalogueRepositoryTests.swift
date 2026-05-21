@@ -67,13 +67,8 @@ struct BrewCatalogueRepositoryTests {
         let package = try await repository.package(for: .formula(name: "fresh"))
         #expect(package?.name == "fresh")
         #expect(package?.dependencies == [])
-
-        #expect(await waitUntil {
-            await apiClient.formulaCallCount() == 1
-        })
-        let etags = await apiClient.recordedFormulaETags()
-        #expect(etags.first == #""etag-stale""#)
-        #expect(!etags.isEmpty)
+        #expect(await apiClient.formulaCallCount() == 1)
+        #expect(await apiClient.recordedFormulaETags() == [#""etag-stale""#])
     }
 
     @Test @MainActor func `not modified refresh updates last refresh and keeps cached data`() async throws {

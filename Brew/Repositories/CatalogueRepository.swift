@@ -30,10 +30,7 @@ final class BrewCatalogueRepository: CatalogueRepository {
     private let now: @Sendable () -> Date
     private let ttl: TimeInterval
 
-    private var formulaPackagesByID: [BrewPackage.ID: BrewPackage]?
-    private var caskPackagesByID: [BrewPackage.ID: BrewPackage]?
-    private var formulaRefreshTask: Task<[BrewPackage], Error>?
-    private var caskRefreshTask: Task<[BrewPackage], Error>?
+    private var refreshTasks: [HomebrewPackageKind: Task<[BrewPackage], Error>] = [:]
 
     init(
         apiClient: any BrewAPIClient,
@@ -50,128 +47,74 @@ final class BrewCatalogueRepository: CatalogueRepository {
     }
 
     func package(for reference: HomebrewPackageReference) async throws -> BrewPackage? {
-        let packagesByID = try await packagesByID(for: reference.kind)
-        return packagesByID[reference.packageID]
+        let packages = try await packages(for: reference.kind)
+        return packages.first { $0.id == reference.packageID }
     }
 
-    private func packagesByID(for kind: HomebrewPackageKind) async throws -> [BrewPackage.ID: BrewPackage] {
+    private func packages(for kind: HomebrewPackageKind) async throws -> [BrewPackage] {
+        if !isStale(kind: kind.catalogueKind) {
+            switch kind {
+            case .formula:
+                if let catalogue = await cache.formulaCatalogue() {
+                    return mapFormulaPackages(from: catalogue)
+                }
+            case .cask:
+                if let catalogue = await cache.caskCatalogue() {
+                    return mapCaskPackages(from: catalogue)
+                }
+            }
+        }
+        return try await refreshAwaitingSharedTask(for: kind)
+    }
+
+    private func refreshAwaitingSharedTask(for kind: HomebrewPackageKind) async throws -> [BrewPackage] {
+        if let existing = refreshTasks[kind] {
+            return try await existing.value
+        }
+        let task = Task { try await self.performRefresh(for: kind) }
+        refreshTasks[kind] = task
+        do {
+            let value = try await task.value
+            refreshTasks[kind] = nil
+            return value
+        } catch {
+            refreshTasks[kind] = nil
+            throw error
+        }
+    }
+
+    private func performRefresh(for kind: HomebrewPackageKind) async throws -> [BrewPackage] {
+        let catalogueKind = kind.catalogueKind
+        let etag = await cache.etag(for: catalogueKind)
         switch kind {
         case .formula:
-            try await formulaPackagesByID()
-        case .cask:
-            try await caskPackagesByID()
-        }
-    }
-
-    private func formulaPackagesByID() async throws -> [BrewPackage.ID: BrewPackage] {
-        if let formulaPackagesByID, !isStale(kind: .formula) {
-            return formulaPackagesByID
-        }
-
-        if !isStale(kind: .formula), let cached = await cache.formulaCatalogue() {
-            let packages = mapFormulaPackages(from: cached)
-            let byID = dictionaryByID(from: packages)
-            formulaPackagesByID = byID
-            return byID
-        }
-
-        let packages = try await refreshFormulaAwaitingSharedTask()
-        let byID = dictionaryByID(from: packages)
-        formulaPackagesByID = byID
-        return byID
-    }
-
-    private func caskPackagesByID() async throws -> [BrewPackage.ID: BrewPackage] {
-        if let caskPackagesByID, !isStale(kind: .cask) {
-            return caskPackagesByID
-        }
-
-        if !isStale(kind: .cask), let cached = await cache.caskCatalogue() {
-            let packages = mapCaskPackages(from: cached)
-            let byID = dictionaryByID(from: packages)
-            caskPackagesByID = byID
-            return byID
-        }
-
-        let packages = try await refreshCaskAwaitingSharedTask()
-        let byID = dictionaryByID(from: packages)
-        caskPackagesByID = byID
-        return byID
-    }
-
-    private func refreshFormulaAwaitingSharedTask() async throws -> [BrewPackage] {
-        if let existingTask = formulaRefreshTask {
-            return try await existingTask.value
-        }
-
-        let task = Task { try await performFormulaRefresh() }
-        formulaRefreshTask = task
-        do {
-            let value = try await task.value
-            formulaRefreshTask = nil
-            return value
-        } catch {
-            formulaRefreshTask = nil
-            throw error
-        }
-    }
-
-    private func refreshCaskAwaitingSharedTask() async throws -> [BrewPackage] {
-        if let existingTask = caskRefreshTask {
-            return try await existingTask.value
-        }
-
-        let task = Task { try await performCaskRefresh() }
-        caskRefreshTask = task
-        do {
-            let value = try await task.value
-            caskRefreshTask = nil
-            return value
-        } catch {
-            caskRefreshTask = nil
-            throw error
-        }
-    }
-
-    private func performFormulaRefresh() async throws -> [BrewPackage] {
-        let etag = await cache.etag(for: .formula)
-        let response = try await apiClient.fetchFormulaCatalogue(etag: etag)
-        switch response {
-        case .notModified:
-            updateLastRefresh(kind: .formula)
-            if let cached = await cache.formulaCatalogue() {
+            let response = try await apiClient.fetchFormulaCatalogue(etag: etag)
+            switch response {
+            case .notModified:
+                updateLastRefresh(kind: catalogueKind)
+                guard let cached = await cache.formulaCatalogue() else {
+                    throw CatalogueRepositoryError.cacheMissingAfterNotModified(kind: .formula)
+                }
                 return mapFormulaPackages(from: cached)
+            case let .updated(data: data, etag: nextETag):
+                try await cache.updateFormulaCatalogue(with: JSONEncoder().encode(data.items), etag: nextETag)
+                updateLastRefresh(kind: catalogueKind)
+                return mapFormulaPackages(from: data)
             }
-            throw CatalogueRepositoryError.cacheMissingAfterNotModified(kind: .formula)
-        case let .updated(data: data, etag: nextETag):
-            let rawData = try encodeFormulaPayload(data)
-            try await cache.updateFormulaCatalogue(
-                with: rawData,
-                etag: nextETag,
-            )
-            updateLastRefresh(kind: .formula)
-            return mapFormulaPackages(from: data)
-        }
-    }
-
-    private func performCaskRefresh() async throws -> [BrewPackage] {
-        let etag = await cache.etag(for: .cask)
-        let response = try await apiClient.fetchCaskCatalogue(etag: etag)
-        switch response {
-        case .notModified:
-            updateLastRefresh(kind: .cask)
-            if let cached = await cache.caskCatalogue() {
+        case .cask:
+            let response = try await apiClient.fetchCaskCatalogue(etag: etag)
+            switch response {
+            case .notModified:
+                updateLastRefresh(kind: catalogueKind)
+                guard let cached = await cache.caskCatalogue() else {
+                    throw CatalogueRepositoryError.cacheMissingAfterNotModified(kind: .cask)
+                }
                 return mapCaskPackages(from: cached)
+            case let .updated(data: data, etag: nextETag):
+                try await cache.updateCaskCatalogue(with: JSONEncoder().encode(data.items), etag: nextETag)
+                updateLastRefresh(kind: catalogueKind)
+                return mapCaskPackages(from: data)
             }
-            throw CatalogueRepositoryError.cacheMissingAfterNotModified(kind: .cask)
-        case let .updated(data: data, etag: nextETag):
-            let rawData = try encodeCaskPayload(data)
-            try await cache.updateCaskCatalogue(
-                with: rawData,
-                etag: nextETag,
-            )
-            updateLastRefresh(kind: .cask)
-            return mapCaskPackages(from: data)
         }
     }
 
@@ -193,18 +136,6 @@ final class BrewCatalogueRepository: CatalogueRepository {
         case .cask:
             DefaultsKey.caskLastRefresh
         }
-    }
-
-    private func dictionaryByID(from packages: [BrewPackage]) -> [BrewPackage.ID: BrewPackage] {
-        Dictionary(uniqueKeysWithValues: packages.map { ($0.id, $0) })
-    }
-
-    private func encodeFormulaPayload(_ catalogue: FormulaCatalogueJSON) throws -> Data {
-        try JSONEncoder().encode(catalogue.items)
-    }
-
-    private func encodeCaskPayload(_ catalogue: CaskCatalogueJSON) throws -> Data {
-        try JSONEncoder().encode(catalogue.items)
     }
 
     private func mapFormulaPackages(from catalogue: FormulaCatalogueJSON) -> [BrewPackage] {
@@ -232,6 +163,15 @@ final class BrewCatalogueRepository: CatalogueRepository {
                 latestVersion: $0.stableVersion,
                 dependencies: $0.dependencyReferences,
             )
+        }
+    }
+}
+
+private extension HomebrewPackageKind {
+    var catalogueKind: CatalogueCache.CatalogueKind {
+        switch self {
+        case .formula: .formula
+        case .cask: .cask
         }
     }
 }
