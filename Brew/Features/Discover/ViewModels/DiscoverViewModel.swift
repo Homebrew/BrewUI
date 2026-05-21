@@ -1,16 +1,6 @@
 import Foundation
 import Observation
 
-enum DiscoverFilterSegment: String, CaseIterable, Identifiable {
-    case all
-    case formula
-    case cask
-
-    var id: String {
-        rawValue
-    }
-}
-
 enum DiscoverLoadState: Equatable {
     case loading
     case loaded
@@ -30,15 +20,6 @@ final class DiscoverViewModel {
     private(set) var state: DiscoverLoadState = .loading
     private(set) var selectedPackageID: BrewPackage.ID?
     private(set) var detailViewModel: DiscoverPackageDetailViewModel?
-    var selectedSegment: DiscoverFilterSegment = .all {
-        didSet {
-            guard selectedSegment != oldValue else {
-                return
-            }
-            synchronizeSelectionWithLoadedRows()
-            refreshDetailViewModel()
-        }
-    }
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
@@ -56,14 +37,7 @@ final class DiscoverViewModel {
         guard case .loaded = state else {
             return []
         }
-        switch selectedSegment {
-        case .all:
-            return rows
-        case .formula:
-            return rows.filter { $0.packageKind == .formula }
-        case .cask:
-            return rows.filter { $0.packageKind == .cask }
-        }
+        return rows
     }
 
     var selectedRow: DiscoverListRowViewModel? {

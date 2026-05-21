@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Middle column of the main window: Discover filter chrome and package list.
+/// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
 
@@ -21,22 +21,13 @@ struct DiscoverPackagesView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Discover")
-                    .font(.brewTitle1)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Text(packageCountSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-            }
-            Picker("Filter", selection: $viewModel.selectedSegment) {
-                Text("All").tag(DiscoverFilterSegment.all)
-                Text("Formula").tag(DiscoverFilterSegment.formula)
-                Text("Cask").tag(DiscoverFilterSegment.cask)
-            }
-            .pickerStyle(.segmented)
-            .accessibilityLabel("Package type filter")
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            Text("Discover")
+                .font(.brewTitle1)
+                .foregroundStyle(Color.brewTextPrimary)
+            Text(packageCountSubtitle)
+                .font(.brewSubheadline)
+                .foregroundStyle(Color.brewTextSecondary)
         }
         .padding(BrewSpacing.lg)
     }
@@ -55,32 +46,32 @@ struct DiscoverPackagesView: View {
 
     private var loadedList: some View {
         List(selection: selectionBinding) {
-            if viewModel.selectedSegment != .cask, !formulaRows.isEmpty {
+            if !formulaRows.isEmpty {
                 Section("Formulae") {
                     ForEach(formulaRows, id: \.id) { row in
-                        DiscoverListRowView(viewModel: row)
-                            .tag(row.id)
-                            .listRowBackground(
-                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
-                            )
+                        listRow(row)
                     }
                 }
             }
 
-            if viewModel.selectedSegment != .formula, !caskRows.isEmpty {
+            if !caskRows.isEmpty {
                 Section("Casks") {
                     ForEach(caskRows, id: \.id) { row in
-                        DiscoverListRowView(viewModel: row)
-                            .tag(row.id)
-                            .listRowBackground(
-                                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
-                            )
+                        listRow(row)
                     }
                 }
             }
         }
         .listStyle(.plain)
         .accessibilityLabel("Discover packages")
+    }
+
+    private func listRow(_ row: DiscoverListRowViewModel) -> some View {
+        DiscoverListRowView(viewModel: row)
+            .tag(row.id)
+            .listRowBackground(
+                viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
+            )
     }
 
     private var selectionBinding: Binding<BrewPackage.ID?> {

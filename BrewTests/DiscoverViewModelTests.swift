@@ -50,26 +50,6 @@ struct DiscoverViewModelTests {
         #expect(git.installedVersionLabel == "v2.45.0")
     }
 
-    @Test @MainActor func `segment filtering keeps selection scoped to visible rows`() async {
-        let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
-                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
-                ),
-            ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
-        )
-
-        await viewModel.load()
-        #expect(viewModel.selectedRow?.id == "formula:git")
-
-        viewModel.selectedSegment = .cask
-
-        #expect(viewModel.visibleRows.count == 1)
-        #expect(viewModel.selectedRow?.id == "cask:iterm2")
-    }
-
     @Test @MainActor func `selected row maps into detail install command`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
@@ -82,7 +62,6 @@ struct DiscoverViewModelTests {
         )
 
         await viewModel.load()
-        viewModel.selectedSegment = .cask
 
         #expect(viewModel.detailViewModel?.installCommand == "brew install --cask docker")
     }
@@ -175,27 +154,6 @@ struct DiscoverViewModelTests {
         viewModel.setSelection(nil)
 
         #expect(viewModel.selectedRow?.id == "formula:git")
-    }
-
-    @Test @MainActor func `segment change preserves selection when row remains visible`() async {
-        let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [
-                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
-                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
-                    ],
-                    topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
-                ),
-            ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
-        )
-
-        await viewModel.load()
-        viewModel.setSelection("formula:node")
-        viewModel.selectedSegment = .formula
-
-        #expect(viewModel.selectedRow?.id == "formula:node")
     }
 
     @Test @MainActor func `reload preserves selection when package still exists`() async {
