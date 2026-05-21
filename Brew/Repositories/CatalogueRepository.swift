@@ -225,9 +225,9 @@ final class BrewCatalogueRepository: CatalogueRepository {
         catalogue.items.map {
             BrewPackage(
                 name: $0.name,
-                displayName: $0.name,
+                displayName: $0.displayName,
                 kind: .cask,
-                description: $0.description,
+                description: $0.description ?? "",
                 homepage: $0.homepage,
                 latestVersion: $0.stableVersion,
                 dependencies: $0.dependencyReferences,
