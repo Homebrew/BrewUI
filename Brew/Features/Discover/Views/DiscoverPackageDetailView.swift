@@ -20,7 +20,7 @@ struct DiscoverPackageDetailView: View {
     }
 
     private var hero: some View {
-        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
+        HStack(alignment: .center, spacing: BrewSpacing.sm) {
             Text(viewModel.name)
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
