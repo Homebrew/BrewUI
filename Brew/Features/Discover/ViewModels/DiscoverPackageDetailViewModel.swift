@@ -24,6 +24,15 @@ final class DiscoverPackageDetailViewModel {
         discoveryPackage.kind.chrome
     }
 
+    var packageDescription: String? {
+        let trimmed = discoveryPackage.description.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    var dependencyNames: [String] {
+        discoveryPackage.dependencies.map(\.name)
+    }
+
     var stableVersionLabel: String {
         discoveryPackage.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
     }

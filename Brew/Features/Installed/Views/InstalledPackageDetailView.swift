@@ -87,10 +87,10 @@ struct InstalledPackageDetailView: View {
 
     private func packageActionsFooter(viewModel: InstalledPackageDetailViewModel) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xl) {
-            InstalledPackageDetailSectionDivider()
+            PackageDetailSectionDivider()
             if viewModel.upgradeItem.showsUpgradeChrome {
                 InstalledPackageDetailUpgradeChrome(viewModel: viewModel)
-                InstalledPackageDetailSectionDivider()
+                PackageDetailSectionDivider()
             }
             InstalledPackageDetailUninstallChrome(viewModel: viewModel)
         }
@@ -100,7 +100,7 @@ struct InstalledPackageDetailView: View {
     @ViewBuilder
     private func packageDetailsSections(viewModel: InstalledPackageDetailViewModel) -> some View {
         InstalledPackageDetailMetadataSection(viewModel: viewModel)
-        InstalledPackageDetailSectionDivider()
+        PackageDetailSectionDivider()
         InstalledPackageDetailRelationshipList(
             title: "Dependencies",
             relationships: viewModel.dependencyRelationships,
@@ -109,7 +109,7 @@ struct InstalledPackageDetailView: View {
             collapsedRelationshipCount: collapsedRelationshipCount,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
-        InstalledPackageDetailSectionDivider()
+        PackageDetailSectionDivider()
         InstalledPackageDetailUsedBySection(
             viewModel: viewModel,
             collapsedRelationshipCount: collapsedRelationshipCount,
@@ -131,7 +131,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                InstalledDetailMutationConsole(
+                PackageDetailCommandConsole(
                     command: uninstall.displayCommand,
                     summaryText: "Uninstalls this package from this Mac",
                 )
@@ -198,7 +198,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                InstalledDetailMutationConsole(
+                PackageDetailCommandConsole(
                     command: upgrade.displayCommand,
                     summaryText: "Upgrades this package to the latest available version",
                 )
@@ -229,54 +229,6 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                 }
             }
         }
-    }
-}
-
-/// Shared terminal-command card used by Installed mutation sections (upgrade/uninstall).
-private struct InstalledDetailMutationConsole: View {
-    let command: String
-    let summaryText: String
-
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Label("Terminal command", systemImage: "terminal")
-                    .font(.brewCaption)
-                    .foregroundStyle(Color.brewTextSecondary)
-                Spacer()
-                Button("Copy", systemImage: "doc.on.doc") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(command, forType: .string)
-                }
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextSecondary)
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal, BrewSpacing.md)
-            .padding(.vertical, BrewSpacing.sm)
-            .background(Color.brewSurfaceRecessed)
-
-            Text(command)
-                .font(.brewCode)
-                .foregroundStyle(Color.brewCodeDefault)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(BrewSpacing.md)
-                .background(Color.brewTerminal)
-                .textSelection(.enabled)
-
-            Text(summaryText)
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, BrewSpacing.md)
-                .padding(.vertical, BrewSpacing.sm)
-                .background(Color.brewSurfaceRecessed)
-        }
-        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
-        .overlay(
-            RoundedRectangle(cornerRadius: BrewRadius.md)
-                .stroke(Color.brewBorderDefault, lineWidth: 1),
-        )
     }
 }
 
