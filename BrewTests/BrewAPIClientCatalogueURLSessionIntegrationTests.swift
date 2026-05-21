@@ -45,13 +45,12 @@ struct BrewAPICatalogueIntegrationTests {
                         """
                         [
                           {
-                            "name": "iterm2",
+                            "token": "iterm2",
+                            "name": ["iTerm2"],
                             "desc": "Terminal emulator",
                             "homepage": "https://iterm2.com",
-                            "versions": { "stable": "3.5.0" },
-                            "analytics": {
-                              "install": { "30d": 1234 }
-                            }
+                            "version": "3.5.0",
+                            "depends_on": { "macos": {} }
                           }
                         ]
                         """.utf8,
@@ -81,7 +80,6 @@ struct BrewAPICatalogueIntegrationTests {
             #expect(data.items.first?.description == "Terminal emulator")
             #expect(data.items.first?.homepage == "https://iterm2.com")
             #expect(data.items.first?.stableVersion == "3.5.0")
-            #expect(data.items.first?.analyticsInstall30d == 1234)
             #expect(etag == returnedETag)
         }
     }
@@ -120,6 +118,76 @@ struct BrewAPICatalogueIntegrationTests {
         }
     }
 
+    @Test func `decodes homebrew wire cask bulk shape`() throws {
+        let data = Data(
+            """
+            [
+              {
+                "token": "iterm2",
+                "name": ["iTerm2"],
+                "desc": "Terminal emulator",
+                "homepage": "https://iterm2.com",
+                "version": "3.5.0",
+                "depends_on": { "macos": { ">=": ["12"] } }
+              }
+            ]
+            """.utf8,
+        )
+
+        let decoded = try JSONDecoder().decode(CaskCatalogueJSON.self, from: data)
+
+        #expect(decoded.items.count == 1)
+        #expect(decoded.decodeFailures.isEmpty)
+        #expect(decoded.items.first?.name == "iterm2")
+        #expect(decoded.items.first?.displayName == "iTerm2")
+        #expect(decoded.items.first?.stableVersion == "3.5.0")
+    }
+
+    @Test func `decodes cask with null desc`() throws {
+        let data = Data(
+            """
+            [
+              {
+                "token": "0-ad",
+                "name": ["0 A.D."],
+                "desc": null,
+                "homepage": "https://play0ad.com/",
+                "version": "0.28.0",
+                "depends_on": { "macos": {} }
+              }
+            ]
+            """.utf8,
+        )
+
+        let decoded = try JSONDecoder().decode(CaskCatalogueJSON.self, from: data)
+
+        #expect(decoded.items.count == 1)
+        #expect(decoded.decodeFailures.isEmpty)
+        #expect(decoded.items.first?.description == nil)
+    }
+
+    @Test func `decodes cask with omitted desc`() throws {
+        let data = Data(
+            """
+            [
+              {
+                "token": "0-ad",
+                "name": ["0 A.D."],
+                "homepage": "https://play0ad.com/",
+                "version": "0.28.0",
+                "depends_on": { "macos": {} }
+              }
+            ]
+            """.utf8,
+        )
+
+        let decoded = try JSONDecoder().decode(CaskCatalogueJSON.self, from: data)
+
+        #expect(decoded.items.count == 1)
+        #expect(decoded.decodeFailures.isEmpty)
+        #expect(decoded.items.first?.description == nil)
+    }
+
     @Test @MainActor func `fetch formula catalogue keeps valid items when one item fails decoding`() async throws {
         let baseURL = makeStubBaseURL()
         try StubURLProtocol.register(
@@ -133,7 +201,7 @@ struct BrewAPICatalogueIntegrationTests {
                             "desc": "Network downloader",
                             "homepage": "https://www.gnu.org/software/wget/",
                             "versions": { "stable": "1.24.5" },
-                            "analytics": { "install": { "30d": 5000 } }
+                            "dependencies": []
                           },
                           {
                             "name": "broken-item"

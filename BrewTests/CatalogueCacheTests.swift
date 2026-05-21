@@ -12,8 +12,8 @@ struct CatalogueCacheTests {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
-        let formulaRawData = fixture.formulaCacheJSON(name: "wget", installs: 100)
-        let caskRawData = fixture.caskCacheJSON(name: "iterm2", installs: 200)
+        let formulaRawData = fixture.formulaCacheJSON(name: "wget")
+        let caskRawData = fixture.caskCacheJSON(name: "iterm2")
         try fixture.writeFormulaCache(formulaRawData)
         try fixture.writeCaskCache(caskRawData)
         fixture.userDefaults.set(#""formula-etag""#, forKey: fixture.formulaETagKey)
@@ -34,7 +34,7 @@ struct CatalogueCacheTests {
     @Test @MainActor func `first read returns prepared cache`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
-        let formulaRawData = fixture.formulaCacheJSON(name: "curl", installs: 321)
+        let formulaRawData = fixture.formulaCacheJSON(name: "curl")
         try fixture.writeFormulaCache(formulaRawData)
 
         let cache = CatalogueCache(
@@ -53,7 +53,7 @@ struct CatalogueCacheTests {
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
-        let updatedRawData = fixture.formulaCacheJSON(name: "git", installs: 999)
+        let updatedRawData = fixture.formulaCacheJSON(name: "git")
 
         try await cache.updateFormulaCatalogue(with: updatedRawData, etag: #""formula-new""#)
 
@@ -68,12 +68,12 @@ struct CatalogueCacheTests {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
 
-        try fixture.writeFormulaCache(fixture.formulaCacheJSON(name: "stale", installs: 1))
+        try fixture.writeFormulaCache(fixture.formulaCacheJSON(name: "stale"))
         let cache = CatalogueCache(
             userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
         )
-        let updatedRawData = fixture.formulaCacheJSON(name: "fresh", installs: 500)
+        let updatedRawData = fixture.formulaCacheJSON(name: "fresh")
         try await cache.updateFormulaCatalogue(with: updatedRawData, etag: #""formula-fresh""#)
 
         await cache.prepare()
@@ -119,7 +119,7 @@ private struct TestFixture {
         try data.write(to: caskCacheURL, options: .atomic)
     }
 
-    func formulaCacheJSON(name: String, installs: Int) -> Data {
+    func formulaCacheJSON(name: String) -> Data {
         Data(
             """
             [
@@ -128,23 +128,24 @@ private struct TestFixture {
                 "desc": "Formula \(name)",
                 "homepage": "https://example.com/\(name)",
                 "versions": { "stable": "1.0.0" },
-                "analytics": { "install": { "30d": \(installs) } }
+                "dependencies": []
               }
             ]
             """.utf8,
         )
     }
 
-    func caskCacheJSON(name: String, installs: Int) -> Data {
+    func caskCacheJSON(name: String) -> Data {
         Data(
             """
             [
               {
-                "name": "\(name)",
+                "token": "\(name)",
+                "name": ["\(name)"],
                 "desc": "Cask \(name)",
                 "homepage": "https://example.com/\(name)",
-                "versions": { "stable": "2.0.0" },
-                "analytics": { "install": { "30d": \(installs) } }
+                "version": "2.0.0",
+                "depends_on": { "macos": {} }
               }
             ]
             """.utf8,

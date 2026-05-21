@@ -203,24 +203,29 @@ private struct DiscoverCatalogueCacheFixture {
             names: names,
             kindLabel: "Formula",
             stableVersion: "1.0.0",
-            installs: 1,
         )
     }
 
     func caskCacheJSON(names: [String]) -> Data {
-        catalogueCacheJSON(
-            names: names,
-            kindLabel: "Cask",
-            stableVersion: "2.0.0",
-            installs: 1,
-        )
+        let items = names.map { name in
+            """
+              {
+                "token": "\(name)",
+                "name": ["\(name)"],
+                "desc": "Cask \(name)",
+                "homepage": "https://example.com/\(name)",
+                "version": "2.0.0",
+                "depends_on": { "macos": {} }
+              }
+            """
+        }
+        return Data("[\n\(items.joined(separator: ",\n"))\n]".utf8)
     }
 
     private func catalogueCacheJSON(
         names: [String],
         kindLabel: String,
         stableVersion: String,
-        installs: Int,
     ) -> Data {
         let items = names.map { name in
             """
@@ -229,7 +234,7 @@ private struct DiscoverCatalogueCacheFixture {
                 "desc": "\(kindLabel) \(name)",
                 "homepage": "https://example.com/\(name)",
                 "versions": { "stable": "\(stableVersion)" },
-                "analytics": { "install": { "30d": \(installs) } }
+                "dependencies": []
               }
             """
         }
@@ -292,7 +297,7 @@ private extension StubURLProtocol.StubbedResult {
                 "desc": "Network downloader",
                 "homepage": "https://www.gnu.org/software/wget/",
                 "versions": { "stable": "1.24.5" },
-                "analytics": { "install": { "30d": 5000 } }
+                "dependencies": []
               }
             ]
             """.utf8,
@@ -305,11 +310,12 @@ private extension StubURLProtocol.StubbedResult {
             """
             [
               {
-                "name": "iterm2",
+                "token": "iterm2",
+                "name": ["iTerm2"],
                 "desc": "Terminal emulator",
                 "homepage": "https://iterm2.com",
-                "versions": { "stable": "3.5.0" },
-                "analytics": { "install": { "30d": 1234 } }
+                "version": "3.5.0",
+                "depends_on": { "macos": {} }
               }
             ]
             """.utf8,
