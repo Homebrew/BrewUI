@@ -181,18 +181,6 @@ private struct DiscoverPackageInstallSection: View {
                     command: viewModel.installCommand,
                     summaryText: "Installs this package on your Mac",
                 )
-
-                Button {
-                    // UI-only for this slice; command execution wiring comes later.
-                } label: {
-                    Text(viewModel.isInstalled ? "Installed" : "Install")
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(true)
-
-                Text("Install actions are UI-only in this iteration.")
-                    .font(.brewCaption)
-                    .foregroundStyle(Color.brewTextTertiary)
             }
         }
     }
