@@ -163,6 +163,48 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedRow?.id == "formula:node")
     }
 
+    @Test @MainActor func `subtitle reflects loading state`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        // VM starts in .loading before load() is called
+        #expect(viewModel.subtitleText == "Loading packages…")
+        #expect(!viewModel.showsSubtitleTrendIcon)
+        #expect(!viewModel.isSubtitleError)
+    }
+
+    @Test @MainActor func `subtitle reflects loaded state`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.subtitleText == "Top 10 formulae · Top 10 casks")
+        #expect(viewModel.showsSubtitleTrendIcon)
+        #expect(!viewModel.isSubtitleError)
+    }
+
+    @Test @MainActor func `subtitle reflects error state`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.subtitleText == "Could not load packages")
+        #expect(!viewModel.showsSubtitleTrendIcon)
+        #expect(viewModel.isSubtitleError)
+    }
+
     @Test @MainActor func `reload repoints selection when selected package disappears`() async {
         let repository = MutableDiscoverPackagesRepository(
             snapshot: DiscoverTopPackagesSnapshot(

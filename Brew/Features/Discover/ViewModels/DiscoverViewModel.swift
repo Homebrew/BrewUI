@@ -32,6 +32,30 @@ final class DiscoverViewModel {
         self.analyticsWindow = analyticsWindow
     }
 
+    var subtitleText: String {
+        switch state {
+        case .loading:
+            String(localized: "Loading packages…", comment: "Discover subtitle while loading")
+        case .loaded:
+            String(
+                localized: "Top 10 formulae · Top 10 casks",
+                comment: "Discover subtitle when loaded",
+            )
+        case .error:
+            String(localized: "Could not load packages", comment: "Discover subtitle on error")
+        }
+    }
+
+    var showsSubtitleTrendIcon: Bool {
+        if case .loaded = state { return true }
+        return false
+    }
+
+    var isSubtitleError: Bool {
+        if case .error = state { return true }
+        return false
+    }
+
     var visibleRows: [DiscoverListRowViewModel] {
         guard case .loaded = state else {
             return []

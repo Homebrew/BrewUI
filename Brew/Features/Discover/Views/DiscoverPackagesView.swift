@@ -30,26 +30,18 @@ struct DiscoverPackagesView: View {
         .padding(BrewSpacing.lg)
     }
 
-    @ViewBuilder
     private var headerSubtitle: some View {
-        switch viewModel.state {
-        case .loaded:
-            HStack(spacing: BrewSpacing.xs) {
+        HStack(spacing: BrewSpacing.xs) {
+            if viewModel.showsSubtitleTrendIcon {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewBrandPrimary)
-                Text("Top 10 formulae · Top 10 casks")
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
             }
-        case .loading:
-            Text("Loading packages…")
+            Text(viewModel.subtitleText)
                 .font(.brewSubheadline)
-                .foregroundStyle(Color.brewTextSecondary)
-        case .error:
-            Text("Could not load packages")
-                .font(.brewSubheadline)
-                .foregroundStyle(Color.brewStatusError)
+                .foregroundStyle(
+                    viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
+                )
         }
     }
 
