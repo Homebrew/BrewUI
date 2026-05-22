@@ -58,12 +58,8 @@ final class DiscoverPackageDetailViewModel {
         }
     }
 
-    var isInstalled: Bool {
-        installedPackage != nil
-    }
-
     var installedStatusLabel: String? {
-        guard isInstalled else {
+        guard installedPackage != nil else {
             return nil
         }
         return String(localized: "Installed", comment: "Discover package installed status")

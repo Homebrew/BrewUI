@@ -28,7 +28,6 @@ struct DiscoverListRowViewModelTests {
             installedPackage: .fixture(name: "git", installedVersions: ["2.45.0"]),
         )
 
-        #expect(viewModel.isInstalled)
         #expect(viewModel.installedStatusLabel == "Installed")
         #expect(viewModel.installedVersionLabel == "v2.45.0")
     }

@@ -42,7 +42,7 @@ struct DiscoverListRowView: View {
 
             packageKindBadge
 
-            if viewModel.isInstalled {
+            if viewModel.installedStatusLabel != nil {
                 DiscoverInstalledBadge()
             }
 

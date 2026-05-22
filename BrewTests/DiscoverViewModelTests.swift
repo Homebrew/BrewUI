@@ -46,7 +46,7 @@ struct DiscoverViewModelTests {
         let git = try #require(viewModel.visibleRows.first { $0.id == "formula:git" })
         #expect(git.descriptionText == "Distributed revision control")
         #expect(git.stableVersionLabel == "2.46.1")
-        #expect(git.isInstalled)
+        #expect(git.installedStatusLabel == "Installed")
         #expect(git.installedVersionLabel == "v2.45.0")
     }
 

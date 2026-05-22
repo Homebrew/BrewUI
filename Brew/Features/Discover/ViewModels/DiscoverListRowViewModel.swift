@@ -51,10 +51,6 @@ final class DiscoverListRowViewModel: Identifiable {
         discoveryPackage.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    var isInstalled: Bool {
-        installedPackage != nil
-    }
-
     var installedVersionLabel: String? {
         guard let raw = installedPackage?.installedVersions.first else {
             return nil
@@ -63,7 +59,7 @@ final class DiscoverListRowViewModel: Identifiable {
     }
 
     var installedStatusLabel: String? {
-        guard isInstalled else {
+        guard installedPackage != nil else {
             return nil
         }
         return String(localized: "Installed", comment: "Discover list row installed status")

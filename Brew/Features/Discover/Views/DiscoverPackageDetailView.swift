@@ -61,7 +61,7 @@ private struct DiscoverPackageDetailHeroSection: View {
                         .background(Color.brewBrandTint)
                         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
 
-                    if viewModel.isInstalled {
+                    if viewModel.installedStatusLabel != nil {
                         DiscoverInstalledBadge()
                     }
                 }
