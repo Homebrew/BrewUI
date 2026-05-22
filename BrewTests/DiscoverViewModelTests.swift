@@ -163,6 +163,26 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedRow?.id == "formula:node")
     }
 
+    @Test @MainActor func `rows with equal install count are sorted alphabetically`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "wget", thirtyDayInstallCount: 50),
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 50),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 50),
+                    ],
+                    topCasks: [],
+                ),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.visibleRows.map(\.name) == ["git", "node", "wget"])
+    }
+
     @Test @MainActor func `formulaRows and caskRows partition loaded rows by kind`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(

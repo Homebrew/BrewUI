@@ -32,6 +32,38 @@ struct DiscoverListRowViewModelTests {
         #expect(viewModel.installedVersionLabel == "v2.45.0")
     }
 
+    @Test @MainActor func `update(row:) copies all fields from the source row`() {
+        let original = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(name: "wget", kind: .formula),
+                thirtyDayInstallCount: 10,
+            ),
+            installedPackage: nil,
+        )
+        let updated = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(
+                    name: "iterm2",
+                    kind: .cask,
+                    description: "Terminal emulator",
+                    latestVersion: "3.5.0",
+                ),
+                thirtyDayInstallCount: 99,
+            ),
+            installedPackage: .fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"]),
+        )
+
+        original.update(row: updated)
+
+        #expect(original.id == updated.id)
+        #expect(original.name == updated.name)
+        #expect(original.packageKind == updated.packageKind)
+        #expect(original.stableVersionLabel == updated.stableVersionLabel)
+        #expect(original.installs30DayLabel == updated.installs30DayLabel)
+        #expect(original.installedStatusLabel == updated.installedStatusLabel)
+        #expect(original.installedVersionLabel == updated.installedVersionLabel)
+    }
+
     @Test @MainActor func `update replaces derived row values`() {
         let viewModel = DiscoverListRowViewModel(
             discoveryPackage: DiscoveryBrewPackage(

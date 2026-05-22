@@ -45,6 +45,81 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.homepageURL == nil)
     }
 
+    @Test @MainActor func `packageDescription is nil when description is whitespace-only`() {
+        let row = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(description: "   \n  "),
+                thirtyDayInstallCount: 1,
+            ),
+            installedPackage: nil,
+        )
+
+        #expect(DiscoverPackageDetailViewModel(row: row).packageDescription == nil)
+    }
+
+    @Test @MainActor func `packageDescription returns trimmed non-empty description`() {
+        let row = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(description: "  A useful tool.  "),
+                thirtyDayInstallCount: 1,
+            ),
+            installedPackage: nil,
+        )
+
+        #expect(DiscoverPackageDetailViewModel(row: row).packageDescription == "A useful tool.")
+    }
+
+    @Test @MainActor func `dependencyNames maps formula dependency references to names`() {
+        let row = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(
+                    name: "ffmpeg",
+                    dependencies: [.formula(name: "libx264"), .formula(name: "libvpx")],
+                ),
+                thirtyDayInstallCount: 1,
+            ),
+            installedPackage: nil,
+        )
+
+        #expect(DiscoverPackageDetailViewModel(row: row).dependencyNames == ["libx264", "libvpx"])
+    }
+
+    @Test @MainActor func `dependencyNames is empty when package has no dependencies`() {
+        let row = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(dependencies: []),
+                thirtyDayInstallCount: 1,
+            ),
+            installedPackage: nil,
+        )
+
+        #expect(DiscoverPackageDetailViewModel(row: row).dependencyNames.isEmpty)
+    }
+
+    @Test @MainActor func `homepageURL is nil for empty homepage string`() {
+        let row = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(homepage: ""),
+                thirtyDayInstallCount: 1,
+            ),
+            installedPackage: nil,
+        )
+
+        #expect(DiscoverPackageDetailViewModel(row: row).homepageURL == nil)
+    }
+
+    @Test @MainActor func `homepageURL is nil for whitespace-only homepage string`() {
+        let row = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(homepage: "   "),
+                thirtyDayInstallCount: 1,
+            ),
+            installedPackage: nil,
+        )
+
+        #expect(DiscoverPackageDetailViewModel(row: row).homepageURL == nil)
+    }
+
     @Test @MainActor func `update refreshes derived detail presentation`() {
         let row = DiscoverListRowViewModel(
             discoveryPackage: DiscoveryBrewPackage(
