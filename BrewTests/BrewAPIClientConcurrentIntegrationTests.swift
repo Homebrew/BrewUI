@@ -88,9 +88,10 @@ struct BrewAPIClientConcurrentIntegrationTests {
         let host = try #require(baseURL.host)
         StubURLProtocol.registerByPath(Self.discoverEndpointStubs, forHost: host)
         let client = makeSharedClient(baseURL: baseURL)
-        let catalogueRepository = try await BrewCatalogueRepository(
+        let catalogueRepository = try await makeWarmCatalogueRepository(
             apiClient: client,
-            cache: makeWarmCatalogueCache(formulaNames: ["wget"], caskNames: ["iterm2"]),
+            formulaNames: ["wget"],
+            caskNames: ["iterm2"],
         )
         let discoverRepository = BrewDiscoverPackagesRepository(
             apiClient: client,
@@ -149,39 +150,48 @@ private func makeDiscoverRepository(
 ) async throws -> BrewDiscoverPackagesRepository {
     try await BrewDiscoverPackagesRepository(
         apiClient: apiClient,
-        catalogueRepository: BrewCatalogueRepository(
+        catalogueRepository: makeWarmCatalogueRepository(
             apiClient: apiClient,
-            cache: makeWarmCatalogueCache(
-                formulaNames: formulaCatalogueNames,
-                caskNames: caskCatalogueNames,
-            ),
+            formulaNames: formulaCatalogueNames,
+            caskNames: caskCatalogueNames,
         ),
     )
 }
 
+/// Builds a `BrewCatalogueRepository` whose staleness check considers the catalogue fresh.
+/// Uses an isolated `UserDefaults` suite so the lastRefresh timestamps are set alongside the
+/// cache data rather than relying on `.standard` UserDefaults from prior runs.
 @MainActor
-private func makeWarmCatalogueCache(
+private func makeWarmCatalogueRepository(
+    apiClient: URLSessionBrewAPIClient,
     formulaNames: [String],
     caskNames: [String],
-) async throws -> CatalogueCache {
+) async throws -> BrewCatalogueRepository {
     let fixture = DiscoverCatalogueCacheFixture()
     let cache = CatalogueCache(
         userDefaults: fixture.userDefaults,
         cacheDirectoryURL: fixture.cacheDirectoryURL,
     )
+    let now = Date()
     if !formulaNames.isEmpty {
         try await cache.updateFormulaCatalogue(
             with: fixture.formulaCacheJSON(names: formulaNames),
             etag: #""formula-etag""#,
         )
+        fixture.userDefaults.set(now, forKey: BrewCatalogueRepository.DefaultsKey.formulaLastRefresh)
     }
     if !caskNames.isEmpty {
         try await cache.updateCaskCatalogue(
             with: fixture.caskCacheJSON(names: caskNames),
             etag: #""cask-etag""#,
         )
+        fixture.userDefaults.set(now, forKey: BrewCatalogueRepository.DefaultsKey.caskLastRefresh)
     }
-    return cache
+    return BrewCatalogueRepository(
+        apiClient: apiClient,
+        cache: cache,
+        userDefaults: fixture.userDefaults,
+    )
 }
 
 @MainActor

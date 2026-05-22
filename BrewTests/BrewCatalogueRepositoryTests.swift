@@ -368,7 +368,7 @@ private struct TestFixture {
     let cacheDirectoryURL: URL
     let userDefaults: UserDefaults
     let userDefaultsSuiteName: String
-    let formulaLastRefreshKey = "CatalogueRepository.formula.lastRefresh"
+    let formulaLastRefreshKey = BrewCatalogueRepository.DefaultsKey.formulaLastRefresh
 
     init() {
         let id = UUID().uuidString

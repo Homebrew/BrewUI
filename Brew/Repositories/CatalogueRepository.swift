@@ -19,7 +19,7 @@ enum CatalogueRepositoryError: Error, Equatable {
 final class BrewCatalogueRepository: CatalogueRepository {
     nonisolated static let defaultTTL: TimeInterval = 3600
 
-    private enum DefaultsKey {
+    enum DefaultsKey {
         static let formulaLastRefresh = "CatalogueRepository.formula.lastRefresh"
         static let caskLastRefresh = "CatalogueRepository.cask.lastRefresh"
     }
