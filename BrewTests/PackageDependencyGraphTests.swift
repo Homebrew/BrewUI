@@ -22,14 +22,14 @@ struct PackageDependencyGraphTests {
         let graph = PackageDependencyGraph(packages: [
             InstalledBrewPackage.fixture(name: "wget", kind: .formula, dependencies: [.formula(name: "zlib")]),
         ])
-        #expect(graph.installedDependents(for: InstalledBrewPackage.ID("unknown")).isEmpty)
+        #expect(graph.installedDependents(for: .formula(name: "unknown")).isEmpty)
     }
 
     @Test func `installedDependents for package id is empty when no installed package depends on id`() {
         let graph = PackageDependencyGraph(packages: [
             InstalledBrewPackage.fixture(name: "wget", kind: .formula, dependencies: [.formula(name: "zlib")]),
         ])
-        #expect(graph.installedDependents(for: "formula:openssl@3").isEmpty)
+        #expect(graph.installedDependents(for: .formula(name: "openssl@3")).isEmpty)
     }
 
     @Test func `installedDependents distinguishes formula and cask dependency references`() {
@@ -43,7 +43,7 @@ struct PackageDependencyGraphTests {
             ),
         ]
         let graph = PackageDependencyGraph(packages: packages)
-        #expect(graph.installedDependents(for: "formula:shared").map(\.name) == ["consumer"])
-        #expect(graph.installedDependents(for: "cask:shared").isEmpty)
+        #expect(graph.installedDependents(for: .formula(name: "shared")).map(\.name) == ["consumer"])
+        #expect(graph.installedDependents(for: .cask(token: "shared")).isEmpty)
     }
 }

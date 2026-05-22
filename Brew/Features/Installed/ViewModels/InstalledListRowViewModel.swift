@@ -20,7 +20,7 @@ final class InstalledListRowViewModel {
     private(set) var showsUninstallBusy: Bool = false
     private let brewCommandCenter: BrewCommandCenter
 
-    var id: String {
+    var id: HomebrewPackageID {
         package.id
     }
 

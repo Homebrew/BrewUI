@@ -6,9 +6,16 @@
 import Foundation
 
 /// Kind-qualified reference to a Homebrew formula name or cask token.
-enum HomebrewPackageReference: Hashable {
+///
+/// This is the canonical package identity across the app: every package type's
+/// `id` is a `HomebrewPackageID`, and the type is its own `Identifiable.ID`.
+enum HomebrewPackageID: Hashable, Identifiable {
     case formula(name: String)
     case cask(token: String)
+
+    var id: Self {
+        self
+    }
 
     var kind: HomebrewPackageKind {
         switch self {
@@ -28,15 +35,6 @@ enum HomebrewPackageReference: Hashable {
         }
     }
 
-    var packageID: BrewPackage.ID {
-        switch self {
-        case let .formula(name):
-            "\(HomebrewPackageKind.formula.rawValue):\(name)"
-        case let .cask(token):
-            "\(HomebrewPackageKind.cask.rawValue):\(token)"
-        }
-    }
-
     init(package: BrewPackage) {
         switch package.kind {
         case .formula:
@@ -51,14 +49,14 @@ enum HomebrewPackageReference: Hashable {
     }
 }
 
-extension HomebrewPackageReference {
-    static func formulaDependencies(from names: [String]) -> [HomebrewPackageReference] {
+extension HomebrewPackageID {
+    static func formulaDependencies(from names: [String]) -> [HomebrewPackageID] {
         uniqueReferences(names.map { .formula(name: $0) })
     }
 
-    static func uniqueReferences(_ references: [HomebrewPackageReference]) -> [HomebrewPackageReference] {
-        var seen: Set<HomebrewPackageReference> = []
-        var result: [HomebrewPackageReference] = []
+    static func uniqueReferences(_ references: [HomebrewPackageID]) -> [HomebrewPackageID] {
+        var seen: Set<HomebrewPackageID> = []
+        var result: [HomebrewPackageID] = []
         for reference in references {
             guard let normalized = reference.normalized, !seen.contains(normalized) else {
                 continue
@@ -69,7 +67,7 @@ extension HomebrewPackageReference {
         return result
     }
 
-    private var normalized: HomebrewPackageReference? {
+    private var normalized: HomebrewPackageID? {
         switch self {
         case let .formula(name):
             let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)

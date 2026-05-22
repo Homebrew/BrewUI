@@ -83,8 +83,8 @@ extension FormulaCatalogueItemJSON {
         versions.stable
     }
 
-    var dependencyReferences: [HomebrewPackageReference] {
-        HomebrewPackageReference.formulaDependencies(from: dependencies)
+    var dependencyReferences: [HomebrewPackageID] {
+        HomebrewPackageID.formulaDependencies(from: dependencies)
     }
 }
 
@@ -105,10 +105,10 @@ extension CaskCatalogueItemJSON {
         version
     }
 
-    var dependencyReferences: [HomebrewPackageReference] {
-        let formulaDependencies = HomebrewPackageReference.formulaDependencies(from: dependsOn.formula)
-        let caskDependencies = dependsOn.cask.map { HomebrewPackageReference.cask(token: $0) }
-        return HomebrewPackageReference.uniqueReferences(formulaDependencies + caskDependencies)
+    var dependencyReferences: [HomebrewPackageID] {
+        let formulaDependencies = HomebrewPackageID.formulaDependencies(from: dependsOn.formula)
+        let caskDependencies = dependsOn.cask.map { HomebrewPackageID.cask(token: $0) }
+        return HomebrewPackageID.uniqueReferences(formulaDependencies + caskDependencies)
     }
 }
 

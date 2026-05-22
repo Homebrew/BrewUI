@@ -182,12 +182,12 @@ private struct MockCatalogueRepository: CatalogueRepository {
         caskCatalogueByID = Dictionary(uniqueKeysWithValues: caskCatalogue.map { ($0.id, $0) })
     }
 
-    func package(for reference: HomebrewPackageReference) async throws -> BrewPackage? {
+    func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
         switch reference.kind {
         case .formula:
-            formulaCatalogueByID[reference.packageID]
+            formulaCatalogueByID[reference]
         case .cask:
-            caskCatalogueByID[reference.packageID]
+            caskCatalogueByID[reference]
         }
     }
 }

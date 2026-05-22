@@ -85,7 +85,7 @@ struct DiscoverListRowViewModelTests {
             installedPackage: .fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"]),
         )
 
-        #expect(viewModel.id == "cask:iterm2")
+        #expect(viewModel.id == .cask(token: "iterm2"))
         #expect(viewModel.name == "iterm2")
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.hasDescription)

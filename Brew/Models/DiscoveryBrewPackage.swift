@@ -42,16 +42,16 @@ struct DiscoveryBrewPackage: Identifiable, Equatable, Hashable {
         set { package.latestVersion = newValue }
     }
 
-    var dependencies: [HomebrewPackageReference] {
+    var dependencies: [HomebrewPackageID] {
         get { package.dependencies }
         set { package.dependencies = newValue }
     }
 
-    var id: String {
+    var id: HomebrewPackageID {
         package.id
     }
 
-    var reference: HomebrewPackageReference {
-        HomebrewPackageReference(package: package)
+    var reference: HomebrewPackageID {
+        HomebrewPackageID(package: package)
     }
 }

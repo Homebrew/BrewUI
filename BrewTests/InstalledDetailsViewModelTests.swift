@@ -224,7 +224,7 @@ struct InstalledDetailsViewModelTests {
         let viewModel = makeInstalledDetailsViewModel(
             package: package,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: ["formula:openssl@3"]),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: [.formula(name: "openssl@3")]),
         )
 
         await viewModel.refreshRelationships()
@@ -246,7 +246,7 @@ struct InstalledDetailsViewModelTests {
                 dependencies: [.formula(name: "openssl@3")],
             ),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: ["formula:openssl@3"]),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: [.formula(name: "openssl@3")]),
         )
         await viewModel.refreshRelationships()
         viewModel.update(package: InstalledBrewPackage.fixture(name: "curl", kind: .formula))

@@ -34,7 +34,7 @@ struct BrewInstalledDependentsRepositoryTests {
         let cache = InstalledInventoryCache()
         let repository = BrewInstalledDependentsRepository(cache: cache)
 
-        let dependents = await repository.installedDependents(for: "formula:openssl@3")
+        let dependents = await repository.installedDependents(for: .formula(name: "openssl@3"))
 
         #expect(dependents.isEmpty)
     }
