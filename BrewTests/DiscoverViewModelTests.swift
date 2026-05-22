@@ -50,22 +50,6 @@ struct DiscoverViewModelTests {
         #expect(git.installedVersionLabel == "v2.45.0")
     }
 
-    @Test @MainActor func `selected row maps into detail install command`() async {
-        let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(
-                    topFormulae: [],
-                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 88)],
-                ),
-            ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
-        )
-
-        await viewModel.load()
-
-        #expect(viewModel.detailViewModel?.installCommand == "brew install --cask docker")
-    }
-
     @Test @MainActor func `load maps discover repository transport errors to underlying message`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(

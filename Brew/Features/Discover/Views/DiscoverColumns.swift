@@ -26,6 +26,7 @@ struct DiscoverColumnsRoot: View {
 
 struct DiscoverColumns: View {
     @State private var viewModel: DiscoverViewModel
+    @State private var detailViewModel: DiscoverPackageDetailViewModel?
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
@@ -51,7 +52,7 @@ struct DiscoverColumns: View {
                 )
 
             Group {
-                if let detailViewModel = viewModel.detailViewModel {
+                if let detailViewModel {
                     DiscoverPackageDetailView(viewModel: detailViewModel)
                 } else {
                     DiscoverPackageDetailPlaceholder()
@@ -68,6 +69,24 @@ struct DiscoverColumns: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .task {
             await viewModel.load()
+        }
+        .onChange(of: viewModel.state) { _, _ in
+            syncDetailViewModel()
+        }
+        .onChange(of: viewModel.selectedPackageID) { _, _ in
+            syncDetailViewModel()
+        }
+    }
+
+    private func syncDetailViewModel() {
+        guard let selectedRow = viewModel.selectedRow else {
+            detailViewModel = nil
+            return
+        }
+        if let existing = detailViewModel {
+            existing.update(row: selectedRow)
+        } else {
+            detailViewModel = DiscoverPackageDetailViewModel(row: selectedRow)
         }
     }
 }

@@ -19,7 +19,6 @@ final class DiscoverViewModel {
 
     private(set) var state: DiscoverLoadState = .loading
     private(set) var selectedPackageID: BrewPackage.ID?
-    private(set) var detailViewModel: DiscoverPackageDetailViewModel?
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
@@ -62,12 +61,10 @@ final class DiscoverViewModel {
             )
             state = .loaded
             synchronizeSelectionWithLoadedRows()
-            refreshDetailViewModel()
         } catch {
             state = .error(Self.userMessage(for: error))
             rows = []
             selectedPackageID = nil
-            detailViewModel = nil
         }
     }
 
@@ -80,7 +77,6 @@ final class DiscoverViewModel {
         } else {
             selectedPackageID = firstVisibleRowID()
         }
-        refreshDetailViewModel()
     }
 
     private func synchronizeSelectionWithLoadedRows() {
@@ -95,18 +91,6 @@ final class DiscoverViewModel {
 
     private func firstVisibleRowID() -> BrewPackage.ID? {
         visibleRows.first?.id
-    }
-
-    private func refreshDetailViewModel() {
-        guard let selectedRow else {
-            detailViewModel = nil
-            return
-        }
-        if let detailViewModel {
-            detailViewModel.update(row: selectedRow)
-        } else {
-            detailViewModel = DiscoverPackageDetailViewModel(row: selectedRow)
-        }
     }
 
     private static func makeRows(
