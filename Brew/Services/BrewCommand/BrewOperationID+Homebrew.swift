@@ -11,7 +11,7 @@ extension BrewOperationID {
         rawValue = "\(kind.rawValue):\(name)"
     }
 
-    init(package: BrewPackage) {
+    init(package: InstalledBrewPackage) {
         self.init(kind: package.kind, name: package.name)
     }
 }

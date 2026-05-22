@@ -29,7 +29,7 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository, InstalledIn
         )
     }
 
-    func loadInstalledPackages(forceRefresh: Bool = false) async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh: Bool = false) async throws -> [InstalledBrewPackage] {
         guard !forceRefresh else {
             return try await fetchInstalledPackages()
         }
@@ -42,14 +42,19 @@ struct BrewInstalledPackagesRepository: InstalledPackagesRepository, InstalledIn
         }
     }
 
-    func installedPackageIDs() async -> Set<BrewPackage.ID> {
+    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
+        let packages = await installedPackages()
+        return Set(packages.map(\.id))
+    }
+
+    func installedPackages() async -> [InstalledBrewPackage] {
         guard let snapshot = await cache.currentSnapshot() else {
             return []
         }
-        return Set(snapshot.packages.map(\.id))
+        return snapshot.packages
     }
 
-    private func fetchInstalledPackages() async throws -> [BrewPackage] {
+    private func fetchInstalledPackages() async throws -> [InstalledBrewPackage] {
         let brew = try locator.findBrewExecutable()
         let output = try await runInstalledInfoJSON(executable: brew)
         let payload = try decodeInfoJSON(from: output)

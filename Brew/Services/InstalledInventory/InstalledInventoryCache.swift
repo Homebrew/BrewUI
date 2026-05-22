@@ -8,8 +8,8 @@ import Foundation
 /// Shared installed-inventory storage with TTL semantics. Domain reads (packages, dependents) go through repositories, not this actor.
 actor InstalledInventoryCache {
     enum CacheResult {
-        case fresh([BrewPackage])
-        case stale([BrewPackage])
+        case fresh([InstalledBrewPackage])
+        case stale([InstalledBrewPackage])
         case empty
     }
 

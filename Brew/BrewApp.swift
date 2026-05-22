@@ -11,9 +11,11 @@ import SwiftUI
 struct BrewApp: App {
     private let commandCenter: SerialBrewCommandCenter
     private let installedInventoryCache: InstalledInventoryCache
+    private let catalogueCache: CatalogueCache
 
     init() {
         installedInventoryCache = InstalledInventoryCache()
+        catalogueCache = CatalogueCache()
         commandCenter = SerialBrewCommandCenter(executionContext: .live())
     }
 
@@ -22,10 +24,17 @@ struct BrewApp: App {
             MainWindowView()
                 .environment(\.brewCommandCenter, commandCenter)
                 .environment(\.installedInventoryCache, installedInventoryCache)
+                .environment(\.catalogueCache, catalogueCache)
+                .task { await catalogueCache.prepare() }
         }
         .defaultSize(
             width: BrewLayout.minWindowWidth,
             height: BrewLayout.minWindowHeight,
         )
+        #if DEBUG
+        .commands {
+                DebugMenuCommands()
+            }
+        #endif
     }
 }

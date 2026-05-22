@@ -35,8 +35,8 @@ struct InstalledInventorySnapshotTests {
 
     @Test func `graph matches standalone dependency graph for packages`() {
         let packages = [
-            BrewPackage.fixture(name: "openssl@3", kind: .formula, dependencies: []),
-            BrewPackage.fixture(name: "node", kind: .formula, dependencies: [.formula(name: "openssl@3")]),
+            InstalledBrewPackage.fixture(name: "openssl@3", kind: .formula, dependencies: []),
+            InstalledBrewPackage.fixture(name: "node", kind: .formula, dependencies: [.formula(name: "openssl@3")]),
         ]
         let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: packages)
         let standalone = PackageDependencyGraph(packages: packages)

@@ -14,7 +14,7 @@ final class InstalledPackageDetailViewModel {
     private let installedInventoryReading: any InstalledInventoryReading
     private var mutationTask: Task<Void, Never>?
 
-    private(set) var package: BrewPackage
+    private(set) var package: InstalledBrewPackage
     /// Latest phase from the command center stream (see ``observeRowUpdates()``); drives mutation chrome.
     private var operationPhase: BrewOperationPhase = .idle
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
@@ -86,7 +86,7 @@ final class InstalledPackageDetailViewModel {
     }
 
     init(
-        package: BrewPackage,
+        package: InstalledBrewPackage,
         brewCommandCenter: any BrewCommandCenter,
         installedDependentsRepository: any InstalledDependentsRepository,
         installedInventoryReading: any InstalledInventoryReading,
@@ -120,7 +120,7 @@ final class InstalledPackageDetailViewModel {
     }
 
     /// Syncs snapshot data for this row (`InstalledListRowViewModel/update(package:)` pattern).
-    func update(package newPackage: BrewPackage) {
+    func update(package newPackage: InstalledBrewPackage) {
         guard newPackage != package else {
             return
         }

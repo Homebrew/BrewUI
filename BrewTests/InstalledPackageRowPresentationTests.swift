@@ -8,14 +8,14 @@ import Testing
 
 struct InstalledPackageRowPresentationTests {
     @Test func `id differs by kind for same name`() {
-        let formula = BrewPackage.fixture(name: "foo", kind: .formula)
-        let cask = BrewPackage.fixture(name: "foo", kind: .cask)
+        let formula = InstalledBrewPackage.fixture(name: "foo", kind: .formula)
+        let cask = InstalledBrewPackage.fixture(name: "foo", kind: .cask)
         #expect(formula.id != cask.id)
     }
 
     @Test @MainActor func `row vm formats version labels`() {
         let vm = InstalledListRowViewModel(
-            package: .fixture(
+            package: InstalledBrewPackage.fixture(
                 name: "git",
                 kind: .formula,
                 latestVersion: "2.1.0",
@@ -31,7 +31,7 @@ struct InstalledPackageRowPresentationTests {
 
     @Test @MainActor func `row vm accessibility summary includes update line`() {
         let vm = InstalledListRowViewModel(
-            package: .fixture(
+            package: InstalledBrewPackage.fixture(
                 name: "Git",
                 kind: .formula,
                 description: "DVCS",

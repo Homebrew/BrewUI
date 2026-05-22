@@ -14,7 +14,7 @@ enum InstalledListRowVersionPresentation: Equatable {
 @Observable
 @MainActor
 final class InstalledListRowViewModel {
-    private(set) var package: BrewPackage
+    private(set) var package: InstalledBrewPackage
     private var operationPhase: BrewOperationPhase = .idle
     private(set) var showsUpgradeBusy: Bool = false
     private(set) var showsUninstallBusy: Bool = false
@@ -94,12 +94,12 @@ final class InstalledListRowViewModel {
         return accessibilitySummary
     }
 
-    init(package: BrewPackage, brewCommandCenter: BrewCommandCenter) {
+    init(package: InstalledBrewPackage, brewCommandCenter: BrewCommandCenter) {
         self.package = package
         self.brewCommandCenter = brewCommandCenter
     }
 
-    func update(package newPackage: BrewPackage) {
+    func update(package newPackage: InstalledBrewPackage) {
         guard newPackage != package else {
             return
         }

@@ -9,7 +9,7 @@ import Testing
 
 struct PackageDetailMetadataItemTests {
     @Test func `info command uses package name`() {
-        let item = PackageDetailMetadataItem(package: .fixture(name: "wget", kind: .formula))
+        let item = PackageDetailMetadataItem(package: InstalledBrewPackage.fixture(name: "wget", kind: .formula))
         #expect(item.infoCommand == "brew info wget")
     }
 

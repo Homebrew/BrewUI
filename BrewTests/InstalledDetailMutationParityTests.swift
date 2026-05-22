@@ -87,7 +87,7 @@ struct InstalledDetailMutationParityTests {
             package: package,
             brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.uninstallFormula)),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
-                packageID == package.id ? [.fixture(name: "curl")] : []
+                packageID == package.id ? [InstalledBrewPackage.fixture(name: "curl")] : []
             },
         )
 

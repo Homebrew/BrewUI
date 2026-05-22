@@ -6,7 +6,7 @@
 import AppKit
 import SwiftUI
 
-struct InstalledPackageDetailSectionHeading: View {
+struct PackageDetailSectionHeading: View {
     let title: String
 
     var body: some View {
@@ -16,10 +16,65 @@ struct InstalledPackageDetailSectionHeading: View {
     }
 }
 
-struct InstalledPackageDetailSectionDivider: View {
+struct PackageDetailSectionDivider: View {
     var body: some View {
         Divider()
             .overlay(Color.brewBorderSeparator)
+    }
+}
+
+/// Terminal-command card with a copy button and an optional footer summary line.
+struct PackageDetailCommandConsole: View {
+    let command: String
+    let summaryText: String?
+
+    init(command: String, summaryText: String? = nil) {
+        self.command = command
+        self.summaryText = summaryText
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Label("Terminal command", systemImage: "terminal")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextSecondary)
+                Spacer()
+                Button("Copy", systemImage: "doc.on.doc") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(command, forType: .string)
+                }
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, BrewSpacing.md)
+            .padding(.vertical, BrewSpacing.sm)
+            .background(Color.brewSurfaceRecessed)
+
+            Text(command)
+                .font(.brewCode)
+                .foregroundStyle(Color.brewCodeDefault)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BrewSpacing.md)
+                .background(Color.brewTerminal)
+                .textSelection(.enabled)
+
+            if let summaryText {
+                Text(summaryText)
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextTertiary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, BrewSpacing.md)
+                    .padding(.vertical, BrewSpacing.sm)
+                    .background(Color.brewSurfaceRecessed)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
+        .overlay(
+            RoundedRectangle(cornerRadius: BrewRadius.md)
+                .stroke(Color.brewBorderDefault, lineWidth: 1),
+        )
     }
 }
 
@@ -79,7 +134,7 @@ struct InstalledPackageDetailMetadataSection: View {
     var body: some View {
         let metadata = viewModel.metadataItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            InstalledPackageDetailSectionHeading(title: "Details")
+            PackageDetailSectionHeading(title: "Details")
             detailRow(label: "Version", value: metadata.latestVersionValue)
             detailRow(label: "Installed", value: metadata.installedVersionsValue)
             if let homepageURL = metadata.homepageURL {
@@ -126,7 +181,7 @@ struct InstalledPackageDetailMetadataSection: View {
 struct InstalledPackageDetailUsedBySection: View {
     let viewModel: InstalledPackageDetailViewModel
     let collapsedRelationshipCount: Int
-    let onSelectInstalledPackage: (BrewPackage.ID) -> Void
+    let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @Binding var isExpanded: Bool
 
     var body: some View {
@@ -152,7 +207,7 @@ struct InstalledPackageDetailUsedBySection: View {
 
     private var usedByHeading: some View {
         HStack(spacing: BrewSpacing.sm) {
-            InstalledPackageDetailSectionHeading(title: "Used by")
+            PackageDetailSectionHeading(title: "Used by")
             if let badgeTitle = viewModel.uninstallItem.usedByBlockingBadgeTitle {
                 Text(badgeTitle)
                     .font(.brewCaption2.weight(.semibold))
@@ -193,7 +248,7 @@ struct InstalledPackageDetailRelationshipList: View {
     let relationships: [PackageRelationshipItem]
     let dotStyle: PackageRelationshipDotStyle
     let collapsedRelationshipCount: Int
-    let onSelectInstalledPackage: (BrewPackage.ID) -> Void
+    let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     let showsHeading: Bool
     @Binding var isExpanded: Bool
 
@@ -204,7 +259,7 @@ struct InstalledPackageDetailRelationshipList: View {
         isExpanded: Binding<Bool>,
         showsHeading: Bool = true,
         collapsedRelationshipCount: Int,
-        onSelectInstalledPackage: @escaping (BrewPackage.ID) -> Void,
+        onSelectInstalledPackage: @escaping (InstalledBrewPackage.ID) -> Void,
     ) {
         self.title = title
         self.relationships = relationships
@@ -218,7 +273,7 @@ struct InstalledPackageDetailRelationshipList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
             if showsHeading {
-                InstalledPackageDetailSectionHeading(title: title)
+                PackageDetailSectionHeading(title: title)
             }
             if relationships.isEmpty {
                 Text("No \(title.lowercased()).")

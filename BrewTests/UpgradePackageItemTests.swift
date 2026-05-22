@@ -8,37 +8,37 @@ import Testing
 
 struct UpgradePackageItemTests {
     @Test func `display command uses formula upgrade flag`() {
-        let item = UpgradePackageItem(package: .fixture(name: "wget", kind: .formula))
+        let item = UpgradePackageItem(package: InstalledBrewPackage.fixture(name: "wget", kind: .formula))
         #expect(item.displayCommand == "brew upgrade --formula wget")
     }
 
     @Test func `display command uses cask upgrade flag`() {
-        let item = UpgradePackageItem(package: .fixture(name: "docker", kind: .cask))
+        let item = UpgradePackageItem(package: InstalledBrewPackage.fixture(name: "docker", kind: .cask))
         #expect(item.displayCommand == "brew upgrade --cask docker")
     }
 
     @Test func `upgrade chrome follows package outdated status`() {
         let outdated = UpgradePackageItem(
-            package: .fixture(name: "wget", latestVersion: "2.0.0", outdated: true),
+            package: InstalledBrewPackage.fixture(name: "wget", latestVersion: "2.0.0", outdated: true),
         )
         #expect(outdated.showsUpgradeChrome)
 
         let current = UpgradePackageItem(
-            package: .fixture(name: "wget", latestVersion: "2.0.0", outdated: false),
+            package: InstalledBrewPackage.fixture(name: "wget", latestVersion: "2.0.0", outdated: false),
         )
         #expect(!current.showsUpgradeChrome)
     }
 
     @Test func `primary button title includes normalized version label`() {
         let item = UpgradePackageItem(
-            package: .fixture(name: "wget", latestVersion: "2.0.0", outdated: true),
+            package: InstalledBrewPackage.fixture(name: "wget", latestVersion: "2.0.0", outdated: true),
         )
         #expect(item.primaryButtonTitle == "Update to v2.0.0")
     }
 
     @Test func `primary button title is nil when no upgrade available`() {
         let item = UpgradePackageItem(
-            package: .fixture(name: "wget", latestVersion: "2.0.0", outdated: false),
+            package: InstalledBrewPackage.fixture(name: "wget", latestVersion: "2.0.0", outdated: false),
         )
         #expect(item.primaryButtonTitle == nil)
     }

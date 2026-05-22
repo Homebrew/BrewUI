@@ -9,7 +9,7 @@ import Testing
 
 struct PackageUpgradeCommandTests {
     @Test func `operation id from package matches package id`() {
-        let package = BrewPackage.fixture(name: "wget", kind: .formula)
+        let package = InstalledBrewPackage.fixture(name: "wget", kind: .formula)
         #expect(BrewOperationID(package: package).rawValue == package.id)
     }
 
@@ -20,7 +20,7 @@ struct PackageUpgradeCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
-        let package = BrewPackage.fixture(name: "git", kind: .formula)
+        let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         try await PackageUpgradeCommand(package: package).run(in: ctx)
 
         #expect(await runner.lastExecutable == brewURL)
@@ -34,7 +34,7 @@ struct PackageUpgradeCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
-        let package = BrewPackage.fixture(name: "Slack", kind: .cask)
+        let package = InstalledBrewPackage.fixture(name: "Slack", kind: .cask)
         try await PackageUpgradeCommand(package: package).run(in: ctx)
 
         #expect(await runner.lastArguments == ["upgrade", "--cask", "Slack"])
@@ -49,7 +49,7 @@ struct PackageUpgradeCommandTests {
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew")),
         )
-        let package = BrewPackage.fixture(name: "x", kind: .formula)
+        let package = InstalledBrewPackage.fixture(name: "x", kind: .formula)
         await #expect(throws: BrewCommandError.self) {
             try await PackageUpgradeCommand(package: package).run(in: ctx)
         }

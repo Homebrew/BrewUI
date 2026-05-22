@@ -8,96 +8,202 @@ import Foundation
 enum AppPreviewSupport {
     static let commandCenter = PreviewBrewCommandCenter()
     static let installedInventoryCache = InstalledInventoryCache()
+    static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(
+        topFormulae: [
+            DiscoveryBrewPackage(
+                package: BrewPackage(
+                    name: "git",
+                    displayName: "git",
+                    kind: .formula,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 420_000,
+            ),
+            DiscoveryBrewPackage(
+                package: BrewPackage(
+                    name: "node",
+                    displayName: "node",
+                    kind: .formula,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 360_000,
+            ),
+        ],
+        topCasks: [
+            DiscoveryBrewPackage(
+                package: BrewPackage(
+                    name: "iterm2",
+                    displayName: "iterm2",
+                    kind: .cask,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 180_000,
+            ),
+            DiscoveryBrewPackage(
+                package: BrewPackage(
+                    name: "docker",
+                    displayName: "docker",
+                    kind: .cask,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                ),
+                thirtyDayInstallCount: 160_000,
+            ),
+        ],
+    )
+    static let discoverFormulaeCatalogue: [BrewPackage] = [
+        BrewPackage(
+            name: "git",
+            displayName: "git",
+            kind: .formula,
+            description: "Distributed revision control system",
+            homepage: "https://git-scm.com",
+            latestVersion: "2.46.1",
+            dependencies: [],
+        ),
+        BrewPackage(
+            name: "node",
+            displayName: "node",
+            kind: .formula,
+            description: "JavaScript runtime built on V8",
+            homepage: "https://nodejs.org",
+            latestVersion: "22.14.0",
+            dependencies: [],
+        ),
+    ]
+    static let discoverCasksCatalogue: [BrewPackage] = [
+        BrewPackage(
+            name: "iterm2",
+            displayName: "iTerm2",
+            kind: .cask,
+            description: "Terminal emulator and shell replacement",
+            homepage: "https://iterm2.com",
+            latestVersion: "3.5.0",
+            dependencies: [],
+        ),
+        BrewPackage(
+            name: "docker",
+            displayName: "Docker",
+            kind: .cask,
+            description: "Build and share containerized applications",
+            homepage: "https://www.docker.com",
+            latestVersion: "4.39.0",
+            dependencies: [],
+        ),
+    ]
 
-    static let outdatedFormula = BrewPackage(
-        name: "git",
-        displayName: "git",
-        kind: .formula,
-        description: "Distributed revision control system.",
-        homepage: "https://git-scm.com",
-        latestVersion: "2.46.1",
+    static let outdatedFormula = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "git",
+            displayName: "git",
+            kind: .formula,
+            description: "Distributed revision control system.",
+            homepage: "https://git-scm.com",
+            latestVersion: "2.46.1",
+            dependencies: [.formula(name: "openssl@3"), .formula(name: "pcre2")],
+        ),
         installedVersions: ["2.45.0"],
-        dependencies: [.formula(name: "openssl@3"), .formula(name: "pcre2")],
         outdated: true,
     )
 
-    static let currentFormula = BrewPackage(
-        name: "node",
-        displayName: "node",
-        kind: .formula,
-        description: "JavaScript runtime built on V8.",
-        homepage: "https://nodejs.org",
-        latestVersion: "22.14.0",
+    static let currentFormula = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "node",
+            displayName: "node",
+            kind: .formula,
+            description: "JavaScript runtime built on V8.",
+            homepage: "https://nodejs.org",
+            latestVersion: "22.14.0",
+            dependencies: [.formula(name: "icu4c@76")],
+        ),
         installedVersions: ["22.14.0"],
-        dependencies: [.formula(name: "icu4c@76")],
         outdated: false,
     )
 
-    static let currentCask = BrewPackage(
-        name: "docker",
-        displayName: "Docker",
-        kind: .cask,
-        description: "Build and share containerized applications.",
-        homepage: "https://www.docker.com",
-        latestVersion: "4.39.0",
+    static let currentCask = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "docker",
+            displayName: "Docker",
+            kind: .cask,
+            description: "Build and share containerized applications.",
+            homepage: "https://www.docker.com",
+            latestVersion: "4.39.0",
+            dependencies: [],
+        ),
         installedVersions: ["4.39.0"],
-        dependencies: [],
         outdated: false,
     )
 
-    static let installedPackages: [BrewPackage] = [
+    static let installedPackages: [InstalledBrewPackage] = [
         outdatedFormula,
         currentFormula,
-        BrewPackage(
-            name: "python",
-            displayName: "python",
-            kind: .formula,
-            description: "Interpreted, interactive, object-oriented programming language.",
-            homepage: "https://www.python.org",
-            latestVersion: "3.13.2",
+        InstalledBrewPackage(
+            package: BrewPackage(
+                name: "python",
+                displayName: "python",
+                kind: .formula,
+                description: "Interpreted, interactive, object-oriented programming language.",
+                homepage: "https://www.python.org",
+                latestVersion: "3.13.2",
+                dependencies: [.formula(name: "openssl@3"), .formula(name: "sqlite")],
+            ),
             installedVersions: ["3.13.2"],
-            dependencies: [.formula(name: "openssl@3"), .formula(name: "sqlite")],
             outdated: false,
         ),
-        BrewPackage(
-            name: "visual-studio-code",
-            displayName: "Visual Studio Code",
-            kind: .cask,
-            description: "Open-source code editor.",
-            homepage: "https://code.visualstudio.com",
-            latestVersion: "1.99.0",
+        InstalledBrewPackage(
+            package: BrewPackage(
+                name: "visual-studio-code",
+                displayName: "Visual Studio Code",
+                kind: .cask,
+                description: "Open-source code editor.",
+                homepage: "https://code.visualstudio.com",
+                latestVersion: "1.99.0",
+                dependencies: [],
+            ),
             installedVersions: ["1.99.0"],
-            dependencies: [],
             outdated: false,
         ),
         currentCask,
     ]
 
-    static let emptyPackages: [BrewPackage] = []
+    static let emptyPackages: [InstalledBrewPackage] = []
 
-    static let installedDependentsByPackageID: [BrewPackage.ID: [BrewPackage]] = [
+    static let installedDependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]] = [
         outdatedFormula.id: [
-            BrewPackage(
-                name: "gh",
-                displayName: "gh",
-                kind: .formula,
-                description: "GitHub's official command line tool.",
-                homepage: "https://cli.github.com",
-                latestVersion: "2.67.0",
+            InstalledBrewPackage(
+                package: BrewPackage(
+                    name: "gh",
+                    displayName: "gh",
+                    kind: .formula,
+                    description: "GitHub's official command line tool.",
+                    homepage: "https://cli.github.com",
+                    latestVersion: "2.67.0",
+                    dependencies: [.formula(name: "git")],
+                ),
                 installedVersions: ["2.67.0"],
-                dependencies: [.formula(name: "git")],
                 outdated: false,
             ),
         ],
     ]
 
-    static let installedInventoryIDs: Set<BrewPackage.ID> = Set(
+    static let installedInventoryIDs: Set<InstalledBrewPackage.ID> = Set(
         installedPackages.map(\.id) + ["formula:openssl@3", "formula:pcre2", "formula:icu4c@76"],
     )
 
     @MainActor
     static func makeInstalledViewModel(
-        packages: [BrewPackage] = installedPackages,
+        packages: [InstalledBrewPackage] = installedPackages,
         commandCenter: any BrewCommandCenter = commandCenter,
     ) -> InstalledViewModel {
         InstalledViewModel(
@@ -115,7 +221,22 @@ enum AppPreviewSupport {
 
     @MainActor
     static func makeInstalledInventoryReading() -> any InstalledInventoryReading {
-        PreviewInstalledInventoryReading(knownInstalledPackageIDs: installedInventoryIDs)
+        PreviewInstalledInventoryReading(
+            packages: installedPackages,
+        )
+    }
+
+    @MainActor
+    static func makeDiscoverPackagesRepository() -> any DiscoverPackagesRepository {
+        PreviewDiscoverPackagesRepository(snapshot: discoverTopPackagesSnapshot)
+    }
+
+    @MainActor
+    static func makeDiscoverCatalogueRepository() -> any CatalogueRepository {
+        PreviewDiscoverCatalogueRepository(
+            formulaCatalogue: discoverFormulaeCatalogue,
+            caskCatalogue: discoverCasksCatalogue,
+        )
     }
 }
 
@@ -152,25 +273,50 @@ actor PreviewBrewCommandCenter: BrewCommandCenter {
 }
 
 struct PreviewInstalledPackagesRepository: InstalledPackagesRepository {
-    let packages: [BrewPackage]
+    let packages: [InstalledBrewPackage]
 
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
         packages
     }
 }
 
 struct PreviewInstalledDependentsRepository: InstalledDependentsRepository {
-    let dependentsByPackageID: [BrewPackage.ID: [BrewPackage]]
+    let dependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]]
 
-    func installedDependents(for packageID: BrewPackage.ID) async -> [BrewPackage] {
+    func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         dependentsByPackageID[packageID] ?? []
     }
 }
 
 struct PreviewInstalledInventoryReading: InstalledInventoryReading {
-    let knownInstalledPackageIDs: Set<BrewPackage.ID>
+    let packages: [InstalledBrewPackage]
 
-    func installedPackageIDs() async -> Set<BrewPackage.ID> {
-        knownInstalledPackageIDs
+    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
+        Set(packages.map(\.id))
+    }
+
+    func installedPackages() async -> [InstalledBrewPackage] {
+        packages
+    }
+}
+
+struct PreviewDiscoverPackagesRepository: DiscoverPackagesRepository {
+    let snapshot: DiscoverTopPackagesSnapshot
+
+    func loadTopPackages(
+        limit _: Int,
+        window _: BrewAnalyticsWindow,
+    ) async throws -> DiscoverTopPackagesSnapshot {
+        snapshot
+    }
+}
+
+struct PreviewDiscoverCatalogueRepository: CatalogueRepository {
+    let formulaCatalogue: [BrewPackage]
+    let caskCatalogue: [BrewPackage]
+
+    func package(for reference: HomebrewPackageReference) async throws -> BrewPackage? {
+        let packages = reference.kind == .formula ? formulaCatalogue : caskCatalogue
+        return packages.first { $0.id == reference.packageID }
     }
 }

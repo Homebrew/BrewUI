@@ -94,12 +94,12 @@ struct InstalledPackagesView: View {
         }
     }
 
-    private func listRow(for package: BrewPackage) -> some View {
+    private func listRow(for package: InstalledBrewPackage) -> some View {
         InstalledListRowRoot(package: package)
     }
 
     private func scrollToSelection(
-        _ selectedID: BrewPackage.ID?,
+        _ selectedID: InstalledBrewPackage.ID?,
         in content: InstalledPackagesContent,
         with proxy: ScrollViewProxy,
     ) {
@@ -127,39 +127,45 @@ struct InstalledPackagesView: View {
         .accessibilityLabel("Loading package list")
     }
 
-    private var loadingFormulaeRows: [BrewPackage] {
+    private var loadingFormulaeRows: [InstalledBrewPackage] {
         [
-            BrewPackage(
-                name: "Placeholder Formula",
-                displayName: "Placeholder Formula",
-                kind: .formula,
-                description: "Placeholder description text for loading row.",
-                homepage: "",
-                latestVersion: "0.0.0",
+            InstalledBrewPackage(
+                package: BrewPackage(
+                    name: "Placeholder Formula",
+                    displayName: "Placeholder Formula",
+                    kind: .formula,
+                    description: "Placeholder description text for loading row.",
+                    homepage: "",
+                    latestVersion: "0.0.0",
+                    dependencies: [],
+                ),
                 installedVersions: ["0.0.0"],
-                dependencies: [],
                 outdated: false,
             ),
-            BrewPackage(
-                name: "Placeholder Formula",
-                displayName: "Placeholder Formula",
-                kind: .formula,
-                description: "Placeholder description text for loading row.",
-                homepage: "",
-                latestVersion: "0.0.0",
+            InstalledBrewPackage(
+                package: BrewPackage(
+                    name: "Placeholder Formula",
+                    displayName: "Placeholder Formula",
+                    kind: .formula,
+                    description: "Placeholder description text for loading row.",
+                    homepage: "",
+                    latestVersion: "0.0.0",
+                    dependencies: [],
+                ),
                 installedVersions: ["0.0.0"],
-                dependencies: [],
                 outdated: false,
             ),
-            BrewPackage(
-                name: "Placeholder Formula",
-                displayName: "Placeholder Formula",
-                kind: .formula,
-                description: "Placeholder description text for loading row.",
-                homepage: "",
-                latestVersion: "0.0.0",
+            InstalledBrewPackage(
+                package: BrewPackage(
+                    name: "Placeholder Formula",
+                    displayName: "Placeholder Formula",
+                    kind: .formula,
+                    description: "Placeholder description text for loading row.",
+                    homepage: "",
+                    latestVersion: "0.0.0",
+                    dependencies: [],
+                ),
                 installedVersions: ["0.0.0"],
-                dependencies: [],
                 outdated: false,
             ),
         ]

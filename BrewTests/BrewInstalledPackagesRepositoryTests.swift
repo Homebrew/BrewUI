@@ -268,7 +268,7 @@ struct BrewInstalledPackagesRepositoryTests {
 }
 
 @MainActor
-private func package(named name: String, in packages: [BrewPackage]) -> BrewPackage? {
+private func package(named name: String, in packages: [InstalledBrewPackage]) -> InstalledBrewPackage? {
     packages.first { $0.name == name }
 }
 

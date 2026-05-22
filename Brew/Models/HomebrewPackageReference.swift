@@ -19,7 +19,7 @@ enum HomebrewPackageReference: Hashable {
         }
     }
 
-    var displayName: String {
+    var name: String {
         switch self {
         case let .formula(name):
             name
@@ -44,6 +44,10 @@ enum HomebrewPackageReference: Hashable {
         case .cask:
             self = .cask(token: package.name)
         }
+    }
+
+    init(installedPackage: InstalledBrewPackage) {
+        self.init(package: installedPackage.package)
     }
 }
 

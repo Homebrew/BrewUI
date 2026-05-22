@@ -7,9 +7,9 @@ import Foundation
 
 /// Presentation mapping for Installed detail metadata content.
 struct PackageDetailMetadataItem {
-    private let package: BrewPackage
+    private let package: InstalledBrewPackage
 
-    init(package: BrewPackage) {
+    init(package: InstalledBrewPackage) {
         self.package = package
     }
 

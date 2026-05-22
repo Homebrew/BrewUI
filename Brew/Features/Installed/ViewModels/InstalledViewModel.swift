@@ -8,7 +8,7 @@ import Observation
 import OSLog
 
 struct InstalledPackagesContent: Equatable {
-    var packages: [BrewPackage]
+    var packages: [InstalledBrewPackage]
 
     var shouldShowFormulaeSection: Bool {
         !formulaPackages.isEmpty
@@ -18,11 +18,11 @@ struct InstalledPackagesContent: Equatable {
         !caskPackages.isEmpty
     }
 
-    var formulaPackages: [BrewPackage] {
+    var formulaPackages: [InstalledBrewPackage] {
         packages.filter { $0.kind == .formula }
     }
 
-    var caskPackages: [BrewPackage] {
+    var caskPackages: [InstalledBrewPackage] {
         packages.filter { $0.kind == .cask }
     }
 }
@@ -53,8 +53,8 @@ final class InstalledViewModel {
     private var observerTask: Task<Void, Never>?
 
     private var loadedContent: InstalledPackagesContent?
-    private var preSearchSelectedPackageID: BrewPackage.ID?
-    private var searchPreviewSelectedPackageID: BrewPackage.ID?
+    private var preSearchSelectedPackageID: InstalledBrewPackage.ID?
+    private var searchPreviewSelectedPackageID: InstalledBrewPackage.ID?
     private var didCommitSelectionDuringSearch = false
     private(set) var state: InstalledLoadState = .loading
     var searchQuery: String = "" {
@@ -65,10 +65,10 @@ final class InstalledViewModel {
         }
     }
 
-    private var selectedPackageID: BrewPackage.ID?
+    private var selectedPackageID: InstalledBrewPackage.ID?
     var isSearchSelected: Bool = false
 
-    var activeSelectedPackageID: BrewPackage.ID? {
+    var activeSelectedPackageID: InstalledBrewPackage.ID? {
         searchPreviewSelectedPackageID ?? selectedPackageID
     }
 
@@ -94,7 +94,7 @@ final class InstalledViewModel {
         return "\(totalPackageCount) packages"
     }
 
-    var selectedPackage: BrewPackage? {
+    var selectedPackage: InstalledBrewPackage? {
         allRows.first(where: { $0.id == activeSelectedPackageID })
     }
 
@@ -156,7 +156,7 @@ final class InstalledViewModel {
         }
     }
 
-    func setSelection(_ selection: BrewPackage.ID?) {
+    func setSelection(_ selection: InstalledBrewPackage.ID?) {
         if isSearchActive {
             didCommitSelectionDuringSearch = true
             searchPreviewSelectedPackageID = nil
@@ -173,7 +173,7 @@ final class InstalledViewModel {
         searchPreviewSelectedPackageID = nil
     }
 
-    func selectInstalledPackage(id: BrewPackage.ID) {
+    func selectInstalledPackage(id: InstalledBrewPackage.ID) {
         guard allRows.contains(where: { $0.id == id }) else {
             return
         }
@@ -184,7 +184,7 @@ final class InstalledViewModel {
         !Self.normalizedSearchQuery(searchQuery).isEmpty
     }
 
-    private var allRows: [BrewPackage] {
+    private var allRows: [InstalledBrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }
@@ -245,7 +245,7 @@ final class InstalledViewModel {
         }
     }
 
-    private func firstVisibleRowID() -> BrewPackage.ID? {
+    private func firstVisibleRowID() -> InstalledBrewPackage.ID? {
         allRows.first?.id
     }
 
@@ -273,7 +273,7 @@ final class InstalledViewModel {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static func packagesContent(from snapshot: [BrewPackage]) -> InstalledPackagesContent {
+    private static func packagesContent(from snapshot: [InstalledBrewPackage]) -> InstalledPackagesContent {
         InstalledPackagesContent(packages: snapshot)
     }
 

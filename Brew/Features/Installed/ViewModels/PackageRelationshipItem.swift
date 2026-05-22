@@ -9,8 +9,8 @@ import Foundation
 struct PackageRelationshipItem: Identifiable, Hashable {
     let displayName: String
     let packageKind: HomebrewPackageKind
-    let targetPackageID: BrewPackage.ID
-    let installedPackageID: BrewPackage.ID?
+    let targetPackageID: InstalledBrewPackage.ID
+    let installedPackageID: InstalledBrewPackage.ID?
 
     var id: String {
         installedPackageID ?? "relationship:\(targetPackageID)"
@@ -25,17 +25,17 @@ struct PackageRelationshipItem: Identifiable, Hashable {
 extension PackageRelationshipItem {
     static func dependency(
         _ reference: HomebrewPackageReference,
-        installedPackageIDs: Set<BrewPackage.ID>,
+        installedPackageIDs: Set<InstalledBrewPackage.ID>,
     ) -> PackageRelationshipItem {
         PackageRelationshipItem(
-            displayName: reference.displayName,
+            displayName: reference.name,
             packageKind: reference.kind,
             targetPackageID: reference.packageID,
             installedPackageID: installedPackageIDs.contains(reference.packageID) ? reference.packageID : nil,
         )
     }
 
-    static func dependent(_ package: BrewPackage) -> PackageRelationshipItem {
+    static func dependent(_ package: InstalledBrewPackage) -> PackageRelationshipItem {
         PackageRelationshipItem(
             displayName: package.displayName,
             packageKind: package.kind,
@@ -46,12 +46,12 @@ extension PackageRelationshipItem {
 
     static func dependencies(
         _ references: [HomebrewPackageReference],
-        installedPackageIDs: Set<BrewPackage.ID>,
+        installedPackageIDs: Set<InstalledBrewPackage.ID>,
     ) -> [PackageRelationshipItem] {
         references.map { dependency($0, installedPackageIDs: installedPackageIDs) }
     }
 
-    static func dependents(_ packages: [BrewPackage]) -> [PackageRelationshipItem] {
+    static func dependents(_ packages: [InstalledBrewPackage]) -> [PackageRelationshipItem] {
         packages.map(dependent)
     }
 }

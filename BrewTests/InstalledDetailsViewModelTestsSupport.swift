@@ -224,7 +224,7 @@ func withInstalledDetailPhaseObservation(
 
 @MainActor
 func makeInstalledDetailsViewModel(
-    package: BrewPackage,
+    package: InstalledBrewPackage,
     brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
     installedDependentsRepository: (any InstalledDependentsRepository)? = nil,
     installedInventoryReading: (any InstalledInventoryReading)? = nil,
@@ -241,16 +241,18 @@ func details(
     name: String,
     kind: InstalledPackageKind = .formula,
     version: String = "1.0.0",
-) -> BrewPackage {
-    BrewPackage(
-        name: name,
-        displayName: name,
-        kind: kind,
-        description: "desc",
-        homepage: "",
-        latestVersion: version,
+) -> InstalledBrewPackage {
+    InstalledBrewPackage(
+        package: BrewPackage(
+            name: name,
+            displayName: name,
+            kind: kind,
+            description: "desc",
+            homepage: "",
+            latestVersion: version,
+            dependencies: [],
+        ),
         installedVersions: [version],
-        dependencies: [],
         outdated: false,
     )
 }

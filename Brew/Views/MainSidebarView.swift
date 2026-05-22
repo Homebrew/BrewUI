@@ -8,6 +8,7 @@ import SwiftUI
 /// Primary navigation items for the main window sidebar.
 enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     case installed
+    case discover
 
     var id: String {
         rawValue
@@ -42,6 +43,14 @@ struct MainSidebarView: View {
             )
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.top, BrewSpacing.sm)
+
+            sidebarRow(
+                title: "Discover",
+                systemImage: "magnifyingglass",
+                item: .discover,
+            )
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.top, BrewSpacing.xs)
 
             Spacer(minLength: 0)
         }

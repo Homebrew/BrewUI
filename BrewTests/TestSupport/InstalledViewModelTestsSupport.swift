@@ -11,9 +11,9 @@ import Testing
 
 struct VMStateSnapshot: Equatable {
     var state: InstalledLoadState
-    var formulaPackages: [BrewPackage]
-    var caskPackages: [BrewPackage]
-    var selectedPackageID: BrewPackage.ID?
+    var formulaPackages: [InstalledBrewPackage]
+    var caskPackages: [InstalledBrewPackage]
+    var selectedPackageID: InstalledBrewPackage.ID?
     var totalPackageCount: Int
 
     /// Rows cleared, load finished, after a failed `load()`.
@@ -69,20 +69,20 @@ struct OddRepositoryError: Error {}
 struct StubThrowingRepository: InstalledPackagesRepository {
     let error: Error
 
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
         throw error
     }
 }
 
 extension InstalledViewModel {
-    var loadedFormulaPackages: [BrewPackage] {
+    var loadedFormulaPackages: [InstalledBrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }
         return content.formulaPackages
     }
 
-    var loadedCaskPackages: [BrewPackage] {
+    var loadedCaskPackages: [InstalledBrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }

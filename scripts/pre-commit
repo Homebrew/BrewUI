@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
 # pre-commit — format and lint staged Swift files before commit.
+# Refreshes the index only for fully staged files; partially staged files must be re-staged manually.
 
 set -euo pipefail
 
@@ -29,6 +30,16 @@ if [[ ${#swift_files[@]} -eq 0 ]]; then
     exit 0
 fi
 
+# Files with unstaged hunks must not be blanket `git add`ed — that would defeat selective staging.
+partially_staged_files=()
+worktree_hashes_before=()
+for file in "${swift_files[@]}"; do
+    if ! git diff --quiet -- "${file}"; then
+        partially_staged_files+=("${file}")
+    fi
+    worktree_hashes_before+=("$(git hash-object -w "${file}")")
+done
+
 echo "pre-commit: formatting staged Swift files (mint run swiftformat)..."
 mint run swiftformat "${swift_files[@]}"
 
@@ -42,8 +53,37 @@ if [[ ${fix_status} -ne 0 ]]; then
     echo "pre-commit: swiftlint auto-fix reported unresolved issues; running final validation."
 fi
 
-echo "pre-commit: staging formatter/linter changes..."
-git add -- "${swift_files[@]}"
+files_needing_manual_stage=()
+for index in "${!swift_files[@]}"; do
+    file="${swift_files[index]}"
+    worktree_hash_before="${worktree_hashes_before[index]}"
+    worktree_hash_after="$(git hash-object -w "${file}")"
+    if [[ "${worktree_hash_before}" == "${worktree_hash_after}" ]]; then
+        continue
+    fi
+
+    is_partial=false
+    for partial in "${partially_staged_files[@]}"; do
+        if [[ "${file}" == "${partial}" ]]; then
+            is_partial=true
+            break
+        fi
+    done
+
+    if [[ "${is_partial}" == true ]]; then
+        files_needing_manual_stage+=("${file}")
+    else
+        git add -- "${file}"
+    fi
+done
+
+if [[ ${#files_needing_manual_stage[@]} -gt 0 ]]; then
+    echo ""
+    echo "pre-commit: formatter/linter updated partially staged file(s)."
+    echo "Re-stage your intended changes (e.g. git add -p) and commit again:"
+    printf '  - %s\n' "${files_needing_manual_stage[@]}"
+    exit 1
+fi
 
 echo "pre-commit: validating lint status..."
 set +e

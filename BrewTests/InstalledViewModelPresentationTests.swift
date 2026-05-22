@@ -148,13 +148,13 @@ struct InstalledViewModelPresentationTests {
 private struct FailingInstalledRepository: InstalledPackagesRepository {
     let error: Error
 
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [BrewPackage] {
+    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
         throw error
     }
 }
 
 @MainActor
-private func selectedFormulaRow(from vm: InstalledViewModel) -> BrewPackage? {
+private func selectedFormulaRow(from vm: InstalledViewModel) -> InstalledBrewPackage? {
     guard case let .loaded(content) = vm.state else {
         return nil
     }

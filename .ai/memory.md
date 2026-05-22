@@ -34,11 +34,11 @@
 
 - **Sandboxing:** App is unsandboxed. No entitlements needed for subprocess execution.
 - **Homebrew detection:** Check `/opt/homebrew/bin/brew` (Apple Silicon) then `/usr/local/bin/brew` (Intel). Degrade gracefully if neither found.
-- **JSON API schema drift:** Handle via optional decoding — never crash on unknown fields.
+- **JSON API schema drift:** Prefer tolerant handling for unknown fields; required-field policy is endpoint-specific (see 2026-05-18 strict catalogue decoding entry).
 
 ## 2026-03-11 — Developer Hook Workflow
 
-- **Pre-commit enforcement:** Repository-managed pre-commit hook runs staged Swift files through Mint (`mint run swiftformat`, then `mint run swiftlint` with `--fix`, then strict `mint run swiftlint`). See **2026-04-12 — Mint for SwiftFormat and SwiftLint**.
+- **Pre-commit enforcement:** Repository-managed pre-commit hook runs staged Swift files through Mint (`mint run swiftformat`, then `mint run swiftlint` with `--fix`, then strict `mint run swiftlint`). See **2026-04-12 — Mint for SwiftFormat and SwiftLint**. After format/lint it only `git add`s fully staged files whose **worktree** blob changed; partially staged files are blocked only when format/lint actually changed the file on disk (not merely because index ≠ worktree).
 - **Bootstrap integration:** `./scripts/bootstrap` installs git hooks automatically via `scripts/install-git-hooks` to minimize manual setup for contributors.
 
 ## 2026-04-12 — Mint for SwiftFormat and SwiftLint
@@ -327,3 +327,116 @@
 
 - Added project skill at `.cursor/skills/pr-description-to-scratchpad/SKILL.md`.
 - Skill contract: build PR bodies from `main...HEAD`, follow `.github/PULL_REQUEST_TEMPLATE.md`, and append to `.ai/scratchpad.md`.
+
+## 2026-05-18 — Discover analytics data-access slice
+
+- Added a dedicated Homebrew analytics network boundary:
+  - `BrewAPIClient` protocol + `URLSessionBrewAPIClient` in `Brew/Services/BrewAPIClient.swift`.
+  - Endpoint-specific APIs for Discover:
+    - `fetchFormulaInstallOnRequestAnalytics(window:)`
+    - `fetchCaskInstallAnalytics(window:)`
+- Added resilient analytics decoding model `BrewAnalyticsJSON`:
+  - tolerant top-level decode with `formulae`/`casks` bucket fallback
+  - count parsing supports both numeric and comma-separated string forms
+  - normalized `BrewAnalyticsPackageCount` output for repository mapping
+- Added `DiscoverPackagesRepository` + `BrewDiscoverPackagesRepository` returning one combined `DiscoverTopPackagesSnapshot` (`topFormulae` + `topCasks`) with limit/window parameters (defaults: top 10, 30d).
+
+## 2026-05-18 — Package-domain lookup identity rule
+
+- Package-domain representations should expose `HomebrewPackageReference` as their lookup identity (formulae map to `.formula(name:)`, casks map to `.cask(token:)`).
+- `BrewPackage` now exposes `reference` again as a computed property from `kind` + `name`.
+- Discover models now carry typed references:
+  - `BrewAnalyticsPackageCount.reference`
+  - `DiscoverTopPackage.reference`
+- Added `.cursor/rules/package-domain-reference.mdc` and mirrored the rule in `CONVENTIONS.md` to keep the requirement persistent for future domain models.
+
+## 2026-05-18 — URLSessionProtocol testing seam for API client
+
+- Added `URLSessionProtocol` (`data(for:)`) in `Brew/Services/URLSessionProtocol.swift` with `URLSession` conformance.
+- `URLSessionBrewAPIClient` now supports dependency injection via `init(session: any URLSessionProtocol, ...)`, enabling deterministic unit tests with a mock session implementation instead of closure-only stubbing.
+
+## 2026-05-18 — Discover analytics strict decoding policy
+
+- Discover analytics decoding now fails fast for required non-optional fields rather than defaulting to empty/zero values.
+- `BrewAnalyticsJSON` requires valid `category`, `total_items`, `total_count`, `start_date`, `end_date`, and at least one analytics bucket container (`formulae` or `casks`).
+- Malformed per-entry `count` values now throw during decode (no fallback `0`), and unresolved package references are treated as decode failures instead of being silently filtered out.
+
+## 2026-05-18 — Discover analytics decoder simplification
+
+- Simplified `BrewAnalyticsJSON` strict decoder by removing fallback identity inference:
+  - no fallback from bucket key
+  - no fallback from `category` inferred kind
+- Analytics rows now require explicit identity in payload (`formula` xor `cask`), which keeps failure behavior deterministic when server payloads are incomplete/ambiguous.
+
+## 2026-05-18 — API client tests use URLProtocol stubs
+
+- Replaced `URLSessionProtocol` abstraction tests with integration-style tests that use a real `URLSession` configured with `URLProtocol` stubbing.
+- `URLSessionBrewAPIClient` session init now takes concrete `URLSession`.
+- `BrewAPIClientTests` use host-scoped stub queues/recording in `StubURLProtocol` to keep tests deterministic under concurrent execution.
+
+## 2026-05-18 — Deferred Installed search adaptation
+
+- Installed search still filters on canonical `BrewPackage.name` rather than `displayName`.
+- User requested this remain unchanged for now and be revisited during discovery search work.
+- Keep this as an explicit follow-up so label-search behavior can be aligned intentionally later.
+
+## 2026-05-18 — Catalogue decode strictness
+
+- Catalogue transport decoding (`FormulaCatalogueJSON` / `CaskCatalogueJSON`) now treats `desc`, `homepage`, `versions.stable`, and `analytics.install["30d"]` as required fields.
+- Catalogue array decoding is now lossy per item: invalid entries are skipped, and decode failures are captured with item index + error string so callers can handle partial failures without dropping valid items.
+
+## 2026-05-19 — Catalogue cache + repository split
+
+- Split catalogue responsibilities into two boundaries:
+  - `CatalogueCache` actor owns only in-memory state, disk persistence, and ETag storage.
+  - `BrewCatalogueRepository` owns TTL, stale-while-revalidate policy, refresh orchestration, and in-flight task deduplication.
+- `CatalogueCache` currently preloads cache on async init:
+  - `init(...) async` loads formula/cask cache files immediately (missing/corrupt files are swallowed);
+  - read/write methods operate on preloaded in-memory state (no separate warm-up method).
+- `BrewCatalogueRepository` behavior:
+  - one refresh `Task` per catalogue kind is shared across concurrent callers;
+  - stale cached data returns immediately while background refresh runs;
+  - cold start (no cache) blocks on refresh and surfaces errors;
+  - `304` updates only last-refresh timestamp;
+  - background refresh failures are swallowed.
+
+## 2026-05-19 — Transport models must not cross repo/service APIs
+
+- `CatalogueRepository` now maps cached/network catalogue transport payloads to domain `BrewPackage` arrays before returning.
+- Durable rule: `Codable` transport types (`*JSON`, DTO/wire models) must stay behind service/repository boundaries and not appear in service/repository protocol return types.
+- Enforcement/docs:
+  - Added `CONVENTIONS.md` note under **Transport boundary**.
+  - Added `.cursor/rules/codable-boundary.mdc` (always apply) and linked guidance in `.cursor/rules/swift-implementation.mdc`.
+
+## 2026-05-19 — Installed model split (`InstalledBrewPackage` vs `BrewPackage`)
+
+- Installed-only state moved out of shared package domain:
+  - `InstalledBrewPackage` composes a `BrewPackage` (`package`) plus `installedVersions` and `outdated`.
+  - Public fields shared with `BrewPackage` are exposed as wrapper properties; identity (`id`, `reference`) derives from `package`.
+  - `BrewPackage` is slim/shared for catalogue/discover-prep fields only.
+- Boundary rule:
+  - installed repositories/inventory/graph/view-model surfaces use `InstalledBrewPackage`,
+  - catalogue repository surfaces remain `[BrewPackage]` and must not reintroduce installed-only fields.
+- Command/convenience identity behavior remains stable via `kind:name` IDs:
+  - `BrewOperationID(package:)` now takes `InstalledBrewPackage`,
+  - `HomebrewPackageReference` gained `init(installedPackage:)` (delegates to `init(package:)`),
+  - package ID/reference semantics remain canonical and unchanged.
+
+## 2026-05-20 — Discover wrapper domain contract
+
+- Discover top-list domain rows now use `DiscoveryBrewPackage` (`package: BrewPackage` + `thirtyDayInstallCount`) instead of reference/count-only payloads.
+- `DiscoverTopPackagesSnapshot` now carries `[DiscoveryBrewPackage]` for formula/cask sections; downstream list/detail mapping should read package metadata from `DiscoveryBrewPackage.package` and ranking from `DiscoveryBrewPackage.thirtyDayInstallCount`.
+
+## 2026-05-20 — Discover repository owns catalogue enrichment
+
+- `BrewDiscoverPackagesRepository` fetches analytics via `BrewAPIClient`, then resolves each ranked analytics row through `CatalogueRepository.package(for:)` (per-reference lookup, not whole-catalogue loads).
+- `CatalogueRepository` public API is `package(for: HomebrewPackageReference) -> BrewPackage?`; whole-catalogue fetch/map/cache refresh stays private inside `BrewCatalogueRepository`.
+- On `package(for:)`, if the kind’s catalogue is uncached or TTL-stale, `BrewCatalogueRepository` fetches the full catalogue once, updates cache, and serves lookups from an in-memory ID index (deduped in-flight refresh preserved).
+- Analytics rows with no catalogue match are dropped silently; the limit applies to matched rows only.
+- `DiscoverViewModel` no longer loads catalogues; it consumes enriched `DiscoveryBrewPackage` rows from the discover repository.
+
+## 2026-05-21 — Installed and Discover list selection UI
+
+- **Selection chrome:** Both `InstalledPackagesView` and `DiscoverPackagesView` use a plain `List` (not `List(selection:)`), row taps via `.onTapGesture` + `viewModel.setSelection`, and `.listRowBackground(selected ? Color.brewBrandTint : Color.clear)`. Avoid `List(selection:)` — it applies system accent selection on top of the brand tint.
+- **Column backgrounds:** List column header, list body, and detail inherit window/split chrome; do not wrap Discover/Installed columns in `.background(Color.brewSurface)` unless product asks for explicit surface fills everywhere.
+- **Scroll:** Both lists use `ScrollViewReader` + `scrollToSelection` on appear/selection/row-id changes (`.brewFast` animation).

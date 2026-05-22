@@ -51,8 +51,8 @@ struct BrewInstalledPackagesCacheTests {
     @Test @MainActor func `inventory reading exposes cached ids`() async {
         let cache = InstalledInventoryCache()
         let packages = [
-            BrewPackage.fixture(name: "openssl@3", kind: .formula),
-            BrewPackage.fixture(name: "wget", kind: .formula, dependencies: [.formula(name: "openssl@3")]),
+            InstalledBrewPackage.fixture(name: "openssl@3", kind: .formula),
+            InstalledBrewPackage.fixture(name: "wget", kind: .formula, dependencies: [.formula(name: "openssl@3")]),
         ]
         await cache.replace(InstalledInventorySnapshot(fetchedAt: .now, packages: packages))
         let repository = InstalledPackagesTestSupport.repository(
