@@ -48,9 +48,9 @@ struct DiscoverPackagesView: View {
     private var loadedList: some View {
         ScrollViewReader { proxy in
             List {
-                if !formulaRows.isEmpty {
+                if !viewModel.formulaRows.isEmpty {
                     Section("Formulae") {
-                        ForEach(formulaRows, id: \.id) { row in
+                        ForEach(viewModel.formulaRows, id: \.id) { row in
                             listRow(row)
                                 .id(row.id)
                                 .contentShape(Rectangle())
@@ -64,9 +64,9 @@ struct DiscoverPackagesView: View {
                     }
                 }
 
-                if !caskRows.isEmpty {
+                if !viewModel.caskRows.isEmpty {
                     Section("Casks") {
-                        ForEach(caskRows, id: \.id) { row in
+                        ForEach(viewModel.caskRows, id: \.id) { row in
                             listRow(row)
                                 .id(row.id)
                                 .contentShape(Rectangle())
@@ -111,14 +111,6 @@ struct DiscoverPackagesView: View {
         withAnimation(.brewFast) {
             proxy.scrollTo(selectedID, anchor: .center)
         }
-    }
-
-    private var formulaRows: [DiscoverListRowViewModel] {
-        viewModel.visibleRows.filter { $0.packageKind == .formula }
-    }
-
-    private var caskRows: [DiscoverListRowViewModel] {
-        viewModel.visibleRows.filter { $0.packageKind == .cask }
     }
 
     private var loadingSkeletonList: some View {

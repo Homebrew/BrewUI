@@ -63,6 +63,14 @@ final class DiscoverViewModel {
         return rows
     }
 
+    var formulaRows: [DiscoverListRowViewModel] {
+        visibleRows.filter { $0.packageKind == .formula }
+    }
+
+    var caskRows: [DiscoverListRowViewModel] {
+        visibleRows.filter { $0.packageKind == .cask }
+    }
+
     var selectedRow: DiscoverListRowViewModel? {
         guard let selectedPackageID else {
             return nil

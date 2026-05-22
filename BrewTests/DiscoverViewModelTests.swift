@@ -163,6 +163,40 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedRow?.id == "formula:node")
     }
 
+    @Test @MainActor func `formulaRows and caskRows partition loaded rows by kind`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                    ],
+                    topCasks: [
+                        discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70),
+                    ],
+                ),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.formulaRows.map(\.id) == ["formula:git", "formula:node"])
+        #expect(viewModel.caskRows.map(\.id) == ["cask:docker"])
+    }
+
+    @Test @MainActor func `formulaRows and caskRows are empty before load`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+        )
+
+        #expect(viewModel.formulaRows.isEmpty)
+        #expect(viewModel.caskRows.isEmpty)
+    }
+
     @Test @MainActor func `subtitle reflects loading state`() {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
