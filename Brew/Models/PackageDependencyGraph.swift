@@ -17,7 +17,7 @@ struct PackageDependencyGraph: Equatable {
         for package in packages {
             byID[package.id] = package
             for dependency in package.dependencies {
-                reverse[dependency.packageID, default: []].append(package.id)
+                reverse[dependency, default: []].append(package.id)
             }
         }
 

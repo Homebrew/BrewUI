@@ -61,15 +61,15 @@ struct InstalledViewModelSearchTests {
                 .fixture(name: "github", kind: .cask),
             ],
         )
-        vm.setSelection("formula:wget")
+        vm.setSelection(.formula(name: "wget"))
 
         vm.searchQuery = "git"
-        #expect(vm.activeSelectedPackageID == "formula:git")
-        #expect(vm.selectedPackage?.id == "formula:git")
+        #expect(vm.activeSelectedPackageID == .formula(name: "git"))
+        #expect(vm.selectedPackage?.id == .formula(name: "git"))
 
         vm.searchQuery = ""
-        #expect(vm.activeSelectedPackageID == "formula:wget")
-        #expect(vm.selectedPackage?.id == "formula:wget")
+        #expect(vm.activeSelectedPackageID == .formula(name: "wget"))
+        #expect(vm.selectedPackage?.id == .formula(name: "wget"))
     }
 
     @Test @MainActor func `searchQuery commit keeps selected result after clearing search`() async {
@@ -82,15 +82,15 @@ struct InstalledViewModelSearchTests {
                 .fixture(name: "github", kind: .cask),
             ],
         )
-        vm.setSelection("formula:wget")
+        vm.setSelection(.formula(name: "wget"))
 
         vm.searchQuery = "git"
-        vm.setSelection("cask:github")
-        #expect(vm.activeSelectedPackageID == "cask:github")
+        vm.setSelection(.cask(token: "github"))
+        #expect(vm.activeSelectedPackageID == .cask(token: "github"))
 
         vm.searchQuery = ""
-        #expect(vm.activeSelectedPackageID == "cask:github")
-        #expect(vm.selectedPackage?.id == "cask:github")
+        #expect(vm.activeSelectedPackageID == .cask(token: "github"))
+        #expect(vm.selectedPackage?.id == .cask(token: "github"))
     }
 
     @Test @MainActor
@@ -106,11 +106,11 @@ struct InstalledViewModelSearchTests {
         )
 
         vm.searchQuery = "git"
-        #expect(vm.activeSelectedPackageID == "formula:git")
+        #expect(vm.activeSelectedPackageID == .formula(name: "git"))
 
         vm.searchQuery = "github"
-        #expect(vm.activeSelectedPackageID == "cask:github")
-        #expect(vm.selectedPackage?.id == "cask:github")
+        #expect(vm.activeSelectedPackageID == .cask(token: "github"))
+        #expect(vm.selectedPackage?.id == .cask(token: "github"))
     }
 
     @Test @MainActor func `searchQuery marks search as selected when query changes`() async {

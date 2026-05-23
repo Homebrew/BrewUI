@@ -29,7 +29,7 @@ struct DiscoverViewModelTests {
                 ),
             ),
             installedInventoryReading: StubInstalledInventoryReading(
-                installedIDs: ["formula:git"],
+                installedIDs: [.formula(name: "git")],
                 packages: [.fixture(name: "git", installedVersions: ["2.45.0"])],
             ),
         )
@@ -41,9 +41,9 @@ struct DiscoverViewModelTests {
             return
         }
         #expect(viewModel.visibleRows.count == 2)
-        #expect(viewModel.selectedRow?.id == "formula:git")
+        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
 
-        let git = try #require(viewModel.visibleRows.first { $0.id == "formula:git" })
+        let git = try #require(viewModel.visibleRows.first { $0.id == .formula(name: "git") })
         #expect(git.descriptionText == "Distributed revision control")
         #expect(git.stableVersionLabel == "2.46.1")
         #expect(git.installedStatusLabel == "Installed")
@@ -94,11 +94,11 @@ struct DiscoverViewModelTests {
         )
 
         await viewModel.load()
-        #expect(viewModel.selectedRow?.id == "formula:git")
+        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
 
-        viewModel.setSelection("formula:missing")
+        viewModel.setSelection(.formula(name: "missing"))
 
-        #expect(viewModel.selectedRow?.id == "formula:git")
+        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `load selects first visible row by popularity`() async {
@@ -114,7 +114,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == "formula:git")
+        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `setSelection nil resolves to first visible row`() async {
@@ -132,12 +132,12 @@ struct DiscoverViewModelTests {
         )
 
         await viewModel.load()
-        viewModel.setSelection("formula:node")
-        #expect(viewModel.selectedRow?.id == "formula:node")
+        viewModel.setSelection(.formula(name: "node"))
+        #expect(viewModel.selectedRow?.id == .formula(name: "node"))
 
         viewModel.setSelection(nil)
 
-        #expect(viewModel.selectedRow?.id == "formula:git")
+        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `reload preserves selection when package still exists`() async {
@@ -156,11 +156,11 @@ struct DiscoverViewModelTests {
         )
 
         await viewModel.load()
-        viewModel.setSelection("formula:node")
+        viewModel.setSelection(.formula(name: "node"))
 
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == "formula:node")
+        #expect(viewModel.selectedRow?.id == .formula(name: "node"))
     }
 
     @Test @MainActor func `rows with equal install count are sorted alphabetically`() async {
@@ -201,8 +201,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.formulaRows.map(\.id) == ["formula:git", "formula:node"])
-        #expect(viewModel.caskRows.map(\.id) == ["cask:docker"])
+        #expect(viewModel.formulaRows.map(\.id) == [.formula(name: "git"), .formula(name: "node")])
+        #expect(viewModel.caskRows.map(\.id) == [.cask(token: "docker")])
     }
 
     @Test @MainActor func `formulaRows and caskRows are empty before load`() {
@@ -275,7 +275,7 @@ struct DiscoverViewModelTests {
         )
 
         await viewModel.load()
-        viewModel.setSelection("formula:node")
+        viewModel.setSelection(.formula(name: "node"))
 
         repository.snapshot = DiscoverTopPackagesSnapshot(
             topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
@@ -283,7 +283,7 @@ struct DiscoverViewModelTests {
         )
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == "formula:git")
+        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
     }
 }
 

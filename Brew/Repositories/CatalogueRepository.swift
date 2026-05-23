@@ -7,7 +7,7 @@ import Foundation
 
 @MainActor
 protocol CatalogueRepository: Sendable {
-    func package(for reference: HomebrewPackageReference) async throws -> BrewPackage?
+    func package(for reference: HomebrewPackageID) async throws -> BrewPackage?
 }
 
 @MainActor
@@ -46,9 +46,9 @@ final class BrewCatalogueRepository: CatalogueRepository {
         self.ttl = ttl
     }
 
-    func package(for reference: HomebrewPackageReference) async throws -> BrewPackage? {
+    func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
         let packages = try await packages(for: reference.kind)
-        return packages.first { $0.id == reference.packageID }
+        return packages.first { $0.id == reference }
     }
 
     private func packages(for kind: HomebrewPackageKind) async throws -> [BrewPackage] {

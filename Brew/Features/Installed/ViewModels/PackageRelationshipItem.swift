@@ -12,8 +12,8 @@ struct PackageRelationshipItem: Identifiable, Hashable {
     let targetPackageID: InstalledBrewPackage.ID
     let installedPackageID: InstalledBrewPackage.ID?
 
-    var id: String {
-        installedPackageID ?? "relationship:\(targetPackageID)"
+    var id: HomebrewPackageID {
+        targetPackageID
     }
 
     var isInstalledInInventory: Bool {
@@ -24,14 +24,14 @@ struct PackageRelationshipItem: Identifiable, Hashable {
 @MainActor
 extension PackageRelationshipItem {
     static func dependency(
-        _ reference: HomebrewPackageReference,
+        _ reference: HomebrewPackageID,
         installedPackageIDs: Set<InstalledBrewPackage.ID>,
     ) -> PackageRelationshipItem {
         PackageRelationshipItem(
             displayName: reference.name,
             packageKind: reference.kind,
-            targetPackageID: reference.packageID,
-            installedPackageID: installedPackageIDs.contains(reference.packageID) ? reference.packageID : nil,
+            targetPackageID: reference,
+            installedPackageID: installedPackageIDs.contains(reference) ? reference : nil,
         )
     }
 
@@ -45,7 +45,7 @@ extension PackageRelationshipItem {
     }
 
     static func dependencies(
-        _ references: [HomebrewPackageReference],
+        _ references: [HomebrewPackageID],
         installedPackageIDs: Set<InstalledBrewPackage.ID>,
     ) -> [PackageRelationshipItem] {
         references.map { dependency($0, installedPackageIDs: installedPackageIDs) }

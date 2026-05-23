@@ -91,9 +91,10 @@ struct BrewAPIClientURLSessionIntegrationTests {
 
     @Test @MainActor func `fetch formula and cask analytics concurrently`() async throws {
         let baseURL = makeStubBaseURL()
-        try StubURLProtocol.register(
+        let host = try #require(baseURL.host)
+        StubURLProtocol.registerByPath(
             [
-                .successWithStatus(
+                "/api/analytics/install-on-request/homebrew-core/30d.json": .successWithStatus(
                     data: Data(
                         """
                         {
@@ -110,7 +111,7 @@ struct BrewAPIClientURLSessionIntegrationTests {
                     ),
                     statusCode: 200,
                 ),
-                .successWithStatus(
+                "/api/analytics/cask-install/homebrew-cask/30d.json": .successWithStatus(
                     data: Data(
                         """
                         {
@@ -128,7 +129,7 @@ struct BrewAPIClientURLSessionIntegrationTests {
                     statusCode: 200,
                 ),
             ],
-            forHost: #require(baseURL.host),
+            forHost: host,
         )
         let session = makeStubbedSession()
         let client = URLSessionBrewAPIClient(session: session, baseURL: baseURL)
@@ -141,7 +142,7 @@ struct BrewAPIClientURLSessionIntegrationTests {
 
         #expect(formulaResult.packageCounts.first?.name == "wget")
         #expect(caskResult.packageCounts.first?.name == "iterm2")
-        #expect(try StubURLProtocol.requests(forHost: #require(baseURL.host)).count == 2)
+        #expect(StubURLProtocol.requests(forHost: host).count == 2)
     }
 
     @Test @MainActor func `fetch throws http status error for non success response`() async throws {

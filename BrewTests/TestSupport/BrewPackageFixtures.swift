@@ -8,7 +8,7 @@ extension BrewPackage {
         description: String = "",
         homepage: String = "",
         latestVersion: String = "",
-        dependencies: [HomebrewPackageReference] = [],
+        dependencies: [HomebrewPackageID] = [],
     ) -> BrewPackage {
         BrewPackage(
             name: name,
@@ -37,7 +37,7 @@ extension InstalledBrewPackage {
         homepage: String = "",
         latestVersion: String = "",
         installedVersions: [String] = [],
-        dependencies: [HomebrewPackageReference] = [],
+        dependencies: [HomebrewPackageID] = [],
         outdated: Bool = false,
     ) -> InstalledBrewPackage {
         InstalledBrewPackage(

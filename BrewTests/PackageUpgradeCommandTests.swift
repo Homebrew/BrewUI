@@ -10,7 +10,7 @@ import Testing
 struct PackageUpgradeCommandTests {
     @Test func `operation id from package matches package id`() {
         let package = InstalledBrewPackage.fixture(name: "wget", kind: .formula)
-        #expect(BrewOperationID(package: package).rawValue == package.id)
+        #expect(BrewOperationID(package: package).rawValue == "formula:wget")
     }
 
     @Test func `formula run invokes brew upgrade name`() async throws {

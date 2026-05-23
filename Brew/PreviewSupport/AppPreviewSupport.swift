@@ -198,7 +198,11 @@ enum AppPreviewSupport {
     ]
 
     static let installedInventoryIDs: Set<InstalledBrewPackage.ID> = Set(
-        installedPackages.map(\.id) + ["formula:openssl@3", "formula:pcre2", "formula:icu4c@76"],
+        installedPackages.map(\.id) + [
+            .formula(name: "openssl@3"),
+            .formula(name: "pcre2"),
+            .formula(name: "icu4c@76"),
+        ],
     )
 
     @MainActor
@@ -315,8 +319,8 @@ struct PreviewDiscoverCatalogueRepository: CatalogueRepository {
     let formulaCatalogue: [BrewPackage]
     let caskCatalogue: [BrewPackage]
 
-    func package(for reference: HomebrewPackageReference) async throws -> BrewPackage? {
+    func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
         let packages = reference.kind == .formula ? formulaCatalogue : caskCatalogue
-        return packages.first { $0.id == reference.packageID }
+        return packages.first { $0.id == reference }
     }
 }

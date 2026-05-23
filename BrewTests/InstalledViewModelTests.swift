@@ -146,12 +146,12 @@ struct InstalledViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         await vm.load()
-        let removedSelectionID: InstalledBrewPackage.ID = "formula:git"
+        let removedSelectionID: InstalledBrewPackage.ID = .formula(name: "git")
         vm.setSelection(removedSelectionID)
 
         await vm.refresh()
 
-        let expectedFallbackID: InstalledBrewPackage.ID = "formula:wget"
+        let expectedFallbackID: InstalledBrewPackage.ID = .formula(name: "wget")
         #expect(vm.selectedPackage?.id == expectedFallbackID)
     }
 

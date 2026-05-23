@@ -75,7 +75,7 @@ struct BrewAnalyticsJSON: Decodable {
 }
 
 struct BrewAnalyticsPackageCount: Hashable {
-    let reference: HomebrewPackageReference
+    let reference: HomebrewPackageID
     let count: Int
 
     var name: String {
@@ -95,7 +95,7 @@ private struct BrewAnalyticsEntry: Decodable {
         count = try container.decodeRequiredIntLossy(forKey: .count)
     }
 
-    func requiredReference(codingPath: [CodingKey]) throws -> HomebrewPackageReference {
+    func requiredReference(codingPath: [CodingKey]) throws -> HomebrewPackageID {
         let formulaName = Self.trimmedOrNil(formula)
         let caskToken = Self.trimmedOrNil(cask)
 

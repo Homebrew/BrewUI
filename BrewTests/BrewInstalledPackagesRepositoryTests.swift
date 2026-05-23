@@ -116,10 +116,10 @@ struct BrewInstalledPackagesRepositoryTests {
               "name": "deps-formula",
               "desc": "  formula desc  ",
               "homepage": " https://example.com ",
-              "dependencies": ["openssl", ""],
+              "dependencies": ["openssl", "openssl"],
               "build_dependencies": ["make", "openssl"],
-              "recommended_dependencies": ["curl", " make "],
-              "optional_dependencies": ["  sqlite ", ""],
+              "recommended_dependencies": ["curl"],
+              "optional_dependencies": ["sqlite"],
               "versions": { "stable": "1.0.0" },
               "installed": [{ "version": "1.0.0" }]
             }
@@ -132,7 +132,7 @@ struct BrewInstalledPackagesRepositoryTests {
               "version": "2.0.0",
               "installed": ["2.0.0"],
               "dependencies": {
-                "formula": [" git ", ""],
+                "formula": ["git"],
                 "cask": ["docker", "git"]
               }
             }

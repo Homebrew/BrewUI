@@ -12,13 +12,13 @@ struct BrewPackage: Identifiable, Hashable {
     var description: String
     var homepage: String
     var latestVersion: String
-    var dependencies: [HomebrewPackageReference]
+    var dependencies: [HomebrewPackageID]
 
-    var id: String {
-        "\(kind.rawValue):\(name)"
+    var id: HomebrewPackageID {
+        reference
     }
 
-    var reference: HomebrewPackageReference {
-        HomebrewPackageReference(package: self)
+    var reference: HomebrewPackageID {
+        HomebrewPackageID(package: self)
     }
 }
