@@ -1,0 +1,3 @@
+parent_config: ../../../.swiftlint.yml
+identifier_name:
+  min_length: 2

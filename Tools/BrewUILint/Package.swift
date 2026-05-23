@@ -18,5 +18,9 @@ let package = Package(
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ],
         ),
+        .testTarget(
+            name: "BrewUILintTests",
+            dependencies: ["BrewUILint"],
+        ),
     ],
 )
