@@ -3,6 +3,7 @@ import SwiftSyntax
 protocol Rule {
     static var identifier: String { get }
     static var message: String { get }
+    init()
     func makeVisitor(context: RuleContext) -> SyntaxVisitor
 }
 
