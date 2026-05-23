@@ -73,6 +73,4 @@ jobs:
             ${{ runner.os }}-brewuilint-
 
       - name: Run BrewUILint
-        run: |
-          mapfile -t brew_sources < <(find Brew -name '*.swift' -print)
-          swift run --package-path Tools/BrewUILint -c release BrewUILint "${brew_sources[@]}"
+        run: swift run --package-path Tools/BrewUILint -c release BrewUILint $(find Brew -name '*.swift')
