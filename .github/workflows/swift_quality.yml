@@ -68,9 +68,14 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: Tools/BrewUILint/.build
-          key: ${{ runner.os }}-brewuilint-${{ hashFiles('Tools/BrewUILint/Package.swift', 'Tools/BrewUILint/Package.resolved', 'Tools/BrewUILint/Sources/**') }}
+          key: ${{ runner.os }}-brewuilint-${{ hashFiles('Tools/BrewUILint/Package.swift', 'Tools/BrewUILint/Package.resolved', 'Tools/BrewUILint/Sources/**', 'Tools/BrewUILint/Plugins/**') }}
           restore-keys: |
             ${{ runner.os }}-brewuilint-
 
+      - name: Build BrewUILint
+        run: swift build --package-path Tools/BrewUILint -c release --enable-experimental-prebuilts
+
       - name: Run BrewUILint
-        run: swift run --package-path Tools/BrewUILint -c release BrewUILint $(find Brew -name '*.swift')
+        run: |
+          BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
+          "$BREWUILINT" $(find Brew -name '*.swift')

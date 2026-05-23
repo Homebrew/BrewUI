@@ -81,7 +81,10 @@ When you change Swift sources or anything that affects Swift formatting or linti
 
 1. `mint run swiftformat --lint .`
 2. `mint run swiftlint lint --strict`
-3. `swift run --package-path Tools/BrewUILint -c release BrewUILint $(find Brew -name '*.swift')`
+3. BrewUILint (matches CI; first build is slow because it compiles `swift-syntax`):
+   - `swift build --package-path Tools/BrewUILint -c release --enable-experimental-prebuilts`
+   - `"$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint" $(find Brew -name '*.swift')`
+   - Keep `Tools/BrewUILint/.build` between runs; deleting it forces a full rebuild (~2+ minutes).
 
 The pre-commit hook formats and lints **staged** files only; these commands validate the **whole** tree like CI and catch drift in unstaged paths.
 
