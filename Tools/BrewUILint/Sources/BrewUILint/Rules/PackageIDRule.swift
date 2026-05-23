@@ -3,7 +3,7 @@ import SwiftSyntax
 struct PackageIDRule: Rule {
     static let identifier = "package_id_type"
     static let message =
-        "Types whose name contains 'Package' must declare `id` as `HomebrewPackageID` (or `HomebrewPackageID?`)."
+        "Types whose name ends with 'Package' must declare `id` as `HomebrewPackageID` (or `HomebrewPackageID?`)."
 
     func makeVisitor(context: RuleContext) -> SyntaxVisitor {
         PackageIDVisitor(context: context)
@@ -88,7 +88,13 @@ private final class PackageIDVisitor: SyntaxVisitor {
     }
 
     private var isInsidePackageNamedType: Bool {
-        enclosingTypeNames.contains { $0.contains("Package") }
+        enclosingTypeNames.contains(where: typeNameEndsWithPackage)
+    }
+
+    private func typeNameEndsWithPackage(_ typeName: String) -> Bool {
+        let simpleName = typeName.split(separator: ".").last.map(String.init) ?? typeName
+        let withoutGenerics = simpleName.split(separator: "<", maxSplits: 1).first.map(String.init) ?? simpleName
+        return withoutGenerics.hasSuffix("Package")
     }
 
     private func pushTypeName(_ name: String) {

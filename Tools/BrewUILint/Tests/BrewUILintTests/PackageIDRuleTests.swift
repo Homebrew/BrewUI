@@ -41,13 +41,24 @@ struct PackageIDRuleTests {
     func `nested package type fails`() {
         let source = """
         struct Container {
-            struct InnerPackageRow {
+            struct InnerPackage {
                 let id: Int
             }
         }
         """
         let violations = LintHarness.lintPackageIDRule(source)
         #expect(violations.count == 1)
+    }
+
+    @Test
+    func `package list type ignored`() {
+        let source = """
+        struct PackageList {
+            let id: String
+        }
+        """
+        let violations = LintHarness.lintPackageIDRule(source)
+        #expect(violations.isEmpty)
     }
 
     @Test
@@ -73,7 +84,7 @@ struct PackageIDRuleTests {
     }
 
     @Test
-    func `canonical identity enum self ID passes`() {
+    func `canonical identity enum ignored`() {
         let source = """
         enum HomebrewPackageID {
             var id: Self { self }
