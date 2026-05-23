@@ -6,6 +6,7 @@ let package = Package(
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "BrewUILint", targets: ["BrewUILint"]),
+        .plugin(name: "BrewUILintPlugin", targets: ["BrewUILintPlugin"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", exact: "602.0.0"),
@@ -17,6 +18,11 @@ let package = Package(
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftParser", package: "swift-syntax"),
             ],
+        ),
+        .plugin(
+            name: "BrewUILintPlugin",
+            capability: .buildTool(),
+            dependencies: ["BrewUILint"],
         ),
         .testTarget(
             name: "BrewUILintTests",
