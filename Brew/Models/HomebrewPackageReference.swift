@@ -58,29 +58,12 @@ extension HomebrewPackageID {
         var seen: Set<HomebrewPackageID> = []
         var result: [HomebrewPackageID] = []
         for reference in references {
-            guard let normalized = reference.normalized, !seen.contains(normalized) else {
+            guard !seen.contains(reference) else {
                 continue
             }
-            seen.insert(normalized)
-            result.append(normalized)
+            seen.insert(reference)
+            result.append(reference)
         }
         return result
-    }
-
-    private var normalized: HomebrewPackageID? {
-        switch self {
-        case let .formula(name):
-            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else {
-                return nil
-            }
-            return .formula(name: trimmed)
-        case let .cask(token):
-            let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else {
-                return nil
-            }
-            return .cask(token: trimmed)
-        }
     }
 }

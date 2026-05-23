@@ -12,17 +12,6 @@ struct HomebrewPackageIDTests {
         #expect(reference.id == reference)
     }
 
-    @Test func `uniqueReferences trims whitespace and drops empty names`() {
-        let references = HomebrewPackageID.uniqueReferences([
-            .formula(name: "  openssl@3  "),
-            .formula(name: ""),
-            .formula(name: "   "),
-            .cask(token: " docker "),
-        ])
-
-        #expect(references == [.formula(name: "openssl@3"), .cask(token: "docker")])
-    }
-
     @Test func `uniqueReferences deduplicates by kind and name`() {
         let references = HomebrewPackageID.uniqueReferences([
             .formula(name: "openssl@3"),
@@ -37,8 +26,7 @@ struct HomebrewPackageIDTests {
     @Test func `formulaDependencies applies uniqueReferences`() {
         let references = HomebrewPackageID.formulaDependencies(from: [
             "openssl@3",
-            " openssl@3 ",
-            "",
+            "openssl@3",
         ])
 
         #expect(references == [.formula(name: "openssl@3")])
