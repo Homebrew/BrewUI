@@ -1,5 +1,5 @@
 //
-//  HomebrewPackageReference.swift
+//  HomebrewPackageID.swift
 //  Brew
 //
 

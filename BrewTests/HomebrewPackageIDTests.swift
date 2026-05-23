@@ -1,5 +1,5 @@
 //
-//  HomebrewPackageReferenceTests.swift
+//  HomebrewPackageIDTests.swift
 //  BrewTests
 //
 
