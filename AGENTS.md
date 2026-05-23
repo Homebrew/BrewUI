@@ -81,8 +81,9 @@ When you change Swift sources or anything that affects Swift formatting or linti
 
 1. `mint run swiftformat --lint .`
 2. `mint run swiftlint lint --strict`
+3. `swift run --package-path Tools/BrewUILint -c release BrewUILint $(find Brew -name '*.swift')`
 
-The pre-commit hook formats and lints **staged** files only; these two commands validate the **whole** tree like CI and catch drift in unstaged paths.
+The pre-commit hook formats and lints **staged** files only; these commands validate the **whole** tree like CI and catch drift in unstaged paths.
 
 ---
 

@@ -63,12 +63,14 @@ for index in "${!swift_files[@]}"; do
     fi
 
     is_partial=false
-    for partial in "${partially_staged_files[@]}"; do
-        if [[ "${file}" == "${partial}" ]]; then
-            is_partial=true
-            break
-        fi
-    done
+    if ((${#partially_staged_files[@]} > 0)); then
+        for partial in "${partially_staged_files[@]}"; do
+            if [[ "${file}" == "${partial}" ]]; then
+                is_partial=true
+                break
+            fi
+        done
+    fi
 
     if [[ "${is_partial}" == true ]]; then
         files_needing_manual_stage+=("${file}")
