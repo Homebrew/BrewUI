@@ -239,7 +239,11 @@ struct BrewInstalledPackagesRepositoryTests {
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
         await repo.load(forceRefresh: true)
-        #expect(repo.state == .failed("boom"))
+        guard case let .failed(error) = repo.state, case let BrewCommandError.failed(_, stderr) = error else {
+            Issue.record("expected failed state carrying a brew command error")
+            return
+        }
+        #expect(stderr == "boom")
     }
 
     @Test @MainActor func `load fails when installed info json is invalid`() async {
@@ -256,14 +260,17 @@ struct BrewInstalledPackagesRepositoryTests {
         }
     }
 
-    @Test @MainActor func `load fails with missing Homebrew message when locator fails`() async {
+    @Test @MainActor func `load fails with brew lookup error when locator fails`() async {
         let runner = MockBrewCommandRunner(responses: [:])
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
             locator: MissingBrewExecutableLocator(),
         )
         await repo.load(forceRefresh: true)
-        #expect(repo.state == .failed(InstalledPackagesTestSupport.localizedBrewExecutableNotFoundMessage()))
+        guard case let .failed(error) = repo.state, case BrewLookupError.executableNotFound = error else {
+            Issue.record("expected failed state carrying BrewLookupError.executableNotFound")
+            return
+        }
     }
 
     @Test @MainActor func `failed refresh keeps previously loaded data on screen`() async {

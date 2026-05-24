@@ -63,8 +63,8 @@ final class InstalledViewModel {
         switch repository.state {
         case .loading:
             .loading
-        case let .failed(message):
-            .error(message)
+        case let .failed(error):
+            .error(Self.userMessage(for: error))
         case let .loaded(packages):
             .loaded(Self.filteredContent(InstalledPackagesContent(packages: packages), query: searchQuery))
         }
@@ -209,5 +209,27 @@ final class InstalledViewModel {
 
     private static func normalizedSearchQuery(_ query: String) -> String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Maps a repository failure into user-facing copy — the presentation decision the repository
+    /// deliberately leaves to this layer.
+    private static func userMessage(for error: any Error) -> String {
+        switch error {
+        case BrewLookupError.executableNotFound:
+            return String(
+                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
+                comment: "Installed tab error when brew binary missing",
+            )
+        case let BrewCommandError.failed(_, stderr):
+            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                return trimmed
+            }
+            return String(localized: "Homebrew command failed.", comment: "Installed tab error generic brew failure")
+        case let BrewCommandError.launchFailed(underlying):
+            return underlying
+        default:
+            return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
+        }
     }
 }

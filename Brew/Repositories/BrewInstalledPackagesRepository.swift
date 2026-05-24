@@ -20,8 +20,9 @@ private let installedRepositoryLogger = Logger(
 @Observable
 @MainActor
 final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, InstalledInventoryObserving {
-    /// Drives blocking/loaded/error chrome. `failed` only when there is no data to show.
-    private(set) var state: LoadState<[InstalledBrewPackage]> = .loading
+    /// Drives blocking/loaded/error chrome. Carries the underlying `Error` on failure — presentation
+    /// layers (view models) map it to user-facing copy. `failed` only when there is no data to show.
+    private(set) var state: LoadState<[InstalledBrewPackage], any Error> = .loading
 
     /// O(1) membership/info lookups, kept in lock-step with ``state``. Tracked by observation so
     /// row views re-render when an install/uninstall changes a package's presence.
@@ -128,7 +129,7 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
                     "Installed inventory revalidation failed: \(error.localizedDescription, privacy: .public)",
                 )
             } else {
-                state = .failed(Self.userMessage(for: error))
+                state = .failed(error)
                 lookup = [:]
             }
         }
@@ -169,26 +170,6 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
                     comment: "Installed tab JSON decode failure",
                 ),
             )
-        }
-    }
-
-    private static func userMessage(for error: Error) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Installed tab error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(localized: "Homebrew command failed.", comment: "Installed tab error generic brew failure")
-        case let BrewCommandError.launchFailed(underlying):
-            return underlying
-        default:
-            return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
         }
     }
 }

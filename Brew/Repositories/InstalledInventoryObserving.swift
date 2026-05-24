@@ -10,7 +10,7 @@ import Observation
 /// Refines `Observable` so SwiftUI tracks ``state`` reads through the existential.
 @MainActor
 protocol InstalledInventoryObserving: Observable, Sendable {
-    var state: LoadState<[InstalledBrewPackage]> { get }
+    var state: LoadState<[InstalledBrewPackage], any Error> { get }
     func load(forceRefresh: Bool) async
 }
 

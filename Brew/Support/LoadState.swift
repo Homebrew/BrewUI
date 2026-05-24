@@ -7,13 +7,13 @@ import Foundation
 
 /// Mutually-exclusive async load states for a single observable value (`CONVENTIONS.md` — Loadable UI state).
 ///
-/// `failed` carries a user-facing message; the producer is responsible for keeping prior
-/// `loaded` data on screen when a refresh fails and only transitioning to `failed` when
-/// there is nothing to show.
-enum LoadState<Value> {
+/// `failed` carries a typed `Failure` (e.g. an `Error` surfaced by a repository); presentation layers
+/// map it to user-facing copy. The producer keeps prior `loaded` data on screen when a refresh fails,
+/// only transitioning to `failed` when there is nothing to show.
+enum LoadState<Value, Failure> {
     case loading
     case loaded(Value)
-    case failed(String)
+    case failed(Failure)
 
     var value: Value? {
         guard case let .loaded(value) = self else {
@@ -23,4 +23,4 @@ enum LoadState<Value> {
     }
 }
 
-extension LoadState: Equatable where Value: Equatable {}
+extension LoadState: Equatable where Value: Equatable, Failure: Equatable {}
