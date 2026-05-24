@@ -40,39 +40,36 @@ func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
 }
 
 @MainActor
-func makeInstalledViewModel(
-    repository: InstalledPackagesRepository,
-    brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
-) -> InstalledViewModel {
-    InstalledViewModel(
-        repository: repository,
-        brewCommandCenter: brewCommandCenter,
+func makeInstalledViewModel(repository: BrewInstalledPackagesRepository) -> InstalledViewModel {
+    InstalledViewModel(repository: repository)
+}
+
+/// Repository that has not loaded yet — stays in `.loading` until `load()` is called.
+@MainActor
+func unloadedInstalledRepository() -> BrewInstalledPackagesRepository {
+    InstalledPackagesTestSupport.repository(commandRunner: MockBrewCommandRunner(responses: [:]))
+}
+
+/// Repository whose `brew info` fetch throws `error`; call `load()` to reach `.failed`.
+@MainActor
+func failingInstalledRepository(error: Error) -> BrewInstalledPackagesRepository {
+    InstalledPackagesTestSupport.repository(
+        commandRunner: MockBrewCommandRunner(
+            behaviors: [["info", "--installed", "--json=v2"]: .throw(error)],
+        ),
     )
 }
 
+/// Repository whose brew locator fails; call `load()` to reach `.failed` with the missing-Homebrew message.
 @MainActor
-func loadViewModel(
-    commandRunner: BrewCommandRunning,
-    locator: (any BrewExecutableLocating)? = nil,
-) async -> InstalledViewModel {
-    let repository = InstalledPackagesTestSupport.repository(commandRunner: commandRunner, locator: locator)
-    let vm = InstalledViewModel(
-        repository: repository,
-        brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+func missingBrewInstalledRepository() -> BrewInstalledPackagesRepository {
+    InstalledPackagesTestSupport.repository(
+        commandRunner: MockBrewCommandRunner(responses: [:]),
+        locator: MissingBrewExecutableLocator(),
     )
-    await vm.load()
-    return vm
 }
 
 struct OddRepositoryError: Error {}
-
-struct StubThrowingRepository: InstalledPackagesRepository {
-    let error: Error
-
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
-        throw error
-    }
-}
 
 extension InstalledViewModel {
     var loadedFormulaPackages: [InstalledBrewPackage] {

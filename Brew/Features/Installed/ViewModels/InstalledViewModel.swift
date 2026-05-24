@@ -5,7 +5,6 @@
 
 import Foundation
 import Observation
-import OSLog
 
 struct InstalledPackagesContent: Equatable {
     var packages: [InstalledBrewPackage]
@@ -40,26 +39,16 @@ enum InstalledLoadState: Equatable {
     }
 }
 
-private let installedPackagesRefreshLogger = Logger(
-    subsystem: "Homebrew.BrewUI",
-    category: "InstalledViewModel",
-)
-
 @Observable
 @MainActor
 final class InstalledViewModel {
-    private let repository: InstalledPackagesRepository
-    private let brewCommandCenter: any BrewCommandCenter
-    private var observerTask: Task<Void, Never>?
+    @ObservationIgnored private let repository: BrewInstalledPackagesRepository
 
-    private var loadedContent: InstalledPackagesContent?
     private var preSearchSelectedPackageID: InstalledBrewPackage.ID?
     private var searchPreviewSelectedPackageID: InstalledBrewPackage.ID?
     private var didCommitSelectionDuringSearch = false
-    private(set) var state: InstalledLoadState = .loading
     var searchQuery: String = "" {
         didSet {
-            applyLoadedStateForCurrentQuery()
             updateSelectionForSearchQueryChange(from: oldValue, to: searchQuery)
             isSearchSelected = true
         }
@@ -68,15 +57,32 @@ final class InstalledViewModel {
     private var selectedPackageID: InstalledBrewPackage.ID?
     var isSearchSelected: Bool = false
 
+    /// Projects the shared repository's inventory through the active search query. The repository is the
+    /// single source of truth; this view model owns only screen-local search and selection state.
+    var state: InstalledLoadState {
+        switch repository.state {
+        case .loading:
+            .loading
+        case let .failed(message):
+            .error(message)
+        case let .loaded(packages):
+            .loaded(Self.filteredContent(InstalledPackagesContent(packages: packages), query: searchQuery))
+        }
+    }
+
     var activeSelectedPackageID: InstalledBrewPackage.ID? {
-        searchPreviewSelectedPackageID ?? selectedPackageID
+        let candidate = searchPreviewSelectedPackageID ?? selectedPackageID
+        if let candidate, allRows.contains(where: { $0.id == candidate }) {
+            return candidate
+        }
+        return firstVisibleRowID()
     }
 
     var totalPackageCount: Int {
         allRows.count
     }
 
-    /// Initial fetch with no rows yet — show blocking spinner (unit-tested via `init(testing…)`).
+    /// Initial fetch with no rows yet — show blocking spinner.
     var shouldShowInitialLoadingIndicator: Bool {
         if case .loading = state {
             return true
@@ -98,62 +104,18 @@ final class InstalledViewModel {
         allRows.first(where: { $0.id == activeSelectedPackageID })
     }
 
-    /// Loads from Homebrew via the repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(
-        repository: InstalledPackagesRepository,
-        brewCommandCenter: any BrewCommandCenter,
-    ) {
+    /// Loads from Homebrew via the shared repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
+    init(repository: BrewInstalledPackagesRepository) {
         self.repository = repository
-        self.brewCommandCenter = brewCommandCenter
-        observerTask = Task { @MainActor [weak self] in
-            await self?.observeOperationCompletions()
-        }
-    }
-
-    isolated deinit {
-        observerTask?.cancel()
     }
 
     func load() async {
-        loadedContent = nil
-        state = .loading
-        do {
-            let snapshot = try await repository.loadInstalledPackages()
-            loadedContent = Self.packagesContent(from: snapshot)
-            applyLoadedStateForCurrentQuery()
-        } catch {
-            state = .error(Self.userMessage(for: error))
-            selectedPackageID = nil
-        }
+        await repository.load()
     }
 
-    /// Reloads installed packages without clearing the list UI (no `.loading` state).
+    /// Reloads installed packages without clearing the list UI (the repository keeps prior data on failure).
     func refresh() async {
-        guard state.isLoaded else {
-            await load()
-            return
-        }
-        do {
-            let snapshot = try await repository.loadInstalledPackages(forceRefresh: true)
-            loadedContent = Self.packagesContent(from: snapshot)
-            applyLoadedStateForCurrentQuery()
-        } catch {
-            installedPackagesRefreshLogger.error(
-                "Refresh installed packages failed: \(error.localizedDescription, privacy: .public)",
-            )
-        }
-    }
-
-    private func observeOperationCompletions() async {
-        var lastPhase: [BrewOperationID: BrewOperationPhase] = [:]
-        let stream = await brewCommandCenter.allPhaseChanges()
-        for await (id, phase) in stream {
-            let previous = lastPhase[id] ?? .idle
-            lastPhase[id] = phase
-            if case .running = previous, case .idle = phase {
-                await refresh()
-            }
-        }
+        await repository.load(forceRefresh: true)
     }
 
     func setSelection(_ selection: InstalledBrewPackage.ID?) {
@@ -189,30 +151,6 @@ final class InstalledViewModel {
             return []
         }
         return content.packages
-    }
-
-    private func applyLoadedStateForCurrentQuery() {
-        guard let loadedContent else {
-            return
-        }
-        synchronizeSelectionWithLoadedContent(loadedContent)
-        state = .loaded(Self.filteredContent(loadedContent, query: searchQuery))
-    }
-
-    private func synchronizeSelectionWithLoadedContent(_ content: InstalledPackagesContent) {
-        let availableIDs = Set(content.packages.map(\.id))
-        if let selectedPackageID, !availableIDs.contains(selectedPackageID) {
-            self.selectedPackageID = nil
-        }
-        if selectedPackageID == nil {
-            selectedPackageID = content.packages.first?.id
-        }
-        if let searchPreviewSelectedPackageID, !availableIDs.contains(searchPreviewSelectedPackageID) {
-            self.searchPreviewSelectedPackageID = nil
-        }
-        if let preSearchSelectedPackageID, !availableIDs.contains(preSearchSelectedPackageID) {
-            self.preSearchSelectedPackageID = nil
-        }
     }
 
     private func updateSelectionForSearchQueryChange(from oldQuery: String, to newQuery: String) {
@@ -271,29 +209,5 @@ final class InstalledViewModel {
 
     private static func normalizedSearchQuery(_ query: String) -> String {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    private static func packagesContent(from snapshot: [InstalledBrewPackage]) -> InstalledPackagesContent {
-        InstalledPackagesContent(packages: snapshot)
-    }
-
-    private static func userMessage(for error: Error) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Installed tab error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(localized: "Homebrew command failed.", comment: "Installed tab error generic brew failure")
-        case let BrewCommandError.launchFailed(underlying):
-            return underlying
-        default:
-            return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
-        }
     }
 }

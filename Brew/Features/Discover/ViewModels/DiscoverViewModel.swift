@@ -10,10 +10,10 @@ enum DiscoverLoadState: Equatable {
 @Observable
 @MainActor
 final class DiscoverViewModel {
-    private let discoverPackagesRepository: any DiscoverPackagesRepository
-    private let installedInventoryReading: any InstalledInventoryReading
-    private let topPackagesLimit: Int
-    private let analyticsWindow: BrewAnalyticsWindow
+    @ObservationIgnored private let discoverPackagesRepository: any DiscoverPackagesRepository
+    @ObservationIgnored private let installedRepository: BrewInstalledPackagesRepository
+    @ObservationIgnored private let topPackagesLimit: Int
+    @ObservationIgnored private let analyticsWindow: BrewAnalyticsWindow
 
     private var rows: [DiscoverListRowViewModel] = []
 
@@ -22,12 +22,12 @@ final class DiscoverViewModel {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
-        installedInventoryReading: any InstalledInventoryReading,
+        installedRepository: BrewInstalledPackagesRepository,
         topPackagesLimit: Int = 10,
         analyticsWindow: BrewAnalyticsWindow = .days30,
     ) {
         self.discoverPackagesRepository = discoverPackagesRepository
-        self.installedInventoryReading = installedInventoryReading
+        self.installedRepository = installedRepository
         self.topPackagesLimit = topPackagesLimit
         self.analyticsWindow = analyticsWindow
     }
@@ -85,11 +85,10 @@ final class DiscoverViewModel {
                 limit: topPackagesLimit,
                 window: analyticsWindow,
             )
-            let installedPackages = await installedInventoryReading.installedPackages()
 
             rows = Self.makeRows(
                 from: topPackages.topFormulae + topPackages.topCasks,
-                installedPackages: installedPackages,
+                installedRepository: installedRepository,
             )
             state = .loaded
             synchronizeSelectionWithLoadedRows()
@@ -127,15 +126,13 @@ final class DiscoverViewModel {
 
     private static func makeRows(
         from discoveryPackages: [DiscoveryBrewPackage],
-        installedPackages: [InstalledBrewPackage],
+        installedRepository: BrewInstalledPackagesRepository,
     ) -> [DiscoverListRowViewModel] {
-        let installedByID = Dictionary(uniqueKeysWithValues: installedPackages.map { ($0.id, $0) })
-
-        return discoveryPackages
+        discoveryPackages
             .map { discoveryPackage in
                 DiscoverListRowViewModel(
                     discoveryPackage: discoveryPackage,
-                    installedPackage: installedByID[discoveryPackage.id],
+                    installedRepository: installedRepository,
                 )
             }
             .sorted(by: sortRowsByPopularityThenName)

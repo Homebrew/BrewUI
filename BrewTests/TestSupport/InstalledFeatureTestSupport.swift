@@ -14,20 +14,9 @@ enum InstalledFeatureTestSupport {
             commandRunner: MockBrewCommandRunner(responses: [:]),
             cache: cache,
         )
-        let viewModel = InstalledViewModel(
-            repository: repository,
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
-        )
+        let viewModel = InstalledViewModel(repository: repository)
         await viewModel.load()
         return viewModel
-    }
-}
-
-struct StubInstalledPackagesRepository: InstalledPackagesRepository {
-    let snapshot: [InstalledBrewPackage]
-
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
-        snapshot
     }
 }
 

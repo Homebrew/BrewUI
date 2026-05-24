@@ -128,7 +128,7 @@ struct DiscoverListRowView: View {
                 package: previewPackage,
                 thirtyDayInstallCount: 420_000,
             ),
-            installedPackage: AppPreviewSupport.outdatedFormula,
+            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
         ),
     )
     .padding()

@@ -29,7 +29,7 @@ struct BrewInstalledPackagesRepositoryTests {
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        let packages = try await repo.loadInstalledPackages()
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
 
         #expect(packages.map(\.name) == ["aria2", "wget", "zed"])
 
@@ -79,7 +79,7 @@ struct BrewInstalledPackagesRepositoryTests {
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        let packages = try await repo.loadInstalledPackages()
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
 
         #expect(packages.map(\.name) == ["alpha", "beta", "charlie", "delta", "echo", "gamma"])
 
@@ -143,7 +143,7 @@ struct BrewInstalledPackagesRepositoryTests {
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        let packages = try await repo.loadInstalledPackages()
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
 
         let formula = try #require(package(named: "deps-formula", in: packages))
         #expect(formula.description == "formula desc")
@@ -185,7 +185,7 @@ struct BrewInstalledPackagesRepositoryTests {
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        let packages = try await repo.loadInstalledPackages()
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
 
         let beidViewer = try #require(package(named: "beid-viewer", in: packages))
         #expect(beidViewer.dependencies == [.cask(token: "beid-token")])
@@ -194,7 +194,7 @@ struct BrewInstalledPackagesRepositoryTests {
         #expect(beutl.dependencies == [.formula(name: "ffmpeg@6")])
     }
 
-    @Test @MainActor func `load tolerates optional and missing fields in json payload`() async throws {
+    @Test @MainActor func `load tolerates optional and missing fields in json payload`() async {
         let json = """
         {
           "formulae": [
@@ -211,11 +211,11 @@ struct BrewInstalledPackagesRepositoryTests {
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        let packages = try await repo.loadInstalledPackages()
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
         #expect(packages.count == 4)
     }
 
-    @Test @MainActor func `load tolerates invalid field types by treating sections as empty`() async throws {
+    @Test @MainActor func `load tolerates invalid field types by treating sections as empty`() async {
         let json = """
         {
           "formulae": "not-an-array",
@@ -226,11 +226,11 @@ struct BrewInstalledPackagesRepositoryTests {
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        let packages = try await repo.loadInstalledPackages()
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
         #expect(packages == [])
     }
 
-    @Test @MainActor func `load throws when installed info exits non zero`() async throws {
+    @Test @MainActor func `load fails when installed info exits non zero`() async {
         let runner = MockBrewCommandRunner(
             responses: InstalledPackagesTestSupport.responsesInstalledInfoFailure(
                 standardError: "boom",
@@ -238,32 +238,85 @@ struct BrewInstalledPackagesRepositoryTests {
             ),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        await #expect(throws: BrewCommandError.self) {
-            try await repo.loadInstalledPackages()
-        }
+        await repo.load(forceRefresh: true)
+        #expect(repo.state == .failed("boom"))
     }
 
-    @Test @MainActor func `load throws when installed info json is invalid`() async throws {
+    @Test @MainActor func `load fails when installed info json is invalid`() async {
         let runner = MockBrewCommandRunner(
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(
                 standardOutput: "{ this-is-not-json }",
             ),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        await #expect(throws: BrewCommandError.self) {
-            try await repo.loadInstalledPackages()
+        await repo.load(forceRefresh: true)
+        guard case .failed = repo.state else {
+            Issue.record("expected failed state")
+            return
         }
     }
 
-    @Test @MainActor func `load throws BrewLookupError when locator fails`() async throws {
+    @Test @MainActor func `load fails with missing Homebrew message when locator fails`() async {
         let runner = MockBrewCommandRunner(responses: [:])
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
             locator: MissingBrewExecutableLocator(),
         )
-        await #expect(throws: BrewLookupError.self) {
-            try await repo.loadInstalledPackages()
+        await repo.load(forceRefresh: true)
+        #expect(repo.state == .failed(InstalledPackagesTestSupport.localizedBrewExecutableNotFoundMessage()))
+    }
+
+    @Test @MainActor func `failed refresh keeps previously loaded data on screen`() async {
+        let cache = InstalledInventoryCache()
+        await cache.replace(
+            InstalledInventorySnapshot(fetchedAt: .now, packages: [.fixture(name: "git", kind: .formula)]),
+        )
+        let runner = MockBrewCommandRunner(
+            behaviors: [
+                ["info", "--installed", "--json=v2"]: .throw(BrewCommandError.failed(exitCode: 1, stderr: "boom")),
+            ],
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner, cache: cache)
+
+        await repo.load() // cache-first paint of git
+        await repo.load(forceRefresh: true) // fetch fails — must not clobber the loaded data
+
+        if case let .loaded(packages) = repo.state {
+            #expect(packages.map(\.name) == ["git"])
+        } else {
+            Issue.record("expected loaded state to be preserved on refresh failure")
         }
+    }
+
+    @Test @MainActor func `command center running to idle triggers a reconcile fetch`() async {
+        let commandCenter = ControllableAllPhasesCommandCenter()
+        let runner = CountingInfoRunner()
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner, commandCenter: commandCenter)
+        await repo.load(forceRefresh: true)
+        #expect(await runner.callCount == 1)
+        await waitForPhaseSubscriber(commandCenter: commandCenter)
+
+        let opID = BrewOperationID(kind: .formula, name: "git")
+        await commandCenter.emitPhase(id: opID, phase: .running(.upgradeFormula))
+        await commandCenter.emitPhase(id: opID, phase: .idle)
+
+        await expectCallCount(atLeast: 2, runner: runner)
+    }
+
+    @Test @MainActor func `command center running to failed does not trigger a reconcile fetch`() async {
+        let commandCenter = ControllableAllPhasesCommandCenter()
+        let runner = CountingInfoRunner()
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner, commandCenter: commandCenter)
+        await repo.load(forceRefresh: true)
+        #expect(await runner.callCount == 1)
+        await waitForPhaseSubscriber(commandCenter: commandCenter)
+
+        let opID = BrewOperationID(kind: .formula, name: "git")
+        await commandCenter.emitPhase(id: opID, phase: .running(.upgradeFormula))
+        await commandCenter.emitPhase(id: opID, phase: .failed(reason: .brewExecutableNotFound))
+        await settleAsync()
+
+        #expect(await runner.callCount == 1)
     }
 }
 
@@ -290,7 +343,7 @@ extension BrewInstalledPackagesRepositoryTests {
             responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
         )
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
-        let packages = try await repo.loadInstalledPackages()
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
 
         let wget = try #require(package(named: "wget", in: packages))
         #expect(wget.displayName == "wget")
@@ -300,5 +353,118 @@ extension BrewInstalledPackagesRepositoryTests {
 
         let docker = try #require(package(named: "docker", in: packages))
         #expect(docker.displayName == "Docker")
+    }
+}
+
+// MARK: - Reconcile helpers
+
+@MainActor
+private func waitForPhaseSubscriber(commandCenter: ControllableAllPhasesCommandCenter) async {
+    for _ in 0 ..< 200 {
+        if await commandCenter.hasPhaseSubscriber() {
+            return
+        }
+        await Task.yield()
+    }
+}
+
+@MainActor
+private func settleAsync() async {
+    for _ in 0 ..< 20 {
+        await Task.yield()
+    }
+}
+
+@MainActor
+private func expectCallCount(atLeast target: Int, runner: CountingInfoRunner) async {
+    for _ in 0 ..< 200 {
+        if await runner.callCount >= target {
+            return
+        }
+        await Task.yield()
+    }
+    #expect(await runner.callCount >= target)
+}
+
+/// Counts `brew info` invocations so reconcile tests can assert a fresh fetch happened.
+private actor CountingInfoRunner: BrewCommandRunning {
+    private(set) var callCount = 0
+
+    func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+        callCount += 1
+        return CommandOutput(
+            standardOutput: #"{ "formulae": [], "casks": [] }"#,
+            standardError: "",
+            terminationStatus: 0,
+        )
+    }
+}
+
+private actor ControllableAllPhasesCommandCenter: BrewCommandCenter {
+    private typealias AllPhaseTermination =
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation.Termination
+
+    private struct AllPhaseStreamListener {
+        let token: UUID
+        let continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation
+    }
+
+    private var allPhaseListeners: [AllPhaseStreamListener] = []
+
+    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
+        .idle
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id _: BrewOperationID) async -> Bool {
+        false
+    }
+
+    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            let token = UUID()
+            continuation.onTermination = { @Sendable (_: AllPhaseTermination) in
+                Task {
+                    await self.removeAllPhaseListener(token: token)
+                }
+            }
+            registerAllPhaseListener(token: token, continuation: continuation)
+        }
+    }
+
+    func submit(
+        id _: BrewOperationID,
+        command _: any BrewMutatingCommand,
+    ) async throws {}
+
+    func emitPhase(id: BrewOperationID, phase: BrewOperationPhase) {
+        for listener in allPhaseListeners {
+            listener.continuation.yield((id, phase))
+        }
+    }
+
+    func hasPhaseSubscriber() async -> Bool {
+        !allPhaseListeners.isEmpty
+    }
+
+    private func registerAllPhaseListener(
+        token: UUID,
+        continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation,
+    ) {
+        let listener = AllPhaseStreamListener(token: token, continuation: continuation)
+        allPhaseListeners.append(listener)
+    }
+
+    private func removeAllPhaseListener(token: UUID) {
+        allPhaseListeners.removeAll { $0.token == token }
     }
 }

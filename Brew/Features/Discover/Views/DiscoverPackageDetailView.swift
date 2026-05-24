@@ -216,7 +216,7 @@ struct DiscoverPackageDetailPlaceholder: View {
             ),
             thirtyDayInstallCount: 420_000,
         ),
-        installedPackage: AppPreviewSupport.outdatedFormula,
+        installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
     )
     DiscoverPackageDetailView(viewModel: DiscoverPackageDetailViewModel(row: row))
         .frame(minWidth: 380, minHeight: 480)

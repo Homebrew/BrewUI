@@ -8,7 +8,7 @@ struct DiscoverListRowViewModelTests {
                 package: .fixture(description: "", latestVersion: ""),
                 thirtyDayInstallCount: 12345,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
 
         #expect(viewModel.descriptionText.isEmpty)
@@ -25,20 +25,21 @@ struct DiscoverListRowViewModelTests {
                 package: .fixture(name: "git", latestVersion: "2.46.1"),
                 thirtyDayInstallCount: 100,
             ),
-            installedPackage: .fixture(name: "git", installedVersions: ["2.45.0"]),
+            installedRepository: installedRepo([.fixture(name: "git", installedVersions: ["2.45.0"])]),
         )
 
         #expect(viewModel.installedStatusLabel == "Installed")
         #expect(viewModel.installedVersionLabel == "v2.45.0")
     }
 
-    @Test @MainActor func `update(row:) copies all fields from the source row`() {
+    @Test @MainActor func `update(row:) copies discovery fields and reflects shared inventory`() {
+        let repository = installedRepo([.fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"])])
         let original = DiscoverListRowViewModel(
             discoveryPackage: DiscoveryBrewPackage(
                 package: .fixture(name: "wget", kind: .formula),
                 thirtyDayInstallCount: 10,
             ),
-            installedPackage: nil,
+            installedRepository: repository,
         )
         let updated = DiscoverListRowViewModel(
             discoveryPackage: DiscoveryBrewPackage(
@@ -50,7 +51,7 @@ struct DiscoverListRowViewModelTests {
                 ),
                 thirtyDayInstallCount: 99,
             ),
-            installedPackage: .fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"]),
+            installedRepository: repository,
         )
 
         original.update(row: updated)
@@ -70,7 +71,7 @@ struct DiscoverListRowViewModelTests {
                 package: .fixture(name: "wget", kind: .formula),
                 thirtyDayInstallCount: 10,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo([.fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"])]),
         )
         viewModel.update(
             discoveryPackage: DiscoveryBrewPackage(
@@ -82,7 +83,6 @@ struct DiscoverListRowViewModelTests {
                 ),
                 thirtyDayInstallCount: 99,
             ),
-            installedPackage: .fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"]),
         )
 
         #expect(viewModel.id == .cask(token: "iterm2"))
@@ -93,4 +93,9 @@ struct DiscoverListRowViewModelTests {
         #expect(viewModel.installs30DayLabel == "99")
         #expect(viewModel.installedVersionLabel == "v3.4.0")
     }
+}
+
+@MainActor
+private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> BrewInstalledPackagesRepository {
+    BrewInstalledPackagesRepository.previewLoaded(packages)
 }

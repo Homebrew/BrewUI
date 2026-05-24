@@ -206,14 +206,17 @@ enum AppPreviewSupport {
     )
 
     @MainActor
+    static func makeInstalledPackagesRepository(
+        packages: [InstalledBrewPackage] = installedPackages,
+    ) -> BrewInstalledPackagesRepository {
+        BrewInstalledPackagesRepository.previewLoaded(packages)
+    }
+
+    @MainActor
     static func makeInstalledViewModel(
         packages: [InstalledBrewPackage] = installedPackages,
-        commandCenter: any BrewCommandCenter = commandCenter,
     ) -> InstalledViewModel {
-        InstalledViewModel(
-            repository: PreviewInstalledPackagesRepository(packages: packages),
-            brewCommandCenter: commandCenter,
-        )
+        InstalledViewModel(repository: makeInstalledPackagesRepository(packages: packages))
     }
 
     @MainActor
@@ -225,9 +228,7 @@ enum AppPreviewSupport {
 
     @MainActor
     static func makeInstalledInventoryReading() -> any InstalledInventoryReading {
-        PreviewInstalledInventoryReading(
-            packages: installedPackages,
-        )
+        makeInstalledPackagesRepository()
     }
 
     @MainActor
@@ -276,31 +277,11 @@ actor PreviewBrewCommandCenter: BrewCommandCenter {
     ) async throws {}
 }
 
-struct PreviewInstalledPackagesRepository: InstalledPackagesRepository {
-    let packages: [InstalledBrewPackage]
-
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
-        packages
-    }
-}
-
 struct PreviewInstalledDependentsRepository: InstalledDependentsRepository {
     let dependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]]
 
     func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         dependentsByPackageID[packageID] ?? []
-    }
-}
-
-struct PreviewInstalledInventoryReading: InstalledInventoryReading {
-    let packages: [InstalledBrewPackage]
-
-    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
-        Set(packages.map(\.id))
-    }
-
-    func installedPackages() async -> [InstalledBrewPackage] {
-        packages
     }
 }
 

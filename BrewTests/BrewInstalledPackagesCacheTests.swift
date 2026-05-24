@@ -8,31 +8,33 @@ import Foundation
 import Testing
 
 struct BrewInstalledPackagesCacheTests {
-    @Test @MainActor func `load returns cached packages when snapshot is fresh`() async throws {
+    @Test @MainActor func `load returns cached packages when snapshot is fresh`() async {
         let cache = InstalledInventoryCache()
         let runner = CountingInstalledInfoJSONRunner()
         let repository = InstalledPackagesTestSupport.repository(commandRunner: runner, cache: cache)
 
-        let first = try await repository.loadInstalledPackages()
-        let second = try await repository.loadInstalledPackages()
+        await repository.load()
+        let first = repository.state.value ?? []
+        await repository.load()
+        let second = repository.state.value ?? []
 
         #expect(first.map(\.name) == ["git"])
         #expect(second.map(\.name) == ["git"])
         #expect(runner.loadCallCount == 1)
     }
 
-    @Test @MainActor func `load refetches when forceRefresh is true`() async throws {
+    @Test @MainActor func `load refetches when forceRefresh is true`() async {
         let cache = InstalledInventoryCache()
         let runner = CountingInstalledInfoJSONRunner()
         let repository = InstalledPackagesTestSupport.repository(commandRunner: runner, cache: cache)
 
-        _ = try await repository.loadInstalledPackages()
-        _ = try await repository.loadInstalledPackages(forceRefresh: true)
+        await repository.load()
+        await repository.load(forceRefresh: true)
 
         #expect(runner.loadCallCount == 2)
     }
 
-    @Test @MainActor func `load refetches when snapshot is stale`() async throws {
+    @Test @MainActor func `load refetches when snapshot is stale`() async {
         let cache = InstalledInventoryCache()
         let runner = CountingInstalledInfoJSONRunner()
         let repository = InstalledPackagesTestSupport.repository(commandRunner: runner, cache: cache)
@@ -42,9 +44,9 @@ struct BrewInstalledPackagesCacheTests {
         )
         await cache.replace(staleSnapshot)
 
-        let packages = try await repository.loadInstalledPackages()
+        await repository.load()
 
-        #expect(packages.map(\.name) == ["git"])
+        #expect(repository.state.value?.map(\.name) == ["git"])
         #expect(runner.loadCallCount == 1)
     }
 
@@ -60,6 +62,7 @@ struct BrewInstalledPackagesCacheTests {
             cache: cache,
         )
 
+        await repository.load()
         let installedIDs = await repository.installedPackageIDs()
         #expect(installedIDs == Set(packages.map(\.id)))
     }
