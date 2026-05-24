@@ -127,6 +127,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				EEAA00012F70000000000003 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EEC39EC12F5AB4B900269514 /* Brew */,
@@ -216,6 +217,9 @@
 			);
 			mainGroup = EEC39EB62F5AB4B900269514;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EEAA00012F70000000000001 /* XCLocalSwiftPackageReference "Tools/BrewUILint" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EEC39EC02F5AB4B900269514 /* Products */;
 			projectDirPath = "";
@@ -279,6 +283,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		EEAA00012F70000000000003 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = EEAA00012F70000000000002 /* BrewUILintPlugin */;
+		};
 		EEC39ECE2F5AB4B900269514 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EEC39EBE2F5AB4B900269514 /* Brew */;
@@ -592,6 +600,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		EEAA00012F70000000000001 /* XCLocalSwiftPackageReference "Tools/BrewUILint" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Tools/BrewUILint;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EEAA00012F70000000000002 /* BrewUILintPlugin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA00012F70000000000001 /* XCLocalSwiftPackageReference "Tools/BrewUILint" */;
+			productName = "plugin:BrewUILintPlugin";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EEC39EB72F5AB4B900269514 /* Project object */;
 }

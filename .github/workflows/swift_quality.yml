@@ -10,6 +10,7 @@ on:
       - ".swiftformat"
       - "Brewfile"
       - "Mintfile"
+      - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
   pull_request:
@@ -20,6 +21,7 @@ on:
       - ".swiftformat"
       - "Brewfile"
       - "Mintfile"
+      - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
 
@@ -28,7 +30,7 @@ permissions:
 
 jobs:
   swift-quality:
-    name: SwiftFormat + SwiftLint
+    name: SwiftFormat + SwiftLint + BrewUILint
     runs-on: macos-26
     env:
       MINT_PATH: ${{ github.workspace }}/mint
@@ -61,3 +63,19 @@ jobs:
 
       - name: Run SwiftLint (strict)
         run: mint run swiftlint lint --strict
+
+      - name: Cache BrewUILint build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: Tools/BrewUILint/.build
+          key: ${{ runner.os }}-brewuilint-${{ hashFiles('Tools/BrewUILint/Package.swift', 'Tools/BrewUILint/Package.resolved', 'Tools/BrewUILint/Sources/**', 'Tools/BrewUILint/Plugins/**') }}
+          restore-keys: |
+            ${{ runner.os }}-brewuilint-
+
+      - name: Build BrewUILint
+        run: swift build --package-path Tools/BrewUILint -c release --enable-experimental-prebuilts
+
+      - name: Run BrewUILint
+        run: |
+          BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
+          find Brew -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
