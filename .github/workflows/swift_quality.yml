@@ -78,4 +78,4 @@ jobs:
       - name: Run BrewUILint
         run: |
           BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
-          "$BREWUILINT" $(find Brew -name '*.swift')
+          find Brew -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
