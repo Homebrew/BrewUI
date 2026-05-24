@@ -5,13 +5,13 @@ import Observation
 @MainActor
 final class DiscoverListRowViewModel: Identifiable {
     private(set) var discoveryPackage: DiscoveryBrewPackage
-    /// Shared installed-inventory source of truth. Read through it so the installed badge/version stay
-    /// reactive to installs and uninstalls happening on other surfaces.
-    @ObservationIgnored let installedRepository: BrewInstalledPackagesRepository
+    /// Shared installed-status reader. Read through it so the installed badge/version stay reactive to
+    /// installs and uninstalls happening on other surfaces.
+    @ObservationIgnored let installedRepository: any InstalledPackageStatusReading
 
     init(
         discoveryPackage: DiscoveryBrewPackage,
-        installedRepository: BrewInstalledPackagesRepository,
+        installedRepository: any InstalledPackageStatusReading,
     ) {
         self.discoveryPackage = discoveryPackage
         self.installedRepository = installedRepository

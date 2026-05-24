@@ -5,7 +5,7 @@ import Observation
 @MainActor
 final class DiscoverPackageDetailViewModel {
     private(set) var discoveryPackage: DiscoveryBrewPackage
-    @ObservationIgnored private let installedRepository: BrewInstalledPackagesRepository
+    @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
 
     init(row: DiscoverListRowViewModel) {
         discoveryPackage = row.discoveryPackage

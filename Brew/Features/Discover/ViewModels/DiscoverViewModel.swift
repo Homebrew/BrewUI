@@ -11,7 +11,7 @@ enum DiscoverLoadState: Equatable {
 @MainActor
 final class DiscoverViewModel {
     @ObservationIgnored private let discoverPackagesRepository: any DiscoverPackagesRepository
-    @ObservationIgnored private let installedRepository: BrewInstalledPackagesRepository
+    @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
     @ObservationIgnored private let topPackagesLimit: Int
     @ObservationIgnored private let analyticsWindow: BrewAnalyticsWindow
 
@@ -22,7 +22,7 @@ final class DiscoverViewModel {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
-        installedRepository: BrewInstalledPackagesRepository,
+        installedRepository: any InstalledPackageStatusReading,
         topPackagesLimit: Int = 10,
         analyticsWindow: BrewAnalyticsWindow = .days30,
     ) {
@@ -126,7 +126,7 @@ final class DiscoverViewModel {
 
     private static func makeRows(
         from discoveryPackages: [DiscoveryBrewPackage],
-        installedRepository: BrewInstalledPackagesRepository,
+        installedRepository: any InstalledPackageStatusReading,
     ) -> [DiscoverListRowViewModel] {
         discoveryPackages
             .map { discoveryPackage in

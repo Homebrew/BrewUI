@@ -42,7 +42,7 @@ enum InstalledLoadState: Equatable {
 @Observable
 @MainActor
 final class InstalledViewModel {
-    @ObservationIgnored private let repository: BrewInstalledPackagesRepository
+    @ObservationIgnored private let repository: any InstalledInventoryObserving
 
     private var preSearchSelectedPackageID: InstalledBrewPackage.ID?
     private var searchPreviewSelectedPackageID: InstalledBrewPackage.ID?
@@ -105,7 +105,7 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the shared repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: BrewInstalledPackagesRepository) {
+    init(repository: any InstalledInventoryObserving) {
         self.repository = repository
     }
 

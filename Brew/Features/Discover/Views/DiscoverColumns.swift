@@ -29,7 +29,7 @@ struct DiscoverColumns: View {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
-        installedRepository: BrewInstalledPackagesRepository,
+        installedRepository: any InstalledPackageStatusReading,
     ) {
         _viewModel = State(
             initialValue: DiscoverViewModel(

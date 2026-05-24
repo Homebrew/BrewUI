@@ -30,24 +30,8 @@ struct StubInstalledDependentsRepository: InstalledDependentsRepository {
 
 struct StubInstalledInventoryReading: InstalledInventoryReading {
     let installedIDs: Set<InstalledBrewPackage.ID>
-    let packages: [InstalledBrewPackage]
-
-    init(
-        installedIDs: Set<InstalledBrewPackage.ID>,
-        packages: [InstalledBrewPackage] = [],
-    ) {
-        self.installedIDs = installedIDs
-        self.packages = packages
-    }
 
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         installedIDs
-    }
-
-    func installedPackages() async -> [InstalledBrewPackage] {
-        if !packages.isEmpty {
-            return packages
-        }
-        return []
     }
 }

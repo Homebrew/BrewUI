@@ -5,8 +5,4 @@ struct EmptyInstalledInventoryReading: InstalledInventoryReading {
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         []
     }
-
-    func installedPackages() async -> [InstalledBrewPackage] {
-        []
-    }
 }

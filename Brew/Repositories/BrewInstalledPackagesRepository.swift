@@ -19,7 +19,7 @@ private let installedRepositoryLogger = Logger(
 /// ``state`` or the synchronous lookups and re-render automatically when the inventory changes.
 @Observable
 @MainActor
-final class BrewInstalledPackagesRepository {
+final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, InstalledInventoryObserving {
     /// Drives blocking/loaded/error chrome. `failed` only when there is no data to show.
     private(set) var state: LoadState<[InstalledBrewPackage]> = .loading
 
@@ -71,10 +71,6 @@ final class BrewInstalledPackagesRepository {
         lookup[id] != nil
     }
 
-    func isOutdated(_ id: HomebrewPackageID) -> Bool {
-        lookup[id]?.outdated ?? false
-    }
-
     func info(for id: HomebrewPackageID) -> InstalledBrewPackage? {
         lookup[id]
     }
@@ -83,7 +79,8 @@ final class BrewInstalledPackagesRepository {
 
     /// Cache-first by default: fresh cache paints instantly with no refetch; stale cache paints immediately
     /// and then reconciles with a fresh fetch; an empty cache fetches. `forceRefresh` always fetches.
-    func load(forceRefresh: Bool = false) async {
+    /// (Call `load()` — the no-arg convenience — via ``InstalledInventoryObserving``.)
+    func load(forceRefresh: Bool) async {
         guard !forceRefresh else {
             await fetchAndStore()
             return
@@ -201,10 +198,6 @@ final class BrewInstalledPackagesRepository {
 extension BrewInstalledPackagesRepository: InstalledInventoryReading {
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         Set(lookup.keys)
-    }
-
-    func installedPackages() async -> [InstalledBrewPackage] {
-        state.value ?? []
     }
 }
 
