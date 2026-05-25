@@ -35,7 +35,7 @@ struct BrewUILintPlugin: BuildToolPlugin {
         return .buildCommand(
             displayName: "BrewUILint (\(fileName))",
             executable: executable,
-            arguments: [inputPath.path, sentinel.path],
+            arguments: [inputPath.path, "--sentinel", sentinel.path],
             inputFiles: [inputPath],
             outputFiles: [sentinel],
         )
