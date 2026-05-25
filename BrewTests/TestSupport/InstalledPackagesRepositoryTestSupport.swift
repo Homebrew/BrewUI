@@ -51,6 +51,26 @@ struct MockBrewCommandRunner: BrewCommandRunning {
     }
 }
 
+/// Returns a different `brew info` JSON payload per invocation (last payload repeats), for two-load tests.
+actor QueuedBrewInfoRunner: BrewCommandRunning {
+    private let outputs: [CommandOutput]
+    private var index = 0
+
+    init(infoJSON: [String]) {
+        outputs = infoJSON.map {
+            CommandOutput(standardOutput: $0, standardError: "", terminationStatus: 0)
+        }
+    }
+
+    func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+        let output = outputs[min(index, outputs.count - 1)]
+        if index < outputs.count - 1 {
+            index += 1
+        }
+        return output
+    }
+}
+
 // MARK: - Fixtures
 
 enum InstalledPackagesTestSupport {
@@ -63,6 +83,7 @@ enum InstalledPackagesTestSupport {
         commandRunner: BrewCommandRunning,
         locator: (any BrewExecutableLocating)? = nil,
         cache: InstalledInventoryCache? = nil,
+        commandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
     ) -> BrewInstalledPackagesRepository {
         let resolvedCache = cache ?? InstalledInventoryCache()
         let resolvedLocator = locator ?? BrewExecutableLocator(overrideURL: fakeBrewExecutableURL)
@@ -70,7 +91,20 @@ enum InstalledPackagesTestSupport {
             commandRunner: commandRunner,
             locator: resolvedLocator,
             cache: resolvedCache,
+            commandCenter: commandCenter,
         )
+    }
+
+    /// Loads (force-refresh) and returns the resulting packages, failing the test if the repository did not reach `.loaded`.
+    @MainActor
+    static func loadedPackages(
+        from repository: BrewInstalledPackagesRepository,
+    ) async -> [InstalledBrewPackage] {
+        await repository.load(forceRefresh: true)
+        guard case let .loaded(packages) = repository.state else {
+            return []
+        }
+        return packages
     }
 
     // MARK: Localized copy (must match `InstalledViewModel.userMessage`)

@@ -5,11 +5,15 @@ import Observation
 @MainActor
 final class DiscoverPackageDetailViewModel {
     private(set) var discoveryPackage: DiscoveryBrewPackage
-    private(set) var installedPackage: InstalledBrewPackage?
+    @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
 
     init(row: DiscoverListRowViewModel) {
         discoveryPackage = row.discoveryPackage
-        installedPackage = row.installedPackage
+        installedRepository = row.installedRepository
+    }
+
+    private var installedPackage: InstalledBrewPackage? {
+        installedRepository.info(for: discoveryPackage.id)
     }
 
     var name: String {
@@ -74,6 +78,5 @@ final class DiscoverPackageDetailViewModel {
 
     func update(row: DiscoverListRowViewModel) {
         discoveryPackage = row.discoveryPackage
-        installedPackage = row.installedPackage
     }
 }

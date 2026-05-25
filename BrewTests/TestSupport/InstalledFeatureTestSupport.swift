@@ -14,20 +14,9 @@ enum InstalledFeatureTestSupport {
             commandRunner: MockBrewCommandRunner(responses: [:]),
             cache: cache,
         )
-        let viewModel = InstalledViewModel(
-            repository: repository,
-            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
-        )
+        let viewModel = InstalledViewModel(repository: repository)
         await viewModel.load()
         return viewModel
-    }
-}
-
-struct StubInstalledPackagesRepository: InstalledPackagesRepository {
-    let snapshot: [InstalledBrewPackage]
-
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
-        snapshot
     }
 }
 
@@ -41,24 +30,8 @@ struct StubInstalledDependentsRepository: InstalledDependentsRepository {
 
 struct StubInstalledInventoryReading: InstalledInventoryReading {
     let installedIDs: Set<InstalledBrewPackage.ID>
-    let packages: [InstalledBrewPackage]
-
-    init(
-        installedIDs: Set<InstalledBrewPackage.ID>,
-        packages: [InstalledBrewPackage] = [],
-    ) {
-        self.installedIDs = installedIDs
-        self.packages = packages
-    }
 
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         installedIDs
-    }
-
-    func installedPackages() async -> [InstalledBrewPackage] {
-        if !packages.isEmpty {
-            return packages
-        }
-        return []
     }
 }

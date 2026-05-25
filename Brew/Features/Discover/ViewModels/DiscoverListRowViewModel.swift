@@ -5,14 +5,16 @@ import Observation
 @MainActor
 final class DiscoverListRowViewModel: Identifiable {
     private(set) var discoveryPackage: DiscoveryBrewPackage
-    private(set) var installedPackage: InstalledBrewPackage?
+    /// Shared installed-status reader. Read through it so the installed badge/version stay reactive to
+    /// installs and uninstalls happening on other surfaces.
+    @ObservationIgnored let installedRepository: any InstalledPackageStatusReading
 
     init(
         discoveryPackage: DiscoveryBrewPackage,
-        installedPackage: InstalledBrewPackage?,
+        installedRepository: any InstalledPackageStatusReading,
     ) {
         self.discoveryPackage = discoveryPackage
-        self.installedPackage = installedPackage
+        self.installedRepository = installedRepository
     }
 
     var id: BrewPackage.ID {
@@ -51,6 +53,10 @@ final class DiscoverListRowViewModel: Identifiable {
         discoveryPackage.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var installedPackage: InstalledBrewPackage? {
+        installedRepository.info(for: id)
+    }
+
     var installedVersionLabel: String? {
         guard let raw = installedPackage?.installedVersions.first else {
             return nil
@@ -59,24 +65,17 @@ final class DiscoverListRowViewModel: Identifiable {
     }
 
     var installedStatusLabel: String? {
-        guard installedPackage != nil else {
+        guard installedRepository.isInstalled(id) else {
             return nil
         }
         return String(localized: "Installed", comment: "Discover list row installed status")
     }
 
-    func update(
-        discoveryPackage newDiscoveryPackage: DiscoveryBrewPackage,
-        installedPackage newInstalledPackage: InstalledBrewPackage?,
-    ) {
+    func update(discoveryPackage newDiscoveryPackage: DiscoveryBrewPackage) {
         discoveryPackage = newDiscoveryPackage
-        installedPackage = newInstalledPackage
     }
 
     func update(row: DiscoverListRowViewModel) {
-        update(
-            discoveryPackage: row.discoveryPackage,
-            installedPackage: row.installedPackage,
-        )
+        update(discoveryPackage: row.discoveryPackage)
     }
 }

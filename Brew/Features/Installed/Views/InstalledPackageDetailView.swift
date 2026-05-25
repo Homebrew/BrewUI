@@ -12,13 +12,14 @@ struct InstalledPackageDetailRoot: View {
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.installedInventoryCache) private var installedInventoryCache
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
         InstalledPackageDetailView(
             package: selectedPackage,
             brewCommandCenter: brewCommandCenter,
             installedDependentsRepository: BrewInstalledDependentsRepository(cache: installedInventoryCache),
-            installedInventoryReading: BrewInstalledPackagesRepository.live(cache: installedInventoryCache),
+            installedInventoryReading: installedPackagesRepository,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
     }

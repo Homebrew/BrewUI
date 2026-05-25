@@ -3,6 +3,7 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -156,7 +157,7 @@ struct DiscoverPackagesView: View {
                     ),
                     thirtyDayInstallCount: 420_000,
                 ),
-                installedPackage: nil,
+                installedRepository: installedPackagesRepository,
             )
         }
     }

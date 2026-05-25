@@ -4,7 +4,7 @@ import SwiftUI
 /// Entry-point wrapper for the Discover tab content.
 struct DiscoverColumnsRoot: View {
     @Environment(\.catalogueCache) private var catalogueCache
-    @Environment(\.installedInventoryCache) private var installedInventoryCache
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
         let apiClient = URLSessionBrewAPIClient.live()
@@ -16,10 +16,9 @@ struct DiscoverColumnsRoot: View {
             apiClient: apiClient,
             catalogueRepository: catalogueRepository,
         )
-        let installedInventoryReading = BrewInstalledPackagesRepository.live(cache: installedInventoryCache)
         DiscoverColumns(
             discoverPackagesRepository: discoverPackagesRepository,
-            installedInventoryReading: installedInventoryReading,
+            installedRepository: installedPackagesRepository,
         )
     }
 }
@@ -30,12 +29,12 @@ struct DiscoverColumns: View {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
-        installedInventoryReading: any InstalledInventoryReading,
+        installedRepository: any InstalledPackageStatusReading,
     ) {
         _viewModel = State(
             initialValue: DiscoverViewModel(
                 discoverPackagesRepository: discoverPackagesRepository,
-                installedInventoryReading: installedInventoryReading,
+                installedRepository: installedRepository,
             ),
         )
     }
@@ -94,6 +93,6 @@ struct DiscoverColumns: View {
 #Preview {
     DiscoverColumns(
         discoverPackagesRepository: AppPreviewSupport.makeDiscoverPackagesRepository(),
-        installedInventoryReading: AppPreviewSupport.makeInstalledInventoryReading(),
+        installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
     )
 }

@@ -28,10 +28,7 @@ struct DiscoverViewModelTests {
                     ],
                 ),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(
-                installedIDs: [.formula(name: "git")],
-                packages: [.fixture(name: "git", installedVersions: ["2.45.0"])],
-            ),
+            installedRepository: installedRepo([.fixture(name: "git", installedVersions: ["2.45.0"])]),
         )
 
         await viewModel.load()
@@ -55,7 +52,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(
                 error: BrewAPIClientError.transport(underlying: "offline"),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -70,7 +67,7 @@ struct DiscoverViewModelTests {
     @Test @MainActor func `load maps unknown discover repository errors to generic message`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -90,7 +87,7 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -109,7 +106,7 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -128,7 +125,7 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -152,7 +149,7 @@ struct DiscoverViewModelTests {
         )
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: repository,
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -175,7 +172,7 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -196,7 +193,7 @@ struct DiscoverViewModelTests {
                     ],
                 ),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -210,7 +207,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         #expect(viewModel.formulaRows.isEmpty)
@@ -222,7 +219,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         // VM starts in .loading before load() is called
@@ -236,7 +233,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -249,7 +246,7 @@ struct DiscoverViewModelTests {
     @Test @MainActor func `subtitle reflects error state`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -271,7 +268,7 @@ struct DiscoverViewModelTests {
         )
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: repository,
-            installedInventoryReading: StubInstalledInventoryReading(installedIDs: []),
+            installedRepository: installedRepo(),
         )
 
         await viewModel.load()
@@ -328,6 +325,11 @@ private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
 }
 
 private struct DiscoverOddError: Error {}
+
+@MainActor
+private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> BrewInstalledPackagesRepository {
+    BrewInstalledPackagesRepository.previewLoaded(packages)
+}
 
 private func discoveryPackage(
     name: String,

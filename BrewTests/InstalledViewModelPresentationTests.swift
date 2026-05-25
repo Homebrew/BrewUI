@@ -26,14 +26,14 @@ private func sectionVisibility(_ vm: InstalledViewModel) -> SectionVisibilitySna
 struct InstalledViewModelPresentationTests {
     @Test @MainActor func `selectedPackage is nil for initial loading state`() {
         let vm = makeInstalledViewModel(
-            repository: StubInstalledPackagesRepository(snapshot: .empty),
+            repository: unloadedInstalledRepository(),
         )
         #expect(vm.selectedPackage == nil)
     }
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is true when loading with no rows and no error`() {
         let vm = makeInstalledViewModel(
-            repository: StubInstalledPackagesRepository(snapshot: .empty),
+            repository: unloadedInstalledRepository(),
         )
         #expect(vm.shouldShowInitialLoadingIndicator)
     }
@@ -46,9 +46,7 @@ struct InstalledViewModelPresentationTests {
     }
 
     @Test @MainActor func `shouldShowInitialLoadingIndicator is false when load has user error`() async {
-        let vm = makeInstalledViewModel(
-            repository: FailingInstalledRepository(error: BrewLookupError.executableNotFound),
-        )
+        let vm = makeInstalledViewModel(repository: missingBrewInstalledRepository())
         await vm.load()
         #expect(!vm.shouldShowInitialLoadingIndicator)
     }
@@ -83,7 +81,7 @@ struct InstalledViewModelPresentationTests {
 
     @Test @MainActor func `packageCountSubtitle shows localized loading text when initial loading`() {
         let vm = makeInstalledViewModel(
-            repository: StubInstalledPackagesRepository(snapshot: .empty),
+            repository: unloadedInstalledRepository(),
         )
         let expected = String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
         #expect(vm.packageCountSubtitle == expected)
@@ -142,14 +140,6 @@ struct InstalledViewModelPresentationTests {
         vm.setSelection(row.id)
         vm.clearSelection()
         #expect(vm.selectedPackage?.id == row.id)
-    }
-}
-
-private struct FailingInstalledRepository: InstalledPackagesRepository {
-    let error: Error
-
-    func loadInstalledPackages(forceRefresh _: Bool) async throws -> [InstalledBrewPackage] {
-        throw error
     }
 }
 

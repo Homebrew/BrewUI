@@ -13,7 +13,7 @@ struct DiscoverPackageDetailViewModelTests {
                 ),
                 thirtyDayInstallCount: 3500,
             ),
-            installedPackage: .fixture(name: "wget", installedVersions: ["1.9.0"]),
+            installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.9.0"])]),
         )
         let viewModel = DiscoverPackageDetailViewModel(row: row)
 
@@ -32,7 +32,7 @@ struct DiscoverPackageDetailViewModelTests {
                 package: .fixture(name: "iterm2", kind: .cask, homepage: "", latestVersion: ""),
                 thirtyDayInstallCount: 500,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
         let viewModel = DiscoverPackageDetailViewModel(row: row)
 
@@ -51,7 +51,7 @@ struct DiscoverPackageDetailViewModelTests {
                 package: .fixture(description: "   \n  "),
                 thirtyDayInstallCount: 1,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
 
         #expect(DiscoverPackageDetailViewModel(row: row).packageDescription == nil)
@@ -63,7 +63,7 @@ struct DiscoverPackageDetailViewModelTests {
                 package: .fixture(description: "  A useful tool.  "),
                 thirtyDayInstallCount: 1,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
 
         #expect(DiscoverPackageDetailViewModel(row: row).packageDescription == "A useful tool.")
@@ -78,7 +78,7 @@ struct DiscoverPackageDetailViewModelTests {
                 ),
                 thirtyDayInstallCount: 1,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
 
         #expect(DiscoverPackageDetailViewModel(row: row).dependencyNames == ["libx264", "libvpx"])
@@ -90,7 +90,7 @@ struct DiscoverPackageDetailViewModelTests {
                 package: .fixture(dependencies: []),
                 thirtyDayInstallCount: 1,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
 
         #expect(DiscoverPackageDetailViewModel(row: row).dependencyNames.isEmpty)
@@ -102,7 +102,7 @@ struct DiscoverPackageDetailViewModelTests {
                 package: .fixture(homepage: ""),
                 thirtyDayInstallCount: 1,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
 
         #expect(DiscoverPackageDetailViewModel(row: row).homepageURL == nil)
@@ -114,7 +114,7 @@ struct DiscoverPackageDetailViewModelTests {
                 package: .fixture(homepage: "   "),
                 thirtyDayInstallCount: 1,
             ),
-            installedPackage: nil,
+            installedRepository: installedRepo(),
         )
 
         #expect(DiscoverPackageDetailViewModel(row: row).homepageURL == nil)
@@ -126,7 +126,7 @@ struct DiscoverPackageDetailViewModelTests {
                 package: .fixture(name: "wget"),
                 thirtyDayInstallCount: 1,
             ),
-            installedPackage: .fixture(name: "wget", installedVersions: ["1.0.0"]),
+            installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.0.0"])]),
         )
         let viewModel = DiscoverPackageDetailViewModel(row: row)
         viewModel.update(
@@ -140,7 +140,7 @@ struct DiscoverPackageDetailViewModelTests {
                     ),
                     thirtyDayInstallCount: 42,
                 ),
-                installedPackage: nil,
+                installedRepository: installedRepo(),
             ),
         )
 
@@ -152,4 +152,9 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.stableVersionLabel == "4.0.0")
         #expect(viewModel.homepageURL?.absoluteString == "https://docker.com")
     }
+}
+
+@MainActor
+private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> BrewInstalledPackagesRepository {
+    BrewInstalledPackagesRepository.previewLoaded(packages)
 }

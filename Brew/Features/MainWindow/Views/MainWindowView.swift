@@ -37,4 +37,5 @@ struct MainWindowView: View {
     MainWindowView()
         .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
         .environment(\.installedInventoryCache, AppPreviewSupport.installedInventoryCache)
+        .environment(\.installedPackagesRepository, AppPreviewSupport.makeInstalledPackagesRepository())
 }

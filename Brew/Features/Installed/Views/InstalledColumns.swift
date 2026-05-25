@@ -1,15 +1,10 @@
 import SwiftUI
 
 struct InstalledColumnsRoot: View {
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
-    @Environment(\.installedInventoryCache) private var installedInventoryCache
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
-        let installedPackagesRepository = BrewInstalledPackagesRepository.live(cache: installedInventoryCache)
-        InstalledColumns(
-            installedPackagesRepository: installedPackagesRepository,
-            brewCommandCenter: brewCommandCenter,
-        )
+        InstalledColumns(installedPackagesRepository: installedPackagesRepository)
     }
 }
 
@@ -17,15 +12,9 @@ struct InstalledColumnsRoot: View {
 struct InstalledColumns: View {
     @State var viewModel: InstalledViewModel
 
-    init(
-        installedPackagesRepository: any InstalledPackagesRepository,
-        brewCommandCenter: BrewCommandCenter,
-    ) {
+    init(installedPackagesRepository: BrewInstalledPackagesRepository) {
         _viewModel = State(
-            initialValue: .init(
-                repository: installedPackagesRepository,
-                brewCommandCenter: brewCommandCenter,
-            ),
+            initialValue: .init(repository: installedPackagesRepository),
         )
     }
 
@@ -61,8 +50,5 @@ struct InstalledColumns: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .task {
-            await viewModel.load()
-        }
     }
 }
