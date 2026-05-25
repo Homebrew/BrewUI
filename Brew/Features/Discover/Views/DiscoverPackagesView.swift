@@ -13,15 +13,7 @@ struct DiscoverPackagesView: View {
                 state: viewModel.activeState,
                 onRetry: { Task { await viewModel.reloadActive() } },
                 loaded: { packages in
-                    DiscoverPackageSections(
-                        packages: packages,
-                        scope: viewModel.scope,
-                        formulaeSectionTitle: viewModel.formulaeSectionTitle,
-                        casksSectionTitle: viewModel.casksSectionTitle,
-                        showsInstallMetrics: viewModel.showsInstallMetrics,
-                        selectedPackageID: viewModel.selectedPackageID,
-                        onSelect: { viewModel.setSelection($0) },
-                    )
+                    DiscoverPackageSections(viewModel: viewModel, packages: packages)
                 },
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -81,40 +73,28 @@ struct DiscoverPackagesView: View {
 /// Sectioned Discover list, split by package kind and filtered by the active scope. Renders an inline
 /// empty-state message when a visible section has no rows (e.g. a scope filter that excludes everything).
 private struct DiscoverPackageSections: View {
+    let viewModel: DiscoverViewModel
+    /// The redacted-placeholder or loaded packages handed down by `AsyncContentView` for this render.
     let packages: [DiscoveryBrewPackage]
-    let scope: DiscoverSearchScope
-    let formulaeSectionTitle: String
-    let casksSectionTitle: String
-    let showsInstallMetrics: Bool
-    let selectedPackageID: BrewPackage.ID?
-    let onSelect: (BrewPackage.ID?) -> Void
-
-    private var showsFormulaeSection: Bool {
-        scope != .casks
-    }
-
-    private var showsCasksSection: Bool {
-        scope != .formulae
-    }
 
     private var formulae: [DiscoveryBrewPackage] {
-        showsFormulaeSection ? DiscoverViewModel.sortedSection(packages, kind: .formula) : []
+        viewModel.showsFormulaeSection ? DiscoverViewModel.sortedSection(packages, kind: .formula) : []
     }
 
     private var casks: [DiscoveryBrewPackage] {
-        showsCasksSection ? DiscoverViewModel.sortedSection(packages, kind: .cask) : []
+        viewModel.showsCasksSection ? DiscoverViewModel.sortedSection(packages, kind: .cask) : []
     }
 
     var body: some View {
         ScrollViewReader { proxy in
             List {
-                if showsFormulaeSection {
-                    Section(formulaeSectionTitle) {
+                if viewModel.showsFormulaeSection {
+                    Section(viewModel.formulaeSectionTitle) {
                         sectionContent(formulae, kind: .formula)
                     }
                 }
-                if showsCasksSection {
-                    Section(casksSectionTitle) {
+                if viewModel.showsCasksSection {
+                    Section(viewModel.casksSectionTitle) {
                         sectionContent(casks, kind: .cask)
                     }
                 }
@@ -122,16 +102,16 @@ private struct DiscoverPackageSections: View {
             .listStyle(.plain)
             .accessibilityLabel("Discover packages")
             .onAppear {
-                scrollToSelection(selectedPackageID, with: proxy)
+                scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
-            .onChange(of: selectedPackageID) { _, selectedID in
+            .onChange(of: viewModel.selectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, with: proxy)
             }
             .onChange(of: packages.map(\.id)) { _, _ in
-                scrollToSelection(selectedPackageID, with: proxy)
+                scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
             .onExitCommand {
-                onSelect(nil)
+                viewModel.setSelection(nil)
             }
         }
     }
@@ -146,10 +126,10 @@ private struct DiscoverPackageSections: View {
                     .id(package.id)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        onSelect(package.id)
+                        viewModel.setSelection(package.id)
                     }
                     .listRowBackground(
-                        selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                        viewModel.selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
                     )
             }
         }
@@ -158,7 +138,7 @@ private struct DiscoverPackageSections: View {
     private func listRow(_ package: DiscoveryBrewPackage) -> some View {
         DiscoverListRowRoot(
             discoveryPackage: package,
-            showsInstallMetrics: showsInstallMetrics,
+            showsInstallMetrics: viewModel.showsInstallMetrics,
         )
     }
 
