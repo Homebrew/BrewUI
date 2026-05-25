@@ -12,23 +12,32 @@ struct BrewUILintPlugin: BuildToolPlugin {
         }
 
         let brewUILint = try context.tool(named: "BrewUILint")
+        let workDirectory = context.pluginWorkDirectoryURL
         return sourceFiles.map(\.url).compactMap {
-            createBuildCommand(for: $0, with: brewUILint.url)
+            createBuildCommand(for: $0, with: brewUILint.url, workDirectory: workDirectory)
         }
     }
 
-    func createBuildCommand(for inputPath: URL, with executable: URL) -> Command? {
+    func createBuildCommand(
+        for inputPath: URL,
+        with executable: URL,
+        workDirectory: URL,
+    ) -> Command? {
         guard inputPath.pathExtension == "swift" else {
             return nil
         }
 
         let fileName = inputPath.lastPathComponent
+        let sentinelName = inputPath.path
+            .replacingOccurrences(of: "/", with: "_")
+            .appending(".sentinel")
+        let sentinel = workDirectory.appending(path: sentinelName)
         return .buildCommand(
             displayName: "BrewUILint (\(fileName))",
             executable: executable,
-            arguments: [inputPath.path],
+            arguments: [inputPath.path, sentinel.path],
             inputFiles: [inputPath],
-            outputFiles: [],
+            outputFiles: [sentinel],
         )
     }
 }
@@ -42,8 +51,9 @@ struct BrewUILintPlugin: BuildToolPlugin {
             target: XcodeTarget,
         ) throws -> [Command] {
             let brewUILint = try context.tool(named: "BrewUILint")
+            let workDirectory = context.pluginWorkDirectoryURL
             return target.inputFiles.map(\.url).compactMap {
-                createBuildCommand(for: $0, with: brewUILint.url)
+                createBuildCommand(for: $0, with: brewUILint.url, workDirectory: workDirectory)
             }
         }
     }
