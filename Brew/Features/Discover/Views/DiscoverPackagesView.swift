@@ -8,6 +8,8 @@ struct DiscoverPackagesView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
+            scopePicker
+            Divider()
             AsyncContentView(
                 state: viewModel.activeState,
                 onRetry: { Task { await viewModel.reloadActive() } },
@@ -33,11 +35,6 @@ struct DiscoverPackagesView: View {
             placement: .toolbar,
             prompt: "Search the Homebrew catalogue",
         )
-        .searchScopes($viewModel.scope) {
-            Text("All").tag(DiscoverSearchScope.all)
-            Text("Formulae").tag(DiscoverSearchScope.formulae)
-            Text("Casks").tag(DiscoverSearchScope.casks)
-        }
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
             try? await Task.sleep(for: .milliseconds(250))
@@ -61,6 +58,19 @@ struct DiscoverPackagesView: View {
         }
         .padding(BrewSpacing.lg)
         .accessibilityElement(children: .combine)
+    }
+
+    /// Persistent kind filter, always visible (trending and results). Filters client-side; never refetches.
+    private var scopePicker: some View {
+        Picker("Scope", selection: $viewModel.scope) {
+            Text("All").tag(DiscoverSearchScope.all)
+            Text("Formulae").tag(DiscoverSearchScope.formulae)
+            Text("Casks").tag(DiscoverSearchScope.casks)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.bottom, BrewSpacing.md)
     }
 }
 
