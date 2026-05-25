@@ -12,7 +12,7 @@ struct InstalledPackagesView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Installed")
+                Text("Your packages")
                     .font(.brewTitle1)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.packageCountSubtitle)
