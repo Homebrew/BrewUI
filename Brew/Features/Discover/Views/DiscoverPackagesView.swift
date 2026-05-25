@@ -15,6 +15,8 @@ struct DiscoverPackagesView: View {
                     DiscoverPackageSections(
                         packages: packages,
                         scope: viewModel.scope,
+                        formulaeSectionTitle: viewModel.formulaeSectionTitle,
+                        casksSectionTitle: viewModel.casksSectionTitle,
                         showsInstallMetrics: viewModel.showsInstallMetrics,
                         isSearching: viewModel.isSearching,
                         selectedPackageID: viewModel.selectedPackageID,
@@ -78,6 +80,8 @@ struct DiscoverPackagesView: View {
 private struct DiscoverPackageSections: View {
     let packages: [DiscoveryBrewPackage]
     let scope: DiscoverSearchScope
+    let formulaeSectionTitle: String
+    let casksSectionTitle: String
     let showsInstallMetrics: Bool
     let isSearching: Bool
     let selectedPackageID: BrewPackage.ID?
@@ -104,12 +108,12 @@ private struct DiscoverPackageSections: View {
         ScrollViewReader { proxy in
             List {
                 if showsFormulaeSection {
-                    Section("Formulae") {
+                    Section(formulaeSectionTitle) {
                         sectionContent(formulae, kind: .formula)
                     }
                 }
                 if showsCasksSection {
-                    Section("Casks") {
+                    Section(casksSectionTitle) {
                         sectionContent(casks, kind: .cask)
                     }
                 }

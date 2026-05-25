@@ -142,6 +142,27 @@ final class DiscoverViewModel {
         scope != .formulae
     }
 
+    /// Trending mode frames sections as the top-N ranking; search mode drops the framing.
+    var formulaeSectionTitle: String {
+        guard !isSearching else {
+            return String(localized: "Formulae", comment: "Discover formulae section header while searching")
+        }
+        return String(
+            localized: "Top \(topPackagesLimit) Formulae",
+            comment: "Discover trending formulae section header",
+        )
+    }
+
+    var casksSectionTitle: String {
+        guard !isSearching else {
+            return String(localized: "Casks", comment: "Discover casks section header while searching")
+        }
+        return String(
+            localized: "Top \(topPackagesLimit) Casks",
+            comment: "Discover trending casks section header",
+        )
+    }
+
     /// Loaded packages of the active mode, scope-filtered and sorted, in display order. Drives selection.
     var visiblePackages: [DiscoveryBrewPackage] {
         guard case let .loaded(packages) = activeState else {

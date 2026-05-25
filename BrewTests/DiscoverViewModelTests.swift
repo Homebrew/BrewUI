@@ -250,6 +250,24 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedRow?.id == .cask(token: "docker"))
     }
 
+    @Test @MainActor func `section titles reflect trending limit and search mode`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+            topPackagesLimit: 10,
+        )
+
+        #expect(viewModel.formulaeSectionTitle == "Top 10 Formulae")
+        #expect(viewModel.casksSectionTitle == "Top 10 Casks")
+
+        viewModel.query = "git"
+        #expect(viewModel.formulaeSectionTitle == "Formulae")
+        #expect(viewModel.casksSectionTitle == "Casks")
+    }
+
     @Test @MainActor func `subtitle reflects loading state`() {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
