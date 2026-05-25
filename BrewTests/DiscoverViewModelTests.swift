@@ -33,18 +33,19 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        guard case .loaded = viewModel.state else {
-            Issue.record("expected loaded state")
+        guard case .loaded = viewModel.trending else {
+            Issue.record("expected loaded trending state")
             return
         }
-        #expect(viewModel.visibleRows.count == 2)
+        #expect(viewModel.visiblePackages.count == 2)
         #expect(viewModel.selectedRow?.id == .formula(name: "git"))
 
-        let git = try #require(viewModel.visibleRows.first { $0.id == .formula(name: "git") })
+        let git = try #require(viewModel.selectedRow)
         #expect(git.descriptionText == "Distributed revision control")
         #expect(git.stableVersionLabel == "2.46.1")
         #expect(git.installedStatusLabel == "Installed")
         #expect(git.installedVersionLabel == "v2.45.0")
+        #expect(git.showsInstallMetrics)
     }
 
     @Test @MainActor func `load maps discover repository transport errors to underlying message`() async {
@@ -57,8 +58,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        guard case let .error(message) = viewModel.state else {
-            Issue.record("expected error state")
+        guard case let .failed(message) = viewModel.trending else {
+            Issue.record("expected failed trending state")
             return
         }
         #expect(message == "offline")
@@ -72,8 +73,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        guard case let .error(message) = viewModel.state else {
-            Issue.record("expected error state")
+        guard case let .failed(message) = viewModel.trending else {
+            Issue.record("expected failed trending state")
             return
         }
         #expect(message == "Something went wrong loading Discover packages.")
@@ -177,10 +178,10 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.visibleRows.map(\.name) == ["git", "node", "wget"])
+        #expect(viewModel.visiblePackages.map(\.name) == ["git", "node", "wget"])
     }
 
-    @Test @MainActor func `formulaRows and caskRows partition loaded rows by kind`() async {
+    @Test @MainActor func `visible packages partition by kind formulae first then casks`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -198,11 +199,14 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.formulaRows.map(\.id) == [.formula(name: "git"), .formula(name: "node")])
-        #expect(viewModel.caskRows.map(\.id) == [.cask(token: "docker")])
+        #expect(viewModel.visiblePackages.map(\.id) == [
+            .formula(name: "git"),
+            .formula(name: "node"),
+            .cask(token: "docker"),
+        ])
     }
 
-    @Test @MainActor func `formulaRows and caskRows are empty before load`() {
+    @Test @MainActor func `visible packages are empty before load`() {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
@@ -210,8 +214,29 @@ struct DiscoverViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        #expect(viewModel.formulaRows.isEmpty)
-        #expect(viewModel.caskRows.isEmpty)
+        #expect(viewModel.visiblePackages.isEmpty)
+    }
+
+    @Test @MainActor func `scope formulae hides casks and casks hides formulae`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+
+        viewModel.scope = .formulae
+        #expect(viewModel.visiblePackages.map(\.id) == [.formula(name: "git")])
+        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+
+        viewModel.scope = .casks
+        #expect(viewModel.visiblePackages.map(\.id) == [.cask(token: "docker")])
+        #expect(viewModel.selectedRow?.id == .cask(token: "docker"))
     }
 
     @Test @MainActor func `subtitle reflects loading state`() {
@@ -228,7 +253,7 @@ struct DiscoverViewModelTests {
         #expect(!viewModel.isSubtitleError)
     }
 
-    @Test @MainActor func `subtitle reflects loaded state`() async {
+    @Test @MainActor func `subtitle reflects trending loaded state`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
@@ -238,7 +263,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.subtitleText == "Top 10 formulae · Top 10 casks")
+        #expect(viewModel.subtitleText == "Trending this month")
         #expect(viewModel.showsSubtitleTrendIcon)
         #expect(!viewModel.isSubtitleError)
     }
@@ -281,6 +306,128 @@ struct DiscoverViewModelTests {
         await viewModel.load()
 
         #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+    }
+
+    // MARK: - Search
+
+    @Test @MainActor func `search populates results and switches into searching mode`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+                searchResults: [
+                    discoveryPackage(name: "ripgrep", thirtyDayInstallCount: 0),
+                    discoveryPackage(name: "imagemagick", thirtyDayInstallCount: 0),
+                ],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.query = "rip"
+        await viewModel.search()
+
+        #expect(viewModel.isSearching)
+        #expect(!viewModel.showsInstallMetrics)
+        #expect(viewModel.visiblePackages.map(\.name) == ["imagemagick", "ripgrep"])
+        #expect(viewModel.selectedRow?.showsInstallMetrics == false)
+    }
+
+    @Test @MainActor func `clearing the query returns to trending without searching`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+                searchResults: [discoveryPackage(name: "ripgrep", thirtyDayInstallCount: 0)],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.query = "rip"
+        await viewModel.search()
+        #expect(viewModel.isSearching)
+
+        viewModel.query = ""
+        await viewModel.search()
+
+        #expect(!viewModel.isSearching)
+        #expect(viewModel.visiblePackages.map(\.id) == [.formula(name: "git")])
+        #expect(viewModel.showsInstallMetrics)
+    }
+
+    @Test @MainActor func `search subtitle reflects result count`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+                searchResults: [
+                    discoveryPackage(name: "git", thirtyDayInstallCount: 0),
+                    discoveryPackage(name: "gitup", kind: .cask, thirtyDayInstallCount: 0),
+                ],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        #expect(viewModel.subtitleText == "2 results for “git”")
+        #expect(!viewModel.showsSubtitleTrendIcon)
+    }
+
+    @Test @MainActor func `search subtitle reports no matches`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+                searchResults: [],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "zzz"
+        await viewModel.search()
+
+        #expect(viewModel.subtitleText == "No matches for “zzz”")
+    }
+
+    @Test @MainActor func `search maps transport errors to underlying message`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(
+                error: BrewAPIClientError.transport(underlying: "offline"),
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        guard case let .failed(message) = viewModel.results else {
+            Issue.record("expected failed results state")
+            return
+        }
+        #expect(message == "offline")
+        #expect(viewModel.subtitleText == "Could not search packages")
+        #expect(viewModel.isSubtitleError)
+    }
+
+    @Test @MainActor func `search maps unknown errors to generic search message`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        guard case let .failed(message) = viewModel.results else {
+            Issue.record("expected failed results state")
+            return
+        }
+        #expect(message == "Something went wrong searching the catalogue.")
     }
 }
 

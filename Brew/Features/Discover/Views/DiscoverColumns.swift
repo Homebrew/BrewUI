@@ -69,10 +69,13 @@ struct DiscoverColumns: View {
         .task {
             await viewModel.load()
         }
-        .onChange(of: viewModel.state) { _, _ in
+        .onChange(of: viewModel.selectedPackageID) { _, _ in
             syncDetailViewModel()
         }
-        .onChange(of: viewModel.selectedPackageID) { _, _ in
+        .onChange(of: viewModel.trending) { _, _ in
+            syncDetailViewModel()
+        }
+        .onChange(of: viewModel.results) { _, _ in
             syncDetailViewModel()
         }
     }

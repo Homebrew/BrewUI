@@ -83,7 +83,9 @@ private struct DiscoverPackageDetailMetadataSection: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
             detailRow(label: "Stable version", value: viewModel.stableVersionLabel)
-            detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
+            if viewModel.showsInstallMetrics {
+                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
+            }
             if let installedVersion = viewModel.installedVersionLabel {
                 detailRow(label: "Installed", value: installedVersion)
             }

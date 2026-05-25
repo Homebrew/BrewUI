@@ -71,12 +71,14 @@ struct DiscoverListRowView: View {
             Text("v\(viewModel.stableVersionLabel)")
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
-            Text("•")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
-            Text("\(viewModel.installs30DayLabel) installs (30d)")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
+            if viewModel.showsInstallMetrics {
+                Text("•")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextTertiary)
+                Text("\(viewModel.installs30DayLabel) installs (30d)")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextTertiary)
+            }
             Spacer(minLength: 0)
         }
     }
@@ -85,8 +87,10 @@ struct DiscoverListRowView: View {
         var parts = [
             viewModel.name,
             viewModel.packageKindChrome.badgeLabel,
-            "\(viewModel.installs30DayLabel) installs in 30 days",
         ]
+        if viewModel.showsInstallMetrics {
+            parts.append("\(viewModel.installs30DayLabel) installs in 30 days")
+        }
         if let installedStatusLabel = viewModel.installedStatusLabel {
             parts.append(installedStatusLabel)
         }

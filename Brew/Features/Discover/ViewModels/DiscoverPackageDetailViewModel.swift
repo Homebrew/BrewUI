@@ -45,6 +45,11 @@ final class DiscoverPackageDetailViewModel {
         discoveryPackage.thirtyDayInstallCount.formatted()
     }
 
+    /// Catalogue search results carry no analytics (zero install count), so the stat is hidden for them.
+    var showsInstallMetrics: Bool {
+        discoveryPackage.thirtyDayInstallCount > 0
+    }
+
     var homepageURL: URL? {
         let trimmed = discoveryPackage.homepage.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
