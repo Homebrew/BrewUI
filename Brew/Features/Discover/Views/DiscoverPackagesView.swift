@@ -18,7 +18,6 @@ struct DiscoverPackagesView: View {
                         formulaeSectionTitle: viewModel.formulaeSectionTitle,
                         casksSectionTitle: viewModel.casksSectionTitle,
                         showsInstallMetrics: viewModel.showsInstallMetrics,
-                        isSearching: viewModel.isSearching,
                         selectedPackageID: viewModel.selectedPackageID,
                         installedRepository: installedPackagesRepository,
                         onSelect: { viewModel.setSelection($0) },
@@ -51,27 +50,17 @@ struct DiscoverPackagesView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            Text("Discover")
+            Text(viewModel.paneHeading)
                 .font(.brewTitle1)
                 .foregroundStyle(Color.brewTextPrimary)
-            headerSubtitle
-        }
-        .padding(BrewSpacing.lg)
-    }
-
-    private var headerSubtitle: some View {
-        HStack(spacing: BrewSpacing.xs) {
-            if viewModel.showsSubtitleTrendIcon {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewBrandPrimary)
-            }
             Text(viewModel.subtitleText)
                 .font(.brewSubheadline)
                 .foregroundStyle(
                     viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
                 )
         }
+        .padding(BrewSpacing.lg)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -83,7 +72,6 @@ private struct DiscoverPackageSections: View {
     let formulaeSectionTitle: String
     let casksSectionTitle: String
     let showsInstallMetrics: Bool
-    let isSearching: Bool
     let selectedPackageID: BrewPackage.ID?
     let installedRepository: any InstalledPackageStatusReading
     let onSelect: (BrewPackage.ID?) -> Void
@@ -174,15 +162,11 @@ private struct DiscoverPackageSections: View {
     }
 
     private func emptyStateMessage(for kind: HomebrewPackageKind) -> String {
-        switch (kind, isSearching) {
-        case (.formula, true):
-            String(localized: "No matching formulae", comment: "Discover empty formulae section, searching")
-        case (.cask, true):
-            String(localized: "No matching casks", comment: "Discover empty casks section, searching")
-        case (.formula, false):
-            String(localized: "No formulae to show", comment: "Discover empty formulae section")
-        case (.cask, false):
-            String(localized: "No casks to show", comment: "Discover empty casks section")
+        switch kind {
+        case .formula:
+            String(localized: "No formulae match", comment: "Discover empty formulae section")
+        case .cask:
+            String(localized: "No casks match", comment: "Discover empty casks section")
         }
     }
 

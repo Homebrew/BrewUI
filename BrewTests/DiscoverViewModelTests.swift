@@ -250,18 +250,17 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedRow?.id == .cask(token: "docker"))
     }
 
-    @Test @MainActor func `section titles reflect trending limit and search mode`() {
+    @Test @MainActor func `section titles reflect trending and search mode`() {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
-            topPackagesLimit: 10,
         )
 
-        #expect(viewModel.formulaeSectionTitle == "Top 10 Formulae")
-        #expect(viewModel.casksSectionTitle == "Top 10 Casks")
+        #expect(viewModel.formulaeSectionTitle == "Popular Formulae")
+        #expect(viewModel.casksSectionTitle == "Popular Casks")
 
         viewModel.query = "git"
         #expect(viewModel.formulaeSectionTitle == "Formulae")
@@ -278,8 +277,8 @@ struct DiscoverViewModelTests {
         )
 
         // VM starts in .loading before load() is called
+        #expect(viewModel.paneHeading == "Trending")
         #expect(viewModel.subtitleText == "Loading packages…")
-        #expect(!viewModel.showsSubtitleTrendIcon)
         #expect(!viewModel.isSubtitleError)
     }
 
@@ -294,8 +293,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.subtitleText == "Trending this month")
-        #expect(viewModel.showsSubtitleTrendIcon)
+        #expect(viewModel.paneHeading == "Trending")
+        #expect(viewModel.subtitleText == "Most-installed packages in the last 30 days")
         #expect(!viewModel.isSubtitleError)
     }
 
@@ -308,8 +307,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
+        #expect(viewModel.paneHeading == "Trending")
         #expect(viewModel.subtitleText == "Could not load packages")
-        #expect(!viewModel.showsSubtitleTrendIcon)
         #expect(viewModel.isSubtitleError)
     }
 
@@ -414,8 +413,26 @@ struct DiscoverViewModelTests {
         viewModel.query = "git"
         await viewModel.search()
 
-        #expect(viewModel.subtitleText == "2 results for “git”")
-        #expect(!viewModel.showsSubtitleTrendIcon)
+        #expect(viewModel.paneHeading == "Results")
+        #expect(viewModel.subtitleText == "2 packages match “git”")
+    }
+
+    @Test @MainActor func `search subtitle uses singular for one match`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchResults: [cataloguePackage(name: "git")],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        #expect(viewModel.paneHeading == "Results")
+        #expect(viewModel.subtitleText == "1 package matches “git”")
     }
 
     @Test @MainActor func `search subtitle reports no matches`() async {
@@ -430,7 +447,8 @@ struct DiscoverViewModelTests {
         viewModel.query = "zzz"
         await viewModel.search()
 
-        #expect(viewModel.subtitleText == "No matches for “zzz”")
+        #expect(viewModel.paneHeading == "No matches")
+        #expect(viewModel.subtitleText == "Nothing found for “zzz”")
     }
 
     @Test @MainActor func `search maps transport errors to underlying message`() async {

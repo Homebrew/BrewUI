@@ -84,6 +84,17 @@ final class DiscoverViewModel {
 
     // MARK: - Heading
 
+    /// Editorial heading for the list pane, driven by the display mode and result count.
+    var paneHeading: String {
+        guard isSearching else {
+            return String(localized: "Trending", comment: "Discover list heading, trending landing")
+        }
+        if case .loaded = results, visiblePackages.isEmpty {
+            return String(localized: "No matches", comment: "Discover list heading, zero search results")
+        }
+        return String(localized: "Results", comment: "Discover list heading, search results")
+    }
+
     var subtitleText: String {
         switch activeState {
         case .loading:
@@ -96,33 +107,33 @@ final class DiscoverViewModel {
                 : String(localized: "Could not load packages", comment: "Discover subtitle on error")
         case .loaded:
             guard isSearching else {
-                return String(localized: "Trending this month", comment: "Discover subtitle on the trending landing")
-            }
-            let count = visiblePackages.count
-            if count == 0 {
                 return String(
-                    localized: "No matches for “\(normalizedQuery)”",
-                    comment: "Discover subtitle, no results",
+                    localized: "Most-installed packages in the last 30 days",
+                    comment: "Discover subhead on the trending landing",
                 )
             }
-            if count == 1 {
-                return String(
-                    localized: "1 result for “\(normalizedQuery)”",
-                    comment: "Discover subtitle, single result",
-                )
-            }
-            return String(
-                localized: "\(count) results for “\(normalizedQuery)”",
-                comment: "Discover subtitle, result count",
-            )
+            return searchResultsSubtitle
         }
     }
 
-    var showsSubtitleTrendIcon: Bool {
-        if case .loaded = activeState, !isSearching {
-            return true
+    private var searchResultsSubtitle: String {
+        let count = visiblePackages.count
+        if count == 0 {
+            return String(
+                localized: "Nothing found for “\(normalizedQuery)”",
+                comment: "Discover subhead, no search results",
+            )
         }
-        return false
+        if count == 1 {
+            return String(
+                localized: "1 package matches “\(normalizedQuery)”",
+                comment: "Discover subhead, single search result",
+            )
+        }
+        return String(
+            localized: "\(count) packages match “\(normalizedQuery)”",
+            comment: "Discover subhead, search result count",
+        )
     }
 
     var isSubtitleError: Bool {
@@ -142,25 +153,17 @@ final class DiscoverViewModel {
         scope != .formulae
     }
 
-    /// Trending mode frames sections as the top-N ranking; search mode drops the framing.
+    /// Trending mode frames sections editorially ("Popular"); search mode drops the framing.
     var formulaeSectionTitle: String {
-        guard !isSearching else {
-            return String(localized: "Formulae", comment: "Discover formulae section header while searching")
-        }
-        return String(
-            localized: "Top \(topPackagesLimit) Formulae",
-            comment: "Discover trending formulae section header",
-        )
+        isSearching
+            ? String(localized: "Formulae", comment: "Discover formulae section header while searching")
+            : String(localized: "Popular Formulae", comment: "Discover trending formulae section header")
     }
 
     var casksSectionTitle: String {
-        guard !isSearching else {
-            return String(localized: "Casks", comment: "Discover casks section header while searching")
-        }
-        return String(
-            localized: "Top \(topPackagesLimit) Casks",
-            comment: "Discover trending casks section header",
-        )
+        isSearching
+            ? String(localized: "Casks", comment: "Discover casks section header while searching")
+            : String(localized: "Popular Casks", comment: "Discover trending casks section header")
     }
 
     /// Loaded packages of the active mode, scope-filtered and sorted, in display order. Drives selection.
