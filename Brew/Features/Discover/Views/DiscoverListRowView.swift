@@ -1,5 +1,23 @@
 import SwiftUI
 
+/// Owns one Discover row's view model, reading the shared installed-status source from the environment at
+/// the row boundary so the installed badge stays reactive without threading the repository through parents.
+struct DiscoverListRowRoot: View {
+    let discoveryPackage: DiscoveryBrewPackage
+    let showsInstallMetrics: Bool
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+
+    var body: some View {
+        DiscoverListRowView(
+            viewModel: DiscoverListRowViewModel(
+                discoveryPackage: discoveryPackage,
+                installedRepository: installedPackagesRepository,
+                showsInstallMetrics: showsInstallMetrics,
+            ),
+        )
+    }
+}
+
 struct DiscoverListRowView: View {
     let viewModel: DiscoverListRowViewModel
 

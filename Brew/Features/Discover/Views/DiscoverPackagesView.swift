@@ -3,7 +3,6 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
-    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -21,7 +20,6 @@ struct DiscoverPackagesView: View {
                         casksSectionTitle: viewModel.casksSectionTitle,
                         showsInstallMetrics: viewModel.showsInstallMetrics,
                         selectedPackageID: viewModel.selectedPackageID,
-                        installedRepository: installedPackagesRepository,
                         onSelect: { viewModel.setSelection($0) },
                     )
                 },
@@ -83,7 +81,6 @@ private struct DiscoverPackageSections: View {
     let casksSectionTitle: String
     let showsInstallMetrics: Bool
     let selectedPackageID: BrewPackage.ID?
-    let installedRepository: any InstalledPackageStatusReading
     let onSelect: (BrewPackage.ID?) -> Void
 
     private var showsFormulaeSection: Bool {
@@ -153,12 +150,9 @@ private struct DiscoverPackageSections: View {
     }
 
     private func listRow(_ package: DiscoveryBrewPackage) -> some View {
-        DiscoverListRowView(
-            viewModel: DiscoverListRowViewModel(
-                discoveryPackage: package,
-                installedRepository: installedRepository,
-                showsInstallMetrics: showsInstallMetrics,
-            ),
+        DiscoverListRowRoot(
+            discoveryPackage: package,
+            showsInstallMetrics: showsInstallMetrics,
         )
     }
 
