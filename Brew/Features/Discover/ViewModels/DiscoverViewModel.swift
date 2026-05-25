@@ -82,14 +82,6 @@ final class DiscoverViewModel {
         !isSearching
     }
 
-    /// The trending landing shows the search-hint callout once data is loaded — not while loading or searching.
-    var showsTrendingCallout: Bool {
-        if case .loaded = trending, !isSearching {
-            return true
-        }
-        return false
-    }
-
     // MARK: - Heading
 
     var subtitleText: String {
