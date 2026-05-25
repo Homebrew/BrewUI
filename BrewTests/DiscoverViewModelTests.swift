@@ -287,21 +287,34 @@ struct DiscoverViewModelTests {
 @MainActor
 private struct StubDiscoverPackagesRepository: DiscoverPackagesRepository {
     let snapshot: DiscoverTopPackagesSnapshot
+    var searchResults: [DiscoveryBrewPackage] = []
 
     func loadTopPackages(
         limit _: Int,
         window _: BrewAnalyticsWindow,
     ) async throws -> DiscoverTopPackagesSnapshot {
         snapshot
+    }
+
+    func search(
+        query _: String,
+        limit _: Int,
+    ) async throws -> [DiscoveryBrewPackage] {
+        searchResults
     }
 }
 
 @MainActor
 private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepository {
     var snapshot: DiscoverTopPackagesSnapshot
+    var searchResults: [DiscoveryBrewPackage]
 
-    init(snapshot: DiscoverTopPackagesSnapshot) {
+    init(
+        snapshot: DiscoverTopPackagesSnapshot,
+        searchResults: [DiscoveryBrewPackage] = [],
+    ) {
         self.snapshot = snapshot
+        self.searchResults = searchResults
     }
 
     func loadTopPackages(
@@ -309,6 +322,13 @@ private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepositor
         window _: BrewAnalyticsWindow,
     ) async throws -> DiscoverTopPackagesSnapshot {
         snapshot
+    }
+
+    func search(
+        query _: String,
+        limit _: Int,
+    ) async throws -> [DiscoveryBrewPackage] {
+        searchResults
     }
 }
 
@@ -320,6 +340,13 @@ private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
         limit _: Int,
         window _: BrewAnalyticsWindow,
     ) async throws -> DiscoverTopPackagesSnapshot {
+        throw error
+    }
+
+    func search(
+        query _: String,
+        limit _: Int,
+    ) async throws -> [DiscoveryBrewPackage] {
         throw error
     }
 }

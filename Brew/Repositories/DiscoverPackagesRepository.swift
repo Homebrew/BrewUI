@@ -11,6 +11,12 @@ protocol DiscoverPackagesRepository: Sendable {
         limit: Int,
         window: BrewAnalyticsWindow,
     ) async throws -> DiscoverTopPackagesSnapshot
+
+    /// Catalogue search for the Discover tab. Results carry no analytics, so install counts are zero.
+    func search(
+        query: String,
+        limit: Int,
+    ) async throws -> [DiscoveryBrewPackage]
 }
 
 extension DiscoverPackagesRepository {
@@ -19,6 +25,13 @@ extension DiscoverPackagesRepository {
         window: BrewAnalyticsWindow = .days30,
     ) async throws -> DiscoverTopPackagesSnapshot {
         try await loadTopPackages(limit: limit, window: window)
+    }
+
+    func search(
+        query: String,
+        limit: Int = 50,
+    ) async throws -> [DiscoveryBrewPackage] {
+        try await search(query: query, limit: limit)
     }
 }
 
@@ -58,6 +71,14 @@ struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
             topFormulae: formulae,
             topCasks: casks,
         )
+    }
+
+    func search(
+        query: String,
+        limit: Int = 50,
+    ) async throws -> [DiscoveryBrewPackage] {
+        let matches = try await catalogueRepository.searchPackages(matching: query, limit: limit)
+        return matches.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) }
     }
 
     private func topPackages(

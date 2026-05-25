@@ -8,6 +8,8 @@ import Foundation
 @MainActor
 protocol CatalogueRepository: Sendable {
     func package(for reference: HomebrewPackageID) async throws -> BrewPackage?
+    /// Catalogue-wide name search across both formulae and casks, capped at `limit` results.
+    func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage]
 }
 
 @MainActor
@@ -49,6 +51,34 @@ final class BrewCatalogueRepository: CatalogueRepository {
     func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
         let packages = try await packages(for: reference.kind)
         return packages.first { $0.id == reference }
+    }
+
+    func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage] {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty, limit > 0 else {
+            return []
+        }
+
+        async let formulaeTask = packages(for: .formula)
+        async let casksTask = packages(for: .cask)
+        let formulae = try await formulaeTask
+        let casks = try await casksTask
+
+        let loweredQuery = trimmedQuery.lowercased()
+        let matches = (formulae + casks).filter { package in
+            package.name.localizedCaseInsensitiveContains(trimmedQuery)
+                || package.displayName.localizedCaseInsensitiveContains(trimmedQuery)
+        }
+        // Surface prefix matches first, then fall back to alphabetical so the most likely target leads.
+        let ranked = matches.sorted { lhs, rhs in
+            let lhsLeads = lhs.name.lowercased().hasPrefix(loweredQuery)
+            let rhsLeads = rhs.name.lowercased().hasPrefix(loweredQuery)
+            if lhsLeads != rhsLeads {
+                return lhsLeads
+            }
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
+        return Array(ranked.prefix(limit))
     }
 
     private func packages(for kind: HomebrewPackageKind) async throws -> [BrewPackage] {

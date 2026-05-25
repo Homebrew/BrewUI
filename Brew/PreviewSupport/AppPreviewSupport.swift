@@ -294,6 +294,21 @@ struct PreviewDiscoverPackagesRepository: DiscoverPackagesRepository {
     ) async throws -> DiscoverTopPackagesSnapshot {
         snapshot
     }
+
+    func search(
+        query: String,
+        limit: Int,
+    ) async throws -> [DiscoveryBrewPackage] {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else {
+            return []
+        }
+        let matches = (snapshot.topFormulae + snapshot.topCasks).filter {
+            $0.name.localizedCaseInsensitiveContains(trimmedQuery)
+                || $0.displayName.localizedCaseInsensitiveContains(trimmedQuery)
+        }
+        return Array(matches.prefix(limit))
+    }
 }
 
 struct PreviewDiscoverCatalogueRepository: CatalogueRepository {
@@ -303,5 +318,17 @@ struct PreviewDiscoverCatalogueRepository: CatalogueRepository {
     func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
         let packages = reference.kind == .formula ? formulaCatalogue : caskCatalogue
         return packages.first { $0.id == reference }
+    }
+
+    func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage] {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty, limit > 0 else {
+            return []
+        }
+        let matches = (formulaCatalogue + caskCatalogue).filter {
+            $0.name.localizedCaseInsensitiveContains(trimmedQuery)
+                || $0.displayName.localizedCaseInsensitiveContains(trimmedQuery)
+        }
+        return Array(matches.prefix(limit))
     }
 }
