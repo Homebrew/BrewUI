@@ -268,6 +268,33 @@ struct DiscoverViewModelTests {
         #expect(viewModel.casksSectionTitle == "Casks")
     }
 
+    @Test @MainActor func `trending callout shows only once loaded and not searching`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(searchResults: [cataloguePackage(name: "ripgrep")]),
+            installedRepository: installedRepo(),
+        )
+
+        // Before load (loading) the callout is hidden.
+        #expect(!viewModel.showsTrendingCallout)
+
+        await viewModel.load()
+        #expect(viewModel.showsTrendingCallout)
+
+        viewModel.query = "rip"
+        await viewModel.search()
+        #expect(!viewModel.showsTrendingCallout)
+
+        viewModel.query = ""
+        await viewModel.search()
+        #expect(viewModel.showsTrendingCallout)
+    }
+
     @Test @MainActor func `subtitle reflects loading state`() {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(

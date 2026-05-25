@@ -18,6 +18,7 @@ struct DiscoverPackagesView: View {
                         formulaeSectionTitle: viewModel.formulaeSectionTitle,
                         casksSectionTitle: viewModel.casksSectionTitle,
                         showsInstallMetrics: viewModel.showsInstallMetrics,
+                        showsCallout: viewModel.showsTrendingCallout,
                         isSearching: viewModel.isSearching,
                         selectedPackageID: viewModel.selectedPackageID,
                         installedRepository: installedPackagesRepository,
@@ -83,10 +84,15 @@ private struct DiscoverPackageSections: View {
     let formulaeSectionTitle: String
     let casksSectionTitle: String
     let showsInstallMetrics: Bool
+    let showsCallout: Bool
     let isSearching: Bool
     let selectedPackageID: BrewPackage.ID?
     let installedRepository: any InstalledPackageStatusReading
     let onSelect: (BrewPackage.ID?) -> Void
+
+    /// Approximate catalogue size for the search-hint copy. Hardcoded for now; should eventually be
+    /// sourced from the catalogue once a package-count property is exposed.
+    private static let approximateCatalogueSize = "9,000+"
 
     private var showsFormulaeSection: Bool {
         scope != .casks
@@ -107,6 +113,11 @@ private struct DiscoverPackageSections: View {
     var body: some View {
         ScrollViewReader { proxy in
             List {
+                if showsCallout {
+                    calloutRow
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
                 if showsFormulaeSection {
                     Section(formulaeSectionTitle) {
                         sectionContent(formulae, kind: .formula)
@@ -133,6 +144,26 @@ private struct DiscoverPackageSections: View {
                 onSelect(nil)
             }
         }
+    }
+
+    private var calloutRow: some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
+            HStack(spacing: BrewSpacing.xs) {
+                Text("Find a package")
+                    .font(.brewBody.weight(.semibold))
+                    .foregroundStyle(Color.brewTextPrimary)
+                Text("(⌘F)")
+                    .font(.brewCodeSmall)
+                    .foregroundStyle(Color.brewTextTertiary)
+            }
+            Text("Search across all \(Self.approximateCatalogueSize) formulae and casks — or browse trending below.")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, BrewSpacing.sm)
+        .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder
