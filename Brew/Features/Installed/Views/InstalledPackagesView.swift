@@ -36,7 +36,6 @@ struct InstalledPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
-            isPresented: $viewModel.isSearchSelected,
             placement: .toolbar,
             prompt: "Search",
         )

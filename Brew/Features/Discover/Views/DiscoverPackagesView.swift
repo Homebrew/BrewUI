@@ -29,7 +29,6 @@ struct DiscoverPackagesView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .searchable(
             text: $viewModel.query,
-            isPresented: $viewModel.isSearchSelected,
             placement: .toolbar,
             prompt: "Search packages — try “node”, “ffmpeg”, “docker”",
         )

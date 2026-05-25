@@ -23,12 +23,9 @@ final class DiscoverViewModel {
             guard oldValue != query else {
                 return
             }
-            isSearchSelected = true
             synchronizeSelectionWithVisibleRows()
         }
     }
-
-    var isSearchSelected: Bool = false
 
     var scope: DiscoverSearchScope = .all {
         didSet {
