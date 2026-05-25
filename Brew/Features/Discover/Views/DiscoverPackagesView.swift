@@ -33,7 +33,7 @@ struct DiscoverPackagesView: View {
             text: $viewModel.query,
             isPresented: $viewModel.isSearchSelected,
             placement: .toolbar,
-            prompt: "Search the Homebrew catalogue",
+            prompt: "Search packages — try “node”, “ffmpeg”, “docker”",
         )
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
