@@ -13,7 +13,7 @@ struct InstalledPackagesView: View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 Text("Your packages")
-                    .font(.brewTitle1)
+                    .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.packageCountSubtitle)
                     .font(.brewSubheadline)
@@ -37,7 +37,7 @@ struct InstalledPackagesView: View {
         .searchable(
             text: $viewModel.searchQuery,
             placement: .toolbar,
-            prompt: "Search",
+            prompt: "Search Installed Packages",
         )
     }
 

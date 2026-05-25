@@ -30,7 +30,7 @@ struct DiscoverPackagesView: View {
         .searchable(
             text: $viewModel.query,
             placement: .toolbar,
-            prompt: "Search packages — try “node”, “ffmpeg”, “docker”",
+            prompt: "Search Homebrew's Catalogue",
         )
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
@@ -45,13 +45,20 @@ struct DiscoverPackagesView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
             Text(viewModel.paneHeading)
-                .font(.brewTitle1)
+                .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text(viewModel.subtitleText)
-                .font(.brewSubheadline)
-                .foregroundStyle(
-                    viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
-                )
+            HStack(spacing: BrewSpacing.xs) {
+                if viewModel.showsSubtitleTrendIcon {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.brewSubheadline)
+                        .foregroundStyle(Color.brewBrandPrimary)
+                }
+                Text(viewModel.subtitleText)
+                    .font(.brewSubheadline)
+                    .foregroundStyle(
+                        viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
+                    )
+            }
         }
         .padding(BrewSpacing.lg)
         .accessibilityElement(children: .combine)

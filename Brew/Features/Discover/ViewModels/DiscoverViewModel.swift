@@ -105,7 +105,7 @@ final class DiscoverViewModel {
         case .loaded:
             guard isSearching else {
                 return String(
-                    localized: "Most-installed packages in the last 30 days",
+                    localized: "Most installed packages this month",
                     comment: "Discover subhead on the trending landing",
                 )
             }
@@ -131,6 +131,14 @@ final class DiscoverViewModel {
             localized: "\(count) packages match “\(normalizedQuery)”",
             comment: "Discover subhead, search result count",
         )
+    }
+
+    /// The trending landing decorates its subhead with an upward-trend glyph once data is loaded.
+    var showsSubtitleTrendIcon: Bool {
+        if case .loaded = activeState, !isSearching {
+            return true
+        }
+        return false
     }
 
     var isSubtitleError: Bool {
