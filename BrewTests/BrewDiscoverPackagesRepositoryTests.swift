@@ -148,58 +148,6 @@ struct BrewDiscoverPackagesRepositoryTests {
             _ = try await repository.loadTopPackages(limit: 10, window: .days30)
         }
     }
-
-    @Test @MainActor func `search maps catalogue matches to discovery packages with zero install count`() async throws {
-        let repository = try BrewDiscoverPackagesRepository(
-            apiClient: MockBrewAPIClient(
-                formulaAnalytics: DiscoverAnalyticsFixtures.emptyCask(),
-                caskAnalytics: DiscoverAnalyticsFixtures.emptyCask(),
-            ),
-            catalogueRepository: MockCatalogueRepository(
-                formulaCatalogue: formulaPackages(names: ["wget", "git"]),
-                caskCatalogue: caskPackages(names: ["gitup"]),
-            ),
-        )
-
-        let results = try await repository.search(query: "git", limit: 10)
-
-        #expect(results.map(\.name) == ["git", "gitup"])
-        #expect(results.allSatisfy { $0.thirtyDayInstallCount == 0 })
-    }
-
-    @Test @MainActor func `search applies the result limit`() async throws {
-        let repository = try BrewDiscoverPackagesRepository(
-            apiClient: MockBrewAPIClient(
-                formulaAnalytics: DiscoverAnalyticsFixtures.emptyCask(),
-                caskAnalytics: DiscoverAnalyticsFixtures.emptyCask(),
-            ),
-            catalogueRepository: MockCatalogueRepository(
-                formulaCatalogue: formulaPackages(names: ["git", "github", "gitlab"]),
-                caskCatalogue: [],
-            ),
-        )
-
-        let results = try await repository.search(query: "git", limit: 2)
-
-        #expect(results.count == 2)
-    }
-
-    @Test @MainActor func `search returns empty for blank query`() async throws {
-        let repository = try BrewDiscoverPackagesRepository(
-            apiClient: MockBrewAPIClient(
-                formulaAnalytics: DiscoverAnalyticsFixtures.emptyCask(),
-                caskAnalytics: DiscoverAnalyticsFixtures.emptyCask(),
-            ),
-            catalogueRepository: MockCatalogueRepository(
-                formulaCatalogue: formulaPackages(names: ["git"]),
-                caskCatalogue: [],
-            ),
-        )
-
-        let results = try await repository.search(query: "   ", limit: 10)
-
-        #expect(results.isEmpty)
-    }
 }
 
 @MainActor

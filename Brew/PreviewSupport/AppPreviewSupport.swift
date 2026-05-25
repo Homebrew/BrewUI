@@ -294,21 +294,6 @@ struct PreviewDiscoverPackagesRepository: DiscoverPackagesRepository {
     ) async throws -> DiscoverTopPackagesSnapshot {
         snapshot
     }
-
-    func search(
-        query: String,
-        limit: Int,
-    ) async throws -> [DiscoveryBrewPackage] {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty else {
-            return []
-        }
-        let matches = (snapshot.topFormulae + snapshot.topCasks).filter {
-            $0.name.localizedCaseInsensitiveContains(trimmedQuery)
-                || $0.displayName.localizedCaseInsensitiveContains(trimmedQuery)
-        }
-        return Array(matches.prefix(limit))
-    }
 }
 
 struct PreviewDiscoverCatalogueRepository: CatalogueRepository {

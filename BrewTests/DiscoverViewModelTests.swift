@@ -28,6 +28,7 @@ struct DiscoverViewModelTests {
                     ],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo([.fixture(name: "git", installedVersions: ["2.45.0"])]),
         )
 
@@ -53,6 +54,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(
                 error: BrewAPIClientError.transport(underlying: "offline"),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -68,6 +70,7 @@ struct DiscoverViewModelTests {
     @Test @MainActor func `load maps unknown discover repository errors to generic message`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -88,6 +91,7 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -107,6 +111,7 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -126,6 +131,7 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -150,6 +156,7 @@ struct DiscoverViewModelTests {
         )
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: repository,
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -173,6 +180,7 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -194,6 +202,7 @@ struct DiscoverViewModelTests {
                     ],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -211,6 +220,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -225,6 +235,7 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -244,6 +255,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -258,6 +270,7 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -271,6 +284,7 @@ struct DiscoverViewModelTests {
     @Test @MainActor func `subtitle reflects error state`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -293,6 +307,7 @@ struct DiscoverViewModelTests {
         )
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: repository,
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -317,9 +332,11 @@ struct DiscoverViewModelTests {
                     topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
                     topCasks: [],
                 ),
+            ),
+            catalogueRepository: StubCatalogueRepository(
                 searchResults: [
-                    discoveryPackage(name: "ripgrep", thirtyDayInstallCount: 0),
-                    discoveryPackage(name: "imagemagick", thirtyDayInstallCount: 0),
+                    cataloguePackage(name: "ripgrep"),
+                    cataloguePackage(name: "imagemagick"),
                 ],
             ),
             installedRepository: installedRepo(),
@@ -342,7 +359,9 @@ struct DiscoverViewModelTests {
                     topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
                     topCasks: [],
                 ),
-                searchResults: [discoveryPackage(name: "ripgrep", thirtyDayInstallCount: 0)],
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchResults: [cataloguePackage(name: "ripgrep")],
             ),
             installedRepository: installedRepo(),
         )
@@ -364,9 +383,11 @@ struct DiscoverViewModelTests {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(
                 searchResults: [
-                    discoveryPackage(name: "git", thirtyDayInstallCount: 0),
-                    discoveryPackage(name: "gitup", kind: .cask, thirtyDayInstallCount: 0),
+                    cataloguePackage(name: "git"),
+                    cataloguePackage(name: "gitup", kind: .cask),
                 ],
             ),
             installedRepository: installedRepo(),
@@ -383,8 +404,8 @@ struct DiscoverViewModelTests {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
-                searchResults: [],
             ),
+            catalogueRepository: StubCatalogueRepository(searchResults: []),
             installedRepository: installedRepo(),
         )
 
@@ -396,8 +417,11 @@ struct DiscoverViewModelTests {
 
     @Test @MainActor func `search maps transport errors to underlying message`() async {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(
-                error: BrewAPIClientError.transport(underlying: "offline"),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchError: BrewAPIClientError.transport(underlying: "offline"),
             ),
             installedRepository: installedRepo(),
         )
@@ -416,7 +440,10 @@ struct DiscoverViewModelTests {
 
     @Test @MainActor func `search maps unknown errors to generic search message`() async {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
             installedRepository: installedRepo(),
         )
 
@@ -434,34 +461,21 @@ struct DiscoverViewModelTests {
 @MainActor
 private struct StubDiscoverPackagesRepository: DiscoverPackagesRepository {
     let snapshot: DiscoverTopPackagesSnapshot
-    var searchResults: [DiscoveryBrewPackage] = []
 
     func loadTopPackages(
         limit _: Int,
         window _: BrewAnalyticsWindow,
     ) async throws -> DiscoverTopPackagesSnapshot {
         snapshot
-    }
-
-    func search(
-        query _: String,
-        limit _: Int,
-    ) async throws -> [DiscoveryBrewPackage] {
-        searchResults
     }
 }
 
 @MainActor
 private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepository {
     var snapshot: DiscoverTopPackagesSnapshot
-    var searchResults: [DiscoveryBrewPackage]
 
-    init(
-        snapshot: DiscoverTopPackagesSnapshot,
-        searchResults: [DiscoveryBrewPackage] = [],
-    ) {
+    init(snapshot: DiscoverTopPackagesSnapshot) {
         self.snapshot = snapshot
-        self.searchResults = searchResults
     }
 
     func loadTopPackages(
@@ -469,13 +483,6 @@ private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepositor
         window _: BrewAnalyticsWindow,
     ) async throws -> DiscoverTopPackagesSnapshot {
         snapshot
-    }
-
-    func search(
-        query _: String,
-        limit _: Int,
-    ) async throws -> [DiscoveryBrewPackage] {
-        searchResults
     }
 }
 
@@ -489,12 +496,22 @@ private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
     ) async throws -> DiscoverTopPackagesSnapshot {
         throw error
     }
+}
 
-    func search(
-        query _: String,
-        limit _: Int,
-    ) async throws -> [DiscoveryBrewPackage] {
-        throw error
+@MainActor
+private struct StubCatalogueRepository: CatalogueRepository {
+    var searchResults: [BrewPackage] = []
+    var searchError: Error?
+
+    func package(for _: HomebrewPackageID) async throws -> BrewPackage? {
+        nil
+    }
+
+    func searchPackages(matching _: String, limit _: Int) async throws -> [BrewPackage] {
+        if let searchError {
+            throw searchError
+        }
+        return searchResults
     }
 }
 
@@ -523,4 +540,11 @@ private func discoveryPackage(
         ),
         thirtyDayInstallCount: thirtyDayInstallCount,
     )
+}
+
+private func cataloguePackage(
+    name: String,
+    kind: HomebrewPackageKind = .formula,
+) -> BrewPackage {
+    .fixture(name: name, kind: kind)
 }

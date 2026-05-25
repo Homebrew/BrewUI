@@ -18,6 +18,7 @@ struct DiscoverColumnsRoot: View {
         )
         DiscoverColumns(
             discoverPackagesRepository: discoverPackagesRepository,
+            catalogueRepository: catalogueRepository,
             installedRepository: installedPackagesRepository,
         )
     }
@@ -29,11 +30,13 @@ struct DiscoverColumns: View {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
+        catalogueRepository: any CatalogueRepository,
         installedRepository: any InstalledPackageStatusReading,
     ) {
         _viewModel = State(
             initialValue: DiscoverViewModel(
                 discoverPackagesRepository: discoverPackagesRepository,
+                catalogueRepository: catalogueRepository,
                 installedRepository: installedRepository,
             ),
         )
@@ -96,6 +99,7 @@ struct DiscoverColumns: View {
 #Preview {
     DiscoverColumns(
         discoverPackagesRepository: AppPreviewSupport.makeDiscoverPackagesRepository(),
+        catalogueRepository: AppPreviewSupport.makeDiscoverCatalogueRepository(),
         installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
     )
 }

@@ -12,6 +12,7 @@ enum DiscoverSearchScope: CaseIterable, Equatable {
 @MainActor
 final class DiscoverViewModel {
     @ObservationIgnored private let discoverPackagesRepository: any DiscoverPackagesRepository
+    @ObservationIgnored private let catalogueRepository: any CatalogueRepository
     @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
     @ObservationIgnored private let topPackagesLimit: Int
     @ObservationIgnored private let analyticsWindow: BrewAnalyticsWindow
@@ -46,12 +47,14 @@ final class DiscoverViewModel {
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
+        catalogueRepository: any CatalogueRepository,
         installedRepository: any InstalledPackageStatusReading,
         topPackagesLimit: Int = 10,
         analyticsWindow: BrewAnalyticsWindow = .days30,
         searchResultsLimit: Int = 50,
     ) {
         self.discoverPackagesRepository = discoverPackagesRepository
+        self.catalogueRepository = catalogueRepository
         self.installedRepository = installedRepository
         self.topPackagesLimit = topPackagesLimit
         self.analyticsWindow = analyticsWindow
@@ -195,11 +198,12 @@ final class DiscoverViewModel {
         }
         results = .loading
         do {
-            let found = try await discoverPackagesRepository.search(
-                query: normalizedQuery,
+            let matches = try await catalogueRepository.searchPackages(
+                matching: normalizedQuery,
                 limit: searchResultsLimit,
             )
-            results = .loaded(found)
+            // Catalogue search has no analytics, so install counts are zero (hidden in this mode).
+            results = .loaded(matches.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) })
         } catch {
             results = .failed(Self.userMessage(for: error, searching: true))
         }
