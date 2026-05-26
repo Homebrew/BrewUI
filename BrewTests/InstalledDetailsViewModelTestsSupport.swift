@@ -34,6 +34,18 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
             continuation.finish()
         }
     }
+
+    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
 }
 
 actor ThrowingSubmitCommandCenter: BrewCommandCenter {
@@ -66,6 +78,18 @@ actor ThrowingSubmitCommandCenter: BrewCommandCenter {
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }
@@ -103,6 +127,18 @@ actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }
@@ -146,6 +182,18 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }

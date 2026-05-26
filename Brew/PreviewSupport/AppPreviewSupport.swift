@@ -298,6 +298,18 @@ actor PreviewBrewCommandCenter: BrewCommandCenter {
         }
     }
 
+    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
     func submit(
         id _: BrewOperationID,
         command _: any BrewMutatingCommand,

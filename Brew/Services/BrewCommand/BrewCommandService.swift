@@ -27,13 +27,25 @@ struct BrewCommandService: BrewCommandRunning {
             throw BrewCommandError.launchFailed(underlying: String(describing: error))
         }
 
+        // Reading the sink once here (rather than per chunk) snapshots the value while the TaskLocal scope is active.
+        // When no console is observing, `sink` is nil and the drain skips the line-splitting work.
+        let sink = BrewCommandOutputContext.sink
+
         let processController = ProcessController(process)
         return try await withTaskCancellationHandler(operation: {
             // Drain pipes concurrently while the subprocess runs.
             // Large outputs (for example `brew info --installed --json=v2`) can deadlock
             // if we wait for exit before reading from stdout/stderr.
-            async let outRead = Self.readAllData(from: outPipe.fileHandleForReading)
-            async let errRead = Self.readAllData(from: errPipe.fileHandleForReading)
+            async let outRead = Self.drainPipe(
+                handle: outPipe.fileHandleForReading,
+                stream: .stdout,
+                sink: sink,
+            )
+            async let errRead = Self.drainPipe(
+                handle: errPipe.fileHandleForReading,
+                stream: .stderr,
+                sink: sink,
+            )
 
             let terminationStatus = await Self.waitForExit(process)
             let outData = await outRead
@@ -52,11 +64,44 @@ struct BrewCommandService: BrewCommandRunning {
         })
     }
 
-    private nonisolated static func readAllData(from handle: FileHandle) async -> Data {
-        await withCheckedContinuation { continuation in
-            // `readDataToEndOfFile` blocks; run on a GCD worker thread.
+    /// Drains a subprocess pipe to EOF, returning the raw bytes verbatim for ``CommandOutput``.
+    /// When `sink` is non-nil, also emits each `\n`-terminated line through it as bytes arrive — the trailing
+    /// partial line (no terminating newline) is flushed on EOF if non-empty. Lines whose bytes aren't valid UTF-8
+    /// are dropped from the stream (they remain in the verbatim byte return).
+    private nonisolated static func drainPipe(
+        handle: FileHandle,
+        stream: BrewCommandOutputLine.Stream,
+        sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
+    ) async -> Data {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Data, Never>) in
+            // `availableData` blocks; run on a GCD worker thread (matches `readAllData` behavior).
             DispatchQueue.global(qos: .utility).async {
-                continuation.resume(returning: handle.readDataToEndOfFile())
+                var fullOutput = Data()
+                var lineBuffer = Data()
+                while true {
+                    let chunk = handle.availableData
+                    if chunk.isEmpty {
+                        if let sink, !lineBuffer.isEmpty,
+                           let final = String(data: lineBuffer, encoding: .utf8)
+                        {
+                            sink(BrewCommandOutputLine(stream: stream, text: final))
+                        }
+                        break
+                    }
+                    fullOutput.append(chunk)
+                    if let sink {
+                        lineBuffer.append(chunk)
+                        while let newlineIndex = lineBuffer.firstIndex(of: 0x0A) {
+                            let offset = lineBuffer.distance(from: lineBuffer.startIndex, to: newlineIndex)
+                            let lineData = lineBuffer.prefix(offset)
+                            if let lineText = String(data: lineData, encoding: .utf8) {
+                                sink(BrewCommandOutputLine(stream: stream, text: lineText))
+                            }
+                            lineBuffer = Data(lineBuffer.dropFirst(offset + 1))
+                        }
+                    }
+                }
+                continuation.resume(returning: fullOutput)
             }
         }
     }

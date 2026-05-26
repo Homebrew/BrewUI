@@ -60,6 +60,17 @@ final class JobRegistry {
             }
         }
         observationTasks.append(phaseTask)
+
+        let outputTask = Task { [weak self] in
+            let stream = await center.allOutputChanges()
+            for await (id, line) in stream {
+                guard let self else {
+                    return
+                }
+                handleOutput(id: id, line: line)
+            }
+        }
+        observationTasks.append(outputTask)
     }
 
     /// Jobs targeting a specific package, oldest first.
@@ -100,5 +111,15 @@ final class JobRegistry {
         let job = CommandJob.materialize(id: id, kind: kind, phase: phase)
         jobs[id] = job
         orderedIDs.append(id)
+    }
+
+    /// Test-and-internal seam — exercised from ``startObserving(_:)`` and unit tests.
+    /// Output lines for unknown ids are dropped: a job materializes from its first ``BrewOperationPhase/running``
+    /// transition, which is always observed before any subprocess emits output.
+    func handleOutput(id: BrewOperationID, line: BrewCommandOutputLine) {
+        guard let job = jobs[id] else {
+            return
+        }
+        job.appendOutput(line)
     }
 }

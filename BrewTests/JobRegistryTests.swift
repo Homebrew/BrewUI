@@ -108,4 +108,28 @@ struct JobRegistryTests {
 
         #expect(registry.selectedID == nil)
     }
+
+    @Test func `handleOutput appends to the matching job's output buffer`() {
+        let registry = JobRegistry()
+        let id = BrewOperationID(rawValue: "formula:gh")
+        registry.handlePhase(id: id, phase: .running(.installFormula))
+
+        registry.handleOutput(id: id, line: BrewCommandOutputLine(stream: .stdout, text: "==> fetching"))
+        registry.handleOutput(id: id, line: BrewCommandOutputLine(stream: .stderr, text: "warn"))
+
+        let job = registry.jobs[id]
+        #expect(job?.output.count == 2)
+        #expect(job?.output[0].text == "==> fetching")
+        #expect(job?.output[1].stream == .stderr)
+    }
+
+    @Test func `handleOutput for unknown id is silently dropped`() {
+        let registry = JobRegistry()
+        let id = BrewOperationID(rawValue: "formula:never-running")
+
+        registry.handleOutput(id: id, line: BrewCommandOutputLine(stream: .stdout, text: "orphan"))
+
+        #expect(registry.jobs.isEmpty)
+        #expect(registry.orderedIDs.isEmpty)
+    }
 }
