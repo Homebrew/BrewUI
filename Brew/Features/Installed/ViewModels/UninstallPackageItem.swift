@@ -6,7 +6,7 @@
 import Foundation
 
 /// Presentation mapping for uninstall actions shown in Installed package detail subviews.
-struct UninstallPackageItem {
+nonisolated struct UninstallPackageItem {
     private let package: InstalledBrewPackage
     private let blockingDependentCount: Int
 
@@ -124,7 +124,7 @@ nonisolated struct UninstallBlockedCalloutContent: Equatable {
 }
 
 /// Result of activating the primary uninstall control in Installed detail.
-enum UninstallPrimaryButtonAction: Equatable {
+nonisolated enum UninstallPrimaryButtonAction: Equatable {
     case presentConfirmation
     case revealBlockedExplanation
 }

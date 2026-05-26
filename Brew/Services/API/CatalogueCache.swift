@@ -16,9 +16,12 @@ actor CatalogueCache: CatalogueCaching {
         static let caskETag = "CatalogueCache.cask.etag"
     }
 
+    // `FileManager` and `UserDefaults` are documented thread-safe but not Sendable, so the only way to
+    // hold injected instances inside an actor whose init runs on MainActor (per file-default isolation)
+    // is `nonisolated(unsafe)` — same escape hatch Apple uses for Foundation singletons in URLSession.
     private nonisolated(unsafe) let fileManager: FileManager
     private nonisolated(unsafe) let userDefaults: UserDefaults
-    private nonisolated let cacheDirectoryURL: URL
+    private let cacheDirectoryURL: URL
     private let decoder = JSONDecoder()
 
     private var formulaData: FormulaCatalogueJSON?
@@ -31,9 +34,9 @@ actor CatalogueCache: CatalogueCaching {
         userDefaults: UserDefaults = .standard,
         cacheDirectoryURL: URL? = nil,
     ) {
+        let resolvedURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL(fileManager: fileManager)
         self.fileManager = fileManager
         self.userDefaults = userDefaults
-        let resolvedURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL(fileManager: fileManager)
         self.cacheDirectoryURL = resolvedURL
     }
 

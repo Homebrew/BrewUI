@@ -5,7 +5,7 @@
 
 import Foundation
 
-enum AppPreviewSupport {
+nonisolated enum AppPreviewSupport {
     static let commandCenter = PreviewBrewCommandCenter()
     static let installedInventoryCache = InstalledInventoryCache()
     static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(
@@ -63,7 +63,7 @@ enum AppPreviewSupport {
         ],
     )
     /// A single representative discovery package for previews that only need one row's worth of data.
-    nonisolated static let discoverPreviewPackage = DiscoveryBrewPackage(
+    static let discoverPreviewPackage = DiscoveryBrewPackage(
         package: BrewPackage(
             name: "git",
             displayName: "git",
@@ -159,7 +159,7 @@ enum AppPreviewSupport {
         outdated: false,
     )
 
-    nonisolated static let installedPackages: [InstalledBrewPackage] = [
+    static let installedPackages: [InstalledBrewPackage] = [
         outdatedFormula,
         currentFormula,
         InstalledBrewPackage(

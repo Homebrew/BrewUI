@@ -6,7 +6,7 @@
 import Foundation
 
 /// Presentation mapping for Installed detail metadata content.
-struct PackageDetailMetadataItem {
+nonisolated struct PackageDetailMetadataItem {
     private let package: InstalledBrewPackage
 
     init(package: InstalledBrewPackage) {

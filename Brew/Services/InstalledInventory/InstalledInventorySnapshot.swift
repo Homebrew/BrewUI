@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct InstalledInventorySnapshot: Equatable {
+nonisolated struct InstalledInventorySnapshot: Equatable {
     nonisolated static let defaultTTL: TimeInterval = 3600
 
     var fetchedAt: Date

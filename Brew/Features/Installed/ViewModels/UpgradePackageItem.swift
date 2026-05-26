@@ -6,7 +6,7 @@
 import Foundation
 
 /// Presentation mapping for upgrade actions shown in Installed package detail.
-struct UpgradePackageItem {
+nonisolated struct UpgradePackageItem {
     private let package: InstalledBrewPackage
 
     init(package: InstalledBrewPackage) {
