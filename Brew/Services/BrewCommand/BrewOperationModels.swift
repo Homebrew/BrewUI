@@ -7,6 +7,8 @@ import Foundation
 
 /// Mutating Homebrew work the command center may schedule (extend as features grow).
 nonisolated enum BrewOperationKind: String, Hashable {
+    case installFormula
+    case installCask
     case upgradeFormula
     case upgradeCask
     case uninstallFormula
