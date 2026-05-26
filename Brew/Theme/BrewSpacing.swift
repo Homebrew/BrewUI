@@ -55,6 +55,20 @@ enum BrewLayout {
 
     /// Minimum supported window height.
     static let minWindowHeight: CGFloat = 520
+
+    // MARK: Command Console
+
+    /// Collapsed status-strip height (36pt — matches the mock and macOS toolbar idiom).
+    static let consoleCollapsedHeight: CGFloat = 36
+
+    /// Lower bound for the expanded console body. Below this the toolbar dominates and output becomes unreadable.
+    static let consoleMinExpandedHeight: CGFloat = 120
+
+    /// Upper bound for the expanded console body. Beyond this the main pane is starved.
+    static let consoleMaxExpandedHeight: CGFloat = 600
+
+    /// Default expanded console body height when no per-window override is stored.
+    static let consoleDefaultExpandedHeight: CGFloat = 240
 }
 
 // MARK: - Corner Radii (§7)

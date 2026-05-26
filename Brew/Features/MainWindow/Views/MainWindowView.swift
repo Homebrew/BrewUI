@@ -3,14 +3,21 @@ import SwiftUI
 
 struct MainWindowView: View {
     @State var selectedSidebarItem: SidebarItem = .installed
+    @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
 
     var body: some View {
-        NavigationSplitView {
-            sidebarColumn
-        } detail: {
-            featureColumn
+        VStack(spacing: 0) {
+            NavigationSplitView {
+                sidebarColumn
+            } detail: {
+                featureColumn
+            }
+            .background(.bar)
+
+            Divider()
+
+            ConsolePanel(expanded: $consoleExpanded)
         }
-        .background(.bar)
     }
 
     /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be

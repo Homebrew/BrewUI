@@ -458,3 +458,13 @@
 - **Ordering across actor boundary uses an internal `AsyncStream` buffer.** The non-actor sink closure yields lines to a continuation; a per-submit drain Task pulls them in FIFO order onto the actor and broadcasts to per-id and all-output listeners. Drains until `lineContinuation.finish()` is called when the submit task settles. Across stdout/stderr the order is inherently non-deterministic (separate POSIX streams).
 - **`NoopBrewCommandCenter` / `RecordingSerialBrewCommandCenter`** stub or forward the new methods. Output streams from `NoopBrewCommandCenter` finish immediately (no work to observe).
 - **No 16ms batching yet** — each line emits to listeners as it arrives. Sufficient for typical brew chatter; batching deferred to console-polish (Slice 6).
+
+## 2026-05-27 — Console UI surfaces (collapsed strip)
+
+- **Root layout:** `MainWindowView` wraps `NavigationSplitView` in a `VStack` (`spacing: 0`) with `Divider() + ConsolePanel` at the bottom. The console spans the full window width (under sidebar + detail) — IDE convention, signals that it reflects all brew activity.
+- **`@SceneStorage("consoleExpanded")`** stores the expand/collapse boolean per window. Survives quit-and-relaunch. Do not use `@AppStorage` (cross-window pollution).
+- **Console layout tokens** live in `BrewLayout`: `consoleCollapsedHeight` (36), `consoleMinExpandedHeight` (120), `consoleMaxExpandedHeight` (600), `consoleDefaultExpandedHeight` (240). No new color literals at call sites — all colors flow through `BrewColors` (`brewTerminal`, `brewBrandPrimary`, `brewStatusSuccess`, `brewStatusError`, `brewTextSecondary`, `brewTextTertiary`, `brewCodeDefault`, `brewCodeError`).
+- **MVVM separation:** `ConsoleStatusPresentation.from(registry:)` projects the registry into a view-passive struct (DotState + Summary + isRunning); the view renders that snapshot. Mirrors the existing `*BusyPresentation` pattern in Discover/Installed.
+- **Phase short labels** live as `BrewOperationPhase.shortLabel` extension (`done` / `running` / `failed`). Coarser than brew stdout markers (`fetching`/`pouring`/`linking`) because the center's phase enum doesn't expose those — sub-phase granularity would require stdout parsing. Single source of truth for status-bar + future inline-card text.
+- **Status dot palette** (design-system rule — BrewUI-owned components use amber for in-progress; terminal states use semantic colors): running = `brewBrandPrimary`, succeeded = `brewStatusSuccess`, failed = `brewStatusError`, idle = `brewTextTertiary`.
+- **Slice 3 ships the collapsed strip only.** The expand toggle is wired but the expanded body comes in slice 4 — the chevron currently toggles state with no visible effect.
