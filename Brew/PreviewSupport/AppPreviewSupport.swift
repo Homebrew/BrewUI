@@ -62,6 +62,20 @@ enum AppPreviewSupport {
             ),
         ],
     )
+    /// A single representative discovery package for previews that only need one row's worth of data.
+    static let discoverPreviewPackage = DiscoveryBrewPackage(
+        package: BrewPackage(
+            name: "git",
+            displayName: "git",
+            kind: .formula,
+            description: "Distributed revision control system",
+            homepage: "https://git-scm.com",
+            latestVersion: "2.46.1",
+            dependencies: [],
+        ),
+        thirtyDayInstallCount: 420_000,
+    )
+
     static let discoverFormulaeCatalogue: [BrewPackage] = [
         BrewPackage(
             name: "git",
@@ -234,6 +248,18 @@ enum AppPreviewSupport {
     @MainActor
     static func makeDiscoverPackagesRepository() -> any DiscoverPackagesRepository {
         PreviewDiscoverPackagesRepository(snapshot: discoverTopPackagesSnapshot)
+    }
+
+    @MainActor
+    static func makeDiscoverListRowViewModel(
+        package: DiscoveryBrewPackage = discoverPreviewPackage,
+        showsInstallMetrics: Bool = true,
+    ) -> DiscoverListRowViewModel {
+        DiscoverListRowViewModel(
+            discoveryPackage: package,
+            installedRepository: makeInstalledPackagesRepository(),
+            showsInstallMetrics: showsInstallMetrics,
+        )
     }
 
     @MainActor

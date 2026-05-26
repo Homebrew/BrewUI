@@ -7,9 +7,9 @@ final class DiscoverPackageDetailViewModel {
     private(set) var discoveryPackage: DiscoveryBrewPackage
     @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
 
-    init(row: DiscoverListRowViewModel) {
-        discoveryPackage = row.discoveryPackage
-        installedRepository = row.installedRepository
+    init(package: DiscoveryBrewPackage, installedRepository: any InstalledPackageStatusReading) {
+        discoveryPackage = package
+        self.installedRepository = installedRepository
     }
 
     private var installedPackage: InstalledBrewPackage? {
@@ -81,7 +81,7 @@ final class DiscoverPackageDetailViewModel {
         return InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
     }
 
-    func update(row: DiscoverListRowViewModel) {
-        discoveryPackage = row.discoveryPackage
+    func update(package: DiscoveryBrewPackage) {
+        discoveryPackage = package
     }
 }

@@ -186,11 +186,11 @@ final class DiscoverViewModel {
         return visible
     }
 
-    var selectedRow: DiscoverListRowViewModel? {
+    var selectedPackage: DiscoveryBrewPackage? {
         guard let selectedPackageID, let package = visiblePackages.first(where: { $0.id == selectedPackageID }) else {
             return nil
         }
-        return makeRow(package)
+        return package
     }
 
     func makeRow(_ package: DiscoveryBrewPackage) -> DiscoverListRowViewModel {

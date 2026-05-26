@@ -135,24 +135,7 @@ struct DiscoverListRowView: View {
 }
 
 #Preview("Installed") {
-    let previewPackage = AppPreviewSupport.discoverFormulaeCatalogue.first ?? BrewPackage(
-        name: "git",
-        displayName: "git",
-        kind: .formula,
-        description: "Distributed revision control system",
-        homepage: "https://git-scm.com",
-        latestVersion: "2.46.1",
-        dependencies: [],
-    )
-    DiscoverListRowView(
-        viewModel: DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
-                package: previewPackage,
-                thirtyDayInstallCount: 420_000,
-            ),
-            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
-        ),
-    )
-    .padding()
-    .frame(width: 440)
+    DiscoverListRowView(viewModel: AppPreviewSupport.makeDiscoverListRowViewModel())
+        .padding()
+        .frame(width: 440)
 }

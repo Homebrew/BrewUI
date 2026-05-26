@@ -3,7 +3,7 @@ import Foundation
 import Testing
 
 struct DiscoverViewModelTests {
-    @Test @MainActor func `load maps enriched discovery packages and installed inventory`() async throws {
+    @Test @MainActor func `load exposes the top packages and selects the most popular`() async throws {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -39,14 +39,12 @@ struct DiscoverViewModelTests {
             return
         }
         #expect(viewModel.visiblePackages.count == 2)
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
 
-        let git = try #require(viewModel.selectedRow)
-        #expect(git.descriptionText == "Distributed revision control")
-        #expect(git.stableVersionLabel == "2.46.1")
-        #expect(git.installedStatusLabel == "Installed")
-        #expect(git.installedVersionLabel == "v2.45.0")
-        #expect(git.showsInstallMetrics)
+        let git = try #require(viewModel.selectedPackage)
+        #expect(git.description == "Distributed revision control")
+        #expect(git.latestVersion == "2.46.1")
+        #expect(viewModel.showsInstallMetrics)
     }
 
     @Test @MainActor func `load maps discover repository transport errors to underlying message`() async {
@@ -96,11 +94,11 @@ struct DiscoverViewModelTests {
         )
 
         await viewModel.load()
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
 
         viewModel.setSelection(.formula(name: "missing"))
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `load selects first visible row by popularity`() async {
@@ -117,7 +115,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `setSelection nil resolves to first visible row`() async {
@@ -137,11 +135,11 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
         viewModel.setSelection(.formula(name: "node"))
-        #expect(viewModel.selectedRow?.id == .formula(name: "node"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
 
         viewModel.setSelection(nil)
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `reload preserves selection when package still exists`() async {
@@ -165,7 +163,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "node"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
     }
 
     @Test @MainActor func `rows with equal install count are sorted alphabetically`() async {
@@ -243,11 +241,11 @@ struct DiscoverViewModelTests {
 
         viewModel.scope = .formulae
         #expect(viewModel.visiblePackages.map(\.id) == [.formula(name: "git")])
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
 
         viewModel.scope = .casks
         #expect(viewModel.visiblePackages.map(\.id) == [.cask(token: "docker")])
-        #expect(viewModel.selectedRow?.id == .cask(token: "docker"))
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
     }
 
     @Test @MainActor func `section titles reflect trending and search mode`() {
@@ -338,7 +336,7 @@ struct DiscoverViewModelTests {
         )
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
     // MARK: - Search
@@ -367,7 +365,8 @@ struct DiscoverViewModelTests {
         #expect(viewModel.isSearching)
         #expect(!viewModel.showsInstallMetrics)
         #expect(viewModel.visiblePackages.map(\.name) == ["imagemagick", "ripgrep"])
-        #expect(viewModel.selectedRow?.showsInstallMetrics == false)
+        // Search results all surface a zero install count (catalogue search has no analytics).
+        #expect(viewModel.selectedPackage?.thirtyDayInstallCount == 0)
     }
 
     @Test @MainActor func `clearing the query returns to trending without searching`() async {
