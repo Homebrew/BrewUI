@@ -105,7 +105,7 @@ final class DiscoverViewModel {
         case .loaded:
             guard isSearching else {
                 return String(
-                    localized: "Most installed packages this month",
+                    localized: "Most-installed packages in the last 30 days",
                     comment: "Discover subhead on the trending landing",
                 )
             }
