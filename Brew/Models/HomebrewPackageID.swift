@@ -49,7 +49,7 @@ nonisolated enum HomebrewPackageID: Hashable, Identifiable {
     }
 }
 
-extension HomebrewPackageID {
+nonisolated extension HomebrewPackageID {
     static func formulaDependencies(from names: [String]) -> [HomebrewPackageID] {
         uniqueReferences(names.map { .formula(name: $0) })
     }

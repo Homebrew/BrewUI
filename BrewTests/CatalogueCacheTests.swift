@@ -16,12 +16,12 @@ struct CatalogueCacheTests {
         let caskRawData = fixture.caskCacheJSON(name: "iterm2")
         try fixture.writeFormulaCache(formulaRawData)
         try fixture.writeCaskCache(caskRawData)
-        fixture.userDefaults.set(#""formula-etag""#, forKey: fixture.formulaETagKey)
-        fixture.userDefaults.set(#""cask-etag""#, forKey: fixture.caskETagKey)
+        UserDefaults.standard.set(#""formula-etag""#, forKey: fixture.formulaETagKey)
+        UserDefaults.standard.set(#""cask-etag""#, forKey: fixture.caskETagKey)
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         await cache.prepare()
 
@@ -38,8 +38,8 @@ struct CatalogueCacheTests {
         try fixture.writeFormulaCache(formulaRawData)
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         await cache.prepare()
 
@@ -50,8 +50,8 @@ struct CatalogueCacheTests {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         let updatedRawData = fixture.formulaCacheJSON(name: "git")
 
@@ -70,8 +70,8 @@ struct CatalogueCacheTests {
 
         try fixture.writeFormulaCache(fixture.formulaCacheJSON(name: "stale"))
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         let updatedRawData = fixture.formulaCacheJSON(name: "fresh")
         try await cache.updateFormulaCatalogue(with: updatedRawData, etag: #""formula-fresh""#)
@@ -87,11 +87,15 @@ private struct TestFixture {
     let cacheDirectoryURL: URL
     let formulaCacheURL: URL
     let caskCacheURL: URL
-    let userDefaults: UserDefaults
-    let userDefaultsSuiteName: String
+    let defaultsKeyPrefix: String
 
-    let formulaETagKey = "CatalogueCache.formula.etag"
-    let caskETagKey = "CatalogueCache.cask.etag"
+    var formulaETagKey: String {
+        "\(defaultsKeyPrefix).formula.etag"
+    }
+
+    var caskETagKey: String {
+        "\(defaultsKeyPrefix).cask.etag"
+    }
 
     init() {
         let id = UUID().uuidString
@@ -99,14 +103,12 @@ private struct TestFixture {
             .appendingPathComponent("CatalogueCacheTests-\(id)", isDirectory: true)
         formulaCacheURL = cacheDirectoryURL.appendingPathComponent("formula-cache.json")
         caskCacheURL = cacheDirectoryURL.appendingPathComponent("cask-cache.json")
-        userDefaultsSuiteName = "CatalogueCacheTests.\(id)"
-        userDefaults = UserDefaults(suiteName: userDefaultsSuiteName) ?? .standard
-        userDefaults.removePersistentDomain(forName: userDefaultsSuiteName)
+        defaultsKeyPrefix = "CatalogueCacheTests.\(id)"
     }
 
     func cleanup() {
         try? FileManager.default.removeItem(at: cacheDirectoryURL)
-        userDefaults.removePersistentDomain(forName: userDefaultsSuiteName)
+        UserDefaults.standard.removePersistedKeys(withPrefix: defaultsKeyPrefix)
     }
 
     func writeFormulaCache(_ data: Data) throws {

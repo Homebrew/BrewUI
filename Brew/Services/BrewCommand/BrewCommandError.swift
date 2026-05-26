@@ -6,7 +6,7 @@
 import Foundation
 
 /// `brew` exited non-zero or could not be launched.
-enum BrewCommandError: Error, Equatable {
+nonisolated enum BrewCommandError: Error, Equatable {
     case failed(exitCode: Int32, stderr: String)
     case launchFailed(underlying: String)
 }

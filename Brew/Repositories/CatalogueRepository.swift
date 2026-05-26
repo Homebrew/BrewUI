@@ -21,31 +21,32 @@ enum CatalogueRepositoryError: Error, Equatable {
 final class BrewCatalogueRepository: CatalogueRepository {
     nonisolated static let defaultTTL: TimeInterval = 3600
 
-    nonisolated enum DefaultsKey {
-        static let formulaLastRefresh = "CatalogueRepository.formula.lastRefresh"
-        static let caskLastRefresh = "CatalogueRepository.cask.lastRefresh"
-    }
-
     private let apiClient: any BrewAPIClient
     private let cache: any CatalogueCaching
-    private let userDefaults: UserDefaults
+    private let defaultsKeyPrefix: String
     private let now: @Sendable () -> Date
     private let ttl: TimeInterval
 
     private var refreshTasks: [HomebrewPackageKind: Task<[BrewPackage], Error>] = [:]
 
+    /// `defaultsKeyPrefix` is the test seam for `UserDefaults.standard`; tests pass a unique prefix
+    /// to isolate their lastRefresh timestamps from each other and from production data.
     init(
         apiClient: any BrewAPIClient,
         cache: any CatalogueCaching,
-        userDefaults: UserDefaults = .standard,
+        defaultsKeyPrefix: String = "CatalogueRepository",
         now: @escaping @Sendable () -> Date = Date.init,
         ttl: TimeInterval = BrewCatalogueRepository.defaultTTL,
     ) {
         self.apiClient = apiClient
         self.cache = cache
-        self.userDefaults = userDefaults
+        self.defaultsKeyPrefix = defaultsKeyPrefix
         self.now = now
         self.ttl = ttl
+    }
+
+    func lastRefreshKey(for kind: CatalogueCache.CatalogueKind) -> String {
+        "\(defaultsKeyPrefix).\(kind.rawValue).lastRefresh"
     }
 
     func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
@@ -149,23 +150,14 @@ final class BrewCatalogueRepository: CatalogueRepository {
     }
 
     private func updateLastRefresh(kind: CatalogueCache.CatalogueKind) {
-        userDefaults.set(now(), forKey: lastRefreshKey(for: kind))
+        UserDefaults.standard.set(now(), forKey: lastRefreshKey(for: kind))
     }
 
     private func isStale(kind: CatalogueCache.CatalogueKind) -> Bool {
-        guard let refreshedAt = userDefaults.object(forKey: lastRefreshKey(for: kind)) as? Date else {
+        guard let refreshedAt = UserDefaults.standard.object(forKey: lastRefreshKey(for: kind)) as? Date else {
             return true
         }
         return now().timeIntervalSince(refreshedAt) >= ttl
-    }
-
-    private func lastRefreshKey(for kind: CatalogueCache.CatalogueKind) -> String {
-        switch kind {
-        case .formula:
-            DefaultsKey.formulaLastRefresh
-        case .cask:
-            DefaultsKey.caskLastRefresh
-        }
     }
 
     private func mapFormulaPackages(from catalogue: FormulaCatalogueJSON) -> [BrewPackage] {

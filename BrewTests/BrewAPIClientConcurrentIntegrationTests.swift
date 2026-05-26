@@ -159,8 +159,8 @@ private func makeDiscoverRepository(
 }
 
 /// Builds a `BrewCatalogueRepository` whose staleness check considers the catalogue fresh.
-/// Uses an isolated `UserDefaults` suite so the lastRefresh timestamps are set alongside the
-/// cache data rather than relying on `.standard` UserDefaults from prior runs.
+/// Uses a per-fixture `defaultsKeyPrefix` so lastRefresh timestamps land under unique keys
+/// in `UserDefaults.standard` rather than relying on whatever's left from prior runs.
 @MainActor
 private func makeWarmCatalogueRepository(
     apiClient: URLSessionBrewAPIClient,
@@ -169,8 +169,13 @@ private func makeWarmCatalogueRepository(
 ) async throws -> BrewCatalogueRepository {
     let fixture = DiscoverCatalogueCacheFixture()
     let cache = CatalogueCache(
-        userDefaults: fixture.userDefaults,
         cacheDirectoryURL: fixture.cacheDirectoryURL,
+        defaultsKeyPrefix: fixture.defaultsKeyPrefix,
+    )
+    let repository = BrewCatalogueRepository(
+        apiClient: apiClient,
+        cache: cache,
+        defaultsKeyPrefix: fixture.defaultsKeyPrefix,
     )
     let now = Date()
     if !formulaNames.isEmpty {
@@ -178,34 +183,28 @@ private func makeWarmCatalogueRepository(
             with: fixture.formulaCacheJSON(names: formulaNames),
             etag: #""formula-etag""#,
         )
-        fixture.userDefaults.set(now, forKey: BrewCatalogueRepository.DefaultsKey.formulaLastRefresh)
+        UserDefaults.standard.set(now, forKey: repository.lastRefreshKey(for: .formula))
     }
     if !caskNames.isEmpty {
         try await cache.updateCaskCatalogue(
             with: fixture.caskCacheJSON(names: caskNames),
             etag: #""cask-etag""#,
         )
-        fixture.userDefaults.set(now, forKey: BrewCatalogueRepository.DefaultsKey.caskLastRefresh)
+        UserDefaults.standard.set(now, forKey: repository.lastRefreshKey(for: .cask))
     }
-    return BrewCatalogueRepository(
-        apiClient: apiClient,
-        cache: cache,
-        userDefaults: fixture.userDefaults,
-    )
+    return repository
 }
 
 @MainActor
 private struct DiscoverCatalogueCacheFixture {
     let cacheDirectoryURL: URL
-    let userDefaults: UserDefaults
+    let defaultsKeyPrefix: String
 
     init() {
         let id = UUID().uuidString
         cacheDirectoryURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("DiscoverCatalogueCacheFixture-\(id)", isDirectory: true)
-        let suiteName = "DiscoverCatalogueCacheFixture.\(id)"
-        userDefaults = UserDefaults(suiteName: suiteName) ?? .standard
-        userDefaults.removePersistentDomain(forName: suiteName)
+        defaultsKeyPrefix = "DiscoverCatalogueCacheFixture.\(id)"
     }
 
     func formulaCacheJSON(names: [String]) -> Data {

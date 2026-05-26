@@ -16,13 +16,13 @@ struct BrewCatalogueRepositoryTests {
             caskHandler: { _ in .notModified },
         )
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
         )
 
@@ -37,15 +37,15 @@ struct BrewCatalogueRepositoryTests {
         defer { fixture.cleanup() }
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         let staleData = fixture.formulaCacheJSON(
             name: "stale",
             dependencies: ["openssl@3"],
         )
         try await cache.updateFormulaCatalogue(with: staleData, etag: #""etag-stale""#)
-        fixture.userDefaults.set(Date(timeIntervalSinceReferenceDate: 0), forKey: fixture.formulaLastRefreshKey)
+        UserDefaults.standard.set(Date(timeIntervalSinceReferenceDate: 0), forKey: fixture.formulaLastRefreshKey)
 
         let refreshedRawData = fixture.formulaCacheJSON(name: "fresh")
         let refreshedPayload = try JSONDecoder().decode(FormulaCatalogueJSON.self, from: refreshedRawData)
@@ -59,7 +59,7 @@ struct BrewCatalogueRepositoryTests {
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
             ttl: 60,
         )
@@ -76,8 +76,8 @@ struct BrewCatalogueRepositoryTests {
         defer { fixture.cleanup() }
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         let staleData = fixture.formulaCacheJSON(
             name: "cached",
@@ -85,7 +85,7 @@ struct BrewCatalogueRepositoryTests {
         )
         try await cache.updateFormulaCatalogue(with: staleData, etag: #""etag-current""#)
         let staleDate = Date(timeIntervalSinceReferenceDate: 0)
-        fixture.userDefaults.set(staleDate, forKey: fixture.formulaLastRefreshKey)
+        UserDefaults.standard.set(staleDate, forKey: fixture.formulaLastRefreshKey)
 
         let apiClient = StubCatalogueAPIClient(
             formulaHandler: { _ in .notModified },
@@ -94,7 +94,7 @@ struct BrewCatalogueRepositoryTests {
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
             ttl: 60,
         )
@@ -104,7 +104,7 @@ struct BrewCatalogueRepositoryTests {
         #expect(package?.dependencies == [.formula(name: "pkg-config"), .formula(name: "openssl@3")])
         #expect(await apiClient.recordedFormulaETags() == [#""etag-current""#])
 
-        let updatedDate = fixture.userDefaults.object(forKey: fixture.formulaLastRefreshKey) as? Date
+        let updatedDate = UserDefaults.standard.object(forKey: fixture.formulaLastRefreshKey) as? Date
         #expect((updatedDate ?? .distantPast) > staleDate)
     }
 
@@ -113,14 +113,14 @@ struct BrewCatalogueRepositoryTests {
         defer { fixture.cleanup() }
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         let apiClient = DeferredFormulaStubCatalogueAPIClient()
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
         )
 
@@ -160,7 +160,7 @@ struct BrewCatalogueRepositoryTests {
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
             ttl: 60,
         )
@@ -190,7 +190,7 @@ struct BrewCatalogueRepositoryTests {
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
             ttl: 60,
         )
@@ -209,14 +209,14 @@ struct BrewCatalogueRepositoryTests {
         defer { fixture.cleanup() }
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         try await cache.updateFormulaCatalogue(
             with: fixture.formulaCacheJSON(name: "wget"),
             etag: #""etag-formula""#,
         )
-        fixture.userDefaults.set(Date(), forKey: fixture.formulaLastRefreshKey)
+        UserDefaults.standard.set(Date(), forKey: fixture.formulaLastRefreshKey)
 
         let apiClient = StubCatalogueAPIClient(
             formulaHandler: { _ in .notModified },
@@ -225,7 +225,7 @@ struct BrewCatalogueRepositoryTests {
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
         )
 
@@ -239,8 +239,8 @@ struct BrewCatalogueRepositoryTests {
         defer { fixture.cleanup() }
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         try await cache.updateFormulaCatalogue(
             with: fixture.formulaCacheJSON(names: ["ripgrep", "git", "imagegit"]),
@@ -251,8 +251,8 @@ struct BrewCatalogueRepositoryTests {
             etag: #""etag-cask""#,
         )
         let now = Date()
-        fixture.userDefaults.set(now, forKey: fixture.formulaLastRefreshKey)
-        fixture.userDefaults.set(now, forKey: BrewCatalogueRepository.DefaultsKey.caskLastRefresh)
+        UserDefaults.standard.set(now, forKey: fixture.formulaLastRefreshKey)
+        UserDefaults.standard.set(now, forKey: fixture.caskLastRefreshKey)
 
         let apiClient = StubCatalogueAPIClient(
             formulaHandler: { _ in .notModified },
@@ -261,7 +261,7 @@ struct BrewCatalogueRepositoryTests {
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
         )
 
@@ -277,15 +277,15 @@ struct BrewCatalogueRepositoryTests {
         defer { fixture.cleanup() }
 
         let cache = CatalogueCache(
-            userDefaults: fixture.userDefaults,
             cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
         )
         try await cache.updateFormulaCatalogue(
             with: fixture.formulaCacheJSON(names: ["git"]),
             etag: #""etag-formula""#,
         )
-        fixture.userDefaults.set(Date(), forKey: fixture.formulaLastRefreshKey)
-        fixture.userDefaults.set(Date(), forKey: BrewCatalogueRepository.DefaultsKey.caskLastRefresh)
+        UserDefaults.standard.set(Date(), forKey: fixture.formulaLastRefreshKey)
+        UserDefaults.standard.set(Date(), forKey: fixture.caskLastRefreshKey)
 
         let apiClient = StubCatalogueAPIClient(
             formulaHandler: { _ in .notModified },
@@ -294,7 +294,7 @@ struct BrewCatalogueRepositoryTests {
         let repository = BrewCatalogueRepository(
             apiClient: apiClient,
             cache: cache,
-            userDefaults: fixture.userDefaults,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
             now: Date.init,
         )
 
@@ -434,22 +434,26 @@ private actor MockCatalogueCache: CatalogueCaching {
 
 private struct TestFixture {
     let cacheDirectoryURL: URL
-    let userDefaults: UserDefaults
-    let userDefaultsSuiteName: String
-    let formulaLastRefreshKey = BrewCatalogueRepository.DefaultsKey.formulaLastRefresh
+    let defaultsKeyPrefix: String
+
+    var formulaLastRefreshKey: String {
+        "\(defaultsKeyPrefix).formula.lastRefresh"
+    }
+
+    var caskLastRefreshKey: String {
+        "\(defaultsKeyPrefix).cask.lastRefresh"
+    }
 
     init() {
         let id = UUID().uuidString
         cacheDirectoryURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("BrewCatalogueRepositoryTests-\(id)", isDirectory: true)
-        userDefaultsSuiteName = "BrewCatalogueRepositoryTests.\(id)"
-        userDefaults = UserDefaults(suiteName: userDefaultsSuiteName) ?? .standard
-        userDefaults.removePersistentDomain(forName: userDefaultsSuiteName)
+        defaultsKeyPrefix = "BrewCatalogueRepositoryTests.\(id)"
     }
 
     func cleanup() {
         try? FileManager.default.removeItem(at: cacheDirectoryURL)
-        userDefaults.removePersistentDomain(forName: userDefaultsSuiteName)
+        UserDefaults.standard.removePersistedKeys(withPrefix: defaultsKeyPrefix)
     }
 
     func formulaCacheJSON(name: String, dependencies: [String] = []) -> Data {

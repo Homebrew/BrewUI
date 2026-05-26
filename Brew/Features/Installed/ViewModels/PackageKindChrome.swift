@@ -23,7 +23,7 @@ nonisolated struct PackageKindChrome: Equatable {
     var iconBackground: PackageKindIconBackgroundToken
 }
 
-extension HomebrewPackageKind {
+nonisolated extension HomebrewPackageKind {
     var chrome: PackageKindChrome {
         switch self {
         case .formula:
