@@ -258,6 +258,7 @@ nonisolated enum AppPreviewSupport {
         DiscoverListRowViewModel(
             discoveryPackage: package,
             installedRepository: makeInstalledPackagesRepository(),
+            brewCommandCenter: NoopBrewCommandCenter(executionContext: .noopForTestingAndPreviews()),
             showsInstallMetrics: showsInstallMetrics,
         )
     }

@@ -6,20 +6,39 @@ struct DiscoverListRowRoot: View {
     let discoveryPackage: DiscoveryBrewPackage
     let showsInstallMetrics: Bool
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
         DiscoverListRowView(
-            viewModel: DiscoverListRowViewModel(
-                discoveryPackage: discoveryPackage,
-                installedRepository: installedPackagesRepository,
-                showsInstallMetrics: showsInstallMetrics,
-            ),
+            discoveryPackage: discoveryPackage,
+            installedRepository: installedPackagesRepository,
+            brewCommandCenter: brewCommandCenter,
+            showsInstallMetrics: showsInstallMetrics,
         )
+        .id(discoveryPackage.id)
     }
 }
 
 struct DiscoverListRowView: View {
-    let viewModel: DiscoverListRowViewModel
+    let discoveryPackage: DiscoveryBrewPackage
+    @State private var viewModel: DiscoverListRowViewModel
+
+    init(
+        discoveryPackage: DiscoveryBrewPackage,
+        installedRepository: any InstalledPackageStatusReading,
+        brewCommandCenter: any BrewCommandCenter,
+        showsInstallMetrics: Bool = true,
+    ) {
+        self.discoveryPackage = discoveryPackage
+        _viewModel = State(
+            initialValue: DiscoverListRowViewModel(
+                discoveryPackage: discoveryPackage,
+                installedRepository: installedRepository,
+                brewCommandCenter: brewCommandCenter,
+                showsInstallMetrics: showsInstallMetrics,
+            ),
+        )
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.md) {
@@ -36,8 +55,14 @@ struct DiscoverListRowView: View {
             }
         }
         .padding(.vertical, BrewSpacing.sm)
+        .task(id: discoveryPackage.id) {
+            await viewModel.observeRowUpdates()
+        }
+        .onChange(of: discoveryPackage) { _, new in
+            viewModel.update(discoveryPackage: new)
+        }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityLabel(viewModel.rowAccessibilityLabel)
     }
 
     private var iconBadge: some View {
@@ -57,6 +82,12 @@ struct DiscoverListRowView: View {
             Text(viewModel.name)
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextPrimary)
+
+            if viewModel.showsInstallBusy {
+                ProgressView()
+                    .controlSize(.small)
+                    .accessibilityHidden(true)
+            }
 
             packageKindBadge
 
@@ -101,20 +132,6 @@ struct DiscoverListRowView: View {
         }
     }
 
-    private var accessibilityLabel: String {
-        var parts = [
-            viewModel.name,
-            viewModel.packageKindChrome.badgeLabel,
-        ]
-        if viewModel.showsInstallMetrics {
-            parts.append("\(viewModel.installs30DayLabel) installs in 30 days")
-        }
-        if let installedStatusLabel = viewModel.installedStatusLabel {
-            parts.append(installedStatusLabel)
-        }
-        return parts.joined(separator: ", ")
-    }
-
     private func accentColor(_ token: PackageKindAccentToken) -> Color {
         switch token {
         case .brandPrimary:
@@ -135,7 +152,11 @@ struct DiscoverListRowView: View {
 }
 
 #Preview("Installed") {
-    DiscoverListRowView(viewModel: AppPreviewSupport.makeDiscoverListRowViewModel())
-        .padding()
-        .frame(width: 440)
+    DiscoverListRowView(
+        discoveryPackage: AppPreviewSupport.discoverPreviewPackage,
+        installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
+        brewCommandCenter: AppPreviewSupport.commandCenter,
+    )
+    .padding()
+    .frame(width: 440)
 }
