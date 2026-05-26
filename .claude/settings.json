@@ -40,15 +40,6 @@
       "Bash(swiftlint *)",
       "Bash(swiftformat *)",
 
-      "Bash(brew bundle)",
-      "Bash(brew bundle install)",
-      "Bash(brew bundle install *)",
-      "Bash(brew bundle check)",
-      "Bash(brew bundle check *)",
-      "Bash(brew bundle list)",
-      "Bash(brew bundle list *)",
-      "Bash(brew bundle dump)",
-      "Bash(brew bundle dump *)",
       "Bash(brew list *)",
       "Bash(brew info *)",
       "Bash(brew --prefix *)",
@@ -97,14 +88,12 @@
       "Bash(scp *)",
       "Bash(sftp *)",
       "Bash(rsync *)",
-      "Bash(brew bundle cleanup)",
-      "Bash(brew bundle cleanup *)",
-      "Bash(brew bundle exec *)",
       "Bash(brew install *)",
       "Bash(brew upgrade *)",
       "Bash(brew uninstall *)",
       "Bash(brew tap *)",
-      "Bash(brew untap *)"
+      "Bash(brew untap *)",
+      "Bash(brew bundle *)"
     ]
   }
 }
