@@ -5,11 +5,13 @@ import SwiftUI
 struct DiscoverPackageDetailRoot: View {
     let selectedPackage: DiscoveryBrewPackage
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
 
     var body: some View {
         DiscoverPackageDetailView(
             package: selectedPackage,
             installedRepository: installedPackagesRepository,
+            brewCommandCenter: brewCommandCenter,
         )
     }
 }
@@ -25,12 +27,14 @@ struct DiscoverPackageDetailView: View {
     init(
         package: DiscoveryBrewPackage,
         installedRepository: any InstalledPackageStatusReading,
+        brewCommandCenter: any BrewCommandCenter,
     ) {
         self.package = package
         _viewModel = State(
             initialValue: DiscoverPackageDetailViewModel(
                 package: package,
                 installedRepository: installedRepository,
+                brewCommandCenter: brewCommandCenter,
             ),
         )
     }
@@ -46,13 +50,18 @@ struct DiscoverPackageDetailView: View {
                     collapsedCount: collapsedDependencyCount,
                     isExpanded: $expandedDependencies,
                 )
-                PackageDetailSectionDivider()
-                DiscoverPackageInstallSection(viewModel: viewModel)
+                if viewModel.showsInstallSection {
+                    PackageDetailSectionDivider()
+                    DiscoverPackageInstallSection(viewModel: viewModel)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .task(id: package) {
+            await viewModel.observeInstallUpdates()
+        }
         .onChange(of: package) { _, newPackage in
             viewModel.update(package: newPackage)
             expandedDependencies = false
@@ -211,6 +220,28 @@ private struct DiscoverPackageInstallSection: View {
                     command: viewModel.installCommand,
                     summaryText: "Installs this package on your Mac",
                 )
+
+                Button {
+                    viewModel.installSelectedPackage()
+                } label: {
+                    if viewModel.isInstalling {
+                        ProgressView()
+                            .controlSize(.small)
+                            .frame(minWidth: 120)
+                    } else {
+                        Text("Install")
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(viewModel.isInstalling)
+                .accessibilityLabel(Text("Install"))
+
+                if let installErrorMessage = viewModel.installErrorMessage {
+                    Text(installErrorMessage)
+                        .font(.brewCallout)
+                        .foregroundStyle(Color.brewStatusError)
+                        .textSelection(.enabled)
+                }
             }
         }
     }
@@ -236,6 +267,7 @@ struct DiscoverPackageDetailPlaceholder: View {
     DiscoverPackageDetailView(
         package: AppPreviewSupport.discoverPreviewPackage,
         installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
+        brewCommandCenter: AppPreviewSupport.commandCenter,
     )
     .frame(minWidth: 380, minHeight: 480)
 }
