@@ -4,6 +4,7 @@ import SwiftUI
 struct MainWindowView: View {
     @State var selectedSidebarItem: SidebarItem = .installed
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
+    @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,8 +17,9 @@ struct MainWindowView: View {
 
             Divider()
 
-            ConsolePanel(expanded: $consoleExpanded)
+            ConsolePanel(expanded: $consoleExpanded, height: $consoleHeight)
         }
+        .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
     }
 
     /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be

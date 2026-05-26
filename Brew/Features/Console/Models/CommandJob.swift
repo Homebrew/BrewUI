@@ -111,6 +111,34 @@ extension CommandJob {
         return (kind: String(parts[0]), name: String(parts[1]))
     }
 
+    /// Plain-text dump of the output buffer for clipboard / save use. `stderr` lines get a `[stderr] ` prefix
+    /// so a reader can disambiguate without losing the timeline.
+    func formattedOutputForExport() -> String {
+        output.map { line in
+            switch line.stream {
+            case .stdout:
+                line.text
+            case .stderr:
+                "[stderr] \(line.text)"
+            }
+        }
+        .joined(separator: "\n")
+    }
+
+    /// Suggested filename when saving this job's output to disk.
+    /// Pattern: `brewui-<sanitized-command>-<yyyy-MM-dd-HHmmss>.log`.
+    func suggestedExportFilename(now: Date = Date()) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
+        let timestamp = formatter.string(from: now)
+        let sanitized = command
+            .replacingOccurrences(of: " ", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: ":", with: "_")
+        return "brewui-\(sanitized)-\(timestamp).log"
+    }
+
     private static func userFacingCommand(kind: BrewOperationKind, name: String) -> String {
         let verb: String
         let isCask: Bool

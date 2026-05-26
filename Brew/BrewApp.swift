@@ -42,6 +42,9 @@ struct BrewApp: App {
             width: BrewLayout.minWindowWidth,
             height: BrewLayout.minWindowHeight,
         )
+        .commands {
+            ConsoleCommands()
+        }
         #if DEBUG
         .commands {
                 DebugMenuCommands()

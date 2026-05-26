@@ -5,14 +5,24 @@
 
 import SwiftUI
 
-/// Bottom-of-window console: collapsed status strip in this slice; expanded body lands in a later slice.
-/// Height is constant for now — slice 4 adds the resize handle and expanded body conditional.
+/// Bottom-of-window console. Collapsed → status strip only. Expanded → resize handle + toolbar + output body.
 struct ConsolePanel: View {
     @Binding var expanded: Bool
+    @Binding var height: Double
 
     var body: some View {
-        ConsoleStatusBar(expanded: $expanded)
-            .frame(height: BrewLayout.consoleCollapsedHeight)
-            .background(Color.brewTerminal)
+        VStack(spacing: 0) {
+            if expanded {
+                ConsoleResizeHandle(height: $height)
+                ConsoleToolbar(expanded: $expanded)
+                Divider().opacity(0.4)
+                ConsoleBody()
+            } else {
+                ConsoleStatusBar(expanded: $expanded)
+            }
+        }
+        .frame(height: expanded ? height : BrewLayout.consoleCollapsedHeight)
+        .background(Color.brewTerminal)
+        .animation(.brewFast, value: expanded)
     }
 }

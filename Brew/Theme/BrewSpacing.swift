@@ -61,6 +61,12 @@ enum BrewLayout {
     /// Collapsed status-strip height (36pt — matches the mock and macOS toolbar idiom).
     static let consoleCollapsedHeight: CGFloat = 36
 
+    /// Expanded-mode toolbar height (matches the collapsed strip so resizing the body doesn't shift chrome height).
+    static let consoleToolbarHeight: CGFloat = 36
+
+    /// Resize handle strip above the toolbar.
+    static let consoleResizeHandleHeight: CGFloat = 6
+
     /// Lower bound for the expanded console body. Below this the toolbar dominates and output becomes unreadable.
     static let consoleMinExpandedHeight: CGFloat = 120
 
