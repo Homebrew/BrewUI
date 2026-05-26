@@ -440,3 +440,12 @@
 - **Selection chrome:** Both `InstalledPackagesView` and `DiscoverPackagesView` use a plain `List` (not `List(selection:)`), row taps via `.onTapGesture` + `viewModel.setSelection`, and `.listRowBackground(selected ? Color.brewBrandTint : Color.clear)`. Avoid `List(selection:)` — it applies system accent selection on top of the brand tint.
 - **Column backgrounds:** List column header, list body, and detail inherit window/split chrome; do not wrap Discover/Installed columns in `.background(Color.brewSurface)` unless product asks for explicit surface fills everywhere.
 - **Scroll:** Both lists use `ScrollViewReader` + `scrollToSelection` on appear/selection/row-id changes (`.brewFast` animation).
+
+## 2026-05-27 — Console command-job projection layer
+
+- **Console UI is fed by a registry, not by `BrewCommandCenter` directly.** `JobRegistry` (`@Observable @MainActor`) projects center operation state for console views; it never mutates the center. Subscribes to `allPhaseChanges()` once at app launch via `BrewApp .task { jobRegistry.startObserving(commandCenter) }`. Injection mirrors `BrewCommandCenterEnvironment` — `@Entry var jobRegistry: JobRegistry`.
+- **`CommandJob` reuses `BrewOperationID`** (do not mint a parallel UUID). Carries phase, output buffer (50k-line cap, FIFO eviction), and a derived `exitCode: Int32?`. `isTerminal == (exitCode != nil)`.
+- **Exit code derivation from phase transitions** (since `BrewOperationPhase` doesn't carry one): `.running → .idle` ⇒ exit 0; `.failed(.brewCommand(exitCode, _))` ⇒ that exit code; other `.failed(...)` cases ⇒ `-1` sentinel. An `.idle → .idle` (initial replay or noop) does not back-fill an exit code.
+- **Job materialization is lazy and ID-derived.** Registry only creates a `CommandJob` when it sees a `.running(kind)` phase for an unknown id; the user-facing command string and `JobScope` are synthesized from `BrewOperationID.rawValue` (parsed as `"<kind>:<name>"`) plus the running `BrewOperationKind`. This avoids extending `BrewMutatingCommand` with metadata for slice 1.
+- **`JobScope`:** `.package(name:)` for per-package ops, `.global` for `brew update`/`doctor`/`cleanup`, `.batch(names:)` for multi-package upgrades. Used to filter jobs in detail panes vs show globally in the console.
+- **Files live in `Brew/Features/Console/Models/`** (`BrewCommandOutputLine`, `JobScope`, `CommandJob`, `JobRegistry`, `JobRegistryEnvironment`). Future console UI will live alongside in `Brew/Features/Console/Views/`.
