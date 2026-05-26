@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct InstalledBrewPackage: Identifiable, Hashable {
+nonisolated struct InstalledBrewPackage: Identifiable, Hashable {
     var package: BrewPackage
     var installedVersions: [String]
     var outdated: Bool

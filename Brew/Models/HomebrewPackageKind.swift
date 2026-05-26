@@ -6,7 +6,7 @@
 import Foundation
 
 /// Whether an installed Homebrew unit is a formula or a cask — domain-level discriminator (repositories, operations, presentation).
-enum HomebrewPackageKind: String, Hashable {
+nonisolated enum HomebrewPackageKind: String, Hashable {
     case formula
     case cask
 }

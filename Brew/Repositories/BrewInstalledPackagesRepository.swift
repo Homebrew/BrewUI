@@ -34,7 +34,7 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
     @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
 
-    nonisolated init(
+    init(
         commandRunner: BrewCommandRunning,
         locator: any BrewExecutableLocating,
         cache: InstalledInventoryCache,
@@ -54,7 +54,7 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
     }
 
     /// Production wiring: real subprocess + default `brew` lookup, reconciling off `commandCenter`.
-    nonisolated static func live(
+    static func live(
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
     ) -> BrewInstalledPackagesRepository {
@@ -186,7 +186,7 @@ extension BrewInstalledPackagesRepository: InstalledInventoryReading {
 
 extension BrewInstalledPackagesRepository {
     /// Inert instance for the environment default and unscoped subtrees (no brew, no command center bookkeeping).
-    nonisolated static func placeholder() -> BrewInstalledPackagesRepository {
+    static func placeholder() -> BrewInstalledPackagesRepository {
         let context = BrewCommandExecutionContext.noopForTestingAndPreviews()
         return BrewInstalledPackagesRepository(
             commandRunner: context.commandRunner,

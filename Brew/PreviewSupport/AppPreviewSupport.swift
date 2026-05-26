@@ -63,7 +63,7 @@ enum AppPreviewSupport {
         ],
     )
     /// A single representative discovery package for previews that only need one row's worth of data.
-    static let discoverPreviewPackage = DiscoveryBrewPackage(
+    nonisolated static let discoverPreviewPackage = DiscoveryBrewPackage(
         package: BrewPackage(
             name: "git",
             displayName: "git",
@@ -159,7 +159,7 @@ enum AppPreviewSupport {
         outdated: false,
     )
 
-    static let installedPackages: [InstalledBrewPackage] = [
+    nonisolated static let installedPackages: [InstalledBrewPackage] = [
         outdatedFormula,
         currentFormula,
         InstalledBrewPackage(

@@ -118,7 +118,7 @@ struct UninstallPackageItem {
 }
 
 /// Copy shown in the uninstall-blocked warning callout.
-struct UninstallBlockedCalloutContent: Equatable {
+nonisolated struct UninstallBlockedCalloutContent: Equatable {
     let lead: String
     let body: String
 }

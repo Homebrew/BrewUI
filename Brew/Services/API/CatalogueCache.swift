@@ -16,9 +16,9 @@ actor CatalogueCache: CatalogueCaching {
         static let caskETag = "CatalogueCache.cask.etag"
     }
 
-    private let fileManager: FileManager
-    private let userDefaults: UserDefaults
-    private let cacheDirectoryURL: URL
+    private nonisolated(unsafe) let fileManager: FileManager
+    private nonisolated(unsafe) let userDefaults: UserDefaults
+    private nonisolated let cacheDirectoryURL: URL
     private let decoder = JSONDecoder()
 
     private var formulaData: FormulaCatalogueJSON?

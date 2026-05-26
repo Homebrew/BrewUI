@@ -230,12 +230,9 @@ struct UninstallBlockedCallout: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewStatusWarning)
-            (
-                Text(lead).fontWeight(.semibold)
-                    + Text(" \(bodyText)"),
-            )
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewTextPrimary)
+            Text("\(Text(lead).fontWeight(.semibold)) \(bodyText)")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextPrimary)
         }
         .padding(BrewSpacing.sm)
         .background(Color.brewStatusWarningSubtle)
