@@ -10,33 +10,34 @@ struct BrewUILintPlugin: BuildToolPlugin {
         guard let sourceFiles = target.sourceModule?.sourceFiles else {
             return []
         }
-
-        let brewUILint = try context.tool(named: "BrewUILint")
-        let workDirectory = context.pluginWorkDirectoryURL
-        return sourceFiles.map(\.url).compactMap {
-            createBuildCommand(for: $0, with: brewUILint.url, workDirectory: workDirectory)
-        }
+        return try makeAllFilesCommand(
+            with: context.tool(named: "BrewUILint").url,
+            workDirectory: context.pluginWorkDirectoryURL,
+            sourceURLs: sourceFiles.map(\.url),
+        ).map { [$0] } ?? []
     }
 
-    func createBuildCommand(
-        for inputPath: URL,
+    /// Lints every Swift source in the target with a single invocation so rules that need
+    /// cross-file context (e.g. `NonisolatedExtensionRule`, which has to know what types are
+    /// declared `nonisolated` in *other* files) see the whole module. Any source change
+    /// re-runs the lint pass, but it's cheap once `BrewUILint` itself is built — sub-second
+    /// for the BrewUI tree.
+    func makeAllFilesCommand(
         with executable: URL,
         workDirectory: URL,
+        sourceURLs: [URL],
     ) -> Command? {
-        guard inputPath.pathExtension == "swift" else {
+        let swiftSources = sourceURLs.filter { $0.pathExtension == "swift" }
+        guard !swiftSources.isEmpty else {
             return nil
         }
-
-        let fileName = inputPath.lastPathComponent
-        let sentinelName = inputPath.path
-            .replacingOccurrences(of: "/", with: "_")
-            .appending(".sentinel")
-        let sentinel = workDirectory.appending(path: sentinelName)
+        let sentinel = workDirectory.appending(path: "BrewUILint.sentinel")
+        let arguments = swiftSources.map(\.path) + ["--sentinel", sentinel.path]
         return .buildCommand(
-            displayName: "BrewUILint (\(fileName))",
+            displayName: "BrewUILint (\(swiftSources.count) files)",
             executable: executable,
-            arguments: [inputPath.path, "--sentinel", sentinel.path],
-            inputFiles: [inputPath],
+            arguments: arguments,
+            inputFiles: swiftSources,
             outputFiles: [sentinel],
         )
     }
@@ -50,11 +51,11 @@ struct BrewUILintPlugin: BuildToolPlugin {
             context: XcodePluginContext,
             target: XcodeTarget,
         ) throws -> [Command] {
-            let brewUILint = try context.tool(named: "BrewUILint")
-            let workDirectory = context.pluginWorkDirectoryURL
-            return target.inputFiles.map(\.url).compactMap {
-                createBuildCommand(for: $0, with: brewUILint.url, workDirectory: workDirectory)
-            }
+            try makeAllFilesCommand(
+                with: context.tool(named: "BrewUILint").url,
+                workDirectory: context.pluginWorkDirectoryURL,
+                sourceURLs: target.inputFiles.map(\.url),
+            ).map { [$0] } ?? []
         }
     }
 #endif

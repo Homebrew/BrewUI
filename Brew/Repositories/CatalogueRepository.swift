@@ -189,7 +189,7 @@ final class BrewCatalogueRepository: CatalogueRepository {
     }
 }
 
-private extension HomebrewPackageKind {
+private nonisolated extension HomebrewPackageKind {
     var catalogueKind: CatalogueCache.CatalogueKind {
         switch self {
         case .formula: .formula
