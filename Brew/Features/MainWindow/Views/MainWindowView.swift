@@ -17,7 +17,7 @@ struct MainWindowView: View {
 
             Divider()
 
-            ConsolePanel(expanded: $consoleExpanded, height: $consoleHeight)
+            ConsolePanelRoot(expanded: $consoleExpanded, height: $consoleHeight)
         }
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
     }

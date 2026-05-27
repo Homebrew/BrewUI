@@ -9,16 +9,23 @@ import SwiftUI
 struct ConsolePanel: View {
     @Binding var expanded: Bool
     @Binding var height: Double
+    @State var viewModel: ConsoleViewModel
+
+    init(expanded: Binding<Bool>, height: Binding<Double>, commandJobsRepository: any CommandJobsObserving) {
+        _expanded = expanded
+        _height = height
+        _viewModel = State(initialValue: .init(repository: commandJobsRepository))
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             if expanded {
                 ConsoleResizeHandle(height: $height)
-                ConsoleToolbar(expanded: $expanded)
+                ConsoleToolbar(expanded: $expanded, viewModel: viewModel)
                 Divider().opacity(0.4)
-                ConsoleBody()
+                ConsoleBody(viewModel: viewModel)
             } else {
-                ConsoleStatusBar(expanded: $expanded)
+                ConsoleStatusBar(expanded: $expanded, viewModel: viewModel)
             }
         }
         .frame(height: expanded ? height : BrewLayout.consoleCollapsedHeight)

@@ -9,10 +9,10 @@ import SwiftUI
 /// with status dot, copyable command, phase label, and an expand affordance.
 struct ConsoleStatusBar: View {
     @Binding var expanded: Bool
-    @Environment(\.jobRegistry) private var registry
+    let viewModel: ConsoleViewModel
 
     var body: some View {
-        let presentation = ConsoleStatusPresentation.from(registry: registry)
+        let presentation = viewModel.statusPresentation
         HStack(spacing: BrewSpacing.md) {
             ConsoleStatusDot(state: presentation.dotState)
             summaryText(presentation.summary)

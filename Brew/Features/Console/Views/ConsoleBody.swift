@@ -8,10 +8,10 @@ import SwiftUI
 /// Output area of the expanded console — virtualizing `List` over the selected job's output buffer
 /// with auto-pin-to-bottom when new lines arrive. User scroll-lock-on-scroll-up is deferred to polish.
 struct ConsoleBody: View {
-    @Environment(\.jobRegistry) private var registry
+    let viewModel: ConsoleViewModel
 
     var body: some View {
-        if let job = registry.selectedJob {
+        if let job = viewModel.selectedJob {
             outputList(for: job)
         } else {
             ContentUnavailableView(

@@ -9,7 +9,7 @@ import SwiftUI
 /// Expanded-console toolbar: selected-job pill on the left, Save/Copy/Clear + collapse chevron on the right.
 struct ConsoleToolbar: View {
     @Binding var expanded: Bool
-    @Environment(\.jobRegistry) private var registry
+    @Bindable var viewModel: ConsoleViewModel
 
     var body: some View {
         HStack(spacing: BrewSpacing.xs) {
@@ -34,8 +34,8 @@ struct ConsoleToolbar: View {
 
     @ViewBuilder
     private var jobPills: some View {
-        let selectedID = registry.selectedJob?.id
-        let orderedJobs = registry.orderedIDs.compactMap { registry.jobs[$0] }
+        let selectedID = viewModel.selectedJob?.id
+        let orderedJobs = viewModel.orderedJobs
         if orderedJobs.isEmpty {
             Text("No activity")
                 .font(.system(.caption, design: .monospaced))
@@ -48,8 +48,8 @@ struct ConsoleToolbar: View {
                         JobPill(
                             job: job,
                             isSelected: job.id == selectedID,
-                            onSelect: { registry.selectedID = job.id },
-                            onDismiss: { registry.remove(id: job.id) },
+                            onSelect: { viewModel.select(id: job.id) },
+                            onDismiss: { viewModel.dismiss(id: job.id) },
                         )
                     }
                 }
@@ -59,7 +59,7 @@ struct ConsoleToolbar: View {
 
     @ViewBuilder
     private var actionButtons: some View {
-        if let job = registry.selectedJob {
+        if let job = viewModel.selectedJob {
             toolbarAction(
                 systemImage: "square.and.arrow.down",
                 label: "Save",
@@ -80,7 +80,7 @@ struct ConsoleToolbar: View {
             label: "Clear",
             help: "Clear completed jobs",
         ) {
-            registry.clearCompleted()
+            viewModel.clearCompleted()
         }
     }
 

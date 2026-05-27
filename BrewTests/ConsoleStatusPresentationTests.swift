@@ -9,10 +9,10 @@ import Testing
 
 @MainActor
 struct ConsoleStatusPresentationTests {
-    @Test func `empty registry presents idle`() {
-        let registry = JobRegistry()
+    @Test func `empty repository presents idle`() {
+        let (_, viewModel) = makeFixture()
 
-        let presentation = ConsoleStatusPresentation.from(registry: registry)
+        let presentation = viewModel.statusPresentation
 
         #expect(presentation.dotState == .idle)
         #expect(presentation.summary == .idle)
@@ -20,11 +20,11 @@ struct ConsoleStatusPresentationTests {
     }
 
     @Test func `active job presents running with the job command and short label`() {
-        let registry = JobRegistry()
+        let (repository, viewModel) = makeFixture()
         let id = BrewOperationID(rawValue: "formula:gh")
-        registry.handlePhase(id: id, phase: .running(.installFormula))
+        repository.handlePhase(id: id, phase: .running(.installFormula))
 
-        let presentation = ConsoleStatusPresentation.from(registry: registry)
+        let presentation = viewModel.statusPresentation
 
         #expect(presentation.dotState == .running)
         #expect(presentation.summary == .running(command: "brew install gh", shortLabel: "running"))
@@ -32,12 +32,12 @@ struct ConsoleStatusPresentationTests {
     }
 
     @Test func `succeeded terminal job presents green dot and done summary`() {
-        let registry = JobRegistry()
+        let (repository, viewModel) = makeFixture()
         let id = BrewOperationID(rawValue: "formula:gh")
-        registry.handlePhase(id: id, phase: .running(.installFormula))
-        registry.handlePhase(id: id, phase: .idle)
+        repository.handlePhase(id: id, phase: .running(.installFormula))
+        repository.handlePhase(id: id, phase: .idle)
 
-        let presentation = ConsoleStatusPresentation.from(registry: registry)
+        let presentation = viewModel.statusPresentation
 
         #expect(presentation.dotState == .succeeded)
         #expect(presentation.summary == .completed(command: "brew install gh", succeeded: true, exitCode: 0))
@@ -45,12 +45,12 @@ struct ConsoleStatusPresentationTests {
     }
 
     @Test func `failed terminal job presents red dot and exit code summary`() {
-        let registry = JobRegistry()
+        let (repository, viewModel) = makeFixture()
         let id = BrewOperationID(rawValue: "formula:gh")
-        registry.handlePhase(id: id, phase: .running(.installFormula))
-        registry.handlePhase(id: id, phase: .failed(reason: .brewCommand(exitCode: 9, stderr: "nope")))
+        repository.handlePhase(id: id, phase: .running(.installFormula))
+        repository.handlePhase(id: id, phase: .failed(reason: .brewCommand(exitCode: 9, stderr: "nope")))
 
-        let presentation = ConsoleStatusPresentation.from(registry: registry)
+        let presentation = viewModel.statusPresentation
 
         #expect(presentation.dotState == .failed)
         #expect(presentation.summary == .completed(command: "brew install gh", succeeded: false, exitCode: 9))
@@ -58,14 +58,14 @@ struct ConsoleStatusPresentationTests {
     }
 
     @Test func `active job is preferred over recent completed`() {
-        let registry = JobRegistry()
+        let (repository, viewModel) = makeFixture()
         let done = BrewOperationID(rawValue: "formula:gh")
         let running = BrewOperationID(rawValue: "formula:ripgrep")
-        registry.handlePhase(id: done, phase: .running(.installFormula))
-        registry.handlePhase(id: done, phase: .idle)
-        registry.handlePhase(id: running, phase: .running(.installFormula))
+        repository.handlePhase(id: done, phase: .running(.installFormula))
+        repository.handlePhase(id: done, phase: .idle)
+        repository.handlePhase(id: running, phase: .running(.installFormula))
 
-        let presentation = ConsoleStatusPresentation.from(registry: registry)
+        let presentation = viewModel.statusPresentation
 
         #expect(presentation.dotState == .running)
         if case let .running(command, _) = presentation.summary {
@@ -73,6 +73,11 @@ struct ConsoleStatusPresentationTests {
         } else {
             Issue.record("expected running summary")
         }
+    }
+
+    private func makeFixture() -> (BrewCommandJobsRepository, ConsoleViewModel) {
+        let repository = BrewCommandJobsRepository.placeholder()
+        return (repository, ConsoleViewModel(repository: repository))
     }
 }
 
