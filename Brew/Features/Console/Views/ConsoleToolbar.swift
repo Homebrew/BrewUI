@@ -45,39 +45,16 @@ struct ConsoleToolbar: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: BrewSpacing.xs) {
                     ForEach(orderedJobs) { job in
-                        jobPill(for: job, isSelected: job.id == selectedID)
+                        JobPill(
+                            job: job,
+                            isSelected: job.id == selectedID,
+                            onSelect: { registry.selectedID = job.id },
+                            onDismiss: { registry.remove(id: job.id) },
+                        )
                     }
                 }
             }
         }
-    }
-
-    private func jobPill(for job: CommandJob, isSelected: Bool) -> some View {
-        Button {
-            registry.selectedID = job.id
-        } label: {
-            HStack(spacing: BrewSpacing.xs) {
-                ConsoleStatusDot(state: dotState(for: job))
-                Text(job.command)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(isSelected ? Color.brewCodeDefault : Color.brewTextSecondary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.vertical, BrewSpacing.xs)
-            .background(
-                RoundedRectangle(cornerRadius: BrewRadius.sm)
-                    .fill(isSelected ? Color.brewBrandTint : Color.clear),
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: BrewRadius.sm)
-                    .strokeBorder(isSelected ? Color.clear : Color.brewBorderDefault, lineWidth: 1),
-            )
-            .contentShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
-        }
-        .buttonStyle(.plain)
-        .help(job.command)
     }
 
     @ViewBuilder
@@ -128,13 +105,6 @@ struct ConsoleToolbar: View {
         .help(help)
     }
 
-    private func dotState(for job: CommandJob) -> ConsoleStatusPresentation.DotState {
-        if !job.isTerminal {
-            return .running
-        }
-        return job.succeeded ? .succeeded : .failed
-    }
-
     private func saveOutput(_ job: CommandJob) {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = job.suggestedExportFilename()
@@ -152,5 +122,62 @@ struct ConsoleToolbar: View {
     private func copyOutput(_ job: CommandJob) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(job.formattedOutputForExport(), forType: .string)
+    }
+}
+
+private struct JobPill: View {
+    let job: CommandJob
+    let isSelected: Bool
+    let onSelect: () -> Void
+    let onDismiss: () -> Void
+
+    @State private var isHovered = false
+
+    var body: some View {
+        HStack(spacing: BrewSpacing.xs) {
+            Button(action: onSelect) {
+                HStack(spacing: BrewSpacing.xs) {
+                    ConsoleStatusDot(state: dotState)
+                    Text(job.command)
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(isSelected ? Color.brewCodeDefault : Color.brewTextSecondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(job.command)
+
+            if isHovered {
+                Button(action: onDismiss) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 9, weight: .semibold))
+                        .foregroundStyle(Color.brewTextSecondary)
+                        .frame(width: 14, height: 14)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help("Dismiss")
+            }
+        }
+        .padding(.horizontal, BrewSpacing.sm)
+        .padding(.vertical, BrewSpacing.xs)
+        .background(
+            RoundedRectangle(cornerRadius: BrewRadius.sm)
+                .fill(isSelected ? Color.brewBrandTint : Color.clear),
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: BrewRadius.sm)
+                .strokeBorder(isSelected ? Color.clear : Color.brewBorderDefault, lineWidth: 1),
+        )
+        .onHover { isHovered = $0 }
+    }
+
+    private var dotState: ConsoleStatusPresentation.DotState {
+        if !job.isTerminal {
+            return .running
+        }
+        return job.succeeded ? .succeeded : .failed
     }
 }

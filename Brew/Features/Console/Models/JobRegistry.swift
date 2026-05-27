@@ -83,6 +83,20 @@ final class JobRegistry {
         }
     }
 
+    /// Drop a single job from the registry. If it was the explicit selection, fall back to defaults.
+    /// In-flight operations keep running in the command center — this only removes the console-side projection,
+    /// and any subsequent phase update for the dismissed id is ignored by ``handlePhase(id:phase:)``.
+    func remove(id: BrewOperationID) {
+        guard jobs[id] != nil else {
+            return
+        }
+        jobs[id] = nil
+        orderedIDs.removeAll { $0 == id }
+        if selectedID == id {
+            selectedID = nil
+        }
+    }
+
     /// Remove all terminal jobs from the registry. In-flight jobs are preserved.
     func clearCompleted() {
         let preservedIDs = orderedIDs.filter { jobs[$0]?.isTerminal == false }
