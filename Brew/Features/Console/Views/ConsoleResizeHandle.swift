@@ -36,10 +36,18 @@ struct ConsoleResizeHandle: View {
                             startHeight = height
                         }
                         let proposed = (startHeight ?? height) - value.translation.height
-                        height = min(
+                        let clamped = min(
                             max(proposed, BrewLayout.consoleMinExpandedHeight),
                             BrewLayout.consoleMaxExpandedHeight,
                         )
+                        // Suppress any inherited animation transaction (e.g. the panel's
+                        // expand/collapse `.animation(.brewFast, value: expanded)`) so each
+                        // drag delta updates the frame immediately rather than interpolating.
+                        var transaction = Transaction(animation: nil)
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            height = clamped
+                        }
                     }
                     .onEnded { _ in
                         startHeight = nil
