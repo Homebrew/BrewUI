@@ -33,6 +33,7 @@ struct ConsoleStatusBar: View {
         }
         .padding(.horizontal, BrewSpacing.lg)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.brewSurface)
         .contentShape(Rectangle())
         .onTapGesture {
             expanded.toggle()
@@ -70,7 +71,7 @@ struct ConsoleStatusBar: View {
     private func commandText(_ command: String) -> some View {
         Text(command)
             .font(.system(.caption, design: .monospaced))
-            .foregroundStyle(Color.brewCodeDefault)
+            .foregroundStyle(Color.brewTextPrimary)
             .lineLimit(1)
             .truncationMode(.middle)
     }

@@ -20,7 +20,7 @@ struct ConsoleBody: View {
                 description: Text("Run a brew command to see output here."),
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.brewTerminal)
+            .background(Color.brewSurfaceElevated)
         }
     }
 
@@ -29,7 +29,7 @@ struct ConsoleBody: View {
             List(job.output) { line in
                 Text(line.text)
                     .font(.system(.body, design: .monospaced))
-                    .foregroundStyle(line.stream == .stderr ? Color.brewCodeError : Color.brewCodeDefault)
+                    .foregroundStyle(line.stream == .stderr ? Color.brewStatusError : Color.brewTextPrimary)
                     .textSelection(.enabled)
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
@@ -38,7 +38,7 @@ struct ConsoleBody: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .background(Color.brewTerminal)
+            .background(Color.brewSurfaceElevated)
             .onAppear {
                 if let last = job.output.last {
                     proxy.scrollTo(last.id, anchor: .bottom)

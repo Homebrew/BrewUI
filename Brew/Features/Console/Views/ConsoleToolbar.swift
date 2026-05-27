@@ -29,6 +29,7 @@ struct ConsoleToolbar: View {
         }
         .padding(.horizontal, BrewSpacing.md)
         .frame(height: BrewLayout.consoleToolbarHeight)
+        .background(Color.brewSurface)
     }
 
     @ViewBuilder
@@ -120,7 +121,7 @@ private struct JobPill: View {
                     ConsoleStatusDot(state: dotState)
                     Text(job.command)
                         .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(isSelected ? Color.brewCodeDefault : Color.brewTextSecondary)
+                        .foregroundStyle(isSelected ? Color.brewTextPrimary : Color.brewTextSecondary)
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
@@ -145,7 +146,7 @@ private struct JobPill: View {
         .padding(.vertical, BrewSpacing.xs)
         .background(
             RoundedRectangle(cornerRadius: BrewRadius.sm)
-                .fill(isSelected ? Color.brewBrandTint : Color.clear),
+                .fill(isSelected ? Color.brewBrandTint : Color.brewSurfaceElevated),
         )
         .overlay(
             RoundedRectangle(cornerRadius: BrewRadius.sm)

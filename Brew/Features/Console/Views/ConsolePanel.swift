@@ -29,7 +29,7 @@ struct ConsolePanel: View {
             }
         }
         .frame(height: expanded ? height : BrewLayout.consoleCollapsedHeight)
-        .background(Color.brewTerminal)
+        .background(Color.brewSurface)
         .animation(.brewFast, value: expanded)
     }
 }
