@@ -67,8 +67,9 @@ enum BrewLayout {
     /// Resize handle strip above the toolbar.
     static let consoleResizeHandleHeight: CGFloat = 6
 
-    /// Lower bound for the expanded console body. Below this the toolbar dominates and output becomes unreadable.
-    static let consoleMinExpandedHeight: CGFloat = 120
+    /// Lower bound for the expanded console body. Below ~150pt a SwiftUI scroll-indicator artefact from
+    /// the main pane bleeds into the console area, on top of the toolbar starting to dominate the output.
+    static let consoleMinExpandedHeight: CGFloat = 150
 
     /// Upper bound for the expanded console body. Beyond this the main pane is starved.
     static let consoleMaxExpandedHeight: CGFloat = 600

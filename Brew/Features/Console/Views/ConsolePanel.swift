@@ -5,22 +5,21 @@
 
 import SwiftUI
 
-/// Bottom-of-window console. Collapsed → status strip only. Expanded → resize handle + toolbar + output body.
+/// Bottom-of-window console. Collapsed → status strip only. Expanded → toolbar + output body.
+/// The pane height (and the drag affordance to resize it) is owned by the parent ``VSplitView`` in
+/// ``MainWindowView``; this view just renders the chrome and content for whatever size it's given.
 struct ConsolePanel: View {
     @Binding var expanded: Bool
-    @Binding var height: Double
     @State var viewModel: ConsoleViewModel
 
-    init(expanded: Binding<Bool>, height: Binding<Double>, commandJobsRepository: any CommandJobsObserving) {
+    init(expanded: Binding<Bool>, commandJobsRepository: any CommandJobsObserving) {
         _expanded = expanded
-        _height = height
         _viewModel = State(initialValue: .init(repository: commandJobsRepository))
     }
 
     var body: some View {
         VStack(spacing: 0) {
             if expanded {
-                ConsoleResizeHandle(height: $height)
                 ConsoleToolbar(expanded: $expanded, viewModel: viewModel)
                 Divider().opacity(0.4)
                 ConsoleBody(viewModel: viewModel)
@@ -28,8 +27,6 @@ struct ConsolePanel: View {
                 ConsoleStatusBar(expanded: $expanded, viewModel: viewModel)
             }
         }
-        .frame(height: expanded ? height : BrewLayout.consoleCollapsedHeight)
         .background(Color.brewSurface)
-        .animation(.brewFast, value: expanded)
     }
 }
