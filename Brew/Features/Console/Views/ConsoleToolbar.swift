@@ -3,7 +3,6 @@
 //  Brew
 //
 
-import AppKit
 import SwiftUI
 
 /// Expanded-console toolbar: selected-job pill on the left, Save/Copy/Clear + collapse chevron on the right.
@@ -65,14 +64,14 @@ struct ConsoleToolbar: View {
                 label: "Save",
                 help: "Save output to file",
             ) {
-                saveOutput(job)
+                ConsoleOutputExport.save(job)
             }
             toolbarAction(
                 systemImage: "doc.on.doc",
                 label: "Copy",
                 help: "Copy output to clipboard",
             ) {
-                copyOutput(job)
+                ConsoleOutputExport.copy(job)
             }
         }
         toolbarAction(
@@ -103,25 +102,6 @@ struct ConsoleToolbar: View {
         }
         .buttonStyle(.borderless)
         .help(help)
-    }
-
-    private func saveOutput(_ job: CommandJob) {
-        let panel = NSSavePanel()
-        panel.nameFieldStringValue = job.suggestedExportFilename()
-        panel.directoryURL = FileManager.default.urls(
-            for: .downloadsDirectory,
-            in: .userDomainMask,
-        ).first
-        guard panel.runModal() == .OK, let url = panel.url else {
-            return
-        }
-        let text = job.formattedOutputForExport()
-        try? text.write(to: url, atomically: true, encoding: .utf8)
-    }
-
-    private func copyOutput(_ job: CommandJob) {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(job.formattedOutputForExport(), forType: .string)
     }
 }
 
