@@ -13,7 +13,7 @@ struct ConsoleToolbar: View {
 
     var body: some View {
         HStack(spacing: BrewSpacing.xs) {
-            jobPill
+            jobPills
             Spacer(minLength: BrewSpacing.sm)
             actionButtons
             Divider().frame(height: 14)
@@ -33,13 +33,34 @@ struct ConsoleToolbar: View {
     }
 
     @ViewBuilder
-    private var jobPill: some View {
-        if let job = registry.selectedJob {
+    private var jobPills: some View {
+        let selectedID = registry.selectedJob?.id
+        let orderedJobs = registry.orderedIDs.compactMap { registry.jobs[$0] }
+        if orderedJobs.isEmpty {
+            Text("No activity")
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(Color.brewTextSecondary)
+                .padding(.leading, BrewSpacing.xs)
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: BrewSpacing.xs) {
+                    ForEach(orderedJobs) { job in
+                        jobPill(for: job, isSelected: job.id == selectedID)
+                    }
+                }
+            }
+        }
+    }
+
+    private func jobPill(for job: CommandJob, isSelected: Bool) -> some View {
+        Button {
+            registry.selectedID = job.id
+        } label: {
             HStack(spacing: BrewSpacing.xs) {
                 ConsoleStatusDot(state: dotState(for: job))
                 Text(job.command)
                     .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(Color.brewCodeDefault)
+                    .foregroundStyle(isSelected ? Color.brewCodeDefault : Color.brewTextSecondary)
                     .lineLimit(1)
                     .truncationMode(.middle)
             }
@@ -47,14 +68,16 @@ struct ConsoleToolbar: View {
             .padding(.vertical, BrewSpacing.xs)
             .background(
                 RoundedRectangle(cornerRadius: BrewRadius.sm)
-                    .fill(Color.brewBrandTint),
+                    .fill(isSelected ? Color.brewBrandTint : Color.clear),
             )
-        } else {
-            Text("No activity")
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(Color.brewTextSecondary)
-                .padding(.leading, BrewSpacing.xs)
+            .overlay(
+                RoundedRectangle(cornerRadius: BrewRadius.sm)
+                    .strokeBorder(isSelected ? Color.clear : Color.brewBorderDefault, lineWidth: 1),
+            )
+            .contentShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
         }
+        .buttonStyle(.plain)
+        .help(job.command)
     }
 
     @ViewBuilder
