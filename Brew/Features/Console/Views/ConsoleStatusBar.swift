@@ -32,7 +32,7 @@ struct ConsoleStatusBar: View {
             .help(expanded ? "Hide console" : "Show console")
         }
         .padding(.horizontal, BrewSpacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .background(Color.brewSurface)
         .contentShape(Rectangle())
         .onTapGesture {
