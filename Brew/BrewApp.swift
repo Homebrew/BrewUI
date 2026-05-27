@@ -14,7 +14,6 @@ struct BrewApp: App {
     private let catalogueCache: CatalogueCache
     private let installedPackagesRepository: BrewInstalledPackagesRepository
     private let commandJobsRepository: BrewCommandJobsRepository
-    private let jobRegistry: JobRegistry
 
     init() {
         installedInventoryCache = InstalledInventoryCache()
@@ -25,7 +24,6 @@ struct BrewApp: App {
             commandCenter: commandCenter,
         )
         commandJobsRepository = BrewCommandJobsRepository(commandCenter: commandCenter)
-        jobRegistry = JobRegistry()
     }
 
     var body: some Scene {
@@ -36,10 +34,8 @@ struct BrewApp: App {
                 .environment(\.catalogueCache, catalogueCache)
                 .environment(\.installedPackagesRepository, installedPackagesRepository)
                 .environment(\.commandJobsRepository, commandJobsRepository)
-                .environment(\.jobRegistry, jobRegistry)
                 .task { await catalogueCache.prepare() }
                 .task { await installedPackagesRepository.load() }
-                .task { jobRegistry.startObserving(commandCenter) }
         }
         .defaultSize(
             width: BrewLayout.minWindowWidth,
