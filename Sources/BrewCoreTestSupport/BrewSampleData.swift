@@ -1,14 +1,14 @@
 //
-//  AppPreviewSupport.swift
-//  Brew
+//  BrewSampleData.swift
+//  BrewCoreTestSupport
 //
 
+import BrewCore
 import Foundation
 
-nonisolated enum AppPreviewSupport {
-    static let commandCenter = PreviewBrewCommandCenter()
-    static let installedInventoryCache = InstalledInventoryCache()
-    static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(
+/// Shared model fixtures for previews and tests. Pure `BrewCore` value types — no repositories, no I/O.
+public enum BrewSampleData {
+    public static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(
         topFormulae: [
             DiscoveryBrewPackage(
                 package: BrewPackage(
@@ -62,8 +62,9 @@ nonisolated enum AppPreviewSupport {
             ),
         ],
     )
+
     /// A single representative discovery package for previews that only need one row's worth of data.
-    static let discoverPreviewPackage = DiscoveryBrewPackage(
+    public static let discoverPreviewPackage = DiscoveryBrewPackage(
         package: BrewPackage(
             name: "git",
             displayName: "git",
@@ -76,7 +77,7 @@ nonisolated enum AppPreviewSupport {
         thirtyDayInstallCount: 420_000,
     )
 
-    static let discoverFormulaeCatalogue: [BrewPackage] = [
+    public static let discoverFormulaeCatalogue: [BrewPackage] = [
         BrewPackage(
             name: "git",
             displayName: "git",
@@ -96,7 +97,8 @@ nonisolated enum AppPreviewSupport {
             dependencies: [],
         ),
     ]
-    static let discoverCasksCatalogue: [BrewPackage] = [
+
+    public static let discoverCasksCatalogue: [BrewPackage] = [
         BrewPackage(
             name: "iterm2",
             displayName: "iTerm2",
@@ -117,7 +119,7 @@ nonisolated enum AppPreviewSupport {
         ),
     ]
 
-    static let outdatedFormula = InstalledBrewPackage(
+    public static let outdatedFormula = InstalledBrewPackage(
         package: BrewPackage(
             name: "git",
             displayName: "git",
@@ -131,7 +133,7 @@ nonisolated enum AppPreviewSupport {
         outdated: true,
     )
 
-    static let currentFormula = InstalledBrewPackage(
+    public static let currentFormula = InstalledBrewPackage(
         package: BrewPackage(
             name: "node",
             displayName: "node",
@@ -145,7 +147,7 @@ nonisolated enum AppPreviewSupport {
         outdated: false,
     )
 
-    static let currentCask = InstalledBrewPackage(
+    public static let currentCask = InstalledBrewPackage(
         package: BrewPackage(
             name: "docker",
             displayName: "Docker",
@@ -159,7 +161,7 @@ nonisolated enum AppPreviewSupport {
         outdated: false,
     )
 
-    static let installedPackages: [InstalledBrewPackage] = [
+    public static let installedPackages: [InstalledBrewPackage] = [
         outdatedFormula,
         currentFormula,
         InstalledBrewPackage(
@@ -191,9 +193,9 @@ nonisolated enum AppPreviewSupport {
         currentCask,
     ]
 
-    static let emptyPackages: [InstalledBrewPackage] = []
+    public static let emptyPackages: [InstalledBrewPackage] = []
 
-    static let installedDependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]] = [
+    public static let installedDependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]] = [
         outdatedFormula.id: [
             InstalledBrewPackage(
                 package: BrewPackage(
@@ -211,148 +213,11 @@ nonisolated enum AppPreviewSupport {
         ],
     ]
 
-    static let installedInventoryIDs: Set<InstalledBrewPackage.ID> = Set(
+    public static let installedInventoryIDs: Set<InstalledBrewPackage.ID> = Set(
         installedPackages.map(\.id) + [
             .formula(name: "openssl@3"),
             .formula(name: "pcre2"),
             .formula(name: "icu4c@76"),
         ],
     )
-
-    @MainActor
-    static func makeInstalledPackagesRepository(
-        packages: [InstalledBrewPackage] = installedPackages,
-    ) -> BrewInstalledPackagesRepository {
-        BrewInstalledPackagesRepository.previewLoaded(packages)
-    }
-
-    @MainActor
-    static func makeInstalledViewModel(
-        packages: [InstalledBrewPackage] = installedPackages,
-    ) -> InstalledViewModel {
-        InstalledViewModel(repository: makeInstalledPackagesRepository(packages: packages))
-    }
-
-    @MainActor
-    static func makeInstalledDependentsRepository() -> any InstalledDependentsRepository {
-        PreviewInstalledDependentsRepository(
-            dependentsByPackageID: installedDependentsByPackageID,
-        )
-    }
-
-    @MainActor
-    static func makeInstalledInventoryReading() -> any InstalledInventoryReading {
-        makeInstalledPackagesRepository()
-    }
-
-    @MainActor
-    static func makeDiscoverPackagesRepository() -> any DiscoverPackagesRepository {
-        PreviewDiscoverPackagesRepository(snapshot: discoverTopPackagesSnapshot)
-    }
-
-    @MainActor
-    static func makeDiscoverListRowViewModel(
-        package: DiscoveryBrewPackage = discoverPreviewPackage,
-        showsInstallMetrics: Bool = true,
-    ) -> DiscoverListRowViewModel {
-        DiscoverListRowViewModel(
-            discoveryPackage: package,
-            installedRepository: makeInstalledPackagesRepository(),
-            brewCommandCenter: NoopBrewCommandCenter(executionContext: .noopForTestingAndPreviews()),
-            showsInstallMetrics: showsInstallMetrics,
-        )
-    }
-
-    @MainActor
-    static func makeDiscoverCatalogueRepository() -> any CatalogueRepository {
-        PreviewDiscoverCatalogueRepository(
-            formulaCatalogue: discoverFormulaeCatalogue,
-            caskCatalogue: discoverCasksCatalogue,
-        )
-    }
-}
-
-actor PreviewBrewCommandCenter: BrewCommandCenter {
-    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
-        .idle
-    }
-
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        false
-    }
-
-    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
-        AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
-            continuation.yield(.idle)
-            continuation.finish()
-        }
-    }
-
-    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
-        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
-        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func submit(
-        id _: BrewOperationID,
-        command _: any BrewMutatingCommand,
-    ) async throws {}
-}
-
-struct PreviewInstalledDependentsRepository: InstalledDependentsRepository {
-    let dependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]]
-
-    func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
-        dependentsByPackageID[packageID] ?? []
-    }
-}
-
-struct PreviewDiscoverPackagesRepository: DiscoverPackagesRepository {
-    let snapshot: DiscoverTopPackagesSnapshot
-
-    func loadTopPackages(
-        limit _: Int,
-        window _: BrewAnalyticsWindow,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        snapshot
-    }
-}
-
-struct PreviewDiscoverCatalogueRepository: CatalogueRepository {
-    let formulaCatalogue: [BrewPackage]
-    let caskCatalogue: [BrewPackage]
-
-    func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
-        let packages = reference.kind == .formula ? formulaCatalogue : caskCatalogue
-        return packages.first { $0.id == reference }
-    }
-
-    func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage] {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty, limit > 0 else {
-            return []
-        }
-        let matches = (formulaCatalogue + caskCatalogue).filter {
-            $0.name.localizedCaseInsensitiveContains(trimmedQuery)
-                || $0.displayName.localizedCaseInsensitiveContains(trimmedQuery)
-        }
-        return Array(matches.prefix(limit))
-    }
 }

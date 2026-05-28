@@ -13,6 +13,8 @@ let package = Package(
         .library(name: "BrewNetworking", targets: ["BrewNetworking"]),
         .library(name: "BrewRepositories", targets: ["BrewRepositories"]),
         .library(name: "BrewRepositoriesLive", targets: ["BrewRepositoriesLive"]),
+        .library(name: "BrewCoreTestSupport", targets: ["BrewCoreTestSupport"]),
+        .library(name: "BrewRepositoriesTestSupport", targets: ["BrewRepositoriesTestSupport"]),
     ],
     targets: [
         .target(
@@ -60,6 +62,22 @@ let package = Package(
         .target(
             name: "BrewRepositoriesLive",
             dependencies: ["BrewRepositories", "BrewCLI", "BrewNetworking"],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewCoreTestSupport",
+            dependencies: ["BrewCore"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewRepositoriesTestSupport",
+            dependencies: ["BrewRepositories", "BrewCoreTestSupport"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
