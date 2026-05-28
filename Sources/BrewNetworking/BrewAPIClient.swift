@@ -18,14 +18,6 @@ public enum CatalogueResponse<T: Sendable>: Sendable {
     case updated(data: T, etag: String?)
 }
 
-public enum BrewAPIClientError: Error, Equatable, Sendable {
-    case invalidURL(path: String)
-    case transport(underlying: String)
-    case invalidResponse
-    case httpStatus(code: Int, bodySnippet: String)
-    case decoding(underlying: String)
-}
-
 public struct URLSessionBrewAPIClient: BrewAPIClient {
     private let baseURL: URL
     private let session: URLSession
