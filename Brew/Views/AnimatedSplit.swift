@@ -78,10 +78,14 @@ struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
 @MainActor
 final class AnimatedSplitView: NSView {
     static let handleThickness: CGFloat = 6
+    static let dividerThickness: CGFloat = 1
 
     let topHost: NSView
     let bottomHost: NSView
     let handleHost: NSView
+    /// Always-visible hairline at the boundary between the two panes — including when collapsed, where
+    /// the (hidden) handle would otherwise leave no separation between the panes.
+    let dividerHost: NSView
 
     var collapsedHeight: CGFloat
     var minExpandedHeight: CGFloat
@@ -103,6 +107,7 @@ final class AnimatedSplitView: NSView {
         topHost = top
         bottomHost = bottom
         handleHost = handle
+        dividerHost = NSHostingView(rootView: Color.brewBorderSeparator)
         bottomHeight = initialBottomHeight
         self.collapsed = collapsed
         self.collapsedHeight = collapsedHeight
@@ -113,6 +118,7 @@ final class AnimatedSplitView: NSView {
         addSubview(topHost)
         addSubview(bottomHost)
         addSubview(handleHost)
+        addSubview(dividerHost)
         let pan = NSPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
         handleHost.addGestureRecognizer(pan)
     }
@@ -150,21 +156,26 @@ final class AnimatedSplitView: NSView {
         }
         let width = bounds.width
         let handleH = collapsed ? 0 : Self.handleThickness
+        let dividerH = Self.dividerThickness
         let bottomH = max(0, min(bottom, total))
-        let topH = max(0, total - bottomH - handleH)
+        let topH = max(0, total - bottomH - handleH - dividerH)
 
-        // NSView coordinates are bottom-up by default: y=0 is the bottom edge.
+        // NSView coordinates are bottom-up by default: y=0 is the bottom edge. Stacking from the
+        // bottom: bottom pane, handle grip, hairline divider, top pane.
         let bottomFrame = NSRect(x: 0, y: 0, width: width, height: bottomH)
         let handleFrame = NSRect(x: 0, y: bottomH, width: width, height: handleH)
-        let topFrame = NSRect(x: 0, y: bottomH + handleH, width: width, height: topH)
+        let dividerFrame = NSRect(x: 0, y: bottomH + handleH, width: width, height: dividerH)
+        let topFrame = NSRect(x: 0, y: bottomH + handleH + dividerH, width: width, height: topH)
 
         if animated {
             bottomHost.animator().frame = bottomFrame
             handleHost.animator().frame = handleFrame
+            dividerHost.animator().frame = dividerFrame
             topHost.animator().frame = topFrame
         } else {
             bottomHost.frame = bottomFrame
             handleHost.frame = handleFrame
+            dividerHost.frame = dividerFrame
             topHost.frame = topFrame
         }
         handleHost.isHidden = collapsed
