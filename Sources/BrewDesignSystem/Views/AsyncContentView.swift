@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewCore
 import SwiftUI
 
 /// Renders a ``LoadState`` by switching on its case and standardises the boilerplate that would
@@ -16,12 +17,12 @@ import SwiftUI
 /// `Failure` is fixed to `String`: ViewModels map their repository errors to user-facing copy before
 /// handing the state here (`CONVENTIONS.md` — Loadable UI state), so ``ErrorStateView`` only needs a
 /// message.
-struct AsyncContentView<Content: Placeholdable, LoadedView: View>: View {
+public struct AsyncContentView<Content: Placeholdable, LoadedView: View>: View {
     let state: LoadState<Content, String>
     let onRetry: (() -> Void)?
     @ViewBuilder let loaded: (Content) -> LoadedView
 
-    init(
+    public init(
         state: LoadState<Content, String>,
         onRetry: (() -> Void)? = nil,
         @ViewBuilder loaded: @escaping (Content) -> LoadedView,
@@ -31,7 +32,7 @@ struct AsyncContentView<Content: Placeholdable, LoadedView: View>: View {
         self.loaded = loaded
     }
 
-    var body: some View {
+    public var body: some View {
         switch state {
         case .loading:
             loaded(Content.placeholder)
@@ -47,16 +48,16 @@ struct AsyncContentView<Content: Placeholdable, LoadedView: View>: View {
 
 /// Standard failure presentation: a warning glyph, the human-readable message a ViewModel mapped from
 /// its error, and an optional Retry button. Pass `onRetry: nil` when a tap can't recover the failure.
-struct ErrorStateView: View {
+public struct ErrorStateView: View {
     let message: String
     let onRetry: (() -> Void)?
 
-    init(message: String, onRetry: (() -> Void)? = nil) {
+    public init(message: String, onRetry: (() -> Void)? = nil) {
         self.message = message
         self.onRetry = onRetry
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(spacing: BrewSpacing.md) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.brewTitle2)

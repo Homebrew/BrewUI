@@ -12,7 +12,7 @@ import SwiftUI
 /// the collapse/expand animation (frame interpolation via `NSAnimationContext` — `NSSplitView`'s
 /// animator path doesn't keep the divider chrome in sync, and `withAnimation` doesn't bridge into
 /// either anyway).
-struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
+public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     let collapsed: Bool
     let collapsedHeight: CGFloat
     let expandedHeight: CGFloat
@@ -22,11 +22,31 @@ struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     @ViewBuilder let top: () -> Top
     @ViewBuilder let bottom: () -> Bottom
 
-    func makeCoordinator() -> Coordinator {
+    public init(
+        collapsed: Bool,
+        collapsedHeight: CGFloat,
+        expandedHeight: CGFloat,
+        minExpandedHeight: CGFloat,
+        maxExpandedHeight: CGFloat,
+        animation: NSAnimationContextSpec?,
+        @ViewBuilder top: @escaping () -> Top,
+        @ViewBuilder bottom: @escaping () -> Bottom,
+    ) {
+        self.collapsed = collapsed
+        self.collapsedHeight = collapsedHeight
+        self.expandedHeight = expandedHeight
+        self.minExpandedHeight = minExpandedHeight
+        self.maxExpandedHeight = maxExpandedHeight
+        self.animation = animation
+        self.top = top
+        self.bottom = bottom
+    }
+
+    public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
 
-    func makeNSView(context: Context) -> AnimatedSplitView {
+    public func makeNSView(context: Context) -> AnimatedSplitView {
         let topHost = NSHostingView(rootView: top())
         let bottomHost = NSHostingView(rootView: bottom())
         let handleHost = NSHostingView(rootView: SplitDragHandle())
@@ -52,7 +72,7 @@ struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
         return view
     }
 
-    func updateNSView(_ nsView: AnimatedSplitView, context: Context) {
+    public func updateNSView(_ nsView: AnimatedSplitView, context: Context) {
         if let topHost = context.coordinator.topHost as? NSHostingView<Top> {
             topHost.rootView = top()
         }
@@ -74,7 +94,7 @@ struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     }
 
     @MainActor
-    final class Coordinator {
+    public final class Coordinator {
         weak var topHost: NSView?
         weak var bottomHost: NSView?
         var previousCollapsed: Bool?
@@ -82,7 +102,7 @@ struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
 }
 
 @MainActor
-final class AnimatedSplitView: NSView {
+public final class AnimatedSplitView: NSView {
     static let handleThickness: CGFloat = 6
     static let dividerThickness: CGFloat = 1
 
@@ -132,11 +152,11 @@ final class AnimatedSplitView: NSView {
     }
 
     @available(*, unavailable)
-    required init?(coder _: NSCoder) {
+    public required init?(coder _: NSCoder) {
         nil
     }
 
-    override func layout() {
+    override public func layout() {
         super.layout()
         applyLayout(forBottomHeight: bottomHeight, animated: false)
     }
@@ -239,11 +259,16 @@ private struct SplitDragHandle: View {
     }
 }
 
-struct NSAnimationContextSpec {
+public struct NSAnimationContextSpec {
     let duration: CFTimeInterval
     let timingFunction: CAMediaTimingFunction?
 
-    static let brewFast = NSAnimationContextSpec(
+    public init(duration: CFTimeInterval, timingFunction: CAMediaTimingFunction?) {
+        self.duration = duration
+        self.timingFunction = timingFunction
+    }
+
+    public static let brewFast = NSAnimationContextSpec(
         duration: 0.15,
         timingFunction: CAMediaTimingFunction(name: .easeOut),
     )
@@ -251,7 +276,7 @@ struct NSAnimationContextSpec {
 
 /// Resolves the bottom-pane height for a split request: collapsed snaps to the fixed collapsed
 /// height; otherwise the proposed value is bounded to `[minExpanded, maxExpanded]`.
-nonisolated func clampedSplitBottomHeight(
+public nonisolated func clampedSplitBottomHeight(
     _ value: CGFloat,
     collapsed: Bool,
     collapsedHeight: CGFloat,

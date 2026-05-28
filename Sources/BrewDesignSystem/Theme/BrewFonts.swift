@@ -5,7 +5,7 @@ import SwiftUI
 // Two-family split: SF Pro for prose, SF Mono for code/commands.
 // Uses system font styles for Dynamic Type support.
 
-extension Font {
+public extension Font {
     // MARK: Display & Headings
 
     /// App name, empty state headings — 28pt SF Pro Display.
@@ -51,7 +51,7 @@ extension Font {
 
 // MARK: - View modifiers for common typographic styles
 
-extension View {
+public extension View {
     /// Applies the standard code/terminal text style: monospaced font + code default colour.
     func brewCodeStyle() -> some View {
         font(.brewCode)

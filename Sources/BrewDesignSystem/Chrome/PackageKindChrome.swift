@@ -1,29 +1,40 @@
 //
 //  PackageKindChrome.swift
-//  Brew
+//  BrewDesignSystem
 //
 
+import BrewCore
 import Foundation
 
 /// Semantic colour roles for mapping to `Color` in SwiftUI (design tokens in one place).
-nonisolated enum PackageKindAccentToken: Equatable {
+public nonisolated enum PackageKindAccentToken: Equatable {
     case brandPrimary
     case statusInfo
 }
 
-nonisolated enum PackageKindIconBackgroundToken: Equatable {
+public nonisolated enum PackageKindIconBackgroundToken: Equatable {
     case brandTint
     case statusInfoSubtle
 }
 
 /// Testable chrome for an installed list row (badge + token roles); views map tokens to `Color`.
-nonisolated struct PackageKindChrome: Equatable {
-    var badgeLabel: String
-    var accent: PackageKindAccentToken
-    var iconBackground: PackageKindIconBackgroundToken
+public nonisolated struct PackageKindChrome: Equatable {
+    public var badgeLabel: String
+    public var accent: PackageKindAccentToken
+    public var iconBackground: PackageKindIconBackgroundToken
+
+    public init(
+        badgeLabel: String,
+        accent: PackageKindAccentToken,
+        iconBackground: PackageKindIconBackgroundToken,
+    ) {
+        self.badgeLabel = badgeLabel
+        self.accent = accent
+        self.iconBackground = iconBackground
+    }
 }
 
-nonisolated extension HomebrewPackageKind {
+public nonisolated extension HomebrewPackageKind {
     var chrome: PackageKindChrome {
         switch self {
         case .formula:
