@@ -37,7 +37,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
     @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
 
-    init(
+    public init(
         commandRunner: BrewCommandRunning,
         locator: any BrewExecutableLocating,
         cache: InstalledInventoryCache,
