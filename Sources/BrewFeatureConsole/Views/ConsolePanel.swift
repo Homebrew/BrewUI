@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 /// Bottom-of-window console. Collapsed → status strip only. Expanded → toolbar + output body.

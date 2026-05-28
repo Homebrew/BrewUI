@@ -3,6 +3,8 @@
 //  BrewFeatureConsole
 //
 
+import BrewCore
+import BrewDesignSystem
 import BrewRepositories
 import Foundation
 

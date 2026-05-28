@@ -4,6 +4,9 @@
 //
 
 import AppKit
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 
 /// View-layer AppKit bridge for saving/copying a command job's output. Lives at the view layer so the
 /// console view model stays AppKit-free; views call these static methods with the data already shaped by

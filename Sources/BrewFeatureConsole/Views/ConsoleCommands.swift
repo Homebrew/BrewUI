@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 /// View menu commands for the command console. Currently a single `⌘\`` toggle matching Xcode / VS Code / Terminal.

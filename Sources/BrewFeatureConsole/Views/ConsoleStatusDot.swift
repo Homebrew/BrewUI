@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 /// 8pt status indicator for the console strip. Color follows design-system §4.3/§4.4:

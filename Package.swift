@@ -15,6 +15,7 @@ let package = Package(
         .library(name: "BrewRepositoriesLive", targets: ["BrewRepositoriesLive"]),
         .library(name: "BrewCoreTestSupport", targets: ["BrewCoreTestSupport"]),
         .library(name: "BrewRepositoriesTestSupport", targets: ["BrewRepositoriesTestSupport"]),
+        .library(name: "BrewFeatureConsole", targets: ["BrewFeatureConsole"]),
     ],
     targets: [
         .target(
@@ -78,6 +79,19 @@ let package = Package(
         .target(
             name: "BrewRepositoriesTestSupport",
             dependencies: ["BrewRepositories", "BrewCoreTestSupport"],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewFeatureConsole",
+            dependencies: [
+                "BrewCore",
+                "BrewDesignSystem",
+                "BrewRepositories",
+                "BrewRepositoriesTestSupport",
+            ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
