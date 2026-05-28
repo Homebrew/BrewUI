@@ -1,21 +1,17 @@
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 import SwiftUI
 
-/// Entry-point wrapper for the Discover tab content.
+/// Entry-point wrapper for the Discover tab content. Reads the discover/catalogue/installed
+/// repositories from the environment (composed by the app's composition root).
 struct DiscoverColumnsRoot: View {
-    @Environment(\.catalogueCache) private var catalogueCache
+    @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
+    @Environment(\.catalogueRepository) private var catalogueRepository
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
-        let apiClient = URLSessionBrewAPIClient.live()
-        let catalogueRepository = BrewCatalogueRepository(
-            apiClient: apiClient,
-            cache: catalogueCache,
-        )
-        let discoverPackagesRepository = BrewDiscoverPackagesRepository(
-            apiClient: apiClient,
-            catalogueRepository: catalogueRepository,
-        )
         DiscoverColumns(
             discoverPackagesRepository: discoverPackagesRepository,
             catalogueRepository: catalogueRepository,
@@ -74,10 +70,14 @@ struct DiscoverColumns: View {
     }
 }
 
-#Preview {
-    DiscoverColumns(
-        discoverPackagesRepository: AppPreviewSupport.makeDiscoverPackagesRepository(),
-        catalogueRepository: AppPreviewSupport.makeDiscoverCatalogueRepository(),
-        installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
-    )
-}
+#if DEBUG
+    import BrewRepositoriesTestSupport
+
+    #Preview {
+        DiscoverColumns(
+            discoverPackagesRepository: AppPreviewSupport.makeDiscoverPackagesRepository(),
+            catalogueRepository: AppPreviewSupport.makeDiscoverCatalogueRepository(),
+            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
+        )
+    }
+#endif

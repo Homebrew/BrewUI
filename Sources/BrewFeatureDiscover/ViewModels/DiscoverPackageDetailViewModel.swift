@@ -1,3 +1,6 @@
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 import Observation
 
@@ -7,6 +10,7 @@ final class DiscoverPackageDetailViewModel {
     private(set) var discoveryPackage: DiscoveryBrewPackage
     @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
     @ObservationIgnored private let brewCommandCenter: any BrewCommandCenter
+    @ObservationIgnored private let commandFactory: any BrewMutatingCommandFactory
     @ObservationIgnored private var mutationTask: Task<Void, Never>?
 
     /// Latest phase from the command center stream (see ``observeInstallUpdates()``); drives install chrome.
@@ -30,10 +34,12 @@ final class DiscoverPackageDetailViewModel {
         package: DiscoveryBrewPackage,
         installedRepository: any InstalledPackageStatusReading,
         brewCommandCenter: any BrewCommandCenter,
+        commandFactory: any BrewMutatingCommandFactory,
     ) {
         discoveryPackage = package
         self.installedRepository = installedRepository
         self.brewCommandCenter = brewCommandCenter
+        self.commandFactory = commandFactory
     }
 
     private var installedPackage: InstalledBrewPackage? {
@@ -123,7 +129,7 @@ final class DiscoverPackageDetailViewModel {
         }
         installErrorMessage = nil
         let operationID = BrewOperationID(kind: packageKind, name: discoveryPackage.name)
-        let command = PackageInstallCommand(package: discoveryPackage)
+        let command = commandFactory.installCommand(kind: packageKind, name: discoveryPackage.name)
         mutationTask?.cancel()
         mutationTask = Task { @MainActor [self] in
             do {

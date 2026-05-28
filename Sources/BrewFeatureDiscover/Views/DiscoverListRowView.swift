@@ -1,3 +1,6 @@
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 /// Owns one Discover row's view model, reading the shared installed-status source from the environment at
@@ -151,12 +154,16 @@ struct DiscoverListRowView: View {
     }
 }
 
-#Preview("Installed") {
-    DiscoverListRowView(
-        discoveryPackage: AppPreviewSupport.discoverPreviewPackage,
-        installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
-        brewCommandCenter: AppPreviewSupport.commandCenter,
-    )
-    .padding()
-    .frame(width: 440)
-}
+#if DEBUG
+    import BrewRepositoriesTestSupport
+
+    #Preview("Installed") {
+        DiscoverListRowView(
+            discoveryPackage: AppPreviewSupport.discoverPreviewPackage,
+            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
+            brewCommandCenter: AppPreviewSupport.commandCenter,
+        )
+        .padding()
+        .frame(width: 440)
+    }
+#endif

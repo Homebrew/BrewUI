@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 
 /// Derived presentation for "install in progress" chrome on a Discover row.

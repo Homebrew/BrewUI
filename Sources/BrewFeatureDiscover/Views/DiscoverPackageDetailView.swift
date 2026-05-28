@@ -1,17 +1,23 @@
 import AppKit
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
-/// Root view for the selected row; detail content reads ``EnvironmentValues/brewCommandCenter`` and builds relationship repositories from ``EnvironmentValues/installedInventoryCache``.
+/// Root view for the selected row; reads the installed repository, command center, and command
+/// factory from the environment and injects them into the detail content's view model.
 struct DiscoverPackageDetailRoot: View {
     let selectedPackage: DiscoveryBrewPackage
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.brewCommandCenter) private var brewCommandCenter
+    @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
 
     var body: some View {
         DiscoverPackageDetailView(
             package: selectedPackage,
             installedRepository: installedPackagesRepository,
             brewCommandCenter: brewCommandCenter,
+            mutatingCommandFactory: mutatingCommandFactory,
         )
     }
 }
@@ -28,6 +34,7 @@ struct DiscoverPackageDetailView: View {
         package: DiscoveryBrewPackage,
         installedRepository: any InstalledPackageStatusReading,
         brewCommandCenter: any BrewCommandCenter,
+        mutatingCommandFactory: any BrewMutatingCommandFactory,
     ) {
         self.package = package
         _viewModel = State(
@@ -35,6 +42,7 @@ struct DiscoverPackageDetailView: View {
                 package: package,
                 installedRepository: installedRepository,
                 brewCommandCenter: brewCommandCenter,
+                commandFactory: mutatingCommandFactory,
             ),
         )
     }
@@ -263,11 +271,16 @@ struct DiscoverPackageDetailPlaceholder: View {
     }
 }
 
-#Preview {
-    DiscoverPackageDetailView(
-        package: AppPreviewSupport.discoverPreviewPackage,
-        installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
-        brewCommandCenter: AppPreviewSupport.commandCenter,
-    )
-    .frame(minWidth: 380, minHeight: 480)
-}
+#if DEBUG
+    import BrewRepositoriesTestSupport
+
+    #Preview {
+        DiscoverPackageDetailView(
+            package: AppPreviewSupport.discoverPreviewPackage,
+            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
+            brewCommandCenter: AppPreviewSupport.commandCenter,
+            mutatingCommandFactory: AppPreviewSupport.mutatingCommandFactory,
+        )
+        .frame(minWidth: 380, minHeight: 480)
+    }
+#endif

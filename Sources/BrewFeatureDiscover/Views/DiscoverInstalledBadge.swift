@@ -1,3 +1,6 @@
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 /// Installed status pill shared by discover list rows and package detail.
