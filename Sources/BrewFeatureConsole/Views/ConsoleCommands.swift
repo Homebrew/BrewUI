@@ -9,10 +9,12 @@ import BrewRepositories
 import SwiftUI
 
 /// View menu commands for the command console. Currently a single `⌘\`` toggle matching Xcode / VS Code / Terminal.
-struct ConsoleCommands: Commands {
+public struct ConsoleCommands: Commands {
     @FocusedBinding(\.consoleExpanded) private var expanded: Bool?
 
-    var body: some Commands {
+    public init() {}
+
+    public var body: some Commands {
         CommandGroup(after: .toolbar) {
             Button(expanded == true ? "Hide Console" : "Show Console") {
                 expanded?.toggle()

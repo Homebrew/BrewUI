@@ -3,10 +3,12 @@ import BrewDesignSystem
 import BrewRepositories
 import SwiftUI
 
-struct InstalledColumnsRoot: View {
+public struct InstalledColumnsRoot: View {
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         InstalledColumns(installedPackagesRepository: installedPackagesRepository)
     }
 }

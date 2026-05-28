@@ -6,12 +6,14 @@ import SwiftUI
 
 /// Entry-point wrapper for the Discover tab content. Reads the discover/catalogue/installed
 /// repositories from the environment (composed by the app's composition root).
-struct DiscoverColumnsRoot: View {
+public struct DiscoverColumnsRoot: View {
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.catalogueRepository) private var catalogueRepository
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         DiscoverColumns(
             discoverPackagesRepository: discoverPackagesRepository,
             catalogueRepository: catalogueRepository,
