@@ -58,8 +58,8 @@ final class BrewCommandJobsRepository: CommandJobsObserving {
         orderedIDs = preservedIDs
     }
 
-    /// Test-and-internal seam — exercised from ``observePhases()`` and unit tests.
-    func handlePhase(id: BrewOperationID, phase: BrewOperationPhase) {
+    /// Applies a phase transition from ``observePhases()`` to the cache.
+    private func handlePhase(id: BrewOperationID, phase: BrewOperationPhase) {
         if let existing = jobs[id] {
             existing.updatePhase(phase)
             return
@@ -75,10 +75,10 @@ final class BrewCommandJobsRepository: CommandJobsObserving {
         orderedIDs.append(id)
     }
 
-    /// Test-and-internal seam — exercised from ``observeOutput()`` and unit tests.
+    /// Appends a streamed output line from ``observeOutput()`` to the matching job.
     /// Output lines for unknown ids are dropped: a job materializes from its first
     /// ``BrewOperationPhase/running`` transition, which is always observed before any subprocess emits output.
-    func handleOutput(id: BrewOperationID, line: BrewCommandOutputLine) {
+    private func handleOutput(id: BrewOperationID, line: BrewCommandOutputLine) {
         guard let job = jobs[id] else {
             return
         }
