@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewUIComponents
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import SwiftUI
 
 /// Expanded-console toolbar: selected-job pill on the left, Save/Copy/Clear + collapse chevron on the right.

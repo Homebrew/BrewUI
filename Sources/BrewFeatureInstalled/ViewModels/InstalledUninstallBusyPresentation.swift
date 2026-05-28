@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewUIComponents
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 
 /// Derived presentation for "uninstall in progress" chrome when observing ``BrewOperationPhase`` for an installed row.

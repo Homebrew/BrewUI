@@ -1,6 +1,6 @@
 import BrewCore
-import BrewUIComponents
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import SwiftUI
 
 public struct InstalledColumnsRoot: View {

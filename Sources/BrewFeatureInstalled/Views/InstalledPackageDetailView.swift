@@ -5,8 +5,8 @@
 
 import AppKit
 import BrewCore
-import BrewUIComponents
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import SwiftUI
 
 /// Root view for the selected row; reads the command center, command factory, and dependents

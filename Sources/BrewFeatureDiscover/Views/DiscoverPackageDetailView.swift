@@ -1,7 +1,7 @@
 import AppKit
 import BrewCore
-import BrewUIComponents
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import SwiftUI
 
 /// Root view for the selected row; reads the installed repository, command center, and command

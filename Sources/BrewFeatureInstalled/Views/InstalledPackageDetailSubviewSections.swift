@@ -5,8 +5,8 @@
 
 import AppKit
 import BrewCore
-import BrewUIComponents
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import SwiftUI
 
 struct InstalledPackageDetailHeroSection: View {

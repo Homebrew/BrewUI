@@ -6,12 +6,12 @@
 import BrewCLI
 import BrewCore
 import BrewCoreTestSupport
-import BrewUIComponents
 @testable import BrewFeatureInstalled
-import BrewRepositoryInterfaces
 import BrewRepositories
 import BrewRepositoriesTestSupport
+import BrewRepositoryInterfaces
 import BrewServicesTestSupport
+import BrewUIComponents
 import Testing
 
 struct InstalledPackageRowPresentationTests {
