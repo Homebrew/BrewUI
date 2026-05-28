@@ -190,10 +190,13 @@ final class AnimatedSplitView: NSView {
     }
 
     private func clamp(_ value: CGFloat, collapsed: Bool) -> CGFloat {
-        if collapsed {
-            return collapsedHeight
-        }
-        return max(min(value, maxExpandedHeight), minExpandedHeight)
+        clampedSplitBottomHeight(
+            value,
+            collapsed: collapsed,
+            collapsedHeight: collapsedHeight,
+            minExpanded: minExpandedHeight,
+            maxExpanded: maxExpandedHeight,
+        )
     }
 
     @objc private func handlePan(_ recognizer: NSPanGestureRecognizer) {
@@ -244,4 +247,19 @@ struct NSAnimationContextSpec {
         duration: 0.15,
         timingFunction: CAMediaTimingFunction(name: .easeOut),
     )
+}
+
+/// Resolves the bottom-pane height for a split request: collapsed snaps to the fixed collapsed
+/// height; otherwise the proposed value is bounded to `[minExpanded, maxExpanded]`.
+nonisolated func clampedSplitBottomHeight(
+    _ value: CGFloat,
+    collapsed: Bool,
+    collapsedHeight: CGFloat,
+    minExpanded: CGFloat,
+    maxExpanded: CGFloat,
+) -> CGFloat {
+    if collapsed {
+        return collapsedHeight
+    }
+    return max(min(value, maxExpanded), minExpanded)
 }
