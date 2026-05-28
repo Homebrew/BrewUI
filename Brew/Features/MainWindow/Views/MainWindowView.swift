@@ -7,27 +7,22 @@ struct MainWindowView: View {
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
     var body: some View {
-        VSplitView {
+        AnimatedSplit(
+            collapsed: !consoleExpanded,
+            collapsedHeight: BrewLayout.consoleCollapsedHeight,
+            expandedHeight: consoleHeight,
+            minExpandedHeight: BrewLayout.consoleMinExpandedHeight,
+            maxExpandedHeight: BrewLayout.consoleMaxExpandedHeight,
+            animation: .brewFast,
+        ) {
             NavigationSplitView {
                 sidebarColumn
             } detail: {
                 featureColumn
             }
             .background(.bar)
-            .frame(minHeight: 200, maxHeight: .infinity)
-
+        } bottom: {
             ConsolePanelRoot(expanded: $consoleExpanded)
-                .frame(
-                    minHeight: consoleExpanded
-                        ? BrewLayout.consoleMinExpandedHeight
-                        : BrewLayout.consoleCollapsedHeight,
-                    idealHeight: consoleExpanded
-                        ? consoleHeight
-                        : BrewLayout.consoleCollapsedHeight,
-                    maxHeight: consoleExpanded
-                        ? BrewLayout.consoleMaxExpandedHeight
-                        : BrewLayout.consoleCollapsedHeight,
-                )
         }
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
     }
