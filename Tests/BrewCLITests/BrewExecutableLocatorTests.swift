@@ -1,4 +1,7 @@
-@testable import Brew
+@testable import BrewCLI
+import BrewCore
+import BrewCoreTestSupport
+import BrewServicesTestSupport
 import Foundation
 import Testing
 

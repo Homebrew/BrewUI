@@ -3,10 +3,18 @@
 //  BrewTests
 //
 
-@testable import Brew
+import BrewCLI
+import BrewCore
+import BrewCoreTestSupport
+import BrewNetworking
+import BrewRepositories
+@testable import BrewRepositoriesLive
+import BrewRepositoriesTestSupport
+import BrewServicesTestSupport
 import Foundation
 import Testing
 
+// swiftlint:disable:next type_body_length
 struct BrewCatalogueRepositoryTests {
     @Test @MainActor func `cold start surfaces fetch errors`() async throws {
         let fixture = TestFixture()

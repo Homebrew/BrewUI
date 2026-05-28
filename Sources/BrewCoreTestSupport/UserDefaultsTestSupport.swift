@@ -5,7 +5,7 @@
 
 import Foundation
 
-extension UserDefaults {
+public extension UserDefaults {
     /// Removes every key in `UserDefaults.standard` (or whichever instance) that starts with
     /// the given prefix. Used by tests that isolate state with a per-test prefix instead of a
     /// suite name, so cleanup doesn't depend on `removePersistentDomain`.

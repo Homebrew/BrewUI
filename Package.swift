@@ -152,5 +152,38 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
+        .testTarget(
+            name: "BrewCLITests",
+            dependencies: ["BrewCLI", "BrewCoreTestSupport", "BrewServicesTestSupport"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewNetworkingTests",
+            dependencies: ["BrewNetworking", "BrewCoreTestSupport"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewRepositoriesLiveTests",
+            dependencies: [
+                "BrewRepositoriesLive",
+                "BrewCore",
+                "BrewCLI",
+                "BrewNetworking",
+                "BrewRepositories",
+                "BrewCoreTestSupport",
+                "BrewServicesTestSupport",
+                "BrewRepositoriesTestSupport",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
     ],
 )
