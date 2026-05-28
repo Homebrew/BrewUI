@@ -55,6 +55,24 @@ enum BrewLayout {
 
     /// Minimum supported window height.
     static let minWindowHeight: CGFloat = 520
+
+    // MARK: Command Console
+
+    /// Collapsed status-strip height (36pt — matches the mock and macOS toolbar idiom).
+    static let consoleCollapsedHeight: CGFloat = 36
+
+    /// Expanded-mode toolbar height (matches the collapsed strip so resizing the body doesn't shift chrome height).
+    static let consoleToolbarHeight: CGFloat = 36
+
+    /// Lower bound for the expanded console body. Below ~150pt a SwiftUI scroll-indicator artefact from
+    /// the main pane bleeds into the console area, on top of the toolbar starting to dominate the output.
+    static let consoleMinExpandedHeight: CGFloat = 150
+
+    /// Upper bound for the expanded console body. Beyond this the main pane is starved.
+    static let consoleMaxExpandedHeight: CGFloat = 600
+
+    /// Default expanded console body height when no per-window override is stored.
+    static let consoleDefaultExpandedHeight: CGFloat = 250
 }
 
 // MARK: - Corner Radii (§7)

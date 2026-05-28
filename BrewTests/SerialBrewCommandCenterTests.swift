@@ -82,7 +82,7 @@ struct SerialBrewCommandCenterTests {
 
     @Test func `clears running phase on success`() async throws {
         let center = makeCenter()
-        let id = BrewOperationID(rawValue: "formula:ok")
+        let id = BrewOperationID(kind: .formula, name: "ok")
         #expect(await center.phase(for: id) == .idle)
 
         try await center.submit(id: id, command: EmptyMutatingCommand())
@@ -93,7 +93,7 @@ struct SerialBrewCommandCenterTests {
 
     @Test func `records failure with OperationFailure and clears in flight slot`() async throws {
         let center = makeCenter()
-        let id = BrewOperationID(rawValue: "formula:bad")
+        let id = BrewOperationID(kind: .formula, name: "bad")
 
         do {
             try await center.submit(id: id, command: ThrowingMutatingCommand())
@@ -113,7 +113,7 @@ struct SerialBrewCommandCenterTests {
 
     @Test func `phaseByID exposes tracked entries`() async throws {
         let center = makeCenter()
-        let id = BrewOperationID(rawValue: "formula:snapshot")
+        let id = BrewOperationID(kind: .formula, name: "snapshot")
         #expect(await center.phaseByID().isEmpty)
 
         do {
@@ -137,7 +137,7 @@ struct SerialBrewCommandCenterTests {
             locator: BrewExecutableLocator(overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL),
         )
         let center = SerialBrewCommandCenter(executionContext: ctx)
-        let id = BrewOperationID(rawValue: "formula:demo-formula")
+        let id = BrewOperationID(kind: .formula, name: "demo-formula")
 
         try await center.submit(id: id, command: RunMockedArgvCommand(arguments: argv))
 
@@ -146,7 +146,7 @@ struct SerialBrewCommandCenterTests {
 
     @Test func `phaseChanges streams initial idle then running and idle on success`() async throws {
         let center = makeCenter()
-        let id = BrewOperationID(rawValue: "formula:stream-success")
+        let id = BrewOperationID(kind: .formula, name: "stream-success")
         let stream = await center.phaseChanges(for: id)
         let collector = PhaseStreamCollector()
         let collect = Task {
@@ -169,7 +169,7 @@ struct SerialBrewCommandCenterTests {
 
     @Test func `phaseChanges multicast delivers to two subscribers`() async throws {
         let center = makeCenter()
-        let id = BrewOperationID(rawValue: "formula:multi-stream")
+        let id = BrewOperationID(kind: .formula, name: "multi-stream")
         let streamA = await center.phaseChanges(for: id)
         let streamB = await center.phaseChanges(for: id)
         let collectorA = PhaseStreamCollector()
@@ -233,8 +233,8 @@ struct SerialBrewCommandCenterTests {
 struct SerialBrewAllPhaseStreamTests {
     @Test func `allPhaseChanges emits transitions across multiple ids without per id subscriber`() async throws {
         let center = makeSerialCommandCenterForTests()
-        let idA = BrewOperationID(rawValue: "formula:all-phase-a")
-        let idB = BrewOperationID(rawValue: "formula:all-phase-b")
+        let idA = BrewOperationID(kind: .formula, name: "all-phase-a")
+        let idB = BrewOperationID(kind: .formula, name: "all-phase-b")
         let stream = await center.allPhaseChanges()
         let collector = AllPhaseStreamCollector()
         let collect = Task {
@@ -264,7 +264,7 @@ struct SerialBrewAllPhaseStreamTests {
 
     @Test func `allPhaseChanges multicast delivers same events to two subscribers`() async throws {
         let center = makeSerialCommandCenterForTests()
-        let id = BrewOperationID(rawValue: "formula:all-phase-multi")
+        let id = BrewOperationID(kind: .formula, name: "all-phase-multi")
         let streamA = await center.allPhaseChanges()
         let streamB = await center.allPhaseChanges()
         let collectorA = AllPhaseStreamCollector()
@@ -298,7 +298,7 @@ struct SerialBrewAllPhaseStreamTests {
 
     @Test func `allPhaseChanges removes listener on stream termination`() async throws {
         let center = makeSerialCommandCenterForTests()
-        let id = BrewOperationID(rawValue: "formula:all-phase-cleanup")
+        let id = BrewOperationID(kind: .formula, name: "all-phase-cleanup")
         let stream = await center.allPhaseChanges()
         let collector = AllPhaseStreamCollector()
         let collect = Task {

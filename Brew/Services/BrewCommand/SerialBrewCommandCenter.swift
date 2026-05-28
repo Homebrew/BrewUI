@@ -8,6 +8,12 @@ import Foundation
 private typealias AllPhaseStreamTermination =
     AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation.Termination
 
+private typealias OutputStreamTermination =
+    AsyncStream<BrewCommandOutputLine>.Continuation.Termination
+
+private typealias AllOutputStreamTermination =
+    AsyncStream<(BrewOperationID, BrewCommandOutputLine)>.Continuation.Termination
+
 /// Runs async mutating work strictly one-at-a-time, including across `await` inside commands (serial policy).
 private actor SerialBrewWorkQueue {
     func run(_ work: @Sendable @escaping () async throws -> Void) async rethrows {
@@ -25,6 +31,16 @@ private struct AllPhaseStreamListener {
     let continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation
 }
 
+private struct OutputStreamListener {
+    let token: UUID
+    let continuation: AsyncStream<BrewCommandOutputLine>.Continuation
+}
+
+private struct AllOutputStreamListener {
+    let token: UUID
+    let continuation: AsyncStream<(BrewOperationID, BrewCommandOutputLine)>.Continuation
+}
+
 /// Default app implementation: serializes mutating `brew` subprocess work and exposes per-operation phase for UI.
 actor SerialBrewCommandCenter: BrewCommandCenter {
     private let executionContext: BrewCommandExecutionContext
@@ -34,6 +50,8 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
     private var inflightByID: [BrewOperationID: Task<Void, Error>] = [:]
     private var phaseListenersByID: [BrewOperationID: [PhaseStreamListener]] = [:]
     private var allPhaseListeners: [AllPhaseStreamListener] = []
+    private var outputListenersByID: [BrewOperationID: [OutputStreamListener]] = [:]
+    private var allOutputListeners: [AllOutputStreamListener] = []
 
     init(executionContext: BrewCommandExecutionContext) {
         self.executionContext = executionContext
@@ -78,6 +96,30 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         }
     }
 
+    func outputChanges(for id: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
+            let token = UUID()
+            continuation.onTermination = { @Sendable (_: OutputStreamTermination) in
+                Task {
+                    await self.removeOutputListener(id: id, token: token)
+                }
+            }
+            registerOutputListener(id: id, token: token, continuation: continuation)
+        }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
+            let token = UUID()
+            continuation.onTermination = { @Sendable (_: AllOutputStreamTermination) in
+                Task {
+                    await self.removeAllOutputListener(token: token)
+                }
+            }
+            registerAllOutputListener(token: token, continuation: continuation)
+        }
+    }
+
     func submit(
         id: BrewOperationID,
         command: any BrewMutatingCommand,
@@ -90,9 +132,28 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         let kind = command.operationKind
         let queue = workQueue
         let ctx = executionContext
+
+        // An internal AsyncStream serves as a thread-safe, FIFO-ordered buffer between the subprocess reader threads
+        // (which call `sink` synchronously) and the actor's listener-broadcast (which requires actor isolation).
+        // Yielding into a continuation is Sendable + thread-safe; a single drain Task pulls in order onto the actor.
+        let (lineStream, lineContinuation) = AsyncStream<BrewCommandOutputLine>.makeStream(
+            bufferingPolicy: .unbounded,
+        )
+        let outputSink: @Sendable (BrewCommandOutputLine) -> Void = { line in
+            lineContinuation.yield(line)
+        }
+
+        let drainTask = Task { [weak self] in
+            for await line in lineStream {
+                await self?.notifyOutputListeners(id: id, line: line)
+            }
+        }
+
         let task = Task<Void, Error> {
-            try await queue.run {
-                try await command.run(in: ctx)
+            try await BrewCommandOutputContext.$sink.withValue(outputSink) {
+                try await queue.run {
+                    try await command.run(in: ctx)
+                }
             }
         }
 
@@ -103,9 +164,13 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         notifyPhaseListeners(for: id)
         do {
             try await task.value
+            lineContinuation.finish()
+            await drainTask.value
             trackedPhasesByID[id] = nil
             notifyPhaseListeners(for: id)
         } catch {
+            lineContinuation.finish()
+            await drainTask.value
             trackedPhasesByID[id] = .failed(reason: OperationFailure(catching: error))
             notifyPhaseListeners(for: id)
             throw error
@@ -147,6 +212,39 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         allPhaseListeners.removeAll { $0.token == token }
     }
 
+    private func registerOutputListener(
+        id: BrewOperationID,
+        token: UUID,
+        continuation: AsyncStream<BrewCommandOutputLine>.Continuation,
+    ) {
+        let listener = OutputStreamListener(token: token, continuation: continuation)
+        outputListenersByID[id, default: []].append(listener)
+    }
+
+    private func removeOutputListener(id: BrewOperationID, token: UUID) {
+        guard var listeners = outputListenersByID[id] else {
+            return
+        }
+        listeners.removeAll { $0.token == token }
+        if listeners.isEmpty {
+            outputListenersByID[id] = nil
+        } else {
+            outputListenersByID[id] = listeners
+        }
+    }
+
+    private func registerAllOutputListener(
+        token: UUID,
+        continuation: AsyncStream<(BrewOperationID, BrewCommandOutputLine)>.Continuation,
+    ) {
+        let listener = AllOutputStreamListener(token: token, continuation: continuation)
+        allOutputListeners.append(listener)
+    }
+
+    private func removeAllOutputListener(token: UUID) {
+        allOutputListeners.removeAll { $0.token == token }
+    }
+
     private func notifyPhaseListeners(for id: BrewOperationID) {
         let phase = trackedPhasesByID[id] ?? .idle
         if let listeners = phaseListenersByID[id] {
@@ -156,6 +254,17 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         }
         for listener in allPhaseListeners {
             listener.continuation.yield((id, phase))
+        }
+    }
+
+    private func notifyOutputListeners(id: BrewOperationID, line: BrewCommandOutputLine) {
+        if let listeners = outputListenersByID[id] {
+            for listener in listeners {
+                listener.continuation.yield(line)
+            }
+        }
+        for listener in allOutputListeners {
+            listener.continuation.yield((id, line))
         }
     }
 }

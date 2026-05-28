@@ -24,6 +24,14 @@ protocol BrewCommandCenter: Actor {
     /// Cancel the consuming task and unregister via ``AsyncStream/Continuation/onTermination``.
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)>
 
+    /// Push-based subprocess output for `id` — yields buffered lines on subscribe, then each new line as the
+    /// underlying `Process` emits it. Cancel the consuming task and unregister via ``AsyncStream/Continuation/onTermination``.
+    func outputChanges(for id: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine>
+
+    /// Push-based subprocess output for **any** operation id — yields each line `(id, line)` with **no** initial replay.
+    /// Cancel the consuming task and unregister via ``AsyncStream/Continuation/onTermination``.
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)>
+
     /// Enqueue mutating work keyed by `id`.
     ///
     /// **Concurrency:** Conforming types such as ``SerialBrewCommandCenter`` run work **serially** (one mutating operation at a time).

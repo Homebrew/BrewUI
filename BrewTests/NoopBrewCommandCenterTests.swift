@@ -32,7 +32,7 @@ struct NoopBrewCommandCenterTests {
 
     @Test func `submit propagates thrown errors`() async {
         let center = NoopBrewCommandCenter.forTesting()
-        let id = BrewOperationID(rawValue: "formula:broken")
+        let id = BrewOperationID(kind: .formula, name: "broken")
 
         await #expect(throws: NoopThrowingCommand.TestError.self) {
             try await center.submit(id: id, command: NoopThrowingCommand())

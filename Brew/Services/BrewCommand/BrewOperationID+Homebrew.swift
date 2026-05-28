@@ -6,12 +6,17 @@
 import Foundation
 
 nonisolated extension BrewOperationID {
-    /// Stable id from domain package kind + name (`kind:name`, matches Homebrew list-stable strings).
+    /// Operation identity from a domain package kind + name.
     init(kind: HomebrewPackageKind, name: String) {
-        rawValue = "\(kind.rawValue):\(name)"
+        switch kind {
+        case .formula:
+            packageID = .formula(name: name)
+        case .cask:
+            packageID = .cask(token: name)
+        }
     }
 
     init(package: InstalledBrewPackage) {
-        self.init(kind: package.kind, name: package.name)
+        packageID = HomebrewPackageID(installedPackage: package)
     }
 }

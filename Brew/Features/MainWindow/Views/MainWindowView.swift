@@ -3,14 +3,28 @@ import SwiftUI
 
 struct MainWindowView: View {
     @State var selectedSidebarItem: SidebarItem = .installed
+    @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
+    @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
     var body: some View {
-        NavigationSplitView {
-            sidebarColumn
-        } detail: {
-            featureColumn
+        AnimatedSplit(
+            collapsed: !consoleExpanded,
+            collapsedHeight: BrewLayout.consoleCollapsedHeight,
+            expandedHeight: consoleHeight,
+            minExpandedHeight: BrewLayout.consoleMinExpandedHeight,
+            maxExpandedHeight: BrewLayout.consoleMaxExpandedHeight,
+            animation: .brewFast,
+        ) {
+            NavigationSplitView {
+                sidebarColumn
+            } detail: {
+                featureColumn
+            }
+            .background(.bar)
+        } bottom: {
+            ConsolePanelRoot(expanded: $consoleExpanded)
         }
-        .background(.bar)
+        .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
     }
 
     /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be

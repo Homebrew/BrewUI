@@ -15,13 +15,15 @@ nonisolated enum BrewOperationKind: String, Hashable {
     case uninstallCask
 }
 
-/// Stable opaque identity for in-flight mutating work (e.g. upgrades). Conventionally `formula:<name>` or `cask:<name>` to align with Homebrew package identity strings — see ``BrewOperationID`` helpers in the Models layer.
+/// Stable identity for in-flight mutating work (e.g. upgrades), backed by the canonical
+/// ``HomebrewPackageID``. There is one mutating operation per package at a time, so the package
+/// identity *is* the operation key — no stringly-typed `kind:name` encoding to parse.
 nonisolated struct BrewOperationID: Hashable, Identifiable {
-    var id: String {
-        rawValue
-    }
+    let packageID: HomebrewPackageID
 
-    let rawValue: String
+    var id: HomebrewPackageID {
+        packageID
+    }
 }
 
 /// Visibility for UI and tests — mutually exclusive with “absent” represented by ``BrewCommandCenter/phase(for:)``
