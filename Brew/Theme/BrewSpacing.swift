@@ -75,7 +75,7 @@ enum BrewLayout {
     static let consoleMaxExpandedHeight: CGFloat = 600
 
     /// Default expanded console body height when no per-window override is stored.
-    static let consoleDefaultExpandedHeight: CGFloat = 240
+    static let consoleDefaultExpandedHeight: CGFloat = 250
 }
 
 // MARK: - Corner Radii (§7)
