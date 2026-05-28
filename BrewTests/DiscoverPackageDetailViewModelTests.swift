@@ -14,6 +14,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 3500,
             ),
             installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.9.0"])]),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.packageKind == .formula)
@@ -33,6 +34,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 500,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.packageKind == .cask)
@@ -51,6 +53,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 0,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(!viewModel.showsInstallMetrics)
@@ -63,6 +66,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.packageDescription == nil)
@@ -75,6 +79,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.packageDescription == "A useful tool.")
@@ -90,6 +95,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.dependencyNames == ["libx264", "libvpx"])
@@ -102,6 +108,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.dependencyNames.isEmpty)
@@ -114,6 +121,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.homepageURL == nil)
@@ -126,6 +134,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.homepageURL == nil)
@@ -138,6 +147,7 @@ struct DiscoverPackageDetailViewModelTests {
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.0.0"])]),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         viewModel.update(

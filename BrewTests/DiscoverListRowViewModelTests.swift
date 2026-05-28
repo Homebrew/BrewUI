@@ -9,6 +9,7 @@ struct DiscoverListRowViewModelTests {
                 thirtyDayInstallCount: 12345,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.descriptionText.isEmpty)
@@ -26,43 +27,11 @@ struct DiscoverListRowViewModelTests {
                 thirtyDayInstallCount: 100,
             ),
             installedRepository: installedRepo([.fixture(name: "git", installedVersions: ["2.45.0"])]),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
         #expect(viewModel.installedStatusLabel == "Installed")
         #expect(viewModel.installedVersionLabel == "v2.45.0")
-    }
-
-    @Test @MainActor func `update(row:) copies discovery fields and reflects shared inventory`() {
-        let repository = installedRepo([.fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"])])
-        let original = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
-                package: .fixture(name: "wget", kind: .formula),
-                thirtyDayInstallCount: 10,
-            ),
-            installedRepository: repository,
-        )
-        let updated = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
-                package: .fixture(
-                    name: "iterm2",
-                    kind: .cask,
-                    description: "Terminal emulator",
-                    latestVersion: "3.5.0",
-                ),
-                thirtyDayInstallCount: 99,
-            ),
-            installedRepository: repository,
-        )
-
-        original.update(row: updated)
-
-        #expect(original.id == updated.id)
-        #expect(original.name == updated.name)
-        #expect(original.packageKind == updated.packageKind)
-        #expect(original.stableVersionLabel == updated.stableVersionLabel)
-        #expect(original.installs30DayLabel == updated.installs30DayLabel)
-        #expect(original.installedStatusLabel == updated.installedStatusLabel)
-        #expect(original.installedVersionLabel == updated.installedVersionLabel)
     }
 
     @Test @MainActor func `showsInstallMetrics defaults to true and can be turned off`() {
@@ -72,6 +41,7 @@ struct DiscoverListRowViewModelTests {
                 thirtyDayInstallCount: 100,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         let searchRow = DiscoverListRowViewModel(
             discoveryPackage: DiscoveryBrewPackage(
@@ -79,6 +49,7 @@ struct DiscoverListRowViewModelTests {
                 thirtyDayInstallCount: 0,
             ),
             installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
             showsInstallMetrics: false,
         )
 
@@ -93,6 +64,7 @@ struct DiscoverListRowViewModelTests {
                 thirtyDayInstallCount: 10,
             ),
             installedRepository: installedRepo([.fixture(name: "iterm2", kind: .cask, installedVersions: ["3.4.0"])]),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.update(
             discoveryPackage: DiscoveryBrewPackage(

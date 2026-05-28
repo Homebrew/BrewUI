@@ -193,14 +193,6 @@ final class DiscoverViewModel {
         return package
     }
 
-    func makeRow(_ package: DiscoveryBrewPackage) -> DiscoverListRowViewModel {
-        DiscoverListRowViewModel(
-            discoveryPackage: package,
-            installedRepository: installedRepository,
-            showsInstallMetrics: showsInstallMetrics,
-        )
-    }
-
     // MARK: - Loading
 
     func load() async {
