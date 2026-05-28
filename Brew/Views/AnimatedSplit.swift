@@ -30,6 +30,12 @@ struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
         let topHost = NSHostingView(rootView: top())
         let bottomHost = NSHostingView(rootView: bottom())
         let handleHost = NSHostingView(rootView: SplitDragHandle())
+        // Don't let the hosting views impose their SwiftUI content's intrinsic size on the layout —
+        // we set every frame manually. Without this the expanded pane snaps back to its content's
+        // intrinsic height after a collapse/expand cycle instead of honouring the requested height.
+        topHost.sizingOptions = []
+        bottomHost.sizingOptions = []
+        handleHost.sizingOptions = []
         let view = AnimatedSplitView(
             top: topHost,
             bottom: bottomHost,
@@ -107,7 +113,9 @@ final class AnimatedSplitView: NSView {
         topHost = top
         bottomHost = bottom
         handleHost = handle
-        dividerHost = NSHostingView(rootView: Color.brewBorderSeparator)
+        let divider = NSHostingView(rootView: Color.brewBorderSeparator)
+        divider.sizingOptions = []
+        dividerHost = divider
         bottomHeight = initialBottomHeight
         self.collapsed = collapsed
         self.collapsedHeight = collapsedHeight
