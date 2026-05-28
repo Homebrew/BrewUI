@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCLI
+import BrewCore
+import BrewRepositories
 import Foundation
 import Observation
 
@@ -14,15 +17,15 @@ import Observation
 /// Never mutates the center — strictly downstream.
 @Observable
 @MainActor
-final class BrewCommandJobsRepository: CommandJobsObserving {
-    private(set) var jobs: [BrewOperationID: CommandJob] = [:]
-    private(set) var orderedIDs: [BrewOperationID] = []
+public final class BrewCommandJobsRepository: CommandJobsObserving {
+    public private(set) var jobs: [BrewOperationID: CommandJob] = [:]
+    public private(set) var orderedIDs: [BrewOperationID] = []
 
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
     @ObservationIgnored private var phaseObserverTask: Task<Void, Never>?
     @ObservationIgnored private var outputObserverTask: Task<Void, Never>?
 
-    init(commandCenter: any BrewCommandCenter) {
+    public init(commandCenter: any BrewCommandCenter) {
         self.commandCenter = commandCenter
         phaseObserverTask = Task { @MainActor [weak self] in
             await self?.observePhases()
@@ -40,7 +43,7 @@ final class BrewCommandJobsRepository: CommandJobsObserving {
     /// Drop a single job from the cache. In-flight operations keep running in the command center —
     /// this only removes the console-side projection, and any subsequent phase update for the dropped
     /// id is ignored by ``handlePhase(id:phase:)``.
-    func remove(id: BrewOperationID) {
+    public func remove(id: BrewOperationID) {
         guard jobs[id] != nil else {
             return
         }
@@ -49,7 +52,7 @@ final class BrewCommandJobsRepository: CommandJobsObserving {
     }
 
     /// Remove all terminal jobs from the cache. In-flight jobs are preserved.
-    func clearCompleted() {
+    public func clearCompleted() {
         let preservedIDs = orderedIDs.filter { jobs[$0]?.isTerminal == false }
         let removedIDs = Set(orderedIDs).subtracting(preservedIDs)
         for id in removedIDs {
@@ -100,7 +103,7 @@ final class BrewCommandJobsRepository: CommandJobsObserving {
     }
 }
 
-extension BrewCommandJobsRepository {
+public extension BrewCommandJobsRepository {
     /// Inert instance for the environment default and unscoped subtrees (no command-center bookkeeping).
     static func placeholder() -> BrewCommandJobsRepository {
         BrewCommandJobsRepository(commandCenter: NoopBrewCommandCenter.preview())

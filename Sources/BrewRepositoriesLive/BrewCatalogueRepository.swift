@@ -1,25 +1,21 @@
 //
-//  CatalogueRepository.swift
-//  Brew
+//  BrewCatalogueRepository.swift
+//  BrewRepositoriesLive
 //
 
+import BrewCore
+import BrewNetworking
+import BrewRepositories
 import Foundation
 
 @MainActor
-protocol CatalogueRepository: Sendable {
-    func package(for reference: HomebrewPackageID) async throws -> BrewPackage?
-    /// Catalogue-wide name search across both formulae and casks, capped at `limit` results.
-    func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage]
-}
-
-@MainActor
-enum CatalogueRepositoryError: Error, Equatable {
+public enum CatalogueRepositoryError: Error, Equatable {
     case cacheMissingAfterNotModified(kind: CatalogueCache.CatalogueKind)
 }
 
 @MainActor
-final class BrewCatalogueRepository: CatalogueRepository {
-    nonisolated static let defaultTTL: TimeInterval = 3600
+public final class BrewCatalogueRepository: CatalogueRepository {
+    public nonisolated static let defaultTTL: TimeInterval = 3600
 
     private let apiClient: any BrewAPIClient
     private let cache: any CatalogueCaching
@@ -31,7 +27,7 @@ final class BrewCatalogueRepository: CatalogueRepository {
 
     /// `defaultsKeyPrefix` is the test seam for `UserDefaults.standard`; tests pass a unique prefix
     /// to isolate their lastRefresh timestamps from each other and from production data.
-    init(
+    public init(
         apiClient: any BrewAPIClient,
         cache: any CatalogueCaching,
         defaultsKeyPrefix: String = "CatalogueRepository",
@@ -49,12 +45,12 @@ final class BrewCatalogueRepository: CatalogueRepository {
         "\(defaultsKeyPrefix).\(kind.rawValue).lastRefresh"
     }
 
-    func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
+    public func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
         let packages = try await packages(for: reference.kind)
         return packages.first { $0.id == reference }
     }
 
-    func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage] {
+    public func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedQuery.isEmpty, limit > 0 else {
             return []

@@ -1,32 +1,18 @@
 //
-//  DiscoverPackagesRepository.swift
-//  Brew
+//  BrewDiscoverPackagesRepository.swift
+//  BrewRepositoriesLive
 //
 
+import BrewCore
+import BrewNetworking
+import BrewRepositories
 import Foundation
 
-@MainActor
-protocol DiscoverPackagesRepository: Sendable {
-    func loadTopPackages(
-        limit: Int,
-        window: BrewAnalyticsWindow,
-    ) async throws -> DiscoverTopPackagesSnapshot
-}
-
-extension DiscoverPackagesRepository {
-    func loadTopPackages(
-        limit: Int = 10,
-        window: BrewAnalyticsWindow = .days30,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        try await loadTopPackages(limit: limit, window: window)
-    }
-}
-
-struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
+public struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     private let apiClient: any BrewAPIClient
     private let catalogueRepository: any CatalogueRepository
 
-    init(
+    public init(
         apiClient: any BrewAPIClient,
         catalogueRepository: any CatalogueRepository,
     ) {
@@ -34,7 +20,7 @@ struct BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         self.catalogueRepository = catalogueRepository
     }
 
-    func loadTopPackages(
+    public func loadTopPackages(
         limit: Int = 10,
         window: BrewAnalyticsWindow = .days30,
     ) async throws -> DiscoverTopPackagesSnapshot {

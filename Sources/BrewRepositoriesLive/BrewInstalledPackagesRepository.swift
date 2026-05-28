@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCLI
+import BrewCore
+import BrewRepositories
 import Foundation
 import Observation
 import OSLog
@@ -19,10 +22,10 @@ private let installedRepositoryLogger = Logger(
 /// ``state`` or the synchronous lookups and re-render automatically when the inventory changes.
 @Observable
 @MainActor
-final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, InstalledInventoryObserving {
+public final class BrewInstalledPackagesRepository: InstalledPackagesRepository {
     /// Drives blocking/loaded/error chrome. Carries the underlying `Error` on failure — presentation
     /// layers (view models) map it to user-facing copy. `failed` only when there is no data to show.
-    private(set) var state: LoadState<[InstalledBrewPackage], any Error> = .loading
+    public private(set) var state: LoadState<[InstalledBrewPackage], any Error> = .loading
 
     /// O(1) membership/info lookups, kept in lock-step with ``state``. Tracked by observation so
     /// row views re-render when an install/uninstall changes a package's presence.
@@ -54,7 +57,7 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
     }
 
     /// Production wiring: real subprocess + default `brew` lookup, reconciling off `commandCenter`.
-    static func live(
+    public static func live(
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
     ) -> BrewInstalledPackagesRepository {
@@ -68,11 +71,11 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
 
     // MARK: - Synchronous lookups (row rendering)
 
-    func isInstalled(_ id: HomebrewPackageID) -> Bool {
+    public func isInstalled(_ id: HomebrewPackageID) -> Bool {
         lookup[id] != nil
     }
 
-    func info(for id: HomebrewPackageID) -> InstalledBrewPackage? {
+    public func info(for id: HomebrewPackageID) -> InstalledBrewPackage? {
         lookup[id]
     }
 
@@ -81,7 +84,7 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
     /// Cache-first by default: fresh cache paints instantly with no refetch; stale cache paints immediately
     /// and then reconciles with a fresh fetch; an empty cache fetches. `forceRefresh` always fetches.
     /// (Call `load()` — the no-arg convenience — via ``InstalledInventoryObserving``.)
-    func load(forceRefresh: Bool) async {
+    public func load(forceRefresh: Bool) async {
         guard !forceRefresh else {
             await fetchAndStore()
             return
@@ -176,7 +179,7 @@ final class BrewInstalledPackagesRepository: InstalledPackageStatusReading, Inst
 
 // MARK: - InstalledInventoryReading
 
-extension BrewInstalledPackagesRepository: InstalledInventoryReading {
+public extension BrewInstalledPackagesRepository {
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         Set(lookup.keys)
     }
@@ -184,7 +187,7 @@ extension BrewInstalledPackagesRepository: InstalledInventoryReading {
 
 // MARK: - Preview / placeholder factories
 
-extension BrewInstalledPackagesRepository {
+public extension BrewInstalledPackagesRepository {
     /// Inert instance for the environment default and unscoped subtrees (no brew, no command center bookkeeping).
     static func placeholder() -> BrewInstalledPackagesRepository {
         let context = BrewCommandExecutionContext.noopForTestingAndPreviews()

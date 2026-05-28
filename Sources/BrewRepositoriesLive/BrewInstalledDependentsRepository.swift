@@ -1,18 +1,21 @@
 //
 //  BrewInstalledDependentsRepository.swift
-//  Brew
+//  BrewRepositoriesLive
 //
 
+import BrewCLI
+import BrewCore
+import BrewRepositories
 import Foundation
 
-struct BrewInstalledDependentsRepository: InstalledDependentsRepository {
+public struct BrewInstalledDependentsRepository: InstalledDependentsRepository {
     private let cache: InstalledInventoryCache
 
-    init(cache: InstalledInventoryCache) {
+    public init(cache: InstalledInventoryCache) {
         self.cache = cache
     }
 
-    func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
+    public func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         guard let snapshot = await cache.currentSnapshot() else {
             return []
         }
