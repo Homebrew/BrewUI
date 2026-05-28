@@ -3,9 +3,10 @@
 //  Brew
 //
 
+import BrewCore
 import Foundation
 
-extension BrewInfoJSON {
+public extension BrewInfoJSON {
     func installedPackages() -> [InstalledBrewPackage] {
         let formulaPackages = formulae.map(\.asBrewPackage)
         let caskPackages = casks.map(\.asBrewPackage)

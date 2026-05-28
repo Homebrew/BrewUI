@@ -1,43 +1,44 @@
 //
-//  PackageUpgradeCommand.swift
+//  PackageInstallCommand.swift
 //  Brew
 //
 
+import BrewCore
 import Foundation
 
-/// Schedules `brew upgrade <name>` or `brew upgrade --cask <name>` via ``BrewCommandCenter/submit``,
+/// Schedules `brew install <name>` or `brew install --cask <name>` via ``BrewCommandCenter/submit``,
 /// using ``BrewCommandExecutionContext`` for subprocess execution and `brew` resolution.
 ///
-struct PackageUpgradeCommand: BrewMutatingCommand {
+public nonisolated struct PackageInstallCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
-    init(package: InstalledBrewPackage) {
+    public init(package: DiscoveryBrewPackage) {
         packageName = package.name
         kind = package.kind
     }
 
-    init(kind: InstalledPackageKind, name: String) {
+    public init(kind: InstalledPackageKind, name: String) {
         packageName = name
         self.kind = kind
     }
 
-    nonisolated var operationKind: BrewOperationKind {
+    public nonisolated var operationKind: BrewOperationKind {
         switch kind {
         case .formula:
-            .upgradeFormula
+            .installFormula
         case .cask:
-            .upgradeCask
+            .installCask
         }
     }
 
-    func run(in context: BrewCommandExecutionContext) async throws {
+    public func run(in context: BrewCommandExecutionContext) async throws {
         let brew = try context.brewExecutableURL()
         let arguments: [String] = switch kind {
         case .formula:
-            ["upgrade", "--formula", packageName]
+            ["install", "--formula", packageName]
         case .cask:
-            ["upgrade", "--cask", packageName]
+            ["install", "--cask", packageName]
         }
 
         let output = try await context.commandRunner.run(

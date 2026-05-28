@@ -6,7 +6,7 @@
 import Foundation
 
 /// Dependencies for mutating `brew` subprocess work passed into ``BrewMutatingCommand/run(in:)``.
-public struct BrewCommandExecutionContext {
+public struct BrewCommandExecutionContext: Sendable {
     public var commandRunner: BrewCommandRunning
     public var locator: BrewExecutableLocating
 

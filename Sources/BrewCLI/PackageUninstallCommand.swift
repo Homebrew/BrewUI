@@ -2,25 +2,26 @@
 //  PackageUninstallCommand.swift
 //  Brew
 //
+import BrewCore
 import Foundation
 
 /// Schedules `brew uninstall <name>` or `brew uninstall --cask <name>` via ``BrewCommandCenter/submit``,
 /// using ``BrewCommandExecutionContext`` for subprocess execution and `brew` resolution.
-struct PackageUninstallCommand: BrewMutatingCommand {
+public nonisolated struct PackageUninstallCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
-    init(package: InstalledBrewPackage) {
+    public init(package: InstalledBrewPackage) {
         packageName = package.name
         kind = package.kind
     }
 
-    init(kind: InstalledPackageKind, name: String) {
+    public init(kind: InstalledPackageKind, name: String) {
         packageName = name
         self.kind = kind
     }
 
-    nonisolated var operationKind: BrewOperationKind {
+    public nonisolated var operationKind: BrewOperationKind {
         switch kind {
         case .formula:
             .uninstallFormula
@@ -29,7 +30,7 @@ struct PackageUninstallCommand: BrewMutatingCommand {
         }
     }
 
-    func run(in context: BrewCommandExecutionContext) async throws {
+    public func run(in context: BrewCommandExecutionContext) async throws {
         let brew = try context.brewExecutableURL()
         let arguments: [String] = switch kind {
         case .formula:

@@ -3,14 +3,15 @@
 //  Brew
 //
 
+import BrewCore
 import Foundation
 
 /// Minimal resilient schema for `brew info --json=v2`.
-struct BrewInfoJSON: Decodable {
+public struct BrewInfoJSON: Decodable {
     var formulae: [BrewInfoFormula]
     var casks: [BrewInfoCask]
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         formulae = (try? container.decode([BrewInfoFormula].self, forKey: .formulae)) ?? []
         casks = (try? container.decode([BrewInfoCask].self, forKey: .casks)) ?? []

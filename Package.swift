@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .library(name: "BrewCore", targets: ["BrewCore"]),
         .library(name: "BrewDesignSystem", targets: ["BrewDesignSystem"]),
+        .library(name: "BrewCLI", targets: ["BrewCLI"]),
     ],
     targets: [
         .target(
@@ -26,6 +27,14 @@ let package = Package(
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewCLI",
+            dependencies: ["BrewCore"],
+            swiftSettings: [
+                .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
             ],
         ),

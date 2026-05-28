@@ -1,8 +1,9 @@
 //
 //  SerialBrewCommandCenter.swift
-//  Brew
+//  BrewCLI
 //
 
+import BrewCore
 import Foundation
 
 private typealias AllPhaseStreamTermination =
@@ -42,7 +43,7 @@ private struct AllOutputStreamListener {
 }
 
 /// Default app implementation: serializes mutating `brew` subprocess work and exposes per-operation phase for UI.
-actor SerialBrewCommandCenter: BrewCommandCenter {
+public actor SerialBrewCommandCenter: BrewCommandCenter {
     private let executionContext: BrewCommandExecutionContext
     private let workQueue = SerialBrewWorkQueue()
 
@@ -53,26 +54,26 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
     private var outputListenersByID: [BrewOperationID: [OutputStreamListener]] = [:]
     private var allOutputListeners: [AllOutputStreamListener] = []
 
-    init(executionContext: BrewCommandExecutionContext) {
+    public init(executionContext: BrewCommandExecutionContext) {
         self.executionContext = executionContext
     }
 
-    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+    public func phase(for id: BrewOperationID) async -> BrewOperationPhase {
         trackedPhasesByID[id] ?? .idle
     }
 
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+    public func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
         trackedPhasesByID
     }
 
-    func isActive(id: BrewOperationID) async -> Bool {
+    public func isActive(id: BrewOperationID) async -> Bool {
         if case .running = trackedPhasesByID[id] ?? .idle {
             return true
         }
         return false
     }
 
-    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+    public func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             let token = UUID()
             continuation.onTermination = { @Sendable (_: AsyncStream<BrewOperationPhase>.Continuation.Termination) in
@@ -84,7 +85,7 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         }
     }
 
-    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+    public func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
             let token = UUID()
             continuation.onTermination = { @Sendable (_: AllPhaseStreamTermination) in
@@ -96,7 +97,7 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         }
     }
 
-    func outputChanges(for id: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+    public func outputChanges(for id: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
         AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
             let token = UUID()
             continuation.onTermination = { @Sendable (_: OutputStreamTermination) in
@@ -108,7 +109,7 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         }
     }
 
-    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+    public func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
         AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
             let token = UUID()
             continuation.onTermination = { @Sendable (_: AllOutputStreamTermination) in
@@ -120,7 +121,7 @@ actor SerialBrewCommandCenter: BrewCommandCenter {
         }
     }
 
-    func submit(
+    public func submit(
         id: BrewOperationID,
         command: any BrewMutatingCommand,
     ) async throws {

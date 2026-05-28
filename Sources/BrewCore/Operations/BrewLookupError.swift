@@ -6,6 +6,6 @@
 import Foundation
 
 /// Could not locate a `brew` executable in supported locations.
-public nonisolated enum BrewLookupError: Error, Equatable {
+public nonisolated enum BrewLookupError: Error, Equatable, Sendable {
     case executableNotFound
 }

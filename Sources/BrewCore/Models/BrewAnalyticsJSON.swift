@@ -6,14 +6,14 @@
 import Foundation
 
 /// Supported Homebrew analytics windows used by Discover.
-public nonisolated enum BrewAnalyticsWindow: String, CaseIterable {
+public nonisolated enum BrewAnalyticsWindow: String, CaseIterable, Sendable {
     case days30 = "30d"
     case days90 = "90d"
     case days365 = "365d"
 }
 
 /// Strict schema for Homebrew analytics API responses.
-public nonisolated struct BrewAnalyticsJSON: Decodable {
+public nonisolated struct BrewAnalyticsJSON: Decodable, Sendable {
     public let category: String
     public let totalItems: Int
     public let totalCount: Int
@@ -74,7 +74,7 @@ public nonisolated struct BrewAnalyticsJSON: Decodable {
     }
 }
 
-public nonisolated struct BrewAnalyticsPackageCount: Hashable {
+public nonisolated struct BrewAnalyticsPackageCount: Hashable, Sendable {
     public let reference: HomebrewPackageID
     public let count: Int
 

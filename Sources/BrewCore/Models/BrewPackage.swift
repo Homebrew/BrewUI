@@ -5,7 +5,7 @@
 
 import Foundation
 
-public nonisolated struct BrewPackage: Identifiable, Hashable {
+public nonisolated struct BrewPackage: Identifiable, Hashable, Sendable {
     public let name: String
     public let displayName: String
     public let kind: HomebrewPackageKind

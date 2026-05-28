@@ -3,15 +3,16 @@
 //  Brew
 //
 
+import BrewCore
 import Foundation
 
 /// Resolves the `brew` binary without relying on a single hard-coded prefix (`AGENTS.md`).
-struct BrewExecutableLocator: BrewExecutableLocating {
+public struct BrewExecutableLocator: BrewExecutableLocating {
     private let isExecutableAtPath: @Sendable (String) -> Bool
     /// When set (tests only), skip filesystem probing.
     private let overrideURL: URL?
 
-    nonisolated init(
+    public nonisolated init(
         isExecutableAtPath: @escaping @Sendable (String) -> Bool = { path in
             FileManager.default.isExecutableFile(atPath: path)
         },
@@ -20,7 +21,7 @@ struct BrewExecutableLocator: BrewExecutableLocating {
         overrideURL = nil
     }
 
-    nonisolated init(overrideURL: URL) {
+    public nonisolated init(overrideURL: URL) {
         isExecutableAtPath = { path in
             FileManager.default.isExecutableFile(atPath: path)
         }
@@ -28,7 +29,7 @@ struct BrewExecutableLocator: BrewExecutableLocating {
     }
 
     /// Tries Apple Silicon default, then Intel default.
-    nonisolated func findBrewExecutable() throws -> URL {
+    public nonisolated func findBrewExecutable() throws -> URL {
         if let overrideURL {
             return overrideURL
         }

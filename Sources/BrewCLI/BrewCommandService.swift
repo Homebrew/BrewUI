@@ -3,13 +3,14 @@
 //  Brew
 //
 
+import BrewCore
 import Foundation
 
 /// Subprocess runner for Homebrew CLI (`ARCHITECTURE.md` — Command execution).
-struct BrewCommandService: BrewCommandRunning {
-    nonisolated init() {}
+public struct BrewCommandService: BrewCommandRunning {
+    public nonisolated init() {}
 
-    nonisolated func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
+    public nonisolated func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
         try Task.checkCancellation()
 
         let process = Process()

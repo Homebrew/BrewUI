@@ -9,7 +9,7 @@ import Foundation
 ///
 /// This is the canonical package identity across the app: every package type's
 /// `id` is a `HomebrewPackageID`, and the type is its own `Identifiable.ID`.
-public nonisolated enum HomebrewPackageID: Hashable, Identifiable {
+public nonisolated enum HomebrewPackageID: Hashable, Identifiable, Sendable {
     case formula(name: String)
     case cask(token: String)
 

@@ -6,13 +6,13 @@
 import Foundation
 
 /// One line of subprocess output, attributed to a stream (`ARCHITECTURE.md` — command execution; transparency).
-public nonisolated struct BrewCommandOutputLine: Identifiable, Equatable {
+public nonisolated struct BrewCommandOutputLine: Identifiable, Equatable, Sendable {
     public let id: UUID
     public let stream: Stream
     public let text: String
     public let timestamp: Date
 
-    public enum Stream: Equatable {
+    public enum Stream: Equatable, Sendable {
         case stdout
         case stderr
     }

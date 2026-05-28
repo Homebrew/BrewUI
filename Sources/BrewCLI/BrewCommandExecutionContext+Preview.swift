@@ -3,9 +3,10 @@
 //  Brew
 //
 
+import BrewCore
 import Foundation
 
-extension BrewCommandExecutionContext {
+public extension BrewCommandExecutionContext {
     /// Runner returns empty success without touching disk; locator yields a dummy `brew` URL for callers that resolve it.
     nonisolated static func noopForTestingAndPreviews() -> BrewCommandExecutionContext {
         BrewCommandExecutionContext(

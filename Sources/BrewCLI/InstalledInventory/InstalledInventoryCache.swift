@@ -3,11 +3,12 @@
 //  Brew
 //
 
+import BrewCore
 import Foundation
 
 /// Shared installed-inventory storage with TTL semantics. Domain reads (packages, dependents) go through repositories, not this actor.
-actor InstalledInventoryCache {
-    enum CacheResult {
+public actor InstalledInventoryCache {
+    public enum CacheResult: Sendable {
         case fresh([InstalledBrewPackage])
         case stale([InstalledBrewPackage])
         case empty
@@ -15,15 +16,17 @@ actor InstalledInventoryCache {
 
     private var snapshot: InstalledInventorySnapshot?
 
-    func replace(_ snapshot: InstalledInventorySnapshot) {
+    public init() {}
+
+    public func replace(_ snapshot: InstalledInventorySnapshot) {
         self.snapshot = snapshot
     }
 
-    func currentSnapshot() -> InstalledInventorySnapshot? {
+    public func currentSnapshot() -> InstalledInventorySnapshot? {
         snapshot
     }
 
-    func cachedPackages() -> CacheResult {
+    public func cachedPackages() -> CacheResult {
         guard let snapshot else { return .empty }
         return snapshot.isStale() ? .stale(snapshot.packages) : .fresh(snapshot.packages)
     }
