@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "BrewUI",
+    name: "BrewKit",
     platforms: [
         .macOS("26.0"),
     ],
