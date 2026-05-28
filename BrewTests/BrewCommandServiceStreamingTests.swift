@@ -14,7 +14,7 @@ nonisolated struct BrewCommandServiceStreamingTests {
         let collector = OutputCollector()
 
         let sink: @Sendable (BrewCommandOutputLine) -> Void = { line in
-            Task { await collector.append(line) }
+            collector.append(line)
         }
         let output: CommandOutput = try await BrewCommandOutputContext.$sink.withValue(sink) {
             try await service.run(
@@ -24,7 +24,7 @@ nonisolated struct BrewCommandServiceStreamingTests {
         }
 
         #expect(output.standardOutput == "one\ntwo\nthree\n")
-        let lines = await collector.allLines()
+        let lines = collector.allLines()
         let stdoutLines = lines.filter { $0.stream == .stdout }.map(\.text)
         #expect(stdoutLines == ["one", "two", "three"])
     }
@@ -35,7 +35,7 @@ nonisolated struct BrewCommandServiceStreamingTests {
         let collector = OutputCollector()
 
         let sink: @Sendable (BrewCommandOutputLine) -> Void = { line in
-            Task { await collector.append(line) }
+            collector.append(line)
         }
         let output: CommandOutput = try await BrewCommandOutputContext.$sink.withValue(sink) {
             try await service.run(
@@ -46,7 +46,7 @@ nonisolated struct BrewCommandServiceStreamingTests {
 
         #expect(output.standardOutput == "hello-out")
         #expect(output.standardError == "hello-err")
-        let lines = await collector.allLines()
+        let lines = collector.allLines()
         #expect(lines.contains { $0.stream == .stdout && $0.text == "hello-out" })
         #expect(lines.contains { $0.stream == .stderr && $0.text == "hello-err" })
     }
@@ -57,7 +57,7 @@ nonisolated struct BrewCommandServiceStreamingTests {
         let collector = OutputCollector()
 
         let sink: @Sendable (BrewCommandOutputLine) -> Void = { line in
-            Task { await collector.append(line) }
+            collector.append(line)
         }
         _ = try await BrewCommandOutputContext.$sink.withValue(sink) {
             try await service.run(
@@ -66,7 +66,7 @@ nonisolated struct BrewCommandServiceStreamingTests {
             )
         }
 
-        let lines = await collector.allLines()
+        let lines = collector.allLines()
         let stdout = lines.filter { $0.stream == .stdout }.map(\.text)
         let stderr = lines.filter { $0.stream == .stderr }.map(\.text)
         #expect(stdout == ["out1", "out2"])
@@ -88,15 +88,22 @@ nonisolated struct BrewCommandServiceStreamingTests {
     }
 }
 
-/// Thread-safe collector for streamed lines; tests assert against its accumulated state.
-private actor OutputCollector {
+/// Thread-safe collector for streamed lines. Appends synchronously (under a lock) inside the sink, so
+/// that — because `BrewCommandService.run` only returns after every sink call has been made — all lines
+/// are recorded by the time a test reads them, with no racing detached Tasks.
+private final class OutputCollector: @unchecked Sendable {
+    private let lock = NSLock()
     private var lines: [BrewCommandOutputLine] = []
 
     func append(_ line: BrewCommandOutputLine) {
+        lock.lock()
+        defer { lock.unlock() }
         lines.append(line)
     }
 
     func allLines() -> [BrewCommandOutputLine] {
-        lines
+        lock.lock()
+        defer { lock.unlock() }
+        return lines
     }
 }
