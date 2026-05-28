@@ -326,10 +326,12 @@ final class StubURLProtocol: URLProtocol {
     }
 
     private static let lock = NSLock()
-    private static var queuedResultsByHost: [String: [StubbedResult]] = [:]
-    private static var queuedResultsByHostAndPath: [String: [String: [StubbedResult]]] = [:]
-    private static var repeatingResultsByHostAndPath: [String: [String: StubbedResult]] = [:]
-    private static var requestsByHost: [String: [URLRequest]] = [:]
+    /// Mutation is serialized by `lock`; opt out of the global-mutable-state check rather than
+    /// re-expressing the lock through `Mutex` for test-only stubbing.
+    private nonisolated(unsafe) static var queuedResultsByHost: [String: [StubbedResult]] = [:]
+    private nonisolated(unsafe) static var queuedResultsByHostAndPath: [String: [String: [StubbedResult]]] = [:]
+    private nonisolated(unsafe) static var repeatingResultsByHostAndPath: [String: [String: StubbedResult]] = [:]
+    private nonisolated(unsafe) static var requestsByHost: [String: [URLRequest]] = [:]
 
     static func register(_ results: [StubbedResult], forHost host: String) {
         lock.lock()

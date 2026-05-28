@@ -74,7 +74,7 @@ nonisolated struct CaskCatalogueItemJSON: Codable {
     }
 }
 
-extension FormulaCatalogueItemJSON {
+nonisolated extension FormulaCatalogueItemJSON {
     var description: String {
         desc
     }
@@ -88,7 +88,7 @@ extension FormulaCatalogueItemJSON {
     }
 }
 
-extension CaskCatalogueItemJSON {
+nonisolated extension CaskCatalogueItemJSON {
     var name: String {
         token
     }

@@ -6,14 +6,14 @@
 import Foundation
 
 /// Supported Homebrew analytics windows used by Discover.
-enum BrewAnalyticsWindow: String, CaseIterable {
+nonisolated enum BrewAnalyticsWindow: String, CaseIterable {
     case days30 = "30d"
     case days90 = "90d"
     case days365 = "365d"
 }
 
 /// Strict schema for Homebrew analytics API responses.
-struct BrewAnalyticsJSON: Decodable {
+nonisolated struct BrewAnalyticsJSON: Decodable {
     let category: String
     let totalItems: Int
     let totalCount: Int
@@ -74,7 +74,7 @@ struct BrewAnalyticsJSON: Decodable {
     }
 }
 
-struct BrewAnalyticsPackageCount: Hashable {
+nonisolated struct BrewAnalyticsPackageCount: Hashable {
     let reference: HomebrewPackageID
     let count: Int
 
@@ -83,7 +83,7 @@ struct BrewAnalyticsPackageCount: Hashable {
     }
 }
 
-private struct BrewAnalyticsEntry: Decodable {
+private nonisolated struct BrewAnalyticsEntry: Decodable {
     let formula: String?
     let cask: String?
     let count: Int
@@ -136,7 +136,7 @@ private struct BrewAnalyticsEntry: Decodable {
 }
 
 private extension KeyedDecodingContainer {
-    func decodeRequiredIntLossy(forKey key: Key) throws -> Int {
+    nonisolated func decodeRequiredIntLossy(forKey key: Key) throws -> Int {
         if let value = try? decode(Int.self, forKey: key) {
             return value
         }
@@ -153,7 +153,7 @@ private extension KeyedDecodingContainer {
         )
     }
 
-    func decodeNonEmptyString(forKey key: Key) throws -> String {
+    nonisolated func decodeNonEmptyString(forKey key: Key) throws -> String {
         let value = try decode(String.self, forKey: key)
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {

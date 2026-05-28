@@ -6,24 +6,24 @@
 import Foundation
 
 /// Semantic colour roles for mapping to `Color` in SwiftUI (design tokens in one place).
-enum PackageKindAccentToken: Equatable {
+nonisolated enum PackageKindAccentToken: Equatable {
     case brandPrimary
     case statusInfo
 }
 
-enum PackageKindIconBackgroundToken: Equatable {
+nonisolated enum PackageKindIconBackgroundToken: Equatable {
     case brandTint
     case statusInfoSubtle
 }
 
 /// Testable chrome for an installed list row (badge + token roles); views map tokens to `Color`.
-struct PackageKindChrome: Equatable {
+nonisolated struct PackageKindChrome: Equatable {
     var badgeLabel: String
     var accent: PackageKindAccentToken
     var iconBackground: PackageKindIconBackgroundToken
 }
 
-extension HomebrewPackageKind {
+nonisolated extension HomebrewPackageKind {
     var chrome: PackageKindChrome {
         switch self {
         case .formula:

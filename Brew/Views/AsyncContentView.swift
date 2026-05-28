@@ -10,7 +10,7 @@ import SwiftUI
 /// Conforming types return a `placeholder` populated with realistic stub data (non-empty name,
 /// plausible version, etc.) so a `.redacted(reason: .placeholder)` rendering sizes the same as the
 /// eventual content.
-protocol Placeholdable {
+nonisolated protocol Placeholdable {
     static var placeholder: Self { get }
 }
 

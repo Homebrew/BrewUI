@@ -6,7 +6,7 @@
 import Foundation
 import Observation
 
-struct InstalledPackagesContent: Equatable {
+nonisolated struct InstalledPackagesContent: Equatable {
     var packages: [InstalledBrewPackage]
 
     var shouldShowFormulaeSection: Bool {
@@ -26,7 +26,7 @@ struct InstalledPackagesContent: Equatable {
     }
 }
 
-enum InstalledLoadState: Equatable {
+nonisolated enum InstalledLoadState: Equatable {
     case loading
     case loaded(InstalledPackagesContent)
     case error(String)

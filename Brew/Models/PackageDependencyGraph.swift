@@ -6,7 +6,7 @@
 import Foundation
 
 /// Reverse dependency lookups over one installed-inventory snapshot.
-struct PackageDependencyGraph: Equatable {
+nonisolated struct PackageDependencyGraph: Equatable {
     private let packagesByID: [InstalledBrewPackage.ID: InstalledBrewPackage]
     private let dependentsByDependencyPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage.ID]]
 

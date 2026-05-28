@@ -5,7 +5,7 @@
 
 import Foundation
 
-enum AppPreviewSupport {
+nonisolated enum AppPreviewSupport {
     static let commandCenter = PreviewBrewCommandCenter()
     static let installedInventoryCache = InstalledInventoryCache()
     static let discoverTopPackagesSnapshot = DiscoverTopPackagesSnapshot(

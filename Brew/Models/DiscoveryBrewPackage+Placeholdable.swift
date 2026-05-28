@@ -5,7 +5,7 @@
 
 import Foundation
 
-extension DiscoveryBrewPackage: Placeholdable {
+nonisolated extension DiscoveryBrewPackage: Placeholdable {
     static var placeholder: DiscoveryBrewPackage {
         DiscoveryBrewPackage(
             package: BrewPackage(
@@ -22,7 +22,7 @@ extension DiscoveryBrewPackage: Placeholdable {
     }
 }
 
-extension [DiscoveryBrewPackage]: Placeholdable {
+nonisolated extension [DiscoveryBrewPackage]: Placeholdable {
     /// A spread of distinct, mixed-kind stub packages. Distinct ids keep `ForEach` happy, and the
     /// formula/cask mix lets both sections render redacted under the "All" scope while loading.
     static var placeholder: [DiscoveryBrewPackage] {

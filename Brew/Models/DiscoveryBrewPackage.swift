@@ -6,12 +6,12 @@
 import Foundation
 
 /// Domain output for Discover top package sections.
-struct DiscoverTopPackagesSnapshot: Equatable {
+nonisolated struct DiscoverTopPackagesSnapshot: Equatable {
     let topFormulae: [DiscoveryBrewPackage]
     let topCasks: [DiscoveryBrewPackage]
 }
 
-struct DiscoveryBrewPackage: Identifiable, Equatable, Hashable {
+nonisolated struct DiscoveryBrewPackage: Identifiable, Equatable, Hashable {
     var package: BrewPackage
     var thirtyDayInstallCount: Int
 

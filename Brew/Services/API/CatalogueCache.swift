@@ -11,14 +11,8 @@ actor CatalogueCache: CatalogueCaching {
         case cask
     }
 
-    private enum DefaultsKey {
-        static let formulaETag = "CatalogueCache.formula.etag"
-        static let caskETag = "CatalogueCache.cask.etag"
-    }
-
-    private let fileManager: FileManager
-    private let userDefaults: UserDefaults
     private let cacheDirectoryURL: URL
+    private let defaultsKeyPrefix: String
     private let decoder = JSONDecoder()
 
     private var formulaData: FormulaCatalogueJSON?
@@ -26,15 +20,15 @@ actor CatalogueCache: CatalogueCaching {
     private var hasPrepared = false
     private var prepareTask: Task<(FormulaCatalogueJSON?, CaskCatalogueJSON?), Never>?
 
+    /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for
+    /// `FileManager.default` / `UserDefaults.standard` itself so it doesn't have to store
+    /// non-Sendable singletons. Tests pass a unique tmp directory + unique key prefix to isolate.
     init(
-        fileManager: FileManager = .default,
-        userDefaults: UserDefaults = .standard,
         cacheDirectoryURL: URL? = nil,
+        defaultsKeyPrefix: String = "CatalogueCache",
     ) {
-        self.fileManager = fileManager
-        self.userDefaults = userDefaults
-        let resolvedURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL(fileManager: fileManager)
-        self.cacheDirectoryURL = resolvedURL
+        self.cacheDirectoryURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL()
+        self.defaultsKeyPrefix = defaultsKeyPrefix
     }
 
     func prepare() async {
@@ -73,7 +67,7 @@ actor CatalogueCache: CatalogueCaching {
     }
 
     func etag(for kind: CatalogueKind) async -> String? {
-        userDefaults.string(forKey: etagKey(for: kind))
+        UserDefaults.standard.string(forKey: etagKey(for: kind))
     }
 
     func updateFormulaCatalogue(with rawData: Data, etag: String?) async throws {
@@ -91,26 +85,21 @@ actor CatalogueCache: CatalogueCaching {
     }
 
     private func writeCache(_ data: Data, to url: URL) throws {
-        try fileManager.createDirectory(at: cacheDirectoryURL, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: cacheDirectoryURL, withIntermediateDirectories: true)
         try data.write(to: url, options: .atomic)
     }
 
     private func persistETag(_ etag: String?, for kind: CatalogueKind) {
         let key = etagKey(for: kind)
         if let etag {
-            userDefaults.set(etag, forKey: key)
+            UserDefaults.standard.set(etag, forKey: key)
         } else {
-            userDefaults.removeObject(forKey: key)
+            UserDefaults.standard.removeObject(forKey: key)
         }
     }
 
     private func etagKey(for kind: CatalogueKind) -> String {
-        switch kind {
-        case .formula:
-            DefaultsKey.formulaETag
-        case .cask:
-            DefaultsKey.caskETag
-        }
+        "\(defaultsKeyPrefix).\(kind.rawValue).etag"
     }
 
     private var formulaCacheFileURL: URL {
@@ -132,7 +121,8 @@ actor CatalogueCache: CatalogueCaching {
 }
 
 private extension CatalogueCache {
-    nonisolated static func defaultCacheDirectoryURL(fileManager: FileManager) -> URL {
+    nonisolated static func defaultCacheDirectoryURL() -> URL {
+        let fileManager = FileManager.default
         if let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
             return appSupportURL.appendingPathComponent("Brew", isDirectory: true)
         }
