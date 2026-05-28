@@ -3,7 +3,8 @@
 //  BrewTests
 //
 
-@testable import Brew
+@testable import BrewCore
+import BrewCoreTestSupport
 import Testing
 
 struct HomebrewPackageIDTests {

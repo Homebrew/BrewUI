@@ -141,5 +141,16 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
+
+        // MARK: - Test targets
+
+        .testTarget(
+            name: "BrewCoreTests",
+            dependencies: ["BrewCore", "BrewCoreTestSupport"],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
     ],
 )
