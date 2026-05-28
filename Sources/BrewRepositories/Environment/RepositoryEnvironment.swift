@@ -25,4 +25,7 @@ public extension EnvironmentValues {
 
     /// Mutating `brew` coordinator, injected by the composition root.
     @Entry var brewCommandCenter: any BrewCommandCenter = UnimplementedBrewCommandCenter()
+
+    /// Builds mutating `brew` commands for view models, injected by the composition root.
+    @Entry var mutatingCommandFactory: any BrewMutatingCommandFactory = UnimplementedMutatingCommandFactory()
 }

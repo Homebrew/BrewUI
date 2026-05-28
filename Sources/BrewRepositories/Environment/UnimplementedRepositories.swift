@@ -60,6 +60,20 @@ struct UnimplementedDependentsRepository: InstalledDependentsRepository {
     }
 }
 
+nonisolated struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
+    func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
+        unimplemented()
+    }
+
+    func upgradeCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
+        unimplemented()
+    }
+
+    func uninstallCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
+        unimplemented()
+    }
+}
+
 @Observable
 @MainActor
 final class UnimplementedCommandJobsObserving: CommandJobsObserving {
