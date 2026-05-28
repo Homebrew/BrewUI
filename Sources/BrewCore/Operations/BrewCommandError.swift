@@ -1,12 +1,12 @@
 //
 //  BrewCommandError.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
 /// `brew` exited non-zero or could not be launched.
-nonisolated enum BrewCommandError: Error, Equatable {
+public nonisolated enum BrewCommandError: Error, Equatable {
     case failed(exitCode: Int32, stderr: String)
     case launchFailed(underlying: String)
 }

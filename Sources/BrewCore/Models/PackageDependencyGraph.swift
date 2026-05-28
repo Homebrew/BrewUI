@@ -1,16 +1,16 @@
 //
 //  PackageDependencyGraph.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
 /// Reverse dependency lookups over one installed-inventory snapshot.
-nonisolated struct PackageDependencyGraph: Equatable {
+public nonisolated struct PackageDependencyGraph: Equatable {
     private let packagesByID: [InstalledBrewPackage.ID: InstalledBrewPackage]
     private let dependentsByDependencyPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage.ID]]
 
-    init(packages: [InstalledBrewPackage]) {
+    public init(packages: [InstalledBrewPackage]) {
         var byID: [InstalledBrewPackage.ID: InstalledBrewPackage] = [:]
         var reverse: [InstalledBrewPackage.ID: [InstalledBrewPackage.ID]] = [:]
 
@@ -25,7 +25,7 @@ nonisolated struct PackageDependencyGraph: Equatable {
         dependentsByDependencyPackageID = reverse
     }
 
-    func installedDependents(for packageID: InstalledBrewPackage.ID) -> [InstalledBrewPackage] {
+    public func installedDependents(for packageID: InstalledBrewPackage.ID) -> [InstalledBrewPackage] {
         (dependentsByDependencyPackageID[packageID] ?? [])
             .compactMap { packagesByID[$0] }
             .sorted {

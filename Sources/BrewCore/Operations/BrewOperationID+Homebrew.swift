@@ -1,22 +1,22 @@
 //
 //  BrewOperationID+Homebrew.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
-nonisolated extension BrewOperationID {
+public nonisolated extension BrewOperationID {
     /// Operation identity from a domain package kind + name.
     init(kind: HomebrewPackageKind, name: String) {
         switch kind {
         case .formula:
-            packageID = .formula(name: name)
+            self.init(packageID: .formula(name: name))
         case .cask:
-            packageID = .cask(token: name)
+            self.init(packageID: .cask(token: name))
         }
     }
 
     init(package: InstalledBrewPackage) {
-        packageID = HomebrewPackageID(installedPackage: package)
+        self.init(packageID: HomebrewPackageID(installedPackage: package))
     }
 }

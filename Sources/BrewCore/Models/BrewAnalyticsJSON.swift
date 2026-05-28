@@ -1,31 +1,31 @@
 //
 //  BrewAnalyticsJSON.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
 /// Supported Homebrew analytics windows used by Discover.
-nonisolated enum BrewAnalyticsWindow: String, CaseIterable {
+public nonisolated enum BrewAnalyticsWindow: String, CaseIterable {
     case days30 = "30d"
     case days90 = "90d"
     case days365 = "365d"
 }
 
 /// Strict schema for Homebrew analytics API responses.
-nonisolated struct BrewAnalyticsJSON: Decodable {
-    let category: String
-    let totalItems: Int
-    let totalCount: Int
-    let startDate: String
-    let endDate: String
+public nonisolated struct BrewAnalyticsJSON: Decodable {
+    public let category: String
+    public let totalItems: Int
+    public let totalCount: Int
+    public let startDate: String
+    public let endDate: String
     private let parsedPackageCounts: [BrewAnalyticsPackageCount]
 
-    var packageCounts: [BrewAnalyticsPackageCount] {
+    public var packageCounts: [BrewAnalyticsPackageCount] {
         parsedPackageCounts
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         category = try container.decodeNonEmptyString(forKey: .category)
         totalItems = try container.decodeRequiredIntLossy(forKey: .totalItems)
@@ -74,12 +74,17 @@ nonisolated struct BrewAnalyticsJSON: Decodable {
     }
 }
 
-nonisolated struct BrewAnalyticsPackageCount: Hashable {
-    let reference: HomebrewPackageID
-    let count: Int
+public nonisolated struct BrewAnalyticsPackageCount: Hashable {
+    public let reference: HomebrewPackageID
+    public let count: Int
 
-    var name: String {
+    public var name: String {
         reference.name
+    }
+
+    public init(reference: HomebrewPackageID, count: Int) {
+        self.reference = reference
+        self.count = count
     }
 }
 

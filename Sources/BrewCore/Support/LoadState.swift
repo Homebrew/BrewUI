@@ -1,6 +1,6 @@
 //
 //  LoadState.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
@@ -10,12 +10,12 @@ import Foundation
 /// `failed` carries a typed `Failure` (e.g. an `Error` surfaced by a repository); presentation layers
 /// map it to user-facing copy. The producer keeps prior `loaded` data on screen when a refresh fails,
 /// only transitioning to `failed` when there is nothing to show.
-enum LoadState<Value, Failure> {
+public enum LoadState<Value, Failure> {
     case loading
     case loaded(Value)
     case failed(Failure)
 
-    var value: Value? {
+    public var value: Value? {
         guard case let .loaded(value) = self else {
             return nil
         }

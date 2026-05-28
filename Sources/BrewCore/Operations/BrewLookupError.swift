@@ -1,11 +1,11 @@
 //
 //  BrewLookupError.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
 /// Could not locate a `brew` executable in supported locations.
-nonisolated enum BrewLookupError: Error, Equatable {
+public nonisolated enum BrewLookupError: Error, Equatable {
     case executableNotFound
 }

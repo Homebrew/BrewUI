@@ -1,6 +1,6 @@
 //
 //  HomebrewPackageID.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
@@ -9,15 +9,15 @@ import Foundation
 ///
 /// This is the canonical package identity across the app: every package type's
 /// `id` is a `HomebrewPackageID`, and the type is its own `Identifiable.ID`.
-nonisolated enum HomebrewPackageID: Hashable, Identifiable {
+public nonisolated enum HomebrewPackageID: Hashable, Identifiable {
     case formula(name: String)
     case cask(token: String)
 
-    var id: Self {
+    public var id: Self {
         self
     }
 
-    var kind: HomebrewPackageKind {
+    public var kind: HomebrewPackageKind {
         switch self {
         case .formula:
             .formula
@@ -26,7 +26,7 @@ nonisolated enum HomebrewPackageID: Hashable, Identifiable {
         }
     }
 
-    var name: String {
+    public var name: String {
         switch self {
         case let .formula(name):
             name
@@ -35,7 +35,7 @@ nonisolated enum HomebrewPackageID: Hashable, Identifiable {
         }
     }
 
-    init(package: BrewPackage) {
+    public init(package: BrewPackage) {
         switch package.kind {
         case .formula:
             self = .formula(name: package.name)
@@ -44,12 +44,12 @@ nonisolated enum HomebrewPackageID: Hashable, Identifiable {
         }
     }
 
-    init(installedPackage: InstalledBrewPackage) {
+    public init(installedPackage: InstalledBrewPackage) {
         self.init(package: installedPackage.package)
     }
 }
 
-nonisolated extension HomebrewPackageID {
+public nonisolated extension HomebrewPackageID {
     static func formulaDependencies(from names: [String]) -> [HomebrewPackageID] {
         uniqueReferences(names.map { .formula(name: $0) })
     }

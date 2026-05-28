@@ -1,12 +1,12 @@
 //
 //  DiscoveryBrewPackage+Placeholdable.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
 nonisolated extension DiscoveryBrewPackage: Placeholdable {
-    static var placeholder: DiscoveryBrewPackage {
+    public static var placeholder: DiscoveryBrewPackage {
         DiscoveryBrewPackage(
             package: BrewPackage(
                 name: "placeholder-package",
@@ -25,7 +25,7 @@ nonisolated extension DiscoveryBrewPackage: Placeholdable {
 nonisolated extension [DiscoveryBrewPackage]: Placeholdable {
     /// A spread of distinct, mixed-kind stub packages. Distinct ids keep `ForEach` happy, and the
     /// formula/cask mix lets both sections render redacted under the "All" scope while loading.
-    static var placeholder: [DiscoveryBrewPackage] {
+    public static var placeholder: [DiscoveryBrewPackage] {
         (0 ..< 8).map { index in
             let kind: HomebrewPackageKind = index.isMultiple(of: 2) ? .formula : .cask
             return DiscoveryBrewPackage(

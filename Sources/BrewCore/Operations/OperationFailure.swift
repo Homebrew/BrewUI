@@ -1,12 +1,12 @@
 //
 //  OperationFailure.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
 /// User-visible and diagnostic failure surfaced through ``BrewOperationPhase/failed(reason:)`` (`Sendable` for actor-isolated state).
-nonisolated enum OperationFailure: Equatable {
+public nonisolated enum OperationFailure: Equatable {
     /// `brew` ran but exited non-zero; stderr is the primary user-visible detail when present.
     case brewCommand(exitCode: Int32, stderr: String)
 
@@ -20,7 +20,7 @@ nonisolated enum OperationFailure: Equatable {
     case generic(userFacing: String, diagnostic: String?)
 
     /// Primary line for UI and accessibility (derived per case).
-    var userFacingMessage: String {
+    public var userFacingMessage: String {
         switch self {
         case let .brewCommand(_, stderr):
             let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -46,11 +46,11 @@ nonisolated enum OperationFailure: Equatable {
         }
     }
 
-    init(userFacingMessage: String, diagnosticDescription: String? = nil) {
+    public init(userFacingMessage: String, diagnosticDescription: String? = nil) {
         self = .generic(userFacing: userFacingMessage, diagnostic: diagnosticDescription)
     }
 
-    init(catching error: Error) {
+    public init(catching error: Error) {
         switch error {
         case let brewCommandError as BrewCommandError:
             switch brewCommandError {

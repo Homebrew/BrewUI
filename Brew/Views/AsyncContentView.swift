@@ -5,15 +5,6 @@
 
 import SwiftUI
 
-/// A type that can supply a representative placeholder value for redacted loading states.
-///
-/// Conforming types return a `placeholder` populated with realistic stub data (non-empty name,
-/// plausible version, etc.) so a `.redacted(reason: .placeholder)` rendering sizes the same as the
-/// eventual content.
-nonisolated protocol Placeholdable {
-    static var placeholder: Self { get }
-}
-
 /// Renders a ``LoadState`` by switching on its case and standardises the boilerplate that would
 /// otherwise be repeated at every loadable surface.
 ///

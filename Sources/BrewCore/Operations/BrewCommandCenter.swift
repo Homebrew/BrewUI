@@ -1,12 +1,12 @@
 //
 //  BrewCommandCenter.swift
-//  Brew
+//  BrewCore
 //
 
 import Foundation
 
 /// Coordinates mutating `brew` operations and cross-surface visibility (`ARCHITECTURE.md` — command execution).
-protocol BrewCommandCenter: Actor {
+public protocol BrewCommandCenter: Actor {
     /// Snapshot for UI — ``BrewOperationPhase/idle`` when no state is tracked for `id`.
     func phase(for id: BrewOperationID) async -> BrewOperationPhase
 
