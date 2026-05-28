@@ -9,7 +9,6 @@ import BrewCoreTestSupport
 import Foundation
 import Testing
 
-// swiftlint:disable:next type_body_length
 struct BrewAPIClientURLSessionIntegrationTests {
     @Test @MainActor func `fetch formula analytics decodes payload`() async throws {
         let baseURL = makeStubBaseURL()

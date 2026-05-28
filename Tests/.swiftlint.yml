@@ -1,0 +1,6 @@
+# Merge with repo root `.swiftlint.yml`. Integration/UI test scaffolding often grows beyond
+# the default struct type-body cap without adding real complexity.
+parent_config: ../.swiftlint.yml
+
+disabled_rules:
+  - type_body_length

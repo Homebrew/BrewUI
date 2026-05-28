@@ -14,7 +14,6 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-// swiftlint:disable:next type_body_length
 struct BrewInstalledPackagesRepositoryTests {
     @Test @MainActor func `load returns sorted packages for mixed formula and cask json payload`() async throws {
         let json = """

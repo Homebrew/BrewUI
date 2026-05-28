@@ -8,7 +8,6 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-// swiftlint:disable:next type_body_length
 struct DiscoverViewModelTests {
     @Test @MainActor func `load exposes the top packages and selects the most popular`() async throws {
         let viewModel = DiscoverViewModel(

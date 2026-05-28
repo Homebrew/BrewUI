@@ -24,6 +24,8 @@ included:
   - Brew
   - BrewTests
   - BrewUITests
+  - Sources
+  - Tests
 
 excluded:
   - .build
