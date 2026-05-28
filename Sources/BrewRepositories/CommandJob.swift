@@ -1,8 +1,9 @@
 //
 //  CommandJob.swift
-//  Brew
+//  BrewRepositories
 //
 
+import BrewCore
 import Foundation
 
 /// One brew command's lifecycle as observed by the console UI: identity, phase, streamed output, and final exit code.
@@ -10,20 +11,23 @@ import Foundation
 /// Reuses ``BrewOperationID`` from the command center (do not mint a new identity).
 /// Derives ``exitCode`` from phase transitions because ``BrewOperationPhase`` does not itself carry one:
 /// `.running → .idle` ⇒ exit 0; `.failed(.brewCommand(exitCode, _))` ⇒ that exit code; other failure cases ⇒ `-1`.
+///
+/// This type holds only stored data and its mutation; display-flavoured helpers (status-dot state, export
+/// formatting) live as extensions in `BrewFeatureConsole`.
 @Observable
 @MainActor
-final class CommandJob: Identifiable {
-    let id: BrewOperationID
-    let command: String
-    let startedAt: Date
+public final class CommandJob: Identifiable {
+    public let id: BrewOperationID
+    public let command: String
+    public let startedAt: Date
 
-    private(set) var phase: BrewOperationPhase
-    private(set) var output: [BrewCommandOutputLine] = []
-    private(set) var exitCode: Int32?
+    public private(set) var phase: BrewOperationPhase
+    public private(set) var output: [BrewCommandOutputLine] = []
+    public private(set) var exitCode: Int32?
 
     private let maxOutputLines: Int
 
-    init(
+    public init(
         id: BrewOperationID,
         command: String,
         startedAt: Date,
@@ -37,24 +41,15 @@ final class CommandJob: Identifiable {
         self.maxOutputLines = maxOutputLines
     }
 
-    var isTerminal: Bool {
+    public var isTerminal: Bool {
         exitCode != nil
     }
 
-    var succeeded: Bool {
+    public var succeeded: Bool {
         exitCode == 0
     }
 
-    /// Status-dot state for this job: running until terminal, then success/failure by exit code.
-    /// Single source of truth for the dot — both the status bar and the toolbar pill bind to it.
-    var dotState: ConsoleStatusPresentation.DotState {
-        if !isTerminal {
-            return .running
-        }
-        return succeeded ? .succeeded : .failed
-    }
-
-    func updatePhase(_ newPhase: BrewOperationPhase) {
+    public func updatePhase(_ newPhase: BrewOperationPhase) {
         let wasRunning = if case .running = phase { true } else { false }
         phase = newPhase
         switch newPhase {
@@ -69,7 +64,7 @@ final class CommandJob: Identifiable {
         }
     }
 
-    func appendOutput(_ line: BrewCommandOutputLine) {
+    public func appendOutput(_ line: BrewCommandOutputLine) {
         output.append(line)
         if output.count > maxOutputLines {
             output.removeFirst(output.count - maxOutputLines)
@@ -84,7 +79,7 @@ final class CommandJob: Identifiable {
     }
 }
 
-extension CommandJob {
+public extension CommandJob {
     /// Materialize a fresh job from operation metadata seen on the phase stream.
     /// Synthesizes the user-facing command string from the operation's ``HomebrewPackageID`` (name)
     /// plus the running ``BrewOperationKind`` (which carries the formula/cask distinction).
@@ -101,34 +96,6 @@ extension CommandJob {
             startedAt: now,
             phase: phase,
         )
-    }
-
-    /// Plain-text dump of the output buffer for clipboard / save use. `stderr` lines get a `[stderr] ` prefix
-    /// so a reader can disambiguate without losing the timeline.
-    func formattedOutputForExport() -> String {
-        output.map { line in
-            switch line.stream {
-            case .stdout:
-                line.text
-            case .stderr:
-                "[stderr] \(line.text)"
-            }
-        }
-        .joined(separator: "\n")
-    }
-
-    /// Suggested filename when saving this job's output to disk.
-    /// Pattern: `brewui-<sanitized-command>-<yyyy-MM-dd-HHmmss>.log`.
-    func suggestedExportFilename(now: Date = Date()) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyy-MM-dd-HHmmss"
-        let timestamp = formatter.string(from: now)
-        let sanitized = command
-            .replacingOccurrences(of: " ", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: ":", with: "_")
-        return "brewui-\(sanitized)-\(timestamp).log"
     }
 
     private static func userFacingCommand(kind: BrewOperationKind, name: String) -> String {
