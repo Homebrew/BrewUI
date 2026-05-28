@@ -11,7 +11,7 @@ import Testing
 struct CommandJobExportTests {
     @Test func `formattedOutputForExport joins lines with newlines`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -23,7 +23,7 @@ struct CommandJobExportTests {
 
     @Test func `formattedOutputForExport prefixes stderr lines for disambiguation`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -36,7 +36,7 @@ struct CommandJobExportTests {
 
     @Test func `formattedOutputForExport on empty buffer is empty string`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -46,7 +46,7 @@ struct CommandJobExportTests {
 
     @Test func `suggestedExportFilename uses timestamped pattern with sanitized command`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -68,7 +68,7 @@ struct CommandJobExportTests {
 
     @Test func `suggestedExportFilename replaces unsafe path characters`() {
         let job = CommandJob(
-            id: BrewOperationID(rawValue: "weird"),
+            id: BrewOperationID(kind: .formula, name: "weird"),
             command: "brew weird /path:colon thing",
             startedAt: Date(),
             phase: .idle,

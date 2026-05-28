@@ -52,7 +52,7 @@ private func makeOutputTestCenter() -> SerialBrewCommandCenter {
 struct SerialBrewCommandCenterOutputTests {
     @Test func `outputChanges for id delivers lines emitted via the sink in order`() async throws {
         let center = makeOutputTestCenter()
-        let id = BrewOperationID(rawValue: "formula:output-order")
+        let id = BrewOperationID(kind: .formula, name: "output-order")
         let stream = await center.outputChanges(for: id)
         let collector = OutputLineCollector()
         let collect = Task {
@@ -80,8 +80,8 @@ struct SerialBrewCommandCenterOutputTests {
 
     @Test func `allOutputChanges emits lines for any id with no initial replay`() async throws {
         let center = makeOutputTestCenter()
-        let idA = BrewOperationID(rawValue: "formula:all-a")
-        let idB = BrewOperationID(rawValue: "formula:all-b")
+        let idA = BrewOperationID(kind: .formula, name: "all-a")
+        let idB = BrewOperationID(kind: .formula, name: "all-b")
         let stream = await center.allOutputChanges()
         let collector = AllOutputCollector()
         let collect = Task {
@@ -110,7 +110,7 @@ struct SerialBrewCommandCenterOutputTests {
 
     @Test func `outputChanges multicasts to multiple subscribers`() async throws {
         let center = makeOutputTestCenter()
-        let id = BrewOperationID(rawValue: "formula:output-multi")
+        let id = BrewOperationID(kind: .formula, name: "output-multi")
         let streamA = await center.outputChanges(for: id)
         let streamB = await center.outputChanges(for: id)
         let collectorA = OutputLineCollector()
@@ -144,7 +144,7 @@ struct SerialBrewCommandCenterOutputTests {
 
     @Test func `output listener removed on stream termination`() async throws {
         let center = makeOutputTestCenter()
-        let id = BrewOperationID(rawValue: "formula:output-cleanup")
+        let id = BrewOperationID(kind: .formula, name: "output-cleanup")
         let stream = await center.outputChanges(for: id)
         let collector = OutputLineCollector()
         let collect = Task {

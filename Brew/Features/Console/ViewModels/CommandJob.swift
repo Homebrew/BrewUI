@@ -86,35 +86,21 @@ final class CommandJob: Identifiable {
 
 extension CommandJob {
     /// Materialize a fresh job from operation metadata seen on the phase stream.
-    /// Synthesizes the user-facing command string from the Homebrew ``BrewOperationID`` raw value
-    /// (`"formula:gh"` / `"cask:firefox"`) plus the running ``BrewOperationKind``.
+    /// Synthesizes the user-facing command string from the operation's ``HomebrewPackageID`` (name)
+    /// plus the running ``BrewOperationKind`` (which carries the formula/cask distinction).
     static func materialize(
         id: BrewOperationID,
         kind: BrewOperationKind,
         phase: BrewOperationPhase,
         now: Date = Date(),
     ) -> CommandJob {
-        let parsed = parseHomebrewID(id)
-        let name = parsed?.name ?? id.rawValue
-        let command = userFacingCommand(kind: kind, name: name)
+        let command = userFacingCommand(kind: kind, name: id.packageID.name)
         return CommandJob(
             id: id,
             command: command,
             startedAt: now,
             phase: phase,
         )
-    }
-
-    private static func parseHomebrewID(_ id: BrewOperationID) -> (kind: String, name: String)? {
-        let parts = id.rawValue.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
-        guard
-            parts.count == 2,
-            !parts[0].isEmpty,
-            !parts[1].isEmpty
-        else {
-            return nil
-        }
-        return (kind: String(parts[0]), name: String(parts[1]))
     }
 
     /// Plain-text dump of the output buffer for clipboard / save use. `stderr` lines get a `[stderr] ` prefix

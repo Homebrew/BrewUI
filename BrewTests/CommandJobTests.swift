@@ -10,7 +10,7 @@ import Testing
 @MainActor
 struct CommandJobTests {
     @Test func `materialize for formula install synthesizes brew install command`() {
-        let id = BrewOperationID(rawValue: "formula:gh")
+        let id = BrewOperationID(kind: .formula, name: "gh")
         let job = CommandJob.materialize(
             id: id,
             kind: .installFormula,
@@ -21,7 +21,7 @@ struct CommandJobTests {
     }
 
     @Test func `materialize for cask install includes --cask flag`() {
-        let id = BrewOperationID(rawValue: "cask:firefox")
+        let id = BrewOperationID(kind: .cask, name: "firefox")
         let job = CommandJob.materialize(
             id: id,
             kind: .installCask,
@@ -32,7 +32,7 @@ struct CommandJobTests {
     }
 
     @Test func `materialize for cask uninstall includes --cask flag`() {
-        let id = BrewOperationID(rawValue: "cask:firefox")
+        let id = BrewOperationID(kind: .cask, name: "firefox")
         let job = CommandJob.materialize(
             id: id,
             kind: .uninstallCask,
@@ -43,7 +43,7 @@ struct CommandJobTests {
     }
 
     @Test func `materialize for formula upgrade synthesizes brew upgrade command`() {
-        let id = BrewOperationID(rawValue: "formula:gh")
+        let id = BrewOperationID(kind: .formula, name: "gh")
         let job = CommandJob.materialize(
             id: id,
             kind: .upgradeFormula,
@@ -53,20 +53,9 @@ struct CommandJobTests {
         #expect(job.command == "brew upgrade gh")
     }
 
-    @Test func `materialize with unparseable id falls back to the raw id`() {
-        let id = BrewOperationID(rawValue: "weird-no-colon")
-        let job = CommandJob.materialize(
-            id: id,
-            kind: .installFormula,
-            phase: .running(.installFormula),
-        )
-
-        #expect(job.command == "brew install weird-no-colon")
-    }
-
     @Test func `updatePhase from running to idle sets exit code zero`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -80,7 +69,7 @@ struct CommandJobTests {
 
     @Test func `updatePhase to brew command failure captures exit code from reason`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -94,7 +83,7 @@ struct CommandJobTests {
 
     @Test func `updatePhase to non-brew failure uses sentinel exit code`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -108,7 +97,7 @@ struct CommandJobTests {
 
     @Test func `updatePhase from idle to idle does not back-fill an exit code`() {
         let job = CommandJob(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             command: "brew install gh",
             startedAt: Date(),
             phase: .idle,
@@ -122,7 +111,7 @@ struct CommandJobTests {
 
     @Test func `appendOutput grows the buffer in order`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -138,7 +127,7 @@ struct CommandJobTests {
 
     @Test func `appendOutput evicts oldest lines once the cap is exceeded`() {
         let job = CommandJob(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             command: "brew install gh",
             startedAt: Date(),
             phase: .running(.installFormula),
@@ -154,7 +143,7 @@ struct CommandJobTests {
 
     @Test func `dotState is running while not terminal`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -164,7 +153,7 @@ struct CommandJobTests {
 
     @Test func `dotState is succeeded after a zero-exit terminal transition`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )
@@ -176,7 +165,7 @@ struct CommandJobTests {
 
     @Test func `dotState is failed after a non-zero-exit terminal transition`() {
         let job = CommandJob.materialize(
-            id: BrewOperationID(rawValue: "formula:gh"),
+            id: BrewOperationID(kind: .formula, name: "gh"),
             kind: .installFormula,
             phase: .running(.installFormula),
         )

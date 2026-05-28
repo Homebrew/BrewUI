@@ -12,7 +12,7 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `running phase for unknown id materializes a job`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let id = BrewOperationID(rawValue: "formula:gh")
+        let id = BrewOperationID(kind: .formula, name: "gh")
 
         await harness.emit(id: id, phase: .running(.installFormula))
 
@@ -24,7 +24,7 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `idle phase for unknown id is ignored (initial replay artifact)`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let id = BrewOperationID(rawValue: "formula:gh")
+        let id = BrewOperationID(kind: .formula, name: "gh")
 
         await harness.emit(id: id, phase: .idle)
 
@@ -35,7 +35,7 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `subsequent transition to idle marks the job terminal and succeeded`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let id = BrewOperationID(rawValue: "formula:gh")
+        let id = BrewOperationID(kind: .formula, name: "gh")
 
         await harness.emit(id: id, phase: .running(.installFormula))
         await harness.emit(id: id, phase: .idle)
@@ -48,8 +48,8 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `clearCompleted removes terminal jobs but preserves in-flight`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let done = BrewOperationID(rawValue: "formula:gh")
-        let running = BrewOperationID(rawValue: "formula:ripgrep")
+        let done = BrewOperationID(kind: .formula, name: "gh")
+        let running = BrewOperationID(kind: .formula, name: "ripgrep")
         await harness.emit(id: done, phase: .running(.installFormula))
         await harness.emit(id: done, phase: .idle)
         await harness.emit(id: running, phase: .running(.installFormula))
@@ -64,8 +64,8 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `remove drops a single job and prunes orderedIDs`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let first = BrewOperationID(rawValue: "formula:gh")
-        let second = BrewOperationID(rawValue: "formula:ripgrep")
+        let first = BrewOperationID(kind: .formula, name: "gh")
+        let second = BrewOperationID(kind: .formula, name: "ripgrep")
         await harness.emit(id: first, phase: .running(.installFormula))
         await harness.emit(id: second, phase: .running(.installFormula))
 
@@ -79,8 +79,8 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `remove for unknown id is a no-op`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let known = BrewOperationID(rawValue: "formula:gh")
-        let unknown = BrewOperationID(rawValue: "formula:never-running")
+        let known = BrewOperationID(kind: .formula, name: "gh")
+        let unknown = BrewOperationID(kind: .formula, name: "never-running")
         await harness.emit(id: known, phase: .running(.installFormula))
 
         harness.repository.remove(id: unknown)
@@ -92,7 +92,7 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `streamed output appends to the matching job's output buffer`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let id = BrewOperationID(rawValue: "formula:gh")
+        let id = BrewOperationID(kind: .formula, name: "gh")
         await harness.emit(id: id, phase: .running(.installFormula))
 
         await harness.emit(id: id, output: BrewCommandOutputLine(stream: .stdout, text: "==> fetching"))
@@ -107,7 +107,7 @@ struct BrewCommandJobsRepositoryTests {
     @Test func `streamed output for unknown id is silently dropped`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
-        let id = BrewOperationID(rawValue: "formula:never-running")
+        let id = BrewOperationID(kind: .formula, name: "never-running")
 
         await harness.emit(id: id, output: BrewCommandOutputLine(stream: .stdout, text: "orphan"))
 
