@@ -185,5 +185,63 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
+        .testTarget(
+            name: "BrewDesignSystemTests",
+            dependencies: ["BrewDesignSystem", "BrewCore"],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewFeatureConsoleTests",
+            dependencies: [
+                "BrewFeatureConsole",
+                "BrewCore",
+                "BrewRepositories",
+                "BrewRepositoriesLive",
+                "BrewCoreTestSupport",
+                "BrewRepositoriesTestSupport",
+                "BrewServicesTestSupport",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewFeatureDiscoverTests",
+            dependencies: [
+                "BrewFeatureDiscover",
+                "BrewCLI",
+                "BrewCore",
+                "BrewRepositories",
+                "BrewCoreTestSupport",
+                "BrewRepositoriesTestSupport",
+                "BrewServicesTestSupport",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewFeatureInstalledTests",
+            dependencies: [
+                "BrewFeatureInstalled",
+                "BrewCLI",
+                "BrewCore",
+                "BrewDesignSystem",
+                "BrewRepositories",
+                "BrewRepositoriesLive",
+                "BrewCoreTestSupport",
+                "BrewRepositoriesTestSupport",
+                "BrewServicesTestSupport",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
     ],
 )

@@ -5,7 +5,14 @@
 //  Created by Graeme Arthur on 6/3/2026.
 //
 
-@testable import Brew
+import BrewCLI
+import BrewCore
+import BrewCoreTestSupport
+@testable import BrewFeatureInstalled
+import BrewRepositories
+import BrewRepositoriesLive
+import BrewRepositoriesTestSupport
+import BrewServicesTestSupport
 import Testing
 
 struct BrewTests {

@@ -1,4 +1,10 @@
-@testable import Brew
+import BrewCLI
+import BrewCore
+import BrewCoreTestSupport
+@testable import BrewFeatureDiscover
+import BrewRepositories
+import BrewRepositoriesTestSupport
+import BrewServicesTestSupport
 import Foundation
 import Testing
 
@@ -15,6 +21,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.9.0"])]),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.packageKind == .formula)
@@ -35,6 +42,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.packageKind == .cask)
@@ -54,6 +62,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(!viewModel.showsInstallMetrics)
@@ -67,6 +76,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.packageDescription == nil)
@@ -80,6 +90,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.packageDescription == "A useful tool.")
@@ -96,6 +107,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.dependencyNames == ["libx264", "libvpx"])
@@ -109,6 +121,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.dependencyNames.isEmpty)
@@ -122,6 +135,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.homepageURL == nil)
@@ -135,6 +149,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo(),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         #expect(viewModel.homepageURL == nil)
@@ -148,6 +163,7 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.0.0"])]),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         viewModel.update(
@@ -174,6 +190,6 @@ struct DiscoverPackageDetailViewModelTests {
 }
 
 @MainActor
-private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> BrewInstalledPackagesRepository {
-    BrewInstalledPackagesRepository.previewLoaded(packages)
+private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> StubInstalledPackagesRepository {
+    StubInstalledPackagesRepository(packages: packages)
 }

@@ -1,4 +1,10 @@
-@testable import Brew
+import BrewCLI
+import BrewCore
+import BrewCoreTestSupport
+@testable import BrewFeatureDiscover
+import BrewRepositories
+import BrewRepositoriesTestSupport
+import BrewServicesTestSupport
 import Testing
 
 struct DiscoverListRowViewModelTests {
@@ -89,6 +95,6 @@ struct DiscoverListRowViewModelTests {
 }
 
 @MainActor
-private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> BrewInstalledPackagesRepository {
-    BrewInstalledPackagesRepository.previewLoaded(packages)
+private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> StubInstalledPackagesRepository {
+    StubInstalledPackagesRepository(packages: packages)
 }

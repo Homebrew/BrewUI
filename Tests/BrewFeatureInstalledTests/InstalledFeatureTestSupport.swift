@@ -1,4 +1,11 @@
-@testable import Brew
+import BrewCLI
+import BrewCore
+import BrewCoreTestSupport
+@testable import BrewFeatureInstalled
+import BrewRepositories
+import BrewRepositoriesLive
+import BrewRepositoriesTestSupport
+import BrewServicesTestSupport
 import Foundation
 
 enum InstalledFeatureTestSupport {
@@ -17,21 +24,5 @@ enum InstalledFeatureTestSupport {
         let viewModel = InstalledViewModel(repository: repository)
         await viewModel.load()
         return viewModel
-    }
-}
-
-struct StubInstalledDependentsRepository: InstalledDependentsRepository {
-    let provider: @Sendable (InstalledBrewPackage.ID) -> [InstalledBrewPackage]
-
-    func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
-        provider(packageID)
-    }
-}
-
-struct StubInstalledInventoryReading: InstalledInventoryReading {
-    let installedIDs: Set<InstalledBrewPackage.ID>
-
-    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
-        installedIDs
     }
 }

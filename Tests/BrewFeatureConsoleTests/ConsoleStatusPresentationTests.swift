@@ -3,7 +3,13 @@
 //  BrewTests
 //
 
-@testable import Brew
+import BrewCore
+import BrewCoreTestSupport
+@testable import BrewFeatureConsole
+import BrewRepositories
+import BrewRepositoriesLive
+import BrewRepositoriesTestSupport
+import BrewServicesTestSupport
 import Foundation
 import Testing
 

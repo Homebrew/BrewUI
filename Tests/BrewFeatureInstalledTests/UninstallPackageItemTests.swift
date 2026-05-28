@@ -3,7 +3,14 @@
 //  BrewTests
 //
 
-@testable import Brew
+import BrewCLI
+import BrewCore
+import BrewCoreTestSupport
+@testable import BrewFeatureInstalled
+import BrewRepositories
+import BrewRepositoriesLive
+import BrewRepositoriesTestSupport
+import BrewServicesTestSupport
 import Testing
 
 struct UninstallPackageItemTests {

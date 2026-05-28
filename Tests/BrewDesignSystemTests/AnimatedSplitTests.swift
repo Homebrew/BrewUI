@@ -3,7 +3,8 @@
 //  BrewTests
 //
 
-@testable import Brew
+import BrewCore
+@testable import BrewDesignSystem
 import Foundation
 import Testing
 
