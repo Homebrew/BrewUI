@@ -155,13 +155,12 @@ struct DiscoverListRowView: View {
 }
 
 #if DEBUG
-    import BrewRepositoriesTestSupport
 
     #Preview("Installed") {
         DiscoverListRowView(
-            discoveryPackage: AppPreviewSupport.discoverPreviewPackage,
-            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
-            brewCommandCenter: AppPreviewSupport.commandCenter,
+            discoveryPackage: PreviewSupport.discoverPreviewPackage,
+            installedRepository: PreviewSupport.makeInstalledPackagesRepository(),
+            brewCommandCenter: PreviewSupport.commandCenter,
         )
         .padding()
         .frame(width: 440)

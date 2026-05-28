@@ -73,13 +73,12 @@ struct DiscoverColumns: View {
 }
 
 #if DEBUG
-    import BrewRepositoriesTestSupport
 
     #Preview {
         DiscoverColumns(
-            discoverPackagesRepository: AppPreviewSupport.makeDiscoverPackagesRepository(),
-            catalogueRepository: AppPreviewSupport.makeDiscoverCatalogueRepository(),
-            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
+            discoverPackagesRepository: PreviewSupport.makeDiscoverPackagesRepository(),
+            catalogueRepository: PreviewSupport.makeDiscoverCatalogueRepository(),
+            installedRepository: PreviewSupport.makeInstalledPackagesRepository(),
         )
     }
 #endif

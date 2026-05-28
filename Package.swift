@@ -14,7 +14,6 @@ let package = Package(
         .library(name: "BrewRepositoryInterfaces", targets: ["BrewRepositoryInterfaces"]),
         .library(name: "BrewRepositories", targets: ["BrewRepositories"]),
         .library(name: "BrewCoreTestSupport", targets: ["BrewCoreTestSupport"]),
-        .library(name: "BrewRepositoriesTestSupport", targets: ["BrewRepositoriesTestSupport"]),
         .library(name: "BrewServicesTestSupport", targets: ["BrewServicesTestSupport"]),
         .library(name: "BrewFeatureConsole", targets: ["BrewFeatureConsole"]),
         .library(name: "BrewFeatureInstalled", targets: ["BrewFeatureInstalled"]),
@@ -80,14 +79,6 @@ let package = Package(
             ],
         ),
         .target(
-            name: "BrewRepositoriesTestSupport",
-            dependencies: ["BrewRepositoryInterfaces", "BrewCoreTestSupport"],
-            swiftSettings: [
-                .defaultIsolation(MainActor.self),
-                .swiftLanguageMode(.v6),
-            ],
-        ),
-        .target(
             name: "BrewServicesTestSupport",
             dependencies: [
                 "BrewCore",
@@ -108,7 +99,6 @@ let package = Package(
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
-                "BrewRepositoriesTestSupport",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -121,7 +111,6 @@ let package = Package(
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
-                "BrewRepositoriesTestSupport",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -134,7 +123,6 @@ let package = Package(
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
-                "BrewRepositoriesTestSupport",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -178,7 +166,6 @@ let package = Package(
                 "BrewRepositoryInterfaces",
                 "BrewCoreTestSupport",
                 "BrewServicesTestSupport",
-                "BrewRepositoriesTestSupport",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -201,7 +188,6 @@ let package = Package(
                 "BrewRepositoryInterfaces",
                 "BrewRepositories",
                 "BrewCoreTestSupport",
-                "BrewRepositoriesTestSupport",
                 "BrewServicesTestSupport",
             ],
             swiftSettings: [
@@ -217,7 +203,6 @@ let package = Package(
                 "BrewCore",
                 "BrewRepositoryInterfaces",
                 "BrewCoreTestSupport",
-                "BrewRepositoriesTestSupport",
                 "BrewServicesTestSupport",
             ],
             swiftSettings: [
@@ -235,7 +220,6 @@ let package = Package(
                 "BrewRepositoryInterfaces",
                 "BrewRepositories",
                 "BrewCoreTestSupport",
-                "BrewRepositoriesTestSupport",
                 "BrewServicesTestSupport",
             ],
             swiftSettings: [

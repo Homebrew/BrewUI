@@ -259,15 +259,14 @@ struct InstalledPackageDetailPlaceholder: View {
 }
 
 #if DEBUG
-    import BrewRepositoriesTestSupport
 
     #Preview("Installed detail") {
         InstalledPackageDetailView(
-            package: AppPreviewSupport.outdatedFormula,
-            brewCommandCenter: AppPreviewSupport.commandCenter,
-            mutatingCommandFactory: AppPreviewSupport.mutatingCommandFactory,
-            installedDependentsRepository: AppPreviewSupport.makeInstalledDependentsRepository(),
-            installedInventoryReading: AppPreviewSupport.makeInstalledInventoryReading(),
+            package: PreviewSupport.outdatedFormula,
+            brewCommandCenter: PreviewSupport.commandCenter,
+            mutatingCommandFactory: PreviewSupport.mutatingCommandFactory,
+            installedDependentsRepository: PreviewSupport.makeInstalledDependentsRepository(),
+            installedInventoryReading: PreviewSupport.makeInstalledInventoryReading(),
         )
         .frame(minWidth: 340, minHeight: 320)
     }

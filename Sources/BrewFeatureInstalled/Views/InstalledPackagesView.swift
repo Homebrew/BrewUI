@@ -185,14 +185,13 @@ struct InstalledPackagesView: View {
 }
 
 #if DEBUG
-    import BrewRepositoriesTestSupport
 
     #Preview("Installed list - loaded") {
-        let viewModel = InstalledViewModel(repository: AppPreviewSupport.makeInstalledPackagesRepository())
+        let viewModel = InstalledViewModel(repository: PreviewSupport.makeInstalledPackagesRepository())
         InstalledPackagesView(
             viewModel: viewModel,
         )
-        .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+        .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
         .task {
             await viewModel.load()
         }
@@ -201,12 +200,12 @@ struct InstalledPackagesView: View {
 
     #Preview("Installed list - empty") {
         let viewModel = InstalledViewModel(
-            repository: AppPreviewSupport.makeInstalledPackagesRepository(packages: AppPreviewSupport.emptyPackages),
+            repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
         )
         InstalledPackagesView(
             viewModel: viewModel,
         )
-        .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+        .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
         .task {
             await viewModel.load()
         }

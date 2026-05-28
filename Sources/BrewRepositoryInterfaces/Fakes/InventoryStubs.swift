@@ -1,10 +1,9 @@
 //
 //  InventoryStubs.swift
-//  BrewRepositoriesTestSupport
+//  BrewRepositoryInterfaces
 //
 
 import BrewCore
-import BrewRepositoryInterfaces
 import Foundation
 
 public struct EmptyInstalledDependentsRepository: InstalledDependentsRepository {

@@ -272,14 +272,13 @@ struct DiscoverPackageDetailPlaceholder: View {
 }
 
 #if DEBUG
-    import BrewRepositoriesTestSupport
 
     #Preview {
         DiscoverPackageDetailView(
-            package: AppPreviewSupport.discoverPreviewPackage,
-            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
-            brewCommandCenter: AppPreviewSupport.commandCenter,
-            mutatingCommandFactory: AppPreviewSupport.mutatingCommandFactory,
+            package: PreviewSupport.discoverPreviewPackage,
+            installedRepository: PreviewSupport.makeInstalledPackagesRepository(),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            mutatingCommandFactory: PreviewSupport.mutatingCommandFactory,
         )
         .frame(minWidth: 380, minHeight: 480)
     }

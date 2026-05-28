@@ -1,10 +1,9 @@
 //
 //  Stubs.swift
-//  BrewRepositoriesTestSupport
+//  BrewRepositoryInterfaces
 //
 
 import BrewCore
-import BrewRepositoryInterfaces
 import Foundation
 import Observation
 

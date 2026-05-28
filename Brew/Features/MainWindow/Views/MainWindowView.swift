@@ -60,15 +60,14 @@ struct MainWindowView: View {
 }
 
 #if DEBUG
-    import BrewRepositoriesTestSupport
     import BrewRepositoryInterfaces
 
     #Preview {
         MainWindowView()
-            .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
-            .environment(\.installedPackagesRepository, AppPreviewSupport.makeInstalledPackagesRepository())
-            .environment(\.discoverPackagesRepository, AppPreviewSupport.makeDiscoverPackagesRepository())
-            .environment(\.catalogueRepository, AppPreviewSupport.makeDiscoverCatalogueRepository())
-            .environment(\.installedDependentsRepository, AppPreviewSupport.makeInstalledDependentsRepository())
+            .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
+            .environment(\.installedPackagesRepository, PreviewSupport.makeInstalledPackagesRepository())
+            .environment(\.discoverPackagesRepository, PreviewSupport.makeDiscoverPackagesRepository())
+            .environment(\.catalogueRepository, PreviewSupport.makeDiscoverCatalogueRepository())
+            .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
     }
 #endif

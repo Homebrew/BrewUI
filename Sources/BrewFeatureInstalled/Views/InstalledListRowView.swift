@@ -177,12 +177,11 @@ struct InstalledSectionHeader: View {
 }
 
 #if DEBUG
-    import BrewRepositoriesTestSupport
 
     #Preview("Formula with update") {
         InstalledListRowView(
-            package: AppPreviewSupport.outdatedFormula,
-            brewCommandCenter: AppPreviewSupport.commandCenter,
+            package: PreviewSupport.outdatedFormula,
+            brewCommandCenter: PreviewSupport.commandCenter,
         )
         .padding()
         .frame(width: 400)
@@ -190,8 +189,8 @@ struct InstalledSectionHeader: View {
 
     #Preview("Cask") {
         InstalledListRowView(
-            package: AppPreviewSupport.currentCask,
-            brewCommandCenter: AppPreviewSupport.commandCenter,
+            package: PreviewSupport.currentCask,
+            brewCommandCenter: PreviewSupport.commandCenter,
         )
         .padding()
         .frame(width: 400)
