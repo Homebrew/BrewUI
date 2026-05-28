@@ -118,7 +118,7 @@ private struct JobPill: View {
         HStack(spacing: BrewSpacing.xs) {
             Button(action: onSelect) {
                 HStack(spacing: BrewSpacing.xs) {
-                    ConsoleStatusDot(state: dotState)
+                    ConsoleStatusDot(state: job.dotState)
                     Text(job.command)
                         .font(.system(.caption, design: .monospaced))
                         .foregroundStyle(isSelected ? Color.brewTextPrimary : Color.brewTextSecondary)
@@ -153,12 +153,5 @@ private struct JobPill: View {
                 .strokeBorder(isSelected ? Color.clear : Color.brewBorderDefault, lineWidth: 1),
         )
         .onHover { isHovered = $0 }
-    }
-
-    private var dotState: ConsoleStatusPresentation.DotState {
-        if !job.isTerminal {
-            return .running
-        }
-        return job.succeeded ? .succeeded : .failed
     }
 }

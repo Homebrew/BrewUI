@@ -64,9 +64,6 @@ enum BrewLayout {
     /// Expanded-mode toolbar height (matches the collapsed strip so resizing the body doesn't shift chrome height).
     static let consoleToolbarHeight: CGFloat = 36
 
-    /// Resize handle strip above the toolbar.
-    static let consoleResizeHandleHeight: CGFloat = 6
-
     /// Lower bound for the expanded console body. Below ~150pt a SwiftUI scroll-indicator artefact from
     /// the main pane bleeds into the console area, on top of the toolbar starting to dominate the output.
     static let consoleMinExpandedHeight: CGFloat = 150

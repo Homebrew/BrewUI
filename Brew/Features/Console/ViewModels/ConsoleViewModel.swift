@@ -51,7 +51,7 @@ final class ConsoleViewModel {
     var statusPresentation: ConsoleStatusPresentation {
         if let active = activeJob {
             return ConsoleStatusPresentation(
-                dotState: .running,
+                dotState: active.dotState,
                 summary: .running(command: active.command, shortLabel: active.phase.shortLabel),
                 isRunning: true,
             )
@@ -61,7 +61,7 @@ final class ConsoleViewModel {
            last.isTerminal
         {
             return ConsoleStatusPresentation(
-                dotState: last.succeeded ? .succeeded : .failed,
+                dotState: last.dotState,
                 summary: .completed(
                     command: last.command,
                     succeeded: last.succeeded,
@@ -71,16 +71,6 @@ final class ConsoleViewModel {
             )
         }
         return ConsoleStatusPresentation(dotState: .idle, summary: .idle, isRunning: false)
-    }
-
-    /// Jobs targeting a specific package, oldest first.
-    func jobs(for packageName: String) -> [CommandJob] {
-        orderedJobs.filter {
-            if case let .package(name) = $0.scope {
-                return name == packageName
-            }
-            return false
-        }
     }
 
     func select(id: BrewOperationID) {

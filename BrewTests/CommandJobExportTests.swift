@@ -70,7 +70,6 @@ struct CommandJobExportTests {
         let job = CommandJob(
             id: BrewOperationID(rawValue: "weird"),
             command: "brew weird /path:colon thing",
-            scope: .global,
             startedAt: Date(),
             phase: .idle,
         )

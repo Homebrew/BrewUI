@@ -18,7 +18,6 @@ struct CommandJobTests {
         )
 
         #expect(job.command == "brew install gh")
-        #expect(job.scope == .package(name: "gh"))
     }
 
     @Test func `materialize for cask install includes --cask flag`() {
@@ -30,7 +29,6 @@ struct CommandJobTests {
         )
 
         #expect(job.command == "brew install --cask firefox")
-        #expect(job.scope == .package(name: "firefox"))
     }
 
     @Test func `materialize for cask uninstall includes --cask flag`() {
@@ -55,7 +53,7 @@ struct CommandJobTests {
         #expect(job.command == "brew upgrade gh")
     }
 
-    @Test func `materialize with unparseable id falls back to global scope and raw id`() {
+    @Test func `materialize with unparseable id falls back to the raw id`() {
         let id = BrewOperationID(rawValue: "weird-no-colon")
         let job = CommandJob.materialize(
             id: id,
@@ -64,7 +62,6 @@ struct CommandJobTests {
         )
 
         #expect(job.command == "brew install weird-no-colon")
-        #expect(job.scope == .global)
     }
 
     @Test func `updatePhase from running to idle sets exit code zero`() {
@@ -113,7 +110,6 @@ struct CommandJobTests {
         let job = CommandJob(
             id: BrewOperationID(rawValue: "formula:gh"),
             command: "brew install gh",
-            scope: .package(name: "gh"),
             startedAt: Date(),
             phase: .idle,
         )
@@ -138,5 +134,55 @@ struct CommandJobTests {
         #expect(job.output[0].text == "first")
         #expect(job.output[0].stream == .stdout)
         #expect(job.output[1].stream == .stderr)
+    }
+
+    @Test func `appendOutput evicts oldest lines once the cap is exceeded`() {
+        let job = CommandJob(
+            id: BrewOperationID(rawValue: "formula:gh"),
+            command: "brew install gh",
+            startedAt: Date(),
+            phase: .running(.installFormula),
+            maxOutputLines: 3,
+        )
+
+        for index in 1 ... 5 {
+            job.appendOutput(BrewCommandOutputLine(stream: .stdout, text: "line\(index)"))
+        }
+
+        #expect(job.output.map(\.text) == ["line3", "line4", "line5"])
+    }
+
+    @Test func `dotState is running while not terminal`() {
+        let job = CommandJob.materialize(
+            id: BrewOperationID(rawValue: "formula:gh"),
+            kind: .installFormula,
+            phase: .running(.installFormula),
+        )
+
+        #expect(job.dotState == .running)
+    }
+
+    @Test func `dotState is succeeded after a zero-exit terminal transition`() {
+        let job = CommandJob.materialize(
+            id: BrewOperationID(rawValue: "formula:gh"),
+            kind: .installFormula,
+            phase: .running(.installFormula),
+        )
+
+        job.updatePhase(.idle)
+
+        #expect(job.dotState == .succeeded)
+    }
+
+    @Test func `dotState is failed after a non-zero-exit terminal transition`() {
+        let job = CommandJob.materialize(
+            id: BrewOperationID(rawValue: "formula:gh"),
+            kind: .installFormula,
+            phase: .running(.installFormula),
+        )
+
+        job.updatePhase(.failed(reason: .brewCommand(exitCode: 1, stderr: "boom")))
+
+        #expect(job.dotState == .failed)
     }
 }
