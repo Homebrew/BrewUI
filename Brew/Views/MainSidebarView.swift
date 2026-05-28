@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewDesignSystem
 import SwiftUI
 
 /// Primary navigation items for the main window sidebar.

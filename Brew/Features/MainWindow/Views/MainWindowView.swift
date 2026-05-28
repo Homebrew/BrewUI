@@ -1,4 +1,8 @@
 import AppKit
+import BrewDesignSystem
+import BrewFeatureConsole
+import BrewFeatureDiscover
+import BrewFeatureInstalled
 import SwiftUI
 
 struct MainWindowView: View {
@@ -55,9 +59,16 @@ struct MainWindowView: View {
     }
 }
 
-#Preview {
-    MainWindowView()
-        .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
-        .environment(\.installedInventoryCache, AppPreviewSupport.installedInventoryCache)
-        .environment(\.installedPackagesRepository, AppPreviewSupport.makeInstalledPackagesRepository())
-}
+#if DEBUG
+    import BrewRepositories
+    import BrewRepositoriesTestSupport
+
+    #Preview {
+        MainWindowView()
+            .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+            .environment(\.installedPackagesRepository, AppPreviewSupport.makeInstalledPackagesRepository())
+            .environment(\.discoverPackagesRepository, AppPreviewSupport.makeDiscoverPackagesRepository())
+            .environment(\.catalogueRepository, AppPreviewSupport.makeDiscoverCatalogueRepository())
+            .environment(\.installedDependentsRepository, AppPreviewSupport.makeInstalledDependentsRepository())
+    }
+#endif
