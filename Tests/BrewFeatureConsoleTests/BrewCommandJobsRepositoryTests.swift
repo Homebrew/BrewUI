@@ -8,8 +8,8 @@ import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureConsole
 import BrewNetworking
-import BrewRepositories
-@testable import BrewRepositoriesLive
+import BrewRepositoryInterfaces
+@testable import BrewRepositories
 import BrewRepositoriesTestSupport
 import BrewServicesTestSupport
 import Foundation

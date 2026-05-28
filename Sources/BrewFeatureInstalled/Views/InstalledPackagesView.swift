@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewUIComponents
+import BrewRepositoryInterfaces
 import SwiftUI
 
 /// Middle column of the main window: “Installed” chrome and the package list.

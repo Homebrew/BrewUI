@@ -4,7 +4,7 @@
 //
 
 import BrewCore
-import BrewRepositories
+import BrewRepositoryInterfaces
 import Foundation
 import Observation
 

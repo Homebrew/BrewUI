@@ -7,7 +7,7 @@
 
 import BrewCLI
 import BrewCore
-import BrewRepositoriesLive
+import BrewRepositories
 import Foundation
 
 public enum InstalledPackagesTestSupport {

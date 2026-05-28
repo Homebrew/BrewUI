@@ -7,11 +7,11 @@
 
 import BrewCLI
 import BrewCore
-import BrewDesignSystem
 import BrewFeatureConsole
 import BrewNetworking
 import BrewRepositories
-import BrewRepositoriesLive
+import BrewRepositoryInterfaces
+import BrewUIComponents
 import SwiftUI
 
 @main

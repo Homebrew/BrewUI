@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewUIComponents
+import BrewRepositoryInterfaces
 import Foundation
 
 /// Derived presentation for "upgrade in progress" chrome when observing ``BrewOperationPhase`` for an installed row.

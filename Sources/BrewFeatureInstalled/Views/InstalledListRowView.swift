@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewUIComponents
+import BrewRepositoryInterfaces
 import SwiftUI
 
 /// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.

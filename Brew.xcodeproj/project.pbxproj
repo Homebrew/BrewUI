@@ -10,11 +10,11 @@
 		EE2FB0362F653F89004AE92A /* Brew-Unit.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */; };
 		EE2FB0382F654024004AE92A /* Brew-UI.xctestplan in Resources */ = {isa = PBXBuildFile; fileRef = EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */; };
 		EEAA110100000000000000B1 /* BrewCore in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100100000000000000C1 /* BrewCore */; };
-		EEAA110200000000000000B2 /* BrewDesignSystem in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100200000000000000C2 /* BrewDesignSystem */; };
+		EEAA110200000000000000B2 /* BrewUIComponents in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100200000000000000C2 /* BrewUIComponents */; };
 		EEAA110300000000000000B3 /* BrewCLI in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100300000000000000C3 /* BrewCLI */; };
 		EEAA110400000000000000B4 /* BrewNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100400000000000000C4 /* BrewNetworking */; };
-		EEAA110500000000000000B5 /* BrewRepositories in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100500000000000000C5 /* BrewRepositories */; };
-		EEAA110600000000000000B6 /* BrewRepositoriesLive in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100600000000000000C6 /* BrewRepositoriesLive */; };
+		EEAA110500000000000000B5 /* BrewRepositoryInterfaces in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100500000000000000C5 /* BrewRepositoryInterfaces */; };
+		EEAA110600000000000000B6 /* BrewRepositories in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100600000000000000C6 /* BrewRepositories */; };
 		EEAA110700000000000000B7 /* BrewFeatureConsole in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100700000000000000C7 /* BrewFeatureConsole */; };
 		EEAA110800000000000000B8 /* BrewFeatureInstalled in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100800000000000000C8 /* BrewFeatureInstalled */; };
 		EEAA110900000000000000B9 /* BrewFeatureDiscover in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100900000000000000C9 /* BrewFeatureDiscover */; };
@@ -72,11 +72,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				EEAA110100000000000000B1 /* BrewCore in Frameworks */,
-				EEAA110200000000000000B2 /* BrewDesignSystem in Frameworks */,
+				EEAA110200000000000000B2 /* BrewUIComponents in Frameworks */,
 				EEAA110300000000000000B3 /* BrewCLI in Frameworks */,
 				EEAA110400000000000000B4 /* BrewNetworking in Frameworks */,
-				EEAA110500000000000000B5 /* BrewRepositories in Frameworks */,
-				EEAA110600000000000000B6 /* BrewRepositoriesLive in Frameworks */,
+				EEAA110500000000000000B5 /* BrewRepositoryInterfaces in Frameworks */,
+				EEAA110600000000000000B6 /* BrewRepositories in Frameworks */,
 				EEAA110700000000000000B7 /* BrewFeatureConsole in Frameworks */,
 				EEAA110800000000000000B8 /* BrewFeatureInstalled in Frameworks */,
 				EEAA110900000000000000B9 /* BrewFeatureDiscover in Frameworks */,
@@ -155,11 +155,11 @@
 			name = Brew;
 			packageProductDependencies = (
 				EEAA100100000000000000C1 /* BrewCore */,
-				EEAA100200000000000000C2 /* BrewDesignSystem */,
+				EEAA100200000000000000C2 /* BrewUIComponents */,
 				EEAA100300000000000000C3 /* BrewCLI */,
 				EEAA100400000000000000C4 /* BrewNetworking */,
-				EEAA100500000000000000C5 /* BrewRepositories */,
-				EEAA100600000000000000C6 /* BrewRepositoriesLive */,
+				EEAA100500000000000000C5 /* BrewRepositoryInterfaces */,
+				EEAA100600000000000000C6 /* BrewRepositories */,
 				EEAA100700000000000000C7 /* BrewFeatureConsole */,
 				EEAA100800000000000000C8 /* BrewFeatureInstalled */,
 				EEAA100900000000000000C9 /* BrewFeatureDiscover */,
@@ -658,10 +658,10 @@
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewCore;
 		};
-		EEAA100200000000000000C2 /* BrewDesignSystem */ = {
+		EEAA100200000000000000C2 /* BrewUIComponents */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
-			productName = BrewDesignSystem;
+			productName = BrewUIComponents;
 		};
 		EEAA100300000000000000C3 /* BrewCLI */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -673,15 +673,15 @@
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewNetworking;
 		};
-		EEAA100500000000000000C5 /* BrewRepositories */ = {
+		EEAA100500000000000000C5 /* BrewRepositoryInterfaces */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewRepositoryInterfaces;
+		};
+		EEAA100600000000000000C6 /* BrewRepositories */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewRepositories;
-		};
-		EEAA100600000000000000C6 /* BrewRepositoriesLive */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
-			productName = BrewRepositoriesLive;
 		};
 		EEAA100700000000000000C7 /* BrewFeatureConsole */ = {
 			isa = XCSwiftPackageProductDependency;

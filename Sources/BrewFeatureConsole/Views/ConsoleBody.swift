@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewRepositoryInterfaces
+import BrewUIComponents
 import SwiftUI
 
 /// Output area of the expanded console — virtualizing `List` over the selected job's output buffer

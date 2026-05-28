@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewUIComponents
+import BrewRepositoryInterfaces
 import SwiftUI
 
 /// App-window-owned root for the console feature: reads the shared command-jobs repository from the

@@ -5,7 +5,7 @@
 
 import BrewCore
 @testable import BrewFeatureConsole
-import BrewRepositoriesLive
+import BrewRepositories
 import BrewServicesTestSupport
 import Foundation
 

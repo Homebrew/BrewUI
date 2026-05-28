@@ -2,7 +2,7 @@ import BrewCLI
 import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureDiscover
-import BrewRepositories
+import BrewRepositoryInterfaces
 import BrewRepositoriesTestSupport
 import BrewServicesTestSupport
 import Testing

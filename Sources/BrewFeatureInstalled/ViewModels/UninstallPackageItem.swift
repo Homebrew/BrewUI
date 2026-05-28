@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewUIComponents
+import BrewRepositoryInterfaces
 import Foundation
 
 /// Presentation mapping for uninstall actions shown in Installed package detail subviews.

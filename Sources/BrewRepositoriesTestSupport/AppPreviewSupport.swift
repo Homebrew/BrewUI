@@ -5,7 +5,7 @@
 
 import BrewCore
 import BrewCoreTestSupport
-import BrewRepositories
+import BrewRepositoryInterfaces
 import Foundation
 
 /// Preview/test wiring built on repository stubs + ``BrewSampleData``. Feature previews import this to

@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 

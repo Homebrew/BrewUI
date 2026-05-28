@@ -4,8 +4,8 @@
 //
 
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 
 /// View-facing snapshot of "what does the collapsed status bar render right now" — keeps the view passive.

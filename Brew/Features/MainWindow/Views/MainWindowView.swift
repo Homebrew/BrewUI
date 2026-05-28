@@ -1,8 +1,8 @@
 import AppKit
-import BrewDesignSystem
 import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureInstalled
+import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
@@ -60,8 +60,8 @@ struct MainWindowView: View {
 }
 
 #if DEBUG
-    import BrewRepositories
     import BrewRepositoriesTestSupport
+    import BrewRepositoryInterfaces
 
     #Preview {
         MainWindowView()

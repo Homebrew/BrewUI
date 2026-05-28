@@ -1,6 +1,6 @@
 import BrewCore
-import BrewDesignSystem
-import BrewRepositories
+import BrewUIComponents
+import BrewRepositoryInterfaces
 import SwiftUI
 
 /// Owns one Discover row's view model, reading the shared installed-status source from the environment at

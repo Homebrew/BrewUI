@@ -8,11 +8,11 @@ let package = Package(
     ],
     products: [
         .library(name: "BrewCore", targets: ["BrewCore"]),
-        .library(name: "BrewDesignSystem", targets: ["BrewDesignSystem"]),
+        .library(name: "BrewUIComponents", targets: ["BrewUIComponents"]),
         .library(name: "BrewCLI", targets: ["BrewCLI"]),
         .library(name: "BrewNetworking", targets: ["BrewNetworking"]),
+        .library(name: "BrewRepositoryInterfaces", targets: ["BrewRepositoryInterfaces"]),
         .library(name: "BrewRepositories", targets: ["BrewRepositories"]),
-        .library(name: "BrewRepositoriesLive", targets: ["BrewRepositoriesLive"]),
         .library(name: "BrewCoreTestSupport", targets: ["BrewCoreTestSupport"]),
         .library(name: "BrewRepositoriesTestSupport", targets: ["BrewRepositoriesTestSupport"]),
         .library(name: "BrewServicesTestSupport", targets: ["BrewServicesTestSupport"]),
@@ -29,7 +29,7 @@ let package = Package(
             ],
         ),
         .target(
-            name: "BrewDesignSystem",
+            name: "BrewUIComponents",
             dependencies: ["BrewCore"],
             resources: [
                 .process("Resources/Media.xcassets"),
@@ -56,7 +56,7 @@ let package = Package(
             ],
         ),
         .target(
-            name: "BrewRepositories",
+            name: "BrewRepositoryInterfaces",
             dependencies: ["BrewCore"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -64,8 +64,8 @@ let package = Package(
             ],
         ),
         .target(
-            name: "BrewRepositoriesLive",
-            dependencies: ["BrewRepositories", "BrewCLI", "BrewNetworking"],
+            name: "BrewRepositories",
+            dependencies: ["BrewRepositoryInterfaces", "BrewCLI", "BrewNetworking"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
@@ -81,7 +81,7 @@ let package = Package(
         ),
         .target(
             name: "BrewRepositoriesTestSupport",
-            dependencies: ["BrewRepositories", "BrewCoreTestSupport"],
+            dependencies: ["BrewRepositoryInterfaces", "BrewCoreTestSupport"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
@@ -93,8 +93,8 @@ let package = Package(
                 "BrewCore",
                 "BrewCLI",
                 "BrewNetworking",
+                "BrewRepositoryInterfaces",
                 "BrewRepositories",
-                "BrewRepositoriesLive",
                 "BrewCoreTestSupport",
             ],
             swiftSettings: [
@@ -106,8 +106,8 @@ let package = Package(
             name: "BrewFeatureConsole",
             dependencies: [
                 "BrewCore",
-                "BrewDesignSystem",
-                "BrewRepositories",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
                 "BrewRepositoriesTestSupport",
             ],
             swiftSettings: [
@@ -119,8 +119,8 @@ let package = Package(
             name: "BrewFeatureInstalled",
             dependencies: [
                 "BrewCore",
-                "BrewDesignSystem",
-                "BrewRepositories",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
                 "BrewRepositoriesTestSupport",
             ],
             swiftSettings: [
@@ -132,8 +132,8 @@ let package = Package(
             name: "BrewFeatureDiscover",
             dependencies: [
                 "BrewCore",
-                "BrewDesignSystem",
-                "BrewRepositories",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
                 "BrewRepositoriesTestSupport",
             ],
             swiftSettings: [
@@ -169,13 +169,13 @@ let package = Package(
             ],
         ),
         .testTarget(
-            name: "BrewRepositoriesLiveTests",
+            name: "BrewRepositoriesTests",
             dependencies: [
-                "BrewRepositoriesLive",
+                "BrewRepositories",
                 "BrewCore",
                 "BrewCLI",
                 "BrewNetworking",
-                "BrewRepositories",
+                "BrewRepositoryInterfaces",
                 "BrewCoreTestSupport",
                 "BrewServicesTestSupport",
                 "BrewRepositoriesTestSupport",
@@ -186,8 +186,8 @@ let package = Package(
             ],
         ),
         .testTarget(
-            name: "BrewDesignSystemTests",
-            dependencies: ["BrewDesignSystem", "BrewCore"],
+            name: "BrewUIComponentsTests",
+            dependencies: ["BrewUIComponents", "BrewCore"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
@@ -198,8 +198,8 @@ let package = Package(
             dependencies: [
                 "BrewFeatureConsole",
                 "BrewCore",
+                "BrewRepositoryInterfaces",
                 "BrewRepositories",
-                "BrewRepositoriesLive",
                 "BrewCoreTestSupport",
                 "BrewRepositoriesTestSupport",
                 "BrewServicesTestSupport",
@@ -215,7 +215,7 @@ let package = Package(
                 "BrewFeatureDiscover",
                 "BrewCLI",
                 "BrewCore",
-                "BrewRepositories",
+                "BrewRepositoryInterfaces",
                 "BrewCoreTestSupport",
                 "BrewRepositoriesTestSupport",
                 "BrewServicesTestSupport",
@@ -231,9 +231,9 @@ let package = Package(
                 "BrewFeatureInstalled",
                 "BrewCLI",
                 "BrewCore",
-                "BrewDesignSystem",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
                 "BrewRepositories",
-                "BrewRepositoriesLive",
                 "BrewCoreTestSupport",
                 "BrewRepositoriesTestSupport",
                 "BrewServicesTestSupport",
