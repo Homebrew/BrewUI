@@ -5,7 +5,7 @@
 
 import Foundation
 
-protocol CatalogueCaching: Sendable {
+public protocol CatalogueCaching: Sendable {
     func formulaCatalogue() async -> FormulaCatalogueJSON?
     func caskCatalogue() async -> CaskCatalogueJSON?
     func etag(for kind: CatalogueCache.CatalogueKind) async -> String?

@@ -10,6 +10,7 @@ let package = Package(
         .library(name: "BrewCore", targets: ["BrewCore"]),
         .library(name: "BrewDesignSystem", targets: ["BrewDesignSystem"]),
         .library(name: "BrewCLI", targets: ["BrewCLI"]),
+        .library(name: "BrewNetworking", targets: ["BrewNetworking"]),
     ],
     targets: [
         .target(
@@ -32,6 +33,14 @@ let package = Package(
         ),
         .target(
             name: "BrewCLI",
+            dependencies: ["BrewCore"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewNetworking",
             dependencies: ["BrewCore"],
             swiftSettings: [
                 .defaultIsolation(nil),

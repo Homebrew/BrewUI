@@ -5,8 +5,8 @@
 
 import Foundation
 
-actor CatalogueCache: CatalogueCaching {
-    enum CatalogueKind: String {
+public actor CatalogueCache: CatalogueCaching {
+    public enum CatalogueKind: String, Sendable {
         case formula
         case cask
     }
@@ -23,7 +23,7 @@ actor CatalogueCache: CatalogueCaching {
     /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for
     /// `FileManager.default` / `UserDefaults.standard` itself so it doesn't have to store
     /// non-Sendable singletons. Tests pass a unique tmp directory + unique key prefix to isolate.
-    init(
+    public init(
         cacheDirectoryURL: URL? = nil,
         defaultsKeyPrefix: String = "CatalogueCache",
     ) {
@@ -31,7 +31,7 @@ actor CatalogueCache: CatalogueCaching {
         self.defaultsKeyPrefix = defaultsKeyPrefix
     }
 
-    func prepare() async {
+    public func prepare() async {
         if hasPrepared {
             return
         }
@@ -58,26 +58,26 @@ actor CatalogueCache: CatalogueCaching {
         hasPrepared = true
     }
 
-    func formulaCatalogue() async -> FormulaCatalogueJSON? {
+    public func formulaCatalogue() async -> FormulaCatalogueJSON? {
         formulaData
     }
 
-    func caskCatalogue() async -> CaskCatalogueJSON? {
+    public func caskCatalogue() async -> CaskCatalogueJSON? {
         caskData
     }
 
-    func etag(for kind: CatalogueKind) async -> String? {
+    public func etag(for kind: CatalogueKind) async -> String? {
         UserDefaults.standard.string(forKey: etagKey(for: kind))
     }
 
-    func updateFormulaCatalogue(with rawData: Data, etag: String?) async throws {
+    public func updateFormulaCatalogue(with rawData: Data, etag: String?) async throws {
         let decoded = try decoder.decode(FormulaCatalogueJSON.self, from: rawData)
         try writeCache(rawData, to: formulaCacheFileURL)
         formulaData = decoded
         persistETag(etag, for: .formula)
     }
 
-    func updateCaskCatalogue(with rawData: Data, etag: String?) async throws {
+    public func updateCaskCatalogue(with rawData: Data, etag: String?) async throws {
         let decoded = try decoder.decode(CaskCatalogueJSON.self, from: rawData)
         try writeCache(rawData, to: caskCacheFileURL)
         caskData = decoded

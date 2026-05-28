@@ -1,52 +1,53 @@
 //
 //  CatalogueJSON.swift
-//  Brew
+//  BrewNetworking
 //
 
+import BrewCore
 import Foundation
 
-nonisolated struct FormulaCatalogueJSON: Codable {
-    let items: [FormulaCatalogueItemJSON]
-    let decodeFailures: [CatalogueItemDecodeFailure]
+public nonisolated struct FormulaCatalogueJSON: Codable, Sendable {
+    public let items: [FormulaCatalogueItemJSON]
+    public let decodeFailures: [CatalogueItemDecodeFailure]
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         (items, decodeFailures) = try decodeCatalogueItems(from: decoder, as: FormulaCatalogueItemJSON.self)
     }
 }
 
-nonisolated struct CaskCatalogueJSON: Codable {
-    let items: [CaskCatalogueItemJSON]
-    let decodeFailures: [CatalogueItemDecodeFailure]
+public nonisolated struct CaskCatalogueJSON: Codable, Sendable {
+    public let items: [CaskCatalogueItemJSON]
+    public let decodeFailures: [CatalogueItemDecodeFailure]
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         (items, decodeFailures) = try decodeCatalogueItems(from: decoder, as: CaskCatalogueItemJSON.self)
     }
 }
 
-nonisolated struct CatalogueItemDecodeFailure: Codable, Equatable {
-    let index: Int
-    let underlying: String
+public nonisolated struct CatalogueItemDecodeFailure: Codable, Equatable, Sendable {
+    public let index: Int
+    public let underlying: String
 }
 
-nonisolated struct FormulaCatalogueItemJSON: Codable {
-    let name: String
-    let desc: String
-    let homepage: String
-    let versions: Versions
-    let dependencies: [String]
+public nonisolated struct FormulaCatalogueItemJSON: Codable, Sendable {
+    public let name: String
+    public let desc: String
+    public let homepage: String
+    public let versions: Versions
+    public let dependencies: [String]
 
-    nonisolated struct Versions: Codable {
-        let stable: String
+    public nonisolated struct Versions: Codable, Sendable {
+        public let stable: String
     }
 }
 
-nonisolated struct CaskCatalogueItemJSON: Codable {
-    let token: String
-    let names: [String]
-    let desc: String?
-    let homepage: String
-    let version: String
-    let dependsOn: DependsOn
+public nonisolated struct CaskCatalogueItemJSON: Codable, Sendable {
+    public let token: String
+    public let names: [String]
+    public let desc: String?
+    public let homepage: String
+    public let version: String
+    public let dependsOn: DependsOn
 
     private enum CodingKeys: String, CodingKey {
         case token
@@ -57,16 +58,16 @@ nonisolated struct CaskCatalogueItemJSON: Codable {
         case dependsOn = "depends_on"
     }
 
-    nonisolated struct DependsOn: Codable {
-        var formula: [String]
-        var cask: [String]
+    public nonisolated struct DependsOn: Codable, Sendable {
+        public var formula: [String]
+        public var cask: [String]
 
-        init(formula: [String] = [], cask: [String] = []) {
+        public init(formula: [String] = [], cask: [String] = []) {
             self.formula = formula
             self.cask = cask
         }
 
-        init(from decoder: Decoder) throws {
+        public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             formula = try container.decodeIfPresent([String].self, forKey: .formula) ?? []
             cask = try container.decodeIfPresent([String].self, forKey: .cask) ?? []
@@ -74,7 +75,7 @@ nonisolated struct CaskCatalogueItemJSON: Codable {
     }
 }
 
-nonisolated extension FormulaCatalogueItemJSON {
+public nonisolated extension FormulaCatalogueItemJSON {
     var description: String {
         desc
     }
@@ -88,7 +89,7 @@ nonisolated extension FormulaCatalogueItemJSON {
     }
 }
 
-nonisolated extension CaskCatalogueItemJSON {
+public nonisolated extension CaskCatalogueItemJSON {
     var name: String {
         token
     }

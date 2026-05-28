@@ -1,23 +1,24 @@
 //
 //  BrewAPIClient.swift
-//  Brew
+//  BrewNetworking
 //
 
+import BrewCore
 import Foundation
 
-protocol BrewAPIClient: Sendable {
+public protocol BrewAPIClient: Sendable {
     func fetchFormulaInstallOnRequestAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON
     func fetchCaskInstallAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON
     func fetchFormulaCatalogue(etag: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON>
     func fetchCaskCatalogue(etag: String?) async throws -> CatalogueResponse<CaskCatalogueJSON>
 }
 
-enum CatalogueResponse<T> {
+public enum CatalogueResponse<T: Sendable>: Sendable {
     case notModified
     case updated(data: T, etag: String?)
 }
 
-enum BrewAPIClientError: Error, Equatable {
+public enum BrewAPIClientError: Error, Equatable, Sendable {
     case invalidURL(path: String)
     case transport(underlying: String)
     case invalidResponse
@@ -25,32 +26,32 @@ enum BrewAPIClientError: Error, Equatable {
     case decoding(underlying: String)
 }
 
-struct URLSessionBrewAPIClient: BrewAPIClient {
+public struct URLSessionBrewAPIClient: BrewAPIClient {
     private let baseURL: URL
     private let session: URLSession
 
-    init(session: URLSession, baseURL: URL? = nil) {
+    public init(session: URLSession, baseURL: URL? = nil) {
         self.session = session
         self.baseURL = baseURL ?? URL(string: "https://formulae.brew.sh") ?? URL(fileURLWithPath: "/")
     }
 
-    static func live() -> URLSessionBrewAPIClient {
+    public static func live() -> URLSessionBrewAPIClient {
         URLSessionBrewAPIClient(session: .shared)
     }
 
-    func fetchFormulaInstallOnRequestAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
+    public func fetchFormulaInstallOnRequestAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
         try await fetchAnalytics(for: .formulaInstallOnRequest(window: window))
     }
 
-    func fetchCaskInstallAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
+    public func fetchCaskInstallAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
         try await fetchAnalytics(for: .caskInstall(window: window))
     }
 
-    func fetchFormulaCatalogue(etag: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON> {
+    public func fetchFormulaCatalogue(etag: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON> {
         try await fetchConditionalCatalogue(for: .formulaCatalogue, etag: etag, as: FormulaCatalogueJSON.self)
     }
 
-    func fetchCaskCatalogue(etag: String?) async throws -> CatalogueResponse<CaskCatalogueJSON> {
+    public func fetchCaskCatalogue(etag: String?) async throws -> CatalogueResponse<CaskCatalogueJSON> {
         try await fetchConditionalCatalogue(for: .caskCatalogue, etag: etag, as: CaskCatalogueJSON.self)
     }
 
