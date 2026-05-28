@@ -112,14 +112,4 @@ struct InstalledViewModelSearchTests {
         #expect(vm.activeSelectedPackageID == .cask(token: "github"))
         #expect(vm.selectedPackage?.id == .cask(token: "github"))
     }
-
-    @Test @MainActor func `searchQuery marks search as selected when query changes`() async {
-        let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [.fixture(name: "git", kind: .formula)],
-        )
-
-        #expect(!vm.isSearchSelected)
-        vm.searchQuery = "git"
-        #expect(vm.isSearchSelected)
-    }
 }

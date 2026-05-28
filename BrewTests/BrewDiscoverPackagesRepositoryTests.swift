@@ -190,6 +190,18 @@ private struct MockCatalogueRepository: CatalogueRepository {
             caskCatalogueByID[reference]
         }
     }
+
+    func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage] {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty, limit > 0 else {
+            return []
+        }
+        let all = Array(formulaCatalogueByID.values) + Array(caskCatalogueByID.values)
+        let matches = all
+            .filter { $0.name.localizedCaseInsensitiveContains(trimmedQuery) }
+            .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        return Array(matches.prefix(limit))
+    }
 }
 
 @MainActor

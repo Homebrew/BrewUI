@@ -3,81 +3,99 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
-    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
-            switch viewModel.state {
-            case .loading:
-                loadingSkeletonList
-            case let .error(message):
-                errorView(message)
-            case .loaded:
-                loadedList
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            }
+            scopePicker
+            Divider()
+            AsyncContentView(
+                state: viewModel.activeState,
+                onRetry: { Task { await viewModel.reloadActive() } },
+                loaded: { packages in
+                    DiscoverPackageSections(viewModel: viewModel, packages: packages)
+                },
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .searchable(
+            text: $viewModel.query,
+            placement: .toolbar,
+            prompt: "Search Homebrew's Catalogue",
+        )
+        .task(id: viewModel.query) {
+            // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
+            try? await Task.sleep(for: .milliseconds(250))
+            guard !Task.isCancelled else {
+                return
+            }
+            await viewModel.search()
+        }
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            Text("Discover")
-                .font(.brewTitle1)
+            Text(viewModel.paneHeading)
+                .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
-            headerSubtitle
+            HStack(spacing: BrewSpacing.xs) {
+                if viewModel.showsSubtitleTrendIcon {
+                    Image(systemName: "chart.line.uptrend.xyaxis")
+                        .font(.brewSubheadline)
+                        .foregroundStyle(Color.brewBrandPrimary)
+                }
+                Text(viewModel.subtitleText)
+                    .font(.brewSubheadline)
+                    .foregroundStyle(
+                        viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
+                    )
+            }
         }
         .padding(BrewSpacing.lg)
+        .accessibilityElement(children: .combine)
     }
 
-    private var headerSubtitle: some View {
-        HStack(spacing: BrewSpacing.xs) {
-            if viewModel.showsSubtitleTrendIcon {
-                Image(systemName: "chart.line.uptrend.xyaxis")
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewBrandPrimary)
-            }
-            Text(viewModel.subtitleText)
-                .font(.brewSubheadline)
-                .foregroundStyle(
-                    viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
-                )
+    /// Persistent kind filter, always visible (trending and results). Filters client-side; never refetches.
+    private var scopePicker: some View {
+        Picker("Scope", selection: $viewModel.scope) {
+            Text("All").tag(DiscoverSearchScope.all)
+            Text("Formulae").tag(DiscoverSearchScope.formulae)
+            Text("Casks").tag(DiscoverSearchScope.casks)
         }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.bottom, BrewSpacing.md)
+    }
+}
+
+/// Sectioned Discover list, split by package kind and filtered by the active scope. Renders an inline
+/// empty-state message when a visible section has no rows (e.g. a scope filter that excludes everything).
+private struct DiscoverPackageSections: View {
+    let viewModel: DiscoverViewModel
+    /// The redacted-placeholder or loaded packages handed down by `AsyncContentView` for this render.
+    let packages: [DiscoveryBrewPackage]
+
+    private var formulae: [DiscoveryBrewPackage] {
+        viewModel.showsFormulaeSection ? DiscoverViewModel.sortedSection(packages, kind: .formula) : []
     }
 
-    private var loadedList: some View {
+    private var casks: [DiscoveryBrewPackage] {
+        viewModel.showsCasksSection ? DiscoverViewModel.sortedSection(packages, kind: .cask) : []
+    }
+
+    var body: some View {
         ScrollViewReader { proxy in
             List {
-                if !viewModel.formulaRows.isEmpty {
-                    Section("Formulae") {
-                        ForEach(viewModel.formulaRows, id: \.id) { row in
-                            listRow(row)
-                                .id(row.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(row.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                if viewModel.showsFormulaeSection {
+                    Section(viewModel.formulaeSectionTitle) {
+                        sectionContent(formulae, kind: .formula)
                     }
                 }
-
-                if !viewModel.caskRows.isEmpty {
-                    Section("Casks") {
-                        ForEach(viewModel.caskRows, id: \.id) { row in
-                            listRow(row)
-                                .id(row.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(row.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.selectedPackageID == row.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                if viewModel.showsCasksSection {
+                    Section(viewModel.casksSectionTitle) {
+                        sectionContent(casks, kind: .cask)
                     }
                 }
             }
@@ -89,7 +107,7 @@ struct DiscoverPackagesView: View {
             .onChange(of: viewModel.selectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, with: proxy)
             }
-            .onChange(of: viewModel.visibleRows.map(\.id)) { _, _ in
+            .onChange(of: packages.map(\.id)) { _, _ in
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
             .onExitCommand {
@@ -98,76 +116,59 @@ struct DiscoverPackagesView: View {
         }
     }
 
-    private func listRow(_ row: DiscoverListRowViewModel) -> some View {
-        DiscoverListRowView(viewModel: row)
+    @ViewBuilder
+    private func sectionContent(_ rows: [DiscoveryBrewPackage], kind: HomebrewPackageKind) -> some View {
+        if rows.isEmpty {
+            emptyState(for: kind)
+        } else {
+            ForEach(rows) { package in
+                listRow(package)
+                    .id(package.id)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        viewModel.setSelection(package.id)
+                    }
+                    .listRowBackground(
+                        viewModel.selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                    )
+            }
+        }
+    }
+
+    private func listRow(_ package: DiscoveryBrewPackage) -> some View {
+        DiscoverListRowRoot(
+            discoveryPackage: package,
+            showsInstallMetrics: viewModel.showsInstallMetrics,
+        )
+    }
+
+    private func emptyState(for kind: HomebrewPackageKind) -> some View {
+        Text(emptyStateMessage(for: kind))
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewTextTertiary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, BrewSpacing.sm)
+            .listRowBackground(Color.clear)
+    }
+
+    private func emptyStateMessage(for kind: HomebrewPackageKind) -> String {
+        switch kind {
+        case .formula:
+            String(localized: "No formulae match", comment: "Discover empty formulae section")
+        case .cask:
+            String(localized: "No casks match", comment: "Discover empty casks section")
+        }
     }
 
     private func scrollToSelection(
         _ selectedID: BrewPackage.ID?,
         with proxy: ScrollViewProxy,
     ) {
-        guard let selectedID, viewModel.visibleRows.contains(where: { $0.id == selectedID }) else {
+        guard let selectedID, packages.contains(where: { $0.id == selectedID }) else {
             return
         }
         withAnimation(.brewFast) {
             proxy.scrollTo(selectedID, anchor: .center)
         }
-    }
-
-    private var loadingSkeletonList: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                InstalledSectionHeader(title: "Formulae", count: 3)
-                ForEach(skeletonFormulaeRows, id: \.id) { row in
-                    DiscoverListRowView(viewModel: row)
-                }
-                InstalledSectionHeader(title: "Casks", count: 3)
-                ForEach(skeletonCaskRows, id: \.id) { row in
-                    DiscoverListRowView(viewModel: row)
-                }
-            }
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.xl)
-        }
-        .redacted(reason: .placeholder)
-        .allowsHitTesting(false)
-        .accessibilityLabel("Loading package list")
-    }
-
-    private var skeletonFormulaeRows: [DiscoverListRowViewModel] {
-        skeletonRows(kind: .formula, names: ["Placeholder Formula", "Another Formula", "Sample Package"])
-    }
-
-    private var skeletonCaskRows: [DiscoverListRowViewModel] {
-        skeletonRows(kind: .cask, names: ["Placeholder Application", "Sample Cask App", "Another App"])
-    }
-
-    private func skeletonRows(kind: HomebrewPackageKind, names: [String]) -> [DiscoverListRowViewModel] {
-        names.map { name in
-            DiscoverListRowViewModel(
-                discoveryPackage: DiscoveryBrewPackage(
-                    package: BrewPackage(
-                        name: name,
-                        displayName: name,
-                        kind: kind,
-                        description: "Placeholder description text for skeleton row.",
-                        homepage: "",
-                        latestVersion: "0.0.0",
-                        dependencies: [],
-                    ),
-                    thirtyDayInstallCount: 420_000,
-                ),
-                installedRepository: installedPackagesRepository,
-            )
-        }
-    }
-
-    private func errorView(_ message: String) -> some View {
-        Text(message)
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewStatusError)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.lg)
     }
 }

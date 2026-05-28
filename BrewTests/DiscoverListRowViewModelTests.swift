@@ -65,6 +65,27 @@ struct DiscoverListRowViewModelTests {
         #expect(original.installedVersionLabel == updated.installedVersionLabel)
     }
 
+    @Test @MainActor func `showsInstallMetrics defaults to true and can be turned off`() {
+        let trendingRow = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(name: "git"),
+                thirtyDayInstallCount: 100,
+            ),
+            installedRepository: installedRepo(),
+        )
+        let searchRow = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(name: "ripgrep"),
+                thirtyDayInstallCount: 0,
+            ),
+            installedRepository: installedRepo(),
+            showsInstallMetrics: false,
+        )
+
+        #expect(trendingRow.showsInstallMetrics)
+        #expect(!searchRow.showsInstallMetrics)
+    }
+
     @Test @MainActor func `update replaces derived row values`() {
         let viewModel = DiscoverListRowViewModel(
             discoveryPackage: DiscoveryBrewPackage(

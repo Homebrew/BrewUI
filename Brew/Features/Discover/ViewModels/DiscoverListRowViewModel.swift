@@ -8,13 +8,17 @@ final class DiscoverListRowViewModel: Identifiable {
     /// Shared installed-status reader. Read through it so the installed badge/version stay reactive to
     /// installs and uninstalls happening on other surfaces.
     @ObservationIgnored let installedRepository: any InstalledPackageStatusReading
+    /// Catalogue search results carry no analytics, so install-count metadata is suppressed for them.
+    let showsInstallMetrics: Bool
 
     init(
         discoveryPackage: DiscoveryBrewPackage,
         installedRepository: any InstalledPackageStatusReading,
+        showsInstallMetrics: Bool = true,
     ) {
         self.discoveryPackage = discoveryPackage
         self.installedRepository = installedRepository
+        self.showsInstallMetrics = showsInstallMetrics
     }
 
     var id: BrewPackage.ID {

@@ -1,5 +1,23 @@
 import SwiftUI
 
+/// Owns one Discover row's view model, reading the shared installed-status source from the environment at
+/// the row boundary so the installed badge stays reactive without threading the repository through parents.
+struct DiscoverListRowRoot: View {
+    let discoveryPackage: DiscoveryBrewPackage
+    let showsInstallMetrics: Bool
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+
+    var body: some View {
+        DiscoverListRowView(
+            viewModel: DiscoverListRowViewModel(
+                discoveryPackage: discoveryPackage,
+                installedRepository: installedPackagesRepository,
+                showsInstallMetrics: showsInstallMetrics,
+            ),
+        )
+    }
+}
+
 struct DiscoverListRowView: View {
     let viewModel: DiscoverListRowViewModel
 
@@ -71,12 +89,14 @@ struct DiscoverListRowView: View {
             Text("v\(viewModel.stableVersionLabel)")
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
-            Text("•")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
-            Text("\(viewModel.installs30DayLabel) installs (30d)")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextTertiary)
+            if viewModel.showsInstallMetrics {
+                Text("•")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextTertiary)
+                Text("\(viewModel.installs30DayLabel) installs (30d)")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextTertiary)
+            }
             Spacer(minLength: 0)
         }
     }
@@ -85,8 +105,10 @@ struct DiscoverListRowView: View {
         var parts = [
             viewModel.name,
             viewModel.packageKindChrome.badgeLabel,
-            "\(viewModel.installs30DayLabel) installs in 30 days",
         ]
+        if viewModel.showsInstallMetrics {
+            parts.append("\(viewModel.installs30DayLabel) installs in 30 days")
+        }
         if let installedStatusLabel = viewModel.installedStatusLabel {
             parts.append(installedStatusLabel)
         }
@@ -113,24 +135,7 @@ struct DiscoverListRowView: View {
 }
 
 #Preview("Installed") {
-    let previewPackage = AppPreviewSupport.discoverFormulaeCatalogue.first ?? BrewPackage(
-        name: "git",
-        displayName: "git",
-        kind: .formula,
-        description: "Distributed revision control system",
-        homepage: "https://git-scm.com",
-        latestVersion: "2.46.1",
-        dependencies: [],
-    )
-    DiscoverListRowView(
-        viewModel: DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
-                package: previewPackage,
-                thirtyDayInstallCount: 420_000,
-            ),
-            installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
-        ),
-    )
-    .padding()
-    .frame(width: 440)
+    DiscoverListRowView(viewModel: AppPreviewSupport.makeDiscoverListRowViewModel())
+        .padding()
+        .frame(width: 440)
 }

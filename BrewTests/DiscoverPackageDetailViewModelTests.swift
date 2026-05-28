@@ -3,9 +3,9 @@ import Foundation
 import Testing
 
 struct DiscoverPackageDetailViewModelTests {
-    @Test @MainActor func `formula row maps install command and installed status`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+    @Test @MainActor func `formula package maps install command and installed status`() {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(
                     name: "wget",
                     homepage: "https://example.org",
@@ -15,7 +15,6 @@ struct DiscoverPackageDetailViewModelTests {
             ),
             installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.9.0"])]),
         )
-        let viewModel = DiscoverPackageDetailViewModel(row: row)
 
         #expect(viewModel.packageKind == .formula)
         #expect(viewModel.installCommand == "brew install wget")
@@ -23,18 +22,18 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.installedVersionLabel == "v1.9.0")
         #expect(viewModel.stableVersionLabel == "2.0.0")
         #expect(viewModel.installs30DayLabel == "3,500")
+        #expect(viewModel.showsInstallMetrics)
         #expect(viewModel.homepageURL?.absoluteString == "https://example.org")
     }
 
-    @Test @MainActor func `cask row maps cask install command and not installed status`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+    @Test @MainActor func `cask package maps cask install command and not installed status`() {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(name: "iterm2", kind: .cask, homepage: "", latestVersion: ""),
                 thirtyDayInstallCount: 500,
             ),
             installedRepository: installedRepo(),
         )
-        let viewModel = DiscoverPackageDetailViewModel(row: row)
 
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.installCommand == "brew install --cask iterm2")
@@ -45,33 +44,45 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.homepageURL == nil)
     }
 
+    @Test @MainActor func `showsInstallMetrics is false for zero install count`() {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
+                package: .fixture(name: "ripgrep"),
+                thirtyDayInstallCount: 0,
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        #expect(!viewModel.showsInstallMetrics)
+    }
+
     @Test @MainActor func `packageDescription is nil when description is whitespace-only`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(description: "   \n  "),
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
         )
 
-        #expect(DiscoverPackageDetailViewModel(row: row).packageDescription == nil)
+        #expect(viewModel.packageDescription == nil)
     }
 
     @Test @MainActor func `packageDescription returns trimmed non-empty description`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(description: "  A useful tool.  "),
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
         )
 
-        #expect(DiscoverPackageDetailViewModel(row: row).packageDescription == "A useful tool.")
+        #expect(viewModel.packageDescription == "A useful tool.")
     }
 
     @Test @MainActor func `dependencyNames maps formula dependency references to names`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(
                     name: "ffmpeg",
                     dependencies: [.formula(name: "libx264"), .formula(name: "libvpx")],
@@ -81,72 +92,70 @@ struct DiscoverPackageDetailViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        #expect(DiscoverPackageDetailViewModel(row: row).dependencyNames == ["libx264", "libvpx"])
+        #expect(viewModel.dependencyNames == ["libx264", "libvpx"])
     }
 
     @Test @MainActor func `dependencyNames is empty when package has no dependencies`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(dependencies: []),
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
         )
 
-        #expect(DiscoverPackageDetailViewModel(row: row).dependencyNames.isEmpty)
+        #expect(viewModel.dependencyNames.isEmpty)
     }
 
     @Test @MainActor func `homepageURL is nil for empty homepage string`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(homepage: ""),
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
         )
 
-        #expect(DiscoverPackageDetailViewModel(row: row).homepageURL == nil)
+        #expect(viewModel.homepageURL == nil)
     }
 
     @Test @MainActor func `homepageURL is nil for whitespace-only homepage string`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(homepage: "   "),
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo(),
         )
 
-        #expect(DiscoverPackageDetailViewModel(row: row).homepageURL == nil)
+        #expect(viewModel.homepageURL == nil)
     }
 
     @Test @MainActor func `update refreshes derived detail presentation`() {
-        let row = DiscoverListRowViewModel(
-            discoveryPackage: DiscoveryBrewPackage(
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(
                 package: .fixture(name: "wget"),
                 thirtyDayInstallCount: 1,
             ),
             installedRepository: installedRepo([.fixture(name: "wget", installedVersions: ["1.0.0"])]),
         )
-        let viewModel = DiscoverPackageDetailViewModel(row: row)
+
         viewModel.update(
-            row: DiscoverListRowViewModel(
-                discoveryPackage: DiscoveryBrewPackage(
-                    package: .fixture(
-                        name: "docker",
-                        kind: .cask,
-                        homepage: "https://docker.com",
-                        latestVersion: "4.0.0",
-                    ),
-                    thirtyDayInstallCount: 42,
+            package: DiscoveryBrewPackage(
+                package: .fixture(
+                    name: "docker",
+                    kind: .cask,
+                    homepage: "https://docker.com",
+                    latestVersion: "4.0.0",
                 ),
-                installedRepository: installedRepo(),
+                thirtyDayInstallCount: 42,
             ),
         )
 
         #expect(viewModel.name == "docker")
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.installCommand == "brew install --cask docker")
+        // The new package isn't in the installed repository, so installed labels go to nil.
         #expect(viewModel.installedStatusLabel == nil)
         #expect(viewModel.installedVersionLabel == nil)
         #expect(viewModel.stableVersionLabel == "4.0.0")

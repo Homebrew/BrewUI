@@ -13,6 +13,10 @@ struct MainWindowView: View {
         .background(.bar)
     }
 
+    /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be
+    /// sourced from the catalogue once a package-count property is exposed.
+    private static let approximateCatalogueSize = "9,000+"
+
     private var sidebarColumn: some View {
         MainSidebarView(selection: $selectedSidebarItem)
             .navigationSplitViewColumnWidth(
@@ -27,8 +31,12 @@ struct MainWindowView: View {
         switch selectedSidebarItem {
         case .installed:
             InstalledColumnsRoot()
+                .navigationTitle("Installed")
+                .navigationSubtitle("Browse or search your installed packages")
         case .discover:
             DiscoverColumnsRoot()
+                .navigationTitle("Discover")
+                .navigationSubtitle("Browse and search \(Self.approximateCatalogueSize) packages")
         }
     }
 }

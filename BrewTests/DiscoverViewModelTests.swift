@@ -3,7 +3,7 @@ import Foundation
 import Testing
 
 struct DiscoverViewModelTests {
-    @Test @MainActor func `load maps enriched discovery packages and installed inventory`() async throws {
+    @Test @MainActor func `load exposes the top packages and selects the most popular`() async throws {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -28,23 +28,23 @@ struct DiscoverViewModelTests {
                     ],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo([.fixture(name: "git", installedVersions: ["2.45.0"])]),
         )
 
         await viewModel.load()
 
-        guard case .loaded = viewModel.state else {
-            Issue.record("expected loaded state")
+        guard case .loaded = viewModel.trending else {
+            Issue.record("expected loaded trending state")
             return
         }
-        #expect(viewModel.visibleRows.count == 2)
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.visiblePackages.count == 2)
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
 
-        let git = try #require(viewModel.visibleRows.first { $0.id == .formula(name: "git") })
-        #expect(git.descriptionText == "Distributed revision control")
-        #expect(git.stableVersionLabel == "2.46.1")
-        #expect(git.installedStatusLabel == "Installed")
-        #expect(git.installedVersionLabel == "v2.45.0")
+        let git = try #require(viewModel.selectedPackage)
+        #expect(git.description == "Distributed revision control")
+        #expect(git.latestVersion == "2.46.1")
+        #expect(viewModel.showsInstallMetrics)
     }
 
     @Test @MainActor func `load maps discover repository transport errors to underlying message`() async {
@@ -52,13 +52,14 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(
                 error: BrewAPIClientError.transport(underlying: "offline"),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
 
-        guard case let .error(message) = viewModel.state else {
-            Issue.record("expected error state")
+        guard case let .failed(message) = viewModel.trending else {
+            Issue.record("expected failed trending state")
             return
         }
         #expect(message == "offline")
@@ -67,13 +68,14 @@ struct DiscoverViewModelTests {
     @Test @MainActor func `load maps unknown discover repository errors to generic message`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
 
-        guard case let .error(message) = viewModel.state else {
-            Issue.record("expected error state")
+        guard case let .failed(message) = viewModel.trending else {
+            Issue.record("expected failed trending state")
             return
         }
         #expect(message == "Something went wrong loading Discover packages.")
@@ -87,15 +89,16 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
 
         viewModel.setSelection(.formula(name: "missing"))
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `load selects first visible row by popularity`() async {
@@ -106,12 +109,13 @@ struct DiscoverViewModelTests {
                     topCasks: [discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 90)],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `setSelection nil resolves to first visible row`() async {
@@ -125,16 +129,17 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
         viewModel.setSelection(.formula(name: "node"))
-        #expect(viewModel.selectedRow?.id == .formula(name: "node"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
 
         viewModel.setSelection(nil)
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `reload preserves selection when package still exists`() async {
@@ -149,6 +154,7 @@ struct DiscoverViewModelTests {
         )
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: repository,
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -157,7 +163,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "node"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
     }
 
     @Test @MainActor func `rows with equal install count are sorted alphabetically`() async {
@@ -172,15 +178,16 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
 
-        #expect(viewModel.visibleRows.map(\.name) == ["git", "node", "wget"])
+        #expect(viewModel.visiblePackages.map(\.name) == ["git", "node", "wget"])
     }
 
-    @Test @MainActor func `formulaRows and caskRows partition loaded rows by kind`() async {
+    @Test @MainActor func `visible packages partition by kind formulae first then casks`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -193,25 +200,69 @@ struct DiscoverViewModelTests {
                     ],
                 ),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
 
-        #expect(viewModel.formulaRows.map(\.id) == [.formula(name: "git"), .formula(name: "node")])
-        #expect(viewModel.caskRows.map(\.id) == [.cask(token: "docker")])
+        #expect(viewModel.visiblePackages.map(\.id) == [
+            .formula(name: "git"),
+            .formula(name: "node"),
+            .cask(token: "docker"),
+        ])
     }
 
-    @Test @MainActor func `formulaRows and caskRows are empty before load`() {
+    @Test @MainActor func `visible packages are empty before load`() {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
-        #expect(viewModel.formulaRows.isEmpty)
-        #expect(viewModel.caskRows.isEmpty)
+        #expect(viewModel.visiblePackages.isEmpty)
+    }
+
+    @Test @MainActor func `scope formulae hides casks and casks hides formulae`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+
+        viewModel.scope = .formulae
+        #expect(viewModel.visiblePackages.map(\.id) == [.formula(name: "git")])
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+
+        viewModel.scope = .casks
+        #expect(viewModel.visiblePackages.map(\.id) == [.cask(token: "docker")])
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+    }
+
+    @Test @MainActor func `section titles reflect trending and search mode`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        #expect(viewModel.formulaeSectionTitle == "Popular Formulae")
+        #expect(viewModel.casksSectionTitle == "Popular Casks")
+
+        viewModel.query = "git"
+        #expect(viewModel.formulaeSectionTitle == "Formulae")
+        #expect(viewModel.casksSectionTitle == "Casks")
     }
 
     @Test @MainActor func `subtitle reflects loading state`() {
@@ -219,26 +270,29 @@ struct DiscoverViewModelTests {
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         // VM starts in .loading before load() is called
+        #expect(viewModel.paneHeading == "Trending")
         #expect(viewModel.subtitleText == "Loading packages…")
-        #expect(!viewModel.showsSubtitleTrendIcon)
         #expect(!viewModel.isSubtitleError)
     }
 
-    @Test @MainActor func `subtitle reflects loaded state`() async {
+    @Test @MainActor func `subtitle reflects trending loaded state`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
 
-        #expect(viewModel.subtitleText == "Top 10 formulae · Top 10 casks")
+        #expect(viewModel.paneHeading == "Trending")
+        #expect(viewModel.subtitleText == "Most-installed packages in the last 30 days")
         #expect(viewModel.showsSubtitleTrendIcon)
         #expect(!viewModel.isSubtitleError)
     }
@@ -246,13 +300,14 @@ struct DiscoverViewModelTests {
     @Test @MainActor func `subtitle reflects error state`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
         await viewModel.load()
 
+        #expect(viewModel.paneHeading == "Trending")
         #expect(viewModel.subtitleText == "Could not load packages")
-        #expect(!viewModel.showsSubtitleTrendIcon)
         #expect(viewModel.isSubtitleError)
     }
 
@@ -268,6 +323,7 @@ struct DiscoverViewModelTests {
         )
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: repository,
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
@@ -280,7 +336,162 @@ struct DiscoverViewModelTests {
         )
         await viewModel.load()
 
-        #expect(viewModel.selectedRow?.id == .formula(name: "git"))
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+    }
+
+    // MARK: - Search
+
+    @Test @MainActor func `search populates results and switches into searching mode`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchResults: [
+                    cataloguePackage(name: "ripgrep"),
+                    cataloguePackage(name: "imagemagick"),
+                ],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.query = "rip"
+        await viewModel.search()
+
+        #expect(viewModel.isSearching)
+        #expect(!viewModel.showsInstallMetrics)
+        #expect(viewModel.visiblePackages.map(\.name) == ["imagemagick", "ripgrep"])
+        // Search results all surface a zero install count (catalogue search has no analytics).
+        #expect(viewModel.selectedPackage?.thirtyDayInstallCount == 0)
+    }
+
+    @Test @MainActor func `clearing the query returns to trending without searching`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchResults: [cataloguePackage(name: "ripgrep")],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.query = "rip"
+        await viewModel.search()
+        #expect(viewModel.isSearching)
+
+        viewModel.query = ""
+        await viewModel.search()
+
+        #expect(!viewModel.isSearching)
+        #expect(viewModel.visiblePackages.map(\.id) == [.formula(name: "git")])
+        #expect(viewModel.showsInstallMetrics)
+    }
+
+    @Test @MainActor func `search subtitle reflects result count`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchResults: [
+                    cataloguePackage(name: "git"),
+                    cataloguePackage(name: "gitup", kind: .cask),
+                ],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        #expect(viewModel.paneHeading == "Results")
+        #expect(viewModel.subtitleText == "2 packages match “git”")
+        #expect(!viewModel.showsSubtitleTrendIcon)
+    }
+
+    @Test @MainActor func `search subtitle uses singular for one match`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchResults: [cataloguePackage(name: "git")],
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        #expect(viewModel.paneHeading == "Results")
+        #expect(viewModel.subtitleText == "1 package matches “git”")
+    }
+
+    @Test @MainActor func `search subtitle reports no matches`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(searchResults: []),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "zzz"
+        await viewModel.search()
+
+        #expect(viewModel.paneHeading == "No matches")
+        #expect(viewModel.subtitleText == "Nothing found for “zzz”")
+    }
+
+    @Test @MainActor func `search maps transport errors to underlying message`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchError: BrewAPIClientError.transport(underlying: "offline"),
+            ),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        guard case let .failed(message) = viewModel.results else {
+            Issue.record("expected failed results state")
+            return
+        }
+        #expect(message == "offline")
+        #expect(viewModel.subtitleText == "Could not search packages")
+        #expect(viewModel.isSubtitleError)
+    }
+
+    @Test @MainActor func `search maps unknown errors to generic search message`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "git"
+        await viewModel.search()
+
+        guard case let .failed(message) = viewModel.results else {
+            Issue.record("expected failed results state")
+            return
+        }
+        #expect(message == "Something went wrong searching the catalogue.")
     }
 }
 
@@ -324,6 +535,23 @@ private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
     }
 }
 
+@MainActor
+private struct StubCatalogueRepository: CatalogueRepository {
+    var searchResults: [BrewPackage] = []
+    var searchError: Error?
+
+    func package(for _: HomebrewPackageID) async throws -> BrewPackage? {
+        nil
+    }
+
+    func searchPackages(matching _: String, limit _: Int) async throws -> [BrewPackage] {
+        if let searchError {
+            throw searchError
+        }
+        return searchResults
+    }
+}
+
 private struct DiscoverOddError: Error {}
 
 @MainActor
@@ -349,4 +577,11 @@ private func discoveryPackage(
         ),
         thirtyDayInstallCount: thirtyDayInstallCount,
     )
+}
+
+private func cataloguePackage(
+    name: String,
+    kind: HomebrewPackageKind = .formula,
+) -> BrewPackage {
+    .fixture(name: name, kind: kind)
 }

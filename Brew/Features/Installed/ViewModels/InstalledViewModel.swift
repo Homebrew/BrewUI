@@ -50,12 +50,10 @@ final class InstalledViewModel {
     var searchQuery: String = "" {
         didSet {
             updateSelectionForSearchQueryChange(from: oldValue, to: searchQuery)
-            isSearchSelected = true
         }
     }
 
     private var selectedPackageID: InstalledBrewPackage.ID?
-    var isSearchSelected: Bool = false
 
     /// Projects the shared repository's inventory through the active search query. The repository is the
     /// single source of truth; this view model owns only screen-local search and selection state.

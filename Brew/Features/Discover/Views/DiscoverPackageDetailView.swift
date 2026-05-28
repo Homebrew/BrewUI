@@ -1,12 +1,39 @@
 import AppKit
 import SwiftUI
 
-/// Right-hand column: detail for the selected discover package.
+/// Root view for the selected row; detail content reads ``EnvironmentValues/brewCommandCenter`` and builds relationship repositories from ``EnvironmentValues/installedInventoryCache``.
+struct DiscoverPackageDetailRoot: View {
+    let selectedPackage: DiscoveryBrewPackage
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+
+    var body: some View {
+        DiscoverPackageDetailView(
+            package: selectedPackage,
+            installedRepository: installedPackagesRepository,
+        )
+    }
+}
+
+/// Right-hand column: detail for the selected discovery package.
 struct DiscoverPackageDetailView: View {
-    @Bindable var viewModel: DiscoverPackageDetailViewModel
+    let package: DiscoveryBrewPackage
+    @State private var viewModel: DiscoverPackageDetailViewModel
     @State private var expandedDependencies = false
 
     private let collapsedDependencyCount = 3
+
+    init(
+        package: DiscoveryBrewPackage,
+        installedRepository: any InstalledPackageStatusReading,
+    ) {
+        self.package = package
+        _viewModel = State(
+            initialValue: DiscoverPackageDetailViewModel(
+                package: package,
+                installedRepository: installedRepository,
+            ),
+        )
+    }
 
     var body: some View {
         ScrollView {
@@ -26,7 +53,8 @@ struct DiscoverPackageDetailView: View {
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .onChange(of: viewModel.name) { _, _ in
+        .onChange(of: package) { _, newPackage in
+            viewModel.update(package: newPackage)
             expandedDependencies = false
         }
     }
@@ -83,7 +111,9 @@ private struct DiscoverPackageDetailMetadataSection: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
             detailRow(label: "Stable version", value: viewModel.stableVersionLabel)
-            detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
+            if viewModel.showsInstallMetrics {
+                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
+            }
             if let installedVersion = viewModel.installedVersionLabel {
                 detailRow(label: "Installed", value: installedVersion)
             }
@@ -203,21 +233,9 @@ struct DiscoverPackageDetailPlaceholder: View {
 }
 
 #Preview {
-    let row = DiscoverListRowViewModel(
-        discoveryPackage: DiscoveryBrewPackage(
-            package: AppPreviewSupport.discoverFormulaeCatalogue.first ?? BrewPackage(
-                name: "git",
-                displayName: "git",
-                kind: .formula,
-                description: "Distributed revision control system",
-                homepage: "https://git-scm.com",
-                latestVersion: "2.46.1",
-                dependencies: [],
-            ),
-            thirtyDayInstallCount: 420_000,
-        ),
+    DiscoverPackageDetailView(
+        package: AppPreviewSupport.discoverPreviewPackage,
         installedRepository: AppPreviewSupport.makeInstalledPackagesRepository(),
     )
-    DiscoverPackageDetailView(viewModel: DiscoverPackageDetailViewModel(row: row))
-        .frame(minWidth: 380, minHeight: 480)
+    .frame(minWidth: 380, minHeight: 480)
 }

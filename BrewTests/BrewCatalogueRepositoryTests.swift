@@ -233,6 +233,74 @@ struct BrewCatalogueRepositoryTests {
         #expect(package == nil)
         #expect(await apiClient.formulaCallCount() == 0)
     }
+
+    @Test @MainActor func `searchPackages ranks prefix matches across formulae and casks`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let cache = CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+        try await cache.updateFormulaCatalogue(
+            with: fixture.formulaCacheJSON(names: ["ripgrep", "git", "imagegit"]),
+            etag: #""etag-formula""#,
+        )
+        try await cache.updateCaskCatalogue(
+            with: fixture.caskCacheJSON(tokens: ["gitup"]),
+            etag: #""etag-cask""#,
+        )
+        let now = Date()
+        fixture.userDefaults.set(now, forKey: fixture.formulaLastRefreshKey)
+        fixture.userDefaults.set(now, forKey: BrewCatalogueRepository.DefaultsKey.caskLastRefresh)
+
+        let apiClient = StubCatalogueAPIClient(
+            formulaHandler: { _ in .notModified },
+            caskHandler: { _ in .notModified },
+        )
+        let repository = BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: cache,
+            userDefaults: fixture.userDefaults,
+            now: Date.init,
+        )
+
+        let results = try await repository.searchPackages(matching: "git", limit: 10)
+
+        // Prefix matches ("git", "gitup") lead, then the substring match ("imagegit"); all alphabetical within tier.
+        #expect(results.map(\.name) == ["git", "gitup", "imagegit"])
+        #expect(await apiClient.formulaCallCount() == 0)
+    }
+
+    @Test @MainActor func `searchPackages returns empty for blank query`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let cache = CatalogueCache(
+            userDefaults: fixture.userDefaults,
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+        )
+        try await cache.updateFormulaCatalogue(
+            with: fixture.formulaCacheJSON(names: ["git"]),
+            etag: #""etag-formula""#,
+        )
+        fixture.userDefaults.set(Date(), forKey: fixture.formulaLastRefreshKey)
+        fixture.userDefaults.set(Date(), forKey: BrewCatalogueRepository.DefaultsKey.caskLastRefresh)
+
+        let apiClient = StubCatalogueAPIClient(
+            formulaHandler: { _ in .notModified },
+            caskHandler: { _ in .notModified },
+        )
+        let repository = BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: cache,
+            userDefaults: fixture.userDefaults,
+            now: Date.init,
+        )
+
+        let results = try await repository.searchPackages(matching: "   ", limit: 10)
+        #expect(results.isEmpty)
+    }
 }
 
 private actor StubCatalogueAPIClient: BrewAPIClient {
@@ -399,6 +467,37 @@ private struct TestFixture {
             ]
             """.utf8,
         )
+    }
+
+    func formulaCacheJSON(names: [String]) -> Data {
+        let items = names.map { name in
+            """
+            {
+              "name": "\(name)",
+              "desc": "Formula \(name)",
+              "homepage": "https://example.com/\(name)",
+              "versions": { "stable": "1.0.0" },
+              "dependencies": []
+            }
+            """
+        }.joined(separator: ",\n")
+        return Data("[\(items)]".utf8)
+    }
+
+    func caskCacheJSON(tokens: [String]) -> Data {
+        let items = tokens.map { token in
+            """
+            {
+              "token": "\(token)",
+              "name": ["\(token)"],
+              "desc": "Cask \(token)",
+              "homepage": "https://example.com/\(token)",
+              "version": "1.0.0",
+              "depends_on": { "macos": {} }
+            }
+            """
+        }.joined(separator: ",\n")
+        return Data("[\(items)]".utf8)
     }
 
     private func dependenciesJSONLiteral(from dependencies: [String]) -> String {
