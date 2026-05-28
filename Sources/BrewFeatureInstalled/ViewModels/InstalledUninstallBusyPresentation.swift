@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 
 /// Derived presentation for "uninstall in progress" chrome when observing ``BrewOperationPhase`` for an installed row.

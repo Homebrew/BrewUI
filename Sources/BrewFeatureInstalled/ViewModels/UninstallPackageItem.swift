@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 
 /// Presentation mapping for uninstall actions shown in Installed package detail subviews.

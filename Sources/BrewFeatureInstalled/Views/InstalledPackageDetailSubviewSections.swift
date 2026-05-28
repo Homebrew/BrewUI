@@ -4,6 +4,9 @@
 //
 
 import AppKit
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 struct PackageDetailSectionHeading: View {

@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 
 /// One dependency or dependent row in installed package detail.

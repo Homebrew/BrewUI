@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 import Observation
 
@@ -10,6 +13,7 @@ import Observation
 @MainActor
 final class InstalledPackageDetailViewModel {
     private let brewCommandCenter: any BrewCommandCenter
+    private let commandFactory: any BrewMutatingCommandFactory
     private let installedDependentsRepository: any InstalledDependentsRepository
     private let installedInventoryReading: any InstalledInventoryReading
     private var mutationTask: Task<Void, Never>?
@@ -88,11 +92,13 @@ final class InstalledPackageDetailViewModel {
     init(
         package: InstalledBrewPackage,
         brewCommandCenter: any BrewCommandCenter,
+        commandFactory: any BrewMutatingCommandFactory,
         installedDependentsRepository: any InstalledDependentsRepository,
         installedInventoryReading: any InstalledInventoryReading,
     ) {
         self.package = package
         self.brewCommandCenter = brewCommandCenter
+        self.commandFactory = commandFactory
         self.installedDependentsRepository = installedDependentsRepository
         self.installedInventoryReading = installedInventoryReading
     }
@@ -135,7 +141,7 @@ final class InstalledPackageDetailViewModel {
 
     func upgradeSelectedPackage() {
         let operationID = BrewOperationID(kind: package.kind, name: package.name)
-        let command = PackageUpgradeCommand(kind: package.kind, name: package.name)
+        let command = commandFactory.upgradeCommand(kind: package.kind, name: package.name)
         submitMutation(
             action: .upgrade,
             operationID: operationID,
@@ -145,7 +151,7 @@ final class InstalledPackageDetailViewModel {
 
     func uninstallSelectedPackage() {
         let operationID = BrewOperationID(kind: package.kind, name: package.name)
-        let command = PackageUninstallCommand(kind: package.kind, name: package.name)
+        let command = commandFactory.uninstallCommand(kind: package.kind, name: package.name)
         submitMutation(
             action: .uninstall,
             operationID: operationID,

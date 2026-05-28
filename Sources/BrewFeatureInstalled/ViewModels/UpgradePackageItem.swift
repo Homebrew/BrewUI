@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 
 /// Presentation mapping for upgrade actions shown in Installed package detail.

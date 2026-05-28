@@ -1,3 +1,6 @@
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 struct InstalledColumnsRoot: View {
@@ -12,7 +15,7 @@ struct InstalledColumnsRoot: View {
 struct InstalledColumns: View {
     @State var viewModel: InstalledViewModel
 
-    init(installedPackagesRepository: BrewInstalledPackagesRepository) {
+    init(installedPackagesRepository: any InstalledPackagesRepository) {
         _viewModel = State(
             initialValue: .init(repository: installedPackagesRepository),
         )

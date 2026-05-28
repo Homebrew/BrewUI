@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 /// Middle column of the main window: “Installed” chrome and the package list.
@@ -181,28 +184,32 @@ struct InstalledPackagesView: View {
     }
 }
 
-#Preview("Installed list - loaded") {
-    let viewModel = AppPreviewSupport.makeInstalledViewModel()
-    InstalledPackagesView(
-        viewModel: viewModel,
-    )
-    .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
-    .task {
-        await viewModel.load()
-    }
-    .frame(minWidth: 360, minHeight: 500)
-}
+#if DEBUG
+    import BrewRepositoriesTestSupport
 
-#Preview("Installed list - empty") {
-    let viewModel = AppPreviewSupport.makeInstalledViewModel(
-        packages: AppPreviewSupport.emptyPackages,
-    )
-    InstalledPackagesView(
-        viewModel: viewModel,
-    )
-    .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
-    .task {
-        await viewModel.load()
+    #Preview("Installed list - loaded") {
+        let viewModel = InstalledViewModel(repository: AppPreviewSupport.makeInstalledPackagesRepository())
+        InstalledPackagesView(
+            viewModel: viewModel,
+        )
+        .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+        .task {
+            await viewModel.load()
+        }
+        .frame(minWidth: 360, minHeight: 500)
     }
-    .frame(minWidth: 360, minHeight: 500)
-}
+
+    #Preview("Installed list - empty") {
+        let viewModel = InstalledViewModel(
+            repository: AppPreviewSupport.makeInstalledPackagesRepository(packages: AppPreviewSupport.emptyPackages),
+        )
+        InstalledPackagesView(
+            viewModel: viewModel,
+        )
+        .environment(\.brewCommandCenter, AppPreviewSupport.commandCenter)
+        .task {
+            await viewModel.load()
+        }
+        .frame(minWidth: 360, minHeight: 500)
+    }
+#endif

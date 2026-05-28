@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
 /// Owns ``InstalledListRowViewModel`` for one row and runs ``InstalledListRowViewModel/observeRowUpdates()`` while the row is on screen.
@@ -173,20 +176,24 @@ struct InstalledSectionHeader: View {
     }
 }
 
-#Preview("Formula with update") {
-    InstalledListRowView(
-        package: AppPreviewSupport.outdatedFormula,
-        brewCommandCenter: AppPreviewSupport.commandCenter,
-    )
-    .padding()
-    .frame(width: 400)
-}
+#if DEBUG
+    import BrewRepositoriesTestSupport
 
-#Preview("Cask") {
-    InstalledListRowView(
-        package: AppPreviewSupport.currentCask,
-        brewCommandCenter: AppPreviewSupport.commandCenter,
-    )
-    .padding()
-    .frame(width: 400)
-}
+    #Preview("Formula with update") {
+        InstalledListRowView(
+            package: AppPreviewSupport.outdatedFormula,
+            brewCommandCenter: AppPreviewSupport.commandCenter,
+        )
+        .padding()
+        .frame(width: 400)
+    }
+
+    #Preview("Cask") {
+        InstalledListRowView(
+            package: AppPreviewSupport.currentCask,
+            brewCommandCenter: AppPreviewSupport.commandCenter,
+        )
+        .padding()
+        .frame(width: 400)
+    }
+#endif

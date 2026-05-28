@@ -4,21 +4,27 @@
 //
 
 import AppKit
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import SwiftUI
 
-/// Root view for the selected row; detail content reads ``EnvironmentValues/brewCommandCenter`` and builds relationship repositories from ``EnvironmentValues/installedInventoryCache``.
+/// Root view for the selected row; reads the command center, command factory, and dependents
+/// repository from the environment and injects them into the detail content's view model.
 struct InstalledPackageDetailRoot: View {
     let selectedPackage: InstalledBrewPackage
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @Environment(\.brewCommandCenter) private var brewCommandCenter
-    @Environment(\.installedInventoryCache) private var installedInventoryCache
+    @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
+    @Environment(\.installedDependentsRepository) private var installedDependentsRepository
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
         InstalledPackageDetailView(
             package: selectedPackage,
             brewCommandCenter: brewCommandCenter,
-            installedDependentsRepository: BrewInstalledDependentsRepository(cache: installedInventoryCache),
+            mutatingCommandFactory: mutatingCommandFactory,
+            installedDependentsRepository: installedDependentsRepository,
             installedInventoryReading: installedPackagesRepository,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
@@ -37,7 +43,8 @@ struct InstalledPackageDetailView: View {
 
     init(
         package: InstalledBrewPackage,
-        brewCommandCenter: BrewCommandCenter,
+        brewCommandCenter: any BrewCommandCenter,
+        mutatingCommandFactory: any BrewMutatingCommandFactory,
         installedDependentsRepository: any InstalledDependentsRepository,
         installedInventoryReading: any InstalledInventoryReading,
         onSelectInstalledPackage: @escaping (InstalledBrewPackage.ID) -> Void = { _ in },
@@ -48,6 +55,7 @@ struct InstalledPackageDetailView: View {
             initialValue: InstalledPackageDetailViewModel(
                 package: package,
                 brewCommandCenter: brewCommandCenter,
+                commandFactory: mutatingCommandFactory,
                 installedDependentsRepository: installedDependentsRepository,
                 installedInventoryReading: installedInventoryReading,
             ),
@@ -250,12 +258,17 @@ struct InstalledPackageDetailPlaceholder: View {
     }
 }
 
-#Preview("Installed detail") {
-    InstalledPackageDetailView(
-        package: AppPreviewSupport.outdatedFormula,
-        brewCommandCenter: AppPreviewSupport.commandCenter,
-        installedDependentsRepository: AppPreviewSupport.makeInstalledDependentsRepository(),
-        installedInventoryReading: AppPreviewSupport.makeInstalledInventoryReading(),
-    )
-    .frame(minWidth: 340, minHeight: 320)
-}
+#if DEBUG
+    import BrewRepositoriesTestSupport
+
+    #Preview("Installed detail") {
+        InstalledPackageDetailView(
+            package: AppPreviewSupport.outdatedFormula,
+            brewCommandCenter: AppPreviewSupport.commandCenter,
+            mutatingCommandFactory: AppPreviewSupport.mutatingCommandFactory,
+            installedDependentsRepository: AppPreviewSupport.makeInstalledDependentsRepository(),
+            installedInventoryReading: AppPreviewSupport.makeInstalledInventoryReading(),
+        )
+        .frame(minWidth: 340, minHeight: 320)
+    }
+#endif

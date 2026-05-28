@@ -3,6 +3,9 @@
 //  Brew
 //
 
+import BrewCore
+import BrewDesignSystem
+import BrewRepositories
 import Foundation
 
 /// Display-only version rules for installed list rows (used from `InstalledViewModel`, not repositories).
