@@ -10,6 +10,7 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
+@MainActor
 struct BrewDoctorRepositoryTests {
     private static let brewURL = URL(fileURLWithPath: "/opt/homebrew/bin/brew")
 
@@ -24,31 +25,83 @@ struct BrewDoctorRepositoryTests {
         return BrewDoctorRepository(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: brewURL))
     }
 
-    @Test func `healthy system reports no issues`() async throws {
+    @Test func `healthy system reports no issues`() async {
         let repository = Self.repository(stdout: "Your system is ready to brew.\n", exitCode: 0)
-        let report = try await repository.runDiagnostics()
-        #expect(report.isHealthy)
+        await repository.load()
+        #expect(repository.state.value?.isHealthy == true)
+        #expect(repository.isRefreshing == false)
     }
 
-    @Test func `warnings on stderr with nonzero exit are parsed, not thrown`() async throws {
+    @Test func `warnings on stderr with nonzero exit are parsed, not thrown`() async {
         let stderr = """
         Warning: You have unlinked kegs in your Cellar.
         Run `brew link` on these:
           openssl@3
         """
         let repository = Self.repository(stderr: stderr, exitCode: 1)
-        let report = try await repository.runDiagnostics()
+        await repository.load()
 
-        #expect(report.issues.count == 1)
-        #expect(report.issues.first?.suggestedFix?.arguments == ["link", "openssl@3"])
+        #expect(repository.state.value?.issues.count == 1)
+        #expect(repository.state.value?.issues.first?.suggestedFix?.arguments == ["link", "openssl@3"])
     }
 
-    @Test func `missing brew executable throws`() async {
+    @Test func `missing brew executable leaves a failed state`() async {
         let runner = MockBrewCommandRunner(responses: [:])
         let repository = BrewDoctorRepository(commandRunner: runner, locator: MissingBrewExecutableLocator())
+        await repository.load()
 
-        await #expect(throws: BrewLookupError.self) {
-            try await repository.runDiagnostics()
+        if case .failed = repository.state {
+            // expected
+        } else {
+            Issue.record("expected .failed state, got \(repository.state)")
+        }
+    }
+
+    @Test func `a failed refresh keeps the prior report on screen`() async {
+        let runner = SequencedCommandRunner([
+            .output(CommandOutput(
+                standardOutput: "",
+                standardError: "Warning: You have unlinked kegs in your Cellar.\n  openssl@3",
+                terminationStatus: 1,
+            )),
+            .failure(BrewCommandError.launchFailed(underlying: "spawn failed")),
+        ])
+        let repository = BrewDoctorRepository(
+            commandRunner: runner,
+            locator: BrewExecutableLocator(overrideURL: Self.brewURL),
+        )
+
+        await repository.load()
+        #expect(repository.state.value?.issues.count == 1)
+
+        await repository.load()
+        // Still showing the first report, not blanked to .failed.
+        #expect(repository.state.value?.issues.count == 1)
+        #expect(repository.isRefreshing == false)
+    }
+}
+
+private actor SequencedCommandRunner: BrewCommandRunning {
+    enum Step {
+        case output(CommandOutput)
+        case failure(any Error & Sendable)
+    }
+
+    private var steps: [Step]
+
+    init(_ steps: [Step]) {
+        self.steps = steps
+    }
+
+    func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+        guard !steps.isEmpty else {
+            return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+        }
+        switch steps.removeFirst() {
+        case let .output(output):
+            return output
+        case let .failure(error):
+            throw error
         }
     }
 }

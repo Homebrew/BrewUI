@@ -93,21 +93,23 @@ struct StubDependentsRepository: InstalledDependentsRepository {
     }
 }
 
-/// Returns a fixed ``DoctorReport`` (or throws a fixed error) without running `brew` — for previews/tests.
-public struct StubDoctorRepository: DoctorRepository {
-    private let result: Result<DoctorReport, any Error & Sendable>
+/// Observable doctor repository preloaded with a fixed ``DoctorReport`` (or error) — for previews/tests.
+/// `load()` is a no-op so the preset state stays put.
+@Observable
+@MainActor
+public final class StubDoctorRepository: DoctorRepository {
+    public private(set) var state: LoadState<DoctorReport, any Error>
+    public private(set) var isRefreshing = false
 
     public init(report: DoctorReport) {
-        result = .success(report)
+        state = .loaded(report)
     }
 
-    public init(error: any Error & Sendable) {
-        result = .failure(error)
+    public init(error: any Error) {
+        state = .failed(error)
     }
 
-    public func runDiagnostics() async throws -> DoctorReport {
-        try result.get()
-    }
+    public func load() async {}
 }
 
 /// No-op command center for previews/tests: immediate, with no phase bookkeeping. Uses only BrewCore.

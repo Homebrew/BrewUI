@@ -47,28 +47,21 @@ struct DoctorViewModelTests {
     }
 
     private static func viewModel(
-        report: DoctorReport,
+        repository: any DoctorRepository,
         commandCenter: any BrewCommandCenter = StubBrewCommandCenter(),
         commandFactory: any BrewMutatingCommandFactory = StubMutatingCommandFactory(),
     ) -> DoctorViewModel {
         DoctorViewModel(
-            doctorRepository: StubDoctorRepository(report: report),
+            doctorRepository: repository,
             brewCommandCenter: commandCenter,
             commandFactory: commandFactory,
         )
     }
 
-    @Test func `initial state is idle`() {
-        let viewModel = Self.viewModel(report: Self.issuesReport())
-        #expect(viewModel.presentation == .idle)
-        #expect(viewModel.issueItems.isEmpty)
-    }
+    @Test func `projects loaded issues and selects the first`() {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
 
-    @Test func `run loads issues and selects the first`() async {
-        let viewModel = Self.viewModel(report: Self.issuesReport())
-        viewModel.run()
-        await waitUntil({ viewModel.presentation == .issues }, "issues loaded")
-
+        #expect(viewModel.presentation == .issues)
         #expect(viewModel.issueItems.count == 2)
         #expect(viewModel.issueItems.first?.title == "You have unlinked kegs in your Cellar.")
         #expect(viewModel.issueItems.first?.hasFix == true)
@@ -77,31 +70,23 @@ struct DoctorViewModelTests {
         #expect(viewModel.issueCountSubtitle == "2 issues found")
     }
 
-    @Test func `run with healthy report shows healthy state`() async {
-        let viewModel = Self.viewModel(report: DoctorReport(issues: []))
-        viewModel.run()
-        await waitUntil({ viewModel.presentation == .healthy }, "healthy state")
+    @Test func `projects healthy report`() {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
+        #expect(viewModel.presentation == .healthy)
         #expect(viewModel.issueItems.isEmpty)
     }
 
-    @Test func `run failure surfaces a user-facing message`() async {
-        let viewModel = DoctorViewModel(
-            doctorRepository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
-            brewCommandCenter: StubBrewCommandCenter(),
-            commandFactory: StubMutatingCommandFactory(),
+    @Test func `projects a failure into a user-facing message`() {
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
         )
-        viewModel.run()
-        await waitUntil({ isFailed(viewModel.presentation) }, "failure")
         #expect(viewModel.presentation == .failed(
             "Could not find Homebrew. Install it or ensure brew is in the default location.",
         ))
     }
 
-    @Test func `setSelection changes the selected issue`() async {
-        let viewModel = Self.viewModel(report: Self.issuesReport())
-        viewModel.run()
-        await waitUntil({ viewModel.presentation == .issues }, "issues loaded")
-
+    @Test func `setSelection changes the selected issue`() {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
         viewModel.setSelection(1)
         #expect(viewModel.activeSelectedIssueID == 1)
         #expect(viewModel.selectedIssue?.title == "Some installed formulae are deprecated.")
@@ -110,12 +95,10 @@ struct DoctorViewModelTests {
     @Test func `runFix submits a doctorFix maintenance operation`() async {
         let center = Self.recordingCenter(cleanupExitCode: 0)
         let viewModel = Self.viewModel(
-            report: Self.cleanupReport(),
+            repository: StubDoctorRepository(report: Self.cleanupReport()),
             commandCenter: center,
             commandFactory: LiveBrewMutatingCommandFactory(),
         )
-        viewModel.run()
-        await waitUntil({ viewModel.presentation == .issues }, "issues loaded")
 
         viewModel.runFix(for: viewModel.issueItems[0])
         let entries = await waitForSubmitEntries(on: center)
@@ -128,12 +111,10 @@ struct DoctorViewModelTests {
     @Test func `runFix surfaces an inline error when the fix fails`() async {
         let center = Self.recordingCenter(cleanupExitCode: 1, stderr: "could not clean")
         let viewModel = Self.viewModel(
-            report: Self.cleanupReport(),
+            repository: StubDoctorRepository(report: Self.cleanupReport()),
             commandCenter: center,
             commandFactory: LiveBrewMutatingCommandFactory(),
         )
-        viewModel.run()
-        await waitUntil({ viewModel.presentation == .issues }, "issues loaded")
         let item = viewModel.issueItems[0]
 
         viewModel.runFix(for: item)
@@ -157,13 +138,6 @@ struct DoctorViewModelTests {
         )
         return RecordingSerialBrewCommandCenter(executionContext: ctx)
     }
-}
-
-private func isFailed(_ presentation: DoctorPresentation) -> Bool {
-    if case .failed = presentation {
-        return true
-    }
-    return false
 }
 
 @MainActor

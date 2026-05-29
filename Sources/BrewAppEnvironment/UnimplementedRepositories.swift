@@ -58,8 +58,18 @@ struct UnimplementedDependentsRepository: InstalledDependentsRepository {
     }
 }
 
-struct UnimplementedDoctorRepository: DoctorRepository {
-    func runDiagnostics() async throws -> DoctorReport {
+@Observable
+@MainActor
+final class UnimplementedDoctorRepository: DoctorRepository {
+    var state: LoadState<DoctorReport, any Error> {
+        unimplemented()
+    }
+
+    var isRefreshing: Bool {
+        unimplemented()
+    }
+
+    func load() async {
         unimplemented()
     }
 }

@@ -6,8 +6,9 @@
 import BrewUIComponents
 import SwiftUI
 
-/// Middle column of the Doctor surface: a header plus the current run state — idle CTA, running,
-/// healthy, the issues list, or an error.
+/// Middle column of the Doctor surface: a header plus the current diagnostics state — initial loading,
+/// healthy, the issues list, or an error. A background re-check keeps the prior content on screen and shows
+/// a small "checking" spinner in the header.
 struct DoctorView: View {
     @Bindable var viewModel: DoctorViewModel
 
@@ -30,11 +31,17 @@ struct DoctorView: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer(minLength: 0)
-            if case .issues = viewModel.presentation {
+            if showsHeaderControls {
+                if viewModel.isRefreshing {
+                    ProgressView()
+                        .controlSize(.small)
+                        .accessibilityLabel("Re-checking")
+                }
                 Button("Run Again") {
-                    viewModel.run()
+                    Task { await viewModel.load() }
                 }
                 .controlSize(.small)
+                .disabled(viewModel.isRefreshing)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -43,16 +50,23 @@ struct DoctorView: View {
         .accessibilityHeading(.h1)
     }
 
+    private var showsHeaderControls: Bool {
+        switch viewModel.presentation {
+        case .healthy, .issues:
+            true
+        case .loading, .failed:
+            false
+        }
+    }
+
     private var subtitle: String {
         switch viewModel.presentation {
-        case .idle:
-            "Check your Homebrew installation for problems"
-        case .running:
+        case .loading:
             "Running brew doctor…"
         case .healthy:
-            "No problems found"
+            viewModel.isRefreshing ? "Re-checking…" : "No problems found"
         case .issues:
-            viewModel.issueCountSubtitle
+            viewModel.isRefreshing ? "Re-checking…" : viewModel.issueCountSubtitle
         case .failed:
             "The check could not be completed"
         }
@@ -61,10 +75,8 @@ struct DoctorView: View {
     @ViewBuilder
     private var content: some View {
         switch viewModel.presentation {
-        case .idle:
-            idleState
-        case .running:
-            runningState
+        case .loading:
+            loadingState
         case .healthy:
             healthyState
         case .issues:
@@ -74,40 +86,13 @@ struct DoctorView: View {
         }
     }
 
-    private var idleState: some View {
-        centeredState {
-            Image(systemName: "stethoscope")
-                .font(.system(size: 40))
-                .foregroundStyle(Color.brewBrandPrimary)
-            Text("Run a health check")
-                .font(.brewTitle3)
-                .foregroundStyle(Color.brewTextPrimary)
-            Text(
-                "Doctor runs brew doctor to find common problems with your Homebrew setup "
-                    + "and suggests fixes you can run.",
-            )
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewTextSecondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: 360)
-            Button("Run Diagnostics") {
-                viewModel.run()
-            }
-            .buttonStyle(.borderedProminent)
-        }
-    }
-
-    private var runningState: some View {
+    private var loadingState: some View {
         centeredState {
             ProgressView()
                 .controlSize(.large)
             Text("Running brew doctor…")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-            Button("Cancel") {
-                viewModel.cancel()
-            }
-            .buttonStyle(.bordered)
         }
     }
 
@@ -122,10 +107,6 @@ struct DoctorView: View {
             Text("brew doctor found no problems.")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-            Button("Run Again") {
-                viewModel.run()
-            }
-            .buttonStyle(.bordered)
         }
     }
 
@@ -140,7 +121,7 @@ struct DoctorView: View {
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 360)
             Button("Try Again") {
-                viewModel.run()
+                Task { await viewModel.load() }
             }
             .buttonStyle(.bordered)
         }
@@ -187,20 +168,11 @@ struct DoctorView: View {
     }
 
     #Preview("Doctor - issues") {
-        let viewModel = makeDoctorPreviewViewModel(report: PreviewSupport.doctorReport)
-        DoctorView(viewModel: viewModel)
-            .task { viewModel.run() }
+        DoctorView(viewModel: makeDoctorPreviewViewModel(report: PreviewSupport.doctorReport))
             .frame(width: 420, height: 480)
     }
 
     #Preview("Doctor - healthy") {
-        let viewModel = makeDoctorPreviewViewModel(report: PreviewSupport.healthyDoctorReport)
-        DoctorView(viewModel: viewModel)
-            .task { viewModel.run() }
-            .frame(width: 420, height: 480)
-    }
-
-    #Preview("Doctor - idle") {
         DoctorView(viewModel: makeDoctorPreviewViewModel(report: PreviewSupport.healthyDoctorReport))
             .frame(width: 420, height: 480)
     }

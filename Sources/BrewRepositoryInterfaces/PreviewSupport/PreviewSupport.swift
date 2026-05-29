@@ -86,6 +86,7 @@ public enum PreviewSupport {
         StubCatalogueRepository(formulaCatalogue: formulaCatalogue, caskCatalogue: caskCatalogue)
     }
 
+    @MainActor
     public static func makeDoctorRepository(report: DoctorReport = doctorReport) -> any DoctorRepository {
         StubDoctorRepository(report: report)
     }

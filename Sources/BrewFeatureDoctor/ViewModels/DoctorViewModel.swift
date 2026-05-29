@@ -8,20 +8,10 @@ import BrewRepositoryInterfaces
 import Foundation
 import Observation
 
-/// Lifecycle of a `brew doctor` run. `.idle` is the pre-run CTA; `.loaded` carries the parsed report
-/// (healthy when it has no issues).
-enum DoctorRunState: Equatable {
-    case idle
-    case running
-    case loaded(DoctorReport)
-    case failed(String)
-}
-
-/// Coarse view-facing projection of ``DoctorRunState`` so the view binds to one decision per state
-/// instead of re-deriving it from the report (`CONVENTIONS.md` — passive views).
+/// Coarse view-facing projection of the repository's diagnostics state so the view binds to one decision
+/// per state instead of re-deriving it from the report (`CONVENTIONS.md` — passive views).
 enum DoctorPresentation: Equatable {
-    case idle
-    case running
+    case loading
     case healthy
     case issues
     case failed(String)
@@ -33,10 +23,8 @@ final class DoctorViewModel {
     @ObservationIgnored private let doctorRepository: any DoctorRepository
     @ObservationIgnored private let brewCommandCenter: any BrewCommandCenter
     @ObservationIgnored private let commandFactory: any BrewMutatingCommandFactory
-    @ObservationIgnored private var runTask: Task<Void, Never>?
     @ObservationIgnored private var fixTasks: [String: Task<Void, Never>] = [:]
 
-    private(set) var state: DoctorRunState = .idle
     private var selectedIssueID: Int?
     /// Fix tokens currently running — drives per-row progress and blocks duplicate submits.
     private(set) var runningFixTokens: Set<String> = []
@@ -54,29 +42,31 @@ final class DoctorViewModel {
     }
 
     isolated deinit {
-        runTask?.cancel()
         for task in fixTasks.values {
             task.cancel()
         }
     }
 
-    // MARK: - Derived state
+    // MARK: - Derived state (projected from the repository)
 
     var presentation: DoctorPresentation {
-        switch state {
-        case .idle:
-            .idle
-        case .running:
-            .running
-        case let .failed(message):
-            .failed(message)
+        switch doctorRepository.state {
+        case .loading:
+            .loading
+        case let .failed(error):
+            .failed(Self.userMessage(for: error))
         case let .loaded(report):
             report.isHealthy ? .healthy : .issues
         }
     }
 
+    /// `true` while a background re-check runs with a prior report on screen (stale-while-revalidate).
+    var isRefreshing: Bool {
+        doctorRepository.isRefreshing
+    }
+
     var issueItems: [DoctorIssueItem] {
-        guard case let .loaded(report) = state else {
+        guard case let .loaded(report) = doctorRepository.state else {
             return []
         }
         return report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
@@ -122,32 +112,10 @@ final class DoctorViewModel {
 
     // MARK: - Intents
 
-    /// Runs `brew doctor` via the read-only repository. Owns an unstructured task so the run isn't
-    /// cancelled when a view-scoped caller task ends (mirrors the installed-detail mutation pattern).
-    func run() {
-        runTask?.cancel()
-        state = .running
-        runTask = Task { @MainActor [self] in
-            do {
-                let report = try await doctorRepository.runDiagnostics()
-                guard !Task.isCancelled else {
-                    return
-                }
-                state = .loaded(report)
-            } catch is CancellationError {
-                // Cancelled — `cancel()` already reset the visible state.
-            } catch {
-                state = .failed(Self.userMessage(for: error))
-            }
-        }
-    }
-
-    func cancel() {
-        runTask?.cancel()
-        runTask = nil
-        if case .running = state {
-            state = .idle
-        }
+    /// Runs `brew doctor` via the repository. Called on tab arrival and from "Run Again"; keeps any prior
+    /// report visible while it refreshes.
+    func load() async {
+        await doctorRepository.load()
     }
 
     /// Submits the issue's suggested `brew` fix as a maintenance operation. Output streams in the bottom
@@ -181,7 +149,7 @@ final class DoctorViewModel {
                 return
             }
             runningFixTokens.remove(token)
-            run()
+            await doctorRepository.load()
         }
     }
 

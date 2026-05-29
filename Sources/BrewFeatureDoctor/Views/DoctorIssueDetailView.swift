@@ -142,7 +142,6 @@ struct DoctorDetailPlaceholder: View {
                 DoctorIssueDetailView(viewModel: viewModel, item: DoctorIssueItem(id: 0, issue: issue))
             }
         }
-        .task { viewModel.run() }
         .frame(width: 380, height: 480)
     }
 #endif
