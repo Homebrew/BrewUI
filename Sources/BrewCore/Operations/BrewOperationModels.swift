@@ -13,20 +13,33 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case upgradeCask
     case uninstallFormula
     case uninstallCask
+    case doctorFix
 }
 
-/// Stable identity for in-flight mutating work (e.g. upgrades), backed by the canonical
-/// ``HomebrewPackageID``. There is one mutating operation per package at a time, so the package
-/// identity *is* the operation key — no stringly-typed `kind:name` encoding to parse.
-public struct BrewOperationID: Hashable, Identifiable, Sendable {
-    public let packageID: HomebrewPackageID
+/// Stable identity for in-flight mutating work.
+///
+/// Most work is package-scoped (install/upgrade/uninstall) — one mutating operation per package at a time, so
+/// the canonical ``HomebrewPackageID`` *is* the operation key. Maintenance work (e.g. a `brew doctor` fix such as
+/// `brew link a b` or `brew cleanup`) isn't tied to a single package, so it carries its own `token` for identity
+/// plus the user-facing `displayCommand` the console renders (it cannot be reconstructed from a package name).
+public enum BrewOperationID: Hashable, Identifiable, Sendable {
+    case package(HomebrewPackageID)
+    case maintenance(token: String, displayCommand: String)
 
-    public var id: HomebrewPackageID {
-        packageID
+    public var id: Self {
+        self
+    }
+
+    /// The canonical package identity for ``package`` ids; `nil` for ``maintenance`` ids.
+    public var packageID: HomebrewPackageID? {
+        guard case let .package(packageID) = self else {
+            return nil
+        }
+        return packageID
     }
 
     public init(packageID: HomebrewPackageID) {
-        self.packageID = packageID
+        self = .package(packageID)
     }
 }
 

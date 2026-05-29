@@ -58,6 +58,17 @@ struct CommandJobTests {
         #expect(job.command == "brew upgrade gh")
     }
 
+    @Test func `materialize for maintenance op uses the id's stored display command`() {
+        let id = BrewOperationID(maintenanceToken: "link:openssl@3", displayCommand: "brew link openssl@3")
+        let job = CommandJob.materialize(
+            id: id,
+            kind: .doctorFix,
+            phase: .running(.doctorFix),
+        )
+
+        #expect(job.command == "brew link openssl@3")
+    }
+
     @Test func `updatePhase from running to idle sets exit code zero`() {
         let job = CommandJob.materialize(
             id: BrewOperationID(kind: .formula, name: "gh"),

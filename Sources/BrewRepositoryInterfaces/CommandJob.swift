@@ -82,15 +82,21 @@ public final class CommandJob: Identifiable {
 @MainActor
 public extension CommandJob {
     /// Materialize a fresh job from operation metadata seen on the phase stream.
-    /// Synthesizes the user-facing command string from the operation's ``HomebrewPackageID`` (name)
-    /// plus the running ``BrewOperationKind`` (which carries the formula/cask distinction).
+    /// For package ids, synthesizes the user-facing command string from the ``HomebrewPackageID`` (name)
+    /// plus the running ``BrewOperationKind`` (which carries the formula/cask distinction). For maintenance
+    /// ids the command isn't reconstructable from a package, so the id's stored `displayCommand` is used verbatim.
     static func materialize(
         id: BrewOperationID,
         kind: BrewOperationKind,
         phase: BrewOperationPhase,
         now: Date = Date(),
     ) -> CommandJob {
-        let command = userFacingCommand(kind: kind, name: id.packageID.name)
+        let command: String = switch id {
+        case let .package(packageID):
+            userFacingCommand(kind: kind, name: packageID.name)
+        case let .maintenance(_, displayCommand):
+            displayCommand
+        }
         return CommandJob(
             id: id,
             command: command,
@@ -121,6 +127,10 @@ public extension CommandJob {
         case .uninstallCask:
             verb = "uninstall"
             isCask = true
+        case .doctorFix:
+            // Unreachable: doctorFix work always uses a `.maintenance` id, which materializes from its
+            // stored `displayCommand` rather than this package-name synthesis. Fall back defensively.
+            return "brew"
         }
         if isCask {
             return "brew \(verb) --cask \(name)"

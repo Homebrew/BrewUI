@@ -19,4 +19,10 @@ public extension BrewOperationID {
     init(package: InstalledBrewPackage) {
         self.init(packageID: HomebrewPackageID(installedPackage: package))
     }
+
+    /// Identity for non-package maintenance work (e.g. a `brew doctor` fix), carrying the user-facing
+    /// `brew …` command the console renders. `token` distinguishes concurrent maintenance ops.
+    init(maintenanceToken token: String, displayCommand: String) {
+        self = .maintenance(token: token, displayCommand: displayCommand)
+    }
 }

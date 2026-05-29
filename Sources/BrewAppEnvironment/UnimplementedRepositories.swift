@@ -70,6 +70,10 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func uninstallCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         unimplemented()
     }
+
+    func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
+        unimplemented()
+    }
 }
 
 @Observable

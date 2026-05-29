@@ -159,4 +159,8 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
     public func uninstallCommand(kind: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         NoopMutatingCommand(operationKind: kind == .formula ? .uninstallFormula : .uninstallCask)
     }
+
+    public func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
+        NoopMutatingCommand(operationKind: .doctorFix)
+    }
 }
