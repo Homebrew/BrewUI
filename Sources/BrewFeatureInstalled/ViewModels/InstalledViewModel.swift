@@ -9,7 +9,7 @@ import BrewUIComponents
 import Foundation
 import Observation
 
-nonisolated struct InstalledPackagesContent: Equatable {
+struct InstalledPackagesContent: Equatable {
     var packages: [InstalledBrewPackage]
 
     var shouldShowFormulaeSection: Bool {
@@ -29,7 +29,7 @@ nonisolated struct InstalledPackagesContent: Equatable {
     }
 }
 
-nonisolated enum InstalledLoadState: Equatable {
+enum InstalledLoadState: Equatable {
     case loading
     case loaded(InstalledPackagesContent)
     case error(String)

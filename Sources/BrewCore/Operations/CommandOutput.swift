@@ -5,7 +5,7 @@
 
 import Foundation
 
-public nonisolated struct CommandOutput: Equatable, Sendable {
+public struct CommandOutput: Equatable, Sendable {
     public var standardOutput: String
     public var standardError: String
     public var terminationStatus: Int32

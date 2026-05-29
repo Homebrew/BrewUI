@@ -6,7 +6,7 @@
 import Foundation
 
 /// One line of subprocess output, attributed to a stream (`ARCHITECTURE.md` — command execution; transparency).
-public nonisolated struct BrewCommandOutputLine: Identifiable, Equatable, Sendable {
+public struct BrewCommandOutputLine: Identifiable, Equatable, Sendable {
     public let id: UUID
     public let stream: Stream
     public let text: String

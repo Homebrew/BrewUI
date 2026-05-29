@@ -9,7 +9,7 @@ import Foundation
 /// Schedules `brew install <name>` or `brew install --cask <name>` via ``BrewCommandCenter/submit``,
 /// using ``BrewCommandExecutionContext`` for subprocess execution and `brew` resolution.
 ///
-nonisolated struct PackageInstallCommand: BrewMutatingCommand {
+struct PackageInstallCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
@@ -23,7 +23,7 @@ nonisolated struct PackageInstallCommand: BrewMutatingCommand {
         self.kind = kind
     }
 
-    nonisolated var operationKind: BrewOperationKind {
+    var operationKind: BrewOperationKind {
         switch kind {
         case .formula:
             .installFormula

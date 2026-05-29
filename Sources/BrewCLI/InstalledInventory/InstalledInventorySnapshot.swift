@@ -6,8 +6,8 @@
 import BrewCore
 import Foundation
 
-public nonisolated struct InstalledInventorySnapshot: Equatable, Sendable {
-    public nonisolated static let defaultTTL: TimeInterval = 3600
+public struct InstalledInventorySnapshot: Equatable, Sendable {
+    public static let defaultTTL: TimeInterval = 3600
 
     public var fetchedAt: Date
     public let packages: [InstalledBrewPackage]
@@ -19,7 +19,7 @@ public nonisolated struct InstalledInventorySnapshot: Equatable, Sendable {
         graph = PackageDependencyGraph(packages: packages)
     }
 
-    public nonisolated func isStale(relativeTo now: Date = .now, ttl: TimeInterval = Self.defaultTTL) -> Bool {
+    public func isStale(relativeTo now: Date = .now, ttl: TimeInterval = Self.defaultTTL) -> Bool {
         now.timeIntervalSince(fetchedAt) >= ttl
     }
 }

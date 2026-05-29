@@ -6,13 +6,13 @@
 import Foundation
 
 /// Supported Homebrew analytics windows used by Discover.
-public nonisolated enum BrewAnalyticsWindow: String, CaseIterable, Sendable {
+public enum BrewAnalyticsWindow: String, CaseIterable, Sendable {
     case days30 = "30d"
     case days90 = "90d"
 }
 
 /// Strict schema for Homebrew analytics API responses.
-public nonisolated struct BrewAnalyticsJSON: Decodable, Sendable {
+public struct BrewAnalyticsJSON: Decodable, Sendable {
     public let category: String
     public let totalItems: Int
     public let totalCount: Int
@@ -73,7 +73,7 @@ public nonisolated struct BrewAnalyticsJSON: Decodable, Sendable {
     }
 }
 
-public nonisolated struct BrewAnalyticsPackageCount: Hashable, Sendable {
+public struct BrewAnalyticsPackageCount: Hashable, Sendable {
     public let reference: HomebrewPackageID
     public let count: Int
 
@@ -87,7 +87,7 @@ public nonisolated struct BrewAnalyticsPackageCount: Hashable, Sendable {
     }
 }
 
-private nonisolated struct BrewAnalyticsEntry: Decodable {
+private struct BrewAnalyticsEntry: Decodable {
     let formula: String?
     let cask: String?
     let count: Int
@@ -140,7 +140,7 @@ private nonisolated struct BrewAnalyticsEntry: Decodable {
 }
 
 private extension KeyedDecodingContainer {
-    nonisolated func decodeRequiredIntLossy(forKey key: Key) throws -> Int {
+    func decodeRequiredIntLossy(forKey key: Key) throws -> Int {
         if let value = try? decode(Int.self, forKey: key) {
             return value
         }
@@ -157,7 +157,7 @@ private extension KeyedDecodingContainer {
         )
     }
 
-    nonisolated func decodeNonEmptyString(forKey key: Key) throws -> String {
+    func decodeNonEmptyString(forKey key: Key) throws -> String {
         let value = try decode(String.self, forKey: key)
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {

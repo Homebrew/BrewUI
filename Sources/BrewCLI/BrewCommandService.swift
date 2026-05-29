@@ -8,9 +8,9 @@ import Foundation
 
 /// Subprocess runner for Homebrew CLI (`ARCHITECTURE.md` — Command execution).
 public struct BrewCommandService: BrewCommandRunning {
-    public nonisolated init() {}
+    public init() {}
 
-    public nonisolated func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
+    public func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
         try Task.checkCancellation()
 
         let process = Process()
@@ -69,7 +69,7 @@ public struct BrewCommandService: BrewCommandRunning {
     /// When `sink` is non-nil, also emits each `\n`-terminated line through it as bytes arrive — the trailing
     /// partial line (no terminating newline) is flushed on EOF if non-empty. Lines whose bytes aren't valid UTF-8
     /// are dropped from the stream (they remain in the verbatim byte return).
-    private nonisolated static func drainPipe(
+    private static func drainPipe(
         handle: FileHandle,
         stream: BrewCommandOutputLine.Stream,
         sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
@@ -107,7 +107,7 @@ public struct BrewCommandService: BrewCommandRunning {
         }
     }
 
-    private nonisolated static func waitForExit(_ process: Process) async -> Int32 {
+    private static func waitForExit(_ process: Process) async -> Int32 {
         await withCheckedContinuation { continuation in
             // `waitUntilExit` blocks; run on a GCD worker thread.
             DispatchQueue.global(qos: .utility).async {
@@ -122,11 +122,11 @@ private final class ProcessController: @unchecked Sendable {
     private let lock = NSLock()
     private let process: Process
 
-    nonisolated init(_ process: Process) {
+    init(_ process: Process) {
         self.process = process
     }
 
-    nonisolated func terminateIfRunning() {
+    func terminateIfRunning() {
         lock.lock()
         defer { lock.unlock() }
         if process.isRunning {

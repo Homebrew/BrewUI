@@ -7,18 +7,18 @@ import BrewCore
 import Foundation
 
 /// Semantic colour roles for mapping to `Color` in SwiftUI (design tokens in one place).
-public nonisolated enum PackageKindAccentToken: Equatable {
+public enum PackageKindAccentToken: Equatable {
     case brandPrimary
     case statusInfo
 }
 
-public nonisolated enum PackageKindIconBackgroundToken: Equatable {
+public enum PackageKindIconBackgroundToken: Equatable {
     case brandTint
     case statusInfoSubtle
 }
 
 /// Testable chrome for an installed list row (badge + token roles); views map tokens to `Color`.
-public nonisolated struct PackageKindChrome: Equatable {
+public struct PackageKindChrome: Equatable {
     public var badgeLabel: String
     public var accent: PackageKindAccentToken
     public var iconBackground: PackageKindIconBackgroundToken
@@ -34,7 +34,7 @@ public nonisolated struct PackageKindChrome: Equatable {
     }
 }
 
-public nonisolated extension HomebrewPackageKind {
+public extension HomebrewPackageKind {
     var chrome: PackageKindChrome {
         switch self {
         case .formula:

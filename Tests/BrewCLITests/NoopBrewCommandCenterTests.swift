@@ -59,7 +59,7 @@ struct NoopBrewCommandCenterTests {
 private struct IncrementOnceCommand: BrewMutatingCommand {
     let counter: InvocationCounter
 
-    nonisolated var operationKind: BrewOperationKind {
+    var operationKind: BrewOperationKind {
         .upgradeFormula
     }
 
@@ -72,7 +72,7 @@ private struct IncrementOnceCommand: BrewMutatingCommand {
 private struct NoopThrowingCommand: BrewMutatingCommand {
     struct TestError: Error {}
 
-    nonisolated var operationKind: BrewOperationKind {
+    var operationKind: BrewOperationKind {
         .upgradeCask
     }
 

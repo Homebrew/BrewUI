@@ -9,7 +9,7 @@ import BrewUIComponents
 import Foundation
 
 /// Presentation mapping for uninstall actions shown in Installed package detail subviews.
-nonisolated struct UninstallPackageItem {
+struct UninstallPackageItem {
     private let package: InstalledBrewPackage
     private let blockingDependentCount: Int
 
@@ -121,13 +121,13 @@ nonisolated struct UninstallPackageItem {
 }
 
 /// Copy shown in the uninstall-blocked warning callout.
-nonisolated struct UninstallBlockedCalloutContent: Equatable {
+struct UninstallBlockedCalloutContent: Equatable {
     let lead: String
     let body: String
 }
 
 /// Result of activating the primary uninstall control in Installed detail.
-nonisolated enum UninstallPrimaryButtonAction: Equatable {
+enum UninstallPrimaryButtonAction: Equatable {
     case presentConfirmation
     case revealBlockedExplanation
 }

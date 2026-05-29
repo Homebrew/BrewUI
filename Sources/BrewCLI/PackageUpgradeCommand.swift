@@ -9,7 +9,7 @@ import Foundation
 /// Schedules `brew upgrade <name>` or `brew upgrade --cask <name>` via ``BrewCommandCenter/submit``,
 /// using ``BrewCommandExecutionContext`` for subprocess execution and `brew` resolution.
 ///
-nonisolated struct PackageUpgradeCommand: BrewMutatingCommand {
+struct PackageUpgradeCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
@@ -23,7 +23,7 @@ nonisolated struct PackageUpgradeCommand: BrewMutatingCommand {
         self.kind = kind
     }
 
-    nonisolated var operationKind: BrewOperationKind {
+    var operationKind: BrewOperationKind {
         switch kind {
         case .formula:
             .upgradeFormula

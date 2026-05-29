@@ -36,13 +36,13 @@ final class UnimplementedInstalledPackagesRepository: InstalledPackagesRepositor
     }
 }
 
-nonisolated struct UnimplementedDiscoverPackagesRepository: DiscoverPackagesRepository {
+struct UnimplementedDiscoverPackagesRepository: DiscoverPackagesRepository {
     func loadTopPackages(limit _: Int, window _: BrewAnalyticsWindow) async throws -> DiscoverTopPackagesSnapshot {
         unimplemented()
     }
 }
 
-nonisolated struct UnimplementedCatalogueRepository: CatalogueRepository {
+struct UnimplementedCatalogueRepository: CatalogueRepository {
     func package(for _: HomebrewPackageID) async throws -> BrewPackage? {
         unimplemented()
     }
@@ -52,13 +52,13 @@ nonisolated struct UnimplementedCatalogueRepository: CatalogueRepository {
     }
 }
 
-nonisolated struct UnimplementedDependentsRepository: InstalledDependentsRepository {
+struct UnimplementedDependentsRepository: InstalledDependentsRepository {
     func installedDependents(for _: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         unimplemented()
     }
 }
 
-nonisolated struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
+struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         unimplemented()
     }

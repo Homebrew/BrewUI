@@ -5,7 +5,7 @@
 
 import Foundation
 
-public nonisolated struct InstalledBrewPackage: Identifiable, Hashable, Sendable {
+public struct InstalledBrewPackage: Identifiable, Hashable, Sendable {
     public var package: BrewPackage
     public var installedVersions: [String]
     public var outdated: Bool

@@ -121,7 +121,7 @@ public actor CatalogueCache: CatalogueCaching {
 }
 
 private extension CatalogueCache {
-    nonisolated static func defaultCacheDirectoryURL() -> URL {
+    static func defaultCacheDirectoryURL() -> URL {
         let fileManager = FileManager.default
         if let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
             return appSupportURL.appendingPathComponent("Brew", isDirectory: true)
@@ -129,15 +129,15 @@ private extension CatalogueCache {
         return fileManager.temporaryDirectory.appendingPathComponent("Brew", isDirectory: true)
     }
 
-    nonisolated static func formulaCacheURL(in directoryURL: URL) -> URL {
+    static func formulaCacheURL(in directoryURL: URL) -> URL {
         directoryURL.appendingPathComponent("formula-cache.json")
     }
 
-    nonisolated static func caskCacheURL(in directoryURL: URL) -> URL {
+    static func caskCacheURL(in directoryURL: URL) -> URL {
         directoryURL.appendingPathComponent("cask-cache.json")
     }
 
-    nonisolated static func loadCache<T: Decodable>(at url: URL, as type: T.Type) -> T? {
+    static func loadCache<T: Decodable>(at url: URL, as type: T.Type) -> T? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(type, from: data)
     }

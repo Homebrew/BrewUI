@@ -31,7 +31,7 @@ private actor AllOutputCollector {
 private struct EmitOutputCommand: BrewMutatingCommand {
     let lines: [(BrewCommandOutputLine.Stream, String)]
 
-    nonisolated var operationKind: BrewOperationKind {
+    var operationKind: BrewOperationKind {
         .upgradeFormula
     }
 

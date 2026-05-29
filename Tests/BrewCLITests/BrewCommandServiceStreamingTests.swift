@@ -10,7 +10,7 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-nonisolated struct BrewCommandServiceStreamingTests {
+struct BrewCommandServiceStreamingTests {
     @Test func `run with task-local sink emits each stdout line as it arrives`() async throws {
         let service = BrewCommandService()
         let executable = URL(fileURLWithPath: "/bin/zsh")

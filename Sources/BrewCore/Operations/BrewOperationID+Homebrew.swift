@@ -5,7 +5,7 @@
 
 import Foundation
 
-public nonisolated extension BrewOperationID {
+public extension BrewOperationID {
     /// Operation identity from a domain package kind + name.
     init(kind: HomebrewPackageKind, name: String) {
         switch kind {

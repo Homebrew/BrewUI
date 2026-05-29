@@ -12,7 +12,7 @@ public struct BrewExecutableLocator: BrewExecutableLocating {
     /// When set (tests only), skip filesystem probing.
     private let overrideURL: URL?
 
-    public nonisolated init(
+    public init(
         isExecutableAtPath: @escaping @Sendable (String) -> Bool = { path in
             FileManager.default.isExecutableFile(atPath: path)
         },
@@ -21,7 +21,7 @@ public struct BrewExecutableLocator: BrewExecutableLocating {
         overrideURL = nil
     }
 
-    public nonisolated init(overrideURL: URL) {
+    public init(overrideURL: URL) {
         isExecutableAtPath = { path in
             FileManager.default.isExecutableFile(atPath: path)
         }
@@ -29,7 +29,7 @@ public struct BrewExecutableLocator: BrewExecutableLocating {
     }
 
     /// Tries Apple Silicon default, then Intel default.
-    public nonisolated func findBrewExecutable() throws -> URL {
+    public func findBrewExecutable() throws -> URL {
         if let overrideURL {
             return overrideURL
         }

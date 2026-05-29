@@ -6,7 +6,7 @@
 import BrewCore
 import Foundation
 
-public nonisolated struct FormulaCatalogueJSON: Codable, Sendable {
+public struct FormulaCatalogueJSON: Codable, Sendable {
     public let items: [FormulaCatalogueItemJSON]
     public let decodeFailures: [CatalogueItemDecodeFailure]
 
@@ -15,7 +15,7 @@ public nonisolated struct FormulaCatalogueJSON: Codable, Sendable {
     }
 }
 
-public nonisolated struct CaskCatalogueJSON: Codable, Sendable {
+public struct CaskCatalogueJSON: Codable, Sendable {
     public let items: [CaskCatalogueItemJSON]
     public let decodeFailures: [CatalogueItemDecodeFailure]
 
@@ -24,24 +24,24 @@ public nonisolated struct CaskCatalogueJSON: Codable, Sendable {
     }
 }
 
-public nonisolated struct CatalogueItemDecodeFailure: Codable, Equatable, Sendable {
+public struct CatalogueItemDecodeFailure: Codable, Equatable, Sendable {
     public let index: Int
     public let underlying: String
 }
 
-public nonisolated struct FormulaCatalogueItemJSON: Codable, Sendable {
+public struct FormulaCatalogueItemJSON: Codable, Sendable {
     public let name: String
     public let desc: String
     public let homepage: String
     public let versions: Versions
     public let dependencies: [String]
 
-    public nonisolated struct Versions: Codable, Sendable {
+    public struct Versions: Codable, Sendable {
         public let stable: String
     }
 }
 
-public nonisolated struct CaskCatalogueItemJSON: Codable, Sendable {
+public struct CaskCatalogueItemJSON: Codable, Sendable {
     public let token: String
     public let names: [String]
     public let desc: String?
@@ -58,7 +58,7 @@ public nonisolated struct CaskCatalogueItemJSON: Codable, Sendable {
         case dependsOn = "depends_on"
     }
 
-    public nonisolated struct DependsOn: Codable, Sendable {
+    public struct DependsOn: Codable, Sendable {
         public var formula: [String]
         public var cask: [String]
 
@@ -75,7 +75,7 @@ public nonisolated struct CaskCatalogueItemJSON: Codable, Sendable {
     }
 }
 
-public nonisolated extension FormulaCatalogueItemJSON {
+public extension FormulaCatalogueItemJSON {
     var description: String {
         desc
     }
@@ -89,7 +89,7 @@ public nonisolated extension FormulaCatalogueItemJSON {
     }
 }
 
-public nonisolated extension CaskCatalogueItemJSON {
+public extension CaskCatalogueItemJSON {
     var name: String {
         token
     }
@@ -113,7 +113,7 @@ public nonisolated extension CaskCatalogueItemJSON {
     }
 }
 
-private nonisolated func decodeCatalogueItems<Item: Decodable>(
+private func decodeCatalogueItems<Item: Decodable>(
     from decoder: Decoder,
     as _: Item.Type,
 ) throws -> ([Item], [CatalogueItemDecodeFailure]) {

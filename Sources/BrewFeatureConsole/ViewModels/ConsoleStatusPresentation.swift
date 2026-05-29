@@ -10,7 +10,7 @@ import Foundation
 
 /// View-facing snapshot of "what does the collapsed status bar render right now" — keeps the view passive.
 /// Derived by ``ConsoleViewModel/statusPresentation``.
-nonisolated struct ConsoleStatusPresentation: Equatable {
+struct ConsoleStatusPresentation: Equatable {
     let dotState: DotState
     let summary: Summary
     let isRunning: Bool
@@ -29,7 +29,7 @@ nonisolated struct ConsoleStatusPresentation: Equatable {
     }
 }
 
-nonisolated extension BrewOperationPhase {
+extension BrewOperationPhase {
     /// Plain-English label for surfaces (status bar, inline card).
     /// The center's phase enum is coarser than brew's stdout (`fetching`/`pouring`/`linking`) so this
     /// stays at the operation-lifecycle level. Sub-phase granularity would require stdout parsing.

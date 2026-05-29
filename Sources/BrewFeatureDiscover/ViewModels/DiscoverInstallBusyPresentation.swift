@@ -15,7 +15,7 @@ import Foundation
 /// Instead, bridge the gap between the operation finishing and the installed badge appearing by
 /// reading the observable installed-state: stay busy while the operation is running, and keep busy
 /// after it finishes until the package is observed as installed.
-nonisolated enum DiscoverInstallBusyPresentation {
+enum DiscoverInstallBusyPresentation {
     static func showsInstallBusy(
         phase: BrewOperationPhase,
         awaitingResolution: Bool,
@@ -28,7 +28,7 @@ nonisolated enum DiscoverInstallBusyPresentation {
     }
 }
 
-nonisolated extension BrewOperationPhase {
+extension BrewOperationPhase {
     var isRunningInstall: Bool {
         switch self {
         case .running(.installFormula), .running(.installCask):

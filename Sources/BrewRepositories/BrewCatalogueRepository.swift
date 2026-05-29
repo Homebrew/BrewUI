@@ -183,7 +183,7 @@ public actor BrewCatalogueRepository: CatalogueRepository {
     }
 }
 
-private nonisolated extension HomebrewPackageKind {
+private extension HomebrewPackageKind {
     var catalogueKind: CatalogueCache.CatalogueKind {
         switch self {
         case .formula: .formula

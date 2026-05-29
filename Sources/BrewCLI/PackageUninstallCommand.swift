@@ -7,7 +7,7 @@ import Foundation
 
 /// Schedules `brew uninstall <name>` or `brew uninstall --cask <name>` via ``BrewCommandCenter/submit``,
 /// using ``BrewCommandExecutionContext`` for subprocess execution and `brew` resolution.
-nonisolated struct PackageUninstallCommand: BrewMutatingCommand {
+struct PackageUninstallCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
@@ -21,7 +21,7 @@ nonisolated struct PackageUninstallCommand: BrewMutatingCommand {
         self.kind = kind
     }
 
-    nonisolated var operationKind: BrewOperationKind {
+    var operationKind: BrewOperationKind {
         switch kind {
         case .formula:
             .uninstallFormula

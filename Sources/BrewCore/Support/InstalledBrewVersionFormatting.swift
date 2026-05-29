@@ -6,7 +6,7 @@
 import Foundation
 
 /// Display-only version rules shared by installed and discover surfaces (used from view models, not repositories).
-public nonisolated enum InstalledBrewVersionFormatting {
+public enum InstalledBrewVersionFormatting {
     /// Applies the same prefix rules as listed installed versions (`v` only when absent).
     public static func displayVersionLabel(trimmedRaw: String) -> String {
         if trimmedRaw.hasPrefix("v") || trimmedRaw.hasPrefix("V") {

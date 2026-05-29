@@ -15,7 +15,7 @@ import Foundation
 /// keep showing busy state.
 ///
 /// Only upgrade operation kinds are matched; uninstall busy state is handled by ``InstalledUninstallBusyPresentation``.
-nonisolated enum InstalledUpgradeBusyPresentation {
+enum InstalledUpgradeBusyPresentation {
     static func showsUpgradeBusy(
         oldPhase: BrewOperationPhase,
         newPhase: BrewOperationPhase,
@@ -31,7 +31,7 @@ nonisolated enum InstalledUpgradeBusyPresentation {
     }
 }
 
-private nonisolated extension BrewOperationPhase {
+private extension BrewOperationPhase {
     var isRunningUpgrade: Bool {
         switch self {
         case .running(.upgradeFormula), .running(.upgradeCask):
