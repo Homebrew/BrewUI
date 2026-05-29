@@ -179,6 +179,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
 
 // MARK: - InstalledInventoryReading
 
+@MainActor
 public extension BrewInstalledPackagesRepository {
     func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         Set(lookup.keys)
@@ -187,6 +188,7 @@ public extension BrewInstalledPackagesRepository {
 
 // MARK: - Preview / placeholder factories
 
+@MainActor
 public extension BrewInstalledPackagesRepository {
     /// Inert instance for the environment default and unscoped subtrees (no brew, no command center bookkeeping).
     static func placeholder() -> BrewInstalledPackagesRepository {

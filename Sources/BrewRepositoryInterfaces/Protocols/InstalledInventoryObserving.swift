@@ -15,6 +15,7 @@ public protocol InstalledInventoryObserving: Observable, Sendable {
     func load(forceRefresh: Bool) async
 }
 
+@MainActor
 public extension InstalledInventoryObserving {
     func load() async {
         await load(forceRefresh: false)

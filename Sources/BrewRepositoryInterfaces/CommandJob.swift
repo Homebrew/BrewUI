@@ -79,6 +79,7 @@ public final class CommandJob: Identifiable {
     }
 }
 
+@MainActor
 public extension CommandJob {
     /// Materialize a fresh job from operation metadata seen on the phase stream.
     /// Synthesizes the user-facing command string from the operation's ``HomebrewPackageID`` (name)

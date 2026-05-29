@@ -59,7 +59,7 @@ let package = Package(
             name: "BrewRepositoryInterfaces",
             dependencies: ["BrewCore"],
             swiftSettings: [
-                .defaultIsolation(MainActor.self),
+                .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
             ],
         ),
@@ -67,7 +67,7 @@ let package = Package(
             name: "BrewRepositories",
             dependencies: ["BrewRepositoryInterfaces", "BrewCLI", "BrewNetworking"],
             swiftSettings: [
-                .defaultIsolation(MainActor.self),
+                .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
             ],
         ),

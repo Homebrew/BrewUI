@@ -8,14 +8,12 @@ import BrewNetworking
 import BrewRepositoryInterfaces
 import Foundation
 
-@MainActor
 public enum CatalogueRepositoryError: Error, Equatable {
     case cacheMissingAfterNotModified(kind: CatalogueCache.CatalogueKind)
 }
 
-@MainActor
-public final class BrewCatalogueRepository: CatalogueRepository {
-    public nonisolated static let defaultTTL: TimeInterval = 3600
+public actor BrewCatalogueRepository: CatalogueRepository {
+    public static let defaultTTL: TimeInterval = 3600
 
     private let apiClient: any BrewAPIClient
     private let cache: any CatalogueCaching
@@ -41,7 +39,7 @@ public final class BrewCatalogueRepository: CatalogueRepository {
         self.ttl = ttl
     }
 
-    func lastRefreshKey(for kind: CatalogueCache.CatalogueKind) -> String {
+    nonisolated func lastRefreshKey(for kind: CatalogueCache.CatalogueKind) -> String {
         "\(defaultsKeyPrefix).\(kind.rawValue).lastRefresh"
     }
 

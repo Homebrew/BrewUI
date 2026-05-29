@@ -6,7 +6,6 @@
 import BrewCore
 import Foundation
 
-@MainActor
 public protocol DiscoverPackagesRepository: Sendable {
     func loadTopPackages(
         limit: Int,

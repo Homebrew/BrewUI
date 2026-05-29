@@ -36,15 +36,13 @@ final class UnimplementedInstalledPackagesRepository: InstalledPackagesRepositor
     }
 }
 
-@MainActor
-struct UnimplementedDiscoverPackagesRepository: DiscoverPackagesRepository {
+nonisolated struct UnimplementedDiscoverPackagesRepository: DiscoverPackagesRepository {
     func loadTopPackages(limit _: Int, window _: BrewAnalyticsWindow) async throws -> DiscoverTopPackagesSnapshot {
         unimplemented()
     }
 }
 
-@MainActor
-struct UnimplementedCatalogueRepository: CatalogueRepository {
+nonisolated struct UnimplementedCatalogueRepository: CatalogueRepository {
     func package(for _: HomebrewPackageID) async throws -> BrewPackage? {
         unimplemented()
     }
@@ -54,8 +52,7 @@ struct UnimplementedCatalogueRepository: CatalogueRepository {
     }
 }
 
-@MainActor
-struct UnimplementedDependentsRepository: InstalledDependentsRepository {
+nonisolated struct UnimplementedDependentsRepository: InstalledDependentsRepository {
     func installedDependents(for _: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         unimplemented()
     }
