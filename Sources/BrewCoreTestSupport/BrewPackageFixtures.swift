@@ -6,7 +6,7 @@
 import BrewCore
 import Foundation
 
-public extension BrewPackage {
+public nonisolated extension BrewPackage {
     static func fixture(
         name: String = "git",
         displayName: String? = nil,
@@ -34,7 +34,7 @@ public extension [BrewPackage] {
     }
 }
 
-public extension InstalledBrewPackage {
+public nonisolated extension InstalledBrewPackage {
     static func fixture(
         name: String = "git",
         displayName: String? = nil,
