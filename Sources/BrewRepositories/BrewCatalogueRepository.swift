@@ -8,7 +8,7 @@ import BrewNetworking
 import BrewRepositoryInterfaces
 import Foundation
 
-public enum CatalogueRepositoryError: Error, Equatable {
+enum CatalogueRepositoryError: Error, Equatable {
     case cacheMissingAfterNotModified(kind: CatalogueCache.CatalogueKind)
 }
 

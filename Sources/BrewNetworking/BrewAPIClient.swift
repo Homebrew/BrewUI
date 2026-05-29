@@ -22,7 +22,7 @@ public struct URLSessionBrewAPIClient: BrewAPIClient {
     private let baseURL: URL
     private let session: URLSession
 
-    public init(session: URLSession, baseURL: URL? = nil) {
+    init(session: URLSession, baseURL: URL? = nil) {
         self.session = session
         self.baseURL = baseURL ?? URL(string: "https://formulae.brew.sh") ?? URL(fileURLWithPath: "/")
     }

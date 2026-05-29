@@ -276,7 +276,7 @@ public struct NSAnimationContextSpec {
 
 /// Resolves the bottom-pane height for a split request: collapsed snaps to the fixed collapsed
 /// height; otherwise the proposed value is bounded to `[minExpanded, maxExpanded]`.
-public nonisolated func clampedSplitBottomHeight(
+nonisolated func clampedSplitBottomHeight(
     _ value: CGFloat,
     collapsed: Bool,
     collapsedHeight: CGFloat,

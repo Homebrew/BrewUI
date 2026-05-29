@@ -6,42 +6,42 @@
 import BrewCore
 import Foundation
 
-public struct EmptyInstalledDependentsRepository: InstalledDependentsRepository {
-    public init() {}
+struct EmptyInstalledDependentsRepository: InstalledDependentsRepository {
+    init() {}
 
-    public func installedDependents(for _: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
+    func installedDependents(for _: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         []
     }
 }
 
-public struct EmptyInstalledInventoryReading: InstalledInventoryReading {
-    public init() {}
+struct EmptyInstalledInventoryReading: InstalledInventoryReading {
+    init() {}
 
-    public func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
+    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         []
     }
 }
 
-public struct StubInstalledDependentsRepository: InstalledDependentsRepository {
+struct StubInstalledDependentsRepository: InstalledDependentsRepository {
     private let provider: @Sendable (InstalledBrewPackage.ID) -> [InstalledBrewPackage]
 
-    public init(provider: @escaping @Sendable (InstalledBrewPackage.ID) -> [InstalledBrewPackage]) {
+    init(provider: @escaping @Sendable (InstalledBrewPackage.ID) -> [InstalledBrewPackage]) {
         self.provider = provider
     }
 
-    public func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
+    func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         provider(packageID)
     }
 }
 
-public struct StubInstalledInventoryReading: InstalledInventoryReading {
+struct StubInstalledInventoryReading: InstalledInventoryReading {
     private let installedIDs: Set<InstalledBrewPackage.ID>
 
-    public init(installedIDs: Set<InstalledBrewPackage.ID>) {
+    init(installedIDs: Set<InstalledBrewPackage.ID>) {
         self.installedIDs = installedIDs
     }
 
-    public func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
+    func installedPackageIDs() async -> Set<InstalledBrewPackage.ID> {
         installedIDs
     }
 }

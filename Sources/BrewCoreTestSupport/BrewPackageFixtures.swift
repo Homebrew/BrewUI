@@ -28,12 +28,6 @@ public nonisolated extension BrewPackage {
     }
 }
 
-public extension [BrewPackage] {
-    static var empty: [BrewPackage] {
-        []
-    }
-}
-
 public nonisolated extension InstalledBrewPackage {
     static func fixture(
         name: String = "git",
@@ -59,11 +53,5 @@ public nonisolated extension InstalledBrewPackage {
             installedVersions: installedVersions,
             outdated: outdated,
         )
-    }
-}
-
-public extension [InstalledBrewPackage] {
-    static var empty: [InstalledBrewPackage] {
-        []
     }
 }

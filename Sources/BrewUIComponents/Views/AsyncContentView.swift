@@ -48,16 +48,16 @@ public struct AsyncContentView<Content: Placeholdable, LoadedView: View>: View {
 
 /// Standard failure presentation: a warning glyph, the human-readable message a ViewModel mapped from
 /// its error, and an optional Retry button. Pass `onRetry: nil` when a tap can't recover the failure.
-public struct ErrorStateView: View {
+struct ErrorStateView: View {
     let message: String
     let onRetry: (() -> Void)?
 
-    public init(message: String, onRetry: (() -> Void)? = nil) {
+    init(message: String, onRetry: (() -> Void)? = nil) {
         self.message = message
         self.onRetry = onRetry
     }
 
-    public var body: some View {
+    var body: some View {
         VStack(spacing: BrewSpacing.md) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.brewTitle2)

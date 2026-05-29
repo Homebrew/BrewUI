@@ -8,7 +8,7 @@ import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureInstalled
 import BrewRepositories
-import BrewRepositoryInterfaces
+@testable import BrewRepositoryInterfaces
 import BrewServicesTestSupport
 import Foundation
 import Testing

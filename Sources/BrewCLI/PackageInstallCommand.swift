@@ -9,21 +9,21 @@ import Foundation
 /// Schedules `brew install <name>` or `brew install --cask <name>` via ``BrewCommandCenter/submit``,
 /// using ``BrewCommandExecutionContext`` for subprocess execution and `brew` resolution.
 ///
-public nonisolated struct PackageInstallCommand: BrewMutatingCommand {
+nonisolated struct PackageInstallCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
-    public init(package: DiscoveryBrewPackage) {
+    init(package: DiscoveryBrewPackage) {
         packageName = package.name
         kind = package.kind
     }
 
-    public init(kind: InstalledPackageKind, name: String) {
+    init(kind: InstalledPackageKind, name: String) {
         packageName = name
         self.kind = kind
     }
 
-    public nonisolated var operationKind: BrewOperationKind {
+    nonisolated var operationKind: BrewOperationKind {
         switch kind {
         case .formula:
             .installFormula
@@ -32,7 +32,7 @@ public nonisolated struct PackageInstallCommand: BrewMutatingCommand {
         }
     }
 
-    public func run(in context: BrewCommandExecutionContext) async throws {
+    func run(in context: BrewCommandExecutionContext) async throws {
         let brew = try context.brewExecutableURL()
         let arguments: [String] = switch kind {
         case .formula:

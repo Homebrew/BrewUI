@@ -81,14 +81,14 @@ public struct StubCatalogueRepository: CatalogueRepository {
     }
 }
 
-public struct StubDependentsRepository: InstalledDependentsRepository {
+struct StubDependentsRepository: InstalledDependentsRepository {
     private let dependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]]
 
-    public init(dependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]]) {
+    init(dependentsByPackageID: [InstalledBrewPackage.ID: [InstalledBrewPackage]]) {
         self.dependentsByPackageID = dependentsByPackageID
     }
 
-    public func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
+    func installedDependents(for packageID: InstalledBrewPackage.ID) async -> [InstalledBrewPackage] {
         dependentsByPackageID[packageID] ?? []
     }
 }
@@ -138,14 +138,10 @@ public actor StubBrewCommandCenter: BrewCommandCenter {
 }
 
 /// Command that does nothing when run — for previews/tests that submit without touching `brew`.
-public struct NoopMutatingCommand: BrewMutatingCommand {
-    public let operationKind: BrewOperationKind
+struct NoopMutatingCommand: BrewMutatingCommand {
+    let operationKind: BrewOperationKind
 
-    public init(operationKind: BrewOperationKind) {
-        self.operationKind = operationKind
-    }
-
-    public func run(in _: BrewCommandExecutionContext) async throws {}
+    func run(in _: BrewCommandExecutionContext) async throws {}
 }
 
 /// Factory vending no-op commands, so view models can be exercised without `brew`.
@@ -162,31 +158,5 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
 
     public func uninstallCommand(kind: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         NoopMutatingCommand(operationKind: kind == .formula ? .uninstallFormula : .uninstallCask)
-    }
-}
-
-/// In-memory command-jobs projection for console previews/tests.
-@Observable
-@MainActor
-public final class StubCommandJobsObserving: CommandJobsObserving {
-    public private(set) var jobs: [BrewOperationID: CommandJob]
-    public private(set) var orderedIDs: [BrewOperationID]
-
-    public init(jobs: [CommandJob] = []) {
-        self.jobs = Dictionary(jobs.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        orderedIDs = jobs.map(\.id)
-    }
-
-    public func remove(id: BrewOperationID) {
-        jobs[id] = nil
-        orderedIDs.removeAll { $0 == id }
-    }
-
-    public func clearCompleted() {
-        let preserved = orderedIDs.filter { jobs[$0]?.isTerminal == false }
-        for id in Set(orderedIDs).subtracting(preserved) {
-            jobs[id] = nil
-        }
-        orderedIDs = preserved
     }
 }

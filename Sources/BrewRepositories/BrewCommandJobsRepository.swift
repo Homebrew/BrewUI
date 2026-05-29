@@ -102,11 +102,3 @@ public final class BrewCommandJobsRepository: CommandJobsObserving {
         }
     }
 }
-
-@MainActor
-public extension BrewCommandJobsRepository {
-    /// Inert instance for the environment default and unscoped subtrees (no command-center bookkeeping).
-    static func placeholder() -> BrewCommandJobsRepository {
-        BrewCommandJobsRepository(commandCenter: NoopBrewCommandCenter.preview())
-    }
-}

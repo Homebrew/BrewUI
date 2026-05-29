@@ -185,26 +185,3 @@ public extension BrewInstalledPackagesRepository {
         Set(lookup.keys)
     }
 }
-
-// MARK: - Preview / placeholder factories
-
-@MainActor
-public extension BrewInstalledPackagesRepository {
-    /// Inert instance for the environment default and unscoped subtrees (no brew, no command center bookkeeping).
-    static func placeholder() -> BrewInstalledPackagesRepository {
-        let context = BrewCommandExecutionContext.noopForTestingAndPreviews()
-        return BrewInstalledPackagesRepository(
-            commandRunner: context.commandRunner,
-            locator: context.locator,
-            cache: InstalledInventoryCache(),
-            commandCenter: NoopBrewCommandCenter.preview(),
-        )
-    }
-
-    /// Preloaded, already-`.loaded` repository for SwiftUI previews and preview fakes.
-    static func previewLoaded(_ packages: [InstalledBrewPackage]) -> BrewInstalledPackagesRepository {
-        let repository = placeholder()
-        repository.apply(packages)
-        return repository
-    }
-}

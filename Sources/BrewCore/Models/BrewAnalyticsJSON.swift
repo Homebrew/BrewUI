@@ -9,7 +9,6 @@ import Foundation
 public nonisolated enum BrewAnalyticsWindow: String, CaseIterable, Sendable {
     case days30 = "30d"
     case days90 = "90d"
-    case days365 = "365d"
 }
 
 /// Strict schema for Homebrew analytics API responses.
