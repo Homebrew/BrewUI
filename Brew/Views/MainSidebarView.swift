@@ -10,6 +10,7 @@ import SwiftUI
 enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     case installed
     case discover
+    case doctor
 
     var id: String {
         rawValue
@@ -49,6 +50,14 @@ struct MainSidebarView: View {
                 title: "Discover",
                 systemImage: "magnifyingglass",
                 item: .discover,
+            )
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.top, BrewSpacing.xs)
+
+            sidebarRow(
+                title: "Doctor",
+                systemImage: "stethoscope",
+                item: .doctor,
             )
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.top, BrewSpacing.xs)
