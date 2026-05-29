@@ -93,6 +93,23 @@ struct StubDependentsRepository: InstalledDependentsRepository {
     }
 }
 
+/// Returns a fixed ``DoctorReport`` (or throws a fixed error) without running `brew` — for previews/tests.
+public struct StubDoctorRepository: DoctorRepository {
+    private let result: Result<DoctorReport, any Error & Sendable>
+
+    public init(report: DoctorReport) {
+        result = .success(report)
+    }
+
+    public init(error: any Error & Sendable) {
+        result = .failure(error)
+    }
+
+    public func runDiagnostics() async throws -> DoctorReport {
+        try result.get()
+    }
+}
+
 /// No-op command center for previews/tests: immediate, with no phase bookkeeping. Uses only BrewCore.
 public actor StubBrewCommandCenter: BrewCommandCenter {
     public init() {}

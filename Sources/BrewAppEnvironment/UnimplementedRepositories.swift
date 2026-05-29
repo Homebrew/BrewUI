@@ -58,6 +58,12 @@ struct UnimplementedDependentsRepository: InstalledDependentsRepository {
     }
 }
 
+struct UnimplementedDoctorRepository: DoctorRepository {
+    func runDiagnostics() async throws -> DoctorReport {
+        unimplemented()
+    }
+}
+
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         unimplemented()

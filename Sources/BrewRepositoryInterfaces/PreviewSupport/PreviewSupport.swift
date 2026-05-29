@@ -86,6 +86,31 @@ public enum PreviewSupport {
         StubCatalogueRepository(formulaCatalogue: formulaCatalogue, caskCatalogue: caskCatalogue)
     }
 
+    public static func makeDoctorRepository(report: DoctorReport = doctorReport) -> any DoctorRepository {
+        StubDoctorRepository(report: report)
+    }
+
+    public static let healthyDoctorReport = DoctorReport(issues: [])
+
+    /// A sample report with a fixable issue (unlinked kegs) and an advisory-only issue (no `brew` fix).
+    public static let doctorReport = DoctorReport(issues: [
+        DoctorIssue(
+            title: "You have unlinked kegs in your Cellar.",
+            details: "Leaving kegs unlinked can lead to build-trouble. Run `brew link` on these:",
+            affectedItems: ["openssl@3", "readline"],
+            suggestedFix: DoctorSuggestedFix(
+                arguments: ["link", "openssl@3", "readline"],
+                displayCommand: "brew link openssl@3 readline",
+            ),
+        ),
+        DoctorIssue(
+            title: "Some installed formulae are deprecated or disabled.",
+            details: "You should find replacements for the following formulae:",
+            affectedItems: ["macvim"],
+            suggestedFix: nil,
+        ),
+    ])
+
     // MARK: - Backing sample data (preview-only)
 
     public static let installedPackages: [InstalledBrewPackage] = [
