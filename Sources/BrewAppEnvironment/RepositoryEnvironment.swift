@@ -1,9 +1,10 @@
 //
 //  RepositoryEnvironment.swift
-//  BrewRepositoryInterfaces
+//  BrewAppEnvironment
 //
 
 import BrewCore
+import BrewRepositoryInterfaces
 import SwiftUI
 
 public extension EnvironmentValues {

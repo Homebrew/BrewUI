@@ -1,4 +1,5 @@
 import AppKit
+import BrewAppEnvironment
 import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureInstalled

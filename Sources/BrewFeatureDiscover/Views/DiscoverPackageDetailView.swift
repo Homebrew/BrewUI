@@ -1,4 +1,5 @@
 import AppKit
+import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents

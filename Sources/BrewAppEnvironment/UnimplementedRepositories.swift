@@ -1,9 +1,10 @@
 //
 //  UnimplementedRepositories.swift
-//  BrewRepositoryInterfaces
+//  BrewAppEnvironment
 //
 
 import BrewCore
+import BrewRepositoryInterfaces
 import Foundation
 import Observation
 
