@@ -56,6 +56,9 @@ struct BrewExecutableLocatorTests {
     }
 }
 
+// `paths` is the only mutable state and both accessors take `lock`, so concurrent appends and reads
+// are serialised.
+// swiftlint:disable:next unchecked_sendable
 private final class ProbeRecorder: @unchecked Sendable {
     private let lock = NSLock()
     private var paths: [String] = []

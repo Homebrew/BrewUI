@@ -94,6 +94,7 @@ struct BrewCommandServiceStreamingTests {
 /// Thread-safe collector for streamed lines. Appends synchronously (under a lock) inside the sink, so
 /// that — because `BrewCommandService.run` only returns after every sink call has been made — all lines
 /// are recorded by the time a test reads them, with no racing detached Tasks.
+// swiftlint:disable:next unchecked_sendable
 private final class OutputCollector: @unchecked Sendable {
     private let lock = NSLock()
     private var lines: [BrewCommandOutputLine] = []

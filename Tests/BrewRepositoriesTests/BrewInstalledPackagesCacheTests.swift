@@ -74,6 +74,10 @@ struct BrewInstalledPackagesCacheTests {
     }
 }
 
+// Exercised only through sequential `await repository.load()` calls from @MainActor tests, so `run`
+// is never invoked concurrently and `loadCallCount` is read only after those awaits finish — no data
+// race despite the unsynchronised counter.
+// swiftlint:disable:next unchecked_sendable
 private final class CountingInstalledInfoJSONRunner: BrewCommandRunning, @unchecked Sendable {
     private(set) var loadCallCount = 0
 

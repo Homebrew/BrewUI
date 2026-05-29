@@ -19,6 +19,11 @@ disabled_rules:
   - unneeded_synthesized_initializer
   - vertical_whitespace
   - void_return
+  # Fires on the common pattern of putting a // swiftlint:disable:next
+  # comment between a doc comment and the declaration it documents.
+  # The combined "explain why you're suppressing a rule" pattern is more
+  # valuable than the rule catches.
+  - orphaned_doc_comment
 
 included:
   - Brew

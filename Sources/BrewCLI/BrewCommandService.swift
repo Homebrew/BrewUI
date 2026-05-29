@@ -118,6 +118,9 @@ public struct BrewCommandService: BrewCommandRunning {
     }
 }
 
+// `process` is the only non-Sendable stored state, and every access to it goes through `lock`; the
+// sole mutating call (`terminate`) runs under that lock, so concurrent use is serialised.
+// swiftlint:disable:next unchecked_sendable
 private final class ProcessController: @unchecked Sendable {
     private let lock = NSLock()
     private let process: Process
