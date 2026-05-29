@@ -22,12 +22,16 @@ public final class StubURLProtocol: URLProtocol {
         case failure(any Error)
     }
 
-    private static let lock = NSLock()
     /// Mutation is serialized by `lock`; opt out of the global-mutable-state check rather than
     /// re-expressing the lock through `Mutex` for test-only stubbing.
+    private static let lock = NSLock()
+    // swiftlint:disable:next nonisolated_unsafe
     private nonisolated(unsafe) static var queuedResultsByHost: [String: [StubbedResult]] = [:]
+    // swiftlint:disable:next nonisolated_unsafe
     private nonisolated(unsafe) static var queuedResultsByHostAndPath: [String: [String: [StubbedResult]]] = [:]
+    // swiftlint:disable:next nonisolated_unsafe
     private nonisolated(unsafe) static var repeatingResultsByHostAndPath: [String: [String: StubbedResult]] = [:]
+    // swiftlint:disable:next nonisolated_unsafe
     private nonisolated(unsafe) static var requestsByHost: [String: [URLRequest]] = [:]
 
     public static func register(_ results: [StubbedResult], forHost host: String) {

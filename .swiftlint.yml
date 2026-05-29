@@ -51,3 +51,28 @@ identifier_name:
     - x
     - y
     - z
+
+custom_rules:
+  unchecked_sendable:
+    name: "Unchecked Sendable"
+    regex: '@unchecked\s+Sendable'
+    message: "@unchecked Sendable bypasses concurrency checking. Justify with a comment explaining why this is safe, then add // swiftlint:disable:next unchecked_sendable"
+    severity: error
+
+  nonisolated_unsafe:
+    name: "Nonisolated Unsafe"
+    regex: 'nonisolated\(unsafe\)'
+    message: "nonisolated(unsafe) disables data-race checking. Justify with a comment explaining the synchronisation mechanism, then add // swiftlint:disable:next nonisolated_unsafe"
+    severity: error
+
+  preconcurrency_import:
+    name: "Preconcurrency Import"
+    regex: '@preconcurrency\s+import'
+    message: "@preconcurrency import suppresses isolation checking for the imported module. Document which APIs from this module are being bridged and why."
+    severity: error
+
+  assume_isolated:
+    name: "Assume Isolated"
+    regex: '\.assumeIsolated\s*\{'
+    message: "MainActor.assumeIsolated asserts isolation without compile-time verification. Justify with a comment explaining why the assumption holds at this call site."
+    severity: error
