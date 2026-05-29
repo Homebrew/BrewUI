@@ -18,6 +18,28 @@ if ! command -v mint >/dev/null 2>&1; then
     exit 1
 fi
 
+# BrewUILint runs over the WHOLE tree (Brew + Sources), not just the staged files. Its
+# nonisolated-extension rule needs to see every `nonisolated` type declaration to flag a bad
+# extension on it, and that declaration may live in an unstaged file in another package. Tests
+# (Tests/) are intentionally excluded. Builds the tool first (cached in Tools/BrewUILint/.build).
+echo "pre-commit: running BrewUILint (whole tree)..."
+if ! xcrun swift build --package-path Tools/BrewUILint -c release >/dev/null 2>&1; then
+    echo "pre-commit: failed to build BrewUILint (Tools/BrewUILint) — fix the toolchain/build and retry."
+    exit 1
+fi
+brewuilint_bin="$(xcrun swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
+set +e
+brewuilint_output="$(find Brew Sources -name '*.swift' -print0 | xargs -0 "${brewuilint_bin}" 2>&1)"
+brewuilint_status=$?
+set -e
+if [[ ${brewuilint_status} -ne 0 ]]; then
+    echo ""
+    echo "pre-commit: commit blocked due to BrewUILint violations:"
+    echo ""
+    echo "${brewuilint_output}"
+    exit 1
+fi
+
 swift_files=()
 while IFS= read -r -d '' file; do
     if [[ "${file}" == *.swift ]]; then
