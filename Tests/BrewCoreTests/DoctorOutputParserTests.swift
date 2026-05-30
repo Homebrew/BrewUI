@@ -92,6 +92,84 @@ struct DoctorOutputParserTests {
         #expect(issue.affectedItems.isEmpty)
     }
 
+    @Test func `tools-at-both-paths block stays as one data block (no command scatter)`() throws {
+        // The original scatter bug: pip3/python3 look like commands per line, but the block's first
+        // member (openssl) isn't, so the whole block is data.
+        let output = """
+        Warning: The following tools exist at both paths:
+          openssl
+          pip3
+          python3
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.affectedItems == ["openssl", "pip3", "python3"])
+        #expect(issue.fixSequences.isEmpty)
+    }
+
+    @Test func `broken-symlinks block classifies as data via the first member, no intro cue needed`() throws {
+        // `Remove them with `brew cleanup`:` ends with a backtick before the colon — no enumerated
+        // cue could match it. The first-member rule handles it because the first item is a path.
+        let output = """
+        Warning: Broken symlinks were found. Remove them with `brew cleanup`:
+          /opt/homebrew/bin/foo
+          /opt/homebrew/bin/bar
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.affectedItems == ["/opt/homebrew/bin/foo", "/opt/homebrew/bin/bar"])
+        #expect(issue.fixSequences.isEmpty)
+    }
+
+    @Test func `stray command with no colon intro is still captured`() throws {
+        // `check_git_status` / `check_multiple_cellars`: the command sits under period-ending prose,
+        // not a colon intro. The .prose fallback catches it via the allowlist.
+        let output = """
+        Warning: Uncommitted git changes.
+        Your homebrew git repo has uncommitted changes.
+          git -C /opt/homebrew stash
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        let sequence = try #require(issue.fixSequences.first)
+        #expect(sequence.steps.map(\.displayCommand) == ["git -C /opt/homebrew stash"])
+    }
+
+    @Test func `echo PATH one-liner classifies as a command block`() throws {
+        // The shell-profile fix from check_user_path_* — first member is `echo …`, in the allowlist.
+        let output = """
+        Warning: Homebrew's bin was not found in your PATH.
+        Consider setting your PATH for example like so:
+          echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        let sequence = try #require(issue.fixSequences.first)
+        #expect(sequence.steps.first?.displayCommand.hasPrefix("echo ") == true)
+    }
+
+    @Test func `dataNounCue forces data even when the first item looks like a command`() throws {
+        // Deprecated formulae list could contain a name that reads as a command (e.g. a formula
+        // literally named `git`). The intro contains "formulae" → data noun cue → data block.
+        let output = """
+        Warning: Some installed formulae are deprecated or disabled.
+        You should find replacements for the following formulae:
+          git
+          python
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.affectedItems == ["git", "python"])
+        #expect(issue.fixSequences.isEmpty)
+    }
+
+    @Test func `value lines inside a data block fall through to prose, not Affected`() throws {
+        // `core.autocrlf = true` shouldn't end up as an Affected item even though it lives under a
+        // colon intro that classifies as data.
+        let output = """
+        Warning: Suspicious git newline settings.
+        The detected git configuration values are:
+          core.autocrlf = true
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(!issue.affectedItems.contains("core.autocrlf = true"))
+    }
+
     // MARK: - Fix sequences
 
     @Test func `indented brew command is captured as a runnable fix sequence`() throws {

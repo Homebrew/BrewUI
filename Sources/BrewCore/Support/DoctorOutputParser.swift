@@ -7,15 +7,16 @@ import Foundation
 
 /// Pure text→domain parser for `brew doctor` output. No dependencies, no isolation — unit-tested directly.
 ///
-/// Layered classifier (see `.ai/plans/DoctorParsing-Plan.md`):
-///   * **Severity** comes from a tier callout (`This is a Tier N configuration:` / `Unsupported configuration:`).
-///   * **Suggested fixes** are indented lines whose first post-`sudo`/`env` token is in the executable
-///     allowlist; consecutive runs are grouped into one ordered sequence.
-///   * **Affected items** are collected only under a recognized data-intro cue (`on these:`, `Unexpected …:`,
-///     `following …:`, etc.) — never "every indented line", which would catch CLT URLs or value lines.
-///   * **Inline chips** are backticked `brew …` references in prose, classified by the same allowlist.
-///   * **Links** use `NSDataDetector`, split into action vs reference by host.
-///   * **Raw body** is the verbatim fallback the detail pane shows beneath everything else.
+/// Classification follows `.ai/plans/DoctorParsing-Plan-Addendum.md`: a colon-terminated un-indented line
+/// opens a *pending block*; the **first member** of that block decides whether the whole block is
+/// commands, data, links, or prose. The executable allowlist is consulted *once* (for the first
+/// member's command test), not per indented line — so a deprecated-tools list never gets scattered into
+/// the commands rail. A `dataNounCue` guard forces data before the first-member command test in the
+/// rare case the first item could read as a command (a deprecated formula named `git`, `python`, …).
+///
+/// Per-issue results: severity (tier callout / `Unsupported configuration:`), title, "What this means"
+/// (prose residue), affected items (data blocks), fix sequences (command blocks grouped by intro / blank
+/// line), inline backtick `brew …` chips, host-classified links, and a verbatim raw-body fallback.
 public enum DoctorOutputParser {
     public static func parse(_ output: String) -> DoctorReport {
         let blocks = warningBlocks(in: output)
@@ -55,6 +56,15 @@ private func warningBlocks(in output: String) -> [WarningBlock] {
 
 // MARK: - Per-warning state machine
 
+/// What the parser is currently inside: a stretch of prose, a command run, a list of items, or a run of
+/// link lines. Decided once at the start of each indented block by peeking at the first member.
+private enum BlockMode {
+    case prose
+    case commands
+    case data
+    case links
+}
+
 private struct WarningBlockParser {
     let block: WarningBlock
     var fixSequences: [DoctorFixSequence] = []
@@ -63,16 +73,24 @@ private struct WarningBlockParser {
     var detailLines: [String] = []
     var inlineChips: [DoctorBacktickChip] = []
     var links: [DoctorLink] = []
-    /// Some warnings (e.g. `check_access_directories`) put the data-intro cue in the title itself and
-    /// start the body with the items. Arm from the title so those item lines are collected.
-    var armedCue: Bool
-    var armedAcceptsUnindented: Bool
+    var mode: BlockMode = .prose
+    /// `true` after a colon-terminated intro and before its first indented member arrives — that member
+    /// decides the block's mode.
+    var pendingBlock: Bool
+    /// Last un-indented colon intro, kept so the first-member rule can consult the `dataNounCue` guard.
+    var previousIntro: String
+    /// `true` while a special intro (`do not exist:` / `not writable by your user:`) is allowing
+    /// un-indented item lines to flow into Affected — brew prints those dir lists at column 0.
+    var specialUnindentedActive: Bool
 
     init(block: WarningBlock) {
         self.block = block
-        let titleIsCue = isDataIntro(block.title)
-        armedCue = titleIsCue
-        armedAcceptsUnindented = titleIsCue && acceptsUnindentedItems(block.title)
+        // The title can itself be the intro (e.g. `check_access_directories` puts it at column 0 of
+        // the `Warning:` line). Seed the state machine from it.
+        let titleIsIntro = block.title.hasSuffix(":")
+        pendingBlock = titleIsIntro
+        previousIntro = titleIsIntro ? block.title : ""
+        specialUnindentedActive = titleIsIntro && acceptsUnindentedItems(block.title)
     }
 
     mutating func parse() -> DoctorIssue? {
@@ -109,49 +127,115 @@ private struct WarningBlockParser {
         let isIndented = line.first == " " || line.first == "\t"
         let trimmed = line.trimmingCharacters(in: .whitespaces)
 
-        if trimmed.isEmpty {
-            flushSequence()
-            armedCue = false
-            armedAcceptsUnindented = false
-            return
-        }
-
-        if isIndented, let step = parseFixStep(trimmed) {
-            currentSteps.append(step)
-            return
-        }
-        flushSequence()
-
-        if isDataIntro(trimmed) {
-            armedCue = true
-            armedAcceptsUnindented = acceptsUnindentedItems(trimmed)
-            detailLines.append(trimmed)
-            appendLinks(from: trimmed, into: &links)
-            appendChips(from: trimmed, into: &inlineChips)
-            return
-        }
-
-        let canCollectItem = armedCue
-            && !containsLink(trimmed)
-            && (isIndented || (armedAcceptsUnindented && looksLikeItem(trimmed)))
-        if canCollectItem {
-            affectedItems.append(trimmed)
-            return
-        }
-
         if !isIndented {
-            armedCue = false
-            armedAcceptsUnindented = false
+            processUnindented(trimmed)
+            return
+        }
+        guard !trimmed.isEmpty else {
+            return
         }
 
+        if pendingBlock {
+            pendingBlock = false
+            mode = decideBlockMode(firstMember: trimmed)
+        }
+        handleIndented(trimmed)
+    }
+
+    private mutating func handleIndented(_ trimmed: String) {
+        switch mode {
+        case .commands, .prose:
+            // .commands picks steps until the block ends; .prose picks up stray commands that sit
+            // under period-ending prose (e.g. `git stash` / `rm -rf`). Both go through parseFixStep.
+            if let step = parseFixStep(trimmed) {
+                currentSteps.append(step)
+            }
+        case .data:
+            appendDataLine(trimmed)
+        case .links:
+            appendLinks(from: trimmed, into: &links)
+        }
+    }
+
+    private mutating func appendDataLine(_ trimmed: String) {
+        guard !containsLink(trimmed) else {
+            return
+        }
+        if isValueLine(trimmed) {
+            detailLines.append(trimmed)
+        } else {
+            affectedItems.append(trimmed)
+        }
+    }
+
+    private mutating func processUnindented(_ trimmed: String) {
+        if trimmed.isEmpty {
+            resetForBlankLine()
+            return
+        }
+        if trimmed.hasSuffix(":") {
+            beginIntro(trimmed)
+            return
+        }
+        if collectUnindentedItem(trimmed) {
+            return
+        }
+        finishAsProse(trimmed)
+    }
+
+    private mutating func resetForBlankLine() {
+        flushSequence()
+        mode = .prose
+        pendingBlock = false
+        specialUnindentedActive = false
+    }
+
+    private mutating func beginIntro(_ trimmed: String) {
+        flushSequence()
+        previousIntro = trimmed
+        pendingBlock = true
+        mode = .prose
+        specialUnindentedActive = acceptsUnindentedItems(trimmed)
+        detailLines.append(trimmed)
+        appendLinks(from: trimmed, into: &links)
+        appendChips(from: trimmed, into: &inlineChips)
+    }
+
+    private mutating func collectUnindentedItem(_ trimmed: String) -> Bool {
+        guard specialUnindentedActive, looksLikeItem(trimmed), !containsLink(trimmed) else {
+            return false
+        }
+        affectedItems.append(trimmed)
+        return true
+    }
+
+    private mutating func finishAsProse(_ trimmed: String) {
+        flushSequence()
+        mode = .prose
+        pendingBlock = false
+        specialUnindentedActive = false
         if isLinkOnly(trimmed) {
             appendLinks(from: trimmed, into: &links)
             return
         }
-
         detailLines.append(trimmed)
         appendLinks(from: trimmed, into: &links)
         appendChips(from: trimmed, into: &inlineChips)
+    }
+
+    private func decideBlockMode(firstMember: String) -> BlockMode {
+        // `dataNounCue` runs *before* the command test so a list whose first item could read as a
+        // command (a deprecated formula named `git`/`python`/`node`, …) still classifies as data.
+        if dataNounCue(previousIntro) {
+            return .data
+        }
+        if parseFixStep(firstMember) != nil {
+            return .commands
+        }
+        if containsLink(firstMember) {
+            return .links
+        }
+        return .data
     }
 }
 
@@ -178,13 +262,15 @@ private func parseSeverity(body: String) -> DoctorSeverity {
 
 // MARK: - Command classifier
 
-/// First non-`sudo`/non-`env`/non-`VAR=…` token must match this set to count as a command. Maintain this
-/// list as Homebrew adds checks that recommend new tools — anything missed falls through to the
-/// "What this means" residue rather than the Suggested-fix rail.
+/// First non-`sudo`/non-`env`/non-`VAR=…` token must match this set to count as a command. With the
+/// first-member rule, this list only decides whether the *first* member of a block opens a commands
+/// block — it isn't consulted per line, so adding a missed verb only matters for blocks whose first
+/// member is that verb. Add to the list as Homebrew adds checks that suggest new tools.
 private let knownExecutables: Set<String> = [
     "brew", "git", "rm", "mkdir", "chown", "chmod", "cp", "mv", "ln",
     "xcode-select", "softwareupdate", "csrutil", "launchctl",
     "pip", "pip3", "python", "python3", "ruby", "bash", "zsh",
+    "echo", "fish_add_path", "set",
 ]
 
 private func parseFixStep(_ trimmed: String) -> DoctorFixStep? {
@@ -211,7 +297,6 @@ private func parseFixStep(_ trimmed: String) -> DoctorFixStep? {
 
 private func appendChips(from line: String, into chips: inout [DoctorBacktickChip]) {
     let segments = line.components(separatedBy: "`")
-    // Backticked spans sit at odd indices once split on the backtick delimiter.
     var index = 1
     while index < segments.count {
         let span = segments[index].trimmingCharacters(in: .whitespaces)
@@ -228,7 +313,6 @@ private func chip(from span: String) -> DoctorBacktickChip? {
           knownExecutables.contains(first),
           tokens.count >= 2
     else {
-        // `brew` by itself or non-executable spans (`.gitconfig`, `$HOMEBREW_TEMP`) stay as inline code.
         return nil
     }
     let arguments: [String]? = first == "brew" ? Array(tokens.dropFirst()) : nil
@@ -305,49 +389,47 @@ private func uniqueLinks(_ links: [DoctorLink]) -> [DoctorLink] {
     return out
 }
 
-// MARK: - Data-intro cues
+// MARK: - Data-noun guard
 
-/// `true` when a trimmed line introduces a list of items (paths / kegs / formula names). The match set
-/// is closed and was derived from walking every heredoc in `diagnostic.rb`.
-private func isDataIntro(_ trimmed: String) -> Bool {
-    guard trimmed.hasSuffix(":") else {
-        return false
-    }
-    let lower = trimmed.lowercased()
-    if lower.contains("following ") {
-        return true
-    }
-    if lower.hasPrefix("unexpected ") {
-        return true
-    }
-    if lower.hasSuffix(" files:") {
-        return true
-    }
-    if lower.contains("to migrate to ") {
-        return true
-    }
-    let specificSuffixes = [
-        "paths found:",
-        "uncommitted files:",
-        "in the following places:",
-        "out of the way:",
-        "on these:",
-        "not readable:",
+/// The only intro cue the addendum keeps: a hard guard that forces `.data` *before* the first-member
+/// command test, so a list whose first item could read as a command (a deprecated formula named
+/// `git`/`python`/`node`, …) still classifies as data. Keys on list-nouns (plural), not on bare
+/// `following`, so the singular `following command:` correctly falls through to the content test.
+private func dataNounCue(_ trimmedIntro: String) -> Bool {
+    let lower = trimmedIntro.lowercased()
+    let listNouns = [
+        "tools", "formulae", "casks", "taps", "directories", "kegs",
+        "places", "files", "paths",
     ]
-    return specificSuffixes.contains { lower.hasSuffix($0) }
+    if listNouns.contains(where: { lower.contains($0) }) {
+        return true
+    }
+    let phrases = [
+        "the same name as",
+        "not readable:",
+        "on these:",
+        "out of the way:",
+    ]
+    return phrases.contains { lower.contains($0) }
 }
 
-/// `check_exist_directories` and `check_access_directories` print their dir lists un-indented. Allow
-/// those two cues to accept un-indented item lines until the next blank line.
+/// `check_exist_directories` / `check_access_directories` print their dir lists un-indented; allow
+/// those two intros to accept un-indented item lines until the next blank line.
 private func acceptsUnindentedItems(_ trimmedCue: String) -> Bool {
     let lower = trimmedCue.lowercased()
     return lower.hasSuffix("do not exist:") || lower.hasSuffix("not writable by your user:")
 }
 
-/// Conservative item shape so the un-indented exception doesn't swallow following prose.
 private func looksLikeItem(_ trimmed: String) -> Bool {
     if trimmed.hasPrefix("/") {
         return true
     }
     return !trimmed.contains(where: \.isWhitespace)
+}
+
+/// Keeps key/value lines (`core.autocrlf = true`, `which resolves to: /path`, `Current developer
+/// directory is: …`) out of Affected when the surrounding block has classified as data. They stay in
+/// the prose residue instead — real item lines (paths, keg/formula names) don't contain `=` or `: `.
+private func isValueLine(_ trimmed: String) -> Bool {
+    trimmed.contains(" = ") || trimmed.contains(": ")
 }
