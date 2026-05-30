@@ -319,7 +319,11 @@ struct DoctorDetailPlaceholder: View {
 
     #Preview("Doctor issue detail") {
         let report = PreviewSupport.doctorReport
-        let viewModel = makeDoctorPreviewViewModel(report: report)
+        let viewModel = DoctorViewModel(
+            doctorRepository: PreviewSupport.makeDoctorRepository(report: report),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            commandFactory: PreviewSupport.mutatingCommandFactory,
+        )
         Group {
             if let issue = report.issues.first {
                 DoctorIssueDetailView(viewModel: viewModel, item: DoctorIssueItem(id: 0, issue: issue))

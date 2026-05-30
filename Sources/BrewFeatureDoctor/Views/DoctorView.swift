@@ -159,25 +159,23 @@ struct DoctorView: View {
 }
 
 #if DEBUG
-    import BrewCore
     import BrewRepositoryInterfaces
 
-    @MainActor
-    func makeDoctorPreviewViewModel(report: DoctorReport) -> DoctorViewModel {
-        DoctorViewModel(
-            doctorRepository: PreviewSupport.makeDoctorRepository(report: report),
+    #Preview("Doctor - issues") {
+        DoctorView(viewModel: DoctorViewModel(
+            doctorRepository: PreviewSupport.makeDoctorRepository(report: PreviewSupport.doctorReport),
             brewCommandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
-        )
-    }
-
-    #Preview("Doctor - issues") {
-        DoctorView(viewModel: makeDoctorPreviewViewModel(report: PreviewSupport.doctorReport))
-            .frame(width: 420, height: 480)
+        ))
+        .frame(width: 420, height: 480)
     }
 
     #Preview("Doctor - healthy") {
-        DoctorView(viewModel: makeDoctorPreviewViewModel(report: PreviewSupport.healthyDoctorReport))
-            .frame(width: 420, height: 480)
+        DoctorView(viewModel: DoctorViewModel(
+            doctorRepository: PreviewSupport.makeDoctorRepository(report: PreviewSupport.healthyDoctorReport),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            commandFactory: PreviewSupport.mutatingCommandFactory,
+        ))
+        .frame(width: 420, height: 480)
     }
 #endif
