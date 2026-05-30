@@ -74,7 +74,7 @@ struct DoctorIssueDetailView: View {
         if let sequence = item.primaryRunnableSequence, let step = sequence.steps.first {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 PackageDetailSectionHeading(title: "Suggested fix")
-                PackageDetailCommandConsole(
+                CommandBlockView(
                     command: step.displayCommand,
                     summaryText: "Runs this command, then re-checks your system",
                 )

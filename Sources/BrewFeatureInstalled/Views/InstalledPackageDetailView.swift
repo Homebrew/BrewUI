@@ -141,7 +141,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                PackageDetailCommandConsole(
+                CommandBlockView(
                     command: uninstall.displayCommand,
                     summaryText: "Uninstalls this package from this Mac",
                 )
@@ -208,7 +208,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                PackageDetailCommandConsole(
+                CommandBlockView(
                     command: upgrade.displayCommand,
                     summaryText: "Upgrades this package to the latest available version",
                 )
