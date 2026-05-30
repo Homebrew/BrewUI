@@ -45,11 +45,54 @@ struct DoctorIssueItem: Identifiable, Equatable {
         primaryRunnableBlock?.copyAllText
     }
 
-    /// `true` for the first `.prose` block in document order — drives where the inline chips rail
-    /// appears so the chips don't repeat under every prose paragraph.
-    func isFirstProseBlock(_ block: DoctorBlock) -> Bool {
-        blocks.first { $0.type == .prose }?.id == block.id
+    // MARK: - Detail rendering
+
+    /// Detail-pane render groups. Almost every check produces one group (all prose merged into one
+    /// "What this means" at the top, with the subject blocks listed below). A new group starts only
+    /// when a paragraph begins with leading prose **and** the current group already has subject
+    /// blocks — the `check_git_status` shape, where each dirty repo is its own subject.
+    var presentationGroups: [DoctorPresentationGroup] {
+        var groups: [DoctorPresentationGroup] = []
+        var currentProse: [String] = []
+        var currentSubjects: [DoctorBlock] = []
+
+        for paragraph in paragraphsOf(blocks) {
+            let leadsWithProse = paragraph.first?.type == .prose
+            if leadsWithProse, !currentSubjects.isEmpty {
+                groups.append(DoctorPresentationGroup(
+                    id: groups.count,
+                    proseLines: currentProse,
+                    subjectBlocks: currentSubjects,
+                ))
+                currentProse = []
+                currentSubjects = []
+            }
+            for block in paragraph {
+                if case let .prose(lines) = block.content {
+                    currentProse.append(contentsOf: lines)
+                } else {
+                    currentSubjects.append(block)
+                }
+            }
+        }
+        if !currentProse.isEmpty || !currentSubjects.isEmpty {
+            groups.append(DoctorPresentationGroup(
+                id: groups.count,
+                proseLines: currentProse,
+                subjectBlocks: currentSubjects,
+            ))
+        }
+        return groups
     }
+}
+
+/// One "What this means" + subject blocks render group.
+struct DoctorPresentationGroup: Identifiable, Equatable {
+    let id: Int
+    let proseLines: [String]
+    /// `.command` / `.data` / `.link` blocks in document order. `.prose` blocks have been folded into
+    /// ``proseLines`` already.
+    let subjectBlocks: [DoctorBlock]
 }
 
 /// One sectioned bucket of issues for the list.
@@ -60,4 +103,20 @@ struct DoctorIssueGroup: Identifiable, Equatable {
     var id: DoctorSection {
         section
     }
+}
+
+/// Groups consecutive blocks by their `paragraphIndex`, preserving document order within each
+/// paragraph.
+private func paragraphsOf(_ blocks: [DoctorBlock]) -> [[DoctorBlock]] {
+    var result: [[DoctorBlock]] = []
+    var lastIndex = -1
+    for block in blocks {
+        if block.paragraphIndex != lastIndex {
+            result.append([block])
+            lastIndex = block.paragraphIndex
+        } else {
+            result[result.count - 1].append(block)
+        }
+    }
+    return result
 }
