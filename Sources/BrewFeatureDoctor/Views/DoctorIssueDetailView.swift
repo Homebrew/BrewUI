@@ -10,11 +10,12 @@ import SwiftUI
 
 /// Right-hand column: full detail for the selected `brew doctor` issue.
 ///
-/// Walks the issue's parsed blocks in document order, rendering each as its own captioned section
-/// (`.command` boxes, `.data` lists, `.link` lists, `.prose` text). Multi-group issues — currently only
-/// `check_git_status`, where each dirty repo is its own subject — fall back to the verbatim raw-output
-/// panel so a fix never gets orphaned from its files. Raw output stays at the bottom always as the
-/// never-wrong fallback.
+/// Walks the issue's parsed blocks in document order. Each block renders as a section: a *standard*
+/// generic heading by block type (`What this means` / `Suggested fix` / `Affected` / `Links`), the
+/// captured colon-terminated intro line as a prose sentence right under the heading, then the actual
+/// content. When a check has more than one block of the same type (e.g. `check_git_status`'s one fix
+/// per dirty repo), the whole section repeats — heading, intro, and content together — so each fix
+/// stays bound to its own subject. Raw output stays at the bottom always as the never-wrong fallback.
 struct DoctorIssueDetailView: View {
     @Bindable var viewModel: DoctorViewModel
     let item: DoctorIssueItem
@@ -23,10 +24,8 @@ struct DoctorIssueDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.xl) {
                 heroSection
-                if item.requiresRawEscapeHatch {
-                    escapeHatchSection
-                } else if let group = item.groups.first, !group.isEmpty {
-                    blocksSection(group)
+                ForEach(item.blocks) { block in
+                    blockSection(block)
                 }
                 if !item.rawBody.isEmpty {
                     rawOutputSection
@@ -50,58 +49,53 @@ struct DoctorIssueDetailView: View {
         }
     }
 
-    // MARK: - Escape hatch
+    // MARK: - Block section
 
-    private var escapeHatchSection: some View {
+    private func blockSection(_ block: DoctorBlock) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Label(
-                "This warning has multiple subjects (one fix per item). Open the raw output below to see each.",
-                systemImage: "info.circle",
-            )
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewTextSecondary)
+            PackageDetailSectionHeading(title: standardHeading(for: block.type))
+            if block.type != .prose, let caption = block.caption {
+                Text(caption)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .textSelection(.enabled)
+            }
+            blockContent(block)
         }
     }
 
-    // MARK: - Blocks
-
-    private func blocksSection(_ blocks: [DoctorBlock]) -> some View {
-        ForEach(Array(blocks.enumerated()), id: \.element.id) { index, block in
-            blockView(block, isFirstProse: isFirstProseBlock(blocks: blocks, index: index))
+    private func standardHeading(for type: DoctorBlockType) -> String {
+        switch type {
+        case .prose: "What this means"
+        case .command: "Suggested fix"
+        case .data: "Affected"
+        case .link: "Links"
         }
-    }
-
-    private func isFirstProseBlock(blocks: [DoctorBlock], index: Int) -> Bool {
-        guard blocks[index].type == .prose else {
-            return false
-        }
-        return !blocks.prefix(index).contains { $0.type == .prose }
     }
 
     @ViewBuilder
-    private func blockView(_ block: DoctorBlock, isFirstProse: Bool) -> some View {
+    private func blockContent(_ block: DoctorBlock) -> some View {
         switch block.content {
         case let .prose(lines):
-            proseBlockView(lines: lines, isFirstProse: isFirstProse)
+            proseContent(lines: lines, showsChips: item.isFirstProseBlock(block))
         case let .command(steps):
-            commandBlockView(block: block, steps: steps)
+            commandContent(block: block, steps: steps)
         case let .data(items):
-            dataBlockView(block: block, items: items)
+            dataContent(items: items)
         case let .link(links):
-            linkBlockView(block: block, links: links)
+            linkContent(links: links)
         }
     }
 
-    private func proseBlockView(lines: [String], isFirstProse: Bool) -> some View {
+    // MARK: - Prose content
+
+    private func proseContent(lines: [String], showsChips: Bool) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            if isFirstProse {
-                PackageDetailSectionHeading(title: "What this means")
-            }
             Text(lines.joined(separator: " "))
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextSecondary)
                 .textSelection(.enabled)
-            if isFirstProse, !item.inlineChips.isEmpty {
+            if showsChips, !item.inlineChips.isEmpty {
                 chipsRow
             }
         }
@@ -117,24 +111,24 @@ struct DoctorIssueDetailView: View {
         }
     }
 
-    private func dataBlockView(block: DoctorBlock, items: [String]) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: displayCaption(block.caption, fallback: "Affected"))
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                ForEach(items, id: \.self) { affected in
-                    Text(affected)
-                        .font(.brewCode)
-                        .foregroundStyle(Color.brewTextPrimary)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
+    // MARK: - Data content
+
+    private func dataContent(items: [String]) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            ForEach(items, id: \.self) { affected in
+                Text(affected)
+                    .font(.brewCode)
+                    .foregroundStyle(Color.brewTextPrimary)
+                    .textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
     }
 
-    private func commandBlockView(block: DoctorBlock, steps: [DoctorFixStep]) -> some View {
+    // MARK: - Command content
+
+    private func commandContent(block: DoctorBlock, steps: [DoctorFixStep]) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            PackageDetailSectionHeading(title: displayCaption(block.caption, fallback: "Suggested fix"))
             if steps.contains(where: \.needsAdmin) {
                 Label("Needs admin · runs in Terminal", systemImage: "lock.fill")
                     .font(.brewCaption)
@@ -177,13 +171,12 @@ struct DoctorIssueDetailView: View {
         }
     }
 
-    private func linkBlockView(block: DoctorBlock, links: [DoctorLink]) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: displayCaption(block.caption, fallback: "Links"))
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                ForEach(links) { link in
-                    DoctorLinkRow(link: link)
-                }
+    // MARK: - Link content
+
+    private func linkContent(links: [DoctorLink]) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            ForEach(links) { link in
+                DoctorLinkRow(link: link)
             }
         }
     }
@@ -207,21 +200,6 @@ struct DoctorIssueDetailView: View {
                 .foregroundStyle(Color.brewTextPrimary)
         }
     }
-}
-
-/// Strips a trailing `:` and sentence-cases the result so captions like `Run \`brew link\` on these:` read
-/// cleanly as section headings. Falls back to `fallback` when the parser didn't capture an intro caption.
-private func displayCaption(_ caption: String?, fallback: String) -> String {
-    guard var text = caption else {
-        return fallback
-    }
-    if text.hasSuffix(":") {
-        text.removeLast()
-    }
-    if let first = text.first, first.isLowercase {
-        text = first.uppercased() + text.dropFirst()
-    }
-    return text.isEmpty ? fallback : text
 }
 
 // MARK: - Subviews

@@ -45,17 +45,10 @@ struct DoctorIssueItem: Identifiable, Equatable {
         primaryRunnableBlock?.copyAllText
     }
 
-    /// Blocks split into logical groups: a new group starts whenever a `.prose` block appears after a
-    /// non-prose block. Almost every check is one group; `check_git_status` is the notable exception
-    /// (one group per dirty repo).
-    var groups: [[DoctorBlock]] {
-        groupBlocks(blocks)
-    }
-
-    /// `true` when the issue has multiple subject groups — the detail pane falls back to raw output
-    /// for those (escape hatch) so each fix stays bound to its own paths.
-    var requiresRawEscapeHatch: Bool {
-        groups.count > 1
+    /// `true` for the first `.prose` block in document order — drives where the inline chips rail
+    /// appears so the chips don't repeat under every prose paragraph.
+    func isFirstProseBlock(_ block: DoctorBlock) -> Bool {
+        blocks.first { $0.type == .prose }?.id == block.id
     }
 }
 
@@ -67,25 +60,4 @@ struct DoctorIssueGroup: Identifiable, Equatable {
     var id: DoctorSection {
         section
     }
-}
-
-/// Walk the issue's blocks in order; start a new group whenever a `.prose` block follows a non-prose
-/// block. Single-group issues render in document order; multi-group issues fall back to raw output.
-func groupBlocks(_ blocks: [DoctorBlock]) -> [[DoctorBlock]] {
-    var groups: [[DoctorBlock]] = []
-    var current: [DoctorBlock] = []
-    for (index, block) in blocks.enumerated() {
-        if block.type == .prose, index > 0, blocks[index - 1].type != .prose {
-            if !current.isEmpty {
-                groups.append(current)
-            }
-            current = [block]
-        } else {
-            current.append(block)
-        }
-    }
-    if !current.isEmpty {
-        groups.append(current)
-    }
-    return groups
 }
