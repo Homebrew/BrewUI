@@ -136,16 +136,17 @@ final class DoctorViewModel {
 
     /// Submits the issue's suggested `brew` fix as a maintenance operation. Output streams in the bottom
     /// console automatically (the command center projects it like any other op); on success the system is
-    /// re-checked so a resolved issue clears. Only single-step, non-admin `brew` sequences are runnable;
-    /// multi-step or `sudo` sequences are copy-only.
+    /// re-checked so a resolved issue clears. Only single-step, non-admin `brew` command blocks are
+    /// runnable; multi-step or `sudo` blocks are copy-only.
     func runFix(for item: DoctorIssueItem) {
-        guard let sequence = item.primaryRunnableSequence,
-              let step = sequence.steps.first,
+        guard let block = item.primaryRunnableBlock,
+              case let .command(steps) = block.content,
+              let step = steps.first,
               let arguments = step.arguments
         else {
             return
         }
-        let token = sequence.copyAllText
+        let token = block.copyAllText
         guard !runningFixTokens.contains(token) else {
             return
         }

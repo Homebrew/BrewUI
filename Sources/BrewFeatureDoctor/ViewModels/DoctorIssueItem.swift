@@ -9,18 +9,15 @@ import Foundation
 /// Presentation mapping for a single ``DoctorIssue`` in the list/detail surface.
 ///
 /// `id` is the issue's index within the report so SwiftUI can track row selection across re-renders.
-/// The runnable-fix token (the sequence's `copyAllText`) doubles as the `.maintenance` operation id token,
-/// so the view model can match an in-flight fix back to the row that started it.
+/// The runnable-fix token (the block's `copyAllText`) doubles as the `.maintenance` operation id
+/// token, so the view model can match an in-flight fix back to the row that started it.
 struct DoctorIssueItem: Identifiable, Equatable {
     let id: Int
     let title: String
     let severity: DoctorSeverity
     let section: DoctorSection
-    let details: String
-    let affectedItems: [String]
+    let blocks: [DoctorBlock]
     let inlineChips: [DoctorBacktickChip]
-    let fixSequences: [DoctorFixSequence]
-    let links: [DoctorLink]
     let rawBody: String
 
     init(id: Int, issue: DoctorIssue) {
@@ -28,32 +25,41 @@ struct DoctorIssueItem: Identifiable, Equatable {
         title = issue.title
         severity = issue.severity
         section = issue.section
-        details = issue.details
-        affectedItems = issue.affectedItems
+        blocks = issue.blocks
         inlineChips = issue.inlineChips
-        fixSequences = issue.fixSequences
-        links = issue.links
         rawBody = issue.rawBody
     }
 
-    /// The first single-step, non-admin `brew` sequence we can submit through the command center.
-    var primaryRunnableSequence: DoctorFixSequence? {
-        fixSequences.first(where: \.isRunnable)
+    /// First runnable command block (single non-admin `brew` step).
+    var primaryRunnableBlock: DoctorBlock? {
+        blocks.first(where: \.isRunnable)
     }
 
-    /// `true` when ``primaryRunnableSequence`` is non-nil — drives the Run Fix affordance.
+    /// `true` when ``primaryRunnableBlock`` is non-nil — drives the Run Fix affordance.
     var hasRunnableFix: Bool {
-        primaryRunnableSequence != nil
+        primaryRunnableBlock != nil
     }
 
     /// Stable token tracking an in-flight fix — matches the `.maintenance` operation id token.
     var fixToken: String? {
-        primaryRunnableSequence?.copyAllText
+        primaryRunnableBlock?.copyAllText
+    }
+
+    /// Blocks split into logical groups: a new group starts whenever a `.prose` block appears after a
+    /// non-prose block. Almost every check is one group; `check_git_status` is the notable exception
+    /// (one group per dirty repo).
+    var groups: [[DoctorBlock]] {
+        groupBlocks(blocks)
+    }
+
+    /// `true` when the issue has multiple subject groups — the detail pane falls back to raw output
+    /// for those (escape hatch) so each fix stays bound to its own paths.
+    var requiresRawEscapeHatch: Bool {
+        groups.count > 1
     }
 }
 
-/// One sectioned bucket of issues for the list. `Identifiable` by the section so SwiftUI's `ForEach`
-/// tracks groups across re-renders.
+/// One sectioned bucket of issues for the list.
 struct DoctorIssueGroup: Identifiable, Equatable {
     let section: DoctorSection
     let items: [DoctorIssueItem]
@@ -61,4 +67,25 @@ struct DoctorIssueGroup: Identifiable, Equatable {
     var id: DoctorSection {
         section
     }
+}
+
+/// Walk the issue's blocks in order; start a new group whenever a `.prose` block follows a non-prose
+/// block. Single-group issues render in document order; multi-group issues fall back to raw output.
+func groupBlocks(_ blocks: [DoctorBlock]) -> [[DoctorBlock]] {
+    var groups: [[DoctorBlock]] = []
+    var current: [DoctorBlock] = []
+    for (index, block) in blocks.enumerated() {
+        if block.type == .prose, index > 0, blocks[index - 1].type != .prose {
+            if !current.isEmpty {
+                groups.append(current)
+            }
+            current = [block]
+        } else {
+            current.append(block)
+        }
+    }
+    if !current.isEmpty {
+        groups.append(current)
+    }
+    return groups
 }

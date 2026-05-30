@@ -22,95 +22,51 @@ public struct DoctorReport: Equatable, Sendable {
     }
 }
 
-/// One `brew doctor` warning, sectioned for the detail pane.
+/// One `brew doctor` warning, kept as an ordered list of typed blocks so renderers can preserve
+/// document order and the intro caption of each block.
 ///
-/// The fields reflect the layered classifier described in `.ai/plans/DoctorParsing-Plan.md`: severity is
-/// the support-tier signal, ``affectedItems`` is collected only under closed data-intro cues (not "every
-/// indented line"), ``fixSequences`` groups consecutive indented commands into ordered runs, ``inlineChips``
-/// surfaces backticked `brew …` references in prose without promoting them to primary fixes, and
-/// ``rawBody`` is the verbatim fallback that's never wrong.
+/// Prior parsed shape flattened body content into `details` + `affectedItems` + `fixSequences` + `links`,
+/// which orphaned each fix from its own paths/files when a single check produced multiple subjects
+/// (notably `check_git_status`'s "one block per dirty repo"). The block model keeps each fix bound to
+/// its own data; `inlineChips` and `rawBody` remain cross-cutting indices.
 public struct DoctorIssue: Equatable, Sendable {
     /// `Warning:` summary line, with the prefix stripped.
     public var title: String
     /// Severity derived from a support-tier callout (`This is a Tier N configuration:` /
     /// `Unsupported configuration:`). Unflagged warnings default to ``DoctorSeverity/caution``.
     public var severity: DoctorSeverity
-    /// Coarse grouping for the issues list, mapped from the warning's text. The plan's `check_name`
-    /// mapping would be more precise; brew doctor doesn't print check names so this is a title-keyword
-    /// stand-in (an explicit, revertable trade-off).
+    /// Coarse grouping for the issues list, mapped from the warning's text. Title-keyword stand-in for
+    /// the plan's `check_name` mapping.
     public var section: DoctorSection
-    /// "What this means" prose — everything that wasn't consumed as command, data line, link, or chip.
-    public var details: String
-    /// Concrete items the warning enumerates (unlinked kegs, offending paths, …). Anchored to recognized
-    /// data-intro cue lines so stray values don't fall in.
-    public var affectedItems: [String]
-    /// Inline backticked references found in prose (e.g. `` `brew cleanup` ``, `` `brew link` ``) — copyable
-    /// chips that are usually generic, not the runnable suggested fix.
+    /// Ordered list of blocks as they appear in the raw output. Each block keeps the colon-terminated
+    /// intro that introduced it as its `caption`, so renderers can label sections by what brew actually
+    /// wrote (e.g. ``Remove them with `brew cleanup`:``). Empty for a title-only warning.
+    public var blocks: [DoctorBlock]
+    /// Inline backticked references found in prose (e.g. `` `brew cleanup` ``, `` `brew link` ``) —
+    /// copyable chips that are never promoted into the runnable suggested fix.
     public var inlineChips: [DoctorBacktickChip]
-    /// Suggested fixes parsed from indented command lines, grouped into ordered sequences (`rm` then
-    /// `brew tap`; `mkdir` then `chown`; …). Empty when there is no runnable guidance.
-    public var fixSequences: [DoctorFixSequence]
-    /// URLs found in the body, split into action vs reference by host.
-    public var links: [DoctorLink]
-    /// Verbatim body the parser consumed, for a dark-mono "Raw output" fallback.
+    /// Verbatim body the parser consumed, for the always-present dark-mono "Raw output" fallback and
+    /// the multi-group escape hatch.
     public var rawBody: String
 
     public init(
         title: String,
         severity: DoctorSeverity,
         section: DoctorSection,
-        details: String,
-        affectedItems: [String],
+        blocks: [DoctorBlock],
         inlineChips: [DoctorBacktickChip],
-        fixSequences: [DoctorFixSequence],
-        links: [DoctorLink],
         rawBody: String,
     ) {
         self.title = title
         self.severity = severity
         self.section = section
-        self.details = details
-        self.affectedItems = affectedItems
+        self.blocks = blocks
         self.inlineChips = inlineChips
-        self.fixSequences = fixSequences
-        self.links = links
         self.rawBody = rawBody
     }
 }
 
-/// Coarse grouping for the issues list, modelled on the curated `check_name` → section map sketched
-/// in `.ai/plans/DoctorParsing-Plan.md` §8. Since `brew doctor` output doesn't include check names, the
-/// parser classifies by title/body keywords instead — accurate enough to organize the list but not as
-/// precise as actually running each check individually would be.
-public enum DoctorSection: String, CaseIterable, Equatable, Sendable, Identifiable {
-    case xcodeAndCLT
-    case environmentAndPath
-    case casks
-    case tapsAndGit
-    case strayFiles
-    case systemAndFormulae
-
-    public var id: String {
-        rawValue
-    }
-
-    /// Human-readable section heading.
-    public var displayName: String {
-        switch self {
-        case .xcodeAndCLT: "Xcode & Command Line Tools"
-        case .environmentAndPath: "Environment & PATH"
-        case .casks: "Casks"
-        case .tapsAndGit: "Taps & Git"
-        case .strayFiles: "Stray Files"
-        case .systemAndFormulae: "System & Formulae"
-        }
-    }
-}
-
 /// Support-tier severity, mapped from `brew doctor`'s tier callouts.
-///
-/// Presentation maps these to *system* semantic colors (info / caution / danger). Homebrew amber stays
-/// reserved for the Homebrew warning glyph and progress UI — spending it on tiers dilutes the brand.
 public enum DoctorSeverity: String, Equatable, Sendable {
     case info
     case caution
@@ -118,7 +74,67 @@ public enum DoctorSeverity: String, Equatable, Sendable {
     case unsupported
 }
 
-/// One step inside a ``DoctorFixSequence`` — a single command line as `brew doctor` printed it.
+/// One typed block in a ``DoctorIssue``'s body — keeps document order and the intro caption that
+/// produced it.
+public struct DoctorBlock: Equatable, Sendable, Identifiable {
+    public let id: Int
+    public let caption: String?
+    public let content: Content
+
+    public enum Content: Equatable, Sendable {
+        /// Un-indented prose lines. No caption (prose lines that end in `:` are captions, not prose).
+        case prose([String])
+        /// Indented command lines, parsed via the executable allowlist.
+        case command([DoctorFixStep])
+        /// Indented list of concrete items (paths, keg/formula names) — collected only under a
+        /// colon-introduced data block.
+        case data([String])
+        /// Indented list of URLs — collected only under a colon-introduced link block.
+        case link([DoctorLink])
+    }
+
+    public init(id: Int, caption: String?, content: Content) {
+        self.id = id
+        self.caption = caption
+        self.content = content
+    }
+
+    public var type: DoctorBlockType {
+        switch content {
+        case .prose: .prose
+        case .command: .command
+        case .data: .data
+        case .link: .link
+        }
+    }
+
+    /// `true` iff this is a single non-admin `brew` command block we can submit through the command
+    /// center. Multi-step command blocks and anything needing `sudo` are copy-only.
+    public var isRunnable: Bool {
+        guard case let .command(steps) = content, steps.count == 1, let step = steps.first else {
+            return false
+        }
+        return step.arguments != nil && !step.needsAdmin
+    }
+
+    /// Joined command text suitable for clipboard "Copy all" — one step per line. Empty for non-command
+    /// blocks.
+    public var copyAllText: String {
+        guard case let .command(steps) = content else {
+            return ""
+        }
+        return steps.map(\.displayCommand).joined(separator: "\n")
+    }
+}
+
+public enum DoctorBlockType: String, Equatable, Sendable {
+    case prose
+    case command
+    case data
+    case link
+}
+
+/// One step inside a ``DoctorBlock``'s `.command` content — a single command line as `brew doctor` printed it.
 public struct DoctorFixStep: Equatable, Sendable {
     /// Verbatim command line (e.g. `"sudo chown -R me /opt/homebrew"`, `"brew link openssl@3"`).
     public var displayCommand: String
@@ -135,34 +151,8 @@ public struct DoctorFixStep: Equatable, Sendable {
     }
 }
 
-/// Ordered run of consecutive indented commands brew printed as one suggested fix (`rm` then `brew tap`,
-/// `mkdir` then `chown`, `rm -rf` then `xcode-select --install`). One "Copy all" beats N loose buttons.
-public struct DoctorFixSequence: Equatable, Sendable, Identifiable {
-    public var id: Int
-    public var steps: [DoctorFixStep]
-
-    public init(id: Int, steps: [DoctorFixStep]) {
-        self.id = id
-        self.steps = steps
-    }
-
-    /// Joined command text suitable for clipboard / "Copy all" — one step per line.
-    public var copyAllText: String {
-        steps.map(\.displayCommand).joined(separator: "\n")
-    }
-
-    /// `true` iff this is a single non-admin `brew` step we can submit through the command center.
-    /// Multi-step sequences and anything needing `sudo` are copy-only.
-    public var isRunnable: Bool {
-        guard steps.count == 1, let step = steps.first else {
-            return false
-        }
-        return step.arguments != nil && !step.needsAdmin
-    }
-}
-
 /// A `brew …` reference parsed out of a backticked span inside prose. Render as a copyable chip; do not
-/// promote into the "Suggested fix" rail (the indented commands are the runnable form).
+/// promote into the runnable suggested fix (the indented commands are the runnable form).
 public struct DoctorBacktickChip: Equatable, Sendable, Identifiable {
     /// The text inside the backticks, e.g. `"brew cleanup"`.
     public var displayCommand: String
@@ -180,7 +170,7 @@ public struct DoctorBacktickChip: Equatable, Sendable, Identifiable {
     }
 }
 
-/// A URL surfaced from a doctor warning, classified by what the user is meant to do with it.
+/// A URL surfaced from a `.link` block, classified by what the user is meant to do with it.
 public struct DoctorLink: Equatable, Sendable, Identifiable {
     public var url: URL
     public var role: DoctorLinkRole
@@ -195,11 +185,34 @@ public struct DoctorLink: Equatable, Sendable, Identifiable {
     }
 }
 
-/// Whether a URL is something the user **does** (download, install) or something the user **reads**
-/// (docs, troubleshooting, issue references).
 public enum DoctorLinkRole: String, Equatable, Sendable {
-    /// Primary affordance — downloads, alternative tools the user should grab.
     case action
-    /// Muted/secondary affordance — documentation, issue references.
     case reference
+}
+
+/// Coarse grouping for the issues list, modelled on the curated `check_name` → section map sketched
+/// in `.ai/plans/DoctorParsing-Plan.md` §8. Since `brew doctor` output doesn't include check names, the
+/// parser classifies by title/body keywords instead.
+public enum DoctorSection: String, CaseIterable, Equatable, Sendable, Identifiable {
+    case xcodeAndCLT
+    case environmentAndPath
+    case casks
+    case tapsAndGit
+    case strayFiles
+    case systemAndFormulae
+
+    public var id: String {
+        rawValue
+    }
+
+    public var displayName: String {
+        switch self {
+        case .xcodeAndCLT: "Xcode & Command Line Tools"
+        case .environmentAndPath: "Environment & PATH"
+        case .casks: "Casks"
+        case .tapsAndGit: "Taps & Git"
+        case .strayFiles: "Stray Files"
+        case .systemAndFormulae: "System & Formulae"
+        }
+    }
 }

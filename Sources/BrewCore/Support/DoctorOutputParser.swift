@@ -7,16 +7,13 @@ import Foundation
 
 /// Pure text→domain parser for `brew doctor` output. No dependencies, no isolation — unit-tested directly.
 ///
-/// Classification follows `.ai/plans/DoctorParsing-Plan-Addendum.md`: a colon-terminated un-indented line
-/// opens a *pending block*; the **first member** of that block decides whether the whole block is
-/// commands, data, links, or prose. The executable allowlist is consulted *once* (for the first
-/// member's command test), not per indented line — so a deprecated-tools list never gets scattered into
-/// the commands rail. A `dataNounCue` guard forces data before the first-member command test in the
-/// rare case the first item could read as a command (a deprecated formula named `git`, `python`, …).
-///
-/// Per-issue results: severity (tier callout / `Unsupported configuration:`), title, "What this means"
-/// (prose residue), affected items (data blocks), fix sequences (command blocks grouped by intro / blank
-/// line), inline backtick `brew …` chips, host-classified links, and a verbatim raw-body fallback.
+/// Each warning is parsed into an ordered list of typed ``DoctorBlock``s (`.prose` / `.command` /
+/// `.data` / `.link`), each keeping the colon-introduced caption that produced it. Classification of an
+/// indented block follows the first-member rule from
+/// `.ai/plans/DoctorParsing-Plan-Addendum.md`: a `dataNounCue` guard forces `.data` *before* the
+/// first-member command test for lists whose first item could read as a command; otherwise the first
+/// member's content (command / link / else) decides the mode. The executable allowlist is consulted
+/// once per block plus as a `.prose` fallback for stray commands sitting under period-ending prose.
 public enum DoctorOutputParser {
     public static func parse(_ output: String) -> DoctorReport {
         let blocks = warningBlocks(in: output)
@@ -56,40 +53,33 @@ private func warningBlocks(in output: String) -> [WarningBlock] {
 
 // MARK: - Per-warning state machine
 
-/// What the parser is currently inside: a stretch of prose, a command run, a list of items, or a run of
-/// link lines. Decided once at the start of each indented block by peeking at the first member.
-private enum BlockMode {
-    case prose
-    case commands
-    case data
-    case links
+private struct BlockBuilder {
+    var type: DoctorBlockType
+    var caption: String?
+    var proseLines: [String] = []
+    var commandSteps: [DoctorFixStep] = []
+    var dataItems: [String] = []
+    var linkItems: [DoctorLink] = []
 }
 
 private struct WarningBlockParser {
     let block: WarningBlock
-    var fixSequences: [DoctorFixSequence] = []
-    var currentSteps: [DoctorFixStep] = []
-    var affectedItems: [String] = []
-    var detailLines: [String] = []
+    var committed: [DoctorBlock] = []
+    var current: BlockBuilder?
     var inlineChips: [DoctorBacktickChip] = []
-    var links: [DoctorLink] = []
-    var mode: BlockMode = .prose
-    /// `true` after a colon-terminated intro and before its first indented member arrives — that member
-    /// decides the block's mode.
-    var pendingBlock: Bool
-    /// Last un-indented colon intro, kept so the first-member rule can consult the `dataNounCue` guard.
-    var previousIntro: String
+    /// Set when a colon-terminated un-indented line is seen and we're waiting for its first indented
+    /// member to decide the block's type.
+    var pendingCaption: String?
     /// `true` while a special intro (`do not exist:` / `not writable by your user:`) is allowing
-    /// un-indented item lines to flow into Affected — brew prints those dir lists at column 0.
+    /// un-indented item lines to flow into a data block.
     var specialUnindentedActive: Bool
 
     init(block: WarningBlock) {
         self.block = block
-        // The title can itself be the intro (e.g. `check_access_directories` puts it at column 0 of
-        // the `Warning:` line). Seed the state machine from it.
+        // The title can itself be the colon intro for the first body block (e.g.
+        // `Warning: The following directories are not writable by your user:`).
         let titleIsIntro = block.title.hasSuffix(":")
-        pendingBlock = titleIsIntro
-        previousIntro = titleIsIntro ? block.title : ""
+        pendingCaption = titleIsIntro ? block.title : nil
         specialUnindentedActive = titleIsIntro && acceptsUnindentedItems(block.title)
     }
 
@@ -100,34 +90,49 @@ private struct WarningBlockParser {
         for line in block.bodyLines {
             processLine(line)
         }
-        flushSequence()
+        flushCurrent()
 
         let rawBody = block.bodyLines.joined(separator: "\n")
         return DoctorIssue(
             title: block.title,
             severity: parseSeverity(body: rawBody),
             section: classifySection(title: block.title, body: rawBody),
-            details: detailLines.joined(separator: " "),
-            affectedItems: affectedItems,
+            blocks: committed,
             inlineChips: uniqueChips(inlineChips),
-            fixSequences: fixSequences,
-            links: uniqueLinks(links),
             rawBody: rawBody,
         )
     }
 
-    private mutating func flushSequence() {
-        guard !currentSteps.isEmpty else {
+    private mutating func flushCurrent() {
+        guard let builder = current else {
             return
         }
-        fixSequences.append(DoctorFixSequence(id: fixSequences.count, steps: currentSteps))
-        currentSteps = []
+        current = nil
+        let content: DoctorBlock.Content
+        let isEmpty: Bool
+        switch builder.type {
+        case .prose:
+            content = .prose(builder.proseLines)
+            isEmpty = builder.proseLines.isEmpty
+        case .command:
+            content = .command(builder.commandSteps)
+            isEmpty = builder.commandSteps.isEmpty
+        case .data:
+            content = .data(builder.dataItems)
+            isEmpty = builder.dataItems.isEmpty
+        case .link:
+            content = .link(builder.linkItems)
+            isEmpty = builder.linkItems.isEmpty
+        }
+        guard !isEmpty else {
+            return
+        }
+        committed.append(DoctorBlock(id: committed.count, caption: builder.caption, content: content))
     }
 
     private mutating func processLine(_ line: String) {
         let isIndented = line.first == " " || line.first == "\t"
         let trimmed = line.trimmingCharacters(in: .whitespaces)
-
         if !isIndented {
             processUnindented(trimmed)
             return
@@ -135,106 +140,109 @@ private struct WarningBlockParser {
         guard !trimmed.isEmpty else {
             return
         }
-
-        if pendingBlock {
-            pendingBlock = false
-            mode = decideBlockMode(firstMember: trimmed)
-        }
-        handleIndented(trimmed)
-    }
-
-    private mutating func handleIndented(_ trimmed: String) {
-        switch mode {
-        case .commands, .prose:
-            // .commands picks steps until the block ends; .prose picks up stray commands that sit
-            // under period-ending prose (e.g. `git stash` / `rm -rf`). Both go through parseFixStep.
-            if let step = parseFixStep(trimmed) {
-                currentSteps.append(step)
-            }
-        case .data:
-            appendDataLine(trimmed)
-        case .links:
-            appendLinks(from: trimmed, into: &links)
-        }
-    }
-
-    private mutating func appendDataLine(_ trimmed: String) {
-        guard !containsLink(trimmed) else {
-            return
-        }
-        if isValueLine(trimmed) {
-            detailLines.append(trimmed)
-        } else {
-            affectedItems.append(trimmed)
-        }
+        processIndented(trimmed)
     }
 
     private mutating func processUnindented(_ trimmed: String) {
         if trimmed.isEmpty {
-            resetForBlankLine()
+            flushCurrent()
+            pendingCaption = nil
+            specialUnindentedActive = false
             return
         }
         if trimmed.hasSuffix(":") {
-            beginIntro(trimmed)
+            flushCurrent()
+            pendingCaption = trimmed
+            specialUnindentedActive = acceptsUnindentedItems(trimmed)
+            // Captions can still contain `` `brew …` `` chips — keep the chip surface working under
+            // the new block model.
+            appendChips(from: trimmed, into: &inlineChips)
             return
         }
-        if collectUnindentedItem(trimmed) {
+        if collectUnindentedDataItem(trimmed) {
             return
         }
-        finishAsProse(trimmed)
+        appendProseLine(trimmed)
     }
 
-    private mutating func resetForBlankLine() {
-        flushSequence()
-        mode = .prose
-        pendingBlock = false
-        specialUnindentedActive = false
-    }
-
-    private mutating func beginIntro(_ trimmed: String) {
-        flushSequence()
-        previousIntro = trimmed
-        pendingBlock = true
-        mode = .prose
-        specialUnindentedActive = acceptsUnindentedItems(trimmed)
-        detailLines.append(trimmed)
-        appendLinks(from: trimmed, into: &links)
-        appendChips(from: trimmed, into: &inlineChips)
-    }
-
-    private mutating func collectUnindentedItem(_ trimmed: String) -> Bool {
+    private mutating func collectUnindentedDataItem(_ trimmed: String) -> Bool {
         guard specialUnindentedActive, looksLikeItem(trimmed), !containsLink(trimmed) else {
             return false
         }
-        affectedItems.append(trimmed)
+        if current?.type != .data {
+            flushCurrent()
+            current = BlockBuilder(type: .data, caption: pendingCaption)
+            pendingCaption = nil
+        }
+        current?.dataItems.append(trimmed)
         return true
     }
 
-    private mutating func finishAsProse(_ trimmed: String) {
-        flushSequence()
-        mode = .prose
-        pendingBlock = false
-        specialUnindentedActive = false
-        if isLinkOnly(trimmed) {
-            appendLinks(from: trimmed, into: &links)
-            return
+    private mutating func appendProseLine(_ trimmed: String) {
+        // Any orphan pendingCaption was a colon intro whose block never materialized — drop it; the
+        // raw body still carries it for the verbatim fallback.
+        if pendingCaption != nil {
+            pendingCaption = nil
+            specialUnindentedActive = false
         }
-        detailLines.append(trimmed)
-        appendLinks(from: trimmed, into: &links)
+        if current?.type != .prose {
+            flushCurrent()
+            current = BlockBuilder(type: .prose, caption: nil)
+        }
+        current?.proseLines.append(trimmed)
         appendChips(from: trimmed, into: &inlineChips)
     }
 
-    private func decideBlockMode(firstMember: String) -> BlockMode {
-        // `dataNounCue` runs *before* the command test so a list whose first item could read as a
-        // command (a deprecated formula named `git`/`python`/`node`, …) still classifies as data.
-        if dataNounCue(previousIntro) {
+    private mutating func processIndented(_ trimmed: String) {
+        if let caption = pendingCaption {
+            flushCurrent()
+            let type = decideBlockType(firstMember: trimmed, intro: caption)
+            current = BlockBuilder(type: type, caption: caption)
+            pendingCaption = nil
+        } else if current == nil || current?.type == .prose, parseFixStep(trimmed) != nil {
+            // Stray command sits under a `.prose` block (or no block yet) without a colon intro
+            // (e.g. `check_git_status`'s `git stash`). Only fire here so it doesn't hijack lines that
+            // belong to an existing data/command/link block — `pip3` under "tools exist at both paths:"
+            // must stay in the data block, not split into commands.
+            flushCurrent()
+            current = BlockBuilder(type: .command, caption: nil)
+        } else if current == nil {
+            current = BlockBuilder(type: .prose, caption: nil)
+        }
+        appendToCurrent(trimmed)
+    }
+
+    private mutating func appendToCurrent(_ trimmed: String) {
+        guard current != nil else {
+            return
+        }
+        switch current!.type {
+        case .prose:
+            current?.proseLines.append(trimmed)
+        case .command:
+            if let step = parseFixStep(trimmed) {
+                current?.commandSteps.append(step)
+            }
+        case .data:
+            if !containsLink(trimmed), !isValueLine(trimmed) {
+                current?.dataItems.append(trimmed)
+            }
+        case .link:
+            if let url = firstURL(in: trimmed) {
+                current?.linkItems.append(DoctorLink(url: url, role: linkRole(for: url)))
+            }
+        }
+    }
+
+    private func decideBlockType(firstMember: String, intro: String) -> DoctorBlockType {
+        if dataNounCue(intro) {
             return .data
         }
         if parseFixStep(firstMember) != nil {
-            return .commands
+            return .command
         }
         if containsLink(firstMember) {
-            return .links
+            return .link
         }
         return .data
     }
@@ -263,10 +271,6 @@ private func parseSeverity(body: String) -> DoctorSeverity {
 
 // MARK: - Command classifier
 
-/// First non-`sudo`/non-`env`/non-`VAR=…` token must match this set to count as a command. With the
-/// first-member rule, this list only decides whether the *first* member of a block opens a commands
-/// block — it isn't consulted per line, so adding a missed verb only matters for blocks whose first
-/// member is that verb. Add to the list as Homebrew adds checks that suggest new tools.
 private let knownExecutables: Set<String> = [
     "brew", "git", "rm", "mkdir", "chown", "chmod", "cp", "mv", "ln",
     "xcode-select", "softwareupdate", "csrutil", "launchctl",
@@ -335,19 +339,6 @@ private let urlDetector: NSDataDetector? = try? NSDataDetector(
     types: NSTextCheckingResult.CheckingType.link.rawValue,
 )
 
-private func appendLinks(from line: String, into links: inout [DoctorLink]) {
-    guard let detector = urlDetector else {
-        return
-    }
-    let nsRange = NSRange(line.startIndex..., in: line)
-    detector.enumerateMatches(in: line, options: [], range: nsRange) { match, _, _ in
-        guard let url = match?.url else {
-            return
-        }
-        links.append(DoctorLink(url: url, role: linkRole(for: url)))
-    }
-}
-
 private func containsLink(_ line: String) -> Bool {
     guard let detector = urlDetector else {
         return false
@@ -356,19 +347,12 @@ private func containsLink(_ line: String) -> Bool {
     return detector.firstMatch(in: line, options: [], range: nsRange) != nil
 }
 
-private func isLinkOnly(_ trimmed: String) -> Bool {
+private func firstURL(in line: String) -> URL? {
     guard let detector = urlDetector else {
-        return false
+        return nil
     }
-    let nsRange = NSRange(trimmed.startIndex..., in: trimmed)
-    guard let match = detector.firstMatch(in: trimmed, options: [], range: nsRange),
-          let urlRange = Range(match.range, in: trimmed)
-    else {
-        return false
-    }
-    let prefix = trimmed[trimmed.startIndex ..< urlRange.lowerBound].trimmingCharacters(in: .whitespaces)
-    let suffix = trimmed[urlRange.upperBound ..< trimmed.endIndex].trimmingCharacters(in: .whitespaces)
-    return prefix.isEmpty && (suffix.isEmpty || suffix == ".")
+    let nsRange = NSRange(line.startIndex..., in: line)
+    return detector.firstMatch(in: line, options: [], range: nsRange)?.url
 }
 
 private func linkRole(for url: URL) -> DoctorLinkRole {
@@ -381,21 +365,8 @@ private func linkRole(for url: URL) -> DoctorLinkRole {
     }
 }
 
-private func uniqueLinks(_ links: [DoctorLink]) -> [DoctorLink] {
-    var seen: Set<URL> = []
-    var out: [DoctorLink] = []
-    for link in links where seen.insert(link.url).inserted {
-        out.append(link)
-    }
-    return out
-}
-
 // MARK: - Data-noun guard
 
-/// The only intro cue the addendum keeps: a hard guard that forces `.data` *before* the first-member
-/// command test, so a list whose first item could read as a command (a deprecated formula named
-/// `git`/`python`/`node`, …) still classifies as data. Keys on list-nouns (plural), not on bare
-/// `following`, so the singular `following command:` correctly falls through to the content test.
 private func dataNounCue(_ trimmedIntro: String) -> Bool {
     let lower = trimmedIntro.lowercased()
     let listNouns = [
@@ -414,8 +385,6 @@ private func dataNounCue(_ trimmedIntro: String) -> Bool {
     return phrases.contains { lower.contains($0) }
 }
 
-/// `check_exist_directories` / `check_access_directories` print their dir lists un-indented; allow
-/// those two intros to accept un-indented item lines until the next blank line.
 private func acceptsUnindentedItems(_ trimmedCue: String) -> Bool {
     let lower = trimmedCue.lowercased()
     return lower.hasSuffix("do not exist:") || lower.hasSuffix("not writable by your user:")
@@ -428,22 +397,15 @@ private func looksLikeItem(_ trimmed: String) -> Bool {
     return !trimmed.contains(where: \.isWhitespace)
 }
 
-/// Keeps key/value lines (`core.autocrlf = true`, `which resolves to: /path`, `Current developer
-/// directory is: …`) out of Affected when the surrounding block has classified as data. They stay in
-/// the prose residue instead — real item lines (paths, keg/formula names) don't contain `=` or `: `.
 private func isValueLine(_ trimmed: String) -> Bool {
     trimmed.contains(" = ") || trimmed.contains(": ")
 }
 
 // MARK: - Section classifier
 
-/// Stand-in for the plan's curated `check_name` → section map (§8). Homebrew doesn't print check names
-/// alongside warnings, so the parser keys on title/body keywords instead. Precedence runs most-specific
-/// first (Xcode/CLT, Env/PATH, Casks, Taps/Git, Stray Files) and falls back to System & Formulae.
 private func classifySection(title: String, body: String) -> DoctorSection {
     let titleLower = title.lowercased()
     let combined = (title + " " + body).lowercased()
-
     if matchesAny(combined, xcodeAndCLTKeywords) {
         return .xcodeAndCLT
     }
@@ -451,8 +413,6 @@ private func classifySection(title: String, body: String) -> DoctorSection {
         return .environmentAndPath
     }
     if titleLower.contains("cask") {
-        // Title-only: "casks" appears in the body of many non-cask warnings (e.g. the deprecated
-        // formula check lists casks too).
         return .casks
     }
     if matchesAny(combined, tapsAndGitKeywords) {

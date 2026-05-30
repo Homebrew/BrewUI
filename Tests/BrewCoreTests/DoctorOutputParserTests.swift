@@ -7,6 +7,42 @@ import BrewCore
 import Foundation
 import Testing
 
+private extension DoctorIssue {
+    /// All `.data` block items across the issue.
+    var allDataItems: [String] {
+        blocks.flatMap { block -> [String] in
+            guard case let .data(items) = block.content else {
+                return []
+            }
+            return items
+        }
+    }
+
+    /// All `.command` blocks (in document order).
+    var commandBlocks: [DoctorBlock] {
+        blocks.filter { $0.type == .command }
+    }
+
+    /// All `.link` block URLs across the issue, host + role.
+    var allLinks: [(host: String, role: DoctorLinkRole)] {
+        blocks.flatMap { block -> [DoctorLink] in
+            guard case let .link(links) = block.content else {
+                return []
+            }
+            return links
+        }.map { ($0.url.host ?? "", $0.role) }
+    }
+}
+
+private extension DoctorBlock {
+    var commandSteps: [DoctorFixStep] {
+        guard case let .command(steps) = content else {
+            return []
+        }
+        return steps
+    }
+}
+
 struct DoctorOutputParserTests {
     @Test func `healthy output yields no issues`() {
         let report = DoctorOutputParser.parse("Your system is ready to brew.\n")
@@ -55,9 +91,9 @@ struct DoctorOutputParserTests {
         #expect(DoctorOutputParser.parse(output).issues.first?.severity == .unsupported)
     }
 
-    // MARK: - Anchored Affected (the original-bug fix)
+    // MARK: - Anchored data blocks (the original-bug fix)
 
-    @Test func `unlinked-kegs cue collects indented items into Affected`() throws {
+    @Test func `unlinked-kegs cue collects indented items into a data block`() throws {
         let output = """
         Warning: You have unlinked kegs in your Cellar.
         Leaving kegs unlinked can lead to build-trouble. Run `brew link` on these:
@@ -65,7 +101,7 @@ struct DoctorOutputParserTests {
           readline
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.affectedItems == ["openssl@3", "readline"])
+        #expect(issue.allDataItems == ["openssl@3", "readline"])
     }
 
     @Test func `not-writable-directories cue collects un-indented paths`() throws {
@@ -78,23 +114,19 @@ struct DoctorOutputParserTests {
           sudo chown -R me /opt/homebrew /opt/homebrew/bin
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.affectedItems == ["/opt/homebrew", "/opt/homebrew/bin"])
+        #expect(issue.allDataItems == ["/opt/homebrew", "/opt/homebrew/bin"])
     }
 
-    @Test func `value lines without a recognized cue stay out of Affected`() throws {
-        // `which resolves to: /path` is a key/value line. Without a data-intro cue, it must not be
-        // collected — that was the original bug.
+    @Test func `value lines without a recognized cue produce no data block`() throws {
         let output = """
         Warning: Your Cellar is symlinked.
         which resolves to: /opt/homebrew/Cellar
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.affectedItems.isEmpty)
+        #expect(issue.allDataItems.isEmpty)
     }
 
     @Test func `tools-at-both-paths block stays as one data block (no command scatter)`() throws {
-        // The original scatter bug: pip3/python3 look like commands per line, but the block's first
-        // member (openssl) isn't, so the whole block is data.
         let output = """
         Warning: The following tools exist at both paths:
           openssl
@@ -102,51 +134,44 @@ struct DoctorOutputParserTests {
           python3
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.affectedItems == ["openssl", "pip3", "python3"])
-        #expect(issue.fixSequences.isEmpty)
+        #expect(issue.allDataItems == ["openssl", "pip3", "python3"])
+        #expect(issue.commandBlocks.isEmpty)
     }
 
     @Test func `broken-symlinks block classifies as data via the first member, no intro cue needed`() throws {
-        // `Remove them with `brew cleanup`:` ends with a backtick before the colon — no enumerated
-        // cue could match it. The first-member rule handles it because the first item is a path.
         let output = """
         Warning: Broken symlinks were found. Remove them with `brew cleanup`:
           /opt/homebrew/bin/foo
           /opt/homebrew/bin/bar
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.affectedItems == ["/opt/homebrew/bin/foo", "/opt/homebrew/bin/bar"])
-        #expect(issue.fixSequences.isEmpty)
+        #expect(issue.allDataItems == ["/opt/homebrew/bin/foo", "/opt/homebrew/bin/bar"])
+        #expect(issue.commandBlocks.isEmpty)
     }
 
     @Test func `stray command with no colon intro is still captured`() throws {
-        // `check_git_status` / `check_multiple_cellars`: the command sits under period-ending prose,
-        // not a colon intro. The .prose fallback catches it via the allowlist.
         let output = """
         Warning: Uncommitted git changes.
         Your homebrew git repo has uncommitted changes.
           git -C /opt/homebrew stash
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        let sequence = try #require(issue.fixSequences.first)
-        #expect(sequence.steps.map(\.displayCommand) == ["git -C /opt/homebrew stash"])
+        let block = try #require(issue.commandBlocks.first)
+        #expect(block.commandSteps.map(\.displayCommand) == ["git -C /opt/homebrew stash"])
     }
 
     @Test func `echo PATH one-liner classifies as a command block`() throws {
-        // The shell-profile fix from check_user_path_* — first member is `echo …`, in the allowlist.
         let output = """
         Warning: Homebrew's bin was not found in your PATH.
         Consider setting your PATH for example like so:
           echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        let sequence = try #require(issue.fixSequences.first)
-        #expect(sequence.steps.first?.displayCommand.hasPrefix("echo ") == true)
+        let block = try #require(issue.commandBlocks.first)
+        #expect(block.commandSteps.first?.displayCommand.hasPrefix("echo ") == true)
     }
 
     @Test func `dataNounCue forces data even when the first item looks like a command`() throws {
-        // Deprecated formulae list could contain a name that reads as a command (e.g. a formula
-        // literally named `git`). The intro contains "formulae" → data noun cue → data block.
         let output = """
         Warning: Some installed formulae are deprecated or disabled.
         You should find replacements for the following formulae:
@@ -154,36 +179,56 @@ struct DoctorOutputParserTests {
           python
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.affectedItems == ["git", "python"])
-        #expect(issue.fixSequences.isEmpty)
+        #expect(issue.allDataItems == ["git", "python"])
+        #expect(issue.commandBlocks.isEmpty)
     }
 
-    @Test func `value lines inside a data block fall through to prose, not Affected`() throws {
-        // `core.autocrlf = true` shouldn't end up as an Affected item even though it lives under a
-        // colon intro that classifies as data.
+    @Test func `value lines inside a data block are skipped, not collected`() throws {
         let output = """
         Warning: Suspicious git newline settings.
         The detected git configuration values are:
           core.autocrlf = true
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(!issue.affectedItems.contains("core.autocrlf = true"))
+        #expect(!issue.allDataItems.contains("core.autocrlf = true"))
     }
 
-    // MARK: - Fix sequences
+    // MARK: - Captions stay on their block
 
-    @Test func `indented brew command is captured as a runnable fix sequence`() throws {
+    @Test func `colon intro is kept as the block's caption, not pushed into prose`() throws {
         let output = """
         Warning: Out of date.
         Update guidance:
           brew upgrade git
         """
-        let sequence = try #require(DoctorOutputParser.parse(output).issues.first?.fixSequences.first)
-        #expect(sequence.steps.count == 1)
-        #expect(sequence.steps[0].displayCommand == "brew upgrade git")
-        #expect(sequence.steps[0].arguments == ["upgrade", "git"])
-        #expect(sequence.steps[0].needsAdmin == false)
-        #expect(sequence.isRunnable == true)
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        let block = try #require(issue.commandBlocks.first)
+        #expect(block.caption == "Update guidance:")
+        // The intro shouldn't appear in any prose block either.
+        let proseLines = issue.blocks.compactMap { block -> [String]? in
+            guard case let .prose(lines) = block.content else {
+                return nil
+            }
+            return lines
+        }.flatMap(\.self)
+        #expect(!proseLines.contains("Update guidance:"))
+    }
+
+    // MARK: - Command blocks
+
+    @Test func `indented brew command is captured as a runnable command block`() throws {
+        let output = """
+        Warning: Out of date.
+        Update guidance:
+          brew upgrade git
+        """
+        let block = try #require(DoctorOutputParser.parse(output).issues.first?.commandBlocks.first)
+        let step = try #require(block.commandSteps.first)
+        #expect(block.commandSteps.count == 1)
+        #expect(step.displayCommand == "brew upgrade git")
+        #expect(step.arguments == ["upgrade", "git"])
+        #expect(step.needsAdmin == false)
+        #expect(block.isRunnable == true)
     }
 
     @Test func `sudo step is flagged as admin and not runnable`() throws {
@@ -192,13 +237,13 @@ struct DoctorOutputParserTests {
         Take ownership:
           sudo chown -R me /opt/homebrew
         """
-        let sequence = try #require(DoctorOutputParser.parse(output).issues.first?.fixSequences.first)
-        #expect(sequence.steps[0].needsAdmin == true)
-        #expect(sequence.steps[0].arguments == nil)
-        #expect(sequence.isRunnable == false)
+        let block = try #require(DoctorOutputParser.parse(output).issues.first?.commandBlocks.first)
+        #expect(block.commandSteps[0].needsAdmin == true)
+        #expect(block.commandSteps[0].arguments == nil)
+        #expect(block.isRunnable == false)
     }
 
-    @Test func `consecutive command lines are grouped into one sequence; a blank line starts a new one`() {
+    @Test func `consecutive command lines stay in one block; blank line opens a new one`() {
         let output = """
         Warning: Multi-step.
         First:
@@ -208,16 +253,17 @@ struct DoctorOutputParserTests {
         Then:
           brew tap homebrew/core
         """
-        let report = DoctorOutputParser.parse(output)
-        let sequences = report.issues.first?.fixSequences ?? []
-        #expect(sequences.count == 2)
-        #expect(sequences[0].steps.map(\.displayCommand) == ["mkdir -p /opt/homebrew", "chown -R me /opt/homebrew"])
-        #expect(sequences[1].steps.map(\.displayCommand) == ["brew tap homebrew/core"])
+        let blocks = DoctorOutputParser.parse(output).issues.first?.commandBlocks ?? []
+        #expect(blocks.count == 2)
+        #expect(blocks[0].commandSteps.map(\.displayCommand) == ["mkdir -p /opt/homebrew", "chown -R me /opt/homebrew"])
+        #expect(blocks[1].commandSteps.map(\.displayCommand) == ["brew tap homebrew/core"])
+        #expect(blocks[0].caption == "First:")
+        #expect(blocks[1].caption == "Then:")
     }
 
     // MARK: - Inline chips (brew-only, with arguments)
 
-    @Test func `backticked brew reference becomes a chip but does not promote into fixSequences`() throws {
+    @Test func `backticked brew reference becomes a chip but does not promote into a command block`() throws {
         let output = """
         Warning: Stale caches.
         Please run `brew cleanup` to remove them.
@@ -225,7 +271,7 @@ struct DoctorOutputParserTests {
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
         #expect(issue.inlineChips.map(\.displayCommand) == ["brew cleanup"])
         #expect(issue.inlineChips.first?.arguments == ["cleanup"])
-        #expect(issue.fixSequences.isEmpty)
+        #expect(issue.commandBlocks.isEmpty)
     }
 
     @Test func `non-executable backticked spans are not chips`() throws {
@@ -237,16 +283,19 @@ struct DoctorOutputParserTests {
         #expect(issue.inlineChips.isEmpty)
     }
 
-    // MARK: - Links
+    // MARK: - Link blocks
 
-    @Test func `developer.apple.com is an action link; docs.brew.sh is reference`() throws {
+    @Test func `developer.apple.com link block is action; docs.brew.sh is reference`() throws {
         let output = """
         Warning: Install CLT.
-        Manual download: https://developer.apple.com/download/
-        Or read the support tiers: https://docs.brew.sh/Support-Tiers
+        Manual download:
+          https://developer.apple.com/download/
+
+        Tier reference:
+          https://docs.brew.sh/Support-Tiers
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        let roles = Dictionary(uniqueKeysWithValues: issue.links.map { ($0.url.host ?? "", $0.role) })
+        let roles = Dictionary(uniqueKeysWithValues: issue.allLinks.map { ($0.host, $0.role) })
         #expect(roles["developer.apple.com"] == .action)
         #expect(roles["docs.brew.sh"] == .reference)
     }

@@ -56,7 +56,13 @@ struct BrewDoctorRepositoryTests {
 
         let issue = repository.state.value?.issues.first
         #expect(repository.state.value?.issues.count == 1)
-        #expect(issue?.affectedItems == ["openssl@3"])
+        let dataItems = issue?.blocks.flatMap { block -> [String] in
+            guard case let .data(items) = block.content else {
+                return []
+            }
+            return items
+        }
+        #expect(dataItems == ["openssl@3"])
         #expect(issue?.inlineChips.first?.displayCommand == "brew link")
     }
 

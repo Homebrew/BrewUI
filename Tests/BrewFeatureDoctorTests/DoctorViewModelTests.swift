@@ -21,30 +21,32 @@ struct DoctorViewModelTests {
                 title: "You have unlinked kegs in your Cellar.",
                 severity: .caution,
                 section: .systemAndFormulae,
-                details: "Run brew link on these:",
-                affectedItems: ["openssl@3"],
-                inlineChips: [DoctorBacktickChip(displayCommand: "brew link", arguments: ["link"])],
-                fixSequences: [
-                    DoctorFixSequence(id: 0, steps: [
-                        DoctorFixStep(
-                            displayCommand: "brew link openssl@3",
-                            arguments: ["link", "openssl@3"],
-                            needsAdmin: false,
-                        ),
-                    ]),
+                blocks: [
+                    DoctorBlock(id: 0, caption: nil, content: .prose(["Run brew link on these:"])),
+                    DoctorBlock(
+                        id: 1,
+                        caption: "Run brew link on these:",
+                        content: .command([
+                            DoctorFixStep(
+                                displayCommand: "brew link openssl@3",
+                                arguments: ["link", "openssl@3"],
+                                needsAdmin: false,
+                            ),
+                        ]),
+                    ),
                 ],
-                links: [],
+                inlineChips: [DoctorBacktickChip(displayCommand: "brew link", arguments: ["link"])],
                 rawBody: "",
             ),
             DoctorIssue(
                 title: "Some installed formulae are deprecated.",
                 severity: .caution,
                 section: .systemAndFormulae,
-                details: "Find replacements.",
-                affectedItems: ["macvim"],
+                blocks: [
+                    DoctorBlock(id: 0, caption: nil, content: .prose(["Find replacements."])),
+                    DoctorBlock(id: 1, caption: nil, content: .data(["macvim"])),
+                ],
                 inlineChips: [],
-                fixSequences: [],
-                links: [],
                 rawBody: "",
             ),
         ])
@@ -56,19 +58,20 @@ struct DoctorViewModelTests {
                 title: "Some cached downloads are stale.",
                 severity: .caution,
                 section: .systemAndFormulae,
-                details: "Run brew cleanup.",
-                affectedItems: [],
-                inlineChips: [],
-                fixSequences: [
-                    DoctorFixSequence(id: 0, steps: [
-                        DoctorFixStep(
-                            displayCommand: "brew cleanup",
-                            arguments: ["cleanup"],
-                            needsAdmin: false,
-                        ),
-                    ]),
+                blocks: [
+                    DoctorBlock(
+                        id: 0,
+                        caption: nil,
+                        content: .command([
+                            DoctorFixStep(
+                                displayCommand: "brew cleanup",
+                                arguments: ["cleanup"],
+                                needsAdmin: false,
+                            ),
+                        ]),
+                    ),
                 ],
-                links: [],
+                inlineChips: [],
                 rawBody: "",
             ),
         ])

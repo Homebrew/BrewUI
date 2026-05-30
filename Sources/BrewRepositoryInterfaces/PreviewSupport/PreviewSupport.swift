@@ -99,30 +99,40 @@ public enum PreviewSupport {
             title: "Some cached downloads are stale.",
             severity: .caution,
             section: .systemAndFormulae,
-            details: "Run brew cleanup to remove them.",
-            affectedItems: [],
-            inlineChips: [DoctorBacktickChip(displayCommand: "brew cleanup", arguments: ["cleanup"])],
-            fixSequences: [
-                DoctorFixSequence(id: 0, steps: [
-                    DoctorFixStep(
-                        displayCommand: "brew cleanup",
-                        arguments: ["cleanup"],
-                        needsAdmin: false,
-                    ),
-                ]),
+            blocks: [
+                DoctorBlock(
+                    id: 0,
+                    caption: nil,
+                    content: .prose(["Run brew cleanup to remove them."]),
+                ),
+                DoctorBlock(
+                    id: 1,
+                    caption: nil,
+                    content: .command([
+                        DoctorFixStep(displayCommand: "brew cleanup", arguments: ["cleanup"], needsAdmin: false),
+                    ]),
+                ),
             ],
-            links: [],
+            inlineChips: [DoctorBacktickChip(displayCommand: "brew cleanup", arguments: ["cleanup"])],
             rawBody: "Run brew cleanup to remove them.\n  brew cleanup",
         ),
         DoctorIssue(
             title: "Some installed formulae are deprecated or disabled.",
             severity: .caution,
             section: .systemAndFormulae,
-            details: "You should find replacements for the following formulae:",
-            affectedItems: ["macvim"],
+            blocks: [
+                DoctorBlock(
+                    id: 0,
+                    caption: nil,
+                    content: .prose(["You should find replacements for the following formulae:"]),
+                ),
+                DoctorBlock(
+                    id: 1,
+                    caption: "You should find replacements for the following formulae:",
+                    content: .data(["macvim"]),
+                ),
+            ],
             inlineChips: [],
-            fixSequences: [],
-            links: [],
             rawBody: "You should find replacements for the following formulae:\n  macvim",
         ),
     ])
