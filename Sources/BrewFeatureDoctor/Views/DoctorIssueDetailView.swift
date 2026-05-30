@@ -71,11 +71,11 @@ struct DoctorIssueDetailView: View {
 
     @ViewBuilder
     private var fixSection: some View {
-        if let fix = item.suggestedFix {
+        if let sequence = item.primaryRunnableSequence, let step = sequence.steps.first {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 PackageDetailSectionHeading(title: "Suggested fix")
                 PackageDetailCommandConsole(
-                    command: fix.displayCommand,
+                    command: step.displayCommand,
                     summaryText: "Runs this command, then re-checks your system",
                 )
                 Button {

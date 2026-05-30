@@ -20,7 +20,7 @@ struct DoctorIssueRowView: View {
                     .font(.brewBody)
                     .foregroundStyle(Color.brewTextPrimary)
                     .lineLimit(2)
-                if item.hasFix {
+                if item.hasRunnableFix {
                     Label("Fix available", systemImage: "wrench.and.screwdriver")
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewBrandPrimary)

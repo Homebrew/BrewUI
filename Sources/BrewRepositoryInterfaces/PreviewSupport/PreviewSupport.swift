@@ -93,22 +93,35 @@ public enum PreviewSupport {
 
     public static let healthyDoctorReport = DoctorReport(issues: [])
 
-    /// A sample report with a fixable issue (unlinked kegs) and an advisory-only issue (no `brew` fix).
+    /// A sample report with a runnable cleanup fix and an advisory-only issue (no `brew` fix).
     public static let doctorReport = DoctorReport(issues: [
         DoctorIssue(
-            title: "You have unlinked kegs in your Cellar.",
-            details: "Leaving kegs unlinked can lead to build-trouble. Run `brew link` on these:",
-            affectedItems: ["openssl@3", "readline"],
-            suggestedFix: DoctorSuggestedFix(
-                arguments: ["link", "openssl@3", "readline"],
-                displayCommand: "brew link openssl@3 readline",
-            ),
+            title: "Some cached downloads are stale.",
+            severity: .caution,
+            details: "Run brew cleanup to remove them.",
+            affectedItems: [],
+            inlineChips: [DoctorBacktickChip(displayCommand: "brew cleanup", arguments: ["cleanup"])],
+            fixSequences: [
+                DoctorFixSequence(id: 0, steps: [
+                    DoctorFixStep(
+                        displayCommand: "brew cleanup",
+                        arguments: ["cleanup"],
+                        needsAdmin: false,
+                    ),
+                ]),
+            ],
+            links: [],
+            rawBody: "Run brew cleanup to remove them.\n  brew cleanup",
         ),
         DoctorIssue(
             title: "Some installed formulae are deprecated or disabled.",
+            severity: .caution,
             details: "You should find replacements for the following formulae:",
             affectedItems: ["macvim"],
-            suggestedFix: nil,
+            inlineChips: [],
+            fixSequences: [],
+            links: [],
+            rawBody: "You should find replacements for the following formulae:\n  macvim",
         ),
     ])
 

@@ -41,8 +41,10 @@ struct BrewDoctorRepositoryTests {
         let repository = Self.repository(stderr: stderr, exitCode: 1)
         await repository.load()
 
+        let issue = repository.state.value?.issues.first
         #expect(repository.state.value?.issues.count == 1)
-        #expect(repository.state.value?.issues.first?.suggestedFix?.arguments == ["link", "openssl@3"])
+        #expect(issue?.affectedItems == ["openssl@3"])
+        #expect(issue?.inlineChips.first?.displayCommand == "brew link")
     }
 
     @Test func `missing brew executable leaves a failed state`() async {

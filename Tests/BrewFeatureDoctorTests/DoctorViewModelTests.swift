@@ -19,18 +19,31 @@ struct DoctorViewModelTests {
         DoctorReport(issues: [
             DoctorIssue(
                 title: "You have unlinked kegs in your Cellar.",
+                severity: .caution,
                 details: "Run brew link on these:",
                 affectedItems: ["openssl@3"],
-                suggestedFix: DoctorSuggestedFix(
-                    arguments: ["link", "openssl@3"],
-                    displayCommand: "brew link openssl@3",
-                ),
+                inlineChips: [DoctorBacktickChip(displayCommand: "brew link", arguments: ["link"])],
+                fixSequences: [
+                    DoctorFixSequence(id: 0, steps: [
+                        DoctorFixStep(
+                            displayCommand: "brew link openssl@3",
+                            arguments: ["link", "openssl@3"],
+                            needsAdmin: false,
+                        ),
+                    ]),
+                ],
+                links: [],
+                rawBody: "",
             ),
             DoctorIssue(
                 title: "Some installed formulae are deprecated.",
+                severity: .caution,
                 details: "Find replacements.",
                 affectedItems: ["macvim"],
-                suggestedFix: nil,
+                inlineChips: [],
+                fixSequences: [],
+                links: [],
+                rawBody: "",
             ),
         ])
     }
@@ -39,9 +52,21 @@ struct DoctorViewModelTests {
         DoctorReport(issues: [
             DoctorIssue(
                 title: "Some cached downloads are stale.",
+                severity: .caution,
                 details: "Run brew cleanup.",
                 affectedItems: [],
-                suggestedFix: DoctorSuggestedFix(arguments: ["cleanup"], displayCommand: "brew cleanup"),
+                inlineChips: [],
+                fixSequences: [
+                    DoctorFixSequence(id: 0, steps: [
+                        DoctorFixStep(
+                            displayCommand: "brew cleanup",
+                            arguments: ["cleanup"],
+                            needsAdmin: false,
+                        ),
+                    ]),
+                ],
+                links: [],
+                rawBody: "",
             ),
         ])
     }
@@ -64,8 +89,8 @@ struct DoctorViewModelTests {
         #expect(viewModel.presentation == .issues)
         #expect(viewModel.issueItems.count == 2)
         #expect(viewModel.issueItems.first?.title == "You have unlinked kegs in your Cellar.")
-        #expect(viewModel.issueItems.first?.hasFix == true)
-        #expect(viewModel.issueItems.last?.hasFix == false)
+        #expect(viewModel.issueItems.first?.hasRunnableFix == true)
+        #expect(viewModel.issueItems.last?.hasRunnableFix == false)
         #expect(viewModel.activeSelectedIssueID == 0)
         #expect(viewModel.issueCountSubtitle == "2 issues found")
     }
