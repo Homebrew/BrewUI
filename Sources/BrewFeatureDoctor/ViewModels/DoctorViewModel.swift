@@ -54,7 +54,7 @@ final class DoctorViewModel {
         case .loading:
             .loading
         case let .failed(error):
-            .failed(Self.userMessage(for: error))
+            .failed(OperationFailure(catching: error).userFacingMessage)
         case let .loaded(report):
             report.isHealthy ? .healthy : .issues
         }
@@ -165,36 +165,12 @@ final class DoctorViewModel {
                 if case let .failed(reason) = latestPhase {
                     fixErrorMessages[token] = reason.userFacingMessage
                 } else {
-                    fixErrorMessages[token] = Self.userMessage(for: error)
+                    fixErrorMessages[token] = OperationFailure(catching: error).userFacingMessage
                 }
                 return
             }
             runningFixTokens.remove(token)
             await doctorRepository.load()
         }
-    }
-
-    private static func userMessage(for error: any Error) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Doctor error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            errorMessage(fromStderr: stderr)
-        case let BrewCommandError.launchFailed(underlying):
-            underlying
-        default:
-            String(localized: "Something went wrong running brew doctor.", comment: "Doctor generic error")
-        }
-    }
-
-    private static func errorMessage(fromStderr stderr: String) -> String {
-        let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmed.isEmpty {
-            return trimmed
-        }
-        return String(localized: "Homebrew command failed.", comment: "Doctor generic brew failure")
     }
 }

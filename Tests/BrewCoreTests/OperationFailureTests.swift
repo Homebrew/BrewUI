@@ -22,7 +22,7 @@ struct OperationFailureTests {
 
     @Test func `userFacingMessage uses missing brew copy for missing executable failures`() {
         let expected = String(
-            localized: "Could not find the brew executable.",
+            localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
             comment: "Shown when brew binary is missing",
         )
 
