@@ -10,13 +10,10 @@ import SwiftUI
 
 /// Right-hand column: full detail for the selected `brew doctor` issue.
 ///
-/// Walks the issue's ``DoctorIssueItem/presentationGroups``. Each group renders as: a single
-/// "What this means" section combining all of the group's prose, followed by one section per subject
-/// block (`Suggested fix` / `Affected` / `Links`) with the colon-introduction line shown as a short
-/// prose sentence right under the standard heading. Almost every check is one group — multi-paragraph
-/// prose (e.g. CLT's trailing "You should download…") still folds into the same "What this means" at
-/// the top. Only checks that emit parallel subjects in separate paragraphs (`check_git_status`'s one
-/// repo per paragraph) duplicate the whole group. Raw output stays at the bottom always as the
+/// Walks the parsed blocks in **document order** with no section headings. Prose paragraphs render as
+/// plain text; a non-prose block's colon caption (e.g. `If that doesn't show you any updates, run:`)
+/// renders as a prose line right above its UI element (a ``CommandBlockView``, an items list, or link
+/// rows). The reading flow matches what brew printed. Raw output stays at the bottom as the
 /// never-wrong fallback.
 struct DoctorIssueDetailView: View {
     @Bindable var viewModel: DoctorViewModel
@@ -24,10 +21,10 @@ struct DoctorIssueDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: BrewSpacing.xl) {
+            VStack(alignment: .leading, spacing: BrewSpacing.lg) {
                 heroSection
-                ForEach(item.presentationGroups) { group in
-                    groupSection(group)
+                ForEach(item.blocks) { block in
+                    blockView(block)
                 }
                 if !item.rawBody.isEmpty {
                     rawOutputSection
@@ -51,65 +48,37 @@ struct DoctorIssueDetailView: View {
         }
     }
 
-    // MARK: - Group section
+    // MARK: - Blocks
 
-    private func groupSection(_ group: DoctorPresentationGroup) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.xl) {
-            if !group.proseLines.isEmpty {
-                whatThisMeansSection(group.proseLines, showsChips: group.id == 0)
-            }
-            ForEach(group.subjectBlocks) { block in
-                subjectSection(block)
-            }
+    @ViewBuilder
+    private func blockView(_ block: DoctorBlock) -> some View {
+        switch block.content {
+        case let .prose(lines):
+            proseView(lines: lines, showsChips: isFirstProseBlock(block))
+        case let .command(steps):
+            commandView(block: block, steps: steps)
+        case let .data(items):
+            dataView(caption: block.caption, items: items)
+        case let .link(links):
+            linkView(caption: block.caption, links: links)
         }
     }
 
-    private func whatThisMeansSection(_ proseLines: [String], showsChips: Bool) -> some View {
+    private func isFirstProseBlock(_ block: DoctorBlock) -> Bool {
+        item.blocks.first { $0.type == .prose }?.id == block.id
+    }
+
+    // MARK: - Prose
+
+    private func proseView(lines: [String], showsChips: Bool) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "What this means")
-            Text(proseLines.joined(separator: " "))
+            Text(lines.joined(separator: " "))
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextSecondary)
                 .textSelection(.enabled)
             if showsChips, !item.inlineChips.isEmpty {
                 chipsRow
             }
-        }
-    }
-
-    private func subjectSection(_ block: DoctorBlock) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: standardHeading(for: block.type))
-            if let caption = block.caption {
-                Text(caption)
-                    .font(.brewCallout)
-                    .foregroundStyle(Color.brewTextSecondary)
-                    .textSelection(.enabled)
-            }
-            subjectContent(block)
-        }
-    }
-
-    private func standardHeading(for type: DoctorBlockType) -> String {
-        switch type {
-        case .prose: "What this means"
-        case .command: "Suggested fix"
-        case .data: "Affected"
-        case .link: "Links"
-        }
-    }
-
-    @ViewBuilder
-    private func subjectContent(_ block: DoctorBlock) -> some View {
-        switch block.content {
-        case .prose:
-            EmptyView()
-        case let .command(steps):
-            commandContent(block: block, steps: steps)
-        case let .data(items):
-            dataContent(items: items)
-        case let .link(links):
-            linkContent(links: links)
         }
     }
 
@@ -123,24 +92,23 @@ struct DoctorIssueDetailView: View {
         }
     }
 
-    // MARK: - Data content
+    // MARK: - Caption (small prose above a UI element)
 
-    private func dataContent(items: [String]) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            ForEach(items, id: \.self) { affected in
-                Text(affected)
-                    .font(.brewCode)
-                    .foregroundStyle(Color.brewTextPrimary)
-                    .textSelection(.enabled)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
+    @ViewBuilder
+    private func captionText(_ caption: String?) -> some View {
+        if let caption {
+            Text(caption)
+                .font(.brewBody)
+                .foregroundStyle(Color.brewTextSecondary)
+                .textSelection(.enabled)
         }
     }
 
-    // MARK: - Command content
+    // MARK: - Command
 
-    private func commandContent(block: DoctorBlock, steps: [DoctorFixStep]) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
+    private func commandView(block: DoctorBlock, steps: [DoctorFixStep]) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            captionText(block.caption)
             if steps.contains(where: \.needsAdmin) {
                 Label("Needs admin · runs in Terminal", systemImage: "lock.fill")
                     .font(.brewCaption)
@@ -183,12 +151,32 @@ struct DoctorIssueDetailView: View {
         }
     }
 
-    // MARK: - Link content
+    // MARK: - Data
 
-    private func linkContent(links: [DoctorLink]) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            ForEach(links) { link in
-                DoctorLinkRow(link: link)
+    private func dataView(caption: String?, items: [String]) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            captionText(caption)
+            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                ForEach(items, id: \.self) { affected in
+                    Text(affected)
+                        .font(.brewCode)
+                        .foregroundStyle(Color.brewTextPrimary)
+                        .textSelection(.enabled)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+        }
+    }
+
+    // MARK: - Link
+
+    private func linkView(caption: String?, links: [DoctorLink]) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            captionText(caption)
+            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                ForEach(links) { link in
+                    DoctorLinkRow(link: link)
+                }
             }
         }
     }
