@@ -1,8 +1,9 @@
 //
 //  DoctorOutputParser.swift
-//  BrewCore
+//  BrewRepositories
 //
 
+import BrewCore
 import Foundation
 
 /// Pure text→domain parser for `brew doctor` output. No dependencies, no isolation — unit-tested directly.

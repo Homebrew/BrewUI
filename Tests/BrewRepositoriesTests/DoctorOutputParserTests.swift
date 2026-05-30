@@ -4,6 +4,7 @@
 //
 
 import BrewCore
+import BrewRepositories
 import Foundation
 import Testing
 
