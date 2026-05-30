@@ -74,13 +74,10 @@ public enum DoctorSeverity: String, Equatable, Sendable {
     case unsupported
 }
 
-/// One typed block in a ``DoctorIssue``'s body — keeps document order, the intro caption that produced
-/// it, and the paragraph it came from. Paragraphs are blank-line-separated runs in the raw output;
-/// renderers use them to decide whether a stretch of prose belongs to the current "What this means" or
-/// starts a new subject group (e.g. `check_git_status`'s one fix per dirty repo).
+/// One typed block in a ``DoctorIssue``'s body — keeps document order and the intro caption that
+/// produced it. Renderers walk blocks in document order.
 public struct DoctorBlock: Equatable, Sendable, Identifiable {
     public let id: Int
-    public let paragraphIndex: Int
     public let caption: String?
     public let content: Content
 
@@ -96,9 +93,8 @@ public struct DoctorBlock: Equatable, Sendable, Identifiable {
         case link([DoctorLink])
     }
 
-    public init(id: Int, paragraphIndex: Int = 0, caption: String?, content: Content) {
+    public init(id: Int, caption: String?, content: Content) {
         self.id = id
-        self.paragraphIndex = paragraphIndex
         self.caption = caption
         self.content = content
     }

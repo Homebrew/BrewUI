@@ -73,12 +73,6 @@ private struct WarningBlockParser {
     /// `true` while a special intro (`do not exist:` / `not writable by your user:`) is allowing
     /// un-indented item lines to flow into a data block.
     var specialUnindentedActive: Bool
-    /// Index of the paragraph currently being parsed. Each blank line that follows committed content
-    /// bumps this — the renderer uses it to decide where a "What this means" group repeats.
-    var currentParagraph: Int = 0
-    /// `true` once we've committed at least one block to ``currentParagraph``; resets on a blank-line
-    /// bump so consecutive blank lines don't each increment.
-    var paragraphHasContent: Bool = false
 
     init(block: WarningBlock) {
         self.block = block
@@ -135,11 +129,9 @@ private struct WarningBlockParser {
         }
         committed.append(DoctorBlock(
             id: committed.count,
-            paragraphIndex: currentParagraph,
             caption: builder.caption,
             content: content,
         ))
-        paragraphHasContent = true
     }
 
     private mutating func processLine(_ line: String) {
@@ -160,10 +152,6 @@ private struct WarningBlockParser {
             flushCurrent()
             pendingCaption = nil
             specialUnindentedActive = false
-            if paragraphHasContent {
-                currentParagraph += 1
-                paragraphHasContent = false
-            }
             return
         }
         if trimmed.hasSuffix(":") {
