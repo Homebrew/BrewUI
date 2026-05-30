@@ -15,33 +15,29 @@ private let doctorRepositoryLogger = Logger(
     category: "BrewDoctorRepository",
 )
 
-/// App-scoped observable that runs `brew doctor` read-only and parses its output into a ``DoctorReport``.
+/// App-scoped observable that runs `brew doctor` through ``BrewCommandCenter`` and parses its output.
 ///
-/// Long-lived so the report survives leaving and returning to the Doctor tab. `load()` refreshes in the
-/// background: once a report is on screen it stays put (`isRefreshing` flips on) until the new one arrives,
-/// rather than blanking to a spinner. Concurrent `load()` calls coalesce onto one in-flight run.
+/// Routing through the center is what makes the run appear in the bottom console (as a pill the user can
+/// open to watch live output) alongside install / upgrade / fix ops — same plumbing, no parallel channel.
+/// The actual parsed report is captured by the ``DoctorReadCommand`` instance, which the repo reads after
+/// submit completes.
 ///
-/// `brew doctor` exits non-zero when it finds warnings — that is the normal "issues found" path, not a
-/// failure, so the exit code is ignored and both streams are parsed. A thrown error means `brew` could not
-/// be located or the subprocess failed to launch.
+/// Long-lived so the report survives leaving and returning to the Doctor tab. `load()` is
+/// **stale-while-revalidate**: an existing report stays on screen (`isRefreshing` flips on) while the
+/// re-check runs; only the very first load shows `.loading`. Concurrent `load()` calls coalesce onto one
+/// in-flight `Task`, and re-submitting the same operation id reuses the existing console pill rather
+/// than spawning a new one.
 @Observable
 @MainActor
 public final class BrewDoctorRepository: DoctorRepository {
     public private(set) var state: LoadState<DoctorReport, any Error> = .loading
     public private(set) var isRefreshing = false
 
-    @ObservationIgnored private let commandRunner: BrewCommandRunning
-    @ObservationIgnored private let locator: any BrewExecutableLocating
+    @ObservationIgnored private let commandCenter: any BrewCommandCenter
     @ObservationIgnored private var inFlight: Task<Void, Never>?
 
-    public init(commandRunner: BrewCommandRunning, locator: any BrewExecutableLocating) {
-        self.commandRunner = commandRunner
-        self.locator = locator
-    }
-
-    /// Production wiring: real subprocess + default `brew` lookup.
-    public static func live() -> BrewDoctorRepository {
-        BrewDoctorRepository(commandRunner: BrewCommandService(), locator: BrewExecutableLocator())
+    public init(commandCenter: any BrewCommandCenter) {
+        self.commandCenter = commandCenter
     }
 
     public func load() async {
@@ -60,8 +56,13 @@ public final class BrewDoctorRepository: DoctorRepository {
         inFlight = nil
     }
 
-    /// Stale-while-revalidate: an existing report stays on screen (with ``isRefreshing`` set) while the
-    /// re-check runs; only the very first load shows `.loading`. A failed refresh keeps the prior report.
+    /// Stable id for the doctor pill in the bottom console — using the same id on every load reuses the
+    /// existing ``CommandJob`` (its phase updates rather than spawning a new pill on each tab arrival).
+    private static let operationID = BrewOperationID(
+        maintenanceToken: "doctor",
+        displayCommand: "brew doctor",
+    )
+
     private func fetch() async {
         let hasReport = if case .loaded = state { true } else { false }
         if hasReport {
@@ -69,11 +70,11 @@ public final class BrewDoctorRepository: DoctorRepository {
         }
         defer { isRefreshing = false }
 
+        let command = DoctorReadCommand()
         do {
-            let report = try await runDoctor()
-            state = .loaded(report)
+            try await commandCenter.submit(id: Self.operationID, command: command)
         } catch is CancellationError {
-            // Left the tab mid-refresh; keep whatever is on screen.
+            return
         } catch {
             if hasReport {
                 doctorRepositoryLogger.error(
@@ -82,24 +83,9 @@ public final class BrewDoctorRepository: DoctorRepository {
             } else {
                 state = .failed(error)
             }
+            return
         }
-    }
-
-    private func runDoctor() async throws -> DoctorReport {
-        let brew = try locator.findBrewExecutable()
-        let output = try await commandRunner.run(executableURL: brew, arguments: ["doctor"])
-        return DoctorOutputParser.parse(combinedOutput(of: output))
-    }
-
-    private func combinedOutput(of output: CommandOutput) -> String {
-        let standardError = output.standardError.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !standardError.isEmpty else {
-            return output.standardOutput
-        }
-        let standardOutput = output.standardOutput.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !standardOutput.isEmpty else {
-            return output.standardError
-        }
-        return output.standardOutput + "\n" + output.standardError
+        let combined = await command.capturedOutput
+        state = .loaded(DoctorOutputParser.parse(combined))
     }
 }

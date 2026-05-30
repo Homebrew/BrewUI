@@ -127,8 +127,8 @@ public extension CommandJob {
         case .uninstallCask:
             verb = "uninstall"
             isCask = true
-        case .doctorFix:
-            // Unreachable: doctorFix work always uses a `.maintenance` id, which materializes from its
+        case .doctorFix, .doctorRead:
+            // Unreachable: both doctor kinds always use a `.maintenance` id, which materializes from its
             // stored `displayCommand` rather than this package-name synthesis. Fall back defensively.
             return "brew"
         }

@@ -50,7 +50,7 @@ struct BrewApp: App {
             apiClient: apiClient,
             catalogueRepository: catalogueRepo,
         )
-        doctorRepository = BrewDoctorRepository.live()
+        doctorRepository = BrewDoctorRepository(commandCenter: center)
     }
 
     var body: some Scene {

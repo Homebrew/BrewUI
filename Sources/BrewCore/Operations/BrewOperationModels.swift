@@ -5,7 +5,11 @@
 
 import Foundation
 
-/// Mutating Homebrew work the command center may schedule (extend as features grow).
+/// Homebrew subprocess work the command center may schedule (extend as features grow).
+///
+/// The read-only ``doctorRead`` case is the small loosening of the original "mutating only" framing —
+/// `brew doctor` is read-only but routing it through the center is what makes its output appear in the
+/// bottom console alongside everything else (one source of progress visibility, same plumbing).
 public enum BrewOperationKind: String, Hashable, Sendable {
     case installFormula
     case installCask
@@ -14,6 +18,7 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case uninstallFormula
     case uninstallCask
     case doctorFix
+    case doctorRead
 }
 
 /// Stable identity for in-flight mutating work.
