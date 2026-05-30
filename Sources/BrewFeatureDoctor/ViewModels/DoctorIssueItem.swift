@@ -15,6 +15,7 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let id: Int
     let title: String
     let severity: DoctorSeverity
+    let section: DoctorSection
     let details: String
     let affectedItems: [String]
     let inlineChips: [DoctorBacktickChip]
@@ -26,6 +27,7 @@ struct DoctorIssueItem: Identifiable, Equatable {
         self.id = id
         title = issue.title
         severity = issue.severity
+        section = issue.section
         details = issue.details
         affectedItems = issue.affectedItems
         inlineChips = issue.inlineChips
@@ -47,5 +49,16 @@ struct DoctorIssueItem: Identifiable, Equatable {
     /// Stable token tracking an in-flight fix — matches the `.maintenance` operation id token.
     var fixToken: String? {
         primaryRunnableSequence?.copyAllText
+    }
+}
+
+/// One sectioned bucket of issues for the list. `Identifiable` by the section so SwiftUI's `ForEach`
+/// tracks groups across re-renders.
+struct DoctorIssueGroup: Identifiable, Equatable {
+    let section: DoctorSection
+    let items: [DoctorIssueItem]
+
+    var id: DoctorSection {
+        section
     }
 }

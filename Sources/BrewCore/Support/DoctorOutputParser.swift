@@ -106,6 +106,7 @@ private struct WarningBlockParser {
         return DoctorIssue(
             title: block.title,
             severity: parseSeverity(body: rawBody),
+            section: classifySection(title: block.title, body: rawBody),
             details: detailLines.joined(separator: " "),
             affectedItems: affectedItems,
             inlineChips: uniqueChips(inlineChips),
@@ -433,3 +434,82 @@ private func looksLikeItem(_ trimmed: String) -> Bool {
 private func isValueLine(_ trimmed: String) -> Bool {
     trimmed.contains(" = ") || trimmed.contains(": ")
 }
+
+// MARK: - Section classifier
+
+/// Stand-in for the plan's curated `check_name` → section map (§8). Homebrew doesn't print check names
+/// alongside warnings, so the parser keys on title/body keywords instead. Precedence runs most-specific
+/// first (Xcode/CLT, Env/PATH, Casks, Taps/Git, Stray Files) and falls back to System & Formulae.
+private func classifySection(title: String, body: String) -> DoctorSection {
+    let titleLower = title.lowercased()
+    let combined = (title + " " + body).lowercased()
+
+    if matchesAny(combined, xcodeAndCLTKeywords) {
+        return .xcodeAndCLT
+    }
+    if matchesAny(combined, environmentAndPathKeywords) {
+        return .environmentAndPath
+    }
+    if titleLower.contains("cask") {
+        // Title-only: "casks" appears in the body of many non-cask warnings (e.g. the deprecated
+        // formula check lists casks too).
+        return .casks
+    }
+    if matchesAny(combined, tapsAndGitKeywords) {
+        return .tapsAndGit
+    }
+    if matchesAny(combined, strayFilesKeywords) {
+        return .strayFiles
+    }
+    return .systemAndFormulae
+}
+
+private func matchesAny(_ haystack: String, _ keywords: [String]) -> Bool {
+    keywords.contains { haystack.contains($0) }
+}
+
+private let xcodeAndCLTKeywords: [String] = [
+    "xcode",
+    "command line tools",
+    "developer tools",
+    "broken sdk",
+    "supported sdk",
+    " clt ",
+    "clt installed",
+]
+
+private let environmentAndPathKeywords: [String] = [
+    "your path",
+    "in your path",
+    "shell profile",
+    "shell rc",
+    "tmpdir",
+    "non-prefixed",
+    "non_prefixed",
+    "not writable by your user",
+    "directories do not exist",
+]
+
+private let tapsAndGitKeywords: [String] = [
+    "tap ",
+    "untap",
+    "taps:",
+    "git origin",
+    "origin remote",
+    "uncommitted",
+    "homebrew git",
+    "git config",
+]
+
+private let strayFilesKeywords: [String] = [
+    "stray",
+    "unbrewed",
+    "unexpected ",
+    "gettext",
+    "iconv",
+    "framework",
+    "header files",
+    "static librar",
+    "broken symlinks",
+    "files exist",
+]

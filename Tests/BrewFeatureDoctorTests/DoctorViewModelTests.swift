@@ -20,6 +20,7 @@ struct DoctorViewModelTests {
             DoctorIssue(
                 title: "You have unlinked kegs in your Cellar.",
                 severity: .caution,
+                section: .systemAndFormulae,
                 details: "Run brew link on these:",
                 affectedItems: ["openssl@3"],
                 inlineChips: [DoctorBacktickChip(displayCommand: "brew link", arguments: ["link"])],
@@ -38,6 +39,7 @@ struct DoctorViewModelTests {
             DoctorIssue(
                 title: "Some installed formulae are deprecated.",
                 severity: .caution,
+                section: .systemAndFormulae,
                 details: "Find replacements.",
                 affectedItems: ["macvim"],
                 inlineChips: [],
@@ -53,6 +55,7 @@ struct DoctorViewModelTests {
             DoctorIssue(
                 title: "Some cached downloads are stale.",
                 severity: .caution,
+                section: .systemAndFormulae,
                 details: "Run brew cleanup.",
                 affectedItems: [],
                 inlineChips: [],

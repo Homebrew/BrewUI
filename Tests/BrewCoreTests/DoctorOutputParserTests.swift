@@ -273,4 +273,36 @@ struct DoctorOutputParserTests {
         let titles = DoctorOutputParser.parse(output).issues.map(\.title)
         #expect(titles == ["First problem.", "Second problem."])
     }
+
+    // MARK: - Section classifier
+
+    @Test func `xcode and CLT title routes to xcodeAndCLT section`() {
+        let output = "Warning: Xcode is outdated.\nUpdate it from the App Store."
+        #expect(DoctorOutputParser.parse(output).issues.first?.section == .xcodeAndCLT)
+    }
+
+    @Test func `your PATH title routes to environmentAndPath section`() {
+        let output = "Warning: Homebrew's bin was not found in your PATH.\nFix your shell rc."
+        #expect(DoctorOutputParser.parse(output).issues.first?.section == .environmentAndPath)
+    }
+
+    @Test func `cask in title routes to casks section`() {
+        let output = "Warning: A cask is broken.\nDetails."
+        #expect(DoctorOutputParser.parse(output).issues.first?.section == .casks)
+    }
+
+    @Test func `git origin keywords route to tapsAndGit section`() {
+        let output = "Warning: Missing git origin remote.\nFix it."
+        #expect(DoctorOutputParser.parse(output).issues.first?.section == .tapsAndGit)
+    }
+
+    @Test func `stray dylibs route to strayFiles section`() {
+        let output = "Warning: Unbrewed dylibs were found.\nDetails."
+        #expect(DoctorOutputParser.parse(output).issues.first?.section == .strayFiles)
+    }
+
+    @Test func `unlinked kegs falls through to default systemAndFormulae`() {
+        let output = "Warning: You have unlinked kegs in your Cellar.\nDetails."
+        #expect(DoctorOutputParser.parse(output).issues.first?.section == .systemAndFormulae)
+    }
 }

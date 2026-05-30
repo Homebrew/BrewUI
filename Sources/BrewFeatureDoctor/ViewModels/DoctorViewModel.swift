@@ -72,6 +72,22 @@ final class DoctorViewModel {
         return report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
     }
 
+    /// Issues bucketed into the curated sections from `DoctorParsing-Plan.md` §8, in `DoctorSection`
+    /// enum order. Empty sections are skipped so the list never shows an empty header.
+    var issueGroups: [DoctorIssueGroup] {
+        let items = issueItems
+        var byScreen: [DoctorSection: [DoctorIssueItem]] = [:]
+        for item in items {
+            byScreen[item.section, default: []].append(item)
+        }
+        return DoctorSection.allCases.compactMap { section in
+            guard let items = byScreen[section], !items.isEmpty else {
+                return nil
+            }
+            return DoctorIssueGroup(section: section, items: items)
+        }
+    }
+
     var issueCountSubtitle: String {
         let count = issueItems.count
         if count == 1 {

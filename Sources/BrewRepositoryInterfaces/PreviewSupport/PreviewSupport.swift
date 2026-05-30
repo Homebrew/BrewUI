@@ -98,6 +98,7 @@ public enum PreviewSupport {
         DoctorIssue(
             title: "Some cached downloads are stale.",
             severity: .caution,
+            section: .systemAndFormulae,
             details: "Run brew cleanup to remove them.",
             affectedItems: [],
             inlineChips: [DoctorBacktickChip(displayCommand: "brew cleanup", arguments: ["cleanup"])],
@@ -116,6 +117,7 @@ public enum PreviewSupport {
         DoctorIssue(
             title: "Some installed formulae are deprecated or disabled.",
             severity: .caution,
+            section: .systemAndFormulae,
             details: "You should find replacements for the following formulae:",
             affectedItems: ["macvim"],
             inlineChips: [],

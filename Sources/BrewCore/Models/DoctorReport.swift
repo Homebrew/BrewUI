@@ -35,6 +35,10 @@ public struct DoctorIssue: Equatable, Sendable {
     /// Severity derived from a support-tier callout (`This is a Tier N configuration:` /
     /// `Unsupported configuration:`). Unflagged warnings default to ``DoctorSeverity/caution``.
     public var severity: DoctorSeverity
+    /// Coarse grouping for the issues list, mapped from the warning's text. The plan's `check_name`
+    /// mapping would be more precise; brew doctor doesn't print check names so this is a title-keyword
+    /// stand-in (an explicit, revertable trade-off).
+    public var section: DoctorSection
     /// "What this means" prose — everything that wasn't consumed as command, data line, link, or chip.
     public var details: String
     /// Concrete items the warning enumerates (unlinked kegs, offending paths, …). Anchored to recognized
@@ -54,6 +58,7 @@ public struct DoctorIssue: Equatable, Sendable {
     public init(
         title: String,
         severity: DoctorSeverity,
+        section: DoctorSection,
         details: String,
         affectedItems: [String],
         inlineChips: [DoctorBacktickChip],
@@ -63,12 +68,42 @@ public struct DoctorIssue: Equatable, Sendable {
     ) {
         self.title = title
         self.severity = severity
+        self.section = section
         self.details = details
         self.affectedItems = affectedItems
         self.inlineChips = inlineChips
         self.fixSequences = fixSequences
         self.links = links
         self.rawBody = rawBody
+    }
+}
+
+/// Coarse grouping for the issues list, modelled on the curated `check_name` → section map sketched
+/// in `.ai/plans/DoctorParsing-Plan.md` §8. Since `brew doctor` output doesn't include check names, the
+/// parser classifies by title/body keywords instead — accurate enough to organize the list but not as
+/// precise as actually running each check individually would be.
+public enum DoctorSection: String, CaseIterable, Equatable, Sendable, Identifiable {
+    case xcodeAndCLT
+    case environmentAndPath
+    case casks
+    case tapsAndGit
+    case strayFiles
+    case systemAndFormulae
+
+    public var id: String {
+        rawValue
+    }
+
+    /// Human-readable section heading.
+    public var displayName: String {
+        switch self {
+        case .xcodeAndCLT: "Xcode & Command Line Tools"
+        case .environmentAndPath: "Environment & PATH"
+        case .casks: "Casks"
+        case .tapsAndGit: "Taps & Git"
+        case .strayFiles: "Stray Files"
+        case .systemAndFormulae: "System & Formulae"
+        }
     }
 }
 

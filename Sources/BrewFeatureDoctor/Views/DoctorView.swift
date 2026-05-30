@@ -129,16 +129,20 @@ struct DoctorView: View {
 
     private var issuesList: some View {
         List {
-            ForEach(viewModel.issueItems) { item in
-                DoctorIssueRowView(item: item)
-                    .id(item.id)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        viewModel.setSelection(item.id)
+            ForEach(viewModel.issueGroups) { group in
+                Section(group.section.displayName) {
+                    ForEach(group.items) { item in
+                        DoctorIssueRowView(item: item)
+                            .id(item.id)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                viewModel.setSelection(item.id)
+                            }
+                            .listRowBackground(
+                                viewModel.activeSelectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
+                            )
                     }
-                    .listRowBackground(
-                        viewModel.activeSelectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
-                    )
+                }
             }
         }
         .listStyle(.plain)
