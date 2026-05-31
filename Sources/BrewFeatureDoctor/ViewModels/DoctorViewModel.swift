@@ -49,14 +49,27 @@ final class DoctorViewModel {
 
     // MARK: - Derived state (projected from the repository)
 
-    var presentation: DoctorPresentation {
+    /// View-friendly mapping of the repository's load state with the failure mapped to user-facing copy.
+    /// Drives the body's ``AsyncContentView`` (redacted placeholder on `.loading`, retry on `.failed`).
+    var state: LoadState<DoctorReport, String> {
         switch doctorRepository.state {
         case .loading:
             .loading
+        case let .loaded(report):
+            .loaded(report)
         case let .failed(error):
             .failed(OperationFailure(catching: error).userFacingMessage)
+        }
+    }
+
+    var presentation: DoctorPresentation {
+        switch state {
+        case .loading:
+            .loading
         case let .loaded(report):
             report.isHealthy ? .healthy : .issues
+        case let .failed(message):
+            .failed(message)
         }
     }
 
@@ -66,7 +79,7 @@ final class DoctorViewModel {
     }
 
     var issueItems: [DoctorIssueItem] {
-        guard case let .loaded(report) = doctorRepository.state else {
+        guard case let .loaded(report) = state else {
             return []
         }
         return report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
@@ -75,17 +88,10 @@ final class DoctorViewModel {
     /// Issues bucketed into the curated sections from `DoctorParsing-Plan.md` §8, in `DoctorSection`
     /// enum order. Empty sections are skipped so the list never shows an empty header.
     var issueGroups: [DoctorIssueGroup] {
-        let items = issueItems
-        var byScreen: [DoctorSection: [DoctorIssueItem]] = [:]
-        for item in items {
-            byScreen[item.section, default: []].append(item)
+        guard case let .loaded(report) = state else {
+            return []
         }
-        return DoctorSection.allCases.compactMap { section in
-            guard let items = byScreen[section], !items.isEmpty else {
-                return nil
-            }
-            return DoctorIssueGroup(section: section, items: items)
-        }
+        return DoctorIssueGroup.grouped(from: report)
     }
 
     var issueCountSubtitle: String {

@@ -3,6 +3,7 @@
 //  BrewFeatureDoctor
 //
 
+import BrewCore
 import BrewUIComponents
 import SwiftUI
 
@@ -72,32 +73,21 @@ struct DoctorView: View {
         }
     }
 
-    @ViewBuilder
     private var content: some View {
-        switch viewModel.presentation {
-        case .loading:
-            loadingState
-        case .healthy:
-            healthyState
-        case .issues:
-            issuesList
-        case let .failed(message):
-            failedState(message)
-        }
-    }
-
-    private var loadingState: some View {
-        centeredState {
-            ProgressView()
-                .controlSize(.large)
-            Text("Running brew doctor…")
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewTextSecondary)
+        AsyncContentView(
+            state: viewModel.state,
+            onRetry: { Task { await viewModel.load() } },
+        ) { report in
+            if report.isHealthy {
+                healthyState
+            } else {
+                issuesList(groups: DoctorIssueGroup.grouped(from: report))
+            }
         }
     }
 
     private var healthyState: some View {
-        centeredState {
+        VStack(spacing: BrewSpacing.md) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 44))
                 .foregroundStyle(Color.brewStatusSuccess)
@@ -108,28 +98,13 @@ struct DoctorView: View {
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .padding(BrewSpacing.xl)
     }
 
-    private func failedState(_ message: String) -> some View {
-        centeredState {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.brewTitle2)
-                .foregroundStyle(Color.brewStatusError)
-            Text(message)
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewStatusError)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: 360)
-            Button("Try Again") {
-                Task { await viewModel.load() }
-            }
-            .buttonStyle(.bordered)
-        }
-    }
-
-    private var issuesList: some View {
+    private func issuesList(groups: [DoctorIssueGroup]) -> some View {
         List {
-            ForEach(viewModel.issueGroups) { group in
+            ForEach(groups) { group in
                 Section(group.section.displayName) {
                     ForEach(group.items) { item in
                         DoctorIssueRowView(item: item)
@@ -147,14 +122,6 @@ struct DoctorView: View {
         }
         .listStyle(.plain)
         .accessibilityLabel("Doctor issues")
-    }
-
-    private func centeredState(@ViewBuilder _ content: () -> some View) -> some View {
-        VStack(spacing: BrewSpacing.md) {
-            content()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(BrewSpacing.xl)
     }
 }
 

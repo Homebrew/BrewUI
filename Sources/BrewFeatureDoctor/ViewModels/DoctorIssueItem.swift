@@ -54,4 +54,21 @@ struct DoctorIssueGroup: Identifiable, Equatable {
     var id: DoctorSection {
         section
     }
+
+    /// Buckets the report's issues into curated sections in `DoctorSection` enum order; empty sections
+    /// are skipped so the list never shows an empty header. Used by the view model and by the view's
+    /// `AsyncContentView` loaded closure (so the redacted placeholder report buckets the same way).
+    static func grouped(from report: DoctorReport) -> [DoctorIssueGroup] {
+        let items = report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
+        var byScreen: [DoctorSection: [DoctorIssueItem]] = [:]
+        for item in items {
+            byScreen[item.section, default: []].append(item)
+        }
+        return DoctorSection.allCases.compactMap { section in
+            guard let items = byScreen[section], !items.isEmpty else {
+                return nil
+            }
+            return DoctorIssueGroup(section: section, items: items)
+        }
+    }
 }
