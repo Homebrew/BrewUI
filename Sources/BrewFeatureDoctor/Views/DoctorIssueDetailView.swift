@@ -21,19 +21,30 @@ struct DoctorIssueDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: BrewSpacing.lg) {
+            VStack(alignment: .leading, spacing: 0) {
                 heroSection
-                ForEach(item.blocks) { block in
+                ForEach(Array(item.blocks.enumerated()), id: \.element.id) { index, block in
                     blockView(block)
+                        .padding(.top, topPadding(for: block, isFirst: index == 0))
                 }
                 if !item.rawBody.isEmpty {
                     rawOutputSection
+                        .padding(.top, BrewSpacing.lg)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    /// Two-tier inter-block gap so the detail view shows the line-break vs blank-line distinction brew
+    /// doctor wrote in its raw output. The first body block keeps the existing hero→content gap.
+    private func topPadding(for block: DoctorBlock, isFirst: Bool) -> CGFloat {
+        if isFirst {
+            return BrewSpacing.lg
+        }
+        return block.precededByBlankLine ? BrewSpacing.lg : BrewSpacing.sm
     }
 
     // MARK: - Hero
@@ -72,7 +83,7 @@ struct DoctorIssueDetailView: View {
 
     private func proseView(lines: [String], showsChips: Bool) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text(lines.joined(separator: " "))
+            Text(lines.joined(separator: "\n"))
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextSecondary)
                 .textSelection(.enabled)
