@@ -291,6 +291,46 @@ struct DoctorOutputParserTests {
         #expect(issue.blocks.allSatisfy { $0.precededByBlankLine == false })
     }
 
+    // MARK: - Caption-into-prose merging
+
+    @Test func `caption merges into preceding prose when no blank line separates them`() throws {
+        let output = """
+        Warning: PATH issue.
+        This means that system-provided programs will be used instead of those
+        provided by Homebrew. Consider setting your PATH so that
+        /opt/homebrew/bin occurs before /usr/bin. Here is a one-liner:
+          echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.blocks.count == 2)
+
+        guard case let .prose(lines) = issue.blocks[0].content else {
+            Issue.record("expected first block to be prose")
+            return
+        }
+        #expect(lines == [
+            "This means that system-provided programs will be used instead of those",
+            "provided by Homebrew. Consider setting your PATH so that",
+            "/opt/homebrew/bin occurs before /usr/bin. Here is a one-liner:",
+        ])
+        #expect(issue.blocks[1].type == .command)
+        #expect(issue.blocks[1].caption == nil)
+    }
+
+    @Test func `caption stays on its block when a blank line separates it from the prose`() throws {
+        let output = """
+        Warning: PATH issue.
+        Background prose.
+
+        Here is a one-liner:
+          brew tap homebrew/core
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        let commands = issue.commandBlocks
+        #expect(commands.count == 1)
+        #expect(commands.first?.caption == "Here is a one-liner:")
+    }
+
     // MARK: - Inline chips (brew-only, with arguments)
 
     @Test func `backticked brew reference becomes a chip but does not promote into a command block`() throws {

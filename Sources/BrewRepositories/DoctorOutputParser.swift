@@ -96,6 +96,7 @@ private struct WarningBlockParser {
             processLine(line)
         }
         flushCurrent()
+        mergeSameParagraphCaptionsIntoProse()
 
         let rawBody = block.bodyLines.joined(separator: "\n")
         return DoctorIssue(
@@ -106,6 +107,39 @@ private struct WarningBlockParser {
             inlineChips: uniqueChips(inlineChips),
             rawBody: rawBody,
         )
+    }
+
+    /// When a non-prose block carries a colon-introduced caption and was not separated from a preceding
+    /// prose block by a blank line, brew was writing one continuous paragraph that ends with the caption
+    /// leading into the affordance. Fold the caption back onto the prose so the detail view renders the
+    /// whole paragraph in one ``Text`` (with native line height) and the affordance card sits below with
+    /// the standard element-transition gap.
+    private mutating func mergeSameParagraphCaptionsIntoProse() {
+        guard committed.count > 1 else {
+            return
+        }
+        for index in 1 ..< committed.count {
+            let current = committed[index]
+            let prior = committed[index - 1]
+            guard !current.precededByBlankLine,
+                  let caption = current.caption,
+                  case let .prose(priorLines) = prior.content
+            else {
+                continue
+            }
+            committed[index - 1] = DoctorBlock(
+                id: prior.id,
+                precededByBlankLine: prior.precededByBlankLine,
+                caption: prior.caption,
+                content: .prose(priorLines + [caption]),
+            )
+            committed[index] = DoctorBlock(
+                id: current.id,
+                precededByBlankLine: current.precededByBlankLine,
+                caption: nil,
+                content: current.content,
+            )
+        }
     }
 
     private mutating func flushCurrent() {
