@@ -262,6 +262,35 @@ struct DoctorOutputParserTests {
         #expect(blocks[1].caption == "Then:")
     }
 
+    // MARK: - Blank-line separation flag
+
+    @Test func `parser flags blocks preceded by a blank line in the raw output`() throws {
+        let output = """
+        Warning: Multi-step.
+        First:
+          mkdir -p /opt/homebrew
+
+        Then:
+          brew tap homebrew/core
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        let blocks = issue.commandBlocks
+        #expect(blocks.count == 2)
+        #expect(blocks[0].precededByBlankLine == false)
+        #expect(blocks[1].precededByBlankLine == true)
+    }
+
+    @Test func `parser leaves adjacent blocks unflagged when no blank line separates them`() throws {
+        let output = """
+        Warning: Adjacent.
+        This means that things will go wrong.
+        Here is a one-liner:
+          brew tap homebrew/core
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.blocks.allSatisfy { $0.precededByBlankLine == false })
+    }
+
     // MARK: - Inline chips (brew-only, with arguments)
 
     @Test func `backticked brew reference becomes a chip but does not promote into a command block`() throws {

@@ -57,6 +57,7 @@ private func warningBlocks(in output: String) -> [WarningBlock] {
 private struct BlockBuilder {
     var type: DoctorBlockType
     var caption: String?
+    var precededByBlankLine: Bool = false
     var proseLines: [String] = []
     var commandSteps: [DoctorFixStep] = []
     var dataItems: [String] = []
@@ -74,6 +75,9 @@ private struct WarningBlockParser {
     /// `true` while a special intro (`do not exist:` / `not writable by your user:`) is allowing
     /// un-indented item lines to flow into a data block.
     var specialUnindentedActive: Bool
+    /// Set when an empty un-indented line is processed; captured by the next ``BlockBuilder`` started
+    /// after the gap. Drives the wider paragraph-break gap in the detail view.
+    var nextBlockFollowsBlankLine: Bool = false
 
     init(block: WarningBlock) {
         self.block = block
@@ -130,6 +134,7 @@ private struct WarningBlockParser {
         }
         committed.append(DoctorBlock(
             id: committed.count,
+            precededByBlankLine: builder.precededByBlankLine,
             caption: builder.caption,
             content: content,
         ))
@@ -153,6 +158,7 @@ private struct WarningBlockParser {
             flushCurrent()
             pendingCaption = nil
             specialUnindentedActive = false
+            nextBlockFollowsBlankLine = true
             return
         }
         if trimmed.hasSuffix(":") {
@@ -176,7 +182,11 @@ private struct WarningBlockParser {
         }
         if current?.type != .data {
             flushCurrent()
-            current = BlockBuilder(type: .data, caption: pendingCaption)
+            current = BlockBuilder(
+                type: .data,
+                caption: pendingCaption,
+                precededByBlankLine: consumePendingBlankLine(),
+            )
             pendingCaption = nil
         }
         current?.dataItems.append(trimmed)
@@ -192,7 +202,11 @@ private struct WarningBlockParser {
         }
         if current?.type != .prose {
             flushCurrent()
-            current = BlockBuilder(type: .prose, caption: nil)
+            current = BlockBuilder(
+                type: .prose,
+                caption: nil,
+                precededByBlankLine: consumePendingBlankLine(),
+            )
         }
         current?.proseLines.append(trimmed)
         appendChips(from: trimmed, into: &inlineChips)
@@ -202,7 +216,11 @@ private struct WarningBlockParser {
         if let caption = pendingCaption {
             flushCurrent()
             let type = decideBlockType(firstMember: trimmed, intro: caption)
-            current = BlockBuilder(type: type, caption: caption)
+            current = BlockBuilder(
+                type: type,
+                caption: caption,
+                precededByBlankLine: consumePendingBlankLine(),
+            )
             pendingCaption = nil
         } else if current == nil || current?.type == .prose, parseFixStep(trimmed) != nil {
             // Stray command sits under a `.prose` block (or no block yet) without a colon intro
@@ -210,11 +228,25 @@ private struct WarningBlockParser {
             // belong to an existing data/command/link block — `pip3` under "tools exist at both paths:"
             // must stay in the data block, not split into commands.
             flushCurrent()
-            current = BlockBuilder(type: .command, caption: nil)
+            current = BlockBuilder(
+                type: .command,
+                caption: nil,
+                precededByBlankLine: consumePendingBlankLine(),
+            )
         } else if current == nil {
-            current = BlockBuilder(type: .prose, caption: nil)
+            current = BlockBuilder(
+                type: .prose,
+                caption: nil,
+                precededByBlankLine: consumePendingBlankLine(),
+            )
         }
         appendToCurrent(trimmed)
+    }
+
+    private mutating func consumePendingBlankLine() -> Bool {
+        let value = nextBlockFollowsBlankLine
+        nextBlockFollowsBlankLine = false
+        return value
     }
 
     private mutating func appendToCurrent(_ trimmed: String) {

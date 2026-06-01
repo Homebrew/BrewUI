@@ -74,10 +74,13 @@ public enum DoctorSeverity: String, Equatable, Sendable {
     case unsupported
 }
 
-/// One typed block in a ``DoctorIssue``'s body — keeps document order and the intro caption that
-/// produced it. Renderers walk blocks in document order.
+/// One typed block in a ``DoctorIssue``'s body — keeps document order, the intro caption that
+/// produced it, and whether `brew doctor` separated this block from the previous one with a blank line.
+/// Renderers walk blocks in document order; the blank-line flag drives a wider paragraph-break gap
+/// in the detail view so a reader can tell same-paragraph continuations from genuine paragraph breaks.
 public struct DoctorBlock: Equatable, Sendable, Identifiable {
     public let id: Int
+    public let precededByBlankLine: Bool
     public let caption: String?
     public let content: Content
 
@@ -93,8 +96,9 @@ public struct DoctorBlock: Equatable, Sendable, Identifiable {
         case link([DoctorLink])
     }
 
-    public init(id: Int, caption: String?, content: Content) {
+    public init(id: Int, precededByBlankLine: Bool = false, caption: String?, content: Content) {
         self.id = id
+        self.precededByBlankLine = precededByBlankLine
         self.caption = caption
         self.content = content
     }
