@@ -36,7 +36,16 @@ private enum DoctorBlockType {
 
 // MARK: - Block splitting
 
+/// What kind of block opens (`Warning:` vs `Error:`) — sets the severity baseline. `Error:` blocks come
+/// from brew's `ofail` path and are more severe than warnings; tier callouts in the body can still
+/// escalate further (`.unsupported`).
+private enum IssueKind {
+    case warning
+    case error
+}
+
 private struct WarningBlock {
+    var kind: IssueKind
     var title: String
     var bodyLines: [String]
 }
@@ -50,7 +59,13 @@ private func warningBlocks(in output: String) -> [WarningBlock] {
                 blocks.append(current)
             }
             let title = String(line.dropFirst("Warning:".count)).trimmingCharacters(in: .whitespaces)
-            current = WarningBlock(title: title, bodyLines: [])
+            current = WarningBlock(kind: .warning, title: title, bodyLines: [])
+        } else if line.hasPrefix("Error:") {
+            if let current {
+                blocks.append(current)
+            }
+            let title = String(line.dropFirst("Error:".count)).trimmingCharacters(in: .whitespaces)
+            current = WarningBlock(kind: .error, title: title, bodyLines: [])
         } else if current != nil {
             current?.bodyLines.append(line)
         }
@@ -109,7 +124,7 @@ private struct WarningBlockParser {
         let rawBody = block.bodyLines.joined(separator: "\n")
         return DoctorIssue(
             title: block.title,
-            severity: parseSeverity(body: rawBody),
+            severity: parseSeverity(body: rawBody, kind: block.kind),
             section: classifySection(title: block.title, body: rawBody),
             blocks: committed,
             rawBody: rawBody,
@@ -324,7 +339,7 @@ private struct WarningBlockParser {
 
 // MARK: - Severity
 
-private func parseSeverity(body: String) -> DoctorSeverity {
+private func parseSeverity(body: String, kind: IssueKind) -> DoctorSeverity {
     if body.contains("Unsupported configuration:") {
         return .unsupported
     }
@@ -333,7 +348,7 @@ private func parseSeverity(body: String) -> DoctorSeverity {
     if let match = body.firstMatch(of: /This is a Tier ([23]) configuration:/) {
         return Int(match.1) == 3 ? .danger : .caution
     }
-    return .caution
+    return kind == .error ? .danger : .caution
 }
 
 // MARK: - Command classifier

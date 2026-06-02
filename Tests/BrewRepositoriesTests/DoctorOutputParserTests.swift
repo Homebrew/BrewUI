@@ -329,6 +329,29 @@ struct DoctorOutputParserTests {
         #expect(commands.first?.caption == "Here is a one-liner:")
     }
 
+    // MARK: - Error blocks
+
+    @Test func `error blocks are parsed alongside warning blocks`() throws {
+        let output = """
+        Error: No developer tools installed.
+        Install the Command Line Tools:
+          xcode-select --install
+        """
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.title == "No developer tools installed.")
+        #expect(issue.severity == .danger)
+    }
+
+    @Test func `error and warning blocks interleave in document order`() {
+        let output = """
+        Error: Something fatal.
+
+        Warning: Something cautionary.
+        """
+        let titles = DoctorOutputParser.parse(output).issues.map(\.title)
+        #expect(titles == ["Something fatal.", "Something cautionary."])
+    }
+
     // MARK: - Link blocks
 
     @Test func `developer.apple.com link block is action; docs.brew.sh is reference`() throws {
