@@ -28,7 +28,7 @@ public struct DoctorReport: Equatable, Sendable {
 /// Prior parsed shape flattened body content into `details` + `affectedItems` + `fixSequences` + `links`,
 /// which orphaned each fix from its own paths/files when a single check produced multiple subjects
 /// (notably `check_git_status`'s "one block per dirty repo"). The block model keeps each fix bound to
-/// its own data; `inlineChips` and `rawBody` remain cross-cutting indices.
+/// its own data; `rawBody` remains a cross-cutting index.
 public struct DoctorIssue: Equatable, Sendable {
     /// `Warning:` summary line, with the prefix stripped.
     public var title: String
@@ -42,9 +42,6 @@ public struct DoctorIssue: Equatable, Sendable {
     /// intro that introduced it as its `caption`, so renderers can label sections by what brew actually
     /// wrote (e.g. ``Remove them with `brew cleanup`:``). Empty for a title-only warning.
     public var blocks: [DoctorBlock]
-    /// Inline backticked references found in prose (e.g. `` `brew cleanup` ``, `` `brew link` ``) —
-    /// copyable chips that are never promoted into the runnable suggested fix.
-    public var inlineChips: [DoctorBacktickChip]
     /// Verbatim body the parser consumed, for the always-present dark-mono "Raw output" fallback and
     /// the multi-group escape hatch.
     public var rawBody: String
@@ -54,14 +51,12 @@ public struct DoctorIssue: Equatable, Sendable {
         severity: DoctorSeverity,
         section: DoctorSection,
         blocks: [DoctorBlock],
-        inlineChips: [DoctorBacktickChip],
         rawBody: String,
     ) {
         self.title = title
         self.severity = severity
         self.section = section
         self.blocks = blocks
-        self.inlineChips = inlineChips
         self.rawBody = rawBody
     }
 }
@@ -138,25 +133,6 @@ public struct DoctorFixStep: Equatable, Sendable {
         self.displayCommand = displayCommand
         self.arguments = arguments
         self.needsAdmin = needsAdmin
-    }
-}
-
-/// A `brew …` reference parsed out of a backticked span inside prose. Render as a copyable chip; do not
-/// promote into the runnable suggested fix (the indented commands are the runnable form).
-public struct DoctorBacktickChip: Equatable, Sendable, Identifiable {
-    /// The text inside the backticks, e.g. `"brew cleanup"`.
-    public var displayCommand: String
-    /// `brew` argv (after dropping the leading `brew`) when this chip is a runnable `brew` invocation;
-    /// `nil` for non-brew references (`xcode-select`, `.gitconfig`, environment variables).
-    public var arguments: [String]?
-
-    public var id: String {
-        displayCommand
-    }
-
-    public init(displayCommand: String, arguments: [String]?) {
-        self.displayCommand = displayCommand
-        self.arguments = arguments
     }
 }
 

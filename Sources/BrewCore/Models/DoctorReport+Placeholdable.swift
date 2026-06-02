@@ -27,7 +27,6 @@ extension DoctorReport: Placeholdable {
                         ]),
                     ),
                 ],
-                inlineChips: [],
                 rawBody: "",
             ),
             DoctorIssue(
@@ -35,7 +34,6 @@ extension DoctorReport: Placeholdable {
                 severity: .caution,
                 section: .systemAndFormulae,
                 blocks: [],
-                inlineChips: [],
                 rawBody: "",
             ),
             DoctorIssue(
@@ -43,7 +41,6 @@ extension DoctorReport: Placeholdable {
                 severity: .caution,
                 section: .systemAndFormulae,
                 blocks: [],
-                inlineChips: [],
                 rawBody: "",
             ),
         ])

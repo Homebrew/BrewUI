@@ -17,7 +17,6 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let severity: DoctorSeverity
     let section: DoctorSection
     let blocks: [DoctorBlock]
-    let inlineChips: [DoctorBacktickChip]
     let rawBody: String
 
     init(id: Int, issue: DoctorIssue) {
@@ -26,7 +25,6 @@ struct DoctorIssueItem: Identifiable, Equatable {
         severity = issue.severity
         section = issue.section
         blocks = issue.blocks
-        inlineChips = issue.inlineChips
         rawBody = issue.rawBody
     }
 

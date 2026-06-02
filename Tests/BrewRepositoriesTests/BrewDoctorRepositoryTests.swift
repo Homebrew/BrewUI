@@ -63,7 +63,6 @@ struct BrewDoctorRepositoryTests {
             return items
         }
         #expect(dataItems == ["openssl@3"])
-        #expect(issue?.inlineChips.first?.displayCommand == "brew link")
     }
 
     @Test func `missing brew executable leaves a failed state`() async {

@@ -331,28 +331,6 @@ struct DoctorOutputParserTests {
         #expect(commands.first?.caption == "Here is a one-liner:")
     }
 
-    // MARK: - Inline chips (brew-only, with arguments)
-
-    @Test func `backticked brew reference becomes a chip but does not promote into a command block`() throws {
-        let output = """
-        Warning: Stale caches.
-        Please run `brew cleanup` to remove them.
-        """
-        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.inlineChips.map(\.displayCommand) == ["brew cleanup"])
-        #expect(issue.inlineChips.first?.arguments == ["cleanup"])
-        #expect(issue.commandBlocks.isEmpty)
-    }
-
-    @Test func `non-executable backticked spans are not chips`() throws {
-        let output = """
-        Warning: Config touched.
-        Edit your `.gitconfig` directly.
-        """
-        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(issue.inlineChips.isEmpty)
-    }
-
     // MARK: - Link blocks
 
     @Test func `developer.apple.com link block is action; docs.brew.sh is reference`() throws {

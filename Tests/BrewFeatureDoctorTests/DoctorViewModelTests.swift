@@ -35,7 +35,6 @@ struct DoctorViewModelTests {
                         ]),
                     ),
                 ],
-                inlineChips: [DoctorBacktickChip(displayCommand: "brew link", arguments: ["link"])],
                 rawBody: "",
             ),
             DoctorIssue(
@@ -46,7 +45,6 @@ struct DoctorViewModelTests {
                     DoctorBlock(id: 0, caption: nil, content: .prose(["Find replacements."])),
                     DoctorBlock(id: 1, caption: nil, content: .data(["macvim"])),
                 ],
-                inlineChips: [],
                 rawBody: "",
             ),
         ])
@@ -71,7 +69,6 @@ struct DoctorViewModelTests {
                         ]),
                     ),
                 ],
-                inlineChips: [],
                 rawBody: "",
             ),
         ])

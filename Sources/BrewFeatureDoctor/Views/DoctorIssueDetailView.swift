@@ -65,7 +65,7 @@ struct DoctorIssueDetailView: View {
     private func blockView(_ block: DoctorBlock) -> some View {
         switch block.content {
         case let .prose(lines):
-            proseView(lines: lines, showsChips: isFirstProseBlock(block))
+            proseView(lines: lines)
         case let .command(steps):
             commandView(block: block, steps: steps)
         case let .data(items):
@@ -75,32 +75,13 @@ struct DoctorIssueDetailView: View {
         }
     }
 
-    private func isFirstProseBlock(_ block: DoctorBlock) -> Bool {
-        item.blocks.first { if case .prose = $0.content { true } else { false } }?.id == block.id
-    }
-
     // MARK: - Prose
 
-    private func proseView(lines: [String], showsChips: Bool) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text(lines.joined(separator: "\n"))
-                .font(.brewBody)
-                .foregroundStyle(Color.brewTextSecondary)
-                .textSelection(.enabled)
-            if showsChips, !item.inlineChips.isEmpty {
-                chipsRow
-            }
-        }
-    }
-
-    private var chipsRow: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: BrewSpacing.xs) {
-                ForEach(item.inlineChips) { chip in
-                    DoctorChipButton(chip: chip)
-                }
-            }
-        }
+    private func proseView(lines: [String]) -> some View {
+        Text(lines.joined(separator: "\n"))
+            .font(.brewBody)
+            .foregroundStyle(Color.brewTextSecondary)
+            .textSelection(.enabled)
     }
 
     // MARK: - Caption (small prose above a UI element)
@@ -259,31 +240,6 @@ private struct DoctorSeverityBadge: View {
         case .caution: .brewStatusWarningSubtle
         case .danger, .unsupported: .brewStatusErrorSubtle
         }
-    }
-}
-
-private struct DoctorChipButton: View {
-    let chip: DoctorBacktickChip
-
-    var body: some View {
-        Button {
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(chip.displayCommand, forType: .string)
-        } label: {
-            HStack(spacing: BrewSpacing.xxs) {
-                Image(systemName: "doc.on.doc")
-                    .imageScale(.small)
-                Text(chip.displayCommand)
-                    .font(.brewCodeSmall)
-            }
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.vertical, BrewSpacing.xxs)
-            .foregroundStyle(Color.brewTextPrimary)
-            .background(Color.brewSurfaceRecessed, in: Capsule())
-            .overlay(Capsule().stroke(Color.brewBorderDefault, lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Copy \(chip.displayCommand)")
     }
 }
 

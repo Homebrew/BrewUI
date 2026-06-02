@@ -77,7 +77,6 @@ private struct WarningBlockParser {
     let block: WarningBlock
     var committed: [DoctorBlock] = []
     var current: BlockBuilder?
-    var inlineChips: [DoctorBacktickChip] = []
     /// Set when a colon-terminated un-indented line is seen and we're waiting for its first indented
     /// member to decide the block's type.
     var pendingCaption: String?
@@ -113,7 +112,6 @@ private struct WarningBlockParser {
             severity: parseSeverity(body: rawBody),
             section: classifySection(title: block.title, body: rawBody),
             blocks: committed,
-            inlineChips: uniqueChips(inlineChips),
             rawBody: rawBody,
         )
     }
@@ -208,9 +206,6 @@ private struct WarningBlockParser {
             flushCurrent()
             pendingCaption = trimmed
             specialUnindentedActive = acceptsUnindentedItems(trimmed)
-            // Captions can still contain `` `brew …` `` chips — keep the chip surface working under
-            // the new block model.
-            appendChips(from: trimmed, into: &inlineChips)
             return
         }
         if collectUnindentedDataItem(trimmed) {
@@ -252,7 +247,6 @@ private struct WarningBlockParser {
             )
         }
         current?.proseLines.append(trimmed)
-        appendChips(from: trimmed, into: &inlineChips)
     }
 
     private mutating func processIndented(_ trimmed: String) {
@@ -376,41 +370,6 @@ private func parseFixStep(_ trimmed: String) -> DoctorFixStep? {
         nil
     }
     return DoctorFixStep(displayCommand: trimmed, arguments: arguments, needsAdmin: needsAdmin)
-}
-
-// MARK: - Backtick chips
-
-private func appendChips(from line: String, into chips: inout [DoctorBacktickChip]) {
-    let segments = line.components(separatedBy: "`")
-    var index = 1
-    while index < segments.count {
-        let span = segments[index].trimmingCharacters(in: .whitespaces)
-        if let chip = chip(from: span) {
-            chips.append(chip)
-        }
-        index += 2
-    }
-}
-
-private func chip(from span: String) -> DoctorBacktickChip? {
-    let tokens = span.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
-    guard let first = tokens.first,
-          knownExecutables.contains(first),
-          tokens.count >= 2
-    else {
-        return nil
-    }
-    let arguments: [String]? = first == "brew" ? Array(tokens.dropFirst()) : nil
-    return DoctorBacktickChip(displayCommand: span, arguments: arguments)
-}
-
-private func uniqueChips(_ chips: [DoctorBacktickChip]) -> [DoctorBacktickChip] {
-    var seen: Set<String> = []
-    var out: [DoctorBacktickChip] = []
-    for chip in chips where seen.insert(chip.id).inserted {
-        out.append(chip)
-    }
-    return out
 }
 
 // MARK: - Links

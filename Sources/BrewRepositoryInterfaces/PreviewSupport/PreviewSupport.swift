@@ -113,7 +113,6 @@ public enum PreviewSupport {
                     ]),
                 ),
             ],
-            inlineChips: [DoctorBacktickChip(displayCommand: "brew cleanup", arguments: ["cleanup"])],
             rawBody: "Run brew cleanup to remove them.\n  brew cleanup",
         ),
         DoctorIssue(
@@ -132,7 +131,6 @@ public enum PreviewSupport {
                     content: .data(["macvim"]),
                 ),
             ],
-            inlineChips: [],
             rawBody: "You should find replacements for the following formulae:\n  macvim",
         ),
     ])
