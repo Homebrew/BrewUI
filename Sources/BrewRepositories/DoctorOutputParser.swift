@@ -295,7 +295,7 @@ private struct WarningBlockParser {
                 current?.commandSteps.append(step)
             }
         case .data:
-            if !containsLink(trimmed), !isValueLine(trimmed) {
+            if !containsLink(trimmed) {
                 current?.dataItems.append(trimmed)
             }
         case .link:
@@ -466,10 +466,6 @@ private func looksLikeItem(_ trimmed: String) -> Bool {
         return true
     }
     return !trimmed.contains(where: \.isWhitespace)
-}
-
-private func isValueLine(_ trimmed: String) -> Bool {
-    trimmed.contains(" = ") || trimmed.contains(": ")
 }
 
 // MARK: - Section classifier

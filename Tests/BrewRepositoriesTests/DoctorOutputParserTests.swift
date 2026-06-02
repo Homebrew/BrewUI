@@ -184,14 +184,14 @@ struct DoctorOutputParserTests {
         #expect(issue.commandBlocks.isEmpty)
     }
 
-    @Test func `value lines inside a data block are skipped, not collected`() throws {
+    @Test func `data block keeps colon-and-equals lines, the user's misconfiguration is the point`() throws {
         let output = """
         Warning: Suspicious git newline settings.
         The detected git configuration values are:
           core.autocrlf = true
         """
         let issue = try #require(DoctorOutputParser.parse(output).issues.first)
-        #expect(!issue.allDataItems.contains("core.autocrlf = true"))
+        #expect(issue.allDataItems == ["core.autocrlf = true"])
     }
 
     // MARK: - Captions stay on their block
