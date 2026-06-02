@@ -211,7 +211,6 @@ private struct DoctorSeverityBadge: View {
 
     private var label: String {
         switch severity {
-        case .info: "Info"
         case .caution: "Caution"
         case .danger: "Danger"
         case .unsupported: "Unsupported"
@@ -220,7 +219,6 @@ private struct DoctorSeverityBadge: View {
 
     private var icon: String {
         switch severity {
-        case .info: "info.circle.fill"
         case .caution: "exclamationmark.triangle.fill"
         case .danger, .unsupported: "xmark.octagon.fill"
         }
@@ -228,7 +226,6 @@ private struct DoctorSeverityBadge: View {
 
     private var foreground: Color {
         switch severity {
-        case .info: .brewStatusInfo
         case .caution: .brewStatusWarning
         case .danger, .unsupported: .brewStatusError
         }
@@ -236,7 +233,6 @@ private struct DoctorSeverityBadge: View {
 
     private var background: Color {
         switch severity {
-        case .info: .brewStatusInfoSubtle
         case .caution: .brewStatusWarningSubtle
         case .danger, .unsupported: .brewStatusErrorSubtle
         }

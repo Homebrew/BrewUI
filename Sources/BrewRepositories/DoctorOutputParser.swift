@@ -328,17 +328,10 @@ private func parseSeverity(body: String) -> DoctorSeverity {
     if body.contains("Unsupported configuration:") {
         return .unsupported
     }
-    if let match = body.firstMatch(of: /This is a Tier (\d) configuration:/) {
-        switch Int(match.1) {
-        case 1:
-            return .info
-        case 2:
-            return .caution
-        case 3:
-            return .danger
-        default:
-            return .caution
-        }
+    // Tier 1 is intentionally absent from the regex — brew's `support_tier_message` short-circuits for
+    // tier == "1", so no `Warning:` block ever carries that callout.
+    if let match = body.firstMatch(of: /This is a Tier ([23]) configuration:/) {
+        return Int(match.1) == 3 ? .danger : .caution
     }
     return .caution
 }

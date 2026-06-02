@@ -75,11 +75,9 @@ struct DoctorOutputParserTests {
         #expect(issue?.severity == .caution)
     }
 
-    @Test func `tier callouts are mapped to severity`() {
-        let tier1 = DoctorOutputParser.parse("Warning: Tier 1 issue.\nThis is a Tier 1 configuration:").issues.first
+    @Test func `tier 2 and 3 callouts are mapped to severity`() {
         let tier2 = DoctorOutputParser.parse("Warning: Tier 2 issue.\nThis is a Tier 2 configuration:").issues.first
         let tier3 = DoctorOutputParser.parse("Warning: Tier 3 issue.\nThis is a Tier 3 configuration:").issues.first
-        #expect(tier1?.severity == .info)
         #expect(tier2?.severity == .caution)
         #expect(tier3?.severity == .danger)
     }

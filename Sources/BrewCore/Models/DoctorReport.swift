@@ -62,8 +62,12 @@ public struct DoctorIssue: Equatable, Sendable {
 }
 
 /// Support-tier severity, mapped from `brew doctor`'s tier callouts.
+///
+/// There is no `.info` case because Tier 1 is unreachable by construction: brew's `support_tier_message`
+/// (Ruby) short-circuits with `return if tier.to_s == "1"`, so no `Warning:` block in any real brew
+/// doctor output ever contains "This is a Tier 1 configuration:". Tier 1 means "fully supported, no
+/// editorial needed" — brew never produces a callout for it.
 public enum DoctorSeverity: String, Equatable, Sendable {
-    case info
     case caution
     case danger
     case unsupported
