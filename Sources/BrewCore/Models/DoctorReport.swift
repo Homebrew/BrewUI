@@ -103,15 +103,6 @@ public struct DoctorBlock: Equatable, Sendable, Identifiable {
         self.content = content
     }
 
-    public var type: DoctorBlockType {
-        switch content {
-        case .prose: .prose
-        case .command: .command
-        case .data: .data
-        case .link: .link
-        }
-    }
-
     /// `true` iff this is a single non-admin `brew` command block we can submit through the command
     /// center. Multi-step command blocks and anything needing `sudo` are copy-only.
     public var isRunnable: Bool {
@@ -131,13 +122,6 @@ public struct DoctorBlock: Equatable, Sendable, Identifiable {
         }
         return step
     }
-}
-
-public enum DoctorBlockType: String, Equatable, Sendable {
-    case prose
-    case command
-    case data
-    case link
 }
 
 /// One step inside a ``DoctorBlock``'s `.command` content — a single command line as `brew doctor` printed it.

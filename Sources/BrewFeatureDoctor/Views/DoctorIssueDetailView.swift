@@ -76,7 +76,7 @@ struct DoctorIssueDetailView: View {
     }
 
     private func isFirstProseBlock(_ block: DoctorBlock) -> Bool {
-        item.blocks.first { $0.type == .prose }?.id == block.id
+        item.blocks.first { if case .prose = $0.content { true } else { false } }?.id == block.id
     }
 
     // MARK: - Prose

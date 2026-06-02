@@ -25,6 +25,15 @@ public enum DoctorOutputParser {
     }
 }
 
+/// Parser-internal mirror of ``DoctorBlock.Content``'s cases. Used by ``BlockBuilder`` to track what kind
+/// of block is being assembled before its payload is fully known. Not part of the public model surface.
+private enum DoctorBlockType {
+    case prose
+    case command
+    case data
+    case link
+}
+
 // MARK: - Block splitting
 
 private struct WarningBlock {

@@ -21,7 +21,7 @@ private extension DoctorIssue {
 
     /// All `.command` blocks (in document order).
     var commandBlocks: [DoctorBlock] {
-        blocks.filter { $0.type == .command }
+        blocks.filter { if case .command = $0.content { true } else { false } }
     }
 
     /// All `.link` block URLs across the issue, host + role.
@@ -313,7 +313,7 @@ struct DoctorOutputParserTests {
             "provided by Homebrew. Consider setting your PATH so that",
             "/opt/homebrew/bin occurs before /usr/bin. Here is a one-liner:",
         ])
-        #expect(issue.blocks[1].type == .command)
+        if case .command = issue.blocks[1].content {} else { Issue.record("expected second block to be a command") }
         #expect(issue.blocks[1].caption == nil)
     }
 
