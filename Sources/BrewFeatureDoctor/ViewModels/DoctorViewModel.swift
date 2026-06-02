@@ -82,6 +82,7 @@ final class DoctorViewModel {
         guard case let .loaded(report) = state else {
             return []
         }
+        print(report.issues)
         return report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
     }
 
@@ -145,14 +146,12 @@ final class DoctorViewModel {
     /// re-checked so a resolved issue clears. Only single-step, non-admin `brew` command blocks are
     /// runnable; multi-step or `sudo` blocks are copy-only.
     func runFix(for item: DoctorIssueItem) {
-        guard let block = item.primaryRunnableBlock,
-              case let .command(steps) = block.content,
-              let step = steps.first,
+        guard let step = item.primaryRunnableStep,
               let arguments = step.arguments
         else {
             return
         }
-        let token = block.copyAllText
+        let token = step.displayCommand
         guard !runningFixTokens.contains(token) else {
             return
         }

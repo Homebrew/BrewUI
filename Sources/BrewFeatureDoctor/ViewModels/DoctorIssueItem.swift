@@ -9,8 +9,8 @@ import Foundation
 /// Presentation mapping for a single ``DoctorIssue`` in the list/detail surface.
 ///
 /// `id` is the issue's index within the report so SwiftUI can track row selection across re-renders.
-/// The runnable-fix token (the block's `copyAllText`) doubles as the `.maintenance` operation id
-/// token, so the view model can match an in-flight fix back to the row that started it.
+/// The runnable-fix token (the single brew step's `displayCommand`) doubles as the `.maintenance`
+/// operation id token, so the view model can match an in-flight fix back to the row that started it.
 struct DoctorIssueItem: Identifiable, Equatable {
     let id: Int
     let title: String
@@ -35,6 +35,11 @@ struct DoctorIssueItem: Identifiable, Equatable {
         blocks.first(where: \.isRunnable)
     }
 
+    /// The single brew step that backs ``primaryRunnableBlock``, when one exists.
+    var primaryRunnableStep: DoctorFixStep? {
+        primaryRunnableBlock?.runnableStep
+    }
+
     /// `true` when ``primaryRunnableBlock`` is non-nil — drives the Run Fix affordance.
     var hasRunnableFix: Bool {
         primaryRunnableBlock != nil
@@ -42,7 +47,7 @@ struct DoctorIssueItem: Identifiable, Equatable {
 
     /// Stable token tracking an in-flight fix — matches the `.maintenance` operation id token.
     var fixToken: String? {
-        primaryRunnableBlock?.copyAllText
+        primaryRunnableStep?.displayCommand
     }
 }
 

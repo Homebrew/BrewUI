@@ -115,19 +115,21 @@ public struct DoctorBlock: Equatable, Sendable, Identifiable {
     /// `true` iff this is a single non-admin `brew` command block we can submit through the command
     /// center. Multi-step command blocks and anything needing `sudo` are copy-only.
     public var isRunnable: Bool {
-        guard case let .command(steps) = content, steps.count == 1, let step = steps.first else {
-            return false
-        }
-        return step.arguments != nil && !step.needsAdmin
+        runnableStep != nil
     }
 
-    /// Joined command text suitable for clipboard "Copy all" — one step per line. Empty for non-command
-    /// blocks.
-    public var copyAllText: String {
-        guard case let .command(steps) = content else {
-            return ""
+    /// The single brew step the block can submit through the command center, when it has one. Multi-step
+    /// command blocks and anything needing `sudo` are copy-only and return `nil`.
+    public var runnableStep: DoctorFixStep? {
+        guard case let .command(steps) = content,
+              steps.count == 1,
+              let step = steps.first,
+              step.arguments != nil,
+              !step.needsAdmin
+        else {
+            return nil
         }
-        return steps.map(\.displayCommand).joined(separator: "\n")
+        return step
     }
 }
 
