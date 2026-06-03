@@ -83,8 +83,9 @@ struct DoctorViewModelTests {
         )
     }
 
-    @Test func `projects loaded issues and selects the first`() {
+    @Test func `projects loaded issues and selects the first`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
+        await viewModel.load()
 
         #expect(viewModel.presentation == .issues)
         #expect(viewModel.issueItems.count == 2)

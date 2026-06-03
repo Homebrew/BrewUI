@@ -6,14 +6,15 @@
 import BrewUIComponents
 import SwiftUI
 
-/// One `brew doctor` warning in the issues list: a warning glyph, the summary, and a "fix available" hint.
+/// One `brew doctor` warning in the issues list: a severity glyph (matching the row's severity), the
+/// summary, and a "fix available" hint.
 struct DoctorIssueRowView: View {
     let item: DoctorIssueItem
 
     var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.sm) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundStyle(Color.brewStatusWarning)
+            Image(systemName: DoctorSeverityStyle.icon(item.severity))
+                .foregroundStyle(DoctorSeverityStyle.foreground(item.severity))
                 .imageScale(.medium)
             VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
                 Text(item.title)

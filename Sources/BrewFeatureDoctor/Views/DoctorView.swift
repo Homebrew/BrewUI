@@ -133,12 +133,9 @@ private struct DoctorSeveritySectionHeader: View {
 
     var body: some View {
         HStack(spacing: BrewSpacing.xs) {
-            Label(
-                DoctorSeverityStyle.displayName(severity),
-                systemImage: DoctorSeverityStyle.icon(severity),
-            )
-            .font(.brewSubheadline.weight(.semibold))
-            .foregroundStyle(DoctorSeverityStyle.foreground(severity))
+            Text(DoctorSeverityStyle.displayName(severity))
+                .font(.brewSubheadline.weight(.semibold))
+                .foregroundStyle(DoctorSeverityStyle.foreground(severity))
             Text("(\(issueCount))")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewTextSecondary)

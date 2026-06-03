@@ -103,16 +103,21 @@ final class DoctorViewModel {
         return "\(count) issues found"
     }
 
+    /// The selected issue id — read each row in `listRowBackground`, so this stays O(1) and never
+    /// iterates the issues array. Auto-selection of the first issue on a fresh load lives in `load()`.
     var activeSelectedIssueID: Int? {
-        let items = issueItems
-        if let selectedIssueID, items.contains(where: { $0.id == selectedIssueID }) {
-            return selectedIssueID
-        }
-        return items.first?.id
+        selectedIssueID
     }
 
+    /// O(1) lookup — the item id is the issue's offset within the loaded report.
     var selectedIssue: DoctorIssueItem? {
-        issueItems.first { $0.id == activeSelectedIssueID }
+        guard let id = selectedIssueID,
+              case let .loaded(report) = state,
+              report.issues.indices.contains(id)
+        else {
+            return nil
+        }
+        return DoctorIssueItem(id: id, issue: report.issues[id])
     }
 
     func setSelection(_ id: Int?) {
@@ -136,9 +141,23 @@ final class DoctorViewModel {
     // MARK: - Intents
 
     /// Runs `brew doctor` via the repository. Called on tab arrival and from "Run Again"; keeps any prior
-    /// report visible while it refreshes.
+    /// report visible while it refreshes. On a fresh load (no prior selection or a stale one), auto-
+    /// selects the first issue so the detail pane has something to show.
     func load() async {
         await doctorRepository.load()
+        synchronizeSelectionWithLoadedReport()
+    }
+
+    /// Validates ``selectedIssueID`` against the freshly-loaded report. Drops it if the issue is gone
+    /// (e.g. a fix resolved it) and defaults to the first issue when nothing is selected.
+    private func synchronizeSelectionWithLoadedReport() {
+        guard case let .loaded(report) = state else {
+            return
+        }
+        if let selectedIssueID, report.issues.indices.contains(selectedIssueID) {
+            return
+        }
+        selectedIssueID = report.issues.isEmpty ? nil : 0
     }
 
     /// Submits the issue's suggested `brew` fix as a maintenance operation. Output streams in the bottom
