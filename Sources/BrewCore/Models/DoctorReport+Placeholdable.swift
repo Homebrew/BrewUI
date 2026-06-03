@@ -13,7 +13,6 @@ extension DoctorReport: Placeholdable {
             DoctorIssue(
                 title: "Placeholder issue title sized for two lines of redacted text",
                 severity: .caution,
-                section: .systemAndFormulae,
                 blocks: [
                     DoctorBlock(
                         id: 0,
@@ -32,14 +31,12 @@ extension DoctorReport: Placeholdable {
             DoctorIssue(
                 title: "Second placeholder issue title",
                 severity: .caution,
-                section: .systemAndFormulae,
                 blocks: [],
                 rawBody: "",
             ),
             DoctorIssue(
                 title: "Third placeholder issue title",
                 severity: .caution,
-                section: .systemAndFormulae,
                 blocks: [],
                 rawBody: "",
             ),

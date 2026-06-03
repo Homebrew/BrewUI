@@ -15,7 +15,6 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let id: Int
     let title: String
     let severity: DoctorSeverity
-    let section: DoctorSection
     let blocks: [DoctorBlock]
     let rawBody: String
 
@@ -23,7 +22,6 @@ struct DoctorIssueItem: Identifiable, Equatable {
         self.id = id
         title = issue.title
         severity = issue.severity
-        section = issue.section
         blocks = issue.blocks
         rawBody = issue.rawBody
     }
@@ -49,29 +47,30 @@ struct DoctorIssueItem: Identifiable, Equatable {
     }
 }
 
-/// One sectioned bucket of issues for the list.
+/// One severity-keyed bucket of issues for the list, ordered most-severe first.
 struct DoctorIssueGroup: Identifiable, Equatable {
-    let section: DoctorSection
+    let severity: DoctorSeverity
     let items: [DoctorIssueItem]
 
-    var id: DoctorSection {
-        section
+    var id: DoctorSeverity {
+        severity
     }
 
-    /// Buckets the report's issues into curated sections in `DoctorSection` enum order; empty sections
-    /// are skipped so the list never shows an empty header. Used by the view model and by the view's
+    /// Buckets the report's issues by severity in descending-severity order; empty buckets are skipped
+    /// so the list never shows an empty header. Used by the view model and by the view's
     /// `AsyncContentView` loaded closure (so the redacted placeholder report buckets the same way).
     static func grouped(from report: DoctorReport) -> [DoctorIssueGroup] {
         let items = report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
-        var byScreen: [DoctorSection: [DoctorIssueItem]] = [:]
+        var bySeverity: [DoctorSeverity: [DoctorIssueItem]] = [:]
         for item in items {
-            byScreen[item.section, default: []].append(item)
+            bySeverity[item.severity, default: []].append(item)
         }
-        return DoctorSection.allCases.compactMap { section in
-            guard let items = byScreen[section], !items.isEmpty else {
+        let order: [DoctorSeverity] = [.unsupported, .danger, .caution]
+        return order.compactMap { severity in
+            guard let items = bySeverity[severity], !items.isEmpty else {
                 return nil
             }
-            return DoctorIssueGroup(section: section, items: items)
+            return DoctorIssueGroup(severity: severity, items: items)
         }
     }
 }

@@ -125,7 +125,6 @@ private struct WarningBlockParser {
         return DoctorIssue(
             title: block.title,
             severity: parseSeverity(body: rawBody, kind: block.kind),
-            section: classifySection(title: block.title, body: rawBody),
             blocks: committed,
             rawBody: rawBody,
         )
@@ -444,75 +443,3 @@ private func looksLikeItem(_ trimmed: String) -> Bool {
     return !trimmed.contains(where: \.isWhitespace)
 }
 
-// MARK: - Section classifier
-
-private func classifySection(title: String, body: String) -> DoctorSection {
-    let titleLower = title.lowercased()
-    let combined = (title + " " + body).lowercased()
-    if matchesAny(combined, xcodeAndCLTKeywords) {
-        return .xcodeAndCLT
-    }
-    if matchesAny(combined, environmentAndPathKeywords) {
-        return .environmentAndPath
-    }
-    if titleLower.contains("cask") {
-        return .casks
-    }
-    if matchesAny(combined, tapsAndGitKeywords) {
-        return .tapsAndGit
-    }
-    if matchesAny(combined, strayFilesKeywords) {
-        return .strayFiles
-    }
-    return .systemAndFormulae
-}
-
-private func matchesAny(_ haystack: String, _ keywords: [String]) -> Bool {
-    keywords.contains { haystack.contains($0) }
-}
-
-private let xcodeAndCLTKeywords: [String] = [
-    "xcode",
-    "command line tools",
-    "developer tools",
-    "broken sdk",
-    "supported sdk",
-    " clt ",
-    "clt installed",
-]
-
-private let environmentAndPathKeywords: [String] = [
-    "your path",
-    "in your path",
-    "shell profile",
-    "shell rc",
-    "tmpdir",
-    "non-prefixed",
-    "non_prefixed",
-    "not writable by your user",
-    "directories do not exist",
-]
-
-private let tapsAndGitKeywords: [String] = [
-    "tap ",
-    "untap",
-    "taps:",
-    "git origin",
-    "origin remote",
-    "uncommitted",
-    "homebrew git",
-    "git config",
-]
-
-private let strayFilesKeywords: [String] = [
-    "stray",
-    "unbrewed",
-    "unexpected ",
-    "gettext",
-    "iconv",
-    "framework",
-    "header files",
-    "static librar",
-    "broken symlinks",
-    "files exist",
-]

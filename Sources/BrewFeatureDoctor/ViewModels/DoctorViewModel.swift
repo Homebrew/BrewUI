@@ -86,8 +86,8 @@ final class DoctorViewModel {
         return report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
     }
 
-    /// Issues bucketed into the curated sections from `DoctorParsing-Plan.md` §8, in `DoctorSection`
-    /// enum order. Empty sections are skipped so the list never shows an empty header.
+    /// Issues bucketed by severity, most-severe first. Empty severities are skipped so the list never
+    /// shows an empty header.
     var issueGroups: [DoctorIssueGroup] {
         guard case let .loaded(report) = state else {
             return []

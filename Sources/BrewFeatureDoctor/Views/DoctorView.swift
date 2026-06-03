@@ -105,7 +105,7 @@ struct DoctorView: View {
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
         List {
             ForEach(groups) { group in
-                Section(group.section.displayName) {
+                Section {
                     ForEach(group.items) { item in
                         DoctorIssueRowView(item: item)
                             .id(item.id)
@@ -117,11 +117,34 @@ struct DoctorView: View {
                                 viewModel.activeSelectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
+                } header: {
+                    DoctorSeveritySectionHeader(severity: group.severity, issueCount: group.items.count)
                 }
             }
         }
         .listStyle(.plain)
         .accessibilityLabel("Doctor issues")
+    }
+}
+
+private struct DoctorSeveritySectionHeader: View {
+    let severity: DoctorSeverity
+    let issueCount: Int
+
+    var body: some View {
+        HStack(spacing: BrewSpacing.xs) {
+            Label(
+                DoctorSeverityStyle.displayName(severity),
+                systemImage: DoctorSeverityStyle.icon(severity),
+            )
+            .font(.brewSubheadline.weight(.semibold))
+            .foregroundStyle(DoctorSeverityStyle.foreground(severity))
+            Text("(\(issueCount))")
+                .font(.brewSubheadline)
+                .foregroundStyle(Color.brewTextSecondary)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(DoctorSeverityStyle.displayName(severity)), \(issueCount) issues")
     }
 }
 

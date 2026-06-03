@@ -98,7 +98,6 @@ public enum PreviewSupport {
         DoctorIssue(
             title: "Some cached downloads are stale.",
             severity: .caution,
-            section: .systemAndFormulae,
             blocks: [
                 DoctorBlock(
                     id: 0,
@@ -118,7 +117,6 @@ public enum PreviewSupport {
         DoctorIssue(
             title: "Some installed formulae are deprecated or disabled.",
             severity: .caution,
-            section: .systemAndFormulae,
             blocks: [
                 DoctorBlock(
                     id: 0,

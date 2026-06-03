@@ -20,7 +20,6 @@ struct DoctorViewModelTests {
             DoctorIssue(
                 title: "You have unlinked kegs in your Cellar.",
                 severity: .caution,
-                section: .systemAndFormulae,
                 blocks: [
                     DoctorBlock(id: 0, caption: nil, content: .prose(["Run brew link on these:"])),
                     DoctorBlock(
@@ -40,7 +39,6 @@ struct DoctorViewModelTests {
             DoctorIssue(
                 title: "Some installed formulae are deprecated.",
                 severity: .caution,
-                section: .systemAndFormulae,
                 blocks: [
                     DoctorBlock(id: 0, caption: nil, content: .prose(["Find replacements."])),
                     DoctorBlock(id: 1, caption: nil, content: .data(["macvim"])),
@@ -55,7 +53,6 @@ struct DoctorViewModelTests {
             DoctorIssue(
                 title: "Some cached downloads are stale.",
                 severity: .caution,
-                section: .systemAndFormulae,
                 blocks: [
                     DoctorBlock(
                         id: 0,

@@ -200,42 +200,14 @@ private struct DoctorSeverityBadge: View {
     let severity: DoctorSeverity
 
     var body: some View {
-        Label(label, systemImage: icon)
+        Label(DoctorSeverityStyle.displayName(severity),
+              systemImage: DoctorSeverityStyle.icon(severity))
             .font(.brewCaption.weight(.semibold))
-            .foregroundStyle(foreground)
+            .foregroundStyle(DoctorSeverityStyle.foreground(severity))
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.vertical, BrewSpacing.xxs)
-            .background(background, in: Capsule())
-            .accessibilityLabel("Severity: \(label)")
-    }
-
-    private var label: String {
-        switch severity {
-        case .caution: "Caution"
-        case .danger: "Danger"
-        case .unsupported: "Unsupported"
-        }
-    }
-
-    private var icon: String {
-        switch severity {
-        case .caution: "exclamationmark.triangle.fill"
-        case .danger, .unsupported: "xmark.octagon.fill"
-        }
-    }
-
-    private var foreground: Color {
-        switch severity {
-        case .caution: .brewStatusWarning
-        case .danger, .unsupported: .brewStatusError
-        }
-    }
-
-    private var background: Color {
-        switch severity {
-        case .caution: .brewStatusWarningSubtle
-        case .danger, .unsupported: .brewStatusErrorSubtle
-        }
+            .background(DoctorSeverityStyle.background(severity), in: Capsule())
+            .accessibilityLabel("Severity: \(DoctorSeverityStyle.displayName(severity))")
     }
 }
 

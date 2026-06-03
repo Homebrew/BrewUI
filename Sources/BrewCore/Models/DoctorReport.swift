@@ -35,9 +35,6 @@ public struct DoctorIssue: Equatable, Sendable {
     /// Severity derived from a support-tier callout (`This is a Tier N configuration:` /
     /// `Unsupported configuration:`). Unflagged warnings default to ``DoctorSeverity/caution``.
     public var severity: DoctorSeverity
-    /// Coarse grouping for the issues list, mapped from the warning's text. Title-keyword stand-in for
-    /// the plan's `check_name` mapping.
-    public var section: DoctorSection
     /// Ordered list of blocks as they appear in the raw output. Each block keeps the colon-terminated
     /// intro that introduced it as its `caption`, so renderers can label sections by what brew actually
     /// wrote (e.g. ``Remove them with `brew cleanup`:``). Empty for a title-only warning.
@@ -49,13 +46,11 @@ public struct DoctorIssue: Equatable, Sendable {
     public init(
         title: String,
         severity: DoctorSeverity,
-        section: DoctorSection,
         blocks: [DoctorBlock],
         rawBody: String,
     ) {
         self.title = title
         self.severity = severity
-        self.section = section
         self.blocks = blocks
         self.rawBody = rawBody
     }
@@ -160,29 +155,3 @@ public enum DoctorLinkRole: String, Equatable, Sendable {
     case reference
 }
 
-/// Coarse grouping for the issues list, modelled on the curated `check_name` → section map sketched
-/// in `.ai/plans/DoctorParsing-Plan.md` §8. Since `brew doctor` output doesn't include check names, the
-/// parser classifies by title/body keywords instead.
-public enum DoctorSection: String, CaseIterable, Equatable, Sendable, Identifiable {
-    case xcodeAndCLT
-    case environmentAndPath
-    case casks
-    case tapsAndGit
-    case strayFiles
-    case systemAndFormulae
-
-    public var id: String {
-        rawValue
-    }
-
-    public var displayName: String {
-        switch self {
-        case .xcodeAndCLT: "Xcode & Command Line Tools"
-        case .environmentAndPath: "Environment & PATH"
-        case .casks: "Casks"
-        case .tapsAndGit: "Taps & Git"
-        case .strayFiles: "Stray Files"
-        case .systemAndFormulae: "System & Formulae"
-        }
-    }
-}
