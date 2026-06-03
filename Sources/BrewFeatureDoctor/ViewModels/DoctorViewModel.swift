@@ -82,21 +82,11 @@ final class DoctorViewModel {
         guard case let .loaded(report) = state else {
             return []
         }
-        print(report.issues)
         return report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
     }
 
-    /// Issues bucketed by severity, most-severe first. Empty severities are skipped so the list never
-    /// shows an empty header.
-    var issueGroups: [DoctorIssueGroup] {
-        guard case let .loaded(report) = state else {
-            return []
-        }
-        return DoctorIssueGroup.grouped(from: report)
-    }
-
     var issueCountSubtitle: String {
-        let count = issueItems.count
+        let count = state.value?.issues.count ?? 0
         if count == 1 {
             return "1 issue found"
         }

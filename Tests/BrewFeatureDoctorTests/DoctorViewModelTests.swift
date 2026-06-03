@@ -164,6 +164,104 @@ struct DoctorViewModelTests {
         )
         return RecordingSerialBrewCommandCenter(executionContext: ctx)
     }
+
+    // MARK: - DoctorIssueGroup.grouped
+
+    @Test func `grouped buckets and orders issues by descending severity`() {
+        let report = DoctorReport(issues: [
+            Self.minimal(.caution, "c1"),
+            Self.minimal(.danger, "d1"),
+            Self.minimal(.caution, "c2"),
+            Self.minimal(.unsupported, "u1"),
+            Self.minimal(.danger, "d2"),
+        ])
+        let groups = DoctorIssueGroup.grouped(from: report)
+        #expect(groups.map(\.severity) == [.unsupported, .danger, .caution])
+        #expect(groups[0].items.map(\.title) == ["u1"])
+        #expect(groups[1].items.map(\.title) == ["d1", "d2"])
+        #expect(groups[2].items.map(\.title) == ["c1", "c2"])
+    }
+
+    @Test func `grouped skips empty severity buckets`() {
+        let report = DoctorReport(issues: [Self.minimal(.caution, "c1")])
+        let groups = DoctorIssueGroup.grouped(from: report)
+        #expect(groups.map(\.severity) == [.caution])
+    }
+
+    @Test func `grouped returns no groups for an empty report`() {
+        let groups = DoctorIssueGroup.grouped(from: DoctorReport(issues: []))
+        #expect(groups.isEmpty)
+    }
+
+    // MARK: - Selection sync on load
+
+    @Test func `load on an empty report clears the selection`() async {
+        let repository = MutableDoctorRepository(report: DoctorReport(issues: []))
+        let viewModel = Self.viewModel(repository: repository)
+
+        await viewModel.load()
+
+        #expect(viewModel.activeSelectedIssueID == nil)
+    }
+
+    @Test func `load with a stale selection resets to the first issue`() async {
+        let initial = DoctorReport(issues: [
+            Self.minimal(.caution, "first"),
+            Self.minimal(.caution, "second"),
+            Self.minimal(.caution, "third"),
+        ])
+        let repository = MutableDoctorRepository(report: initial)
+        let viewModel = Self.viewModel(repository: repository)
+
+        await viewModel.load()
+        viewModel.setSelection(2)
+        #expect(viewModel.activeSelectedIssueID == 2)
+
+        repository.replace(report: DoctorReport(issues: [Self.minimal(.caution, "only-survivor")]))
+        await viewModel.load()
+
+        #expect(viewModel.activeSelectedIssueID == 0)
+    }
+
+    @Test func `load preserves a still-valid selection`() async {
+        let report = DoctorReport(issues: [
+            Self.minimal(.caution, "first"),
+            Self.minimal(.caution, "second"),
+        ])
+        let repository = MutableDoctorRepository(report: report)
+        let viewModel = Self.viewModel(repository: repository)
+
+        await viewModel.load()
+        viewModel.setSelection(1)
+
+        await viewModel.load()
+
+        #expect(viewModel.activeSelectedIssueID == 1)
+    }
+
+    private static func minimal(_ severity: DoctorSeverity, _ title: String) -> DoctorIssue {
+        DoctorIssue(title: title, severity: severity, blocks: [], rawBody: "")
+    }
+}
+
+/// Test-scoped doctor repository that lets the test swap in a new report between `load()` calls.
+/// `load()` is a no-op (the report is supplied directly) so the view model's selection-sync logic
+/// runs against whatever state the test has staged.
+@Observable
+@MainActor
+private final class MutableDoctorRepository: DoctorRepository {
+    private(set) var state: LoadState<DoctorReport, any Error>
+    private(set) var isRefreshing = false
+
+    init(report: DoctorReport) {
+        state = .loaded(report)
+    }
+
+    func load() async {}
+
+    func replace(report: DoctorReport) {
+        state = .loaded(report)
+    }
 }
 
 @MainActor
