@@ -154,4 +154,3 @@ public enum DoctorLinkRole: String, Equatable, Sendable {
     case action
     case reference
 }
-

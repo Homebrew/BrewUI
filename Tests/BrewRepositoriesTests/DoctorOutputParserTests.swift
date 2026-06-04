@@ -391,5 +391,4 @@ struct DoctorOutputParserTests {
         let titles = DoctorOutputParser.parse(output).issues.map(\.title)
         #expect(titles == ["First problem.", "Second problem."])
     }
-
 }

@@ -442,4 +442,3 @@ private func looksLikeItem(_ trimmed: String) -> Bool {
     }
     return !trimmed.contains(where: \.isWhitespace)
 }
-
