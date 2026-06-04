@@ -64,6 +64,21 @@ public final class BrewDoctorRepository: DoctorRepository {
     )
 
     private func fetch() async {
+        #if DEBUG
+            // Local debug-only fixture override. Reads a saved brew doctor transcript instead of running
+            // `brew doctor` against the live system — handy for iterating on the parser / detail UI
+            // without a real failing environment. Skipped under xctest so the repository tests still
+            // exercise their mock runner. Do not commit uncommented.
+            let runningInLiveApp = Bundle.main.bundlePath.hasSuffix(".app")
+            if runningInLiveApp,
+               let fixture = try? String(
+                   contentsOfFile: "/Users/Shared/sv-graeme/BrewUI/.ai/plans/brew-doctor-console.txt",
+                   encoding: .utf8,
+               ) {
+                state = .loaded(DoctorOutputParser.parse(fixture))
+                return
+            }
+        #endif
         let hasReport = if case .loaded = state { true } else { false }
         if hasReport {
             isRefreshing = true

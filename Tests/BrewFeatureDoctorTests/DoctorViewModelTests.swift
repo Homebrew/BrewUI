@@ -242,6 +242,70 @@ struct DoctorViewModelTests {
     private static func minimal(_ severity: DoctorSeverity, _ title: String) -> DoctorIssue {
         DoctorIssue(title: title, severity: severity, blocks: [], rawBody: "")
     }
+
+    // MARK: - Header chrome
+
+    @Test func `showsHeaderControls is hidden while loading and on failure`() {
+        let loading = Self.viewModel(repository: LoadingDoctorRepository())
+        #expect(loading.showsHeaderControls == false)
+
+        let failed = Self.viewModel(
+            repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
+        )
+        #expect(failed.showsHeaderControls == false)
+    }
+
+    @Test func `showsHeaderControls is visible once a report is on screen`() {
+        let healthy = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
+        #expect(healthy.showsHeaderControls == true)
+
+        let issues = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
+        #expect(issues.showsHeaderControls == true)
+    }
+
+    // MARK: - Subtitle
+
+    @Test func `subtitle while loading describes the running check`() {
+        let viewModel = Self.viewModel(repository: LoadingDoctorRepository())
+        #expect(viewModel.subtitle == "Running brew doctor…")
+    }
+
+    @Test func `subtitle on healthy reflects refresh state`() {
+        let repository = MutableDoctorRepository(report: DoctorReport(issues: []))
+        let viewModel = Self.viewModel(repository: repository)
+
+        #expect(viewModel.subtitle == "No problems found")
+
+        repository.setRefreshing(true)
+        #expect(viewModel.subtitle == "Re-checking…")
+    }
+
+    @Test func `subtitle on issues falls back to the issue count when not refreshing`() {
+        let repository = MutableDoctorRepository(report: Self.issuesReport())
+        let viewModel = Self.viewModel(repository: repository)
+
+        #expect(viewModel.subtitle == "2 issues found")
+
+        repository.setRefreshing(true)
+        #expect(viewModel.subtitle == "Re-checking…")
+    }
+
+    @Test func `subtitle on failure shows a generic could-not-complete message`() {
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
+        )
+        #expect(viewModel.subtitle == "The check could not be completed")
+    }
+}
+
+/// Test-scoped doctor repository pinned in the `.loading` state. Used to exercise the loading branches of
+/// view-model derived state without driving an async load.
+@Observable
+@MainActor
+private final class LoadingDoctorRepository: DoctorRepository {
+    let state: LoadState<DoctorReport, any Error> = .loading
+    let isRefreshing = false
+    func load() async {}
 }
 
 /// Test-scoped doctor repository that lets the test swap in a new report between `load()` calls.
@@ -261,6 +325,10 @@ private final class MutableDoctorRepository: DoctorRepository {
 
     func replace(report: DoctorReport) {
         state = .loaded(report)
+    }
+
+    func setRefreshing(_ refreshing: Bool) {
+        isRefreshing = refreshing
     }
 }
 

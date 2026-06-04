@@ -93,6 +93,33 @@ final class DoctorViewModel {
         return "\(count) issues found"
     }
 
+    /// Header chrome (Run Again button, re-check spinner) is only meaningful once a report — healthy or
+    /// with issues — is on screen. Hidden during the initial load and on failure (the failure surface owns
+    /// its own retry affordance via ``AsyncContentView``).
+    var showsHeaderControls: Bool {
+        switch presentation {
+        case .healthy, .issues:
+            true
+        case .loading, .failed:
+            false
+        }
+    }
+
+    /// Header subtitle copy. Mirrors ``presentation``; while a re-check runs on top of a prior report it
+    /// switches to "Re-checking…" so the user knows the visible content is being refreshed.
+    var subtitle: String {
+        switch presentation {
+        case .loading:
+            "Running brew doctor…"
+        case .healthy:
+            isRefreshing ? "Re-checking…" : "No problems found"
+        case .issues:
+            isRefreshing ? "Re-checking…" : issueCountSubtitle
+        case .failed:
+            "The check could not be completed"
+        }
+    }
+
     /// The selected issue id — read each row in `listRowBackground`, so this stays O(1) and never
     /// iterates the issues array. Auto-selection of the first issue on a fresh load lives in `load()`.
     var activeSelectedIssueID: Int? {

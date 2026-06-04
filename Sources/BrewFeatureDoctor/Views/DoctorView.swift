@@ -27,12 +27,12 @@ struct DoctorView: View {
                 Text("Doctor")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(subtitle)
+                Text(viewModel.subtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer(minLength: 0)
-            if showsHeaderControls {
+            if viewModel.showsHeaderControls {
                 if viewModel.isRefreshing {
                     ProgressView()
                         .controlSize(.small)
@@ -49,28 +49,6 @@ struct DoctorView: View {
         .padding(BrewSpacing.lg)
         .accessibilityElement(children: .combine)
         .accessibilityHeading(.h1)
-    }
-
-    private var showsHeaderControls: Bool {
-        switch viewModel.presentation {
-        case .healthy, .issues:
-            true
-        case .loading, .failed:
-            false
-        }
-    }
-
-    private var subtitle: String {
-        switch viewModel.presentation {
-        case .loading:
-            "Running brew doctor…"
-        case .healthy:
-            viewModel.isRefreshing ? "Re-checking…" : "No problems found"
-        case .issues:
-            viewModel.isRefreshing ? "Re-checking…" : viewModel.issueCountSubtitle
-        case .failed:
-            "The check could not be completed"
-        }
     }
 
     private var content: some View {
