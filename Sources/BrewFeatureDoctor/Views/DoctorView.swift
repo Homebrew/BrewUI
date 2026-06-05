@@ -55,13 +55,14 @@ struct DoctorView: View {
         AsyncContentView(
             state: viewModel.state,
             onRetry: { Task { await viewModel.load() } },
-        ) { report in
-            if report.isHealthy {
-                healthyState
-            } else {
-                issuesList(groups: DoctorIssueGroup.grouped(from: report))
-            }
-        }
+            loaded: { report in
+                if report.isHealthy {
+                    healthyState
+                } else {
+                    issuesList(groups: DoctorIssueGroup.grouped(from: report))
+                }
+            },
+        )
     }
 
     private var healthyState: some View {

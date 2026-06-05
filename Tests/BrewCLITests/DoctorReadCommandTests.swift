@@ -14,7 +14,11 @@ struct DoctorReadCommandTests {
     @Test func `captures stdout when stderr is empty`() async throws {
         let command = DoctorReadCommand()
         let runner = StubbedCommandRunner(
-            output: CommandOutput(standardOutput: "Your system is ready to brew.\n", standardError: "", terminationStatus: 0),
+            output: CommandOutput(
+                standardOutput: "Your system is ready to brew.\n",
+                standardError: "",
+                terminationStatus: 0,
+            ),
         )
         try await command.run(in: Self.context(runner: runner))
 
