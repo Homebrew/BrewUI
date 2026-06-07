@@ -246,37 +246,77 @@ private struct SecretField: View {
     }
 }
 
-/// Inline form for adding a custom `HOMEBREW_*` row. The key field is locked to the `HOMEBREW_`
-/// prefix and the Add button only enables once the user has typed something past it.
+/// Inline form for adding a custom `HOMEBREW_*` row. Lives behind a disclosure so that the curated
+/// allowlist stays the obvious surface, and gates classification-flagged keys through a confirmation
+/// banner before they land in the draft.
 private struct ConfigCustomRowAffordance: View {
     @Bindable var viewModel: ConfigViewModel
     @State private var keyDraft: String = "HOMEBREW_"
     @State private var valueDraft: String = ""
     @State private var rejectionMessage: String?
+    @State private var isExpanded: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            Text("Add a custom HOMEBREW_*")
+        DisclosureGroup(isExpanded: $isExpanded) {
+            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                Text("These take effect on every `brew` invocation. Wrong values can route downloads to other servers or run a different `git`/`curl`. Only paste from sources you trust.")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: BrewSpacing.sm) {
+                    TextField("HOMEBREW_KEY", text: $keyDraft)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.brewCode)
+                        .frame(maxWidth: 260)
+                    TextField("value", text: $valueDraft)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.brewCode)
+                        .frame(maxWidth: .infinity)
+                    Button("Add", action: addRow)
+                        .disabled(!isAddable)
+                }
+                if let pending = viewModel.pendingDangerousCustomRow {
+                    pendingDangerousBanner(pending)
+                }
+                if let rejectionMessage {
+                    Text(rejectionMessage)
+                        .font(.brewCaption2)
+                        .foregroundStyle(Color.brewStatusError)
+                }
+            }
+            .padding(.top, BrewSpacing.xs)
+        } label: {
+            Text("Advanced — set any HOMEBREW_* variable")
                 .font(.brewCaption.weight(.semibold))
                 .foregroundStyle(Color.brewTextSecondary)
+        }
+    }
+
+    private func pendingDangerousBanner(_ pending: PendingCustomRow) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            Text("Set \(pending.key)?")
+                .font(.brewCallout.weight(.semibold))
+                .foregroundStyle(Color.brewTextPrimary)
+            Text(pending.reason)
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: BrewSpacing.sm) {
-                TextField("HOMEBREW_KEY", text: $keyDraft)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.brewCode)
-                    .frame(maxWidth: 260)
-                TextField("value", text: $valueDraft)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.brewCode)
-                    .frame(maxWidth: .infinity)
-                Button("Add", action: addRow)
-                    .disabled(!isAddable)
-            }
-            if let rejectionMessage {
-                Text(rejectionMessage)
-                    .font(.brewCaption2)
-                    .foregroundStyle(Color.brewStatusError)
+                Button("Add anyway") {
+                    viewModel.confirmPendingCustomRow()
+                    keyDraft = "HOMEBREW_"
+                    valueDraft = ""
+                    rejectionMessage = nil
+                }
+                Button("Cancel") {
+                    viewModel.cancelPendingCustomRow()
+                }
+                .buttonStyle(.plain)
             }
         }
+        .padding(BrewSpacing.sm)
+        .background(Color.brewStatusWarningSubtle)
+        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
     }
 
     private var isAddable: Bool {
@@ -284,12 +324,16 @@ private struct ConfigCustomRowAffordance: View {
     }
 
     private func addRow() {
-        let accepted = viewModel.addCustomRow(key: keyDraft, value: valueDraft)
-        if accepted {
+        switch viewModel.addCustomRow(key: keyDraft, value: valueDraft) {
+        case .added:
             keyDraft = "HOMEBREW_"
             valueDraft = ""
             rejectionMessage = nil
-        } else {
+        case .needsConfirmation:
+            // Form stays populated so the user can tweak the value before confirming. The pending
+            // banner takes over visually until they confirm or cancel.
+            rejectionMessage = nil
+        case .rejected:
             rejectionMessage = String(
                 localized: "That key is already covered by a built-in row or isn't a valid HOMEBREW_* name.",
                 comment: "Configuration tab, custom row rejection",

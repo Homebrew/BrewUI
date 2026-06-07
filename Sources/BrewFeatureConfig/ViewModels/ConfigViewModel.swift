@@ -27,6 +27,10 @@ final class ConfigViewModel {
     /// Save-side error surfaced inline so the editor's main load state can stay `.loaded`.
     private(set) var saveError: String?
 
+    /// When the user tries to add a custom row whose key is classified as dangerous, the row sits here
+    /// until they explicitly confirm. The view renders a confirmation banner driven by this value.
+    private(set) var pendingDangerousCustomRow: PendingCustomRow?
+
     init(
         repository: any ConfigRepository,
         envFileRepository: any EnvFileRepository,
@@ -114,23 +118,51 @@ final class ConfigViewModel {
         hasPendingEdits = true
     }
 
-    /// Adds a custom `HOMEBREW_*` row. Rejects keys without the prefix and keys already covered by the
-    /// curated allowlist or the install-time set (those should be set via their typed row instead).
+    /// Tries to add a custom `HOMEBREW_*` row to the draft.
+    ///
+    /// Returns `.rejected` for keys without the prefix, or keys already covered by the curated
+    /// allowlist or the install-time set (those should be set via their typed row instead). Returns
+    /// `.needsConfirmation` for keys classified as dangerous — the row is held in
+    /// ``pendingDangerousCustomRow`` until the caller commits via ``confirmPendingCustomRow`` or
+    /// drops it via ``cancelPendingCustomRow``. Returns `.added` when the row landed in the draft.
     @discardableResult
-    func addCustomRow(key: String, value: String) -> Bool {
+    func addCustomRow(key: String, value: String) -> AddCustomRowOutcome {
         let trimmedKey = key.trimmingCharacters(in: .whitespaces)
         guard trimmedKey.hasPrefix("HOMEBREW_"), trimmedKey.count > "HOMEBREW_".count else {
-            return false
+            return .rejected
         }
         guard EnvKeyCatalogue.descriptor(forKey: trimmedKey) == nil else {
-            return false
+            return .rejected
         }
         guard !EnvKeyCatalogue.isInstallTimeOnly(trimmedKey) else {
-            return false
+            return .rejected
         }
-        draft = draft.setting(trimmedKey, value: value)
+        if case let .dangerous(reason) = EnvKeyCatalogue.classifyCustomKey(trimmedKey) {
+            pendingDangerousCustomRow = PendingCustomRow(key: trimmedKey, value: value, reason: reason)
+            return .needsConfirmation
+        }
+        commitCustomRow(key: trimmedKey, value: value)
+        return .added
+    }
+
+    /// Commits the row currently held in ``pendingDangerousCustomRow`` to the draft. No-op when
+    /// nothing is pending.
+    func confirmPendingCustomRow() {
+        guard let pending = pendingDangerousCustomRow else {
+            return
+        }
+        commitCustomRow(key: pending.key, value: pending.value)
+        pendingDangerousCustomRow = nil
+    }
+
+    /// Drops the pending dangerous row without writing to the draft.
+    func cancelPendingCustomRow() {
+        pendingDangerousCustomRow = nil
+    }
+
+    private func commitCustomRow(key: String, value: String) {
+        draft = draft.setting(key, value: value)
         hasPendingEdits = true
-        return true
     }
 
     /// Toggle binding sink. `"1"` is the on-disk truthy value; off removes the entry entirely so it

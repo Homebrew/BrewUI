@@ -225,9 +225,9 @@ struct ConfigViewModelEditingTests {
         let (viewModel, _) = makeViewModel()
 
         await viewModel.load()
-        let accepted = viewModel.addCustomRow(key: "HOMEBREW_SOMETHING_EXOTIC", value: "yes")
+        let outcome = viewModel.addCustomRow(key: "HOMEBREW_SOMETHING_EXOTIC", value: "yes")
 
-        #expect(accepted)
+        #expect(outcome == .added)
         #expect(viewModel.draft.value(forKey: "HOMEBREW_SOMETHING_EXOTIC") == "yes")
         #expect(viewModel.envRows.contains { $0.key == "HOMEBREW_SOMETHING_EXOTIC" && $0.provenance == .custom })
     }
@@ -236,9 +236,9 @@ struct ConfigViewModelEditingTests {
         let (viewModel, _) = makeViewModel()
 
         await viewModel.load()
-        let accepted = viewModel.addCustomRow(key: "PATH", value: "/usr/bin")
+        let outcome = viewModel.addCustomRow(key: "PATH", value: "/usr/bin")
 
-        #expect(!accepted)
+        #expect(outcome == .rejected)
         #expect(!viewModel.isDirty)
     }
 
@@ -246,9 +246,66 @@ struct ConfigViewModelEditingTests {
         let (viewModel, _) = makeViewModel()
 
         await viewModel.load()
-        let accepted = viewModel.addCustomRow(key: "HOMEBREW_NO_ANALYTICS", value: "1")
+        let outcome = viewModel.addCustomRow(key: "HOMEBREW_NO_ANALYTICS", value: "1")
 
-        #expect(!accepted)
+        #expect(outcome == .rejected)
+    }
+
+    @Test @MainActor func `addCustomRow holds explicitly-dangerous keys for confirmation`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        let outcome = viewModel.addCustomRow(key: "HOMEBREW_BOTTLE_DOMAIN", value: "https://evil.example.com")
+
+        #expect(outcome == .needsConfirmation)
+        #expect(viewModel.draft.value(forKey: "HOMEBREW_BOTTLE_DOMAIN") == nil)
+        #expect(!viewModel.isDirty)
+        #expect(viewModel.pendingDangerousCustomRow?.key == "HOMEBREW_BOTTLE_DOMAIN")
+        #expect(viewModel.pendingDangerousCustomRow?.value == "https://evil.example.com")
+    }
+
+    @Test @MainActor func `addCustomRow holds suffix-classified _DOMAIN keys for confirmation`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        let outcome = viewModel.addCustomRow(key: "HOMEBREW_SOME_NEW_DOMAIN", value: "https://x")
+
+        #expect(outcome == .needsConfirmation)
+        #expect(viewModel.pendingDangerousCustomRow?.key == "HOMEBREW_SOME_NEW_DOMAIN")
+    }
+
+    @Test @MainActor func `addCustomRow holds suffix-classified _PATH keys for confirmation`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        let outcome = viewModel.addCustomRow(key: "HOMEBREW_CURL_PATH", value: "/tmp/curl")
+
+        #expect(outcome == .needsConfirmation)
+        #expect(viewModel.pendingDangerousCustomRow?.key == "HOMEBREW_CURL_PATH")
+    }
+
+    @Test @MainActor func `confirmPendingCustomRow commits the staged row to the draft`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+        _ = viewModel.addCustomRow(key: "HOMEBREW_BOTTLE_DOMAIN", value: "https://example.com")
+
+        viewModel.confirmPendingCustomRow()
+
+        #expect(viewModel.pendingDangerousCustomRow == nil)
+        #expect(viewModel.draft.value(forKey: "HOMEBREW_BOTTLE_DOMAIN") == "https://example.com")
+        #expect(viewModel.isDirty)
+    }
+
+    @Test @MainActor func `cancelPendingCustomRow drops the staged row without writing`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+        _ = viewModel.addCustomRow(key: "HOMEBREW_BOTTLE_DOMAIN", value: "https://example.com")
+
+        viewModel.cancelPendingCustomRow()
+
+        #expect(viewModel.pendingDangerousCustomRow == nil)
+        #expect(viewModel.draft.value(forKey: "HOMEBREW_BOTTLE_DOMAIN") == nil)
+        #expect(!viewModel.isDirty)
     }
 
     @Test @MainActor func `revert restores the draft to the loaded file`() async {

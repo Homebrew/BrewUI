@@ -108,4 +108,53 @@ enum EnvKeyCatalogue {
     static func isInstallTimeOnly(_ key: String) -> Bool {
         installTimeOnly.contains(key)
     }
+
+    /// Custom rows can set any `HOMEBREW_*` key that isn't already in the curated allowlist or the
+    /// install-time set. Some of those keys (domain/path overrides, developer mode) have meaningful
+    /// security or stability implications, so the editor gates them behind a second confirmation
+    /// step. This classifier decides whether a given custom key needs that gate and what reason to
+    /// surface in the confirmation banner.
+    static func classifyCustomKey(_ key: String) -> CustomKeyClassification {
+        if let reason = explicitDangerousCustomKeys[key] {
+            return .dangerous(reason: reason)
+        }
+        if key.hasSuffix("_DOMAIN") {
+            return .dangerous(reason: "Redirects a Homebrew download to the URL you set. Only paste a host you trust — a wrong or malicious value can route every download somewhere else.")
+        }
+        if key.hasSuffix("_PATH") {
+            return .dangerous(reason: "Points brew at an alternate binary at the path you set. Every brew invocation will execute it — only set this if the path is one you control.")
+        }
+        return .safe
+    }
+
+    private static let explicitDangerousCustomKeys: [String: String] = [
+        "HOMEBREW_BOTTLE_DOMAIN": "Redirects bottle downloads to the URL you set. Only paste a host you trust.",
+        "HOMEBREW_ARTIFACT_DOMAIN": "Redirects artifact downloads to the URL you set. Only paste a host you trust.",
+        "HOMEBREW_API_DOMAIN": "Redirects the Homebrew formulae JSON API to the URL you set. Only paste a host you trust.",
+        "HOMEBREW_DEVELOPER": "Turns on Homebrew developer mode globally — exposes experimental commands and stricter warnings.",
+        "HOMEBREW_SUDO_THROUGH_SUDO_USER": "Changes how brew elevates privileges. Set only if you know why you need it.",
+    ]
+}
+
+/// Whether a custom-row key is something we should add to the draft on a single tap, or something we
+/// should surface a confirmation step for first.
+enum CustomKeyClassification: Equatable {
+    case safe
+    case dangerous(reason: String)
+}
+
+/// Outcome of an `addCustomRow` attempt. The view branches on this to clear the form, hold the
+/// confirmation banner, or render a rejection message.
+enum AddCustomRowOutcome: Equatable {
+    case added
+    case needsConfirmation
+    case rejected
+}
+
+/// A dangerous custom row staged for confirmation. The view renders ``reason`` in the warning
+/// banner above the Confirm / Cancel buttons.
+struct PendingCustomRow: Equatable {
+    let key: String
+    let value: String
+    let reason: String
 }
