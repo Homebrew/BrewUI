@@ -164,6 +164,31 @@ struct BrewEnvFileRepositoryTests {
         #expect(backupContents == secondContents)
     }
 
+    @Test @MainActor func `save still succeeds when the .bak write fails`() async throws {
+        let home = try makeTempHome()
+        defer { try? Self.fileManager.removeItem(at: home) }
+
+        let repository = makeRepository(homeDirectory: home)
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "4")]))
+
+        // Pre-occupy brew.env.bak with a directory at the same path so the next save's backup
+        // step (a file write) cannot succeed. The main save of brew.env should still go through.
+        let backup = home.appendingPathComponent(".homebrew/brew.env.bak")
+        try Self.fileManager.createDirectory(at: backup, withIntermediateDirectories: false)
+
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "8")]))
+
+        let envFile = home.appendingPathComponent(".homebrew/brew.env")
+        let contents = try String(contentsOf: envFile, encoding: .utf8)
+        #expect(contents.contains("HOMEBREW_MAKE_JOBS=8"))
+        #expect(repository.state.value?.value(forKey: "HOMEBREW_MAKE_JOBS") == "8")
+
+        // The directory we planted is still there — the failed backup didn't clobber it either.
+        var isDirectory: ObjCBool = false
+        #expect(Self.fileManager.fileExists(atPath: backup.path, isDirectory: &isDirectory))
+        #expect(isDirectory.boolValue)
+    }
+
     @Test @MainActor func `backup file is written with 0600 to protect any token in the prior content`() async throws {
         let home = try makeTempHome()
         defer { try? Self.fileManager.removeItem(at: home) }
