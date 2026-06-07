@@ -3,7 +3,6 @@
 //  BrewFeatureDoctor
 //
 
-import AppKit
 import BrewCore
 import BrewUIComponents
 import SwiftUI
