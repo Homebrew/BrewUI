@@ -516,6 +516,35 @@ struct ConfigViewModelEditingTests {
         #expect(viewModel.textValue(forKey: "HOMEBREW_CASK_OPTS") == "")
     }
 
+    // MARK: - Cask opts advisory
+
+    @Test @MainActor func `caskOptsAdvisory is nil when the draft value is unset`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        #expect(viewModel.caskOptsAdvisory() == nil)
+    }
+
+    @Test @MainActor func `caskOptsAdvisory is nil when every token is recognised and safe`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        viewModel.setString(forKey: "HOMEBREW_CASK_OPTS", to: "--appdir=/Applications --require-sha")
+
+        #expect(viewModel.caskOptsAdvisory() == nil)
+    }
+
+    @Test @MainActor func `caskOptsAdvisory surfaces no-quarantine and unrecognised flags`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        viewModel.setString(forKey: "HOMEBREW_CASK_OPTS", to: "--no-quarantine --made-up-flag")
+
+        let advisory = viewModel.caskOptsAdvisory()
+        #expect(advisory?.hasNoQuarantine == true)
+        #expect(advisory?.unrecognisedFlags == ["--made-up-flag"])
+    }
+
     // MARK: - Save
 
     @Test @MainActor func `save persists the draft and resets isDirty`() async {
