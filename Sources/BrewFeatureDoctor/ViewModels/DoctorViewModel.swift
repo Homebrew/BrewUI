@@ -200,13 +200,14 @@ final class DoctorViewModel {
                     runningFixTokens.remove(token)
                     return
                 }
-                runningFixTokens.remove(token)
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
-                if case let .failed(reason) = latestPhase {
-                    fixErrorMessages[token] = reason.userFacingMessage
+                let message: String = if case let .failed(reason) = latestPhase {
+                    reason.userFacingMessage
                 } else {
-                    fixErrorMessages[token] = OperationFailure(catching: error).userFacingMessage
+                    OperationFailure(catching: error).userFacingMessage
                 }
+                fixErrorMessages[token] = message
+                runningFixTokens.remove(token)
                 return
             }
             runningFixTokens.remove(token)
