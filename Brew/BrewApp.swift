@@ -26,6 +26,7 @@ struct BrewApp: App {
     private let installedDependentsRepository: BrewInstalledDependentsRepository
     private let catalogueRepository: BrewCatalogueRepository
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
+    private let doctorRepository: BrewDoctorRepository
 
     init() {
         let inventoryCache = InstalledInventoryCache()
@@ -49,6 +50,7 @@ struct BrewApp: App {
             apiClient: apiClient,
             catalogueRepository: catalogueRepo,
         )
+        doctorRepository = BrewDoctorRepository(commandCenter: center)
     }
 
     var body: some Scene {
@@ -61,6 +63,7 @@ struct BrewApp: App {
                 .environment(\.installedDependentsRepository, installedDependentsRepository)
                 .environment(\.catalogueRepository, catalogueRepository)
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
+                .environment(\.doctorRepository, doctorRepository)
                 .task { await catalogueCache.prepare() }
                 .task { await installedPackagesRepository.load() }
         }

@@ -93,6 +93,25 @@ struct StubDependentsRepository: InstalledDependentsRepository {
     }
 }
 
+/// Observable doctor repository preloaded with a fixed ``DoctorReport`` (or error) — for previews/tests.
+/// `load()` is a no-op so the preset state stays put.
+@Observable
+@MainActor
+public final class StubDoctorRepository: DoctorRepository {
+    public private(set) var state: LoadState<DoctorReport, any Error>
+    public private(set) var isRefreshing = false
+
+    public init(report: DoctorReport) {
+        state = .loaded(report)
+    }
+
+    public init(error: any Error) {
+        state = .failed(error)
+    }
+
+    public func load() async {}
+}
+
 /// No-op command center for previews/tests: immediate, with no phase bookkeeping. Uses only BrewCore.
 public actor StubBrewCommandCenter: BrewCommandCenter {
     public init() {}
@@ -158,5 +177,9 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
 
     public func uninstallCommand(kind: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         NoopMutatingCommand(operationKind: kind == .formula ? .uninstallFormula : .uninstallCask)
+    }
+
+    public func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
+        NoopMutatingCommand(operationKind: .doctorFix)
     }
 }

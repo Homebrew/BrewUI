@@ -2,6 +2,7 @@ import AppKit
 import BrewAppEnvironment
 import BrewFeatureConsole
 import BrewFeatureDiscover
+import BrewFeatureDoctor
 import BrewFeatureInstalled
 import BrewUIComponents
 import SwiftUI
@@ -56,6 +57,10 @@ struct MainWindowView: View {
             DiscoverColumnsRoot()
                 .navigationTitle("Discover")
                 .navigationSubtitle("Browse and search \(Self.approximateCatalogueSize) packages")
+        case .doctor:
+            DoctorColumnsRoot()
+                .navigationTitle("Doctor")
+                .navigationSubtitle("Check your Homebrew installation for problems")
         }
     }
 }
@@ -70,5 +75,6 @@ struct MainWindowView: View {
             .environment(\.discoverPackagesRepository, PreviewSupport.makeDiscoverPackagesRepository())
             .environment(\.catalogueRepository, PreviewSupport.makeDiscoverCatalogueRepository())
             .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
+            .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
     }
 #endif

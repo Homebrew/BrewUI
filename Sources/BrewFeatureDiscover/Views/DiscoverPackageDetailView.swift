@@ -225,7 +225,7 @@ private struct DiscoverPackageInstallSection: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Install")
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
-                PackageDetailCommandConsole(
+                CommandBlockView(
                     command: viewModel.installCommand,
                     summaryText: "Installs this package on your Mac",
                 )

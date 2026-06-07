@@ -58,6 +58,22 @@ struct UnimplementedDependentsRepository: InstalledDependentsRepository {
     }
 }
 
+@Observable
+@MainActor
+final class UnimplementedDoctorRepository: DoctorRepository {
+    var state: LoadState<DoctorReport, any Error> {
+        unimplemented()
+    }
+
+    var isRefreshing: Bool {
+        unimplemented()
+    }
+
+    func load() async {
+        unimplemented()
+    }
+}
+
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         unimplemented()
@@ -68,6 +84,10 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     }
 
     func uninstallCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
+        unimplemented()
+    }
+
+    func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
         unimplemented()
     }
 }

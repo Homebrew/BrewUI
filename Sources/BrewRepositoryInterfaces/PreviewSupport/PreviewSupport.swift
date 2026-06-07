@@ -86,6 +86,53 @@ public enum PreviewSupport {
         StubCatalogueRepository(formulaCatalogue: formulaCatalogue, caskCatalogue: caskCatalogue)
     }
 
+    @MainActor
+    public static func makeDoctorRepository(report: DoctorReport = doctorReport) -> any DoctorRepository {
+        StubDoctorRepository(report: report)
+    }
+
+    public static let healthyDoctorReport = DoctorReport(issues: [])
+
+    /// A sample report with a runnable cleanup fix and an advisory-only issue (no `brew` fix).
+    public static let doctorReport = DoctorReport(issues: [
+        DoctorIssue(
+            title: "Some cached downloads are stale.",
+            severity: .caution,
+            blocks: [
+                DoctorBlock(
+                    id: 0,
+                    caption: nil,
+                    content: .prose(["Run brew cleanup to remove them."]),
+                ),
+                DoctorBlock(
+                    id: 1,
+                    caption: nil,
+                    content: .command([
+                        DoctorFixStep(displayCommand: "brew cleanup", arguments: ["cleanup"], needsAdmin: false),
+                    ]),
+                ),
+            ],
+            rawBody: "Run brew cleanup to remove them.\n  brew cleanup",
+        ),
+        DoctorIssue(
+            title: "Some installed formulae are deprecated or disabled.",
+            severity: .caution,
+            blocks: [
+                DoctorBlock(
+                    id: 0,
+                    caption: nil,
+                    content: .prose(["You should find replacements for the following formulae:"]),
+                ),
+                DoctorBlock(
+                    id: 1,
+                    caption: "You should find replacements for the following formulae:",
+                    content: .data(["macvim"]),
+                ),
+            ],
+            rawBody: "You should find replacements for the following formulae:\n  macvim",
+        ),
+    ])
+
     // MARK: - Backing sample data (preview-only)
 
     public static let installedPackages: [InstalledBrewPackage] = [

@@ -37,7 +37,7 @@ public enum OperationFailure: Equatable, Sendable {
 
         case .brewExecutableNotFound:
             return String(
-                localized: "Could not find the brew executable.",
+                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
                 comment: "Shown when brew binary is missing",
             )
 

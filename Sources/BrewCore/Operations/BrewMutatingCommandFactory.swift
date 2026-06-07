@@ -13,4 +13,9 @@ public protocol BrewMutatingCommandFactory: Sendable {
     func installCommand(kind: HomebrewPackageKind, name: String) -> any BrewMutatingCommand
     func upgradeCommand(kind: HomebrewPackageKind, name: String) -> any BrewMutatingCommand
     func uninstallCommand(kind: HomebrewPackageKind, name: String) -> any BrewMutatingCommand
+
+    /// Builds a maintenance command running the given `brew` argument vector (e.g. a `brew doctor` fix
+    /// like `["link", "openssl@3"]` or `["cleanup"]`). Not package-scoped — surfaces in the console as
+    /// a ``BrewOperationKind/doctorFix`` operation.
+    func doctorFixCommand(arguments: [String]) -> any BrewMutatingCommand
 }

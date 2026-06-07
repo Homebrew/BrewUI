@@ -24,6 +24,9 @@ public extension EnvironmentValues {
     /// Reverse-dependency lookups over the installed inventory, injected by the composition root.
     @Entry var installedDependentsRepository: any InstalledDependentsRepository = UnimplementedDependentsRepository()
 
+    /// Read-only `brew doctor` diagnostics source, injected by the composition root.
+    @Entry var doctorRepository: any DoctorRepository = UnimplementedDoctorRepository()
+
     /// Mutating `brew` coordinator, injected by the composition root.
     @Entry var brewCommandCenter: any BrewCommandCenter = UnimplementedBrewCommandCenter()
 
