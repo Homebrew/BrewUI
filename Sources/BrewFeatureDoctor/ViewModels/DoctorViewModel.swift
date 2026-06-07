@@ -206,7 +206,7 @@ final class DoctorViewModel {
                 return
             }
             runningFixTokens.remove(token)
-            await doctorRepository.load()
+            await load()
         }
     }
 }
