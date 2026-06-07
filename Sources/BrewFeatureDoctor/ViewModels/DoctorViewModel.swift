@@ -193,6 +193,14 @@ final class DoctorViewModel {
         fixTasks[token]?.cancel()
         fixTasks[token] = Task { @MainActor [weak self] in
             guard let self else { return }
+            // Re-running the same token cancels and replaces the slot before this
+            // task can clear it; the cancelled task observes Task.isCancelled and
+            // leaves the newer task's entry intact.
+            defer {
+                if !Task.isCancelled {
+                    fixTasks[token] = nil
+                }
+            }
             do {
                 try await brewCommandCenter.submit(id: operationID, command: command)
             } catch {
