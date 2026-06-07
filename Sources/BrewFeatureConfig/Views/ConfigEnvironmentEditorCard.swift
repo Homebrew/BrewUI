@@ -21,6 +21,11 @@ struct ConfigEnvironmentEditorCard: View {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
             PackageDetailSectionHeading(title: "Environment (HOMEBREW_*)")
 
+            Text("These settings live in `~/.homebrew/brew.env` and apply to every `brew` invocation, including in your terminal.")
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
             if let saveError = viewModel.saveError {
                 saveErrorBanner(saveError)
             }

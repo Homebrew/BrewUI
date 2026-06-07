@@ -57,7 +57,7 @@ enum EnvKeyCatalogue {
         EnvKeyDescriptor(
             key: "HOMEBREW_NO_INSTALL_UPGRADE",
             label: "Disable install-time upgrades",
-            summary: "Stops `brew install` from upgrading already-installed dependencies.",
+            summary: "Stops `brew install` from upgrading already-installed dependencies. Can leave new formulae linked against older libraries — only enable if you know why you need it.",
             kind: .toggle,
         ),
         EnvKeyDescriptor(
