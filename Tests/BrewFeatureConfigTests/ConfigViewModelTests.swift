@@ -118,12 +118,21 @@ struct ConfigViewModelTests {
     }
 }
 
-private struct ThrowingConfigRepository: ConfigRepository {
-    let error: any Error
+@Observable
+@MainActor
+private final class ThrowingConfigRepository: ConfigRepository {
+    private(set) var state: LoadState<BrewConfigSnapshot, any Error> = .loading
+    private let error: any Error
 
-    func loadConfig() async throws -> BrewConfigSnapshot {
-        throw error
+    init(error: any Error) {
+        self.error = error
     }
+
+    func load(forceRefresh _: Bool) async {
+        state = .failed(error)
+    }
+
+    func invalidate() {}
 }
 
 private struct ConfigOddError: Error {}

@@ -28,6 +28,11 @@ struct ConfigView: View {
         .task {
             await viewModel.load()
         }
+        .onChange(of: viewModel.envFileState.value) { _, _ in
+            // When `brew.env` is silently revalidated (e.g. on return-to-foreground) and the user has
+            // no pending edits, sync the draft to the freshly loaded file.
+            viewModel.envFileStateDidChange()
+        }
     }
 
     private var header: some View {
@@ -58,29 +63,26 @@ struct ConfigView: View {
 
     @ViewBuilder
     private var content: some View {
-        switch viewModel.state {
-        case .loading:
-            ProgressView()
-                .controlSize(.large)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        case .loaded:
-            loadedCards
-        case .failed:
-            if viewModel.isBrewNotFound {
-                brewNotFoundState
-            } else {
-                errorState
-            }
+        if viewModel.isBrewNotFound {
+            brewNotFoundState
+        } else {
+            AsyncContentView(
+                state: viewModel.pageState,
+                onRetry: { Task { await viewModel.refresh() } },
+                loaded: { payload in
+                    loadedCards(payload: payload)
+                },
+            )
         }
     }
 
-    private var loadedCards: some View {
+    private func loadedCards(payload: ConfigPagePayload) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
-                ForEach(viewModel.sections) { section in
+                ForEach(viewModel.sections(for: payload.snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }
-                ConfigEnvironmentEditorCard(viewModel: viewModel)
+                ConfigEnvironmentEditorCard(viewModel: viewModel, envFile: payload.envFile)
             }
             .padding(BrewSpacing.lg)
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -95,15 +97,6 @@ struct ConfigView: View {
                 localized: "Couldn't locate the brew executable. Install Homebrew, then refresh.",
                 comment: "Configuration tab, brew-not-found message",
             ),
-        )
-    }
-
-    private var errorState: some View {
-        emptyState(
-            systemImage: "exclamationmark.triangle",
-            title: String(localized: "Couldn't load configuration", comment: "Configuration tab, error title"),
-            message: viewModel.errorMessage,
-            tint: Color.brewStatusError,
         )
     }
 

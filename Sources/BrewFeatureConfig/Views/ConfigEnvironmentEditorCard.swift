@@ -3,6 +3,7 @@
 //  BrewFeatureConfig
 //
 
+import BrewCore
 import BrewUIComponents
 import SwiftUI
 
@@ -12,6 +13,9 @@ import SwiftUI
 /// `brew.env` when the header's Save button is pressed.
 struct ConfigEnvironmentEditorCard: View {
     @Bindable var viewModel: ConfigViewModel
+    /// The currently loaded `brew.env` content from the page payload. Drives row provenance and lets
+    /// `AsyncContentView`'s placeholder render a realistic redacted skeleton.
+    let envFile: BrewEnvFile
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
@@ -21,12 +25,8 @@ struct ConfigEnvironmentEditorCard: View {
                 saveErrorBanner(saveError)
             }
 
-            if viewModel.envRows.isEmpty {
-                emptyState
-            } else {
-                ForEach(viewModel.envRows) { row in
-                    ConfigEnvironmentRow(row: row, viewModel: viewModel)
-                }
+            ForEach(viewModel.envRows(envFile: envFile)) { row in
+                ConfigEnvironmentRow(row: row, viewModel: viewModel)
             }
 
             Divider()
@@ -42,12 +42,6 @@ struct ConfigEnvironmentEditorCard: View {
             RoundedRectangle(cornerRadius: BrewRadius.lg)
                 .stroke(Color.brewBorderDefault, lineWidth: 1),
         )
-    }
-
-    private var emptyState: some View {
-        Text("Loading…")
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewTextTertiary)
     }
 
     private func saveErrorBanner(_ message: String) -> some View {

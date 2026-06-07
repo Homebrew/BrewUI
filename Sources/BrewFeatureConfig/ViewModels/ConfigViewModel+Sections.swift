@@ -10,17 +10,23 @@ import Foundation
 /// string, and error-mapping helpers. Lives in its own extension so the editing surface
 /// (`ConfigViewModel`) stays small.
 extension ConfigViewModel {
-    /// Grouped read-only cards in display order. The `HOMEBREW_*` Environment surface is handled by the
-    /// editor card directly (it's editable), so it's intentionally absent here.
-    var sections: [ConfigSectionItem] {
-        guard let snapshot = state.value else {
-            return []
-        }
+    /// Grouped read-only cards in display order. Takes the snapshot so callers (typically
+    /// `AsyncContentView`) can pass placeholder content for the redacted loading state. The
+    /// `HOMEBREW_*` Environment surface is handled by the editor card and intentionally absent here.
+    func sections(for snapshot: BrewConfigSnapshot) -> [ConfigSectionItem] {
         var result: [ConfigSectionItem] = []
         appendIfNonEmpty(&result, id: "homebrew", title: "Homebrew", group: .homebrew, in: snapshot.entries)
         appendIfNonEmpty(&result, id: "system", title: "System", group: .system, in: snapshot.entries)
         appendIfNonEmpty(&result, id: "build", title: "Build settings", group: .build, in: snapshot.entries)
         return result
+    }
+
+    /// Convenience for callers (mainly tests) that derive sections from the cached snapshot.
+    var sections: [ConfigSectionItem] {
+        guard let snapshot = state.value else {
+            return []
+        }
+        return sections(for: snapshot)
     }
 
     var canCopyReport: Bool {
@@ -59,16 +65,7 @@ extension ConfigViewModel {
         guard case let .failed(error) = state else {
             return ""
         }
-        if case let BrewCommandError.failed(_, stderr) = error {
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-        }
-        return String(
-            localized: "Couldn't read the Homebrew configuration.",
-            comment: "Configuration tab, generic load failure",
-        )
+        return userMessage(for: error)
     }
 
     // MARK: - Grouping

@@ -28,6 +28,85 @@ struct ConfigViewModelEditingTests {
         return (viewModel, envRepo)
     }
 
+    // MARK: - pageState
+
+    @Test @MainActor func `pageState bundles the snapshot and env file when both are loaded`() async {
+        let envFile = BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "8")])
+        let (viewModel, _) = makeViewModel(envFile: envFile)
+
+        await viewModel.load()
+
+        guard case let .loaded(payload) = viewModel.pageState else {
+            Issue.record("expected pageState .loaded")
+            return
+        }
+        #expect(payload.snapshot == Self.snapshot)
+        #expect(payload.envFile == envFile)
+    }
+
+    @Test @MainActor func `pageState is loading until both halves have loaded`() {
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(state: .loading),
+            envFileRepository: StubEnvFileRepository(state: .loading),
+            processEnvironment: [:],
+        )
+
+        guard case .loading = viewModel.pageState else {
+            Issue.record("expected pageState .loading")
+            return
+        }
+    }
+
+    @Test @MainActor func `pageState surfaces a config load failure as a user-facing message`() async {
+        let viewModel = ConfigViewModel(
+            repository: ThrowingPageStateConfigRepository(
+                error: BrewCommandError.failed(exitCode: 1, stderr: "boom"),
+            ),
+            envFileRepository: StubEnvFileRepository(),
+        )
+
+        await viewModel.load()
+
+        guard case let .failed(message) = viewModel.pageState else {
+            Issue.record("expected pageState .failed")
+            return
+        }
+        #expect(message == "boom")
+    }
+
+    @Test @MainActor func `sections(for:) is cache-independent so AsyncContentView placeholders render`() async {
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(state: .loading),
+            envFileRepository: StubEnvFileRepository(state: .loading),
+            processEnvironment: [:],
+        )
+
+        // No load called — state is .loading, but feeding the placeholder snapshot still produces rows.
+        let rows = viewModel.sections(for: ConfigPagePayload.placeholder.snapshot)
+        #expect(!rows.isEmpty)
+        #expect(rows.contains { $0.id == "homebrew" })
+    }
+
+    // MARK: - Cache integration
+
+    @Test @MainActor func `draft is seeded from the cached env file on init`() async {
+        // Mirrors the "user switches back to the Configuration tab during a session" case where the
+        // repository already holds a `.loaded` value before the view re-creates the VM. The editor
+        // shouldn't render a transiently empty draft while .task is still in flight.
+        let envFile = BrewEnvFile(lines: [
+            .entry(key: "HOMEBREW_MAKE_JOBS", value: "8"),
+            .entry(key: "HOMEBREW_NO_ANALYTICS", value: "1"),
+        ])
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(snapshot: Self.snapshot),
+            envFileRepository: StubEnvFileRepository(file: envFile),
+            processEnvironment: ["SHELL": "/bin/zsh"],
+        )
+
+        #expect(viewModel.draft == envFile)
+        #expect(!viewModel.isDirty)
+    }
+
     // MARK: - Row classification
 
     @Test @MainActor func `allowlist row with no shell override is editable with its descriptor kind`() async {
@@ -183,6 +262,98 @@ struct ConfigViewModelEditingTests {
         #expect(viewModel.draft.value(forKey: "HOMEBREW_MAKE_JOBS") == nil)
     }
 
+    // MARK: - envFileStateDidChange
+
+    @Test @MainActor func `envFileStateDidChange syncs the draft when clean`() async {
+        let envRepo = RecordingEnvFileRepository(file: BrewEnvFile())
+        let viewModel = ConfigViewModel(
+            repository: RecordingConfigRepository(snapshot: Self.snapshot),
+            envFileRepository: envRepo,
+            processEnvironment: ["SHELL": "/bin/zsh"],
+        )
+        await viewModel.load()
+
+        // SwiftUI observes the repository state changing (background revalidation completed).
+        let updated = BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "4")])
+        envRepo.externallySet(file: updated)
+        viewModel.envFileStateDidChange()
+
+        #expect(viewModel.draft == updated)
+        #expect(!viewModel.isDirty)
+    }
+
+    @Test @MainActor func `envFileStateDidChange leaves the draft alone when dirty`() async {
+        let envRepo = RecordingEnvFileRepository(file: BrewEnvFile())
+        let viewModel = ConfigViewModel(
+            repository: RecordingConfigRepository(snapshot: Self.snapshot),
+            envFileRepository: envRepo,
+            processEnvironment: ["SHELL": "/bin/zsh"],
+        )
+        await viewModel.load()
+        viewModel.setValue(forKey: "HOMEBREW_MAKE_JOBS", to: "8")
+
+        envRepo.externallySet(file: BrewEnvFile(lines: [.entry(key: "HOMEBREW_NO_ANALYTICS", value: "1")]))
+        viewModel.envFileStateDidChange()
+
+        #expect(viewModel.draft.value(forKey: "HOMEBREW_MAKE_JOBS") == "8")
+        #expect(viewModel.draft.value(forKey: "HOMEBREW_NO_ANALYTICS") == nil)
+        #expect(viewModel.isDirty)
+    }
+
+    // MARK: - Refresh
+
+    @Test @MainActor func `refresh forces a fresh fetch on both repos`() async {
+        let configRepo = RecordingConfigRepository(snapshot: Self.snapshot)
+        let envRepo = RecordingEnvFileRepository(file: BrewEnvFile())
+        let viewModel = ConfigViewModel(
+            repository: configRepo,
+            envFileRepository: envRepo,
+            processEnvironment: ["SHELL": "/bin/zsh"],
+        )
+
+        await viewModel.refresh()
+
+        #expect(configRepo.loadCalls == [true])
+        #expect(envRepo.loadCalls == [true])
+    }
+
+    @Test @MainActor func `refresh syncs the draft when the user has no pending edits`() async {
+        let envRepo = RecordingEnvFileRepository(file: BrewEnvFile())
+        let viewModel = ConfigViewModel(
+            repository: RecordingConfigRepository(snapshot: Self.snapshot),
+            envFileRepository: envRepo,
+            processEnvironment: ["SHELL": "/bin/zsh"],
+        )
+        await viewModel.load()
+        #expect(viewModel.draft == BrewEnvFile())
+
+        // External change: a different process rewrote brew.env between tab visits.
+        let updated = BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "12")])
+        envRepo.stage(file: updated)
+
+        await viewModel.refresh()
+
+        #expect(viewModel.draft == updated)
+        #expect(!viewModel.isDirty)
+    }
+
+    @Test @MainActor func `refresh preserves pending edits even when the file changed externally`() async {
+        let envRepo = RecordingEnvFileRepository(file: BrewEnvFile())
+        let viewModel = ConfigViewModel(
+            repository: RecordingConfigRepository(snapshot: Self.snapshot),
+            envFileRepository: envRepo,
+            processEnvironment: ["SHELL": "/bin/zsh"],
+        )
+        await viewModel.load()
+        viewModel.setValue(forKey: "HOMEBREW_MAKE_JOBS", to: "8")
+        envRepo.stage(file: BrewEnvFile(lines: [.entry(key: "HOMEBREW_NO_ANALYTICS", value: "1")]))
+
+        await viewModel.refresh()
+
+        #expect(viewModel.draft.value(forKey: "HOMEBREW_MAKE_JOBS") == "8")
+        #expect(viewModel.isDirty)
+    }
+
     // MARK: - Binding sinks
 
     @Test @MainActor func `setToggle on writes the truthy value`() async {
@@ -294,9 +465,9 @@ struct ConfigViewModelEditingTests {
         await viewModel.save()
 
         #expect(!viewModel.isDirty)
-        let saved = await envRepo.currentFile()
+        let saved = envRepo.currentFile
         #expect(saved.value(forKey: "HOMEBREW_MAKE_JOBS") == "8")
-        #expect(await envRepo.saveCount == 1)
+        #expect(envRepo.saveCount == 1)
     }
 
     @Test @MainActor func `save is a no-op when nothing has changed`() async {
@@ -305,7 +476,7 @@ struct ConfigViewModelEditingTests {
         await viewModel.load()
         await viewModel.save()
 
-        #expect(await envRepo.saveCount == 0)
+        #expect(envRepo.saveCount == 0)
         #expect(viewModel.saveError == nil)
     }
 
@@ -327,12 +498,92 @@ struct ConfigViewModelEditingTests {
     }
 }
 
-private struct ThrowingEnvFileRepository: EnvFileRepository {
-    func loadEnvFile() async throws -> BrewEnvFile {
-        BrewEnvFile()
+@Observable
+@MainActor
+private final class ThrowingPageStateConfigRepository: ConfigRepository {
+    private(set) var state: LoadState<BrewConfigSnapshot, any Error> = .loading
+    private let error: any Error
+
+    init(error: any Error) {
+        self.error = error
     }
+
+    func load(forceRefresh _: Bool) async {
+        state = .failed(error)
+    }
+
+    func invalidate() {}
+}
+
+@Observable
+@MainActor
+private final class RecordingConfigRepository: ConfigRepository {
+    private(set) var state: LoadState<BrewConfigSnapshot, any Error>
+    private(set) var loadCalls: [Bool] = []
+    private let snapshot: BrewConfigSnapshot
+
+    init(snapshot: BrewConfigSnapshot) {
+        self.snapshot = snapshot
+        state = .loaded(snapshot)
+    }
+
+    func load(forceRefresh: Bool) async {
+        loadCalls.append(forceRefresh)
+        state = .loaded(snapshot)
+    }
+
+    func invalidate() {}
+}
+
+/// Recording env-file fake that lets a test stage a new `BrewEnvFile` to be returned on the next
+/// `load` — mimics an external rewrite between tab visits without touching disk.
+@Observable
+@MainActor
+private final class RecordingEnvFileRepository: EnvFileRepository {
+    private(set) var state: LoadState<BrewEnvFile, any Error>
+    private(set) var loadCalls: [Bool] = []
+    private var nextFile: BrewEnvFile?
+
+    init(file: BrewEnvFile) {
+        state = .loaded(file)
+    }
+
+    func load(forceRefresh: Bool) async {
+        loadCalls.append(forceRefresh)
+        if let nextFile {
+            state = .loaded(nextFile)
+            self.nextFile = nil
+        }
+    }
+
+    func save(_ newFile: BrewEnvFile) async throws {
+        state = .loaded(newFile)
+    }
+
+    func invalidate() {}
+
+    func stage(file: BrewEnvFile) {
+        nextFile = file
+    }
+
+    /// Simulates the View's observation path: SwiftUI sees a `state` change (e.g. because the
+    /// repository's foreground revalidation completed) and forwards the new value into the VM via
+    /// `envFileStateDidChange()`.
+    func externallySet(file: BrewEnvFile) {
+        state = .loaded(file)
+    }
+}
+
+@Observable
+@MainActor
+private final class ThrowingEnvFileRepository: EnvFileRepository {
+    private(set) var state: LoadState<BrewEnvFile, any Error> = .loaded(BrewEnvFile())
+
+    func load(forceRefresh _: Bool) async {}
 
     func save(_: BrewEnvFile) async throws {
         throw NSError(domain: "test", code: 1, userInfo: [NSLocalizedDescriptionKey: "disk full"])
     }
+
+    func invalidate() {}
 }

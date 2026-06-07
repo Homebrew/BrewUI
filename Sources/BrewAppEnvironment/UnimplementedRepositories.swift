@@ -74,18 +74,38 @@ final class UnimplementedDoctorRepository: DoctorRepository {
     }
 }
 
-struct UnimplementedConfigRepository: ConfigRepository {
-    func loadConfig() async throws -> BrewConfigSnapshot {
+@Observable
+@MainActor
+final class UnimplementedConfigRepository: ConfigRepository {
+    var state: LoadState<BrewConfigSnapshot, any Error> {
+        unimplemented()
+    }
+
+    func load(forceRefresh _: Bool) async {
+        unimplemented()
+    }
+
+    func invalidate() {
         unimplemented()
     }
 }
 
-struct UnimplementedEnvFileRepository: EnvFileRepository {
-    func loadEnvFile() async throws -> BrewEnvFile {
+@Observable
+@MainActor
+final class UnimplementedEnvFileRepository: EnvFileRepository {
+    var state: LoadState<BrewEnvFile, any Error> {
+        unimplemented()
+    }
+
+    func load(forceRefresh _: Bool) async {
         unimplemented()
     }
 
     func save(_: BrewEnvFile) async throws {
+        unimplemented()
+    }
+
+    func invalidate() {
         unimplemented()
     }
 }

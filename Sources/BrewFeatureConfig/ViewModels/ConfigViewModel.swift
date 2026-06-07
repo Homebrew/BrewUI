@@ -15,15 +15,14 @@ final class ConfigViewModel {
     @ObservationIgnored private let envFileRepository: any EnvFileRepository
     @ObservationIgnored private let processEnvironment: [String: String]
 
-    /// Drives the loading / loaded / failed chrome. Carries the underlying `Error` so this view model
-    /// can map it to user-facing copy (`CONVENTIONS.md` — Loadable UI state).
-    private(set) var state: LoadState<BrewConfigSnapshot, any Error> = .loading
-
-    /// `brew.env` load state. A missing file isn't an error — the repository returns an empty file.
-    private(set) var envFileState: LoadState<BrewEnvFile, any Error> = .loading
-
-    /// Pending edits. Reset to the loaded file after a successful save / revert.
+    /// Pending edits. Reset to the loaded file after a successful save / revert, and auto-synced when
+    /// the underlying `brew.env` changes externally and the user hasn't started editing.
     private(set) var draft: BrewEnvFile = .init()
+
+    /// Tracks whether the user has touched the draft since the last sync. Lets us distinguish
+    /// "external `brew.env` change while idle" (re-sync draft) from "external change while editing"
+    /// (keep the user's edits visible).
+    private(set) var hasPendingEdits: Bool = false
 
     /// Save-side error surfaced inline so the editor's main load state can stay `.loaded`.
     private(set) var saveError: String?
@@ -36,42 +35,64 @@ final class ConfigViewModel {
         self.repository = repository
         self.envFileRepository = envFileRepository
         self.processEnvironment = processEnvironment
-    }
-
-    func load() async {
-        state = .loading
-        envFileState = .loading
-        saveError = nil
-        async let configCall: BrewConfigSnapshot = repository.loadConfig()
-        async let envFileCall: BrewEnvFile = envFileRepository.loadEnvFile()
-
-        do {
-            state = try await .loaded(configCall)
-        } catch {
-            state = .failed(error)
-        }
-
-        do {
-            let file = try await envFileCall
-            envFileState = .loaded(file)
+        // Seed the draft from the cached state if available so the editor renders the right initial
+        // values immediately — important when switching back to the Configuration tab during a session.
+        if case let .loaded(file) = envFileRepository.state {
             draft = file
-        } catch {
-            envFileState = .failed(error)
-            draft = BrewEnvFile()
         }
     }
 
+    /// Mirrors the cached `brew config` snapshot owned by the repository — single source of truth across
+    /// tab switches.
+    var state: LoadState<BrewConfigSnapshot, any Error> {
+        repository.state
+    }
+
+    /// Mirrors the cached `brew.env` state owned by the repository.
+    var envFileState: LoadState<BrewEnvFile, any Error> {
+        envFileRepository.state
+    }
+
+    /// Combined load state the Configuration page renders. Both halves need to be loaded for the page
+    /// to show real content; `.failed` collapses either side's failure into a user-facing message so
+    /// `AsyncContentView` can render the standard error chrome with a Retry affordance.
+    var pageState: LoadState<ConfigPagePayload, String> {
+        switch (state, envFileState) {
+        case let (.loaded(snapshot), .loaded(envFile)):
+            return .loaded(ConfigPagePayload(snapshot: snapshot, envFile: envFile))
+        case let (.failed(error), _):
+            return .failed(userMessage(for: error))
+        case let (_, .failed(error)):
+            return .failed(userMessage(for: error))
+        default:
+            return .loading
+        }
+    }
+
+    /// Cache-first: subsequent appearances of the Configuration view hit the cached snapshot and don't
+    /// trigger a re-fetch. The composition root (or scene-phase observer) calls `refresh()` to
+    /// re-validate.
+    func load() async {
+        async let configLoad: Void = repository.load(forceRefresh: false)
+        async let envFileLoad: Void = envFileRepository.load(forceRefresh: false)
+        _ = await (configLoad, envFileLoad)
+        syncDraftIfClean()
+    }
+
+    /// Forces a silent re-fetch. The repositories keep the existing `.loaded` value visible while the
+    /// network/disk work runs, so the editor doesn't flash a loading state. After the env file finishes,
+    /// the draft is auto-synced unless the user has pending edits.
     func refresh() async {
-        await load()
+        async let configLoad: Void = repository.load(forceRefresh: true)
+        async let envFileLoad: Void = envFileRepository.load(forceRefresh: true)
+        _ = await (configLoad, envFileLoad)
+        syncDraftIfClean()
     }
 
     // MARK: - Editing
 
     var isDirty: Bool {
-        guard case let .loaded(loaded) = envFileState else {
-            return false
-        }
-        return draft != loaded
+        hasPendingEdits
     }
 
     /// Sets `key` to `value` in the pending draft. No-op when the row is read-only (shell-overridden or
@@ -81,6 +102,7 @@ final class ConfigViewModel {
             return
         }
         draft = draft.setting(key, value: value)
+        hasPendingEdits = true
     }
 
     /// Removes a row from the draft. Used for toggling allowlist booleans off and for deleting custom rows.
@@ -89,6 +111,7 @@ final class ConfigViewModel {
             return
         }
         draft = draft.removing(key: key)
+        hasPendingEdits = true
     }
 
     /// Adds a custom `HOMEBREW_*` row. Rejects keys without the prefix and keys already covered by the
@@ -106,6 +129,7 @@ final class ConfigViewModel {
             return false
         }
         draft = draft.setting(trimmedKey, value: value)
+        hasPendingEdits = true
         return true
     }
 
@@ -156,24 +180,26 @@ final class ConfigViewModel {
 
     /// Discards pending edits, reverting `draft` to the loaded file.
     func revert() {
-        guard case let .loaded(loaded) = envFileState else {
+        guard let file = envFileState.value else {
             return
         }
-        draft = loaded
+        draft = file
+        hasPendingEdits = false
         saveError = nil
     }
 
-    /// Persists `draft` via the repository. On success, the loaded state catches up so `isDirty` flips
-    /// back to false. On failure, the draft is untouched and `saveError` carries the user-visible copy.
+    /// Persists `draft` via the repository. On success the cached state catches up (the repo updates
+    /// its own state) and the dirty flag clears. On failure the draft is untouched and `saveError`
+    /// carries the user-visible copy.
     func save() async {
-        guard isDirty else {
+        guard hasPendingEdits else {
             return
         }
         let snapshot = draft
         saveError = nil
         do {
             try await envFileRepository.save(snapshot)
-            envFileState = .loaded(snapshot)
+            hasPendingEdits = false
         } catch {
             saveError = String(
                 localized: "Couldn't save brew.env: \(error.localizedDescription)",
@@ -182,19 +208,31 @@ final class ConfigViewModel {
         }
     }
 
+    /// Called by the view on `envFileState` changes. When the underlying file changes externally and
+    /// the user hasn't started editing, mirror the new content into the draft so the editor stays in
+    /// sync. When there are pending edits, leave the draft alone.
+    func envFileStateDidChange() {
+        syncDraftIfClean()
+    }
+
+    private func syncDraftIfClean() {
+        guard !hasPendingEdits, let file = envFileState.value else {
+            return
+        }
+        draft = file
+    }
+
     // MARK: - Editor rows
 
     /// Rows the editor renders, in display order: curated allowlist, install-time read-only set, then
-    /// any custom rows already present in the draft. Returns `[]` while `brew.env` is still loading.
-    var envRows: [EnvRowItem] {
-        guard envFileState.value != nil else {
-            return []
-        }
+    /// any custom rows present in the draft. Takes the loaded `brew.env` so callers (typically
+    /// `AsyncContentView`) can pass placeholder content for the redacted loading state.
+    func envRows(envFile: BrewEnvFile) -> [EnvRowItem] {
         var rows: [EnvRowItem] = []
         var emitted: Set<String> = []
 
         for descriptor in EnvKeyCatalogue.editable {
-            rows.append(row(for: descriptor.key, descriptor: descriptor))
+            rows.append(row(for: descriptor.key, descriptor: descriptor, envFile: envFile))
             emitted.insert(descriptor.key)
         }
 
@@ -215,7 +253,16 @@ final class ConfigViewModel {
         return rows
     }
 
-    private func row(for key: String, descriptor: EnvKeyDescriptor) -> EnvRowItem {
+    /// Convenience for callers (mainly tests) that want the rows derived from the cached `brew.env`
+    /// without threading a payload through. Returns `[]` until the file has loaded.
+    var envRows: [EnvRowItem] {
+        guard let envFile = envFileState.value else {
+            return []
+        }
+        return envRows(envFile: envFile)
+    }
+
+    private func row(for key: String, descriptor: EnvKeyDescriptor, envFile: BrewEnvFile) -> EnvRowItem {
         if let shellValue = processEnvironment[key] {
             return EnvRowItem(
                 id: key,
@@ -227,11 +274,17 @@ final class ConfigViewModel {
             )
         }
         let draftValue = draft.value(forKey: key)
+        // Provenance: present in the on-disk file = `.envFile`; present in draft only = `.envFile` too
+        // (user has staged an edit); nothing anywhere = `.defaultValue`.
+        let provenance: EnvRowProvenance =
+            envFile.value(forKey: key) != nil || draftValue != nil
+                ? .envFile
+                : .defaultValue
         return EnvRowItem(
             id: key,
             key: key,
             value: draftValue ?? "",
-            provenance: draftValue == nil ? .defaultValue : .envFile,
+            provenance: provenance,
             status: .editable(descriptor.kind),
             descriptor: descriptor,
         )
@@ -276,6 +329,20 @@ final class ConfigViewModel {
         processEnvironment[key] != nil
     }
 
+    /// Maps any repository error to the user-facing copy shown in the AsyncContentView's error state.
+    func userMessage(for error: any Error) -> String {
+        if case let BrewCommandError.failed(_, stderr) = error {
+            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                return trimmed
+            }
+        }
+        return String(
+            localized: "Couldn't read the Homebrew configuration.",
+            comment: "Configuration tab, generic load failure",
+        )
+    }
+
     /// Best-effort hint about which shell rc the user would edit to remove an override. The editor
     /// surfaces this in the read-only badge copy so the user knows where to look next.
     private func shellRcHint() -> String {
@@ -296,7 +363,6 @@ final class ConfigViewModel {
     }
 
     // MARK: - Presentation
-
     // The read-only Configuration card surface (`sections`, `copyReport`, `errorMessage`, etc.) lives in
     // `ConfigViewModel+Sections.swift` to keep this type focused on the editing model.
 }
