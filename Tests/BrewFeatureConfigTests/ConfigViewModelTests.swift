@@ -20,7 +20,10 @@ struct ConfigViewModelTests {
     )
 
     @Test @MainActor func `load groups entries into homebrew, system and build cards`() async {
-        let viewModel = ConfigViewModel(repository: StubConfigRepository(snapshot: Self.snapshot))
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(snapshot: Self.snapshot),
+            envFileRepository: StubEnvFileRepository(),
+        )
 
         await viewModel.load()
 
@@ -29,7 +32,8 @@ struct ConfigViewModelTests {
             return
         }
         let sections = viewModel.sections
-        #expect(sections.map(\.title) == ["Homebrew", "System", "Build settings", "Environment (HOMEBREW_*)"])
+        // The HOMEBREW_* surface is the editor card now — it's handled separately, not in `sections`.
+        #expect(sections.map(\.title) == ["Homebrew", "System", "Build settings"])
 
         let homebrew = sections.first { $0.id == "homebrew" }
         #expect(homebrew?.rows.map(\.label) == ["HOMEBREW_VERSION", "HOMEBREW_PREFIX"])
@@ -42,17 +46,11 @@ struct ConfigViewModelTests {
         #expect(build?.rows.map(\.label) == ["HOMEBREW_MAKE_JOBS"])
     }
 
-    @Test @MainActor func `environment card surfaces the merged HOMEBREW variables`() async {
-        let viewModel = ConfigViewModel(repository: StubConfigRepository(snapshot: Self.snapshot))
-
-        await viewModel.load()
-
-        let environment = viewModel.sections.first { $0.id == "environment" }
-        #expect(environment?.rows.map(\.label) == ["HOMEBREW_NO_ANALYTICS"])
-    }
-
     @Test @MainActor func `copy report contains grouped key value lines`() async {
-        let viewModel = ConfigViewModel(repository: StubConfigRepository(snapshot: Self.snapshot))
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(snapshot: Self.snapshot),
+            envFileRepository: StubEnvFileRepository(),
+        )
 
         await viewModel.load()
 
@@ -62,25 +60,25 @@ struct ConfigViewModelTests {
         #expect(viewModel.canCopyReport)
     }
 
-    @Test @MainActor func `empty environment keeps the card with an empty-state message`() async {
+    @Test @MainActor func `copy report still names the environment block when nothing is set`() async {
         let snapshot = BrewConfigSnapshot(
             entries: [BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0")],
             environment: [],
         )
-        let viewModel = ConfigViewModel(repository: StubConfigRepository(snapshot: snapshot))
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(snapshot: snapshot),
+            envFileRepository: StubEnvFileRepository(),
+        )
 
         await viewModel.load()
 
-        let environment = viewModel.sections.first { $0.id == "environment" }
-        #expect(environment?.rows.isEmpty == true)
-        #expect(environment?.emptyMessage != nil)
-        // The empty environment block reports "(none)" in the copy report rather than being omitted.
         #expect(viewModel.copyReport.contains("Environment (HOMEBREW_*)\n(none)"))
     }
 
     @Test @MainActor func `missing brew executable surfaces the brew-not-found state`() async {
         let viewModel = ConfigViewModel(
             repository: ThrowingConfigRepository(error: BrewLookupError.executableNotFound),
+            envFileRepository: StubEnvFileRepository(),
         )
 
         await viewModel.load()
@@ -99,6 +97,7 @@ struct ConfigViewModelTests {
             repository: ThrowingConfigRepository(
                 error: BrewCommandError.failed(exitCode: 1, stderr: "something broke"),
             ),
+            envFileRepository: StubEnvFileRepository(),
         )
 
         await viewModel.load()
@@ -108,7 +107,10 @@ struct ConfigViewModelTests {
     }
 
     @Test @MainActor func `unknown errors map to a generic message`() async {
-        let viewModel = ConfigViewModel(repository: ThrowingConfigRepository(error: ConfigOddError()))
+        let viewModel = ConfigViewModel(
+            repository: ThrowingConfigRepository(error: ConfigOddError()),
+            envFileRepository: StubEnvFileRepository(),
+        )
 
         await viewModel.load()
 

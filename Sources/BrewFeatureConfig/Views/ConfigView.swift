@@ -13,15 +13,15 @@ import SwiftUI
 struct ConfigView: View {
     @State private var viewModel: ConfigViewModel
 
-    init(repository: any ConfigRepository) {
-        _viewModel = State(initialValue: ConfigViewModel(repository: repository))
+    init(repository: any ConfigRepository, envFileRepository: any EnvFileRepository) {
+        _viewModel = State(
+            initialValue: ConfigViewModel(repository: repository, envFileRepository: envFileRepository),
+        )
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 3) {
             header
-            Divider()
-                .overlay(Color.brewBorderSeparator)
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -33,6 +33,17 @@ struct ConfigView: View {
     private var header: some View {
         HStack(spacing: BrewSpacing.sm) {
             Spacer(minLength: 0)
+            Button("Discard", systemImage: "arrow.uturn.backward") {
+                viewModel.revert()
+            }
+            .disabled(!viewModel.isDirty)
+            Button("Save", systemImage: "checkmark") {
+                Task { await viewModel.save() }
+            }
+            .keyboardShortcut("s", modifiers: .command)
+            .disabled(!viewModel.isDirty)
+            Divider()
+                .frame(height: 18)
             Button("Copy report", systemImage: "doc.on.doc") {
                 copyReport()
             }
@@ -69,6 +80,7 @@ struct ConfigView: View {
                 ForEach(viewModel.sections) { section in
                     ConfigSectionCard(section: section)
                 }
+                ConfigEnvironmentEditorCard(viewModel: viewModel)
             }
             .padding(BrewSpacing.lg)
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -130,7 +142,10 @@ struct ConfigView: View {
 
 #if DEBUG
     #Preview("Loaded") {
-        ConfigView(repository: PreviewSupport.makeConfigRepository())
-            .frame(width: 720, height: 600)
+        ConfigView(
+            repository: PreviewSupport.makeConfigRepository(),
+            envFileRepository: PreviewSupport.makeEnvFileRepository(),
+        )
+        .frame(width: 720, height: 600)
     }
 #endif
