@@ -22,7 +22,7 @@ final class ConfigViewModel {
     /// Tracks whether the user has touched the draft since the last sync. Lets us distinguish
     /// "external `brew.env` change while idle" (re-sync draft) from "external change while editing"
     /// (keep the user's edits visible).
-    private(set) var hasPendingEdits: Bool = false
+    private(set) var isDirty: Bool = false
 
     /// Save-side error surfaced inline so the editor's main load state can stay `.loaded`.
     private(set) var saveError: String?
@@ -95,10 +95,6 @@ final class ConfigViewModel {
 
     // MARK: - Editing
 
-    var isDirty: Bool {
-        hasPendingEdits
-    }
-
     /// Sets `key` to `value` in the pending draft. No-op when the row is read-only (shell-overridden or
     /// install-time) — the editor wires these as disabled, but the VM enforces it too as a safety net.
     func setValue(forKey key: String, to value: String) {
@@ -106,7 +102,7 @@ final class ConfigViewModel {
             return
         }
         draft = draft.setting(key, value: value)
-        hasPendingEdits = true
+        isDirty = true
     }
 
     /// Removes a row from the draft. Used for toggling allowlist booleans off and for deleting custom rows.
@@ -115,7 +111,7 @@ final class ConfigViewModel {
             return
         }
         draft = draft.removing(key: key)
-        hasPendingEdits = true
+        isDirty = true
     }
 
     /// Tries to add a custom `HOMEBREW_*` row to the draft.
@@ -162,7 +158,7 @@ final class ConfigViewModel {
 
     private func commitCustomRow(key: String, value: String) {
         draft = draft.setting(key, value: value)
-        hasPendingEdits = true
+        isDirty = true
     }
 
     /// Toggle binding sink. `"1"` is the on-disk truthy value; off removes the entry entirely so it
@@ -228,7 +224,7 @@ final class ConfigViewModel {
             return
         }
         draft = file
-        hasPendingEdits = false
+        isDirty = false
         saveError = nil
     }
 
@@ -236,14 +232,14 @@ final class ConfigViewModel {
     /// its own state) and the dirty flag clears. On failure the draft is untouched and `saveError`
     /// carries the user-visible copy.
     func save() async {
-        guard hasPendingEdits else {
+        guard isDirty else {
             return
         }
         let snapshot = draft
         saveError = nil
         do {
             try await envFileRepository.save(snapshot)
-            hasPendingEdits = false
+            isDirty = false
         } catch {
             saveError = String(
                 localized: "Couldn't save brew.env: \(error.localizedDescription)",
@@ -260,7 +256,7 @@ final class ConfigViewModel {
     }
 
     private func syncDraftIfClean() {
-        guard !hasPendingEdits, let file = envFileState.value else {
+        guard !isDirty, let file = envFileState.value else {
             return
         }
         draft = file
