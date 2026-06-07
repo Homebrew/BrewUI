@@ -58,6 +58,12 @@ final class UpdatesViewModel {
         allRows.count
     }
 
+    /// Total installed package count from the underlying inventory, used by the
+    /// "All N packages are at their latest versions." empty-state copy.
+    var totalInstalledCount: Int {
+        (repository.state.value ?? []).count
+    }
+
     /// Initial fetch with no rows yet — show blocking spinner.
     var shouldShowInitialLoadingIndicator: Bool {
         if case .loading = state {
