@@ -47,9 +47,8 @@ struct DoctorView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BrewSpacing.lg)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .contain)
         .accessibilityHeading(.h1)
-    }
 
     private var content: some View {
         AsyncContentView(
