@@ -177,16 +177,16 @@ final class DoctorViewModel {
     /// runnable; multi-step or `sudo` blocks are copy-only.
     func runFix(for item: DoctorIssueItem) {
         guard let step = item.primaryRunnableStep,
+              let token = item.fixToken,
               let arguments = step.arguments
         else {
             return
         }
-        let token = step.displayCommand
         guard !runningFixTokens.contains(token) else {
             return
         }
 
-        let operationID = BrewOperationID(maintenanceToken: token, displayCommand: step.displayCommand)
+        let operationID = BrewOperationID(maintenanceToken: token, displayCommand: token)
         let command = commandFactory.doctorFixCommand(arguments: arguments)
         fixErrorMessages[token] = nil
         runningFixTokens.insert(token)
