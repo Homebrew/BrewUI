@@ -297,15 +297,6 @@ final class ConfigViewModel {
         return rows
     }
 
-    /// Convenience for callers (mainly tests) that want the rows derived from the cached `brew.env`
-    /// without threading a payload through. Returns `[]` until the file has loaded.
-    var envRows: [EnvRowItem] {
-        guard let envFile = envFileState.value else {
-            return []
-        }
-        return envRows(envFile: envFile)
-    }
-
     private func row(for key: String, descriptor: EnvKeyDescriptor, envFile: BrewEnvFile) -> EnvRowItem {
         if let shellValue = processEnvironment[key] {
             return EnvRowItem(

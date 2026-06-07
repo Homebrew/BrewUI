@@ -28,6 +28,10 @@ struct ConfigViewModelEditingTests {
         return (viewModel, envRepo)
     }
 
+    private func envRows(_ viewModel: ConfigViewModel) -> [EnvRowItem] {
+        viewModel.envRows(envFile: viewModel.envFileState.value ?? BrewEnvFile())
+    }
+
     // MARK: - pageState
 
     @Test @MainActor func `pageState bundles the snapshot and env file when both are loaded`() async {
@@ -114,7 +118,7 @@ struct ConfigViewModelEditingTests {
 
         await viewModel.load()
 
-        let row = try? #require(viewModel.envRows.first { $0.key == "HOMEBREW_NO_ANALYTICS" })
+        let row = envRows(viewModel).first { $0.key == "HOMEBREW_NO_ANALYTICS" }
         #expect(row?.status == .editable(.toggle))
         #expect(row?.provenance == .defaultValue)
         #expect(row?.descriptor?.label == "Disable analytics")
@@ -127,7 +131,7 @@ struct ConfigViewModelEditingTests {
 
         await viewModel.load()
 
-        let row = try? #require(viewModel.envRows.first { $0.key == "HOMEBREW_NO_ANALYTICS" })
+        let row = envRows(viewModel).first { $0.key == "HOMEBREW_NO_ANALYTICS" }
         #expect(row?.status == .readOnlyShellOverridden(rcHint: "~/.zshrc"))
         #expect(row?.provenance == .shell)
         // The descriptor stays attached so the UI keeps the label and help copy.
@@ -144,7 +148,7 @@ struct ConfigViewModelEditingTests {
 
         await viewModel.load()
 
-        let row = try? #require(viewModel.envRows.first { $0.key == "HOMEBREW_PREFIX" })
+        let row = envRows(viewModel).first { $0.key == "HOMEBREW_PREFIX" }
         #expect(row?.status == .readOnlyInstallTime)
     }
 
@@ -153,7 +157,7 @@ struct ConfigViewModelEditingTests {
             processEnvironment: ["SHELL": "/bin/zsh", "HOMEBREW_NO_AUTO_UPDATE": "1"],
         )
         await viewModel.load()
-        let row = viewModel.envRows.first { $0.key == "HOMEBREW_NO_AUTO_UPDATE" }
+        let row = envRows(viewModel).first { $0.key == "HOMEBREW_NO_AUTO_UPDATE" }
         #expect(row?.status == .readOnlyShellOverridden(rcHint: "~/.zshrc"))
     }
 
@@ -162,7 +166,7 @@ struct ConfigViewModelEditingTests {
             processEnvironment: ["SHELL": "/bin/bash", "HOMEBREW_NO_AUTO_UPDATE": "1"],
         )
         await viewModel.load()
-        let row = viewModel.envRows.first { $0.key == "HOMEBREW_NO_AUTO_UPDATE" }
+        let row = envRows(viewModel).first { $0.key == "HOMEBREW_NO_AUTO_UPDATE" }
         #expect(row?.status == .readOnlyShellOverridden(rcHint: "~/.bash_profile"))
     }
 
@@ -171,7 +175,7 @@ struct ConfigViewModelEditingTests {
             processEnvironment: ["SHELL": "/opt/homebrew/bin/fish", "HOMEBREW_NO_AUTO_UPDATE": "1"],
         )
         await viewModel.load()
-        let row = viewModel.envRows.first { $0.key == "HOMEBREW_NO_AUTO_UPDATE" }
+        let row = envRows(viewModel).first { $0.key == "HOMEBREW_NO_AUTO_UPDATE" }
         #expect(row?.status == .readOnlyShellOverridden(rcHint: "~/.config/fish/config.fish"))
     }
 
@@ -229,7 +233,7 @@ struct ConfigViewModelEditingTests {
 
         #expect(outcome == .added)
         #expect(viewModel.draft.value(forKey: "HOMEBREW_SOMETHING_EXOTIC") == "yes")
-        #expect(viewModel.envRows.contains { $0.key == "HOMEBREW_SOMETHING_EXOTIC" && $0.provenance == .custom })
+        #expect(envRows(viewModel).contains { $0.key == "HOMEBREW_SOMETHING_EXOTIC" && $0.provenance == .custom })
     }
 
     @Test @MainActor func `addCustomRow rejects keys without the HOMEBREW prefix`() async {
