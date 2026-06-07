@@ -196,6 +196,10 @@ final class DoctorViewModel {
             do {
                 try await brewCommandCenter.submit(id: operationID, command: command)
             } catch {
+                if error is CancellationError {
+                    runningFixTokens.remove(token)
+                    return
+                }
                 runningFixTokens.remove(token)
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason) = latestPhase {
