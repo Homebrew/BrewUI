@@ -244,7 +244,7 @@ final class ConfigViewModel {
 
         // Custom rows already in the draft.
         for line in draft.lines {
-            if case let .entry(key, _) = line, !emitted.contains(key), key.hasPrefix("HOMEBREW_") {
+            if case let .entry(key, _, _) = line, !emitted.contains(key), key.hasPrefix("HOMEBREW_") {
                 rows.append(customRow(forKey: key))
                 emitted.insert(key)
             }

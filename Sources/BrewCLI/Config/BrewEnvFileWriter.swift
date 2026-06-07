@@ -6,59 +6,48 @@
 import BrewCore
 import Foundation
 
-/// Renders a ``BrewEnvFile`` back to its on-disk shell representation. Quoting is applied only when
-/// the value would otherwise be ambiguous to shell parsing, so an unmodified file round-trips
-/// byte-identically through ``BrewEnvFileParser`` ↔ ``BrewEnvFileWriter``.
+/// Renders a ``BrewEnvFile`` back to its on-disk shell representation.
+///
+/// `brew` itself loads each line with `read -r line; export "${line?}"` — no shell evaluation, no
+/// quote stripping. So we emit raw `KEY=value`: any quoting in the value would become part of the
+/// value `brew` sees. Lines that came from the parser carry their original substring as `raw` and
+/// are re-emitted verbatim, keeping unedited files byte-identical on disk. Refuses to render values
+/// containing literal newlines, which `brew`'s line-oriented loader has no way to honour.
 public enum BrewEnvFileWriter {
-    public static func render(_ file: BrewEnvFile) -> String {
-        let rendered = file.lines.map(render(line:)).joined(separator: "\n")
-        return rendered.isEmpty ? "" : rendered + "\n"
+    public static func render(_ file: BrewEnvFile) throws -> String {
+        var rendered: [String] = []
+        rendered.reserveCapacity(file.lines.count)
+        for line in file.lines {
+            try rendered.append(render(line: line))
+        }
+        let joined = rendered.joined(separator: "\n")
+        return joined.isEmpty ? "" : joined + "\n"
     }
 
-    private static func render(line: BrewEnvFileLine) -> String {
+    private static func render(line: BrewEnvFileLine) throws -> String {
         switch line {
         case .blank:
-            ""
+            return ""
         case let .comment(text):
-            text
-        case let .entry(key, value):
-            "\(key)=\(quoteIfNeeded(value))"
-        }
-    }
-
-    /// Wraps `value` in double quotes when it contains characters that would change shell parsing —
-    /// whitespace, comment markers, or syntax that initiates substitution / globbing. Inner double
-    /// quotes and backslashes are escaped. An empty value renders as `""`.
-    private static func quoteIfNeeded(_ value: String) -> String {
-        if value.isEmpty {
-            return "\"\""
-        }
-        if value.unicodeScalars.allSatisfy(isUnquotedSafe) {
-            return value
-        }
-        var escaped = ""
-        escaped.reserveCapacity(value.count + 2)
-        escaped.append("\"")
-        for character in value {
-            if character == "\\" || character == "\"" {
-                escaped.append("\\")
+            return text
+        case let .entry(key, value, raw):
+            if let raw {
+                return raw
             }
-            escaped.append(character)
+            // brew's file is line-oriented (`read -r line`); there's no escape it honours for a
+            // literal newline in a value. Refuse rather than corrupt.
+            guard !value.contains("\n") else {
+                throw BrewEnvFileWriterError.newlineInValue(key: key)
+            }
+            return "\(key)=\(value)"
+        case let .inert(rawText, _):
+            return rawText
         }
-        escaped.append("\"")
-        return escaped
     }
+}
 
-    private static func isUnquotedSafe(_ scalar: Unicode.Scalar) -> Bool {
-        let character = Character(scalar)
-        if character.isLetter || character.isNumber {
-            return true
-        }
-        switch character {
-        case "_", "-", ".", "/", ":", "@", "+", ",", "=":
-            return true
-        default:
-            return false
-        }
-    }
+public enum BrewEnvFileWriterError: Error, Equatable, Sendable {
+    /// The value for `key` contained a literal newline. `brew`'s loader is line-oriented and has no
+    /// escape for embedded newlines.
+    case newlineInValue(key: String)
 }

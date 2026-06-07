@@ -6,59 +6,68 @@ import Testing
 struct BrewEnvFileLocatorTests {
     private static let home = "/Users/test"
 
-    @Test func `HOMEBREW_USER_CONFIG_HOME wins when present`() {
+    @Test func `XDG_CONFIG_HOME wins when present`() {
         let locator = BrewEnvFileLocator(
             environment: [
                 "HOME": Self.home,
-                "HOMEBREW_USER_CONFIG_HOME": "/opt/cfg",
-                "XDG_CONFIG_HOME": "/Users/test/.config",
+                "XDG_CONFIG_HOME": "/Users/test/.xdg",
+                "HOMEBREW_XDG_CONFIG_HOME": "/Users/test/.homebrew-xdg",
             ],
-            fileExists: { _ in false },
-        )
-        #expect(locator.preferredCreationPath().path == "/opt/cfg/brew.env")
-    }
-
-    @Test func `XDG_CONFIG_HOME is used when HOMEBREW_USER_CONFIG_HOME is unset`() {
-        let locator = BrewEnvFileLocator(
-            environment: ["HOME": Self.home, "XDG_CONFIG_HOME": "/Users/test/.xdg"],
             fileExists: { _ in false },
         )
         #expect(locator.preferredCreationPath().path == "/Users/test/.xdg/homebrew/brew.env")
     }
 
-    @Test func `default creation path is ~/.config/homebrew/brew.env`() {
+    @Test func `HOMEBREW_XDG_CONFIG_HOME branch used when XDG_CONFIG_HOME is unset`() {
+        let locator = BrewEnvFileLocator(
+            environment: [
+                "HOME": Self.home,
+                "HOMEBREW_XDG_CONFIG_HOME": "/Users/test/.homebrew-xdg",
+            ],
+            fileExists: { _ in false },
+        )
+        #expect(locator.preferredCreationPath().path == "/Users/test/.homebrew-xdg/homebrew/brew.env")
+    }
+
+    @Test func `default creation path is ~/.homebrew/brew.env`() {
         let locator = BrewEnvFileLocator(
             environment: ["HOME": Self.home],
             fileExists: { _ in false },
         )
-        #expect(locator.preferredCreationPath().path == "/Users/test/.config/homebrew/brew.env")
+        #expect(locator.preferredCreationPath().path == "/Users/test/.homebrew/brew.env")
     }
 
-    @Test func `legacy path is never selected as a creation target`() {
+    @Test func `empty XDG_CONFIG_HOME falls through to HOMEBREW_XDG_CONFIG_HOME`() {
         let locator = BrewEnvFileLocator(
-            environment: ["HOME": Self.home],
+            environment: [
+                "HOME": Self.home,
+                "XDG_CONFIG_HOME": "",
+                "HOMEBREW_XDG_CONFIG_HOME": "/Users/test/.homebrew-xdg",
+            ],
             fileExists: { _ in false },
         )
-        #expect(locator.preferredCreationPath().path != "/Users/test/.homebrew/brew.env")
+        #expect(locator.preferredCreationPath().path == "/Users/test/.homebrew-xdg/homebrew/brew.env")
     }
 
-    @Test func `locate returns the first existing probe path`() {
-        let xdgPath = "/Users/test/.config/homebrew/brew.env"
+    @Test func `empty HOMEBREW_XDG_CONFIG_HOME falls through to HOME default`() {
         let locator = BrewEnvFileLocator(
-            environment: ["HOME": Self.home],
-            fileExists: { $0 == xdgPath },
+            environment: [
+                "HOME": Self.home,
+                "HOMEBREW_XDG_CONFIG_HOME": "",
+            ],
+            fileExists: { _ in false },
         )
-        #expect(locator.locate().path == xdgPath)
-        #expect(locator.existingPath()?.path == xdgPath)
+        #expect(locator.preferredCreationPath().path == "/Users/test/.homebrew/brew.env")
     }
 
-    @Test func `locate finds the legacy path when it is the only one present`() {
-        let legacy = "/Users/test/.homebrew/brew.env"
+    @Test func `locate returns the resolved path when it exists`() {
+        let path = "/Users/test/.homebrew/brew.env"
         let locator = BrewEnvFileLocator(
             environment: ["HOME": Self.home],
-            fileExists: { $0 == legacy },
+            fileExists: { $0 == path },
         )
-        #expect(locator.locate().path == legacy)
+        #expect(locator.locate().path == path)
+        #expect(locator.existingPath()?.path == path)
     }
 
     @Test func `locate falls back to the preferred creation path when no file exists`() {
@@ -66,25 +75,27 @@ struct BrewEnvFileLocatorTests {
             environment: ["HOME": Self.home],
             fileExists: { _ in false },
         )
-        #expect(locator.locate().path == "/Users/test/.config/homebrew/brew.env")
+        #expect(locator.locate().path == "/Users/test/.homebrew/brew.env")
         #expect(locator.existingPath() == nil)
     }
 
-    @Test func `existing modern XDG file wins over an existing legacy file`() {
-        let xdg = "/Users/test/.config/homebrew/brew.env"
-        let legacy = "/Users/test/.homebrew/brew.env"
-        let locator = BrewEnvFileLocator(
-            environment: ["HOME": Self.home],
-            fileExists: { $0 == xdg || $0 == legacy },
+    /// Integration check that ties the existing mocked probe-order assertions back to the real
+    /// `FileManager.fileExists(atPath:)` callback the locator uses in production. Writes a real
+    /// `brew.env` at the default path under a temp `$HOME` and confirms `locate()` finds it.
+    @Test func `locate uses the real FileManager when no override is provided`() throws {
+        let fileManager = FileManager.default
+        let tempHome = fileManager.temporaryDirectory.appendingPathComponent(
+            "brew-env-locator-\(UUID().uuidString)",
+            isDirectory: true,
         )
-        #expect(locator.locate().path == xdg)
-    }
+        let envFile = tempHome.appendingPathComponent(".homebrew/brew.env")
+        try fileManager.createDirectory(at: envFile.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data("HOMEBREW_NO_ANALYTICS=1\n".utf8).write(to: envFile)
+        defer { try? fileManager.removeItem(at: tempHome) }
 
-    @Test func `empty HOMEBREW_USER_CONFIG_HOME is ignored`() {
-        let locator = BrewEnvFileLocator(
-            environment: ["HOME": Self.home, "HOMEBREW_USER_CONFIG_HOME": ""],
-            fileExists: { _ in false },
-        )
-        #expect(locator.preferredCreationPath().path == "/Users/test/.config/homebrew/brew.env")
+        // Explicitly clear XDG_CONFIG_HOME so the default branch is exercised even on CI hosts that set it.
+        let locator = BrewEnvFileLocator(environment: ["HOME": tempHome.path])
+
+        #expect(locator.locate().path == envFile.path)
     }
 }

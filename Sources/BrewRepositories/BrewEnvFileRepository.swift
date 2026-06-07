@@ -77,7 +77,7 @@ public final class BrewEnvFileRepository: EnvFileRepository {
             attributes: [.posixPermissions: 0o700],
         )
 
-        let rendered = BrewEnvFileWriter.render(file)
+        let rendered = try BrewEnvFileWriter.render(file)
         let data = Data(rendered.utf8)
         // `Data.write(options: .atomic)` writes to a temp sibling and renames into place, so a partial
         // write never overwrites the original — the guarantee the editor relies on. We follow up with a

@@ -46,7 +46,11 @@ struct BrewEnvFileRepositoryTests {
         try await repository.save(original)
         await repository.load(forceRefresh: true)
 
-        #expect(repository.state.value == original)
+        // The reloaded file carries `raw` on each entry (the parser captures the on-disk substring).
+        // Compare on the user-visible (key, value) shape rather than the raw-bearing line array.
+        let reloaded = try #require(repository.state.value)
+        #expect(reloaded.entries.map(\.key) == original.entries.map(\.key))
+        #expect(reloaded.entries.map(\.value) == original.entries.map(\.value))
     }
 
     @Test @MainActor func `save updates the cached state immediately`() async throws {
@@ -58,7 +62,8 @@ struct BrewEnvFileRepositoryTests {
 
         try await repository.save(original)
 
-        // No `load()` call between save and read — the cache should reflect the saved file.
+        // No `load()` call between save and read — the cache should reflect the in-memory file
+        // exactly (no parser round-trip → no `raw` set on the entries).
         #expect(repository.state.value == original)
     }
 
@@ -70,7 +75,7 @@ struct BrewEnvFileRepositoryTests {
         try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_NO_ANALYTICS", value: "1")]))
 
         let expectedFile = home
-            .appendingPathComponent(".config/homebrew/brew.env")
+            .appendingPathComponent(".homebrew/brew.env")
         #expect(Self.fileManager.fileExists(atPath: expectedFile.path))
     }
 
@@ -81,25 +86,25 @@ struct BrewEnvFileRepositoryTests {
         let repository = makeRepository(homeDirectory: home)
         try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_GITHUB_API_TOKEN", value: "ghp_secret")]))
 
-        let expectedFile = home.appendingPathComponent(".config/homebrew/brew.env")
+        let expectedFile = home.appendingPathComponent(".homebrew/brew.env")
         let attributes = try Self.fileManager.attributesOfItem(atPath: expectedFile.path)
         let mode = try #require(attributes[.posixPermissions] as? NSNumber)
         #expect(mode.int16Value == 0o600)
     }
 
-    @Test @MainActor func `existing legacy ~/.homebrew/brew.env is read in place`() async throws {
+    @Test @MainActor func `existing ~/.homebrew/brew.env is read in place`() async throws {
         let home = try makeTempHome()
         defer { try? Self.fileManager.removeItem(at: home) }
 
-        let legacyDir = home.appendingPathComponent(".homebrew")
-        try Self.fileManager.createDirectory(at: legacyDir, withIntermediateDirectories: true)
-        let legacyFile = legacyDir.appendingPathComponent("brew.env")
-        try Data("HOMEBREW_NO_ANALYTICS=1\n".utf8).write(to: legacyFile)
+        let envDir = home.appendingPathComponent(".homebrew")
+        try Self.fileManager.createDirectory(at: envDir, withIntermediateDirectories: true)
+        let envFile = envDir.appendingPathComponent("brew.env")
+        try Data("HOMEBREW_NO_ANALYTICS=1\n".utf8).write(to: envFile)
 
         let repository = makeRepository(homeDirectory: home)
         await repository.load(forceRefresh: false)
 
-        #expect(repository.state.value?.lines == [.entry(key: "HOMEBREW_NO_ANALYTICS", value: "1")])
+        #expect(repository.state.value?.value(forKey: "HOMEBREW_NO_ANALYTICS") == "1")
     }
 
     @Test @MainActor func `save replaces an existing file atomically without corruption on overwrite`() async throws {
@@ -123,7 +128,7 @@ struct BrewEnvFileRepositoryTests {
         try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "4")]))
 
         // Now overwrite the on-disk file directly behind the repository's back.
-        let envFile = home.appendingPathComponent(".config/homebrew/brew.env")
+        let envFile = home.appendingPathComponent(".homebrew/brew.env")
         try Data("HOMEBREW_MAKE_JOBS=99\n".utf8).write(to: envFile)
 
         // Cache-first load: shouldn't pick up the external change.
@@ -143,7 +148,7 @@ struct BrewEnvFileRepositoryTests {
         try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "4")]))
 
         // External change.
-        let envFile = home.appendingPathComponent(".config/homebrew/brew.env")
+        let envFile = home.appendingPathComponent(".homebrew/brew.env")
         try Data("HOMEBREW_MAKE_JOBS=99\n".utf8).write(to: envFile)
 
         repository.invalidate()
