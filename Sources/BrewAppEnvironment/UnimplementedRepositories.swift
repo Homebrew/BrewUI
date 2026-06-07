@@ -80,6 +80,16 @@ struct UnimplementedConfigRepository: ConfigRepository {
     }
 }
 
+struct UnimplementedEnvFileRepository: EnvFileRepository {
+    func loadEnvFile() async throws -> BrewEnvFile {
+        unimplemented()
+    }
+
+    func save(_: BrewEnvFile) async throws {
+        unimplemented()
+    }
+}
+
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         unimplemented()

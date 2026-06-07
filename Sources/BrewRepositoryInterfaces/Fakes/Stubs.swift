@@ -66,6 +66,30 @@ public struct StubConfigRepository: ConfigRepository {
     }
 }
 
+/// Actor-backed in-memory `brew.env` for previews and tests. Mutable so tests can inspect what was
+/// saved without spinning up real disk I/O.
+public actor StubEnvFileRepository: EnvFileRepository {
+    private var file: BrewEnvFile
+    public private(set) var saveCount: Int = 0
+
+    public init(file: BrewEnvFile = BrewEnvFile()) {
+        self.file = file
+    }
+
+    public func loadEnvFile() async throws -> BrewEnvFile {
+        file
+    }
+
+    public func save(_ newFile: BrewEnvFile) async throws {
+        file = newFile
+        saveCount += 1
+    }
+
+    public func currentFile() -> BrewEnvFile {
+        file
+    }
+}
+
 public struct StubCatalogueRepository: CatalogueRepository {
     private let formulaCatalogue: [BrewPackage]
     private let caskCatalogue: [BrewPackage]
