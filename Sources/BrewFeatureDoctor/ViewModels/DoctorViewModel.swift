@@ -25,7 +25,9 @@ final class DoctorViewModel {
     @ObservationIgnored private let commandFactory: any BrewMutatingCommandFactory
     @ObservationIgnored private var fixTasks: [String: Task<Void, Never>] = [:]
 
-    private var selectedIssueID: Int?
+    /// The selected issue id — read each row in `listRowBackground`, so this stays O(1) and never
+    /// iterates the issues array. Auto-selection of the first issue on a fresh load lives in `load()`.
+    private(set) var selectedIssueID: Int?
     /// Fix tokens currently running — drives per-row progress and blocks duplicate submits.
     private(set) var runningFixTokens: Set<String> = []
     /// Inline fix errors keyed by fix token.
@@ -112,12 +114,6 @@ final class DoctorViewModel {
         case .failed:
             "The check could not be completed"
         }
-    }
-
-    /// The selected issue id — read each row in `listRowBackground`, so this stays O(1) and never
-    /// iterates the issues array. Auto-selection of the first issue on a fresh load lives in `load()`.
-    var activeSelectedIssueID: Int? {
-        selectedIssueID
     }
 
     /// O(1) lookup — the item id is the issue's offset within the loaded report.

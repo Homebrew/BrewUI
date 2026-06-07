@@ -93,7 +93,7 @@ struct DoctorView: View {
                                 viewModel.setSelection(item.id)
                             }
                             .listRowBackground(
-                                viewModel.activeSelectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
+                                viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
                             )
                     }
                 } header: {

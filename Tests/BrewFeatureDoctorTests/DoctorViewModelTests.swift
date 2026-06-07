@@ -92,7 +92,7 @@ struct DoctorViewModelTests {
         #expect(viewModel.issueItems.first?.title == "You have unlinked kegs in your Cellar.")
         #expect(viewModel.issueItems.first?.hasRunnableFix == true)
         #expect(viewModel.issueItems.last?.hasRunnableFix == false)
-        #expect(viewModel.activeSelectedIssueID == 0)
+        #expect(viewModel.selectedIssueID == 0)
         #expect(viewModel.issueCountSubtitle == "2 issues found")
     }
 
@@ -114,7 +114,7 @@ struct DoctorViewModelTests {
     @Test func `setSelection changes the selected issue`() {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
         viewModel.setSelection(1)
-        #expect(viewModel.activeSelectedIssueID == 1)
+        #expect(viewModel.selectedIssueID == 1)
         #expect(viewModel.selectedIssue?.title == "Some installed formulae are deprecated.")
     }
 
@@ -201,7 +201,7 @@ struct DoctorViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.activeSelectedIssueID == nil)
+        #expect(viewModel.selectedIssueID == nil)
     }
 
     @Test func `load with a stale selection resets to the first issue`() async {
@@ -215,12 +215,12 @@ struct DoctorViewModelTests {
 
         await viewModel.load()
         viewModel.setSelection(2)
-        #expect(viewModel.activeSelectedIssueID == 2)
+        #expect(viewModel.selectedIssueID == 2)
 
         repository.replace(report: DoctorReport(issues: [Self.minimal(.caution, "only-survivor")]))
         await viewModel.load()
 
-        #expect(viewModel.activeSelectedIssueID == 0)
+        #expect(viewModel.selectedIssueID == 0)
     }
 
     @Test func `load preserves a still-valid selection`() async {
@@ -236,7 +236,7 @@ struct DoctorViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.activeSelectedIssueID == 1)
+        #expect(viewModel.selectedIssueID == 1)
     }
 
     private static func minimal(_ severity: DoctorSeverity, _ title: String) -> DoctorIssue {
