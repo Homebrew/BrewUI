@@ -119,6 +119,65 @@ struct BrewEnvFileRepositoryTests {
         #expect(repository.state.value?.value(forKey: "HOMEBREW_MAKE_JOBS") == "8")
     }
 
+    @Test @MainActor func `first save does not create a backup file`() async throws {
+        let home = try makeTempHome()
+        defer { try? Self.fileManager.removeItem(at: home) }
+
+        let repository = makeRepository(homeDirectory: home)
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_NO_ANALYTICS", value: "1")]))
+
+        let backup = home.appendingPathComponent(".homebrew/brew.env.bak")
+        #expect(Self.fileManager.fileExists(atPath: backup.path) == false)
+    }
+
+    @Test @MainActor func `subsequent save writes the prior content to a sibling .bak`() async throws {
+        let home = try makeTempHome()
+        defer { try? Self.fileManager.removeItem(at: home) }
+
+        let repository = makeRepository(homeDirectory: home)
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "4")]))
+        let envFile = home.appendingPathComponent(".homebrew/brew.env")
+        let firstContents = try String(contentsOf: envFile, encoding: .utf8)
+
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "8")]))
+
+        let backup = home.appendingPathComponent(".homebrew/brew.env.bak")
+        let backupContents = try String(contentsOf: backup, encoding: .utf8)
+        #expect(backupContents == firstContents)
+    }
+
+    @Test @MainActor func `backup file is single-generation and overwrites the previous .bak`() async throws {
+        let home = try makeTempHome()
+        defer { try? Self.fileManager.removeItem(at: home) }
+
+        let repository = makeRepository(homeDirectory: home)
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "4")]))
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "8")]))
+        let envFile = home.appendingPathComponent(".homebrew/brew.env")
+        let secondContents = try String(contentsOf: envFile, encoding: .utf8)
+
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_MAKE_JOBS", value: "16")]))
+
+        // The .bak should now match the second-save contents, not the first.
+        let backup = home.appendingPathComponent(".homebrew/brew.env.bak")
+        let backupContents = try String(contentsOf: backup, encoding: .utf8)
+        #expect(backupContents == secondContents)
+    }
+
+    @Test @MainActor func `backup file is written with 0600 to protect any token in the prior content`() async throws {
+        let home = try makeTempHome()
+        defer { try? Self.fileManager.removeItem(at: home) }
+
+        let repository = makeRepository(homeDirectory: home)
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_GITHUB_API_TOKEN", value: "ghp_secret_v1")]))
+        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_GITHUB_API_TOKEN", value: "ghp_secret_v2")]))
+
+        let backup = home.appendingPathComponent(".homebrew/brew.env.bak")
+        let attributes = try Self.fileManager.attributesOfItem(atPath: backup.path)
+        let mode = try #require(attributes[.posixPermissions] as? NSNumber)
+        #expect(mode.int16Value == 0o600)
+    }
+
     @Test @MainActor func `load is a no-op when state is already loaded and forceRefresh is false`() async throws {
         let home = try makeTempHome()
         defer { try? Self.fileManager.removeItem(at: home) }
