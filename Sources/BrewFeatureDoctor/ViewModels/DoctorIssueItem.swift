@@ -31,8 +31,8 @@ struct DoctorIssueItem: Identifiable, Equatable {
     /// Stable FNV-1a 64-bit hash of `title` + `rawBody`, truncated to platform `Int`. Exposed so the
     /// view model can probe membership without rebuilding items.
     static func contentID(for issue: DoctorIssue) -> Int {
-        var hash: UInt64 = 0xcbf2_9ce4_8422_2325
-        let prime: UInt64 = 0x100_0000_01b3
+        var hash: UInt64 = 0xCBF2_9CE4_8422_2325
+        let prime: UInt64 = 0x100_0000_01B3
         for byte in "\(issue.title)\n\(issue.rawBody)".utf8 {
             hash ^= UInt64(byte)
             hash = hash &* prime
