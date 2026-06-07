@@ -55,6 +55,8 @@ struct MainWindowView: View {
             InstalledColumnsRoot()
                 .navigationTitle("Installed")
                 .navigationSubtitle("Browse or search your installed packages")
+        case .updates:
+            UpdatesColumnsRoot()
         case .discover:
             DiscoverColumnsRoot()
                 .navigationTitle("Discover")
