@@ -54,6 +54,18 @@ public struct StubDiscoverPackagesRepository: DiscoverPackagesRepository {
     }
 }
 
+public struct StubConfigRepository: ConfigRepository {
+    private let snapshot: BrewConfigSnapshot
+
+    public init(snapshot: BrewConfigSnapshot) {
+        self.snapshot = snapshot
+    }
+
+    public func loadConfig() async throws -> BrewConfigSnapshot {
+        snapshot
+    }
+}
+
 public struct StubCatalogueRepository: CatalogueRepository {
     private let formulaCatalogue: [BrewPackage]
     private let caskCatalogue: [BrewPackage]

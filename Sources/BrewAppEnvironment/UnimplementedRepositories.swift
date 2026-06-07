@@ -74,6 +74,12 @@ final class UnimplementedDoctorRepository: DoctorRepository {
     }
 }
 
+struct UnimplementedConfigRepository: ConfigRepository {
+    func loadConfig() async throws -> BrewConfigSnapshot {
+        unimplemented()
+    }
+}
+
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         unimplemented()

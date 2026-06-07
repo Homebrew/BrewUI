@@ -133,6 +133,39 @@ public enum PreviewSupport {
         ),
     ])
 
+    @MainActor
+    public static func makeConfigRepository() -> any ConfigRepository {
+        StubConfigRepository(snapshot: configSnapshot)
+    }
+
+    public static let configSnapshot = BrewConfigSnapshot(
+        entries: [
+            BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0"),
+            BrewConfigEntry(key: "ORIGIN", value: "https://github.com/Homebrew/brew"),
+            BrewConfigEntry(key: "HEAD", value: "a1b2c3d4"),
+            BrewConfigEntry(key: "Last commit", value: "3 days ago"),
+            BrewConfigEntry(key: "HOMEBREW_PREFIX", value: "/opt/homebrew"),
+            BrewConfigEntry(
+                key: "Homebrew Ruby",
+                value: "3.3.0 => /opt/homebrew/Library/Homebrew/vendor/portable-ruby/3.3.0/bin/ruby",
+            ),
+            BrewConfigEntry(key: "HOMEBREW_CASK_OPTS", value: "[]"),
+            BrewConfigEntry(key: "HOMEBREW_DOWNLOAD_CONCURRENCY", value: "auto"),
+            BrewConfigEntry(key: "HOMEBREW_MAKE_JOBS", value: "16"),
+            BrewConfigEntry(key: "CPU", value: "16-core 64-bit arm_brava"),
+            BrewConfigEntry(key: "Clang", value: "17.0.0 build 1700"),
+            BrewConfigEntry(key: "Git", value: "2.50.1 => /usr/bin/git"),
+            BrewConfigEntry(key: "macOS", value: "15.4-arm64"),
+            BrewConfigEntry(key: "CLT", value: "16.4.0.0.1.1747106510"),
+            BrewConfigEntry(key: "Xcode", value: "16.4"),
+            BrewConfigEntry(key: "Rosetta 2", value: "false"),
+        ],
+        environment: [
+            BrewConfigEntry(key: "HOMEBREW_NO_ANALYTICS", value: "1"),
+            BrewConfigEntry(key: "HOMEBREW_PREFIX", value: "/opt/homebrew"),
+        ],
+    )
+
     // MARK: - Backing sample data (preview-only)
 
     public static let installedPackages: [InstalledBrewPackage] = [

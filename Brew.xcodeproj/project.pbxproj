@@ -20,6 +20,7 @@
 		EEAA110900000000000000B9 /* BrewFeatureDiscover in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100900000000000000C9 /* BrewFeatureDiscover */; };
 		EEAA110A00000000000000BA /* BrewAppEnvironment in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100A00000000000000CA /* BrewAppEnvironment */; };
 		EEAA110B00000000000000BB /* BrewFeatureDoctor in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100B00000000000000CB /* BrewFeatureDoctor */; };
+		EEAA110C00000000000000BC /* BrewFeatureConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100C00000000000000CC /* BrewFeatureConfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 				EEAA110900000000000000B9 /* BrewFeatureDiscover in Frameworks */,
 				EEAA110A00000000000000BA /* BrewAppEnvironment in Frameworks */,
 				EEAA110B00000000000000BB /* BrewFeatureDoctor in Frameworks */,
+				EEAA110C00000000000000BC /* BrewFeatureConfig in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -167,6 +169,7 @@
 				EEAA100900000000000000C9 /* BrewFeatureDiscover */,
 				EEAA100A00000000000000CA /* BrewAppEnvironment */,
 				EEAA100B00000000000000CB /* BrewFeatureDoctor */,
+				EEAA100C00000000000000CC /* BrewFeatureConfig */,
 			);
 			productName = Brew;
 			productReference = EEC39EBF2F5AB4B900269514 /* Brew.app */;
@@ -710,6 +713,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewFeatureDoctor;
+		};
+		EEAA100C00000000000000CC /* BrewFeatureConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewFeatureConfig;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
