@@ -178,6 +178,18 @@ final class ConfigViewModel {
         draft.value(forKey: key) ?? ""
     }
 
+    /// Advisory for the current `HOMEBREW_CASK_OPTS` draft value — `nil` when the value is empty or
+    /// every token is recognised and safe. The view renders this beneath the field so the user can see
+    /// "you pasted `--no-quarantine`, here's what that means" without us having to block the save.
+    func caskOptsAdvisory() -> CaskOptsAdvisory? {
+        let raw = draft.value(forKey: "HOMEBREW_CASK_OPTS") ?? ""
+        guard !raw.isEmpty else {
+            return nil
+        }
+        let advisory = CaskOpts.advisory(for: raw)
+        return advisory.isClean ? nil : advisory
+    }
+
     /// Discards pending edits, reverting `draft` to the loaded file.
     func revert() {
         guard let file = envFileState.value else {

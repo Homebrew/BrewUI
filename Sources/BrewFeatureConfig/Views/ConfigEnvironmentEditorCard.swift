@@ -103,7 +103,12 @@ private struct ConfigEnvironmentRow: View {
     private var valueColumn: some View {
         switch row.status {
         case let .editable(kind):
-            editableControl(for: kind)
+            VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
+                editableControl(for: kind)
+                if row.key == "HOMEBREW_CASK_OPTS", let advisory = viewModel.caskOptsAdvisory() {
+                    caskOptsAdvisoryView(advisory)
+                }
+            }
         case let .readOnlyShellOverridden(rcHint):
             readOnlyValue(badge: "set by your shell", hint: "Remove the export from \(rcHint) to edit here.")
         case .readOnlyInstallTime:
@@ -111,6 +116,34 @@ private struct ConfigEnvironmentRow: View {
                 badge: "fixed at install",
                 hint: "Set by Homebrew at install time — can't be changed in brew.env.",
             )
+        }
+    }
+
+    @ViewBuilder
+    private func caskOptsAdvisoryView(_ advisory: CaskOptsAdvisory) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
+            if !advisory.unrecognisedFlags.isEmpty {
+                Text("Unrecognised flags — review your paste: \(advisory.unrecognisedFlags.joined(separator: ", "))")
+                    .font(.brewCaption2.weight(.semibold))
+                    .foregroundStyle(Color.brewStatusWarning)
+                    .padding(.horizontal, BrewSpacing.xs)
+                    .padding(.vertical, BrewSpacing.xxs)
+                    .background(Color.brewStatusWarningSubtle)
+                    .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if advisory.hasNoQuarantine {
+                Text("`--no-quarantine` disables macOS Gatekeeper quarantine on downloaded casks. Only set this if you're sure.")
+                    .font(.brewCaption2)
+                    .foregroundStyle(Color.brewStatusError)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if advisory.hasForce {
+                Text("`--force` overrides several install-time safety checks. Only set this if you're sure.")
+                    .font(.brewCaption2)
+                    .foregroundStyle(Color.brewStatusError)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
