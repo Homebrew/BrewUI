@@ -288,6 +288,36 @@ struct ConfigViewModelEditingTests {
         #expect(viewModel.pendingDangerousCustomRow?.key == "HOMEBREW_CURL_PATH")
     }
 
+    @Test @MainActor func `addCustomRow trims surrounding whitespace from the key`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        let outcome = viewModel.addCustomRow(key: "  HOMEBREW_PASTED_KEY  ", value: "x")
+
+        #expect(outcome == .added)
+        #expect(viewModel.draft.value(forKey: "HOMEBREW_PASTED_KEY") == "x")
+    }
+
+    @Test @MainActor func `addCustomRow rejects the bare HOMEBREW_ prefix with no suffix`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        let outcome = viewModel.addCustomRow(key: "HOMEBREW_", value: "x")
+
+        #expect(outcome == .rejected)
+        #expect(!viewModel.isDirty)
+    }
+
+    @Test @MainActor func `addCustomRow rejects install-time keys`() async {
+        let (viewModel, _) = makeViewModel()
+        await viewModel.load()
+
+        let outcome = viewModel.addCustomRow(key: "HOMEBREW_PREFIX", value: "/somewhere")
+
+        #expect(outcome == .rejected)
+        #expect(!viewModel.isDirty)
+    }
+
     @Test @MainActor func `confirmPendingCustomRow commits the staged row to the draft`() async {
         let (viewModel, _) = makeViewModel()
         await viewModel.load()
