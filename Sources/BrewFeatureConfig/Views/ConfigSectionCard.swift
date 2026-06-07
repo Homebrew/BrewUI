@@ -15,15 +15,8 @@ struct ConfigSectionCard: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: section.title)
 
-            if section.rows.isEmpty {
-                Text(section.emptyMessage ?? "")
-                    .font(.brewCallout)
-                    .foregroundStyle(Color.brewTextTertiary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else {
-                ForEach(section.rows) { row in
-                    detailRow(label: row.label, value: row.value)
-                }
+            ForEach(section.rows) { row in
+                detailRow(label: row.label, value: row.value)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
