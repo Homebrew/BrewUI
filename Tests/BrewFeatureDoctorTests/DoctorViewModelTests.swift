@@ -92,7 +92,7 @@ struct DoctorViewModelTests {
         #expect(viewModel.issueItems.first?.title == "You have unlinked kegs in your Cellar.")
         #expect(viewModel.issueItems.first?.hasRunnableFix == true)
         #expect(viewModel.issueItems.last?.hasRunnableFix == false)
-        #expect(viewModel.selectedIssueID == 0)
+        #expect(viewModel.selectedIssueID == viewModel.issueItems.first?.id)
         #expect(viewModel.issueCountSubtitle == "2 issues found")
     }
 
@@ -113,8 +113,9 @@ struct DoctorViewModelTests {
 
     @Test func `setSelection changes the selected issue`() {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
-        viewModel.setSelection(1)
-        #expect(viewModel.selectedIssueID == 1)
+        let secondID = viewModel.issueItems[1].id
+        viewModel.setSelection(secondID)
+        #expect(viewModel.selectedIssueID == secondID)
         #expect(viewModel.selectedIssue?.title == "Some installed formulae are deprecated.")
     }
 
@@ -214,13 +215,15 @@ struct DoctorViewModelTests {
         let viewModel = Self.viewModel(repository: repository)
 
         await viewModel.load()
-        viewModel.setSelection(2)
-        #expect(viewModel.selectedIssueID == 2)
+        let thirdID = viewModel.issueItems[2].id
+        viewModel.setSelection(thirdID)
+        #expect(viewModel.selectedIssueID == thirdID)
 
-        repository.replace(report: DoctorReport(issues: [Self.minimal(.caution, "only-survivor")]))
+        let survivor = Self.minimal(.caution, "only-survivor")
+        repository.replace(report: DoctorReport(issues: [survivor]))
         await viewModel.load()
 
-        #expect(viewModel.selectedIssueID == 0)
+        #expect(viewModel.selectedIssueID == DoctorIssueItem.contentID(for: survivor))
     }
 
     @Test func `load preserves a still-valid selection`() async {
@@ -232,11 +235,31 @@ struct DoctorViewModelTests {
         let viewModel = Self.viewModel(repository: repository)
 
         await viewModel.load()
-        viewModel.setSelection(1)
+        let secondID = viewModel.issueItems[1].id
+        viewModel.setSelection(secondID)
 
         await viewModel.load()
 
-        #expect(viewModel.selectedIssueID == 1)
+        #expect(viewModel.selectedIssueID == secondID)
+    }
+
+    @Test func `load follows the selected issue when a different issue is removed`() async {
+        let first = Self.minimal(.caution, "first")
+        let middle = Self.minimal(.caution, "middle")
+        let last = Self.minimal(.caution, "last")
+        let repository = MutableDoctorRepository(report: DoctorReport(issues: [first, middle, last]))
+        let viewModel = Self.viewModel(repository: repository)
+
+        await viewModel.load()
+        let middleID = DoctorIssueItem.contentID(for: middle)
+        viewModel.setSelection(middleID)
+
+        // Resolve the first issue; "middle" shifts to index 0 but the selection should follow it.
+        repository.replace(report: DoctorReport(issues: [middle, last]))
+        await viewModel.load()
+
+        #expect(viewModel.selectedIssueID == middleID)
+        #expect(viewModel.selectedIssue?.title == "middle")
     }
 
     private static func minimal(_ severity: DoctorSeverity, _ title: String) -> DoctorIssue {

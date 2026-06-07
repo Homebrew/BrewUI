@@ -78,7 +78,7 @@ final class DoctorViewModel {
         guard case let .loaded(report) = state else {
             return []
         }
-        return report.issues.enumerated().map { DoctorIssueItem(id: $0.offset, issue: $0.element) }
+        return report.issues.map { DoctorIssueItem(issue: $0) }
     }
 
     var issueCountSubtitle: String {
@@ -116,15 +116,13 @@ final class DoctorViewModel {
         }
     }
 
-    /// O(1) lookup — the item id is the issue's offset within the loaded report.
+    /// Linear scan over `report.issues` keyed by the content id. `brew doctor` reports a handful of
+    /// issues at most and this only runs when the detail pane re-renders.
     var selectedIssue: DoctorIssueItem? {
-        guard let id = selectedIssueID,
-              case let .loaded(report) = state,
-              report.issues.indices.contains(id)
-        else {
+        guard let id = selectedIssueID, case let .loaded(report) = state else {
             return nil
         }
-        return DoctorIssueItem(id: id, issue: report.issues[id])
+        return report.issues.lazy.map(DoctorIssueItem.init(issue:)).first { $0.id == id }
     }
 
     func setSelection(_ id: Int?) {
@@ -155,16 +153,19 @@ final class DoctorViewModel {
         synchronizeSelectionWithLoadedReport()
     }
 
-    /// Validates ``selectedIssueID`` against the freshly-loaded report. Drops it if the issue is gone
-    /// (e.g. a fix resolved it) and defaults to the first issue when nothing is selected.
+    /// Validates ``selectedIssueID`` against the freshly-loaded report by content id, so selection
+    /// follows the same issue across reloads even when a different issue has been resolved and the
+    /// surviving issues have shifted position. Drops the selection if the issue is gone and defaults
+    /// to the first issue when nothing is selected.
     private func synchronizeSelectionWithLoadedReport() {
         guard case let .loaded(report) = state else {
             return
         }
-        if let selectedIssueID, report.issues.indices.contains(selectedIssueID) {
+        let ids = Set(report.issues.lazy.map(DoctorIssueItem.contentID(for:)))
+        if let selectedIssueID, ids.contains(selectedIssueID) {
             return
         }
-        selectedIssueID = report.issues.isEmpty ? nil : 0
+        selectedIssueID = report.issues.first.map(DoctorIssueItem.contentID(for:))
     }
 
     /// Submits the issue's suggested `brew` fix as a maintenance operation. Output streams in the bottom

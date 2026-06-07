@@ -260,7 +260,7 @@ struct DoctorDetailPlaceholder: View {
         )
         Group {
             if let issue = report.issues.first {
-                DoctorIssueDetailView(viewModel: viewModel, item: DoctorIssueItem(id: 0, issue: issue))
+                DoctorIssueDetailView(viewModel: viewModel, item: DoctorIssueItem(issue: issue))
             }
         }
         .frame(width: 380, height: 600)
