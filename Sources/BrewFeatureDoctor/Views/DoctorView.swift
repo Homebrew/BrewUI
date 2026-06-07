@@ -49,6 +49,7 @@ struct DoctorView: View {
         .padding(BrewSpacing.lg)
         .accessibilityElement(children: .contain)
         .accessibilityHeading(.h1)
+    }
 
     private var content: some View {
         AsyncContentView(
