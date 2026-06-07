@@ -135,6 +135,25 @@ struct DoctorViewModelTests {
         #expect(entries.first?.id == .maintenance(token: "brew cleanup", displayCommand: "brew cleanup"))
     }
 
+    @Test func `issueCountSubtitle uses the singular form for a single issue`() {
+        let report = DoctorReport(issues: [Self.minimal(.caution, "only one")])
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: report))
+        #expect(viewModel.issueCountSubtitle == "1 issue found")
+    }
+
+    @Test func `isFixRunning is false for an item without a runnable fix`() {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
+        // The deprecated-formulae issue (index 1) has no runnable block, so no fix token to track.
+        let nonRunnable = viewModel.issueItems[1]
+        #expect(nonRunnable.fixToken == nil)
+        #expect(viewModel.isFixRunning(nonRunnable) == false)
+    }
+
+    @Test func `fixError is nil for an item without a runnable fix`() {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
+        #expect(viewModel.fixError(viewModel.issueItems[1]) == nil)
+    }
+
     @Test func `runFix surfaces an inline error when the fix fails`() async {
         let center = Self.recordingCenter(cleanupExitCode: 1, stderr: "could not clean")
         let viewModel = Self.viewModel(
