@@ -41,12 +41,6 @@ final class DoctorViewModel {
         self.commandFactory = commandFactory
     }
 
-    isolated deinit {
-        for task in fixTasks.values {
-            task.cancel()
-        }
-    }
-
     // MARK: - Derived state (projected from the repository)
 
     /// View-friendly mapping of the repository's load state with the failure mapped to user-facing copy.
@@ -197,7 +191,8 @@ final class DoctorViewModel {
         fixErrorMessages[token] = nil
         runningFixTokens.insert(token)
         fixTasks[token]?.cancel()
-        fixTasks[token] = Task { @MainActor [self] in
+        fixTasks[token] = Task { @MainActor [weak self] in
+            guard let self else { return }
             do {
                 try await brewCommandCenter.submit(id: operationID, command: command)
             } catch {
