@@ -59,6 +59,11 @@ struct DoctorIssueItem: Identifiable, Equatable {
     var fixToken: String? {
         primaryRunnableStep?.displayCommand
     }
+
+    /// Label for voiceover mode — combines title with Fix available
+    var accessibilityLabel: String {
+        hasRunnableFix ? "\(title), Fix available" : title
+    }
 }
 
 /// One severity-keyed bucket of issues for the list, ordered most-severe first.

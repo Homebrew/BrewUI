@@ -32,6 +32,6 @@ struct DoctorIssueRowView: View {
         .padding(.vertical, BrewSpacing.xs)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(item.title)
+        .accessibilityLabel(item.accessibilityLabel)
     }
 }
