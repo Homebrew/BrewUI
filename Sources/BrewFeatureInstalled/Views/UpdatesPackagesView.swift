@@ -17,23 +17,22 @@ struct UpdatesPackagesView: View {
         VStack(alignment: .leading, spacing: 0) {
             header
 
-            switch viewModel.state {
-            case .loading:
-                loadingSkeletonList
-            case let .error(message):
-                errorView(message)
-            case let .loaded(content):
-                if content.packages.isEmpty {
-                    if viewModel.totalOutdatedCount > 0 {
-                        noSearchMatchesState
+            AsyncContentView(
+                state: viewModel.state,
+                onRetry: { Task { await viewModel.refresh() } },
+                loaded: { content in
+                    if content.packages.isEmpty {
+                        if viewModel.totalOutdatedCount > 0 {
+                            noSearchMatchesState
+                        } else {
+                            allCaughtUpState
+                        }
                     } else {
-                        allCaughtUpState
+                        updatesList(content)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
-                } else {
-                    updatesList(content)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                }
-            }
+                },
+            )
         }
         .searchable(
             text: $viewModel.searchQuery,
@@ -224,50 +223,6 @@ struct UpdatesPackagesView: View {
             localized: "\(hidden) outdated packages are hidden by the current search.",
             comment: "Updates search-empty state with multiple hidden outdated packages",
         )
-    }
-
-    private var loadingSkeletonList: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                InstalledSectionHeader(title: "Formulae", count: 2)
-                ForEach(loadingFormulaeRows) { package in
-                    InstalledListRowRoot(package: package)
-                }
-            }
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.xl)
-        }
-        .redacted(reason: .placeholder)
-        .allowsHitTesting(false)
-        .accessibilityLabel("Loading available updates")
-    }
-
-    private var loadingFormulaeRows: [InstalledBrewPackage] {
-        Array(repeating: Self.loadingPlaceholder, count: 2)
-    }
-
-    private static let loadingPlaceholder = InstalledBrewPackage(
-        package: BrewPackage(
-            name: "Placeholder Formula",
-            displayName: "Placeholder Formula",
-            kind: .formula,
-            description: "Placeholder description text for loading row.",
-            homepage: "",
-            latestVersion: "0.0.0",
-            dependencies: [],
-        ),
-        installedVersions: ["0.0.0"],
-        outdated: true,
-    )
-
-    private func errorView(_ message: String) -> some View {
-        Text(message)
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewStatusError)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.sm)
-            .accessibilityLabel(message)
     }
 }
 

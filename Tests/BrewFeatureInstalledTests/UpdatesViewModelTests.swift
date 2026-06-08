@@ -138,7 +138,7 @@ struct UpdatesViewModelTests {
             commandFactory: StubMutatingCommandFactory(),
         )
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }

@@ -30,12 +30,12 @@ final class UpdatesViewModel {
 
     private var runningIDs: Set<BrewOperationID> = []
 
-    var state: InstalledLoadState {
+    var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
             .loading
         case let .failed(error):
-            .error(Self.userMessage(for: error))
+            .failed(Self.userMessage(for: error))
         case let .loaded(packages):
             .loaded(
                 Self.filteredContent(

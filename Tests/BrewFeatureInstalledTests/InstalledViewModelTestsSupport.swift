@@ -16,7 +16,7 @@ import Testing
 // MARK: - Snapshots (one logical assertion per load test)
 
 struct VMStateSnapshot: Equatable {
-    var state: InstalledLoadState
+    var state: LoadState<InstalledPackagesContent, String>
     var formulaPackages: [InstalledBrewPackage]
     var caskPackages: [InstalledBrewPackage]
     var selectedPackageID: InstalledBrewPackage.ID?
@@ -25,7 +25,7 @@ struct VMStateSnapshot: Equatable {
     /// Rows cleared, load finished, after a failed `load()`.
     static func emptyAfterLoad(userFacingError: String) -> VMStateSnapshot {
         VMStateSnapshot(
-            state: .error(userFacingError),
+            state: .failed(userFacingError),
             formulaPackages: [],
             caskPackages: [],
             selectedPackageID: nil,

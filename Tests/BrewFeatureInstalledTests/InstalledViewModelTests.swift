@@ -174,7 +174,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }
@@ -186,7 +186,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }
@@ -202,7 +202,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }
@@ -214,7 +214,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }

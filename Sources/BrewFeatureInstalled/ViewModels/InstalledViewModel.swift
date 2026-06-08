@@ -29,19 +29,6 @@ struct InstalledPackagesContent: Equatable {
     }
 }
 
-enum InstalledLoadState: Equatable {
-    case loading
-    case loaded(InstalledPackagesContent)
-    case error(String)
-
-    var isLoaded: Bool {
-        if case .loaded = self {
-            return true
-        }
-        return false
-    }
-}
-
 @Observable
 @MainActor
 final class InstalledViewModel {
@@ -60,12 +47,12 @@ final class InstalledViewModel {
 
     /// Projects the shared repository's inventory through the active search query. The repository is the
     /// single source of truth; this view model owns only screen-local search and selection state.
-    var state: InstalledLoadState {
+    var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
             .loading
         case let .failed(error):
-            .error(Self.userMessage(for: error))
+            .failed(Self.userMessage(for: error))
         case let .loaded(packages):
             .loaded(Self.filteredContent(InstalledPackagesContent(packages: packages), query: searchQuery))
         }
