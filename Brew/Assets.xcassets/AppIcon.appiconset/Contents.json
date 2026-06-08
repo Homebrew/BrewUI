@@ -1,58 +1,68 @@
 {
-  "images" : [
+  "images": [
     {
-      "idiom" : "mac",
-      "scale" : "1x",
-      "size" : "16x16"
+      "idiom": "mac",
+      "size": "16x16",
+      "scale": "1x",
+      "filename": "icon_16.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "16x16"
+      "idiom": "mac",
+      "size": "16x16",
+      "scale": "2x",
+      "filename": "icon_32.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "1x",
-      "size" : "32x32"
+      "idiom": "mac",
+      "size": "32x32",
+      "scale": "1x",
+      "filename": "icon_32.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "32x32"
+      "idiom": "mac",
+      "size": "32x32",
+      "scale": "2x",
+      "filename": "icon_64.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "1x",
-      "size" : "128x128"
+      "idiom": "mac",
+      "size": "128x128",
+      "scale": "1x",
+      "filename": "icon_128.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "128x128"
+      "idiom": "mac",
+      "size": "128x128",
+      "scale": "2x",
+      "filename": "icon_256.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "1x",
-      "size" : "256x256"
+      "idiom": "mac",
+      "size": "256x256",
+      "scale": "1x",
+      "filename": "icon_256.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "256x256"
+      "idiom": "mac",
+      "size": "256x256",
+      "scale": "2x",
+      "filename": "icon_512.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "1x",
-      "size" : "512x512"
+      "idiom": "mac",
+      "size": "512x512",
+      "scale": "1x",
+      "filename": "icon_512.png"
     },
     {
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "512x512"
+      "idiom": "mac",
+      "size": "512x512",
+      "scale": "2x",
+      "filename": "icon_1024.png"
     }
   ],
-  "info" : {
-    "author" : "xcode",
-    "version" : 1
+  "info": {
+    "version": 1,
+    "author": "xcode"
   }
 }
