@@ -86,6 +86,27 @@ struct UpdatesViewModelTests {
         #expect(many.outdatedSubtitle == "2 packages can be upgraded")
     }
 
+    @Test @MainActor func `outdatedSubtitle switches to Showing N of M while searching`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        vm.searchQuery = "git"
+
+        #expect(vm.outdatedSubtitle == "Showing 1 of 2 updates")
+    }
+
+    @Test @MainActor func `outdatedSubtitle calls out hidden updates when search matches nothing`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        vm.searchQuery = "zzz-no-match"
+        #expect(vm.outdatedSubtitle == "No matches in 2 outdated packages")
+
+        let single = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: true),
+        ])
+        single.searchQuery = "zzz"
+        #expect(single.outdatedSubtitle == "No matches in 1 outdated package")
+    }
+
     @Test @MainActor func `load failure surfaces user facing brew stderr`() {
         let repository = StubInstalledPackagesRepository(
             state: .failed(BrewCommandError.failed(exitCode: 1, stderr: "formula conflict")),

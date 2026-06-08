@@ -79,28 +79,58 @@ final class UpdatesViewModel {
         return false
     }
 
-    /// Subtitle for the Updates header and the window chrome.
+    /// Subtitle for the Updates header and the window chrome. Reflects the
+    /// unfiltered inventory when no search is active, and "Showing N of M" /
+    /// "No matches in M outdated packages" once a query narrows the list.
     var outdatedSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Updates tab subtitle while fetching")
         }
-        switch outdatedCount {
+        if isSearchActive {
+            return searchActiveSubtitle
+        }
+        return inventorySubtitle
+    }
+
+    private var inventorySubtitle: String {
+        switch totalOutdatedCount {
         case 0:
-            return String(
+            String(
                 localized: "All packages are up to date",
                 comment: "Updates tab subtitle when nothing is outdated",
             )
         case 1:
-            return String(
+            String(
                 localized: "1 package can be upgraded",
                 comment: "Updates tab subtitle for a single outdated package",
             )
         default:
-            return String(
-                localized: "\(outdatedCount) packages can be upgraded",
+            String(
+                localized: "\(totalOutdatedCount) packages can be upgraded",
                 comment: "Updates tab subtitle when multiple packages are outdated",
             )
         }
+    }
+
+    private var searchActiveSubtitle: String {
+        let total = totalOutdatedCount
+        let visible = outdatedCount
+        if visible > 0 {
+            return String(
+                localized: "Showing \(visible) of \(total) updates",
+                comment: "Updates tab subtitle while searching with at least one match",
+            )
+        }
+        if total == 1 {
+            return String(
+                localized: "No matches in 1 outdated package",
+                comment: "Updates tab subtitle when search hides the single available update",
+            )
+        }
+        return String(
+            localized: "No matches in \(total) outdated packages",
+            comment: "Updates tab subtitle when search hides every available update",
+        )
     }
 
     var selectedPackage: InstalledBrewPackage? {
