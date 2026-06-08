@@ -21,10 +21,13 @@ struct ConfigEnvironmentEditorCard: View {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
             PackageDetailSectionHeading(title: "Environment (HOMEBREW_*)")
 
-            Text("These settings live in `~/.homebrew/brew.env` and apply to every `brew` invocation, including in your terminal.")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+            Text("""
+            These settings live in `~/.homebrew/brew.env` and apply to every \
+            `brew` invocation, including in your terminal.
+            """)
+            .font(.brewCaption)
+            .foregroundStyle(Color.brewTextSecondary)
+            .fixedSize(horizontal: false, vertical: true)
 
             if let saveError = viewModel.saveError {
                 saveErrorBanner(saveError)
@@ -37,7 +40,7 @@ struct ConfigEnvironmentEditorCard: View {
             Divider()
                 .overlay(Color.brewBorderSeparator)
 
-            ConfigCustomRowAffordance(viewModel: viewModel)
+            ConfigAdvancedSection(viewModel: viewModel, envFile: envFile)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BrewSpacing.lg)
@@ -119,7 +122,6 @@ private struct ConfigEnvironmentRow: View {
         }
     }
 
-    @ViewBuilder
     private func caskOptsAdvisoryView(_ advisory: CaskOptsAdvisory) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
             if !advisory.unrecognisedFlags.isEmpty {
@@ -133,10 +135,13 @@ private struct ConfigEnvironmentRow: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             if advisory.hasNoQuarantine {
-                Text("`--no-quarantine` disables macOS Gatekeeper quarantine on downloaded casks. Only set this if you're sure.")
-                    .font(.brewCaption2)
-                    .foregroundStyle(Color.brewStatusError)
-                    .fixedSize(horizontal: false, vertical: true)
+                Text("""
+                `--no-quarantine` disables macOS Gatekeeper quarantine on downloaded casks. \
+                Only set this if you're sure.
+                """)
+                .font(.brewCaption2)
+                .foregroundStyle(Color.brewStatusError)
+                .fixedSize(horizontal: false, vertical: true)
             }
             if advisory.hasForce {
                 Text("`--force` overrides several install-time safety checks. Only set this if you're sure.")
@@ -190,6 +195,7 @@ private struct ConfigEnvironmentRow: View {
     }
 
     // MARK: - Bindings
+
     // Thin wrappers around `ConfigViewModel` sinks/sources. The conditional remove-vs-set rules and
     // the integer digit-filter/clamp live in the VM so they can be unit-tested without spinning up a
     // SwiftUI view tree.
@@ -246,11 +252,14 @@ private struct SecretField: View {
     }
 }
 
-/// Inline form for adding a custom `HOMEBREW_*` row. Lives behind a disclosure so that the curated
-/// allowlist stays the obvious surface, and gates classification-flagged keys through a confirmation
-/// banner before they land in the draft.
-private struct ConfigCustomRowAffordance: View {
+/// Advanced disclosure: holds the curated rows that weaken default brew safety
+/// (`HOMEBREW_NO_INSTALL_UPGRADE`, `HOMEBREW_CASK_OPTS`) and an inline form for adding any other
+/// `HOMEBREW_*` variable. Hidden by default so the everyday allowlist stays the obvious surface;
+/// classification-flagged custom keys still pass through the confirmation banner before they land
+/// in the draft.
+private struct ConfigAdvancedSection: View {
     @Bindable var viewModel: ConfigViewModel
+    let envFile: BrewEnvFile
     @State private var keyDraft: String = "HOMEBREW_"
     @State private var valueDraft: String = ""
     @State private var rejectionMessage: String?
@@ -258,35 +267,48 @@ private struct ConfigCustomRowAffordance: View {
 
     var body: some View {
         DisclosureGroup(isExpanded: $isExpanded) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("These take effect on every `brew` invocation. Wrong values can route downloads to other servers or run a different `git`/`curl`. Only paste from sources you trust.")
+            VStack(alignment: .leading, spacing: BrewSpacing.md) {
+                ForEach(viewModel.advancedEnvRows(envFile: envFile)) { row in
+                    ConfigEnvironmentRow(row: row, viewModel: viewModel)
+                }
+
+                Divider()
+                    .overlay(Color.brewBorderSeparator)
+
+                VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                    Text("""
+                    Set any other HOMEBREW_* variable. These take effect on every `brew` invocation. \
+                    Wrong values can route downloads to other servers or run a different `git`/`curl`. \
+                    Only paste from sources you trust.
+                    """)
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: BrewSpacing.sm) {
-                    TextField("HOMEBREW_KEY", text: $keyDraft)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.brewCode)
-                        .frame(maxWidth: 260)
-                    TextField("value", text: $valueDraft)
-                        .textFieldStyle(.roundedBorder)
-                        .font(.brewCode)
-                        .frame(maxWidth: .infinity)
-                    Button("Add", action: addRow)
-                        .disabled(!isAddable)
-                }
-                if let pending = viewModel.pendingDangerousCustomRow {
-                    pendingDangerousBanner(pending)
-                }
-                if let rejectionMessage {
-                    Text(rejectionMessage)
-                        .font(.brewCaption2)
-                        .foregroundStyle(Color.brewStatusError)
+                    HStack(spacing: BrewSpacing.sm) {
+                        TextField("HOMEBREW_KEY", text: $keyDraft)
+                            .textFieldStyle(.roundedBorder)
+                            .font(.brewCode)
+                            .frame(maxWidth: 260)
+                        TextField("value", text: $valueDraft)
+                            .textFieldStyle(.roundedBorder)
+                            .font(.brewCode)
+                            .frame(maxWidth: .infinity)
+                        Button("Add", action: addRow)
+                            .disabled(!isAddable)
+                    }
+                    if let pending = viewModel.pendingDangerousCustomRow {
+                        pendingDangerousBanner(pending)
+                    }
+                    if let rejectionMessage {
+                        Text(rejectionMessage)
+                            .font(.brewCaption2)
+                            .foregroundStyle(Color.brewStatusError)
+                    }
                 }
             }
             .padding(.top, BrewSpacing.xs)
         } label: {
-            Text("Advanced — set any HOMEBREW_* variable")
+            Text("Advanced")
                 .font(.brewCaption.weight(.semibold))
                 .foregroundStyle(Color.brewTextSecondary)
         }

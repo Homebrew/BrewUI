@@ -20,6 +20,10 @@ struct EnvKeyDescriptor: Equatable, Identifiable {
     let label: String
     let summary: String
     let kind: Kind
+    /// `true` for rows that change a default safety behaviour (link against older deps, disable
+    /// quarantine, etc.). The editor tucks these behind the Advanced disclosure so the everyday
+    /// allowlist stays the obvious surface.
+    var isAdvanced: Bool = false
 
     var id: String {
         key
@@ -57,8 +61,11 @@ enum EnvKeyCatalogue {
         EnvKeyDescriptor(
             key: "HOMEBREW_NO_INSTALL_UPGRADE",
             label: "Disable install-time upgrades",
-            summary: "Stops `brew install` from upgrading already-installed dependencies. Can leave new formulae linked against older libraries — only enable if you know why you need it.",
+            summary: "Stops `brew install` from upgrading already-installed dependencies. "
+                + "Can leave new formulae linked against older libraries — "
+                + "only enable if you know why you need it.",
             kind: .toggle,
+            isAdvanced: true,
         ),
         EnvKeyDescriptor(
             key: "HOMEBREW_DOWNLOAD_CONCURRENCY",
@@ -75,8 +82,10 @@ enum EnvKeyCatalogue {
         EnvKeyDescriptor(
             key: "HOMEBREW_CASK_OPTS",
             label: "Cask options",
-            summary: "Default flags appended to every `brew install --cask` invocation.",
+            summary: "Default flags appended to every `brew install --cask` invocation. "
+                + "`--no-quarantine` and `--force` weaken install-time safety checks.",
             kind: .string,
+            isAdvanced: true,
         ),
         EnvKeyDescriptor(
             key: "HOMEBREW_FORBID_PACKAGES_FROM_PATHS",
@@ -119,20 +128,33 @@ enum EnvKeyCatalogue {
             return .dangerous(reason: reason)
         }
         if key.hasSuffix("_DOMAIN") {
-            return .dangerous(reason: "Redirects a Homebrew download to the URL you set. Only paste a host you trust — a wrong or malicious value can route every download somewhere else.")
+            return .dangerous(
+                reason: "Redirects a Homebrew download to the URL you set. "
+                    + "Only paste a host you trust — a wrong or malicious value can route "
+                    + "every download somewhere else.",
+            )
         }
         if key.hasSuffix("_PATH") {
-            return .dangerous(reason: "Points brew at an alternate binary at the path you set. Every brew invocation will execute it — only set this if the path is one you control.")
+            return .dangerous(
+                reason: "Points brew at an alternate binary at the path you set. "
+                    + "Every brew invocation will execute it — only set this if the path is one you control.",
+            )
         }
         return .safe
     }
 
     private static let explicitDangerousCustomKeys: [String: String] = [
-        "HOMEBREW_BOTTLE_DOMAIN": "Redirects bottle downloads to the URL you set. Only paste a host you trust.",
-        "HOMEBREW_ARTIFACT_DOMAIN": "Redirects artifact downloads to the URL you set. Only paste a host you trust.",
-        "HOMEBREW_API_DOMAIN": "Redirects the Homebrew formulae JSON API to the URL you set. Only paste a host you trust.",
-        "HOMEBREW_DEVELOPER": "Turns on Homebrew developer mode globally — exposes experimental commands and stricter warnings.",
-        "HOMEBREW_SUDO_THROUGH_SUDO_USER": "Changes how brew elevates privileges. Set only if you know why you need it.",
+        "HOMEBREW_BOTTLE_DOMAIN":
+            "Redirects bottle downloads to the URL you set. Only paste a host you trust.",
+        "HOMEBREW_ARTIFACT_DOMAIN":
+            "Redirects artifact downloads to the URL you set. Only paste a host you trust.",
+        "HOMEBREW_API_DOMAIN":
+            "Redirects the Homebrew formulae JSON API to the URL you set. Only paste a host you trust.",
+        "HOMEBREW_DEVELOPER":
+            "Turns on Homebrew developer mode globally — "
+            + "exposes experimental commands and stricter warnings.",
+        "HOMEBREW_SUDO_THROUGH_SUDO_USER":
+            "Changes how brew elevates privileges. Set only if you know why you need it.",
     ]
 }
 

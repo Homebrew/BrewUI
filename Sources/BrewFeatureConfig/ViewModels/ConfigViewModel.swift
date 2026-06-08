@@ -63,13 +63,13 @@ final class ConfigViewModel {
     var pageState: LoadState<ConfigPagePayload, String> {
         switch (state, envFileState) {
         case let (.loaded(snapshot), .loaded(envFile)):
-            return .loaded(ConfigPagePayload(snapshot: snapshot, envFile: envFile))
+            .loaded(ConfigPagePayload(snapshot: snapshot, envFile: envFile))
         case let (.failed(error), _):
-            return .failed(userMessage(for: error))
+            .failed(userMessage(for: error))
         case let (_, .failed(error)):
-            return .failed(userMessage(for: error))
+            .failed(userMessage(for: error))
         default:
-            return .loading
+            .loading
         }
     }
 
@@ -262,16 +262,39 @@ final class ConfigViewModel {
         draft = file
     }
 
-    // MARK: - Editor rows
+    /// Maps any repository error to the user-facing copy shown in the AsyncContentView's error state.
+    func userMessage(for error: any Error) -> String {
+        if case let BrewCommandError.failed(_, stderr) = error {
+            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
+                return trimmed
+            }
+        }
+        return String(
+            localized: "Couldn't read the Homebrew configuration.",
+            comment: "Configuration tab, generic load failure",
+        )
+    }
 
-    /// Rows the editor renders, in display order: curated allowlist, install-time read-only set, then
-    /// any custom rows present in the draft. Takes the loaded `brew.env` so callers (typically
-    /// `AsyncContentView`) can pass placeholder content for the redacted loading state.
+    // The read-only Configuration card surface (`sections`, `copyReport`, `errorMessage`, etc.) lives in
+    // `ConfigViewModel+Sections.swift`. The Environment editor row helpers (`envRows`,
+    // `advancedEnvRows`) live in the extension below.
+}
+
+// MARK: - Editor rows
+
+extension ConfigViewModel {
+    /// Rows the always-visible editor renders, in display order: the everyday allowlist,
+    /// install-time read-only, then any custom rows present in the draft. Advanced allowlist rows
+    /// (the ones that weaken default safety) are excluded — they live behind the Advanced
+    /// disclosure and come from ``advancedEnvRows(envFile:)``. Takes the loaded `brew.env` so
+    /// callers (typically `AsyncContentView`) can pass placeholder content for the redacted
+    /// loading state.
     func envRows(envFile: BrewEnvFile) -> [EnvRowItem] {
         var rows: [EnvRowItem] = []
         var emitted: Set<String> = []
 
-        for descriptor in EnvKeyCatalogue.editable {
+        for descriptor in EnvKeyCatalogue.editable where !descriptor.isAdvanced {
             rows.append(row(for: descriptor.key, descriptor: descriptor, envFile: envFile))
             emitted.insert(descriptor.key)
         }
@@ -280,6 +303,12 @@ final class ConfigViewModel {
         for key in EnvKeyCatalogue.installTimeOnly.sorted() {
             rows.append(installTimeRow(forKey: key))
             emitted.insert(key)
+        }
+
+        // Reserve the advanced keys so a set value on disk doesn't reappear here as a custom row —
+        // they belong to ``advancedEnvRows`` instead.
+        for descriptor in EnvKeyCatalogue.editable where descriptor.isAdvanced {
+            emitted.insert(descriptor.key)
         }
 
         // Custom rows already in the draft.
@@ -291,6 +320,19 @@ final class ConfigViewModel {
         }
 
         return rows
+    }
+
+    /// Rows that live behind the Advanced disclosure: curated keys that weaken default brew
+    /// safety. Same row shape as ``envRows(envFile:)`` so the view renders them with the shared
+    /// row component.
+    func advancedEnvRows(envFile: BrewEnvFile) -> [EnvRowItem] {
+        EnvKeyCatalogue.editable
+            .filter(\.isAdvanced)
+            .map { row(for: $0.key, descriptor: $0, envFile: envFile) }
+    }
+
+    private func isShellOverridden(key: String) -> Bool {
+        processEnvironment[key] != nil
     }
 
     private func row(for key: String, descriptor: EnvKeyDescriptor, envFile: BrewEnvFile) -> EnvRowItem {
@@ -356,29 +398,14 @@ final class ConfigViewModel {
         )
     }
 
-    private func isShellOverridden(key: String) -> Bool {
-        processEnvironment[key] != nil
-    }
-
-    /// Maps any repository error to the user-facing copy shown in the AsyncContentView's error state.
-    func userMessage(for error: any Error) -> String {
-        if case let BrewCommandError.failed(_, stderr) = error {
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-        }
-        return String(
-            localized: "Couldn't read the Homebrew configuration.",
-            comment: "Configuration tab, generic load failure",
-        )
-    }
-
     /// Best-effort hint about which shell rc the user would edit to remove an override. The editor
     /// surfaces this in the read-only badge copy so the user knows where to look next.
     private func shellRcHint() -> String {
         guard let shellPath = processEnvironment["SHELL"] else {
-            return String(localized: "your shell config", comment: "Configuration tab, generic shell rc fallback")
+            return String(
+                localized: "your shell config",
+                comment: "Configuration tab, generic shell rc fallback",
+            )
         }
         let shellName = (shellPath as NSString).lastPathComponent
         switch shellName {
@@ -389,11 +416,10 @@ final class ConfigViewModel {
         case "fish":
             return "~/.config/fish/config.fish"
         default:
-            return String(localized: "your shell config", comment: "Configuration tab, generic shell rc fallback")
+            return String(
+                localized: "your shell config",
+                comment: "Configuration tab, generic shell rc fallback",
+            )
         }
     }
-
-    // MARK: - Presentation
-    // The read-only Configuration card surface (`sections`, `copyReport`, `errorMessage`, etc.) lives in
-    // `ConfigViewModel+Sections.swift` to keep this type focused on the editing model.
 }
