@@ -106,8 +106,16 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the shared repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: any InstalledInventoryObserving) {
+    /// `initialSelection` seeds `selectedPackageID` for deep links (e.g. cross-tab navigation from a
+    /// "Used by" tap). It's intentionally not gated on `allRows` — when the repo is still loading, the
+    /// existing `activeSelectedPackageID` fallback returns nil, and once the inventory lands the
+    /// candidate resolves naturally via observation-driven re-render.
+    init(
+        repository: any InstalledInventoryObserving,
+        initialSelection: InstalledBrewPackage.ID? = nil,
+    ) {
         self.repository = repository
+        selectedPackageID = initialSelection
     }
 
     func load() async {
