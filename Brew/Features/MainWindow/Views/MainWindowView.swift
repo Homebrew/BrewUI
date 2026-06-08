@@ -61,9 +61,9 @@ struct MainWindowView: View {
             InstalledColumnsRoot(deepLinkSelection: $pendingInstalledSelection)
                 .navigationTitle("Installed")
                 .navigationSubtitle("Browse or search your installed packages")
-        case .updates:
-            UpdatesColumnsRoot()
-                .navigationTitle("Updates")
+        case .upgrades:
+            UpgradesColumnsRoot()
+                .navigationTitle("Upgrades")
                 .navigationSubtitle("Review and upgrade outdated packages")
         case .discover:
             DiscoverColumnsRoot()

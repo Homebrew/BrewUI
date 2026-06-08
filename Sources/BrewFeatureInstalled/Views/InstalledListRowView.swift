@@ -116,11 +116,11 @@ struct InstalledListRowView: View {
     }
 
     private func statusIconName(viewModel: InstalledListRowViewModel) -> String {
-        viewModel.showsUpdateAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+        viewModel.showsUpgradeAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
     }
 
     private func statusIconColor(viewModel: InstalledListRowViewModel) -> Color {
-        viewModel.showsUpdateAvailable ? .brewStatusWarning : .brewStatusSuccess
+        viewModel.showsUpgradeAvailable ? .brewStatusWarning : .brewStatusSuccess
     }
 
     @ViewBuilder
@@ -179,7 +179,7 @@ struct InstalledSectionHeader: View {
 
 #if DEBUG
 
-    #Preview("Formula with update") {
+    #Preview("Formula with upgrade") {
         InstalledListRowView(
             package: PreviewSupport.outdatedFormula,
             brewCommandCenter: PreviewSupport.commandCenter,

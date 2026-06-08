@@ -14,7 +14,7 @@ public extension InstalledInventoryObserving {
         (state.value ?? []).filter(\.outdated)
     }
 
-    /// Count for the sidebar badge / Updates subtitle.
+    /// Count for the sidebar badge / Upgrades subtitle.
     var outdatedCount: Int {
         outdatedPackages.count
     }

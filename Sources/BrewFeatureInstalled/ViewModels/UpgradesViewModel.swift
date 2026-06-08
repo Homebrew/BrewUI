@@ -1,5 +1,5 @@
 //
-//  UpdatesViewModel.swift
+//  UpgradesViewModel.swift
 //  BrewFeatureInstalled
 //
 
@@ -11,7 +11,7 @@ import Observation
 
 @Observable
 @MainActor
-final class UpdatesViewModel {
+final class UpgradesViewModel {
     @ObservationIgnored private let repository: any InstalledInventoryObserving
     @ObservationIgnored private let brewCommandCenter: any BrewCommandCenter
     @ObservationIgnored private let commandFactory: any BrewMutatingCommandFactory
@@ -66,7 +66,7 @@ final class UpdatesViewModel {
 
     /// Outdated count from the underlying inventory, ignoring the active search.
     /// Lets the empty state distinguish "truly nothing to upgrade" from
-    /// "nothing matched the search, but updates exist".
+    /// "nothing matched the search, but upgrades exist".
     var totalOutdatedCount: Int {
         repository.outdatedCount
     }
@@ -79,13 +79,13 @@ final class UpdatesViewModel {
         return false
     }
 
-    /// Subtitle for the in-page Updates header. Reflects the unfiltered
+    /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
     /// inventory when no search is active, and "Showing N of M" / "No matches
     /// in M outdated packages" once a query narrows the list. The window-chrome
     /// subtitle is a static tab description owned by `MainWindowView`.
     var outdatedSubtitle: String {
         if shouldShowInitialLoadingIndicator {
-            return String(localized: "Loading packages…", comment: "Updates tab subtitle while fetching")
+            return String(localized: "Loading packages…", comment: "Upgrades tab subtitle while fetching")
         }
         if isSearchActive {
             return searchActiveSubtitle
@@ -98,17 +98,17 @@ final class UpdatesViewModel {
         case 0:
             String(
                 localized: "All packages are up to date",
-                comment: "Updates tab subtitle when nothing is outdated",
+                comment: "Upgrades tab subtitle when nothing is outdated",
             )
         case 1:
             String(
                 localized: "1 package can be upgraded",
-                comment: "Updates tab subtitle for a single outdated package",
+                comment: "Upgrades tab subtitle for a single outdated package",
             )
         default:
             String(
                 localized: "\(totalOutdatedCount) packages can be upgraded",
-                comment: "Updates tab subtitle when multiple packages are outdated",
+                comment: "Upgrades tab subtitle when multiple packages are outdated",
             )
         }
     }
@@ -118,19 +118,19 @@ final class UpdatesViewModel {
         let visible = outdatedCount
         if visible > 0 {
             return String(
-                localized: "Showing \(visible) of \(total) updates",
-                comment: "Updates tab subtitle while searching with at least one match",
+                localized: "Showing \(visible) of \(total) upgrades",
+                comment: "Upgrades tab subtitle while searching with at least one match",
             )
         }
         if total == 1 {
             return String(
                 localized: "No matches in 1 outdated package",
-                comment: "Updates tab subtitle when search hides the single available update",
+                comment: "Upgrades tab subtitle when search hides the single available upgrade",
             )
         }
         return String(
             localized: "No matches in \(total) outdated packages",
-            comment: "Updates tab subtitle when search hides every available update",
+            comment: "Upgrades tab subtitle when search hides every available upgrade",
         )
     }
 
@@ -140,7 +140,7 @@ final class UpdatesViewModel {
 
     /// True while at least one upgrade kicked off from this VM is still running.
     /// Submit is coalescing-safe (`SerialBrewCommandCenter` dedupes in-flight IDs),
-    /// so this drives the *Update All* button's disabled state, not correctness.
+    /// so this drives the *Upgrade All* button's disabled state, not correctness.
     var isUpgradingAny: Bool {
         !runningIDs.isEmpty
     }
@@ -300,18 +300,18 @@ final class UpdatesViewModel {
         case BrewLookupError.executableNotFound:
             return String(
                 localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Updates tab error when brew binary missing",
+                comment: "Upgrades tab error when brew binary missing",
             )
         case let BrewCommandError.failed(_, stderr):
             let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 return trimmed
             }
-            return String(localized: "Homebrew command failed.", comment: "Updates tab error generic brew failure")
+            return String(localized: "Homebrew command failed.", comment: "Upgrades tab error generic brew failure")
         case let BrewCommandError.launchFailed(underlying):
             return underlying
         default:
-            return String(localized: "Something went wrong loading packages.", comment: "Updates tab generic error")
+            return String(localized: "Something went wrong loading packages.", comment: "Upgrades tab generic error")
         }
     }
 }

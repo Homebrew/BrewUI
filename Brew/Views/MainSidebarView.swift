@@ -10,7 +10,7 @@ import SwiftUI
 /// Primary navigation items for the main window sidebar.
 enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     case installed
-    case updates
+    case upgrades
     case discover
     case doctor
     case configuration
@@ -50,10 +50,10 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.sm)
 
             sidebarRow(
-                title: "Updates",
+                title: "Upgrades",
                 systemImage: "arrow.triangle.2.circlepath",
-                item: .updates,
-                trailingAccessory: { UpdatesSidebarBadge() },
+                item: .upgrades,
+                trailingAccessory: { UpgradesSidebarBadge() },
             )
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.top, BrewSpacing.xs)

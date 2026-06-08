@@ -1,5 +1,5 @@
 //
-//  UpdatesViewModelTests.swift
+//  UpgradesViewModelTests.swift
 //  BrewTests
 //
 
@@ -10,7 +10,7 @@ import BrewRepositoryInterfaces
 import Foundation
 import Testing
 
-struct UpdatesViewModelTests {
+struct UpgradesViewModelTests {
     @Test @MainActor func `outdatedPackages filters loaded inventory to outdated rows`() {
         let repository = StubInstalledPackagesRepository(packages: Self.mixedPackages)
 
@@ -112,10 +112,10 @@ struct UpdatesViewModelTests {
 
         vm.searchQuery = "git"
 
-        #expect(vm.outdatedSubtitle == "Showing 1 of 2 updates")
+        #expect(vm.outdatedSubtitle == "Showing 1 of 2 upgrades")
     }
 
-    @Test @MainActor func `outdatedSubtitle calls out hidden updates when search matches nothing`() {
+    @Test @MainActor func `outdatedSubtitle calls out hidden upgrades when search matches nothing`() {
         let vm = Self.makeViewModel(packages: Self.mixedPackages)
 
         vm.searchQuery = "zzz-no-match"
@@ -132,7 +132,7 @@ struct UpdatesViewModelTests {
         let repository = StubInstalledPackagesRepository(
             state: .failed(BrewCommandError.failed(exitCode: 1, stderr: "formula conflict")),
         )
-        let vm = UpdatesViewModel(
+        let vm = UpgradesViewModel(
             repository: repository,
             brewCommandCenter: StubBrewCommandCenter(),
             commandFactory: StubMutatingCommandFactory(),
@@ -157,8 +157,8 @@ struct UpdatesViewModelTests {
     }
 
     @MainActor
-    private static func makeViewModel(packages: [InstalledBrewPackage]) -> UpdatesViewModel {
-        UpdatesViewModel(
+    private static func makeViewModel(packages: [InstalledBrewPackage]) -> UpgradesViewModel {
+        UpgradesViewModel(
             repository: StubInstalledPackagesRepository(packages: packages),
             brewCommandCenter: StubBrewCommandCenter(),
             commandFactory: StubMutatingCommandFactory(),

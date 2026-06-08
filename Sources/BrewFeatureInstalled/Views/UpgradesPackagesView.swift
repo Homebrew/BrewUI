@@ -1,5 +1,5 @@
 //
-//  UpdatesPackagesView.swift
+//  UpgradesPackagesView.swift
 //  BrewFeatureInstalled
 //
 
@@ -8,10 +8,10 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Middle column of the Updates tab: header, batch Update All, list of outdated packages,
+/// Middle column of the Upgrades tab: header, batch Upgrade All, list of outdated packages,
 /// and a friendly empty state when nothing is outdated.
-struct UpdatesPackagesView: View {
-    @Bindable var viewModel: UpdatesViewModel
+struct UpgradesPackagesView: View {
+    @Bindable var viewModel: UpgradesViewModel
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -28,7 +28,7 @@ struct UpdatesPackagesView: View {
                             allCaughtUpState
                         }
                     } else {
-                        updatesList(content)
+                        upgradesList(content)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
                 },
@@ -37,14 +37,14 @@ struct UpdatesPackagesView: View {
         .searchable(
             text: $viewModel.searchQuery,
             placement: .toolbar,
-            prompt: "Search Updates",
+            prompt: "Search Upgrades",
         )
     }
 
     private var header: some View {
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Available updates")
+                Text("Available upgrades")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.outdatedSubtitle)
@@ -59,18 +59,18 @@ struct UpdatesPackagesView: View {
                 Button {
                     viewModel.upgradeAll()
                 } label: {
-                    Text("Update All (\(viewModel.outdatedCount))")
+                    Text("Upgrade All (\(viewModel.outdatedCount))")
                 }
                 .controlSize(.regular)
                 .keyboardShortcut("u", modifiers: [.command, .shift])
                 .disabled(viewModel.isUpgradingAny)
-                .accessibilityLabel("Update all \(viewModel.outdatedCount) packages")
+                .accessibilityLabel("Upgrade all \(viewModel.outdatedCount) packages")
             }
         }
         .padding(BrewSpacing.lg)
     }
 
-    private func updatesList(_ content: InstalledPackagesContent) -> some View {
+    private func upgradesList(_ content: InstalledPackagesContent) -> some View {
         ScrollViewReader { proxy in
             List {
                 if content.shouldShowFormulaeSection {
@@ -150,13 +150,13 @@ struct UpdatesPackagesView: View {
         }
     }
 
-    /// Shown when the search filter hides every outdated package but updates
+    /// Shown when the search filter hides every outdated package but upgrades
     /// still exist in the inventory — distinct from the "all caught up" state.
     private var noSearchMatchesState: some View {
         centeredEmptyState(
-            title: "No matching updates",
+            title: "No matching upgrades",
             subtitle: noSearchMatchesSubtitle,
-            actionTitle: "Show all updates",
+            actionTitle: "Show all upgrades",
             accessibilityLabel: noSearchMatchesSubtitle,
         ) {
             viewModel.searchQuery = ""
@@ -196,17 +196,17 @@ struct UpdatesPackagesView: View {
         case 0:
             return String(
                 localized: "No installed packages to check.",
-                comment: "Updates empty state when nothing is installed",
+                comment: "Upgrades empty state when nothing is installed",
             )
         case 1:
             return String(
                 localized: "Your installed package is at its latest version.",
-                comment: "Updates empty state for a single installed package",
+                comment: "Upgrades empty state for a single installed package",
             )
         default:
             return String(
                 localized: "All \(total) packages are at their latest versions.",
-                comment: "Updates empty state with total installed count",
+                comment: "Upgrades empty state with total installed count",
             )
         }
     }
@@ -216,25 +216,25 @@ struct UpdatesPackagesView: View {
         if hidden == 1 {
             return String(
                 localized: "1 outdated package is hidden by the current search.",
-                comment: "Updates search-empty state with a single hidden outdated package",
+                comment: "Upgrades search-empty state with a single hidden outdated package",
             )
         }
         return String(
             localized: "\(hidden) outdated packages are hidden by the current search.",
-            comment: "Updates search-empty state with multiple hidden outdated packages",
+            comment: "Upgrades search-empty state with multiple hidden outdated packages",
         )
     }
 }
 
 #if DEBUG
 
-    #Preview("Updates list - loaded") {
-        let viewModel = UpdatesViewModel(
+    #Preview("Upgrades list - loaded") {
+        let viewModel = UpgradesViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(),
             brewCommandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
         )
-        UpdatesPackagesView(viewModel: viewModel)
+        UpgradesPackagesView(viewModel: viewModel)
             .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
             .task {
                 await viewModel.load()
@@ -242,15 +242,15 @@ struct UpdatesPackagesView: View {
             .frame(minWidth: 360, minHeight: 500)
     }
 
-    #Preview("Updates list - empty") {
-        let viewModel = UpdatesViewModel(
+    #Preview("Upgrades list - empty") {
+        let viewModel = UpgradesViewModel(
             repository: StubInstalledPackagesRepository(packages: [
                 PreviewSupport.currentCask,
             ]),
             brewCommandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
         )
-        UpdatesPackagesView(viewModel: viewModel)
+        UpgradesPackagesView(viewModel: viewModel)
             .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
             .task {
                 await viewModel.load()

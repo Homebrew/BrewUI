@@ -110,7 +110,7 @@ struct InstalledListRowViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
-        #expect(!viewModel.showsUpdateAvailable)
+        #expect(!viewModel.showsUpgradeAvailable)
         if case let .installed(label) = viewModel.versionPresentation {
             #expect(!label.isEmpty)
         } else {
@@ -127,7 +127,7 @@ struct InstalledListRowViewModelTests {
         )
         viewModel.update(package: outdated)
 
-        #expect(viewModel.showsUpdateAvailable)
+        #expect(viewModel.showsUpgradeAvailable)
         if case .upgrade = viewModel.versionPresentation {
             ()
         } else {
@@ -135,7 +135,7 @@ struct InstalledListRowViewModelTests {
         }
 
         viewModel.update(package: outdated)
-        #expect(viewModel.showsUpdateAvailable)
+        #expect(viewModel.showsUpgradeAvailable)
     }
 }
 

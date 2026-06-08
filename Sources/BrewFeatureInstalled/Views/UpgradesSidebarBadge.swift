@@ -1,5 +1,5 @@
 //
-//  UpdatesSidebarBadge.swift
+//  UpgradesSidebarBadge.swift
 //  BrewFeatureInstalled
 //
 
@@ -7,10 +7,10 @@ import BrewAppEnvironment
 import BrewUIComponents
 import SwiftUI
 
-/// Warning-tinted count badge for the Updates sidebar row.
+/// Warning-tinted count badge for the Upgrades sidebar row.
 /// Reads the installed-packages repository so SwiftUI re-renders when an
 /// upgrade reconciles the inventory and the outdated count changes.
-public struct UpdatesSidebarBadge: View {
+public struct UpgradesSidebarBadge: View {
     @Environment(\.installedPackagesRepository) private var repository
 
     public init() {}
@@ -24,7 +24,7 @@ public struct UpdatesSidebarBadge: View {
                 .padding(.horizontal, BrewSpacing.xs)
                 .padding(.vertical, BrewSpacing.xxs)
                 .background(Capsule().fill(Color.brewStatusWarning))
-                .accessibilityLabel("\(count) updates available")
+                .accessibilityLabel("\(count) upgrades available")
         }
     }
 }
