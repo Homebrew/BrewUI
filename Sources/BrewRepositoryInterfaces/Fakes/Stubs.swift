@@ -54,6 +54,61 @@ public struct StubDiscoverPackagesRepository: DiscoverPackagesRepository {
     }
 }
 
+@Observable
+@MainActor
+public final class StubConfigRepository: ConfigRepository {
+    public private(set) var state: LoadState<BrewConfigSnapshot, any Error>
+    public private(set) var invalidateCount: Int = 0
+
+    public init(snapshot: BrewConfigSnapshot) {
+        state = .loaded(snapshot)
+    }
+
+    public init(state: LoadState<BrewConfigSnapshot, any Error>) {
+        self.state = state
+    }
+
+    public func load(forceRefresh _: Bool) async {}
+
+    public func invalidate() {
+        invalidateCount += 1
+    }
+}
+
+/// In-memory `brew.env` for previews and tests. Mutable so tests can inspect what `save` produced.
+@Observable
+@MainActor
+public final class StubEnvFileRepository: EnvFileRepository {
+    public private(set) var state: LoadState<BrewEnvFile, any Error>
+    public private(set) var saveCount: Int = 0
+    public private(set) var invalidateCount: Int = 0
+
+    public init(file: BrewEnvFile = BrewEnvFile()) {
+        state = .loaded(file)
+    }
+
+    public init(state: LoadState<BrewEnvFile, any Error>) {
+        self.state = state
+    }
+
+    public func load(forceRefresh _: Bool) async {}
+
+    public func save(_ newFile: BrewEnvFile) async throws {
+        state = .loaded(newFile)
+        saveCount += 1
+    }
+
+    public func invalidate() {
+        invalidateCount += 1
+    }
+
+    /// Convenience accessor used by tests that want to inspect what's currently cached without
+    /// pattern-matching on `state`.
+    public var currentFile: BrewEnvFile {
+        state.value ?? BrewEnvFile()
+    }
+}
+
 public struct StubCatalogueRepository: CatalogueRepository {
     private let formulaCatalogue: [BrewPackage]
     private let caskCatalogue: [BrewPackage]

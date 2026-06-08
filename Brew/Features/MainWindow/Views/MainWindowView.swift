@@ -1,5 +1,6 @@
 import AppKit
 import BrewAppEnvironment
+import BrewFeatureConfig
 import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureDoctor
@@ -27,6 +28,7 @@ struct MainWindowView: View {
                 featureColumn
             }
             .background(.bar)
+            .navigationSplitViewStyle(.prominentDetail)
         } bottom: {
             ConsolePanelRoot(expanded: $consoleExpanded)
         }
@@ -61,6 +63,10 @@ struct MainWindowView: View {
             DoctorColumnsRoot()
                 .navigationTitle("Doctor")
                 .navigationSubtitle("Check your Homebrew installation for problems")
+        case .configuration:
+            ConfigColumnsRoot()
+                .navigationTitle("Configuration")
+                .navigationSubtitle("Homebrew environment & diagnostics")
         }
     }
 }
@@ -76,5 +82,7 @@ struct MainWindowView: View {
             .environment(\.catalogueRepository, PreviewSupport.makeDiscoverCatalogueRepository())
             .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
             .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
+            .environment(\.configRepository, PreviewSupport.makeConfigRepository())
+            .environment(\.envFileRepository, PreviewSupport.makeEnvFileRepository())
     }
 #endif

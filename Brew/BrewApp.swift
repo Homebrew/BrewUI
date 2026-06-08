@@ -17,6 +17,8 @@ import SwiftUI
 
 @main
 struct BrewApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
     private let commandCenter: SerialBrewCommandCenter
     private let commandFactory: LiveBrewMutatingCommandFactory
     private let installedInventoryCache: InstalledInventoryCache
@@ -27,6 +29,8 @@ struct BrewApp: App {
     private let catalogueRepository: BrewCatalogueRepository
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
+    private let configRepository: BrewConfigRepository
+    private let envFileRepository: BrewEnvFileRepository
 
     init() {
         let inventoryCache = InstalledInventoryCache()
@@ -51,6 +55,8 @@ struct BrewApp: App {
             catalogueRepository: catalogueRepo,
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center)
+        configRepository = BrewConfigRepository.live()
+        envFileRepository = BrewEnvFileRepository.live()
     }
 
     var body: some Scene {
@@ -64,8 +70,20 @@ struct BrewApp: App {
                 .environment(\.catalogueRepository, catalogueRepository)
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
+                .environment(\.configRepository, configRepository)
+                .environment(\.envFileRepository, envFileRepository)
                 .task { await catalogueCache.prepare() }
                 .task { await installedPackagesRepository.load() }
+                .onChange(of: scenePhase) { oldPhase, newPhase in
+                    // Mark the config + brew.env caches stale on return-to-foreground so the next visit
+                    // to the Configuration tab triggers a silent revalidation (stale value stays on
+                    // screen during the refetch). No work is done if the user never opens the tab.
+                    guard oldPhase == .background, newPhase == .active else {
+                        return
+                    }
+                    configRepository.invalidate()
+                    envFileRepository.invalidate()
+                }
         }
         .defaultSize(
             width: BrewLayout.minWindowWidth,

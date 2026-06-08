@@ -20,6 +20,7 @@ let package = Package(
         .library(name: "BrewFeatureInstalled", targets: ["BrewFeatureInstalled"]),
         .library(name: "BrewFeatureDiscover", targets: ["BrewFeatureDiscover"]),
         .library(name: "BrewFeatureDoctor", targets: ["BrewFeatureDoctor"]),
+        .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
     ],
     targets: [
         .target(
@@ -155,6 +156,19 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
+        .target(
+            name: "BrewFeatureConfig",
+            dependencies: [
+                "BrewCore",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
+                "BrewAppEnvironment",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
 
         // MARK: - Test targets
 
@@ -262,6 +276,20 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewRepositories",
+                "BrewCoreTestSupport",
+                "BrewServicesTestSupport",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewFeatureConfigTests",
+            dependencies: [
+                "BrewFeatureConfig",
+                "BrewCore",
+                "BrewRepositoryInterfaces",
                 "BrewCoreTestSupport",
                 "BrewServicesTestSupport",
             ],

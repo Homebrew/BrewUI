@@ -32,4 +32,10 @@ public extension EnvironmentValues {
 
     /// Builds mutating `brew` commands for view models, injected by the composition root.
     @Entry var mutatingCommandFactory: any BrewMutatingCommandFactory = UnimplementedMutatingCommandFactory()
+
+    /// One-shot `brew config` + `HOMEBREW_*` environment source, injected by the composition root.
+    @Entry var configRepository: any ConfigRepository = UnimplementedConfigRepository()
+
+    /// Read/write access to `brew.env` — the persistent `HOMEBREW_*` file, injected by the composition root.
+    @Entry var envFileRepository: any EnvFileRepository = UnimplementedEnvFileRepository()
 }

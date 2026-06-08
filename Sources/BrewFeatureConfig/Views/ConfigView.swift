@@ -1,0 +1,144 @@
+//
+//  ConfigView.swift
+//  BrewFeatureConfig
+//
+
+import AppKit
+import BrewCore
+import BrewRepositoryInterfaces
+import BrewUIComponents
+import SwiftUI
+
+/// Single scrolling pane presenting `brew config` + the `HOMEBREW_*` environment, with copy/refresh.
+struct ConfigView: View {
+    @State private var viewModel: ConfigViewModel
+
+    init(repository: any ConfigRepository, envFileRepository: any EnvFileRepository) {
+        _viewModel = State(
+            initialValue: ConfigViewModel(repository: repository, envFileRepository: envFileRepository),
+        )
+    }
+
+    var body: some View {
+        VStack(spacing: 3) {
+            header
+            content
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .task {
+            await viewModel.load()
+        }
+        .onChange(of: viewModel.envFileState.value) { _, _ in
+            // When `brew.env` is silently revalidated (e.g. on return-to-foreground) and the user has
+            // no pending edits, sync the draft to the freshly loaded file.
+            viewModel.envFileStateDidChange()
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: BrewSpacing.sm) {
+            Spacer(minLength: 0)
+            Button("Discard", systemImage: "arrow.uturn.backward") {
+                viewModel.revert()
+            }
+            .disabled(!viewModel.isDirty)
+            Button("Save", systemImage: "checkmark") {
+                Task { await viewModel.save() }
+            }
+            .keyboardShortcut("s", modifiers: .command)
+            .disabled(!viewModel.isDirty)
+            Divider()
+                .frame(height: 18)
+            Button("Copy report", systemImage: "doc.on.doc") {
+                copyReport()
+            }
+            .disabled(!viewModel.canCopyReport)
+            Button("Refresh", systemImage: "arrow.clockwise") {
+                Task { await viewModel.refresh() }
+            }
+        }
+        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.vertical, BrewSpacing.md)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if viewModel.isBrewNotFound {
+            brewNotFoundState
+        } else {
+            AsyncContentView(
+                state: viewModel.pageState,
+                onRetry: { Task { await viewModel.refresh() } },
+                loaded: { payload in
+                    loadedCards(payload: payload)
+                },
+            )
+        }
+    }
+
+    private func loadedCards(payload: ConfigPagePayload) -> some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: BrewSpacing.lg) {
+                ForEach(viewModel.sections(for: payload.snapshot)) { section in
+                    ConfigSectionCard(section: section)
+                }
+                ConfigEnvironmentEditorCard(viewModel: viewModel, envFile: payload.envFile)
+            }
+            .padding(BrewSpacing.lg)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+    }
+
+    private var brewNotFoundState: some View {
+        emptyState(
+            systemImage: "questionmark.folder",
+            title: String(localized: "Homebrew not found", comment: "Configuration tab, brew-not-found title"),
+            message: String(
+                localized: "Couldn't locate the brew executable. Install Homebrew, then refresh.",
+                comment: "Configuration tab, brew-not-found message",
+            ),
+        )
+    }
+
+    private func emptyState(
+        systemImage: String,
+        title: String,
+        message: String,
+        tint: Color = Color.brewTextSecondary,
+    ) -> some View {
+        VStack(spacing: BrewSpacing.md) {
+            Image(systemName: systemImage)
+                .font(.brewTitle1)
+                .foregroundStyle(tint)
+            Text(title)
+                .font(.brewTitle3)
+                .foregroundStyle(Color.brewTextPrimary)
+            Text(message)
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+                .multilineTextAlignment(.center)
+            Button("Refresh", systemImage: "arrow.clockwise") {
+                Task { await viewModel.refresh() }
+            }
+            .padding(.top, BrewSpacing.xs)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .padding(BrewSpacing.xl)
+        .accessibilityElement(children: .combine)
+    }
+
+    private func copyReport() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(viewModel.copyReport, forType: .string)
+    }
+}
+
+#if DEBUG
+    #Preview("Loaded") {
+        ConfigView(
+            repository: PreviewSupport.makeConfigRepository(),
+            envFileRepository: PreviewSupport.makeEnvFileRepository(),
+        )
+        .frame(width: 720, height: 600)
+    }
+#endif

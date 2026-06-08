@@ -11,6 +11,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     case installed
     case discover
     case doctor
+    case configuration
 
     var id: String {
         rawValue
@@ -58,6 +59,14 @@ struct MainSidebarView: View {
                 title: "Doctor",
                 systemImage: "stethoscope",
                 item: .doctor,
+            )
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.top, BrewSpacing.xs)
+
+            sidebarRow(
+                title: "Configuration",
+                systemImage: "gearshape",
+                item: .configuration,
             )
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.top, BrewSpacing.xs)
