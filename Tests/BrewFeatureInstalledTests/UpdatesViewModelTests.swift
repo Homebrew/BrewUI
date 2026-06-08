@@ -57,6 +57,27 @@ struct UpdatesViewModelTests {
         #expect(vm.totalOutdatedCount == 2)
     }
 
+    @Test @MainActor func `default selection prefers the first formula over an alphabetically earlier cask`() {
+        // Repository sorts by name across kinds, so "alfred" (cask) comes
+        // before "git" (formula). The list shows Formulae first though, so
+        // the default selection should still land on git.
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "alfred", kind: .cask, outdated: true),
+            .fixture(name: "git", kind: .formula, outdated: true),
+        ])
+
+        #expect(vm.selectedPackage?.name == "git")
+    }
+
+    @Test @MainActor func `default selection falls back to first cask when no formulae are outdated`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "alfred", kind: .cask, outdated: true),
+            .fixture(name: "slack", kind: .cask, outdated: true),
+        ])
+
+        #expect(vm.selectedPackage?.name == "alfred")
+    }
+
     @Test @MainActor func `state stays empty when no outdated rows exist`() {
         let vm = Self.makeViewModel(packages: [
             .fixture(name: "wget", kind: .formula, outdated: false),

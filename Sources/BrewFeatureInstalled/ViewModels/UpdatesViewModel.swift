@@ -209,11 +209,16 @@ final class UpdatesViewModel {
         !Self.normalizedSearchQuery(searchQuery).isEmpty
     }
 
+    /// Rows in the order the list renders them (formulae section, then casks).
+    /// `content.packages` is name-sorted across kinds, which would make
+    /// `firstVisibleRowID` pick the alphabetically-first row regardless of
+    /// section — surfacing a cask as the default selection even though the
+    /// Formulae section appears first on screen.
     private var allRows: [InstalledBrewPackage] {
         guard case let .loaded(content) = state else {
             return []
         }
-        return content.packages
+        return content.formulaPackages + content.caskPackages
     }
 
     private func updateSelectionForSearchQueryChange(from oldQuery: String, to newQuery: String) {
