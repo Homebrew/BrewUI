@@ -79,9 +79,10 @@ final class UpdatesViewModel {
         return false
     }
 
-    /// Subtitle for the Updates header and the window chrome. Reflects the
-    /// unfiltered inventory when no search is active, and "Showing N of M" /
-    /// "No matches in M outdated packages" once a query narrows the list.
+    /// Subtitle for the in-page Updates header. Reflects the unfiltered
+    /// inventory when no search is active, and "Showing N of M" / "No matches
+    /// in M outdated packages" once a query narrows the list. The window-chrome
+    /// subtitle is a static tab description owned by `MainWindowView`.
     var outdatedSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Updates tab subtitle while fetching")

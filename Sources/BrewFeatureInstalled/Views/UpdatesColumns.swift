@@ -72,7 +72,5 @@ struct UpdatesColumns: View {
         .task {
             await viewModel.load()
         }
-        .navigationTitle("Updates")
-        .navigationSubtitle(viewModel.outdatedSubtitle)
     }
 }
