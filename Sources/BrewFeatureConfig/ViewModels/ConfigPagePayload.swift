@@ -9,7 +9,7 @@ import Foundation
 /// Bundles the two pieces of data the Configuration page renders together — the cached `brew config`
 /// snapshot and the cached `brew.env` file — so `AsyncContentView` can drive both the read-only cards
 /// and the editor card from a single `LoadState`.
-struct ConfigPagePayload: Equatable, Sendable {
+struct ConfigPagePayload: Equatable {
     let snapshot: BrewConfigSnapshot
     let envFile: BrewEnvFile
 }

@@ -194,8 +194,12 @@ struct BrewEnvFileRepositoryTests {
         defer { try? Self.fileManager.removeItem(at: home) }
 
         let repository = makeRepository(homeDirectory: home)
-        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_GITHUB_API_TOKEN", value: "ghp_secret_v1")]))
-        try await repository.save(BrewEnvFile(lines: [.entry(key: "HOMEBREW_GITHUB_API_TOKEN", value: "ghp_secret_v2")]))
+        try await repository.save(
+            BrewEnvFile(lines: [.entry(key: "HOMEBREW_GITHUB_API_TOKEN", value: "ghp_secret_v1")]),
+        )
+        try await repository.save(
+            BrewEnvFile(lines: [.entry(key: "HOMEBREW_GITHUB_API_TOKEN", value: "ghp_secret_v2")]),
+        )
 
         let backup = home.appendingPathComponent(".homebrew/brew.env.bak")
         let attributes = try Self.fileManager.attributesOfItem(atPath: backup.path)

@@ -40,7 +40,7 @@ struct BrewConfigRepositoryTests {
         ])
     }
 
-    @Test @MainActor func `load merges only HOMEBREW prefixed environment variables, sorted by name`() async throws {
+    @Test @MainActor func `load merges only HOMEBREW prefixed environment variables, sorted by name`() async {
         let runner = MockBrewCommandRunner(responses: [
             ["config"]: CommandOutput(standardOutput: Self.configStdout, standardError: "", terminationStatus: 0),
         ])
@@ -109,7 +109,7 @@ struct BrewConfigRepositoryTests {
         #expect(firstSnapshot == secondSnapshot)
     }
 
-    @Test @MainActor func `invalidate marks stale so the next load refetches without forceRefresh`() async throws {
+    @Test @MainActor func `invalidate marks stale so the next load refetches without forceRefresh`() async {
         let runner = SequentialBrewCommandRunner(behaviours: [
             .output(CommandOutput(standardOutput: Self.configStdout, standardError: "", terminationStatus: 0)),
             .output(CommandOutput(
@@ -172,7 +172,7 @@ struct BrewConfigRepositoryTests {
 /// Returns sequential responses; useful for testing cache-hit vs revalidation behaviour without
 /// composing multiple mocks.
 private struct SequentialBrewCommandRunner: BrewCommandRunning {
-    enum Behaviour: Sendable {
+    enum Behaviour {
         case output(CommandOutput)
         case `throw`(any Error & Sendable)
     }
