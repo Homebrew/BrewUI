@@ -364,7 +364,7 @@ extension ConfigViewModel {
     }
 
     private func installTimeRow(forKey key: String) -> EnvRowItem {
-        let value = state.value?.environment.first(where: { $0.key == key })?.value
+        let value = state.value?.entries.first(where: { $0.key == key })?.value
             ?? processEnvironment[key]
             ?? ""
         return EnvRowItem(

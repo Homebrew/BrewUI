@@ -152,6 +152,43 @@ struct ConfigViewModelEditingTests {
         #expect(row?.status == .readOnlyInstallTime)
     }
 
+    @Test @MainActor func `install-time row value comes from entries not the env mirror`() async {
+        // `environment` is just the process env mirror — typically empty for install-time keys.
+        let snapshot = BrewConfigSnapshot(
+            entries: [
+                BrewConfigEntry(key: "HOMEBREW_PREFIX", value: "/opt/homebrew"),
+                BrewConfigEntry(key: "HOMEBREW_CELLAR", value: "/opt/homebrew/Cellar"),
+            ],
+            environment: [],
+        )
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(snapshot: snapshot),
+            envFileRepository: StubEnvFileRepository(),
+            processEnvironment: ["SHELL": "/bin/zsh"],
+        )
+
+        await viewModel.load()
+
+        let prefix = envRows(viewModel).first { $0.key == "HOMEBREW_PREFIX" }
+        #expect(prefix?.value == "/opt/homebrew")
+        let cellar = envRows(viewModel).first { $0.key == "HOMEBREW_CELLAR" }
+        #expect(cellar?.value == "/opt/homebrew/Cellar")
+    }
+
+    @Test @MainActor func `install-time row falls back to process env when brew config doesn't list it`() async {
+        let snapshot = BrewConfigSnapshot(entries: [], environment: [])
+        let viewModel = ConfigViewModel(
+            repository: StubConfigRepository(snapshot: snapshot),
+            envFileRepository: StubEnvFileRepository(),
+            processEnvironment: ["SHELL": "/bin/zsh", "HOMEBREW_PREFIX": "/usr/local"],
+        )
+
+        await viewModel.load()
+
+        let row = envRows(viewModel).first { $0.key == "HOMEBREW_PREFIX" }
+        #expect(row?.value == "/usr/local")
+    }
+
     @Test @MainActor func `shell rc hint maps zsh to .zshrc`() async {
         let (viewModel, _) = makeViewModel(
             processEnvironment: ["SHELL": "/bin/zsh", "HOMEBREW_NO_AUTO_UPDATE": "1"],
