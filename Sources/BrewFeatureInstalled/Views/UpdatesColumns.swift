@@ -8,6 +8,7 @@ public struct UpdatesColumnsRoot: View {
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
+    @Environment(\.navigateToInstalledPackage) private var navigateToInstalledPackage
 
     public init() {}
 
@@ -16,6 +17,7 @@ public struct UpdatesColumnsRoot: View {
             installedPackagesRepository: installedPackagesRepository,
             brewCommandCenter: brewCommandCenter,
             mutatingCommandFactory: mutatingCommandFactory,
+            navigateToInstalledPackage: navigateToInstalledPackage,
         )
     }
 }
@@ -24,11 +26,13 @@ public struct UpdatesColumnsRoot: View {
 /// but projects only outdated packages and adds an Update All affordance.
 struct UpdatesColumns: View {
     @State var viewModel: UpdatesViewModel
+    private let navigateToInstalledPackage: @MainActor (InstalledBrewPackage.ID) -> Void
 
     init(
         installedPackagesRepository: any InstalledPackagesRepository,
         brewCommandCenter: any BrewCommandCenter,
         mutatingCommandFactory: any BrewMutatingCommandFactory,
+        navigateToInstalledPackage: @escaping @MainActor (InstalledBrewPackage.ID) -> Void,
     ) {
         _viewModel = State(
             initialValue: UpdatesViewModel(
@@ -37,6 +41,7 @@ struct UpdatesColumns: View {
                 commandFactory: mutatingCommandFactory,
             ),
         )
+        self.navigateToInstalledPackage = navigateToInstalledPackage
     }
 
     var body: some View {
@@ -52,9 +57,13 @@ struct UpdatesColumns: View {
 
             Group {
                 if let selectedPackage = viewModel.selectedPackage {
+                    // Relationship taps (Used by / Dependencies) cross to the
+                    // Installed tab — the dependent is rarely outdated, so
+                    // routing through the local Updates VM would silently fail
+                    // its outdated-only guard.
                     InstalledPackageDetailRoot(
                         selectedPackage: selectedPackage,
-                        onSelectInstalledPackage: { viewModel.selectInstalledPackage(id: $0) },
+                        onSelectInstalledPackage: navigateToInstalledPackage,
                     )
                 } else {
                     InstalledPackageDetailPlaceholder()

@@ -1,5 +1,6 @@
 import AppKit
 import BrewAppEnvironment
+import BrewCore
 import BrewFeatureConfig
 import BrewFeatureConsole
 import BrewFeatureDiscover
@@ -10,6 +11,7 @@ import SwiftUI
 
 struct MainWindowView: View {
     @State var selectedSidebarItem: SidebarItem = .installed
+    @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
@@ -33,6 +35,10 @@ struct MainWindowView: View {
             ConsolePanelRoot(expanded: $consoleExpanded)
         }
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
+        .environment(\.navigateToInstalledPackage) { id in
+            pendingInstalledSelection = id
+            selectedSidebarItem = .installed
+        }
     }
 
     /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be
@@ -52,7 +58,7 @@ struct MainWindowView: View {
     private var featureColumn: some View {
         switch selectedSidebarItem {
         case .installed:
-            InstalledColumnsRoot()
+            InstalledColumnsRoot(deepLinkSelection: $pendingInstalledSelection)
                 .navigationTitle("Installed")
                 .navigationSubtitle("Browse or search your installed packages")
         case .updates:
