@@ -64,6 +64,13 @@ final class UpdatesViewModel {
         (repository.state.value ?? []).count
     }
 
+    /// Outdated count from the underlying inventory, ignoring the active search.
+    /// Lets the empty state distinguish "truly nothing to upgrade" from
+    /// "nothing matched the search, but updates exist".
+    var totalOutdatedCount: Int {
+        repository.outdatedCount
+    }
+
     /// Initial fetch with no rows yet — show blocking spinner.
     var shouldShowInitialLoadingIndicator: Bool {
         if case .loading = state {

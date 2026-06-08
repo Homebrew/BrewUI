@@ -43,6 +43,20 @@ struct UpdatesViewModelTests {
         #expect(content.packages.map(\.name) == ["git"])
     }
 
+    @Test @MainActor func `totalOutdatedCount stays unfiltered when search hides every outdated row`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        vm.searchQuery = "zzz-no-match"
+
+        guard case let .loaded(content) = vm.state else {
+            Issue.record("expected loaded state")
+            return
+        }
+        #expect(content.packages.isEmpty)
+        #expect(vm.outdatedCount == 0)
+        #expect(vm.totalOutdatedCount == 2)
+    }
+
     @Test @MainActor func `state stays empty when no outdated rows exist`() {
         let vm = Self.makeViewModel(packages: [
             .fixture(name: "wget", kind: .formula, outdated: false),

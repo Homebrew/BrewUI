@@ -24,7 +24,11 @@ struct UpdatesPackagesView: View {
                 errorView(message)
             case let .loaded(content):
                 if content.packages.isEmpty {
-                    emptyState
+                    if viewModel.totalOutdatedCount > 0 {
+                        noSearchMatchesState
+                    } else {
+                        allCaughtUpState
+                    }
                 } else {
                     updatesList(content)
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -136,32 +140,58 @@ struct UpdatesPackagesView: View {
         }
     }
 
-    private var emptyState: some View {
+    private var allCaughtUpState: some View {
+        centeredEmptyState(
+            title: "✅ You're all caught up",
+            subtitle: allCaughtUpSubtitle,
+            actionTitle: "Refresh",
+            accessibilityLabel: "All packages are up to date",
+        ) {
+            Task { await viewModel.refresh() }
+        }
+    }
+
+    /// Shown when the search filter hides every outdated package but updates
+    /// still exist in the inventory — distinct from the "all caught up" state.
+    private var noSearchMatchesState: some View {
+        centeredEmptyState(
+            title: "No matching updates",
+            subtitle: noSearchMatchesSubtitle,
+            actionTitle: "Show all updates",
+            accessibilityLabel: noSearchMatchesSubtitle,
+        ) {
+            viewModel.searchQuery = ""
+        }
+    }
+
+    private func centeredEmptyState(
+        title: LocalizedStringKey,
+        subtitle: String,
+        actionTitle: LocalizedStringKey,
+        accessibilityLabel: String,
+        action: @escaping () -> Void,
+    ) -> some View {
         VStack(spacing: BrewSpacing.md) {
             Spacer(minLength: 0)
-            Text("✅ You're all caught up")
+            Text(title)
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text(emptyStateSubtitle)
+            Text(subtitle)
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .multilineTextAlignment(.center)
-            Button {
-                Task { await viewModel.refresh() }
-            } label: {
-                Text("Refresh")
-            }
-            .controlSize(.regular)
-            .padding(.top, BrewSpacing.sm)
+            Button(action: action) { Text(actionTitle) }
+                .controlSize(.regular)
+                .padding(.top, BrewSpacing.sm)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(BrewSpacing.xl)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("All packages are up to date")
+        .accessibilityLabel(accessibilityLabel)
     }
 
-    private var emptyStateSubtitle: String {
+    private var allCaughtUpSubtitle: String {
         let total = viewModel.totalInstalledCount
         switch total {
         case 0:
@@ -182,6 +212,20 @@ struct UpdatesPackagesView: View {
         }
     }
 
+    private var noSearchMatchesSubtitle: String {
+        let hidden = viewModel.totalOutdatedCount
+        if hidden == 1 {
+            return String(
+                localized: "1 outdated package is hidden by the current search.",
+                comment: "Updates search-empty state with a single hidden outdated package",
+            )
+        }
+        return String(
+            localized: "\(hidden) outdated packages are hidden by the current search.",
+            comment: "Updates search-empty state with multiple hidden outdated packages",
+        )
+    }
+
     private var loadingSkeletonList: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
@@ -199,35 +243,22 @@ struct UpdatesPackagesView: View {
     }
 
     private var loadingFormulaeRows: [InstalledBrewPackage] {
-        [
-            InstalledBrewPackage(
-                package: BrewPackage(
-                    name: "Placeholder Formula",
-                    displayName: "Placeholder Formula",
-                    kind: .formula,
-                    description: "Placeholder description text for loading row.",
-                    homepage: "",
-                    latestVersion: "0.0.0",
-                    dependencies: [],
-                ),
-                installedVersions: ["0.0.0"],
-                outdated: true,
-            ),
-            InstalledBrewPackage(
-                package: BrewPackage(
-                    name: "Placeholder Formula",
-                    displayName: "Placeholder Formula",
-                    kind: .formula,
-                    description: "Placeholder description text for loading row.",
-                    homepage: "",
-                    latestVersion: "0.0.0",
-                    dependencies: [],
-                ),
-                installedVersions: ["0.0.0"],
-                outdated: true,
-            ),
-        ]
+        Array(repeating: Self.loadingPlaceholder, count: 2)
     }
+
+    private static let loadingPlaceholder = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "Placeholder Formula",
+            displayName: "Placeholder Formula",
+            kind: .formula,
+            description: "Placeholder description text for loading row.",
+            homepage: "",
+            latestVersion: "0.0.0",
+            dependencies: [],
+        ),
+        installedVersions: ["0.0.0"],
+        outdated: true,
+    )
 
     private func errorView(_ message: String) -> some View {
         Text(message)
