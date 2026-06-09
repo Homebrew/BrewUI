@@ -194,6 +194,12 @@ final class UpgradesViewModel {
         setSelection(id)
     }
 
+    /// User-facing command rendered by the Updates header's `CommandBlockView`. Kept here so the view
+    /// and the command center share a single source of truth for what "Upgrade All" actually runs.
+    var bulkUpgradeDisplayCommand: String {
+        "brew upgrade"
+    }
+
     /// Submits a single `brew upgrade` (no arguments) under ``BrewOperationID/bulkUpgrade``. Submit
     /// dedupes against the in-flight id, so a re-tap while the bulk run is in progress is a no-op.
     /// The repository's completion observer reconciles inventory on running→idle, so finished rows

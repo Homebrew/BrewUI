@@ -42,7 +42,7 @@ struct UpgradesPackagesView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top, spacing: BrewSpacing.md) {
+        VStack(alignment: .leading, spacing: BrewSpacing.md) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 Text("Available upgrades")
                     .font(.brewTitle2)
@@ -56,11 +56,17 @@ struct UpgradesPackagesView: View {
             .accessibilityHeading(.h1)
 
             if viewModel.outdatedCount > 0 {
+                CommandBlockView(
+                    command: viewModel.bulkUpgradeDisplayCommand,
+                    summaryText: "Upgrades every outdated package",
+                )
+
                 Button {
                     viewModel.upgradeAll()
                 } label: {
                     Text("Upgrade All (\(viewModel.outdatedCount))")
                 }
+                .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .keyboardShortcut("u", modifiers: [.command, .shift])
                 .disabled(viewModel.isUpgradingAny)
