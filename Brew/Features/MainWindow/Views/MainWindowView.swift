@@ -33,8 +33,7 @@ struct MainWindowView: View {
             }
             .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         }
-        .background(.bar)
-        .navigationSplitViewStyle(.prominentDetail)
+        .navigationSplitViewStyle(.automatic)
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
