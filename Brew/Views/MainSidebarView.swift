@@ -85,7 +85,7 @@ struct MainSidebarView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.brewSurfaceRecessed)
+        .background(Color.brewSurface)
     }
 
     @ViewBuilder
