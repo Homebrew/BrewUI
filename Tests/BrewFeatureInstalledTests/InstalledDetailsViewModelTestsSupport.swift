@@ -150,6 +150,57 @@ actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
     }
 }
 
+actor SubmitRecordingCommandCenter: BrewCommandCenter {
+    private(set) var recordedSubmitEntries: [(id: BrewOperationID, kind: BrewOperationKind)] = []
+
+    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
+        .idle
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id _: BrewOperationID) async -> Bool {
+        false
+    }
+
+    func submit(id: BrewOperationID, command: any BrewMutatingCommand) async throws {
+        recordedSubmitEntries.append((id, command.operationKind))
+    }
+
+    func waitForSubmitCallCount(_ expected: Int) async {
+        for _ in 0 ..< 1000 {
+            if recordedSubmitEntries.count >= expected { return }
+            await Task.yield()
+        }
+    }
+
+    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+            continuation.yield(.idle)
+        }
+    }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
+            continuation.finish()
+        }
+    }
+}
+
 actor DeferredSubmitCommandCenter: BrewCommandCenter {
     private(set) var submitCallCount: Int = 0
     private var continuation: CheckedContinuation<Void, Never>?

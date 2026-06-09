@@ -234,6 +234,10 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
         NoopMutatingCommand(operationKind: kind == .formula ? .uninstallFormula : .uninstallCask)
     }
 
+    public func bulkUpgradeCommand() -> any BrewMutatingCommand {
+        NoopMutatingCommand(operationKind: .upgradeAll)
+    }
+
     public func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
         NoopMutatingCommand(operationKind: .doctorFix)
     }

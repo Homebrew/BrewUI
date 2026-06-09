@@ -194,16 +194,14 @@ final class UpgradesViewModel {
         setSelection(id)
     }
 
-    /// Enqueues an upgrade for every outdated package. Submit dedupes a duplicate
-    /// in-flight `BrewOperationID`, so a re-tap during a batch is a no-op.
-    /// The repository's completion observer reconciles inventory on running→idle,
-    /// dropping each finished row from this list automatically.
+    /// Submits a single `brew upgrade` (no arguments) under ``BrewOperationID/bulkUpgrade``. Submit
+    /// dedupes against the in-flight id, so a re-tap while the bulk run is in progress is a no-op.
+    /// The repository's completion observer reconciles inventory on running→idle, so finished rows
+    /// drop from the list when the bulk run finishes.
     func upgradeAll() {
-        for package in repository.outdatedPackages {
-            let id = BrewOperationID(kind: package.kind, name: package.name)
-            let command = commandFactory.upgradeCommand(kind: package.kind, name: package.name)
-            Task { try? await brewCommandCenter.submit(id: id, command: command) }
-        }
+        let id = BrewOperationID.bulkUpgrade
+        let command = commandFactory.bulkUpgradeCommand()
+        Task { try? await brewCommandCenter.submit(id: id, command: command) }
     }
 
     private var isSearchActive: Bool {

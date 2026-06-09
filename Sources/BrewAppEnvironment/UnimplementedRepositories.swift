@@ -123,6 +123,10 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
         unimplemented()
     }
 
+    func bulkUpgradeCommand() -> any BrewMutatingCommand {
+        unimplemented()
+    }
+
     func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
         unimplemented()
     }

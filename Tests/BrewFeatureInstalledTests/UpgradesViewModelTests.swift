@@ -128,6 +128,26 @@ struct UpgradesViewModelTests {
         #expect(single.outdatedSubtitle == "No matches in 1 outdated package")
     }
 
+    @Test @MainActor func `upgradeAll submits exactly one bulk upgrade regardless of outdated count`() async {
+        let recorder = SubmitRecordingCommandCenter()
+        let vm = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(packages: Self.mixedPackages),
+            brewCommandCenter: recorder,
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        vm.upgradeAll()
+        for _ in 0 ..< 10 {
+            await Task.yield()
+        }
+        await recorder.waitForSubmitCallCount(1)
+
+        let entries = await recorder.recordedSubmitEntries
+        #expect(entries.count == 1)
+        #expect(entries.first?.id == .bulkUpgrade)
+        #expect(entries.first?.kind == .upgradeAll)
+    }
+
     @Test @MainActor func `load failure surfaces user facing brew stderr`() {
         let repository = StubInstalledPackagesRepository(
             state: .failed(BrewCommandError.failed(exitCode: 1, stderr: "formula conflict")),
