@@ -97,7 +97,7 @@ public extension CommandJob {
         case let .maintenance(_, displayCommand):
             displayCommand
         case .bulkUpgrade:
-            "brew upgrade"
+            BrewOperationID.bulkUpgradeDisplayCommand
         }
         return CommandJob(
             id: id,

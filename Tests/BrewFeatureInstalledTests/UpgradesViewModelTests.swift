@@ -165,6 +165,83 @@ struct UpgradesViewModelTests {
         #expect(message == "formula conflict")
     }
 
+    @Test @MainActor func `bulkUpgradeDisplayCommand mirrors the shared constant`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+        #expect(vm.bulkUpgradeDisplayCommand == BrewOperationID.bulkUpgradeDisplayCommand)
+    }
+
+    @Test @MainActor func `selectInstalledPackage ignores ids that are not visible`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+        let originalSelection = vm.selectedPackage?.id
+
+        // wget is installed but not outdated, so it isn't in the projected rows.
+        vm.selectInstalledPackage(id: .formula(name: "wget"))
+
+        #expect(vm.selectedPackage?.id == originalSelection)
+    }
+
+    @Test @MainActor func `setSelection nil resolves to first visible outdated row`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+        vm.setSelection(.cask(token: "slack"))
+        #expect(vm.selectedPackage?.id == .cask(token: "slack"))
+
+        vm.setSelection(nil)
+
+        // Always-on selection — falls back to the first formula in the projected list.
+        #expect(vm.selectedPackage?.id == .formula(name: "git"))
+    }
+
+    @Test @MainActor
+    func `search previews first visible upgrade and restores prior selection when cleared`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: true),
+            .fixture(name: "wget", kind: .formula, outdated: true),
+            .fixture(name: "github", kind: .cask, outdated: true),
+        ])
+        vm.setSelection(.formula(name: "wget"))
+
+        vm.searchQuery = "git"
+        #expect(vm.activeSelectedPackageID == .formula(name: "git"))
+
+        vm.searchQuery = ""
+        #expect(vm.activeSelectedPackageID == .formula(name: "wget"))
+    }
+
+    @Test @MainActor func `committing a selection during search keeps it after clearing search`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: true),
+            .fixture(name: "wget", kind: .formula, outdated: true),
+            .fixture(name: "github", kind: .cask, outdated: true),
+        ])
+        vm.setSelection(.formula(name: "wget"))
+
+        vm.searchQuery = "git"
+        vm.setSelection(.cask(token: "github"))
+
+        vm.searchQuery = ""
+        #expect(vm.activeSelectedPackageID == .cask(token: "github"))
+    }
+
+    @Test @MainActor func `isUpgradingAny tracks the bulk upgrade phase stream`() async {
+        let center = PhaseStreamingCommandCenter()
+        let vm = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(packages: Self.mixedPackages),
+            brewCommandCenter: center,
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        // Wait for the observer to subscribe to allPhaseChanges before emitting.
+        await center.waitForSubscriber()
+
+        await center.emit(id: .bulkUpgrade, phase: .running(.upgradeAll))
+        await Self.waitUntil { vm.isUpgradingAny }
+        #expect(vm.isUpgradingAny)
+
+        await center.emit(id: .bulkUpgrade, phase: .idle)
+        await Self.waitUntil { !vm.isUpgradingAny }
+        #expect(!vm.isUpgradingAny)
+    }
+
     // MARK: - Helpers
 
     private static var mixedPackages: [InstalledBrewPackage] {
@@ -183,5 +260,78 @@ struct UpgradesViewModelTests {
             brewCommandCenter: StubBrewCommandCenter(),
             commandFactory: StubMutatingCommandFactory(),
         )
+    }
+
+    /// Yields cooperatively until `condition` flips true, with a bounded budget so a regression
+    /// surfaces as a `#expect` failure on the caller's assertion rather than hanging the suite.
+    @MainActor
+    private static func waitUntil(_ condition: () -> Bool) async {
+        for _ in 0 ..< 200 {
+            if condition() { return }
+            await Task.yield()
+        }
+    }
+}
+
+/// Live phase stream the test drives by hand — `UpgradesViewModel.observePhaseChanges` subscribes to
+/// `allPhaseChanges()` once, then `runningIDs` updates flow from whatever the test emits.
+private actor PhaseStreamingCommandCenter: BrewCommandCenter {
+    typealias PhaseEvent = (BrewOperationID, BrewOperationPhase)
+
+    private let phaseStream: AsyncStream<PhaseEvent>
+    private let phaseContinuation: AsyncStream<PhaseEvent>.Continuation
+    private var subscribed = false
+    private var subscriberWaiters: [CheckedContinuation<Void, Never>] = []
+
+    init() {
+        let (stream, continuation) = AsyncStream<PhaseEvent>.makeStream()
+        phaseStream = stream
+        phaseContinuation = continuation
+    }
+
+    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
+        .idle
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id _: BrewOperationID) async -> Bool {
+        false
+    }
+
+    func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {}
+
+    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        AsyncStream { $0.finish() }
+    }
+
+    func allPhaseChanges() async -> AsyncStream<PhaseEvent> {
+        subscribed = true
+        for waiter in subscriberWaiters {
+            waiter.resume()
+        }
+        subscriberWaiters.removeAll()
+        return phaseStream
+    }
+
+    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
+        AsyncStream { $0.finish() }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream { $0.finish() }
+    }
+
+    func emit(id: BrewOperationID, phase: BrewOperationPhase) {
+        phaseContinuation.yield((id, phase))
+    }
+
+    func waitForSubscriber() async {
+        if subscribed { return }
+        await withCheckedContinuation { continuation in
+            subscriberWaiters.append(continuation)
+        }
     }
 }

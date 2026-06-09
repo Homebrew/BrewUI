@@ -72,7 +72,7 @@ final class UpgradesViewModel {
     }
 
     /// Initial fetch with no rows yet — show blocking spinner.
-    var shouldShowInitialLoadingIndicator: Bool {
+    private var shouldShowInitialLoadingIndicator: Bool {
         if case .loading = state {
             return true
         }
@@ -194,10 +194,11 @@ final class UpgradesViewModel {
         setSelection(id)
     }
 
-    /// User-facing command rendered by the Updates header's `CommandBlockView`. Kept here so the view
-    /// and the command center share a single source of truth for what "Upgrade All" actually runs.
+    /// User-facing command rendered by the Updates header's `CommandBlockView`. Reads the canonical
+    /// literal from ``BrewOperationID/bulkUpgradeDisplayCommand`` so the view, the console job, and
+    /// the live `BulkUpgradeCommand` all share one source of truth.
     var bulkUpgradeDisplayCommand: String {
-        "brew upgrade"
+        BrewOperationID.bulkUpgradeDisplayCommand
     }
 
     /// Submits a single `brew upgrade` (no arguments) under ``BrewOperationID/bulkUpgrade``. Submit

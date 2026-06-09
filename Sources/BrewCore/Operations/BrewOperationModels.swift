@@ -50,6 +50,11 @@ public enum BrewOperationID: Hashable, Identifiable, Sendable {
     public init(packageID: HomebrewPackageID) {
         self = .package(packageID)
     }
+
+    /// Canonical user-facing rendering of ``bulkUpgrade`` — the literal a person would type. Shared
+    /// across the Upgrades tab's `CommandBlockView`, the console job, and the live `BulkUpgradeCommand`
+    /// so a future rename (e.g. `brew upgrade --greedy`) only needs to land here.
+    public static let bulkUpgradeDisplayCommand = "brew upgrade"
 }
 
 /// Visibility for UI and tests — mutually exclusive with “absent” represented by ``BrewCommandCenter/phase(for:)``
