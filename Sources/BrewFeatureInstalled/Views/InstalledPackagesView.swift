@@ -27,15 +27,14 @@ struct InstalledPackagesView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            switch viewModel.state {
-            case .loading:
-                loadingSkeletonList
-            case let .error(message):
-                errorView(message)
-            case let .loaded(content):
-                installedList(content)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            }
+            AsyncContentView(
+                state: viewModel.state,
+                onRetry: { Task { await viewModel.refresh() } },
+                loaded: { content in
+                    installedList(content)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                },
+            )
         }
         .searchable(
             text: $viewModel.searchQuery,
@@ -111,76 +110,6 @@ struct InstalledPackagesView: View {
         withAnimation(.brewFast) {
             proxy.scrollTo(selectedID, anchor: .center)
         }
-    }
-
-    private var loadingSkeletonList: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                InstalledSectionHeader(title: "Formulae", count: 3)
-                ForEach(loadingFormulaeRows) { package in
-                    InstalledListRowRoot(package: package)
-                }
-            }
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.xl)
-        }
-        .redacted(reason: .placeholder)
-        .allowsHitTesting(false)
-        .accessibilityLabel("Loading package list")
-    }
-
-    private var loadingFormulaeRows: [InstalledBrewPackage] {
-        [
-            InstalledBrewPackage(
-                package: BrewPackage(
-                    name: "Placeholder Formula",
-                    displayName: "Placeholder Formula",
-                    kind: .formula,
-                    description: "Placeholder description text for loading row.",
-                    homepage: "",
-                    latestVersion: "0.0.0",
-                    dependencies: [],
-                ),
-                installedVersions: ["0.0.0"],
-                outdated: false,
-            ),
-            InstalledBrewPackage(
-                package: BrewPackage(
-                    name: "Placeholder Formula",
-                    displayName: "Placeholder Formula",
-                    kind: .formula,
-                    description: "Placeholder description text for loading row.",
-                    homepage: "",
-                    latestVersion: "0.0.0",
-                    dependencies: [],
-                ),
-                installedVersions: ["0.0.0"],
-                outdated: false,
-            ),
-            InstalledBrewPackage(
-                package: BrewPackage(
-                    name: "Placeholder Formula",
-                    displayName: "Placeholder Formula",
-                    kind: .formula,
-                    description: "Placeholder description text for loading row.",
-                    homepage: "",
-                    latestVersion: "0.0.0",
-                    dependencies: [],
-                ),
-                installedVersions: ["0.0.0"],
-                outdated: false,
-            ),
-        ]
-    }
-
-    private func errorView(_ message: String) -> some View {
-        Text(message)
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewStatusError)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.sm)
-            .accessibilityLabel(message)
     }
 }
 

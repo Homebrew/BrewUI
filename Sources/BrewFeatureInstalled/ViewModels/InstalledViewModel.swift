@@ -29,19 +29,6 @@ struct InstalledPackagesContent: Equatable {
     }
 }
 
-enum InstalledLoadState: Equatable {
-    case loading
-    case loaded(InstalledPackagesContent)
-    case error(String)
-
-    var isLoaded: Bool {
-        if case .loaded = self {
-            return true
-        }
-        return false
-    }
-}
-
 @Observable
 @MainActor
 final class InstalledViewModel {
@@ -60,12 +47,12 @@ final class InstalledViewModel {
 
     /// Projects the shared repository's inventory through the active search query. The repository is the
     /// single source of truth; this view model owns only screen-local search and selection state.
-    var state: InstalledLoadState {
+    var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
             .loading
         case let .failed(error):
-            .error(Self.userMessage(for: error))
+            .failed(Self.userMessage(for: error))
         case let .loaded(packages):
             .loaded(Self.filteredContent(InstalledPackagesContent(packages: packages), query: searchQuery))
         }
@@ -106,8 +93,16 @@ final class InstalledViewModel {
     }
 
     /// Loads from Homebrew via the shared repository (`ARCHITECTURE.md`: View → ViewModel → Repository → Service).
-    init(repository: any InstalledInventoryObserving) {
+    /// `initialSelection` seeds `selectedPackageID` for deep links (e.g. cross-tab navigation from a
+    /// "Used by" tap). It's intentionally not gated on `allRows` — when the repo is still loading, the
+    /// existing `activeSelectedPackageID` fallback returns nil, and once the inventory lands the
+    /// candidate resolves naturally via observation-driven re-render.
+    init(
+        repository: any InstalledInventoryObserving,
+        initialSelection: InstalledBrewPackage.ID? = nil,
+    ) {
         self.repository = repository
+        selectedPackageID = initialSelection
     }
 
     func load() async {

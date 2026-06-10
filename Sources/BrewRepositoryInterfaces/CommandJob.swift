@@ -96,6 +96,8 @@ public extension CommandJob {
             userFacingCommand(kind: kind, name: packageID.name)
         case let .maintenance(_, displayCommand):
             displayCommand
+        case .bulkUpgrade:
+            BrewOperationID.bulkUpgradeDisplayCommand
         }
         return CommandJob(
             id: id,
@@ -127,9 +129,10 @@ public extension CommandJob {
         case .uninstallCask:
             verb = "uninstall"
             isCask = true
-        case .doctorFix, .doctorRead:
-            // Unreachable: both doctor kinds always use a `.maintenance` id, which materializes from its
-            // stored `displayCommand` rather than this package-name synthesis. Fall back defensively.
+        case .doctorFix, .doctorRead, .upgradeAll:
+            // Unreachable: doctor kinds use `.maintenance` ids, and `.upgradeAll` uses `.bulkUpgrade` —
+            // both materialize their display command in the outer switch rather than via package-name
+            // synthesis. Fall back defensively.
             return "brew"
         }
         if isCask {

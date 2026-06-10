@@ -54,12 +54,12 @@ final class InstalledListRowViewModel {
         InstalledBrewVersionFormatting.upgradeDisplayLabel(from: package.latestVersion)
     }
 
-    var showsUpdateAvailable: Bool {
+    var showsUpgradeAvailable: Bool {
         package.outdated && availableVersionLabel != nil
     }
 
     var versionPresentation: InstalledListRowVersionPresentation {
-        if showsUpdateAvailable, let latest = availableVersionLabel {
+        if showsUpgradeAvailable, let latest = availableVersionLabel {
             return .upgrade(current: installedVersionLabel, latest: latest)
         }
         return .installed(installedVersionLabel)
@@ -71,8 +71,8 @@ final class InstalledListRowViewModel {
             parts.append(descriptionText)
         }
         parts.append(installedVersionLabel)
-        if showsUpdateAvailable, let latest = availableVersionLabel {
-            parts.append("Update available to \(latest)")
+        if showsUpgradeAvailable, let latest = availableVersionLabel {
+            parts.append("Upgrade available to \(latest)")
         } else {
             parts.append("Installed and up to date")
         }

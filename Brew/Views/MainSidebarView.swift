@@ -3,12 +3,14 @@
 //  Brew
 //
 
+import BrewFeatureInstalled
 import BrewUIComponents
 import SwiftUI
 
 /// Primary navigation items for the main window sidebar.
 enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     case installed
+    case upgrades
     case discover
     case doctor
     case configuration
@@ -48,6 +50,15 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.sm)
 
             sidebarRow(
+                title: "Upgrades",
+                systemImage: "arrow.triangle.2.circlepath",
+                item: .upgrades,
+                trailingAccessory: { UpgradesSidebarBadge() },
+            )
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.top, BrewSpacing.xs)
+
+            sidebarRow(
                 title: "Discover",
                 systemImage: "magnifyingglass",
                 item: .discover,
@@ -78,7 +89,12 @@ struct MainSidebarView: View {
     }
 
     @ViewBuilder
-    private func sidebarRow(title: String, systemImage: String, item: SidebarItem) -> some View {
+    private func sidebarRow(
+        title: String,
+        systemImage: String,
+        item: SidebarItem,
+        @ViewBuilder trailingAccessory: () -> some View = { EmptyView() },
+    ) -> some View {
         let isSelected = selection == item
         Button {
             selection = item
@@ -91,6 +107,7 @@ struct MainSidebarView: View {
                     .font(.brewBody)
                     .foregroundStyle(isSelected ? Color.brewBrandPrimary : Color.brewTextPrimary)
                 Spacer(minLength: 0)
+                trailingAccessory()
             }
             .padding(.horizontal, BrewSpacing.md)
             .padding(.vertical, BrewSpacing.sm)

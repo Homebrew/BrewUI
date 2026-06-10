@@ -6,22 +6,36 @@ import SwiftUI
 
 public struct InstalledColumnsRoot: View {
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+    @Binding private var deepLinkSelection: InstalledBrewPackage.ID?
 
-    public init() {}
+    public init(deepLinkSelection: Binding<InstalledBrewPackage.ID?> = .constant(nil)) {
+        _deepLinkSelection = deepLinkSelection
+    }
 
     public var body: some View {
-        InstalledColumns(installedPackagesRepository: installedPackagesRepository)
+        InstalledColumns(
+            installedPackagesRepository: installedPackagesRepository,
+            deepLinkSelection: $deepLinkSelection,
+        )
     }
 }
 
 /// Feature-owned content/detail columns for the main window.
 struct InstalledColumns: View {
     @State var viewModel: InstalledViewModel
+    @Binding var deepLinkSelection: InstalledBrewPackage.ID?
 
-    init(installedPackagesRepository: any InstalledPackagesRepository) {
+    init(
+        installedPackagesRepository: any InstalledPackagesRepository,
+        deepLinkSelection: Binding<InstalledBrewPackage.ID?>,
+    ) {
         _viewModel = State(
-            initialValue: .init(repository: installedPackagesRepository),
+            initialValue: .init(
+                repository: installedPackagesRepository,
+                initialSelection: deepLinkSelection.wrappedValue,
+            ),
         )
+        _deepLinkSelection = deepLinkSelection
     }
 
     var body: some View {
@@ -56,5 +70,8 @@ struct InstalledColumns: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .onAppear {
+            if deepLinkSelection != nil { deepLinkSelection = nil }
+        }
     }
 }

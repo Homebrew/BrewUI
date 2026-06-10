@@ -69,6 +69,17 @@ struct CommandJobTests {
         #expect(job.command == "brew link openssl@3")
     }
 
+    @Test func `materialize for bulk upgrade id renders the shared display command`() {
+        let job = CommandJob.materialize(
+            id: .bulkUpgrade,
+            kind: .upgradeAll,
+            phase: .running(.upgradeAll),
+        )
+
+        #expect(job.command == BrewOperationID.bulkUpgradeDisplayCommand)
+        #expect(job.command == "brew upgrade")
+    }
+
     @Test func `updatePhase from running to idle sets exit code zero`() {
         let job = CommandJob.materialize(
             id: BrewOperationID(kind: .formula, name: "gh"),

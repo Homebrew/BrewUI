@@ -39,7 +39,7 @@ struct UpgradePackageItem {
             return nil
         }
         return String(
-            localized: "Update to \(label)",
+            localized: "Upgrade to \(label)",
             comment: "Installed detail upgrade button; interpolated label shows target tap version.",
         )
     }

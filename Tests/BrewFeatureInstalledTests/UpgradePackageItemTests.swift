@@ -39,7 +39,7 @@ struct UpgradePackageItemTests {
         let item = UpgradePackageItem(
             package: InstalledBrewPackage.fixture(name: "wget", latestVersion: "2.0.0", outdated: true),
         )
-        #expect(item.primaryButtonTitle == "Update to v2.0.0")
+        #expect(item.primaryButtonTitle == "Upgrade to v2.0.0")
     }
 
     @Test func `primary button title is nil when no upgrade available`() {

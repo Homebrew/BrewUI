@@ -117,6 +117,54 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == .formula(name: "wget"))
     }
 
+    @Test @MainActor func `init with initialSelection picks that package when inventory contains it`() {
+        let git = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        let wget = InstalledBrewPackage.fixture(name: "wget", kind: .formula)
+        let repo = StubInstalledPackagesRepository(packages: [git, wget])
+
+        let vm = InstalledViewModel(repository: repo, initialSelection: wget.id)
+
+        #expect(vm.selectedPackage?.id == wget.id)
+    }
+
+    @Test @MainActor func `init with initialSelection falls back to first row when id not in inventory`() {
+        let git = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        let missing = InstalledBrewPackage.ID.formula(name: "not-installed")
+        let repo = StubInstalledPackagesRepository(packages: [git])
+
+        let vm = InstalledViewModel(repository: repo, initialSelection: missing)
+
+        // activeSelectedPackageID drops the candidate when it isn't in allRows
+        // and falls back to firstVisibleRowID — the deep link doesn't strand
+        // the UI on an empty selection.
+        #expect(vm.selectedPackage?.id == git.id)
+    }
+
+    @Test @MainActor func `init with initialSelection applies once load completes`() async {
+        let json = """
+        {
+          "formulae": [
+            { "name": "git", "installed": [{ "version": "1.0.0" }] },
+            { "name": "wget", "installed": [{ "version": "1.0.0" }] }
+          ],
+          "casks": []
+        }
+        """
+        let repo = InstalledPackagesTestSupport.repository(
+            commandRunner: QueuedBrewInfoRunner(infoJSON: [json]),
+        )
+        let target = InstalledBrewPackage.ID.formula(name: "wget")
+        let vm = InstalledViewModel(repository: repo, initialSelection: target)
+
+        // Repo is still .loading — allRows is empty so activeSelectedPackageID returns nil.
+        #expect(vm.selectedPackage == nil)
+
+        await vm.load()
+
+        // Repo just landed in .loaded; the deep-link id is now in allRows so it resolves.
+        #expect(vm.selectedPackage?.id == target)
+    }
+
     @Test @MainActor func `load preserves brew stderr in user facing error state`() async {
         let vm = makeInstalledViewModel(
             repository: failingInstalledRepository(
@@ -126,7 +174,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }
@@ -138,7 +186,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }
@@ -154,7 +202,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }
@@ -166,7 +214,7 @@ struct InstalledViewModelTests {
 
         await vm.load()
 
-        guard case let .error(message) = vm.state else {
+        guard case let .failed(message) = vm.state else {
             Issue.record("expected error state")
             return
         }
