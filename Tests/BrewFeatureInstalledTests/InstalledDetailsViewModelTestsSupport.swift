@@ -32,6 +32,7 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             continuation.yield(fixedPhase)
+            continuation.finish()
         }
     }
 
