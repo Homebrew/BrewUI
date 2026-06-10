@@ -4,8 +4,6 @@
 //
 
 import BrewCore
-import BrewRepositoryInterfaces
-import Foundation
 
 extension InstalledPackagesContent: Placeholdable {
     /// A small mixed-kind stub so the redacted skeleton renders both the Formulae and Casks

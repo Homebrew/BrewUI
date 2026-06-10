@@ -4,7 +4,6 @@
 //
 
 import BrewCore
-import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
@@ -233,6 +232,7 @@ struct UpgradesPackagesView: View {
 }
 
 #if DEBUG
+    import BrewRepositoryInterfaces
 
     #Preview("Upgrades list - loaded") {
         let viewModel = UpgradesViewModel(
