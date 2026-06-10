@@ -242,6 +242,30 @@ struct UpgradesViewModelTests {
         #expect(!vm.isUpgradingAny)
     }
 
+    @Test @MainActor func `isUpgradingAny ignores unrelated operations on the shared phase stream`() async {
+        let center = PhaseStreamingCommandCenter()
+        let vm = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(packages: Self.mixedPackages),
+            brewCommandCenter: center,
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        await center.waitForSubscriber()
+
+        // A single-package install (or any non-bulk op) flowing through the shared command center
+        // must not flip the Upgrade All button's disabled state.
+        let unrelated = BrewOperationID.package(.formula(name: "wget"))
+        await center.emit(id: unrelated, phase: .running(.installFormula))
+
+        // Give the observer a few yields to (incorrectly) react before asserting the negative.
+        for _ in 0 ..< 10 {
+            await Task.yield()
+        }
+        #expect(!vm.isUpgradingAny)
+
+        await center.emit(id: unrelated, phase: .idle)
+    }
+
     // MARK: - Helpers
 
     private static var mixedPackages: [InstalledBrewPackage] {

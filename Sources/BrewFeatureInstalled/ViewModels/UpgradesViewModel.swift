@@ -262,10 +262,13 @@ final class UpgradesViewModel {
     }
 
     /// Maintains `runningIDs` from the command-center stream so `isUpgradingAny`
-    /// reflects whether any batch-upgrade is still in flight.
+    /// reflects whether the bulk upgrade is still in flight. Filtered to
+    /// `.bulkUpgrade` — the only id this VM submits — so unrelated installs,
+    /// uninstalls, and doctor fixes flowing through the shared command center
+    /// don't disable the *Upgrade All* button.
     private func observePhaseChanges() async {
         let stream = await brewCommandCenter.allPhaseChanges()
-        for await (id, phase) in stream {
+        for await (id, phase) in stream where id == .bulkUpgrade {
             switch phase {
             case .running:
                 runningIDs.insert(id)
