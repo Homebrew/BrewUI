@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EEC39EBE2F5AB4B900269514"
-               BuildableName = "Brew.app"
-               BlueprintName = "Brew"
-               ReferencedContainer = "container:Brew.xcodeproj">
+               BuildableName = "Homebrew.app"
+               BlueprintName = "Homebrew"
+               ReferencedContainer = "container:Homebrew.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -30,7 +30,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:Brew-Unit.xctestplan"
+            reference = "container:Brew-UI.xctestplan"
             default = "YES">
          </TestPlanReference>
       </TestPlans>
@@ -50,9 +50,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EEC39EBE2F5AB4B900269514"
-            BuildableName = "Brew.app"
-            BlueprintName = "Brew"
-            ReferencedContainer = "container:Brew.xcodeproj">
+            BuildableName = "Homebrew.app"
+            BlueprintName = "Homebrew"
+            ReferencedContainer = "container:Homebrew.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -67,9 +67,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EEC39EBE2F5AB4B900269514"
-            BuildableName = "Brew.app"
-            BlueprintName = "Brew"
-            ReferencedContainer = "container:Brew.xcodeproj">
+            BuildableName = "Homebrew.app"
+            BlueprintName = "Homebrew"
+            ReferencedContainer = "container:Homebrew.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

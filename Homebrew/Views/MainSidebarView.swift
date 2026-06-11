@@ -26,8 +26,6 @@ struct MainSidebarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: BrewSpacing.sm) {
-                Text("🍺")
-                    .font(.brewTitle2)
                 Text("Homebrew")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)

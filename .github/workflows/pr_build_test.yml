@@ -8,7 +8,7 @@ on:
       - "Brew/**"
       - "BrewTests/**"
       - "BrewUITests/**"
-      - "Brew.xcodeproj/**"
+      - "Homebrew.xcodeproj/**"
       - "Brew.entitlements"
       - "Package.resolved"
       - ".github/workflows/pr_build_test.yml"
@@ -18,7 +18,7 @@ on:
       - "Brew/**"
       - "BrewTests/**"
       - "BrewUITests/**"
-      - "Brew.xcodeproj/**"
+      - "Homebrew.xcodeproj/**"
       - "Brew.entitlements"
       - "Package.resolved"
       - ".github/workflows/pr_build_test.yml"
@@ -40,13 +40,13 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Resolve package dependencies
-        run: xcodebuild -resolvePackageDependencies -project Brew.xcodeproj
+        run: xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
 
       - name: Build and test
         run: |
           set -o pipefail
           xcodebuild test \
-            -project Brew.xcodeproj \
+            -project Homebrew.xcodeproj \
             -scheme Brew-Unit \
             -destination "platform=macOS" \
             -skipPackagePluginValidation \
