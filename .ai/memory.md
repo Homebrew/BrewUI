@@ -66,7 +66,7 @@
   - `BrewTests` = unit tests
   - `BrewUITests` = UI tests
 - Repository root folder remains `BrewUI` (part of a larger parent project layout).
-- App bundle/package identifier remains unchanged for compatibility (`sh.brew.BrewUI`), while test bundle identifiers were updated to match renamed targets (`sh.brew.BrewTests` and `sh.brew.BrewUITests`).
+- App bundle identifier and installer package identifier changed to `sh.brew.app` (was `sh.brew.BrewUI`). Test bundle identifiers track renamed targets (`sh.brew.BrewTests` and `sh.brew.BrewUITests`).
 
 ## 2026-03-15 — Actionlint Policy-Compliant Pattern
 
