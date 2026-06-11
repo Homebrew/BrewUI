@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Resolve package dependencies
-        run: xcodebuild -resolvePackageDependencies -project Brew.xcodeproj
+        run: xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
 
       - name: Run UI smoke test
         run: |
@@ -53,7 +53,7 @@ jobs:
 
           XCODEBUILD_ARGS=(
             test
-            -project Brew.xcodeproj
+            -project Homebrew.xcodeproj
             -scheme Brew-UI
             -destination "platform=macOS"
             -skipPackagePluginValidation

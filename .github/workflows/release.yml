@@ -87,7 +87,7 @@ jobs:
       - name: Build and archive
         run: |
           xcodebuild archive \
-            -project Brew.xcodeproj \
+            -project Homebrew.xcodeproj \
             -scheme Brew \
             -configuration Release \
             -archivePath "$RUNNER_TEMP/Brew.xcarchive" \
@@ -140,7 +140,7 @@ jobs:
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           pkgbuild \
             --root "$RUNNER_TEMP/export" \
-            --identifier "sh.brew.BrewUI" \
+            --identifier "sh.brew.app" \
             --version "$VERSION" \
             --install-location "/Applications" \
             --scripts scripts \
