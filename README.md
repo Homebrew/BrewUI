@@ -30,7 +30,7 @@ After cloning:
 ./scripts/bootstrap
 ```
 
-This installs Mint from `Brewfile`, runs `mint bootstrap` to build the SwiftFormat and SwiftLint versions pinned in `Mintfile`, enables repository git hooks, and resolves Swift package dependencies for `Brew.xcodeproj`.
+This installs Mint from `Brewfile`, runs `mint bootstrap` to build the SwiftFormat and SwiftLint versions pinned in `Mintfile`, enables repository git hooks, and resolves Swift package dependencies for `Homebrew.xcodeproj`.
 
 ### Pre-commit formatting and linting
 

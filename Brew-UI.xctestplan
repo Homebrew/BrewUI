@@ -14,7 +14,7 @@
   "testTargets" : [
     {
       "target" : {
-        "containerPath" : "container:Brew.xcodeproj",
+        "containerPath" : "container:Homebrew.xcodeproj",
         "identifier" : "EEC39ED52F5AB4B900269514",
         "name" : "BrewUITests"
       }
