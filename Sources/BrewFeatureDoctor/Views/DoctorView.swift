@@ -101,7 +101,7 @@ struct DoctorView: View {
                 }
             }
         }
-        .listStyle(.plain)
+        .listStyle(.inset)
         .accessibilityLabel("Doctor issues")
     }
 }

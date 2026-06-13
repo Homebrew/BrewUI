@@ -78,7 +78,7 @@ struct InstalledPackagesView: View {
                     }
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.inset)
             .accessibilityLabel("Installed packages")
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
