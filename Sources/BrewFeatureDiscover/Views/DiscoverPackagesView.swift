@@ -102,7 +102,7 @@ private struct DiscoverPackageSections: View {
                     }
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.inset)
             .accessibilityLabel("Discover packages")
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)

@@ -110,7 +110,7 @@ struct UpgradesPackagesView: View {
                     }
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.inset)
             .accessibilityLabel("Outdated packages")
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
