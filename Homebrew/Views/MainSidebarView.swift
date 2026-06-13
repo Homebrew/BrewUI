@@ -25,7 +25,11 @@ struct MainSidebarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: BrewSpacing.sm) {
+            HStack(alignment: .bottom, spacing: BrewSpacing.sm) {
+                Image("Mark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 24)
                 Text("Homebrew")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
@@ -41,7 +45,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Installed",
-                systemImage: "cube.box.fill",
+                emoji: "📦",
                 item: .installed,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -49,7 +53,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Upgrades",
-                systemImage: "arrow.triangle.2.circlepath",
+                emoji: "⬆️",
                 item: .upgrades,
                 trailingAccessory: { UpgradesSidebarBadge() },
             )
@@ -58,7 +62,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Discover",
-                systemImage: "magnifyingglass",
+                emoji: "🔍",
                 item: .discover,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -66,7 +70,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Doctor",
-                systemImage: "stethoscope",
+                emoji: "🩺",
                 item: .doctor,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -74,7 +78,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Configuration",
-                systemImage: "gearshape",
+                emoji: "⚙️",
                 item: .configuration,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -89,7 +93,7 @@ struct MainSidebarView: View {
     @ViewBuilder
     private func sidebarRow(
         title: String,
-        systemImage: String,
+        emoji: String,
         item: SidebarItem,
         @ViewBuilder trailingAccessory: () -> some View = { EmptyView() },
     ) -> some View {
@@ -98,10 +102,7 @@ struct MainSidebarView: View {
             selection = item
         } label: {
             HStack(spacing: BrewSpacing.sm) {
-                Image(systemName: systemImage)
-                    .foregroundStyle(isSelected ? Color.brewBrandPrimary : Color.brewTextSecondary)
-                    .imageScale(.medium)
-                Text(title)
+                Text("\(emoji) \(title)")
                     .font(.brewBody)
                     .foregroundStyle(isSelected ? Color.brewBrandPrimary : Color.brewTextPrimary)
                 Spacer(minLength: 0)
