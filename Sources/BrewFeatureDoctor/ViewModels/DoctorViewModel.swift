@@ -5,6 +5,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -129,6 +130,15 @@ final class DoctorViewModel {
         selectedIssueID = id
     }
 
+    /// Issue identifiers in display order — severity-grouped (unsupported → danger → caution) and
+    /// flattened — so arrow-key navigation walks the visible list rather than the unordered raw report.
+    private var orderedVisibleIssueIDs: [Int] {
+        guard case let .loaded(report) = state else {
+            return []
+        }
+        return DoctorIssueGroup.grouped(from: report).flatMap(\.items).map(\.id)
+    }
+
     func isFixRunning(_ item: DoctorIssueItem) -> Bool {
         guard let token = item.fixToken else {
             return false
@@ -218,5 +228,15 @@ final class DoctorViewModel {
             runningFixTokens.remove(token)
             await load()
         }
+    }
+}
+
+extension DoctorViewModel: ListNavigable {
+    var orderedVisibleRowIDs: [Int] {
+        orderedVisibleIssueIDs
+    }
+
+    var currentSelectionID: Int? {
+        selectedIssueID
     }
 }

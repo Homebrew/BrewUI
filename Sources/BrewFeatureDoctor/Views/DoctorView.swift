@@ -12,6 +12,7 @@ import SwiftUI
 /// a small "checking" spinner in the header.
 struct DoctorView: View {
     @Bindable var viewModel: DoctorViewModel
+    @FocusState private var field: PaneField?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -19,6 +20,14 @@ struct DoctorView: View {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .focusedSceneValue(\.activePaneActions, paneActions)
+    }
+
+    private var paneActions: PaneActions {
+        PaneActions(
+            refresh: { Task { await viewModel.load() } },
+            clearSelection: { viewModel.setSelection(nil) },
+        )
     }
 
     private var header: some View {
@@ -42,6 +51,7 @@ struct DoctorView: View {
                     Task { await viewModel.load() }
                 }
                 .controlSize(.small)
+                .keyboardShortcut("r", modifiers: .command)
                 .disabled(viewModel.isRefreshing)
             }
         }
@@ -103,6 +113,16 @@ struct DoctorView: View {
         }
         .listStyle(.inset)
         .accessibilityLabel("Doctor issues")
+        .keyboardListNavigation(viewModel)
+        .focused($field, equals: .list)
+        .onAppear {
+            if field == nil {
+                field = .list
+            }
+        }
+        .onExitCommand {
+            viewModel.setSelection(nil)
+        }
     }
 }
 
