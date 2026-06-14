@@ -163,6 +163,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                     }
                 }
                 .buttonStyle(.bordered)
+                .keyboardShortcut(.delete, modifiers: .command)
                 .opacity(viewModel.showsUninstallBlockedPrimaryButtonChrome ? 0.65 : 1)
                 .disabled(viewModel.isMutatingPackage)
                 .accessibilityLabel(uninstall.primaryButtonTitle)
@@ -227,6 +228,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                             }
                         }
                         .buttonStyle(.borderedProminent)
+                        .keyboardShortcut(.return, modifiers: .command)
                         .disabled(viewModel.isUpgrading)
                         .accessibilityLabel(title)
                     }

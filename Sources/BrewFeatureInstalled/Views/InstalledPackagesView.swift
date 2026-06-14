@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import AppKit
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -11,6 +12,7 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
+    @FocusState private var field: PaneField?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -41,6 +43,32 @@ struct InstalledPackagesView: View {
             placement: .toolbar,
             prompt: "Search Installed Packages",
         )
+        .searchFocused($field, equals: .search)
+        .focusedSceneValue(\.activePaneActions, paneActions)
+    }
+
+    private var paneActions: PaneActions {
+        PaneActions(
+            refresh: { Task { await viewModel.refresh() } },
+            focusSearch: { field = .search },
+            clearSelection: {
+                if field == .search {
+                    viewModel.searchQuery = ""
+                    field = .list
+                } else {
+                    viewModel.clearSelection()
+                }
+            },
+            copySelectionName: viewModel.copyableSelectedPackageName().map { name in
+                { Self.copyToPasteboard(name) }
+            },
+        )
+    }
+
+    private static func copyToPasteboard(_ string: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(string, forType: .string)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
@@ -80,8 +108,13 @@ struct InstalledPackagesView: View {
             }
             .listStyle(.inset)
             .accessibilityLabel("Installed packages")
+            .keyboardListNavigation(viewModel)
+            .focused($field, equals: .list)
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
+                if field == nil {
+                    field = .list
+                }
             }
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, in: content, with: proxy)
@@ -90,7 +123,12 @@ struct InstalledPackagesView: View {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
             .onExitCommand {
-                viewModel.clearSelection()
+                if field == .search {
+                    viewModel.searchQuery = ""
+                    field = .list
+                } else {
+                    viewModel.clearSelection()
+                }
             }
         }
     }

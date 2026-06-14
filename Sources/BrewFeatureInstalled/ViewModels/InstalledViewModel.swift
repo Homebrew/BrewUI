@@ -138,6 +138,12 @@ final class InstalledViewModel {
         setSelection(id)
     }
 
+    /// The package name (formula name or cask token) to put on the pasteboard when the user invokes
+    /// `Cmd+C` while the list has focus. Returns `nil` when nothing is selected.
+    func copyableSelectedPackageName() -> String? {
+        selectedPackage?.name
+    }
+
     private var isSearchActive: Bool {
         !Self.normalizedSearchQuery(searchQuery).isEmpty
     }
@@ -147,6 +153,15 @@ final class InstalledViewModel {
             return []
         }
         return content.packages
+    }
+
+    /// Row identifiers in display order (Formulae section then Casks section), used by
+    /// ``ListNavigable`` for arrow-key navigation.
+    private var orderedRowIDsInDisplayOrder: [InstalledBrewPackage.ID] {
+        guard case let .loaded(content) = state else {
+            return []
+        }
+        return content.formulaPackages.map(\.id) + content.caskPackages.map(\.id)
     }
 
     private func updateSelectionForSearchQueryChange(from oldQuery: String, to newQuery: String) {
@@ -227,5 +242,15 @@ final class InstalledViewModel {
         default:
             return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
         }
+    }
+}
+
+extension InstalledViewModel: ListNavigable {
+    var orderedVisibleRowIDs: [InstalledBrewPackage.ID] {
+        orderedRowIDsInDisplayOrder
+    }
+
+    var currentSelectionID: InstalledBrewPackage.ID? {
+        activeSelectedPackageID
     }
 }
