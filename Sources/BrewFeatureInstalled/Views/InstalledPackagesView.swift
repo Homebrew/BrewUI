@@ -76,33 +76,13 @@ struct InstalledPackagesView: View {
             List {
                 if content.shouldShowFormulaeSection {
                     Section("Formulae") {
-                        ForEach(content.formulaPackages) { package in
-                            listRow(for: package)
-                                .id(package.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(package.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                        packageRows(content.formulaPackages)
                     }
                 }
 
                 if content.shouldShowCasksSection {
                     Section("Casks") {
-                        ForEach(content.caskPackages) { package in
-                            listRow(for: package)
-                                .id(package.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(package.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                        packageRows(content.caskPackages)
                     }
                 }
             }
@@ -135,6 +115,20 @@ struct InstalledPackagesView: View {
 
     private func listRow(for package: InstalledBrewPackage) -> some View {
         InstalledListRowRoot(package: package)
+    }
+
+    private func packageRows(_ packages: [InstalledBrewPackage]) -> some View {
+        ForEach(packages) { package in
+            listRow(for: package)
+                .id(package.id)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    viewModel.setSelection(package.id)
+                }
+                .listRowBackground(
+                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                )
+        }
     }
 
     private func scrollToSelection(
