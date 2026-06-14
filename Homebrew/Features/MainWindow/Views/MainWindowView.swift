@@ -35,6 +35,7 @@ struct MainWindowView: View {
         }
         .navigationSplitViewStyle(.automatic)
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
+        .focusedSceneValue(\.selectedSidebarItem, $selectedSidebarItem)
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
             selectedSidebarItem = .installed

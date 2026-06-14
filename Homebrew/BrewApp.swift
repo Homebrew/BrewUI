@@ -95,6 +95,8 @@ struct BrewApp: App {
         )
         .commands {
             ConsoleCommands()
+            SidebarCommands()
+            PaneCommands()
         }
         #if DEBUG
         .commands {
