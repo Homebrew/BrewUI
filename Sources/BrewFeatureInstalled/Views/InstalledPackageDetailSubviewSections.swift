@@ -171,6 +171,42 @@ struct UninstallBlockedCallout: View {
     }
 }
 
+enum RelationshipRowID: Hashable {
+    case relationship(HomebrewPackageID)
+    case showMore
+}
+
+/// Pure helper: what rows are arrow-key navigable in a relationship list, in display order. Extracted
+/// so it can be unit-tested without instantiating SwiftUI views.
+func relationshipNavigableIDs(
+    relationships: [PackageRelationshipItem],
+    isExpanded: Bool,
+    collapsedRelationshipCount: Int,
+) -> [RelationshipRowID] {
+    guard !relationships.isEmpty else { return [] }
+    let visibleCount = isExpanded || relationships.count <= collapsedRelationshipCount
+        ? relationships.count
+        : collapsedRelationshipCount
+    var ids = relationships.prefix(visibleCount).map { RelationshipRowID.relationship($0.id) }
+    if relationships.count > collapsedRelationshipCount {
+        ids.append(.showMore)
+    }
+    return ids
+}
+
+/// Pure helper: the row that focus should land on after a collapsed section auto-expands due to
+/// Down pressed on the last visible row. Returns nil if no expansion is appropriate.
+func relationshipAutoExpandTargetID(
+    relationships: [PackageRelationshipItem],
+    isExpanded: Bool,
+    collapsedRelationshipCount: Int,
+) -> RelationshipRowID? {
+    guard !isExpanded, relationships.indices.contains(collapsedRelationshipCount) else {
+        return nil
+    }
+    return .relationship(relationships[collapsedRelationshipCount].id)
+}
+
 struct InstalledPackageDetailRelationshipList: View {
     let title: String
     let relationships: [PackageRelationshipItem]
@@ -179,6 +215,7 @@ struct InstalledPackageDetailRelationshipList: View {
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     let showsHeading: Bool
     @Binding var isExpanded: Bool
+    @FocusState private var focusedRow: RelationshipRowID?
 
     init(
         title: String,
@@ -213,25 +250,75 @@ struct InstalledPackageDetailRelationshipList: View {
                     relationshipRow(relationship)
                 }
                 if relationships.count > collapsedRelationshipCount {
-                    Button {
-                        isExpanded.toggle()
-                    } label: {
-                        Text(
-                            isExpanded
-                                ? "Show less"
-                                : "+\(relationships.count - collapsedRelationshipCount) more…",
-                        )
-                        .font(.brewCallout)
-                        .foregroundStyle(Color.brewBrandPrimary)
-                    }
-                    .buttonStyle(.plain)
+                    showMoreRow
                 }
             }
         }
+        .focusableListSection(
+            orderedIDs: navigableIDs,
+            focusedRow: $focusedRow,
+            onDownPastLast: autoExpandStep,
+        )
+    }
+
+    private var navigableIDs: [RelationshipRowID] {
+        relationshipNavigableIDs(
+            relationships: relationships,
+            isExpanded: isExpanded,
+            collapsedRelationshipCount: collapsedRelationshipCount,
+        )
+    }
+
+    private var autoExpandStep: (() -> RelationshipRowID?)? {
+        guard let targetID = relationshipAutoExpandTargetID(
+            relationships: relationships,
+            isExpanded: isExpanded,
+            collapsedRelationshipCount: collapsedRelationshipCount,
+        ) else {
+            return nil
+        }
+        return {
+            isExpanded = true
+            return targetID
+        }
+    }
+
+    @ViewBuilder
+    private var showMoreRow: some View {
+        let isFocused = focusedRow == .showMore
+        Button {
+            isExpanded.toggle()
+        } label: {
+            Text(
+                isExpanded
+                    ? "Show less"
+                    : "+\(relationships.count - collapsedRelationshipCount) more…",
+            )
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewBrandPrimary)
+            .padding(.vertical, BrewSpacing.xxs)
+            .padding(.horizontal, BrewSpacing.xs)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                RoundedRectangle(cornerRadius: BrewRadius.sm)
+                    .fill(isFocused ? Color.brewBrandTint : Color.clear)
+            }
+            .overlay {
+                if isFocused {
+                    RoundedRectangle(cornerRadius: BrewRadius.sm)
+                        .strokeBorder(Color.brewBrandPrimary, lineWidth: 1)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .focused($focusedRow, equals: .showMore)
     }
 
     private func relationshipRow(_ relationship: PackageRelationshipItem) -> some View {
         let isInstalled = relationship.isInstalledInInventory
+        let rowID = RelationshipRowID.relationship(relationship.id)
+        let isFocused = focusedRow == rowID
         return Button {
             if let installedPackageID = relationship.installedPackageID {
                 onSelectInstalledPackage(installedPackageID)
@@ -252,10 +339,22 @@ struct InstalledPackageDetailRelationshipList: View {
                 }
             }
             .padding(.vertical, BrewSpacing.xs)
+            .padding(.horizontal, BrewSpacing.xs)
+            .background {
+                RoundedRectangle(cornerRadius: BrewRadius.sm)
+                    .fill(isFocused ? Color.brewBrandTint : Color.clear)
+            }
+            .overlay {
+                if isFocused {
+                    RoundedRectangle(cornerRadius: BrewRadius.sm)
+                        .strokeBorder(Color.brewBrandPrimary, lineWidth: 1)
+                }
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .disabled(!isInstalled)
+        .focused($focusedRow, equals: rowID)
         .accessibilityLabel(
             isInstalled
                 ? "Open installed package \(relationship.displayName)"
