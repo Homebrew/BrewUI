@@ -1,3 +1,4 @@
+import AppKit
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -6,6 +7,7 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
+    @FocusState private var field: PaneField?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -16,7 +18,7 @@ struct DiscoverPackagesView: View {
                 state: viewModel.activeState,
                 onRetry: { Task { await viewModel.reloadActive() } },
                 loaded: { packages in
-                    DiscoverPackageSections(viewModel: viewModel, packages: packages)
+                    DiscoverPackageSections(viewModel: viewModel, packages: packages, field: $field)
                 },
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -27,6 +29,8 @@ struct DiscoverPackagesView: View {
             placement: .toolbar,
             prompt: "Search Homebrew's Catalogue",
         )
+        .searchFocused($field, equals: .search)
+        .focusedSceneValue(\.activePaneActions, paneActions)
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
             try? await Task.sleep(for: .milliseconds(250))
@@ -35,6 +39,30 @@ struct DiscoverPackagesView: View {
             }
             await viewModel.search()
         }
+    }
+
+    private var paneActions: PaneActions {
+        PaneActions(
+            refresh: { Task { await viewModel.reloadActive() } },
+            focusSearch: { field = .search },
+            clearSelection: {
+                if field == .search {
+                    viewModel.query = ""
+                    field = .list
+                } else {
+                    viewModel.setSelection(nil)
+                }
+            },
+            copySelectionName: viewModel.copyableSelectedPackageName().map { name in
+                { Self.copyToPasteboard(name) }
+            },
+        )
+    }
+
+    private static func copyToPasteboard(_ string: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(string, forType: .string)
     }
 
     private var header: some View {
@@ -79,6 +107,7 @@ private struct DiscoverPackageSections: View {
     let viewModel: DiscoverViewModel
     /// The redacted-placeholder or loaded packages handed down by `AsyncContentView` for this render.
     let packages: [DiscoveryBrewPackage]
+    var field: FocusState<PaneField?>.Binding
 
     private var formulae: [DiscoveryBrewPackage] {
         viewModel.showsFormulaeSection ? DiscoverViewModel.sortedSection(packages, kind: .formula) : []
@@ -104,8 +133,13 @@ private struct DiscoverPackageSections: View {
             }
             .listStyle(.inset)
             .accessibilityLabel("Discover packages")
+            .keyboardListNavigation(viewModel)
+            .focused(field, equals: .list)
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
+                if field.wrappedValue == nil {
+                    field.wrappedValue = .list
+                }
             }
             .onChange(of: viewModel.selectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, with: proxy)
@@ -114,7 +148,12 @@ private struct DiscoverPackageSections: View {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
             .onExitCommand {
-                viewModel.setSelection(nil)
+                if field.wrappedValue == .search {
+                    viewModel.query = ""
+                    field.wrappedValue = .list
+                } else {
+                    viewModel.setSelection(nil)
+                }
             }
         }
     }

@@ -242,6 +242,7 @@ private struct DiscoverPackageInstallSection: View {
                     }
                 }
                 .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.return, modifiers: .command)
                 .disabled(viewModel.isInstalling)
                 .accessibilityLabel(Text("Install"))
 

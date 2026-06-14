@@ -256,6 +256,12 @@ final class DiscoverViewModel {
         }
     }
 
+    /// The package name to put on the pasteboard when the user invokes `Cmd+C` while the list has focus.
+    /// Returns `nil` when nothing is selected.
+    func copyableSelectedPackageName() -> String? {
+        selectedPackage?.name
+    }
+
     private func synchronizeSelectionWithVisibleRows() {
         let visibleIDs = Set(visiblePackages.map(\.id))
         if let selectedPackageID, !visibleIDs.contains(selectedPackageID) {
@@ -287,6 +293,10 @@ final class DiscoverViewModel {
         return lhs.thirtyDayInstallCount > rhs.thirtyDayInstallCount
     }
 
+    private var orderedVisibleRowIDsForKeyboardNav: [BrewPackage.ID] {
+        visiblePackages.map(\.id)
+    }
+
     private static func userMessage(for error: Error, searching: Bool) -> String {
         if case let BrewAPIClientError.transport(underlying) = error {
             return underlying
@@ -301,5 +311,15 @@ final class DiscoverViewModel {
             localized: "Something went wrong loading Discover packages.",
             comment: "Discover tab generic load failure",
         )
+    }
+}
+
+extension DiscoverViewModel: ListNavigable {
+    var orderedVisibleRowIDs: [BrewPackage.ID] {
+        orderedVisibleRowIDsForKeyboardNav
+    }
+
+    var currentSelectionID: BrewPackage.ID? {
+        selectedPackageID
     }
 }
