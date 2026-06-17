@@ -7,19 +7,6 @@ import BrewFeatureInstalled
 import BrewUIComponents
 import SwiftUI
 
-/// Primary navigation items for the main window sidebar.
-enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
-    case installed
-    case upgrades
-    case discover
-    case doctor
-    case configuration
-
-    var id: String {
-        rawValue
-    }
-}
-
 struct MainSidebarView: View {
     @Binding var selection: SidebarItem
 
