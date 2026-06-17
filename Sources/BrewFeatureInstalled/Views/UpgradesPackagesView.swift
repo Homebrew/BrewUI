@@ -11,6 +11,7 @@ import SwiftUI
 /// and a friendly empty state when nothing is outdated.
 struct UpgradesPackagesView: View {
     @Bindable var viewModel: UpgradesViewModel
+    @State private var searchPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -35,9 +36,11 @@ struct UpgradesPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
+            isPresented: $searchPresented,
             placement: .toolbar,
             prompt: "Search Upgrades",
         )
+        .focusedSceneValue(\.searchPresented, $searchPresented)
     }
 
     private var header: some View {

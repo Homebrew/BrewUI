@@ -11,6 +11,7 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
+    @State private var searchPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -38,9 +39,11 @@ struct InstalledPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
+            isPresented: $searchPresented,
             placement: .toolbar,
             prompt: "Search Installed Packages",
         )
+        .focusedSceneValue(\.searchPresented, $searchPresented)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
