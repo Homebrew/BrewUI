@@ -82,16 +82,16 @@ struct DoctorView: View {
     }
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
-        List {
+        List(selection: Binding(
+            get: { viewModel.selectedIssueID },
+            set: { viewModel.setSelection($0) },
+        )) {
             ForEach(groups) { group in
                 Section {
                     ForEach(group.items) { item in
                         DoctorIssueRowView(item: item)
                             .id(item.id)
                             .contentShape(Rectangle())
-                            .onTapGesture {
-                                viewModel.setSelection(item.id)
-                            }
                             .listRowBackground(
                                 viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
                             )

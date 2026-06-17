@@ -90,7 +90,10 @@ private struct DiscoverPackageSections: View {
 
     var body: some View {
         ScrollViewReader { proxy in
-            List {
+            List(selection: Binding(
+                get: { viewModel.selectedPackageID },
+                set: { viewModel.setSelection($0) },
+            )) {
                 if viewModel.showsFormulaeSection {
                     Section(viewModel.formulaeSectionTitle) {
                         sectionContent(formulae, kind: .formula)

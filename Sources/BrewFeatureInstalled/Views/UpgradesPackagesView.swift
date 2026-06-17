@@ -77,36 +77,25 @@ struct UpgradesPackagesView: View {
 
     private func upgradesList(_ content: InstalledPackagesContent) -> some View {
         ScrollViewReader { proxy in
-            List {
+            List(selection: Binding(
+                get: { viewModel.activeSelectedPackageID },
+                set: { newValue in
+                    if let newValue {
+                        viewModel.setSelection(newValue)
+                    } else {
+                        viewModel.clearSelection()
+                    }
+                },
+            )) {
                 if content.shouldShowFormulaeSection {
                     Section("Formulae") {
-                        ForEach(content.formulaPackages) { package in
-                            listRow(for: package)
-                                .id(package.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(package.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                        sectionContent(for: content.formulaPackages)
                     }
                 }
 
                 if content.shouldShowCasksSection {
                     Section("Casks") {
-                        ForEach(content.caskPackages) { package in
-                            listRow(for: package)
-                                .id(package.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(package.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                        sectionContent(for: content.caskPackages)
                     }
                 }
             }
@@ -124,6 +113,17 @@ struct UpgradesPackagesView: View {
             .onExitCommand {
                 viewModel.clearSelection()
             }
+        }
+    }
+
+    private func sectionContent(for packages: [InstalledBrewPackage]) -> some View {
+        ForEach(packages) { package in
+            listRow(for: package)
+                .id(package.id)
+                .contentShape(Rectangle())
+                .listRowBackground(
+                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                )
         }
     }
 
