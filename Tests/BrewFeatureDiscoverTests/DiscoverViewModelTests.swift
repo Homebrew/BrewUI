@@ -21,6 +21,7 @@ struct DiscoverViewModelTests {
                             thirtyDayInstallCount: 100,
                         ),
                     ],
+
                     topCasks: [
                         discoveryPackage(
                             name: "iterm2",
@@ -498,6 +499,52 @@ struct DiscoverViewModelTests {
         }
         #expect(message == "Something went wrong searching the catalogue.")
     }
+
+    @Test @MainActor func `isListFocused is true when trending has loaded and not searching`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = nil
+
+        #expect(viewModel.isListFocused)
+    }
+
+    @Test @MainActor func `isListFocused is false when trending has NOT loaded and not searching`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = nil
+
+        #expect(!viewModel.isListFocused)
+    }
+
+    @Test @MainActor func `isListFocused is false when trending has loaded and searching`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.query = "foo"
+
+        #expect(!viewModel.isListFocused)
+    }
 }
 
 @MainActor
@@ -531,6 +578,10 @@ private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepositor
 @MainActor
 private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
     let error: Error
+
+    init(error: Error = DiscoverOddError()) {
+        self.error = error
+    }
 
     func loadTopPackages(
         limit _: Int,

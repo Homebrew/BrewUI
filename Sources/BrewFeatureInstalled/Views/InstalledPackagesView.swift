@@ -12,6 +12,7 @@ import SwiftUI
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
     @State private var searchPresented = false
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -74,7 +75,9 @@ struct InstalledPackagesView: View {
             .accessibilityLabel("Installed packages")
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
+                Task { isFocused = viewModel.state.isLoaded }
             }
+            .focused($isFocused)
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, in: content, with: proxy)
             }

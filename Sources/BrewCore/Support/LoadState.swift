@@ -21,6 +21,13 @@ public enum LoadState<Value, Failure> {
         }
         return value
     }
+
+    public var isLoaded: Bool {
+        guard case .loaded = self else {
+            return false
+        }
+        return true
+    }
 }
 
 extension LoadState: Equatable where Value: Equatable, Failure: Equatable {}

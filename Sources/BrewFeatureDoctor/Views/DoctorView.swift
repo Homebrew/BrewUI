@@ -12,6 +12,7 @@ import SwiftUI
 /// a small "checking" spinner in the header.
 struct DoctorView: View {
     @Bindable var viewModel: DoctorViewModel
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -101,6 +102,10 @@ struct DoctorView: View {
                 }
             }
         }
+        .onAppear {
+            Task { isFocused = viewModel.state.isLoaded }
+        }
+        .focused($isFocused)
         .listStyle(.inset)
         .accessibilityLabel("Doctor issues")
     }

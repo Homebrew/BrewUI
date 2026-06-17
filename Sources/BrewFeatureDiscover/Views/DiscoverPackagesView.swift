@@ -79,6 +79,8 @@ struct DiscoverPackagesView: View {
 /// Sectioned Discover list, split by package kind and filtered by the active scope. Renders an inline
 /// empty-state message when a visible section has no rows (e.g. a scope filter that excludes everything).
 private struct DiscoverPackageSections: View {
+    @FocusState private var isFocused: Bool
+
     let viewModel: DiscoverViewModel
     /// The redacted-placeholder or loaded packages handed down by `AsyncContentView` for this render.
     let packages: [DiscoveryBrewPackage]
@@ -112,7 +114,11 @@ private struct DiscoverPackageSections: View {
             .accessibilityLabel("Discover packages")
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
+                Task {
+                    isFocused = viewModel.trending.isLoaded && !viewModel.isSearching
+                }
             }
+            .focused($isFocused)
             .onChange(of: viewModel.selectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, with: proxy)
             }

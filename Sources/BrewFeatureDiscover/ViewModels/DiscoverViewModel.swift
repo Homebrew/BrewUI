@@ -77,6 +77,10 @@ final class DiscoverViewModel {
         isSearching ? results : trending
     }
 
+    var isListFocused: Bool {
+        trending.isLoaded && !isSearching
+    }
+
     /// Search results have no analytics, so install-count metadata is suppressed in that mode.
     var showsInstallMetrics: Bool {
         !isSearching
