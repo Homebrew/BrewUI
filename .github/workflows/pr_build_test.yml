@@ -10,7 +10,11 @@ on:
       - "BrewUITests/**"
       - "Brew.xcodeproj/**"
       - "Brew.entitlements"
+      - "Sources/**"
+      - "Tests/**"
+      - "Package.swift"
       - "Package.resolved"
+      - "Tools/BrewUILint/**"
       - ".github/workflows/pr_build_test.yml"
   pull_request:
     types: [opened, reopened, synchronize]
@@ -20,7 +24,11 @@ on:
       - "BrewUITests/**"
       - "Brew.xcodeproj/**"
       - "Brew.entitlements"
+      - "Sources/**"
+      - "Tests/**"
+      - "Package.swift"
       - "Package.resolved"
+      - "Tools/BrewUILint/**"
       - ".github/workflows/pr_build_test.yml"
 
 permissions:
@@ -34,7 +42,7 @@ jobs:
   build-and-test:
     name: Build + unit tests
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -42,7 +50,7 @@ jobs:
       - name: Resolve package dependencies
         run: xcodebuild -resolvePackageDependencies -project Brew.xcodeproj
 
-      - name: Build and test
+      - name: Build and test (Xcode app target)
         run: |
           set -o pipefail
           xcodebuild test \
@@ -57,10 +65,39 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | tee xcodebuild.log
 
+      - name: Cache BrewKit .build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: .build
+          key: ${{ runner.os }}-brewkit-${{ hashFiles('Package.swift', 'Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-brewkit-
+
+      - name: Run BrewKit package tests
+        run: |
+          set -o pipefail
+          xcrun swift test --package-path . | tee swift-test-brewkit.log
+
+      - name: Cache BrewUILint .build
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        with:
+          path: Tools/BrewUILint/.build
+          key: ${{ runner.os }}-brewuilint-${{ hashFiles('Tools/BrewUILint/Package.swift', 'Tools/BrewUILint/Package.resolved', 'Tools/BrewUILint/Sources/**', 'Tools/BrewUILint/Plugins/**') }}
+          restore-keys: |
+            ${{ runner.os }}-brewuilint-
+
+      - name: Run BrewUILint package tests
+        run: |
+          set -o pipefail
+          xcrun swift test --package-path Tools/BrewUILint | tee swift-test-brewuilint.log
+
       - name: Upload logs on failure
         if: failure() || cancelled()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: pr-build-test-logs
-          path: xcodebuild.log
+          path: |
+            xcodebuild.log
+            swift-test-brewkit.log
+            swift-test-brewuilint.log
           retention-days: 7
