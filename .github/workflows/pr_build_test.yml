@@ -88,7 +88,7 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: Tools/BrewUILint/.build
-          key: ${{ runner.os }}-brewuilint-${{ steps.swift-toolchain.outputs.fingerprint }}-${{ hashFiles('Tools/BrewUILint/Package.swift', 'Tools/BrewUILint/Package.resolved', 'Tools/BrewUILint/Sources/**', 'Tools/BrewUILint/Plugins/**') }}
+           key: ${{ runner.os }}-brewuilint-${{ steps.swift-toolchain.outputs.fingerprint }}-${{ hashFiles('Tools/BrewUILint/Package.swift', 'Tools/BrewUILint/Package.resolved', 'Tools/BrewUILint/Sources/**', 'Tools/BrewUILint/Tests/**', 'Tools/BrewUILint/Plugins/**') }}
           restore-keys: |
             ${{ runner.os }}-brewuilint-${{ steps.swift-toolchain.outputs.fingerprint }}-
 
