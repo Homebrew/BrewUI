@@ -34,7 +34,7 @@ extension FocusedValues {
     @Entry var sidebarSelection: Binding<SidebarItem>?
 }
 
-/// View menu commands for the command console. Currently a single `⌘\`` toggle matching Xcode / VS Code / Terminal.
+/// View menu commands for navigating the main window sidebar (⌘1–⌘5).
 public struct SidebarCommands: Commands {
     @FocusedValue(\.sidebarSelection) private var selection
 
