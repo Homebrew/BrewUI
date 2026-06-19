@@ -30,6 +30,7 @@ on:
       - "Package.swift"
       - "Package.resolved"
       - "Tools/BrewUILint/**"
+      - "scripts/test"
       - ".github/workflows/pr_build_test.yml"
 
 permissions:
