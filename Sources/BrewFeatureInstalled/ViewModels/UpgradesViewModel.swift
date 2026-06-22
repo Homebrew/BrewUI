@@ -78,6 +78,12 @@ final class UpgradesViewModel {
         return false
     }
 
+    /// Drives the list view's `@FocusState`. The list only owns keyboard focus once the outdated
+    /// inventory has loaded — while loading or in an error state focus belongs elsewhere.
+    var shouldFocusList: Bool {
+        state.isLoaded
+    }
+
     /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
     /// inventory when no search is active, and "Showing N of M" / "No matches
     /// in M outdated packages" once a query narrows the list. The window-chrome

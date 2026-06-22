@@ -338,6 +338,37 @@ struct DoctorViewModelTests {
         )
         #expect(viewModel.subtitle == "The check could not be completed")
     }
+
+    // MARK: - shouldFocusList
+
+    @Test func `shouldFocusList is false while the doctor check is running`() {
+        let viewModel = Self.viewModel(repository: LoadingDoctorRepository())
+        #expect(!viewModel.shouldFocusList)
+    }
+
+    @Test func `shouldFocusList is true once a report with issues has loaded`() async {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
+
+        await viewModel.load()
+
+        #expect(viewModel.shouldFocusList)
+    }
+
+    @Test func `shouldFocusList is true on a healthy report`() async {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
+
+        await viewModel.load()
+
+        #expect(viewModel.shouldFocusList)
+    }
+
+    @Test func `shouldFocusList is false when the doctor check fails`() {
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
+        )
+
+        #expect(!viewModel.shouldFocusList)
+    }
 }
 
 /// Test-scoped doctor repository pinned in the `.loading` state. Used to exercise the loading branches of

@@ -500,7 +500,9 @@ struct DiscoverViewModelTests {
         #expect(message == "Something went wrong searching the catalogue.")
     }
 
-    @Test @MainActor func `isListFocused is true when trending has loaded and not searching`() {
+    // MARK: - shouldFocusList
+
+    @Test @MainActor func `shouldFocusList is true when trending has loaded and not searching`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -508,28 +510,41 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
-            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
-        viewModel.query = nil
+        await viewModel.load()
 
-        #expect(viewModel.isListFocused)
+        #expect(viewModel.shouldFocusList)
     }
 
-    @Test @MainActor func `isListFocused is false when trending has NOT loaded and not searching`() {
+    @Test @MainActor func `shouldFocusList is false while trending is still loading`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        // trending starts as .loading and load() has not been awaited yet.
+        #expect(!viewModel.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is false when trending failed to load`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
-            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
-        viewModel.query = nil
+        await viewModel.load()
 
-        #expect(!viewModel.isListFocused)
+        #expect(!viewModel.shouldFocusList)
     }
 
-    @Test @MainActor func `isListFocused is false when trending has loaded and searching`() {
+    @Test @MainActor func `shouldFocusList is false when trending has loaded but a search is active`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -537,13 +552,14 @@ struct DiscoverViewModelTests {
                     topCasks: [],
                 ),
             ),
-            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
+        await viewModel.load()
         viewModel.query = "foo"
 
-        #expect(!viewModel.isListFocused)
+        #expect(!viewModel.shouldFocusList)
     }
 }
 

@@ -74,6 +74,12 @@ final class DoctorViewModel {
         doctorRepository.isRefreshing
     }
 
+    /// Drives the issues list's `@FocusState`. The list only owns keyboard focus once a report has
+    /// loaded — loading and failure states have no rows to focus.
+    var shouldFocusList: Bool {
+        state.isLoaded
+    }
+
     var issueItems: [DoctorIssueItem] {
         guard case let .loaded(report) = state else {
             return []

@@ -107,7 +107,9 @@ struct UpgradesPackagesView: View {
             .accessibilityLabel("Outdated packages")
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
-                Task { isFocused = viewModel.state.isLoaded }
+            }
+            .task(id: viewModel.shouldFocusList) {
+                isFocused = viewModel.shouldFocusList
             }
             .focused($isFocused)
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in

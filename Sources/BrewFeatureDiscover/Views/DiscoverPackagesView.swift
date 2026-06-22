@@ -114,9 +114,9 @@ private struct DiscoverPackageSections: View {
             .accessibilityLabel("Discover packages")
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
-                Task {
-                    isFocused = viewModel.trending.isLoaded && !viewModel.isSearching
-                }
+            }
+            .task(id: viewModel.shouldFocusList) {
+                isFocused = viewModel.shouldFocusList
             }
             .focused($isFocused)
             .onChange(of: viewModel.selectedPackageID) { _, selectedID in

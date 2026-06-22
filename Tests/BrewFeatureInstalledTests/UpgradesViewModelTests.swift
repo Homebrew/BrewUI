@@ -266,6 +266,42 @@ struct UpgradesViewModelTests {
         await center.emit(id: unrelated, phase: .idle)
     }
 
+    // MARK: - shouldFocusList
+
+    @Test @MainActor func `shouldFocusList is false while the outdated inventory is still loading`() {
+        let vm = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(state: .loading),
+            brewCommandCenter: StubBrewCommandCenter(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        #expect(!vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is true once the outdated inventory has loaded`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        #expect(vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is true when loaded with no outdated rows`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "wget", kind: .formula, outdated: false),
+        ])
+
+        #expect(vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is false when the inventory load failed`() {
+        let vm = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(state: .failed(OddRepositoryError())),
+            brewCommandCenter: StubBrewCommandCenter(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        #expect(!vm.shouldFocusList)
+    }
+
     // MARK: - Helpers
 
     private static var mixedPackages: [InstalledBrewPackage] {

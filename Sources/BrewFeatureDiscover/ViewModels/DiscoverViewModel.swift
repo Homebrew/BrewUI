@@ -77,7 +77,9 @@ final class DiscoverViewModel {
         isSearching ? results : trending
     }
 
-    var isListFocused: Bool {
+    /// Drives the list view's `@FocusState`. The list only owns keyboard focus on the trending landing
+    /// once it has loaded — while a search is active focus belongs to the catalogue search field.
+    var shouldFocusList: Bool {
         trending.isLoaded && !isSearching
     }
 

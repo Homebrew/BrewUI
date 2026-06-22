@@ -78,6 +78,12 @@ final class InstalledViewModel {
         return false
     }
 
+    /// Drives the list view's `@FocusState`. The list only owns keyboard focus once the inventory has
+    /// loaded — while loading or in an error state focus belongs elsewhere (or to nothing).
+    var shouldFocusList: Bool {
+        state.isLoaded
+    }
+
     var packageCountSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")

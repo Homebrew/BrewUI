@@ -102,8 +102,8 @@ struct DoctorView: View {
                 }
             }
         }
-        .onAppear {
-            Task { isFocused = viewModel.state.isLoaded }
+        .task(id: viewModel.shouldFocusList) {
+            isFocused = viewModel.shouldFocusList
         }
         .focused($isFocused)
         .listStyle(.inset)
