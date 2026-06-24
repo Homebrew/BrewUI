@@ -44,10 +44,11 @@ public final class BrewConfigRepository: ConfigRepository {
         self.environment = environment
     }
 
-    /// Production wiring: real subprocess + default `brew` lookup + the live process environment.
+    /// Production wiring: brew is spawned through the user's login + interactive shell
+    /// (``LoginShellBrewCommandRunner``) so `brew config` reflects the same environment as Terminal.
     public static func live() -> BrewConfigRepository {
         BrewConfigRepository(
-            commandRunner: BrewCommandService(),
+            commandRunner: LoginShellBrewCommandRunner(),
             locator: BrewExecutableLocator(),
         )
     }

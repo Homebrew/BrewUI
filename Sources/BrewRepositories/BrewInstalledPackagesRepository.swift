@@ -56,13 +56,15 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         completionObserverTask?.cancel()
     }
 
-    /// Production wiring: real subprocess + default `brew` lookup, reconciling off `commandCenter`.
+    /// Production wiring: brew spawned through the user's login + interactive shell
+    /// (``LoginShellBrewCommandRunner``) so `brew info --installed --json=v2` reads the same world
+    /// as Terminal. Reconciles off `commandCenter`.
     public static func live(
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
     ) -> BrewInstalledPackagesRepository {
         BrewInstalledPackagesRepository(
-            commandRunner: BrewCommandService(),
+            commandRunner: LoginShellBrewCommandRunner(),
             locator: BrewExecutableLocator(),
             cache: cache,
             commandCenter: commandCenter,
