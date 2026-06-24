@@ -345,6 +345,85 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
+    // MARK: - Keyboard navigation
+
+    @Test @MainActor func `selectNext steps through visible rows and stops at the last`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                    ],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
+        // Crosses the formulae → casks section boundary.
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+        // Clamps at the last visible row.
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+    }
+
+    @Test @MainActor func `selectPrevious steps backward through visible rows and stops at the first`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                    ],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.setSelection(.cask(token: "docker"))
+
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+    }
+
+    @Test @MainActor func `selectNext navigates only within the active scope`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.scope = .casks
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+
+        // Only the cask is visible, so there's nothing to advance to.
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+    }
+
     // MARK: - Search
 
     @Test @MainActor func `search populates results and switches into searching mode`() async {

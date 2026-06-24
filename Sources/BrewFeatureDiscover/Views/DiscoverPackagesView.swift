@@ -95,10 +95,7 @@ private struct DiscoverPackageSections: View {
 
     var body: some View {
         ScrollViewReader { proxy in
-            List(selection: Binding(
-                get: { viewModel.selectedPackageID },
-                set: { viewModel.setSelection($0) },
-            )) {
+            List {
                 if viewModel.showsFormulaeSection {
                     Section(viewModel.formulaeSectionTitle) {
                         sectionContent(formulae, kind: .formula)
@@ -125,6 +122,14 @@ private struct DiscoverPackageSections: View {
             .onChange(of: packages.map(\.id)) { _, _ in
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
+            .onKeyPress(.upArrow) {
+                viewModel.selectPrevious()
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                viewModel.selectNext()
+                return .handled
+            }
             .onExitCommand {
                 viewModel.setSelection(nil)
             }
@@ -140,12 +145,13 @@ private struct DiscoverPackageSections: View {
                 listRow(package)
                     .id(package.id)
                     .contentShape(Rectangle())
-                    .onTapGesture {
-                        viewModel.setSelection(package.id)
-                    }
                     .listRowBackground(
                         viewModel.selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
                     )
+                    .onTapGesture {
+                        // Needed to suppress the default ugly blue macOS highlight state
+                        viewModel.setSelection(package.id)
+                    }
             }
         }
     }

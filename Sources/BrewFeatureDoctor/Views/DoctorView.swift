@@ -83,10 +83,7 @@ struct DoctorView: View {
     }
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
-        List(selection: Binding(
-            get: { viewModel.selectedIssueID },
-            set: { viewModel.setSelection($0) },
-        )) {
+        List {
             ForEach(groups) { group in
                 Section {
                     ForEach(group.items) { item in
@@ -96,6 +93,10 @@ struct DoctorView: View {
                             .listRowBackground(
                                 viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
                             )
+                            .onTapGesture {
+                                // Needed to suppress the default ugly blue macOS highlight state
+                                viewModel.setSelection(item.id)
+                            }
                     }
                 } header: {
                     DoctorSeveritySectionHeader(severity: group.severity, issueCount: group.items.count)
@@ -108,6 +109,14 @@ struct DoctorView: View {
         .focused($isFocused)
         .listStyle(.inset)
         .accessibilityLabel("Doctor issues")
+        .onKeyPress(.upArrow) {
+            viewModel.selectPrevious()
+            return .handled
+        }
+        .onKeyPress(.downArrow) {
+            viewModel.selectNext()
+            return .handled
+        }
     }
 }
 

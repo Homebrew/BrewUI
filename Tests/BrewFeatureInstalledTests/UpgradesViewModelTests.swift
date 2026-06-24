@@ -266,6 +266,65 @@ struct UpgradesViewModelTests {
         await center.emit(id: unrelated, phase: .idle)
     }
 
+    // MARK: - Keyboard navigation
+
+    @Test @MainActor func `selectNext steps forward through outdated rows and stops at the last`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: true),
+            .fixture(name: "wget", kind: .formula, outdated: true),
+            .fixture(name: "slack", kind: .cask, outdated: true),
+        ])
+        guard case let .loaded(content) = vm.state else {
+            Issue.record("expected loaded state")
+            return
+        }
+        let ordered = content.formulaPackages.map(\.id) + content.caskPackages.map(\.id)
+        #expect(ordered.count == 3)
+
+        vm.setSelection(ordered[0])
+        vm.selectNext()
+        #expect(vm.selectedPackage?.id == ordered[1])
+        // Crosses the formulae → casks section boundary.
+        vm.selectNext()
+        #expect(vm.selectedPackage?.id == ordered[2])
+        // Clamps at the final row.
+        vm.selectNext()
+        #expect(vm.selectedPackage?.id == ordered[2])
+    }
+
+    @Test @MainActor func `selectPrevious steps backward through outdated rows and stops at the first`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: true),
+            .fixture(name: "wget", kind: .formula, outdated: true),
+            .fixture(name: "slack", kind: .cask, outdated: true),
+        ])
+        guard case let .loaded(content) = vm.state else {
+            Issue.record("expected loaded state")
+            return
+        }
+        let ordered = content.formulaPackages.map(\.id) + content.caskPackages.map(\.id)
+
+        vm.setSelection(ordered[2])
+        vm.selectPrevious()
+        #expect(vm.selectedPackage?.id == ordered[1])
+        vm.selectPrevious()
+        #expect(vm.selectedPackage?.id == ordered[0])
+        vm.selectPrevious()
+        #expect(vm.selectedPackage?.id == ordered[0])
+    }
+
+    @Test @MainActor func `selectNext and selectPrevious are no-ops when nothing is outdated`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "wget", kind: .formula, outdated: false),
+        ])
+        #expect(vm.selectedPackage == nil)
+
+        vm.selectNext()
+        #expect(vm.selectedPackage == nil)
+        vm.selectPrevious()
+        #expect(vm.selectedPackage == nil)
+    }
+
     // MARK: - shouldFocusList
 
     @Test @MainActor func `shouldFocusList is false while the outdated inventory is still loading`() {

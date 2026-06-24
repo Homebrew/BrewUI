@@ -81,16 +81,7 @@ struct UpgradesPackagesView: View {
 
     private func upgradesList(_ content: InstalledPackagesContent) -> some View {
         ScrollViewReader { proxy in
-            List(selection: Binding(
-                get: { viewModel.activeSelectedPackageID },
-                set: { newValue in
-                    if let newValue {
-                        viewModel.setSelection(newValue)
-                    } else {
-                        viewModel.clearSelection()
-                    }
-                },
-            )) {
+            List {
                 if content.shouldShowFormulaeSection {
                     Section("Formulae") {
                         sectionContent(for: content.formulaPackages)
@@ -118,6 +109,14 @@ struct UpgradesPackagesView: View {
             .onChange(of: content.packages.map(\.id)) { _, _ in
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
+            .onKeyPress(.upArrow) {
+                viewModel.selectPrevious()
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                viewModel.selectNext()
+                return .handled
+            }
             .onExitCommand {
                 viewModel.clearSelection()
             }
@@ -132,6 +131,10 @@ struct UpgradesPackagesView: View {
                 .listRowBackground(
                     viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
                 )
+                .onTapGesture {
+                    // Needed to suppress the default ugly blue macOS highlight state
+                    viewModel.setSelection(package.id)
+                }
         }
     }
 

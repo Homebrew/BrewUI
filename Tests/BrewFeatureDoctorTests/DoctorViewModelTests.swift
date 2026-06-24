@@ -285,6 +285,94 @@ struct DoctorViewModelTests {
         DoctorIssue(title: title, severity: severity, blocks: [], rawBody: "")
     }
 
+    // MARK: - Keyboard navigation
+
+    @Test func `orderedIssueIDs follows grouped descending-severity order`() async {
+        let caution = Self.minimal(.caution, "c1")
+        let danger = Self.minimal(.danger, "d1")
+        let unsupported = Self.minimal(.unsupported, "u1")
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(report: DoctorReport(issues: [caution, danger, unsupported])),
+        )
+        await viewModel.load()
+
+        #expect(viewModel.orderedIssueIDs == [
+            DoctorIssueItem.contentID(for: unsupported),
+            DoctorIssueItem.contentID(for: danger),
+            DoctorIssueItem.contentID(for: caution),
+        ])
+    }
+
+    @Test func `selectNext steps through issues in grouped order and stops at the last`() async {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
+        await viewModel.load()
+        let ordered = viewModel.orderedIssueIDs
+        #expect(ordered.count == 3)
+
+        viewModel.setSelection(ordered[0])
+        viewModel.selectNext()
+        #expect(viewModel.selectedIssueID == ordered[1])
+        viewModel.selectNext()
+        #expect(viewModel.selectedIssueID == ordered[2])
+        // Clamps at the final issue.
+        viewModel.selectNext()
+        #expect(viewModel.selectedIssueID == ordered[2])
+    }
+
+    @Test func `selectPrevious steps backward through issues and stops at the first`() async {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
+        await viewModel.load()
+        let ordered = viewModel.orderedIssueIDs
+
+        viewModel.setSelection(ordered[2])
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedIssueID == ordered[1])
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedIssueID == ordered[0])
+        // Clamps at the first issue.
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedIssueID == ordered[0])
+    }
+
+    @Test func `selectNext from no selection selects the first issue`() async {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
+        await viewModel.load()
+        viewModel.setSelection(nil)
+
+        viewModel.selectNext()
+
+        #expect(viewModel.selectedIssueID == viewModel.orderedIssueIDs.first)
+    }
+
+    @Test func `selectPrevious from no selection selects the last issue`() async {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
+        await viewModel.load()
+        viewModel.setSelection(nil)
+
+        viewModel.selectPrevious()
+
+        #expect(viewModel.selectedIssueID == viewModel.orderedIssueIDs.last)
+    }
+
+    @Test func `selectNext is a no-op on a healthy report`() async {
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
+        await viewModel.load()
+        #expect(viewModel.selectedIssueID == nil)
+
+        viewModel.selectNext()
+        #expect(viewModel.selectedIssueID == nil)
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedIssueID == nil)
+    }
+
+    private static func threeSeverityReport() -> DoctorReport {
+        DoctorReport(issues: [
+            minimal(.caution, "c1"),
+            minimal(.danger, "d1"),
+            minimal(.unsupported, "u1"),
+        ])
+    }
+
     // MARK: - Header chrome
 
     @Test func `showsHeaderControls is hidden while loading and on failure`() {

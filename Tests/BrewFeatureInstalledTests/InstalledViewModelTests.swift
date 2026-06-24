@@ -60,6 +60,53 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
+    // MARK: - Keyboard navigation
+
+    @Test @MainActor func `selectNext steps forward through the rows and stops at the last`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [.fixture(name: "git", kind: .formula), .fixture(name: "wget", kind: .formula)],
+            casks: [.fixture(name: "slack", kind: .cask)],
+        )
+        let ordered = vm.loadedFormulaPackages.map(\.id) + vm.loadedCaskPackages.map(\.id)
+        #expect(ordered.count == 3)
+
+        vm.setSelection(ordered[0])
+        vm.selectNext()
+        #expect(vm.selectedPackage?.id == ordered[1])
+        // Crosses the formulae → casks section boundary.
+        vm.selectNext()
+        #expect(vm.selectedPackage?.id == ordered[2])
+        // Clamps at the final row.
+        vm.selectNext()
+        #expect(vm.selectedPackage?.id == ordered[2])
+    }
+
+    @Test @MainActor func `selectPrevious steps backward through the rows and stops at the first`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [.fixture(name: "git", kind: .formula), .fixture(name: "wget", kind: .formula)],
+            casks: [.fixture(name: "slack", kind: .cask)],
+        )
+        let ordered = vm.loadedFormulaPackages.map(\.id) + vm.loadedCaskPackages.map(\.id)
+
+        vm.setSelection(ordered[2])
+        vm.selectPrevious()
+        #expect(vm.selectedPackage?.id == ordered[1])
+        vm.selectPrevious()
+        #expect(vm.selectedPackage?.id == ordered[0])
+        vm.selectPrevious()
+        #expect(vm.selectedPackage?.id == ordered[0])
+    }
+
+    @Test @MainActor func `selectNext and selectPrevious are no-ops with an empty inventory`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel()
+        #expect(vm.selectedPackage == nil)
+
+        vm.selectNext()
+        #expect(vm.selectedPackage == nil)
+        vm.selectPrevious()
+        #expect(vm.selectedPackage == nil)
+    }
+
     @Test @MainActor func `refresh preserves selection when package still exists`() async {
         let firstJSON = """
         {

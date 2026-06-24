@@ -202,8 +202,94 @@ final class DiscoverViewModel {
         return package
     }
 
-    // MARK: - Loading
+    // MARK: - Helpers
 
+    static func sortedSection(
+        _ packages: [DiscoveryBrewPackage],
+        kind: HomebrewPackageKind,
+    ) -> [DiscoveryBrewPackage] {
+        packages
+            .filter { $0.kind == kind }
+            .sorted(by: sortByPopularityThenName)
+    }
+
+    private static func sortByPopularityThenName(
+        _ lhs: DiscoveryBrewPackage,
+        _ rhs: DiscoveryBrewPackage,
+    ) -> Bool {
+        if lhs.thirtyDayInstallCount == rhs.thirtyDayInstallCount {
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
+        return lhs.thirtyDayInstallCount > rhs.thirtyDayInstallCount
+    }
+
+    private static func userMessage(for error: Error, searching: Bool) -> String {
+        if case let BrewAPIClientError.transport(underlying) = error {
+            return underlying
+        }
+        if searching {
+            return String(
+                localized: "Something went wrong searching the catalogue.",
+                comment: "Discover tab generic search failure",
+            )
+        }
+        return String(
+            localized: "Something went wrong loading Discover packages.",
+            comment: "Discover tab generic load failure",
+        )
+    }
+}
+
+// MARK: - Selection
+
+extension DiscoverViewModel {
+    func setSelection(_ packageID: BrewPackage.ID?) {
+        if let packageID {
+            guard visiblePackages.contains(where: { $0.id == packageID }) else {
+                return
+            }
+            selectedPackageID = packageID
+        } else {
+            selectedPackageID = visiblePackages.first?.id
+        }
+    }
+
+    func selectNext() {
+        let orderedIDs = visiblePackages.map(\.id)
+        guard let currentID = selectedPackageID else {
+            if let first = orderedIDs.first { setSelection(first) }
+            return
+        }
+        if let nextID = orderedIDs.item(after: currentID) {
+            setSelection(nextID)
+        }
+    }
+
+    func selectPrevious() {
+        let orderedIDs = visiblePackages.map(\.id)
+        guard let currentID = selectedPackageID else {
+            if let last = orderedIDs.last { setSelection(last) }
+            return
+        }
+        if let previousID = orderedIDs.item(before: currentID) {
+            setSelection(previousID)
+        }
+    }
+
+    private func synchronizeSelectionWithVisibleRows() {
+        let visibleIDs = Set(visiblePackages.map(\.id))
+        if let selectedPackageID, !visibleIDs.contains(selectedPackageID) {
+            self.selectedPackageID = nil
+        }
+        if selectedPackageID == nil {
+            selectedPackageID = visiblePackages.first?.id
+        }
+    }
+}
+
+// MARK: - Loading
+
+extension DiscoverViewModel {
     func load() async {
         trending = .loading
         do {
@@ -248,64 +334,20 @@ final class DiscoverViewModel {
             await load()
         }
     }
+}
 
-    // MARK: - Selection
-
-    func setSelection(_ packageID: BrewPackage.ID?) {
-        if let packageID {
-            guard visiblePackages.contains(where: { $0.id == packageID }) else {
-                return
-            }
-            selectedPackageID = packageID
-        } else {
-            selectedPackageID = visiblePackages.first?.id
+extension Array where Element: Equatable {
+    func item(after value: Element) -> Element? {
+        guard let index = firstIndex(of: value), index + 1 < count else {
+            return nil
         }
+        return self[index + 1]
     }
 
-    private func synchronizeSelectionWithVisibleRows() {
-        let visibleIDs = Set(visiblePackages.map(\.id))
-        if let selectedPackageID, !visibleIDs.contains(selectedPackageID) {
-            self.selectedPackageID = nil
+    func item(before value: Element) -> Element? {
+        guard let index = firstIndex(of: value), index - 1 >= 0 else {
+            return nil
         }
-        if selectedPackageID == nil {
-            selectedPackageID = visiblePackages.first?.id
-        }
-    }
-
-    // MARK: - Helpers
-
-    static func sortedSection(
-        _ packages: [DiscoveryBrewPackage],
-        kind: HomebrewPackageKind,
-    ) -> [DiscoveryBrewPackage] {
-        packages
-            .filter { $0.kind == kind }
-            .sorted(by: sortByPopularityThenName)
-    }
-
-    private static func sortByPopularityThenName(
-        _ lhs: DiscoveryBrewPackage,
-        _ rhs: DiscoveryBrewPackage,
-    ) -> Bool {
-        if lhs.thirtyDayInstallCount == rhs.thirtyDayInstallCount {
-            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
-        }
-        return lhs.thirtyDayInstallCount > rhs.thirtyDayInstallCount
-    }
-
-    private static func userMessage(for error: Error, searching: Bool) -> String {
-        if case let BrewAPIClientError.transport(underlying) = error {
-            return underlying
-        }
-        if searching {
-            return String(
-                localized: "Something went wrong searching the catalogue.",
-                comment: "Discover tab generic search failure",
-            )
-        }
-        return String(
-            localized: "Something went wrong loading Discover packages.",
-            comment: "Discover tab generic load failure",
-        )
+        return self[index - 1]
     }
 }
