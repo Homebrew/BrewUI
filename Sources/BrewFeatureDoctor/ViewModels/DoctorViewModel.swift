@@ -74,6 +74,12 @@ final class DoctorViewModel {
         doctorRepository.isRefreshing
     }
 
+    /// Drives the issues list's `@FocusState`. The list only owns keyboard focus once a report has
+    /// loaded — loading and failure states have no rows to focus.
+    var shouldFocusList: Bool {
+        state.isLoaded
+    }
+
     var issueItems: [DoctorIssueItem] {
         guard case let .loaded(report) = state else {
             return []
@@ -127,6 +133,35 @@ final class DoctorViewModel {
 
     func setSelection(_ id: Int?) {
         selectedIssueID = id
+    }
+
+    /// Issue ids in the order their rows render — grouped by descending severity, matching
+    /// `DoctorIssueGroup.grouped(from:)` — so keyboard navigation steps through the list as shown.
+    var orderedIssueIDs: [Int] {
+        guard case let .loaded(report) = state else {
+            return []
+        }
+        return DoctorIssueGroup.grouped(from: report).flatMap { $0.items.map(\.id) }
+    }
+
+    func selectNext() {
+        guard let currentID = selectedIssueID else {
+            if let first = orderedIssueIDs.first { setSelection(first) }
+            return
+        }
+        if let nextID = orderedIssueIDs.item(after: currentID) {
+            setSelection(nextID)
+        }
+    }
+
+    func selectPrevious() {
+        guard let currentID = selectedIssueID else {
+            if let last = orderedIssueIDs.last { setSelection(last) }
+            return
+        }
+        if let previousID = orderedIssueIDs.item(before: currentID) {
+            setSelection(previousID)
+        }
     }
 
     func isFixRunning(_ item: DoctorIssueItem) -> Bool {
@@ -218,5 +253,21 @@ final class DoctorViewModel {
             runningFixTokens.remove(token)
             await load()
         }
+    }
+}
+
+extension Array where Element: Equatable {
+    func item(after value: Element) -> Element? {
+        guard let index = firstIndex(of: value), index + 1 < count else {
+            return nil
+        }
+        return self[index + 1]
+    }
+
+    func item(before value: Element) -> Element? {
+        guard let index = firstIndex(of: value), index - 1 >= 0 else {
+            return nil
+        }
+        return self[index - 1]
     }
 }

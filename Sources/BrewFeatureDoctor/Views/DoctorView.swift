@@ -12,6 +12,7 @@ import SwiftUI
 /// a small "checking" spinner in the header.
 struct DoctorView: View {
     @Bindable var viewModel: DoctorViewModel
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -89,20 +90,33 @@ struct DoctorView: View {
                         DoctorIssueRowView(item: item)
                             .id(item.id)
                             .contentShape(Rectangle())
-                            .onTapGesture {
-                                viewModel.setSelection(item.id)
-                            }
                             .listRowBackground(
                                 viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
                             )
+                            .onTapGesture {
+                                // Needed to suppress the default ugly blue macOS highlight state
+                                viewModel.setSelection(item.id)
+                            }
                     }
                 } header: {
                     DoctorSeveritySectionHeader(severity: group.severity, issueCount: group.items.count)
                 }
             }
         }
-        .listStyle(.plain)
+        .task(id: viewModel.shouldFocusList) {
+            isFocused = viewModel.shouldFocusList
+        }
+        .focused($isFocused)
+        .listStyle(.inset)
         .accessibilityLabel("Doctor issues")
+        .onKeyPress(.upArrow) {
+            viewModel.selectPrevious()
+            return .handled
+        }
+        .onKeyPress(.downArrow) {
+            viewModel.selectNext()
+            return .handled
+        }
     }
 }
 

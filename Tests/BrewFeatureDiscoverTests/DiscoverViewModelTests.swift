@@ -21,6 +21,7 @@ struct DiscoverViewModelTests {
                             thirtyDayInstallCount: 100,
                         ),
                     ],
+
                     topCasks: [
                         discoveryPackage(
                             name: "iterm2",
@@ -344,6 +345,85 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
+    // MARK: - Keyboard navigation
+
+    @Test @MainActor func `selectNext steps through visible rows and stops at the last`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                    ],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
+        // Crosses the formulae → casks section boundary.
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+        // Clamps at the last visible row.
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+    }
+
+    @Test @MainActor func `selectPrevious steps backward through visible rows and stops at the first`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [
+                        discoveryPackage(name: "git", thirtyDayInstallCount: 100),
+                        discoveryPackage(name: "node", thirtyDayInstallCount: 80),
+                    ],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.setSelection(.cask(token: "docker"))
+
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
+    }
+
+    @Test @MainActor func `selectNext navigates only within the active scope`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [discoveryPackage(name: "docker", kind: .cask, thirtyDayInstallCount: 70)],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.scope = .casks
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+
+        // Only the cask is visible, so there's nothing to advance to.
+        viewModel.selectNext()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+        viewModel.selectPrevious()
+        #expect(viewModel.selectedPackage?.id == .cask(token: "docker"))
+    }
+
     // MARK: - Search
 
     @Test @MainActor func `search populates results and switches into searching mode`() async {
@@ -498,6 +578,68 @@ struct DiscoverViewModelTests {
         }
         #expect(message == "Something went wrong searching the catalogue.")
     }
+
+    // MARK: - shouldFocusList
+
+    @Test @MainActor func `shouldFocusList is true when trending has loaded and not searching`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+
+        #expect(viewModel.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is false while trending is still loading`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        // trending starts as .loading and load() has not been awaited yet.
+        #expect(!viewModel.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is false when trending failed to load`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+
+        #expect(!viewModel.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is false when trending has loaded but a search is active`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        await viewModel.load()
+        viewModel.query = "foo"
+
+        #expect(!viewModel.shouldFocusList)
+    }
 }
 
 @MainActor
@@ -531,6 +673,10 @@ private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepositor
 @MainActor
 private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
     let error: Error
+
+    init(error: Error = DiscoverOddError()) {
+        self.error = error
+    }
 
     func loadTopPackages(
         limit _: Int,

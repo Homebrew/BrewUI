@@ -27,6 +27,10 @@ struct InstalledPackagesContent: Equatable {
     var caskPackages: [InstalledBrewPackage] {
         packages.filter { $0.kind == .cask }
     }
+
+    var orderedPackageIDs: [InstalledBrewPackage.ID] {
+        formulaPackages.map(\.id) + caskPackages.map(\.id)
+    }
 }
 
 @Observable
@@ -78,6 +82,12 @@ final class InstalledViewModel {
         return false
     }
 
+    /// Drives the list view's `@FocusState`. The list only owns keyboard focus once the inventory has
+    /// loaded — while loading or in an error state focus belongs elsewhere (or to nothing).
+    var shouldFocusList: Bool {
+        state.isLoaded
+    }
+
     var packageCountSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
@@ -123,6 +133,26 @@ final class InstalledViewModel {
             selectedPackageID = selection
         } else {
             selectedPackageID = firstVisibleRowID()
+        }
+    }
+
+    func selectNext() {
+        guard let currentID = activeSelectedPackageID else {
+            if let first = state.value?.orderedPackageIDs.first { setSelection(first) }
+            return
+        }
+        if let nextID = state.value?.orderedPackageIDs.item(after: currentID) {
+            setSelection(nextID)
+        }
+    }
+
+    func selectPrevious() {
+        guard let currentID = activeSelectedPackageID else {
+            if let last = state.value?.orderedPackageIDs.last { setSelection(last) }
+            return
+        }
+        if let previousID = state.value?.orderedPackageIDs.item(before: currentID) {
+            setSelection(previousID)
         }
     }
 
@@ -227,5 +257,21 @@ final class InstalledViewModel {
         default:
             return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
         }
+    }
+}
+
+extension Array where Element: Equatable {
+    func item(after value: Element) -> Element? {
+        guard let index = firstIndex(of: value), index + 1 < count else {
+            return nil
+        }
+        return self[index + 1]
+    }
+
+    func item(before value: Element) -> Element? {
+        guard let index = firstIndex(of: value), index - 1 >= 0 else {
+            return nil
+        }
+        return self[index - 1]
     }
 }

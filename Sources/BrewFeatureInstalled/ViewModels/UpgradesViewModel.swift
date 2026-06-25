@@ -78,6 +78,12 @@ final class UpgradesViewModel {
         return false
     }
 
+    /// Drives the list view's `@FocusState`. The list only owns keyboard focus once the outdated
+    /// inventory has loaded — while loading or in an error state focus belongs elsewhere.
+    var shouldFocusList: Bool {
+        state.isLoaded
+    }
+
     /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
     /// inventory when no search is active, and "Showing N of M" / "No matches
     /// in M outdated packages" once a query narrows the list. The window-chrome
@@ -167,30 +173,6 @@ final class UpgradesViewModel {
 
     func refresh() async {
         await repository.load(forceRefresh: true)
-    }
-
-    func setSelection(_ selection: InstalledBrewPackage.ID?) {
-        if isSearchActive {
-            didCommitSelectionDuringSearch = true
-            searchPreviewSelectedPackageID = nil
-        }
-        if let selection {
-            selectedPackageID = selection
-        } else {
-            selectedPackageID = firstVisibleRowID()
-        }
-    }
-
-    func clearSelection() {
-        selectedPackageID = firstVisibleRowID()
-        searchPreviewSelectedPackageID = nil
-    }
-
-    func selectInstalledPackage(id: InstalledBrewPackage.ID) {
-        guard allRows.contains(where: { $0.id == id }) else {
-            return
-        }
-        setSelection(id)
     }
 
     /// User-facing command rendered by the Updates header's `CommandBlockView`. Reads the canonical
@@ -320,5 +302,53 @@ final class UpgradesViewModel {
         default:
             return String(localized: "Something went wrong loading packages.", comment: "Upgrades tab generic error")
         }
+    }
+}
+
+// MARK: - Selection
+
+extension UpgradesViewModel {
+    func setSelection(_ selection: InstalledBrewPackage.ID?) {
+        if isSearchActive {
+            didCommitSelectionDuringSearch = true
+            searchPreviewSelectedPackageID = nil
+        }
+        if let selection {
+            selectedPackageID = selection
+        } else {
+            selectedPackageID = firstVisibleRowID()
+        }
+    }
+
+    func selectNext() {
+        guard let currentID = activeSelectedPackageID else {
+            if let first = state.value?.orderedPackageIDs.first { setSelection(first) }
+            return
+        }
+        if let nextID = state.value?.orderedPackageIDs.item(after: currentID) {
+            setSelection(nextID)
+        }
+    }
+
+    func selectPrevious() {
+        guard let currentID = activeSelectedPackageID else {
+            if let last = state.value?.orderedPackageIDs.last { setSelection(last) }
+            return
+        }
+        if let previousID = state.value?.orderedPackageIDs.item(before: currentID) {
+            setSelection(previousID)
+        }
+    }
+
+    func clearSelection() {
+        selectedPackageID = firstVisibleRowID()
+        searchPreviewSelectedPackageID = nil
+    }
+
+    func selectInstalledPackage(id: InstalledBrewPackage.ID) {
+        guard allRows.contains(where: { $0.id == id }) else {
+            return
+        }
+        setSelection(id)
     }
 }

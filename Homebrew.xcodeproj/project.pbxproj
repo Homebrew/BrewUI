@@ -45,15 +45,15 @@
 		EE00AA000000000000000002 /* Signing.local.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.local.xcconfig.example; sourceTree = "<group>"; };
 		EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-Unit.xctestplan"; sourceTree = "<group>"; };
 		EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-UI.xctestplan"; sourceTree = "<group>"; };
-		EEC39EBF2F5AB4B900269514 /* Brew.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Brew.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEC39EBF2F5AB4B900269514 /* Homebrew.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Homebrew.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ECC2F5AB4B900269514 /* BrewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		EEC39EC12F5AB4B900269514 /* Brew */ = {
+		EEC39EC12F5AB4B900269514 /* Homebrew */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Brew;
+			path = Homebrew;
 			sourceTree = "<group>";
 		};
 		EEC39ECF2F5AB4B900269514 /* BrewTests */ = {
@@ -119,7 +119,7 @@
 			children = (
 				EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */,
 				EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */,
-				EEC39EC12F5AB4B900269514 /* Brew */,
+				EEC39EC12F5AB4B900269514 /* Homebrew */,
 				EEC39ECF2F5AB4B900269514 /* BrewTests */,
 				EEC39ED92F5AB4B900269514 /* BrewUITests */,
 				EEC39EC02F5AB4B900269514 /* Products */,
@@ -130,7 +130,7 @@
 		EEC39EC02F5AB4B900269514 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EEC39EBF2F5AB4B900269514 /* Brew.app */,
+				EEC39EBF2F5AB4B900269514 /* Homebrew.app */,
 				EEC39ECC2F5AB4B900269514 /* BrewTests.xctest */,
 				EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */,
 			);
@@ -140,9 +140,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EEC39EBE2F5AB4B900269514 /* Brew */ = {
+		EEC39EBE2F5AB4B900269514 /* Homebrew */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EEC39EE02F5AB4B900269514 /* Build configuration list for PBXNativeTarget "Brew" */;
+			buildConfigurationList = EEC39EE02F5AB4B900269514 /* Build configuration list for PBXNativeTarget "Homebrew" */;
 			buildPhases = (
 				EEC39EBB2F5AB4B900269514 /* Sources */,
 				EEC39EBC2F5AB4B900269514 /* Frameworks */,
@@ -154,9 +154,9 @@
 				EEAA00012F70000000000003 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				EEC39EC12F5AB4B900269514 /* Brew */,
+				EEC39EC12F5AB4B900269514 /* Homebrew */,
 			);
-			name = Brew;
+			name = Homebrew;
 			packageProductDependencies = (
 				EEAA100100000000000000C1 /* BrewCore */,
 				EEAA100200000000000000C2 /* BrewUIComponents */,
@@ -172,7 +172,7 @@
 				EEAA100C00000000000000CC /* BrewFeatureConfig */,
 			);
 			productName = Brew;
-			productReference = EEC39EBF2F5AB4B900269514 /* Brew.app */;
+			productReference = EEC39EBF2F5AB4B900269514 /* Homebrew.app */;
 			productType = "com.apple.product-type.application";
 		};
 		EEC39ECB2F5AB4B900269514 /* BrewTests */ = {
@@ -244,7 +244,7 @@
 					};
 				};
 			};
-			buildConfigurationList = EEC39EBA2F5AB4B900269514 /* Build configuration list for PBXProject "Brew" */;
+			buildConfigurationList = EEC39EBA2F5AB4B900269514 /* Build configuration list for PBXProject "Homebrew" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -262,7 +262,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EEC39EBE2F5AB4B900269514 /* Brew */,
+				EEC39EBE2F5AB4B900269514 /* Homebrew */,
 				EEC39ECB2F5AB4B900269514 /* BrewTests */,
 				EEC39ED52F5AB4B900269514 /* BrewUITests */,
 			);
@@ -326,12 +326,12 @@
 		};
 		EEC39ECE2F5AB4B900269514 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = EEC39EBE2F5AB4B900269514 /* Brew */;
+			target = EEC39EBE2F5AB4B900269514 /* Homebrew */;
 			targetProxy = EEC39ECD2F5AB4B900269514 /* PBXContainerItemProxy */;
 		};
 		EEC39ED82F5AB4B900269514 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = EEC39EBE2F5AB4B900269514 /* Brew */;
+			target = EEC39EBE2F5AB4B900269514 /* Homebrew */;
 			targetProxy = EEC39ED72F5AB4B900269514 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -482,7 +482,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUI;
+				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -513,7 +513,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUI;
+				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -541,7 +541,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Brew.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Brew";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Homebrew.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Homebrew";
 			};
 			name = Debug;
 		};
@@ -561,7 +561,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Brew.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Brew";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Homebrew.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Homebrew";
 			};
 			name = Release;
 		};
@@ -579,7 +579,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TEST_TARGET_NAME = Brew;
+				TEST_TARGET_NAME = Homebrew;
 			};
 			name = Debug;
 		};
@@ -597,14 +597,14 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
-				TEST_TARGET_NAME = Brew;
+				TEST_TARGET_NAME = Homebrew;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EEC39EBA2F5AB4B900269514 /* Build configuration list for PBXProject "Brew" */ = {
+		EEC39EBA2F5AB4B900269514 /* Build configuration list for PBXProject "Homebrew" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EEC39EDE2F5AB4B900269514 /* Debug */,
@@ -613,7 +613,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EEC39EE02F5AB4B900269514 /* Build configuration list for PBXNativeTarget "Brew" */ = {
+		EEC39EE02F5AB4B900269514 /* Build configuration list for PBXNativeTarget "Homebrew" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EEC39EE12F5AB4B900269514 /* Debug */,

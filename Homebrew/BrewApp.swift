@@ -84,6 +84,10 @@ struct BrewApp: App {
                     configRepository.invalidate()
                     envFileRepository.invalidate()
                 }
+                .frame(
+                    minWidth: BrewLayout.minWindowWidth,
+                    minHeight: BrewLayout.minWindowHeight,
+                )
         }
         .defaultSize(
             width: BrewLayout.minWindowWidth,
@@ -91,6 +95,8 @@ struct BrewApp: App {
         )
         .commands {
             ConsoleCommands()
+            SidebarCommands()
+            SearchCommands()
         }
         #if DEBUG
         .commands {

@@ -6,6 +6,7 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
+    @State private var searchPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -24,9 +25,11 @@ struct DiscoverPackagesView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .searchable(
             text: $viewModel.query,
+            isPresented: $searchPresented,
             placement: .toolbar,
             prompt: "Search Homebrew's Catalogue",
         )
+        .focusedSceneValue(\.searchPresented, $searchPresented)
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
             try? await Task.sleep(for: .milliseconds(250))
@@ -76,6 +79,8 @@ struct DiscoverPackagesView: View {
 /// Sectioned Discover list, split by package kind and filtered by the active scope. Renders an inline
 /// empty-state message when a visible section has no rows (e.g. a scope filter that excludes everything).
 private struct DiscoverPackageSections: View {
+    @FocusState private var isFocused: Bool
+
     let viewModel: DiscoverViewModel
     /// The redacted-placeholder or loaded packages handed down by `AsyncContentView` for this render.
     let packages: [DiscoveryBrewPackage]
@@ -102,16 +107,28 @@ private struct DiscoverPackageSections: View {
                     }
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.inset)
             .accessibilityLabel("Discover packages")
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
+            .task(id: viewModel.shouldFocusList) {
+                isFocused = viewModel.shouldFocusList
+            }
+            .focused($isFocused)
             .onChange(of: viewModel.selectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, with: proxy)
             }
             .onChange(of: packages.map(\.id)) { _, _ in
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
+            }
+            .onKeyPress(.upArrow) {
+                viewModel.selectPrevious()
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                viewModel.selectNext()
+                return .handled
             }
             .onExitCommand {
                 viewModel.setSelection(nil)
@@ -128,12 +145,13 @@ private struct DiscoverPackageSections: View {
                 listRow(package)
                     .id(package.id)
                     .contentShape(Rectangle())
-                    .onTapGesture {
-                        viewModel.setSelection(package.id)
-                    }
                     .listRowBackground(
                         viewModel.selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
                     )
+                    .onTapGesture {
+                        // Needed to suppress the default ugly blue macOS highlight state
+                        viewModel.setSelection(package.id)
+                    }
             }
         }
     }

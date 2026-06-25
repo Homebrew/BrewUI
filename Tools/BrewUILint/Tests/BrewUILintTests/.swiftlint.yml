@@ -1,3 +1,9 @@
+# Test scaffolding is allowed to grow without tripping length caps.
 parent_config: ../../../.swiftlint.yml
+
+disabled_rules:
+  - type_body_length
+  - file_length
+
 identifier_name:
   min_length: 2

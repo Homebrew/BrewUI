@@ -11,6 +11,8 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
+    @State private var searchPresented = false
+    @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -38,9 +40,11 @@ struct InstalledPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
+            isPresented: $searchPresented,
             placement: .toolbar,
             prompt: "Search Installed Packages",
         )
+        .focusedSceneValue(\.searchPresented, $searchPresented)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
@@ -48,50 +52,57 @@ struct InstalledPackagesView: View {
             List {
                 if content.shouldShowFormulaeSection {
                     Section("Formulae") {
-                        ForEach(content.formulaPackages) { package in
-                            listRow(for: package)
-                                .id(package.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(package.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                        sectionContent(for: content.formulaPackages)
                     }
                 }
 
                 if content.shouldShowCasksSection {
                     Section("Casks") {
-                        ForEach(content.caskPackages) { package in
-                            listRow(for: package)
-                                .id(package.id)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    viewModel.setSelection(package.id)
-                                }
-                                .listRowBackground(
-                                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                                )
-                        }
+                        sectionContent(for: content.caskPackages)
                     }
                 }
             }
-            .listStyle(.plain)
+            .listStyle(.inset)
             .accessibilityLabel("Installed packages")
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
+            .task(id: viewModel.shouldFocusList) {
+                isFocused = viewModel.shouldFocusList
+            }
+            .focused($isFocused)
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, in: content, with: proxy)
             }
             .onChange(of: content.packages.map(\.id)) { _, _ in
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
+            .onKeyPress(.upArrow) {
+                viewModel.selectPrevious()
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                viewModel.selectNext()
+                return .handled
+            }
             .onExitCommand {
                 viewModel.clearSelection()
             }
+        }
+    }
+
+    private func sectionContent(for packages: [InstalledBrewPackage]) -> some View {
+        ForEach(packages) { package in
+            listRow(for: package)
+                .id(package.id)
+                .contentShape(Rectangle())
+                .listRowBackground(
+                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                )
+                .onTapGesture {
+                    // Needed to suppress the default ugly blue macOS highlight state
+                    viewModel.setSelection(package.id)
+                }
         }
     }
 

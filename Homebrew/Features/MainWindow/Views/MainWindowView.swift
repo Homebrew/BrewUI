@@ -16,25 +16,26 @@ struct MainWindowView: View {
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
     var body: some View {
-        AnimatedSplit(
-            collapsed: !consoleExpanded,
-            collapsedHeight: BrewLayout.consoleCollapsedHeight,
-            expandedHeight: consoleHeight,
-            minExpandedHeight: BrewLayout.consoleMinExpandedHeight,
-            maxExpandedHeight: BrewLayout.consoleMaxExpandedHeight,
-            animation: .brewFast,
-        ) {
-            NavigationSplitView {
-                sidebarColumn
-            } detail: {
+        NavigationSplitView {
+            sidebarColumn
+        } detail: {
+            AnimatedSplit(
+                collapsed: !consoleExpanded,
+                collapsedHeight: BrewLayout.consoleCollapsedHeight,
+                expandedHeight: consoleHeight,
+                minExpandedHeight: BrewLayout.consoleMinExpandedHeight,
+                maxExpandedHeight: BrewLayout.consoleMaxExpandedHeight,
+                animation: .brewFast,
+            ) {
                 featureColumn
+            } bottom: {
+                ConsolePanelRoot(expanded: $consoleExpanded)
             }
-            .background(.bar)
-            .navigationSplitViewStyle(.prominentDetail)
-        } bottom: {
-            ConsolePanelRoot(expanded: $consoleExpanded)
+            .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         }
+        .navigationSplitViewStyle(.automatic)
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
+        .focusedSceneValue(\.sidebarSelection, $selectedSidebarItem)
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
