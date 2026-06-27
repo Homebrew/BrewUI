@@ -15,12 +15,10 @@ struct BrewConfigRepositoryTests {
     @MainActor
     private func repository(
         runner: any BrewCommandRunning,
-        environment: [String: String] = [:],
     ) -> BrewConfigRepository {
         BrewConfigRepository(
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew")),
-            environment: environment,
         )
     }
 
@@ -40,23 +38,16 @@ struct BrewConfigRepositoryTests {
         ])
     }
 
-    @Test @MainActor func `load merges only HOMEBREW prefixed environment variables, sorted by name`() async {
+    @Test @MainActor func `load exposes HOMEBREW rows from brew config output`() async {
         let runner = MockBrewCommandRunner(responses: [
             ["config"]: CommandOutput(standardOutput: Self.configStdout, standardError: "", terminationStatus: 0),
         ])
-        let environment = [
-            "HOMEBREW_NO_ANALYTICS": "1",
-            "PATH": "/usr/bin",
-            "HOMEBREW_CASK_OPTS": "--no-quarantine",
-            "HOME": "/Users/test",
-        ]
-
-        let repo = repository(runner: runner, environment: environment)
+        let repo = repository(runner: runner)
         await repo.load(forceRefresh: false)
 
         #expect(repo.state.value?.environment == [
-            BrewConfigEntry(key: "HOMEBREW_CASK_OPTS", value: "--no-quarantine"),
-            BrewConfigEntry(key: "HOMEBREW_NO_ANALYTICS", value: "1"),
+            BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0"),
+            BrewConfigEntry(key: "HOMEBREW_PREFIX", value: "/opt/homebrew"),
         ])
     }
 

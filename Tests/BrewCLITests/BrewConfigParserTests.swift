@@ -92,7 +92,7 @@ struct BrewConfigParserTests {
     }
 
     @Test func `parser does not populate environment`() {
-        // The repository merges the HOMEBREW_* process environment; the parser only reads stdout.
+        // The repository derives HOMEBREW_* environment rows separately; the parser only reads stdout.
         #expect(BrewConfigParser.parse(Self.fixture).environment.isEmpty)
     }
 }

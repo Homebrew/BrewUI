@@ -15,10 +15,10 @@ private let configRepositoryLogger = Logger(
     category: "BrewConfigRepository",
 )
 
-/// Live `ConfigRepository`: app-scoped `@Observable` that runs `brew config`, parses it, and merges the
-/// `HOMEBREW_*` process environment. Cache-first by default — repeated `load()` calls return immediately
-/// when state is already `.loaded`. `forceRefresh: true` keeps the existing snapshot visible while a new
-/// fetch runs, only replacing on success.
+/// Live `ConfigRepository`: app-scoped `@Observable` that runs `brew config`, parses it, and also surfaces
+/// the `HOMEBREW_*` rows reported by `brew config` itself. Cache-first by default — repeated `load()` calls
+/// return immediately when state is already `.loaded`. `forceRefresh: true` keeps the existing snapshot
+/// visible while a new fetch runs, only replacing on success.
 @Observable
 @MainActor
 public final class BrewConfigRepository: ConfigRepository {
@@ -32,16 +32,12 @@ public final class BrewConfigRepository: ConfigRepository {
 
     @ObservationIgnored private let commandRunner: any BrewCommandRunning
     @ObservationIgnored private let locator: any BrewExecutableLocating
-    @ObservationIgnored private let environment: [String: String]
-
     public init(
         commandRunner: any BrewCommandRunning,
         locator: any BrewExecutableLocating,
-        environment: [String: String] = ProcessInfo.processInfo.environment,
     ) {
         self.commandRunner = commandRunner
         self.locator = locator
-        self.environment = environment
     }
 
     /// Production wiring: brew is spawned through the user's login + interactive shell
@@ -93,14 +89,11 @@ public final class BrewConfigRepository: ConfigRepository {
         let parsed = BrewConfigParser.parse(output.standardOutput)
         return BrewConfigSnapshot(
             entries: parsed.entries,
-            environment: homebrewEnvironmentEntries(),
+            environment: reportedHomebrewEnvironmentEntries(in: parsed.entries),
         )
     }
 
-    private func homebrewEnvironmentEntries() -> [BrewConfigEntry] {
-        environment
-            .filter { $0.key.hasPrefix("HOMEBREW_") }
-            .sorted { $0.key < $1.key }
-            .map { BrewConfigEntry(key: $0.key, value: $0.value) }
+    private func reportedHomebrewEnvironmentEntries(in entries: [BrewConfigEntry]) -> [BrewConfigEntry] {
+        entries.filter { $0.key.hasPrefix("HOMEBREW_") }
     }
 }

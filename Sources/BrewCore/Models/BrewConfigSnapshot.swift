@@ -9,8 +9,8 @@ import Foundation
 ///
 /// ``entries`` preserves the raw, ordered `Key: Value` pairs reported by `brew config` verbatim —
 /// grouping and section labels are a presentation concern decided in the feature layer, not here.
-/// ``environment`` is the effective `HOMEBREW_*` process environment, surfaced separately because it
-/// is read from the host process rather than `brew`'s own self-report.
+/// ``environment`` is the effective `HOMEBREW_*` environment reported by `brew config`, surfaced
+/// separately for diagnostics/copy-report rendering.
 public struct BrewConfigSnapshot: Equatable, Sendable {
     public var entries: [BrewConfigEntry]
     public var environment: [BrewConfigEntry]
