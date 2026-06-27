@@ -9,39 +9,28 @@ import Foundation
 import Testing
 
 struct LoginShellBrewCommandRunnerTests {
-    // MARK: - Quoting
-
-    @Test func `singleQuoted wraps simple tokens`() {
-        #expect(LoginShellBrewCommandRunner.singleQuoted("brew") == "'brew'")
-    }
-
-    @Test func `singleQuoted preserves spaces and metacharacters inside quotes`() {
-        #expect(LoginShellBrewCommandRunner.singleQuoted("package name") == "'package name'")
-        #expect(LoginShellBrewCommandRunner.singleQuoted("--flag=$VAR") == "'--flag=$VAR'")
-        #expect(LoginShellBrewCommandRunner.singleQuoted("a;b|c`d`") == "'a;b|c`d`'")
-    }
-
-    @Test func `singleQuoted escapes embedded single quotes posix-style`() {
-        // POSIX-portable: close the quote, emit an escaped quote, reopen.
-        #expect(LoginShellBrewCommandRunner.singleQuoted("it's") == "'it'\\''s'")
-    }
-
     // MARK: - Command construction
 
-    @Test func `shellCommand prefixes the brew path and joins arguments`() {
+    @Test func `shellCommand for posix shells uses positional parameters`() {
         let command = LoginShellBrewCommandRunner.shellCommand(
-            executableURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew"),
-            arguments: ["config"],
+            for: URL(fileURLWithPath: "/bin/zsh"),
         )
-        #expect(command == "'/opt/homebrew/bin/brew' 'config'")
+        #expect(command == "exec \"$0\" \"$@\"")
     }
 
-    @Test func `shellCommand quotes each argument independently`() {
+    @Test func `shellCommand for fish uses argv`() {
         let command = LoginShellBrewCommandRunner.shellCommand(
+            for: URL(fileURLWithPath: "/opt/homebrew/bin/fish"),
+        )
+        #expect(command == "exec $argv")
+    }
+
+    @Test func `shellArguments prefixes the brew path and appends arguments`() {
+        let arguments = LoginShellBrewCommandRunner.shellArguments(
             executableURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew"),
             arguments: ["info", "--installed", "--json=v2"],
         )
-        #expect(command == "'/opt/homebrew/bin/brew' 'info' '--installed' '--json=v2'")
+        #expect(arguments == ["/opt/homebrew/bin/brew", "info", "--installed", "--json=v2"])
     }
 
     // MARK: - Wrapping behavior
@@ -62,11 +51,35 @@ struct LoginShellBrewCommandRunnerTests {
 
         let invocation = try #require(await recorder.first)
         #expect(invocation.executableURL.path == "/bin/bash")
-        #expect(invocation.arguments.count == 4)
+        #expect(invocation.arguments.count == 6)
         #expect(invocation.arguments[0] == "-l")
         #expect(invocation.arguments[1] == "-i")
         #expect(invocation.arguments[2] == "-c")
-        #expect(invocation.arguments[3] == "'/opt/homebrew/bin/brew' 'doctor'")
+        #expect(invocation.arguments[3] == "exec \"$0\" \"$@\"")
+        #expect(invocation.arguments[4] == "/opt/homebrew/bin/brew")
+        #expect(invocation.arguments[5] == "doctor")
+    }
+
+    @Test func `run uses fish-compatible exec script when login shell is fish`() async throws {
+        let recorder = InvocationRecorder()
+        let wrapped = LoginShellBrewCommandRunner(
+            underlying: recorder,
+            shellResolver: LoginShellResolver(
+                lookup: { URL(fileURLWithPath: "/opt/homebrew/bin/fish") },
+            ),
+        )
+
+        _ = try await wrapped.run(
+            executableURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew"),
+            arguments: ["config", "--foo=it's"],
+        )
+
+        let invocation = try #require(await recorder.first)
+        #expect(invocation.executableURL.path == "/opt/homebrew/bin/fish")
+        #expect(invocation.arguments[3] == "exec $argv")
+        #expect(invocation.arguments[4] == "/opt/homebrew/bin/brew")
+        #expect(invocation.arguments[5] == "config")
+        #expect(invocation.arguments[6] == "--foo=it's")
     }
 
     @Test func `run falls back to default shell when Directory Services lookup yields nil`() async throws {
