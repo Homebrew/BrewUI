@@ -6,7 +6,7 @@
 import Darwin
 import Foundation
 
-/// Resolves the current user's login shell from Directory Services (`getpwuid` reads the same
+/// Resolves the current user's login shell from Directory Services (`getpwuid_r` reads the same
 /// backing store as `dscl . -read /Users/<user> UserShell`, without a subprocess).
 ///
 /// Why this exists: a GUI process launched from Finder/Dock/launchd inherits a stripped environment
@@ -34,19 +34,35 @@ public struct LoginShellResolver: Sendable {
         lookup() ?? fallback
     }
 
-    /// Native equivalent of `dscl . -read /Users/<user> UserShell`: queries `getpwuid` for the
-    /// effective uid and reads `pw_shell`. Returns nil if the call fails or the shell field is empty.
+    /// Native equivalent of `dscl . -read /Users/<user> UserShell`, using the thread-safe
+    /// `getpwuid_r`. Returns nil if the lookup fails or the path isn't a trustworthy absolute path.
     public static let directoryServicesLookup: @Sendable () -> URL? = {
-        guard let entry = getpwuid(getuid()) else {
-            return nil
-        }
-        guard let cString = entry.pointee.pw_shell else {
-            return nil
-        }
-        let path = String(cString: cString)
-        guard !path.isEmpty else {
-            return nil
-        }
+        guard let path = resolveLoginShellPath() else { return nil }
         return URL(fileURLWithPath: path)
+    }
+
+    /// Does the actual `getpwuid_r` lookup.
+    private static func resolveLoginShellPath() -> String? {
+        var pwd = passwd()
+        var result: UnsafeMutablePointer<passwd>?
+
+        let suggestedSize = sysconf(_SC_GETPW_R_SIZE_MAX)
+        let bufferSize = suggestedSize > 0 ? Int(suggestedSize) : 16384
+
+        var buffer = [CChar](repeating: 0, count: bufferSize)
+
+        let rc: Int32 = buffer.withUnsafeMutableBufferPointer { buf in
+            guard let baseAddress = buf.baseAddress else { return EINVAL }
+            return getpwuid_r(getuid(), &pwd, baseAddress, buf.count, &result)
+        }
+
+        guard rc == 0, let entry = result else { return nil }
+        guard let cString = entry.pointee.pw_shell else { return nil }
+
+        let path = String(cString: cString)
+
+        guard path.hasPrefix("/") else { return nil }
+
+        return path
     }
 }
