@@ -18,10 +18,13 @@ import Foundation
 public enum DoctorOutputParser {
     public static func parse(_ output: String) -> DoctorReport {
         let blocks = warningBlocks(in: output)
-        return DoctorReport(issues: blocks.compactMap { block in
-            var parser = WarningBlockParser(block: block)
-            return parser.parse()
-        })
+        return DoctorReport(
+            issues: blocks.compactMap { block in
+                var parser = WarningBlockParser(block: block)
+                return parser.parse()
+            },
+            rawOutput: output,
+        )
     }
 }
 

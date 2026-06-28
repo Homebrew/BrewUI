@@ -39,6 +39,12 @@ struct DoctorView: View {
                         .controlSize(.small)
                         .accessibilityLabel("Re-checking")
                 }
+                if viewModel.rawDoctorOutput != nil {
+                    Button("Copy brew doctor output") {
+                        viewModel.copyDoctorOutput()
+                    }
+                    .controlSize(.small)
+                }
                 Button("Run Again") {
                     Task { await viewModel.load() }
                 }

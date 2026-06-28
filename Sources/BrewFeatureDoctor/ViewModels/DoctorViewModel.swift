@@ -3,6 +3,7 @@
 //  BrewFeatureDoctor
 //
 
+import AppKit
 import BrewCore
 import BrewRepositoryInterfaces
 import Foundation
@@ -78,6 +79,13 @@ final class DoctorViewModel {
     /// loaded — loading and failure states have no rows to focus.
     var shouldFocusList: Bool {
         state.isLoaded
+    }
+
+    var rawDoctorOutput: String? {
+        guard case let .loaded(report) = state, !report.rawOutput.isEmpty else {
+            return nil
+        }
+        return report.rawOutput
     }
 
     var issueItems: [DoctorIssueItem] {
@@ -171,6 +179,12 @@ final class DoctorViewModel {
     }
 
     // MARK: - Intents
+
+    func copyDoctorOutput() {
+        guard let output = rawDoctorOutput else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(output, forType: .string)
+    }
 
     /// Runs `brew doctor` via the repository. Called on tab arrival and from "Run Again"; keeps any prior
     /// report visible while it refreshes. On a fresh load (no prior selection or a stale one), auto-

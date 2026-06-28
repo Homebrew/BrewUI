@@ -11,9 +11,11 @@ import Foundation
 /// `brew doctor` printed "Your system is ready to brew." rather than any warnings.
 public struct DoctorReport: Equatable, Sendable {
     public var issues: [DoctorIssue]
+    public var rawOutput: String
 
-    public init(issues: [DoctorIssue]) {
+    public init(issues: [DoctorIssue], rawOutput: String = "") {
         self.issues = issues
+        self.rawOutput = rawOutput
     }
 
     /// `true` when `brew doctor` surfaced no warnings.
