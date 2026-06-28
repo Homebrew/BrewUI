@@ -83,39 +83,48 @@ struct DoctorView: View {
     }
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
-        List {
-            ForEach(groups) { group in
-                Section {
-                    ForEach(group.items) { item in
-                        DoctorIssueRowView(item: item)
-                            .id(item.id)
-                            .contentShape(Rectangle())
-                            .listRowBackground(
-                                viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
-                            )
-                            .onTapGesture {
-                                // Needed to suppress the default ugly blue macOS highlight state
-                                viewModel.setSelection(item.id)
-                            }
+        VStack(alignment: .leading, spacing: 0) {
+            Text(
+                "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
+            )
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewTextSecondary)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.vertical, BrewSpacing.sm)
+            List {
+                ForEach(groups) { group in
+                    Section {
+                        ForEach(group.items) { item in
+                            DoctorIssueRowView(item: item)
+                                .id(item.id)
+                                .contentShape(Rectangle())
+                                .listRowBackground(
+                                    viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
+                                )
+                                .onTapGesture {
+                                    // Needed to suppress the default ugly blue macOS highlight state
+                                    viewModel.setSelection(item.id)
+                                }
+                        }
+                    } header: {
+                        DoctorSeveritySectionHeader(severity: group.severity)
                     }
-                } header: {
-                    DoctorSeveritySectionHeader(severity: group.severity)
                 }
             }
-        }
-        .task(id: viewModel.shouldFocusList) {
-            isFocused = viewModel.shouldFocusList
-        }
-        .focused($isFocused)
-        .listStyle(.inset)
-        .accessibilityLabel("Doctor issues")
-        .onKeyPress(.upArrow) {
-            viewModel.selectPrevious()
-            return .handled
-        }
-        .onKeyPress(.downArrow) {
-            viewModel.selectNext()
-            return .handled
+            .task(id: viewModel.shouldFocusList) {
+                isFocused = viewModel.shouldFocusList
+            }
+            .focused($isFocused)
+            .listStyle(.inset)
+            .accessibilityLabel("Doctor issues")
+            .onKeyPress(.upArrow) {
+                viewModel.selectPrevious()
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                viewModel.selectNext()
+                return .handled
+            }
         }
     }
 }
