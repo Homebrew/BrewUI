@@ -93,7 +93,6 @@ struct DoctorViewModelTests {
         #expect(viewModel.issueItems.first?.hasRunnableFix == true)
         #expect(viewModel.issueItems.last?.hasRunnableFix == false)
         #expect(viewModel.selectedIssueID == viewModel.issueItems.first?.id)
-        #expect(viewModel.issueCountSubtitle == "2 issues found")
     }
 
     @Test func `projects healthy report`() {
@@ -133,12 +132,6 @@ struct DoctorViewModelTests {
         #expect(entries.count == 1)
         #expect(entries.first?.kind == .doctorFix)
         #expect(entries.first?.id == .maintenance(token: "brew cleanup", displayCommand: "brew cleanup"))
-    }
-
-    @Test func `issueCountSubtitle uses the singular form for a single issue`() {
-        let report = DoctorReport(issues: [Self.minimal(.caution, "only one")])
-        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: report))
-        #expect(viewModel.issueCountSubtitle == "1 issue found")
     }
 
     @Test func `isFixRunning is false for an item without a runnable fix`() {
@@ -410,11 +403,11 @@ struct DoctorViewModelTests {
         #expect(viewModel.subtitle == "Re-checking…")
     }
 
-    @Test func `subtitle on issues falls back to the issue count when not refreshing`() {
+    @Test func `subtitle on issues shows "Warnings found" when not refreshing`() {
         let repository = MutableDoctorRepository(report: Self.issuesReport())
         let viewModel = Self.viewModel(repository: repository)
 
-        #expect(viewModel.subtitle == "2 issues found")
+        #expect(viewModel.subtitle == "Warnings found")
 
         repository.setRefreshing(true)
         #expect(viewModel.subtitle == "Re-checking…")

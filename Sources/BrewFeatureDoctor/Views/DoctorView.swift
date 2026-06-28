@@ -99,7 +99,7 @@ struct DoctorView: View {
                             }
                     }
                 } header: {
-                    DoctorSeveritySectionHeader(severity: group.severity, issueCount: group.items.count)
+                    DoctorSeveritySectionHeader(severity: group.severity)
                 }
             }
         }
@@ -122,19 +122,11 @@ struct DoctorView: View {
 
 private struct DoctorSeveritySectionHeader: View {
     let severity: DoctorSeverity
-    let issueCount: Int
 
     var body: some View {
-        HStack(spacing: BrewSpacing.xs) {
-            Text(DoctorSeverityStyle.displayName(severity))
-                .font(.brewSubheadline.weight(.semibold))
-                .foregroundStyle(DoctorSeverityStyle.foreground(severity))
-            Text("(\(issueCount))")
-                .font(.brewSubheadline)
-                .foregroundStyle(Color.brewTextSecondary)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(DoctorSeverityStyle.displayName(severity)), \(issueCount) issues")
+        Text(DoctorSeverityStyle.displayName(severity))
+            .font(.brewSubheadline.weight(.semibold))
+            .foregroundStyle(DoctorSeverityStyle.foreground(severity))
     }
 }
 

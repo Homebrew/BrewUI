@@ -87,14 +87,6 @@ final class DoctorViewModel {
         return report.issues.map { DoctorIssueItem(issue: $0) }
     }
 
-    var issueCountSubtitle: String {
-        let count = state.value?.issues.count ?? 0
-        if count == 1 {
-            return "1 issue found"
-        }
-        return "\(count) issues found"
-    }
-
     /// Header chrome (Run Again button, re-check spinner) is only meaningful once a report — healthy or
     /// with issues — is on screen. Hidden during the initial load and on failure (the failure surface owns
     /// its own retry affordance via ``AsyncContentView``).
@@ -116,7 +108,7 @@ final class DoctorViewModel {
         case .healthy:
             isRefreshing ? "Re-checking…" : "No problems found"
         case .issues:
-            isRefreshing ? "Re-checking…" : issueCountSubtitle
+            isRefreshing ? "Re-checking…" : "Warnings found"
         case .failed:
             "The check could not be completed"
         }
