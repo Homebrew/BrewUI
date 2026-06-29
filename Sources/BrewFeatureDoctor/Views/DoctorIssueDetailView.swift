@@ -175,21 +175,7 @@ struct DoctorIssueDetailView: View {
     // MARK: - Raw output
 
     private var rawOutputSection: some View {
-        DisclosureGroup {
-            Text(item.rawBody)
-                .font(.brewCode)
-                .foregroundStyle(Color.brewCodeDefault)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(BrewSpacing.md)
-                .background(Color.brewTerminal)
-                .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
-                .textSelection(.enabled)
-                .padding(.top, BrewSpacing.sm)
-        } label: {
-            Text("Raw output")
-                .font(.brewSubheadline.weight(.semibold))
-                .foregroundStyle(Color.brewTextPrimary)
-        }
+        CommandBlockView(command: item.rawBody, title: "Raw output")
     }
 }
 

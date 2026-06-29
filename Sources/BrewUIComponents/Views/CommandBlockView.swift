@@ -12,15 +12,18 @@ import SwiftUI
 public struct CommandBlockView: View {
     let commands: [String]
     let summaryText: String?
+    let title: String?
 
-    public init(command: String, summaryText: String? = nil) {
+    public init(command: String, summaryText: String? = nil, title: String? = nil) {
         commands = [command]
         self.summaryText = summaryText
+        self.title = title
     }
 
-    public init(commands: [String], summaryText: String? = nil) {
+    public init(commands: [String], summaryText: String? = nil, title: String? = nil) {
         self.commands = commands
         self.summaryText = summaryText
+        self.title = title
     }
 
     public var body: some View {
@@ -40,7 +43,7 @@ public struct CommandBlockView: View {
 
     private var header: some View {
         HStack {
-            Label(headerTitle, systemImage: "terminal")
+            Label(title ?? headerTitle, systemImage: "terminal")
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextSecondary)
             Spacer()
