@@ -20,18 +20,20 @@ struct DoctorIssueDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                heroSection
-                ForEach(Array(item.blocks.enumerated()), id: \.element.id) { index, block in
-                    blockView(block)
-                        .padding(.top, topPadding(for: block, isFirst: index == 0))
+            VStack(alignment: .leading, spacing: BrewSpacing.xl) {
+                VStack(alignment: .leading, spacing: 0) {
+                    heroSection
+                    ForEach(Array(item.blocks.enumerated()), id: \.element.id) { index, block in
+                        blockView(block)
+                            .padding(.top, topPadding(for: block, isFirst: index == 0))
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 if !item.rawBody.isEmpty {
+                    Divider()
                     rawOutputSection
-                        .padding(.top, BrewSpacing.lg)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
