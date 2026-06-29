@@ -26,6 +26,9 @@ public struct CommandBlockView: View {
         self.title = title
     }
 
+    @State private var copied = false
+    @State private var copyTask: Task<Void, Never>?
+
     public var body: some View {
         VStack(spacing: 0) {
             header
@@ -47,9 +50,17 @@ public struct CommandBlockView: View {
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextSecondary)
             Spacer()
-            Button(copyTitle, systemImage: "doc.on.doc") {
+            Button(copied ? "Copied" : copyTitle, systemImage: copied ? "checkmark" : "doc.on.doc") {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
+                copied = true
+                copyTask?.cancel()
+                copyTask = Task {
+                    try? await Task.sleep(for: .seconds(5))
+                    if !Task.isCancelled {
+                        copied = false
+                    }
+                }
             }
             .font(.brewCaption)
             .foregroundStyle(Color.brewTextSecondary)
