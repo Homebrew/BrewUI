@@ -90,13 +90,6 @@ struct DoctorView: View {
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(
-                "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
-            )
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewTextSecondary)
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.vertical, BrewSpacing.sm)
             List {
                 ForEach(groups) { group in
                     Section {
@@ -114,6 +107,14 @@ struct DoctorView: View {
                         }
                     } header: {
                         DoctorSeveritySectionHeader(severity: group.severity)
+                    } footer: {
+                        Text(
+                            "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
+                        )
+                        .font(.brewCallout)
+                        .foregroundStyle(Color.brewTextSecondary)
+                        .padding(.vertical, BrewSpacing.sm)
+                        .padding(.trailing, BrewSpacing.md)
                     }
                 }
             }
