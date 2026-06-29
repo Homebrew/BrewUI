@@ -71,23 +71,21 @@ public struct CommandBlockView: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer()
-            if isExpanded {
-                Button(copied ? "Copied" : copyTitle, systemImage: copied ? "checkmark" : "doc.on.doc") {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
-                    copied = true
-                    copyTask?.cancel()
-                    copyTask = Task {
-                        try? await Task.sleep(for: .seconds(5))
-                        if !Task.isCancelled {
-                            copied = false
-                        }
+            Button(copied ? "Copied" : copyTitle, systemImage: copied ? "checkmark" : "doc.on.doc") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
+                copied = true
+                copyTask?.cancel()
+                copyTask = Task {
+                    try? await Task.sleep(for: .seconds(5))
+                    if !Task.isCancelled {
+                        copied = false
                     }
                 }
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextSecondary)
-                .buttonStyle(.plain)
             }
+            .font(.brewCaption)
+            .foregroundStyle(Color.brewTextSecondary)
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, BrewSpacing.md)
         .padding(.vertical, BrewSpacing.sm)
