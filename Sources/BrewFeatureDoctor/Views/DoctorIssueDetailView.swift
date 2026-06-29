@@ -175,7 +175,7 @@ struct DoctorIssueDetailView: View {
     // MARK: - Raw output
 
     private var rawOutputSection: some View {
-        CommandBlockView(command: item.rawBody, title: "Raw output")
+        CommandBlockView(command: item.rawBody, title: "Raw output", collapsible: true)
     }
 }
 
