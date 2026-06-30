@@ -26,7 +26,9 @@ public struct BrewInfoJSON: Decodable {
 struct BrewInfoFormula: Decodable {
     var name: String
     var fullName: String?
+    var tap: String?
     var desc: String?
+    var license: String?
     var homepage: String?
     var dependencies: [String]
     var buildDependencies: [String]
@@ -34,13 +36,19 @@ struct BrewInfoFormula: Decodable {
     var optionalDependencies: [String]
     var versions: BrewInfoFormulaVersions
     var installed: [BrewInfoFormulaInstalled]
+    var linkedKeg: String?
+    var pinned: Bool
+    var kegOnly: Bool
+    var caveats: String?
     var outdated: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = (try? container.decode(String.self, forKey: .name)) ?? ""
         fullName = try? container.decode(String.self, forKey: .fullName)
+        tap = try? container.decode(String.self, forKey: .tap)
         desc = try? container.decode(String.self, forKey: .desc)
+        license = try? container.decode(String.self, forKey: .license)
         homepage = try? container.decode(String.self, forKey: .homepage)
         dependencies = container.decodeStringArray(forKey: .dependencies)
         buildDependencies = container.decodeStringArray(forKey: .buildDependencies)
@@ -50,13 +58,19 @@ struct BrewInfoFormula: Decodable {
             ?? BrewInfoFormulaVersions(stable: nil)
         installed = (try? container.decode([BrewInfoFormulaInstalled].self, forKey: .installed))
             ?? []
+        linkedKeg = try? container.decode(String.self, forKey: .linkedKeg)
+        pinned = (try? container.decode(Bool.self, forKey: .pinned)) ?? false
+        kegOnly = (try? container.decode(Bool.self, forKey: .kegOnly)) ?? false
+        caveats = try? container.decode(String.self, forKey: .caveats)
         outdated = (try? container.decode(Bool.self, forKey: .outdated)) ?? false
     }
 
     private enum CodingKeys: String, CodingKey {
         case name
         case fullName = "full_name"
+        case tap
         case desc
+        case license
         case homepage
         case dependencies
         case buildDependencies = "build_dependencies"
@@ -64,6 +78,10 @@ struct BrewInfoFormula: Decodable {
         case optionalDependencies = "optional_dependencies"
         case versions
         case installed
+        case linkedKeg = "linked_keg"
+        case pinned
+        case kegOnly = "keg_only"
+        case caveats
         case outdated
     }
 }
@@ -74,10 +92,29 @@ struct BrewInfoFormulaVersions: Decodable {
 
 struct BrewInfoFormulaInstalled: Decodable {
     var version: String?
+    var installedOnRequest: Bool
+    var pouredFromBottle: Bool
+    var time: TimeInterval?
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try? container.decode(String.self, forKey: .version)
+        installedOnRequest = (try? container.decode(Bool.self, forKey: .installedOnRequest)) ?? true
+        pouredFromBottle = (try? container.decode(Bool.self, forKey: .pouredFromBottle)) ?? false
+        time = try? container.decode(TimeInterval.self, forKey: .time)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case version
+        case installedOnRequest = "installed_on_request"
+        case pouredFromBottle = "poured_from_bottle"
+        case time
+    }
 }
 
 struct BrewInfoCask: Decodable {
     var token: String
+    var tap: String?
     var names: [String]
     var desc: String?
     var homepage: String?
@@ -86,12 +123,14 @@ struct BrewInfoCask: Decodable {
     /// Nested stable when present in JSON (current Homebrew `--json=v2` casks omit this; formulae-style mirror).
     var versions: BrewInfoFormulaVersions
     var installedVersions: [String]
+    var installedOnRequest: Bool
     var dependencies: [HomebrewPackageID]
     var outdated: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         token = (try? container.decode(String.self, forKey: .token)) ?? ""
+        tap = try? container.decode(String.self, forKey: .tap)
         names = container.decodeStringArrayOrSingle(forKey: .name)
         desc = try? container.decode(String.self, forKey: .desc)
         homepage = try? container.decode(String.self, forKey: .homepage)
@@ -99,6 +138,7 @@ struct BrewInfoCask: Decodable {
         versions = (try? container.decode(BrewInfoFormulaVersions.self, forKey: .versions))
             ?? BrewInfoFormulaVersions(stable: nil)
         installedVersions = container.decodeInstalledVersions(forKey: .installed)
+        installedOnRequest = (try? container.decode(Bool.self, forKey: .installedOnRequest)) ?? true
         dependencies = container.decodeCaskDependencyReferences(
             forKeys: [.dependencies, .dependsOn],
         )
@@ -107,12 +147,14 @@ struct BrewInfoCask: Decodable {
 
     private enum CodingKeys: String, CodingKey {
         case token
+        case tap
         case name
         case desc
         case homepage
         case version
         case versions
         case installed
+        case installedOnRequest = "installed_on_request"
         case dependencies
         case dependsOn = "depends_on"
         case outdated
