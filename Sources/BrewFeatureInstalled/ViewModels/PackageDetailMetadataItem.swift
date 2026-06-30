@@ -12,6 +12,13 @@ import Foundation
 struct PackageDetailMetadataItem {
     private let package: InstalledBrewPackage
 
+    private static let installDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        f.timeStyle = .none
+        return f
+    }()
+
     init(package: InstalledBrewPackage) {
         self.package = package
     }
@@ -25,11 +32,50 @@ struct PackageDetailMetadataItem {
         formattedValue(package.latestVersion)
     }
 
+    /// Installed version(s), annotated with "(linked)" when the keg is active.
     var installedVersionsValue: String {
         guard !package.installedVersions.isEmpty else {
             return "—"
         }
-        return package.installedVersions.joined(separator: ", ")
+        let joined = package.installedVersions.joined(separator: ", ")
+        guard package.linkedKeg != nil else {
+            return joined
+        }
+        return "\(joined) (linked)"
+    }
+
+    /// Nil when there is no install date to show.
+    var installDateValue: String? {
+        guard let date = package.installDate else { return nil }
+        let formatted = Self.installDateFormatter.string(from: date)
+        return package.pouredFromBottle ? "Poured from bottle — \(formatted)" : formatted
+    }
+
+    /// Nil when the package was installed on request (the default); non-nil for dependency installs.
+    var installReasonValue: String? {
+        package.installedOnRequest ? nil : "As dependency"
+    }
+
+    var licenseValue: String? {
+        guard let license = package.license, !license.isEmpty else { return nil }
+        return license
+    }
+
+    /// Display label for the source tap, e.g. "homebrew/core".
+    var tapDisplayValue: String? {
+        package.tap
+    }
+
+    /// Direct link to the formula/cask source on GitHub, for homebrew-core formulae only.
+    var sourceURL: URL? {
+        guard
+            let tap = package.tap,
+            tap == "homebrew/core",
+            package.kind == .formula
+        else { return nil }
+        let firstName = String(package.name.prefix(1)).lowercased()
+        let path = "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/\(firstName)/\(package.name).rb"
+        return URL(string: path)
     }
 
     /// Valid homepage URL for display, if available.
@@ -45,6 +91,19 @@ struct PackageDetailMetadataItem {
             return host
         }
         return homepageURL.absoluteString
+    }
+
+    var isPinned: Bool {
+        package.pinned
+    }
+
+    var isKegOnly: Bool {
+        package.kegOnly
+    }
+
+    var caveatsText: String? {
+        guard let caveats = package.caveats, !caveats.isEmpty else { return nil }
+        return caveats
     }
 
     private func formattedValue(_ raw: String) -> String {
