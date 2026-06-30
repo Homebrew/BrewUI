@@ -27,9 +27,6 @@ struct DiscoverPackageDetailRoot: View {
 struct DiscoverPackageDetailView: View {
     let package: DiscoveryBrewPackage
     @State private var viewModel: DiscoverPackageDetailViewModel
-    @State private var expandedDependencies = false
-
-    private let collapsedDependencyCount = 3
 
     init(
         package: DiscoveryBrewPackage,
@@ -54,11 +51,7 @@ struct DiscoverPackageDetailView: View {
                 DiscoverPackageDetailHeroSection(viewModel: viewModel)
                 DiscoverPackageDetailMetadataSection(viewModel: viewModel)
                 PackageDetailSectionDivider()
-                DiscoverPackageDetailDependenciesSection(
-                    viewModel: viewModel,
-                    collapsedCount: collapsedDependencyCount,
-                    isExpanded: $expandedDependencies,
-                )
+                DiscoverPackageDetailDependenciesSection(viewModel: viewModel)
                 if viewModel.showsInstallSection {
                     PackageDetailSectionDivider()
                     DiscoverPackageInstallSection(viewModel: viewModel)
@@ -73,7 +66,6 @@ struct DiscoverPackageDetailView: View {
         }
         .onChange(of: package) { _, newPackage in
             viewModel.update(package: newPackage)
-            expandedDependencies = false
         }
     }
 }
@@ -178,8 +170,6 @@ private struct DiscoverPackageDetailMetadataSection: View {
 
 private struct DiscoverPackageDetailDependenciesSection: View {
     let viewModel: DiscoverPackageDetailViewModel
-    let collapsedCount: Int
-    @Binding var isExpanded: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
@@ -190,8 +180,7 @@ private struct DiscoverPackageDetailDependenciesSection: View {
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
-                let visible = isExpanded ? deps : Array(deps.prefix(collapsedCount))
-                ForEach(visible, id: \.self) { name in
+                ForEach(deps, id: \.self) { name in
                     HStack(spacing: BrewSpacing.sm) {
                         Circle()
                             .fill(Color.brewTextTertiary)
@@ -202,16 +191,6 @@ private struct DiscoverPackageDetailDependenciesSection: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, BrewSpacing.xs)
-                }
-                if deps.count > collapsedCount {
-                    Button {
-                        isExpanded.toggle()
-                    } label: {
-                        Text(isExpanded ? "Show less" : "+\(deps.count - collapsedCount) more…")
-                            .font(.brewCallout)
-                            .foregroundStyle(Color.brewBrandPrimary)
-                    }
-                    .buttonStyle(.plain)
                 }
             }
         }
