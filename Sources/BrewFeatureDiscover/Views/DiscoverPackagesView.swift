@@ -146,7 +146,14 @@ private struct DiscoverPackageSections: View {
                     .id(package.id)
                     .contentShape(Rectangle())
                     .listRowBackground(
-                        viewModel.selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                        RoundedRectangle(
+                            cornerRadius: BrewRadius.lg,
+                            style: .continuous,
+                        )
+                        .fill(
+                            viewModel.selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                        )
+                        .padding(.horizontal, BrewSpacing.sm),
                     )
                     .onTapGesture {
                         // Needed to suppress the default ugly blue macOS highlight state
