@@ -117,15 +117,33 @@ private struct DiscoverPackageDetailHeroSection: View {
 private struct DiscoverPackageDetailMetadataSection: View {
     let viewModel: DiscoverPackageDetailViewModel
 
+    private let labelWidth: CGFloat = 110
+
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
-            detailRow(label: "Stable version", value: viewModel.stableVersionLabel)
+            detailRow(label: "Latest stable", value: viewModel.stableVersionLabel)
             if viewModel.showsInstallMetrics {
                 detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
             }
             if let installedVersion = viewModel.installedVersionLabel {
-                detailRow(label: "Installed", value: installedVersion)
+                detailRow(
+                    label: "Installed",
+                    value: installedVersion,
+                    valueColor: viewModel.isInstalledVersionOutdated ? .brewStatusWarning : .brewTextPrimary,
+                )
+            }
+            if let dateValue = viewModel.installDateValue {
+                detailRow(label: "Installed on", value: dateValue)
+            }
+            if let reason = viewModel.installReasonValue {
+                detailRow(label: "Install reason", value: reason)
+            }
+            if let license = viewModel.licenseLabel {
+                detailRow(label: "License", value: license)
+            }
+            if let tap = viewModel.tapDisplayValue {
+                sourceRow(tap: tap, url: viewModel.sourceURL)
             }
             if let url = viewModel.homepageURL {
                 homepageRow(url: url)
@@ -133,16 +151,42 @@ private struct DiscoverPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String) -> some View {
+    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-                .frame(width: 110, alignment: .leading)
+                .frame(width: labelWidth, alignment: .leading)
             Text(value)
                 .font(.brewCallout.weight(.medium))
-                .foregroundStyle(Color.brewTextPrimary)
+                .foregroundStyle(valueColor)
                 .textSelection(.enabled)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func sourceRow(tap: String, url: URL?) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
+            Text("Source")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+                .frame(width: labelWidth, alignment: .leading)
+            if let url {
+                Link(destination: url) {
+                    HStack(spacing: BrewSpacing.xxs) {
+                        Text(tap)
+                            .font(.brewCallout.weight(.medium))
+                        Image(systemName: "arrow.up.right")
+                            .font(.brewCaption2)
+                    }
+                    .foregroundStyle(Color.brewBrandPrimary)
+                }
+            } else {
+                Text(tap)
+                    .font(.brewCallout.weight(.medium))
+                    .foregroundStyle(Color.brewTextPrimary)
+                    .textSelection(.enabled)
+            }
             Spacer(minLength: 0)
         }
     }
@@ -152,7 +196,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
             Text("Homepage")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-                .frame(width: 110, alignment: .leading)
+                .frame(width: labelWidth, alignment: .leading)
             Link(destination: url) {
                 HStack(spacing: BrewSpacing.xxs) {
                     Text(url.host ?? url.absoluteString)
@@ -164,7 +208,6 @@ private struct DiscoverPackageDetailMetadataSection: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.vertical, BrewSpacing.xs)
     }
 }
 
