@@ -66,16 +66,9 @@ struct PackageDetailMetadataItem {
         package.tap
     }
 
-    /// Direct link to the formula/cask source on GitHub, for homebrew-core formulae only.
+    /// Direct link to the formula's source on GitHub, derived from ``InstalledBrewPackage/formulaSourceURL``.
     var sourceURL: URL? {
-        guard
-            let tap = package.tap,
-            tap == "homebrew/core",
-            package.kind == .formula
-        else { return nil }
-        let firstName = String(package.name.prefix(1)).lowercased()
-        let path = "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/\(firstName)/\(package.name).rb"
-        return URL(string: path)
+        package.formulaSourceURL
     }
 
     /// Valid homepage URL for display, if available.

@@ -68,6 +68,13 @@ public struct InstalledBrewPackage: Identifiable, Hashable, Sendable {
         HomebrewPackageID(package: package)
     }
 
+    /// Direct link to the formula's source file on GitHub; only available for homebrew/core formulae.
+    public var formulaSourceURL: URL? {
+        guard kind == .formula, tap == "homebrew/core" else { return nil }
+        let firstLetter = String(name.prefix(1)).lowercased()
+        return URL(string: "https://github.com/Homebrew/homebrew-core/blob/HEAD/Formula/\(firstLetter)/\(name).rb")
+    }
+
     public init(
         package: BrewPackage,
         installedVersions: [String],
