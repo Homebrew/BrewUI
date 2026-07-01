@@ -74,7 +74,7 @@ struct InstalledPackageDetailMetadataSection: View {
                 detailRow(label: "Installed on", value: dateValue)
             }
             if let reason = metadata.installReasonValue {
-                detailRow(label: "Install", value: reason)
+                detailRow(label: "Install reason", value: reason)
             }
             if let license = metadata.licenseValue {
                 detailRow(label: "License", value: license)
