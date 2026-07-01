@@ -159,7 +159,7 @@ struct InstalledPackageDetailMetadataSection: View {
     }
 
     private func caveatsCallout(text: String) -> some View {
-        HStack(alignment: .top, spacing: BrewSpacing.sm) {
+        HStack(alignment: .center, spacing: BrewSpacing.sm) {
             Image(systemName: "info.circle.fill")
                 .font(.brewSubheadline)
                 .foregroundStyle(Color.brewBrandPrimary)
