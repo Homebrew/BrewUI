@@ -69,7 +69,11 @@ struct InstalledPackageDetailMetadataSection: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
             detailRow(label: "Version", value: metadata.latestVersionValue)
-            detailRow(label: "Installed", value: metadata.installedVersionsValue)
+            detailRow(
+                label: "Installed",
+                value: metadata.installedVersionsValue,
+                valueColor: metadata.isOutdated ? .brewStatusWarning : .brewTextPrimary,
+            )
             if let dateValue = metadata.installDateValue {
                 detailRow(label: "Installed on", value: dateValue)
             }
@@ -97,7 +101,7 @@ struct InstalledPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String) -> some View {
+    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
@@ -105,7 +109,7 @@ struct InstalledPackageDetailMetadataSection: View {
                 .frame(width: labelWidth, alignment: .leading)
             Text(value)
                 .font(.brewCallout.weight(.medium))
-                .foregroundStyle(Color.brewTextPrimary)
+                .foregroundStyle(valueColor)
                 .textSelection(.enabled)
             Spacer(minLength: 0)
         }

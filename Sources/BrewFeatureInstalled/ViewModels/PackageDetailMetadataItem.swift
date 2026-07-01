@@ -86,6 +86,10 @@ struct PackageDetailMetadataItem {
         return homepageURL.absoluteString
     }
 
+    var isOutdated: Bool {
+        package.outdated
+    }
+
     var isPinned: Bool {
         package.pinned
     }
