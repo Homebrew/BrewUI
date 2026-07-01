@@ -68,7 +68,7 @@ struct InstalledPackageDetailMetadataSection: View {
         let metadata = viewModel.metadataItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
-            detailRow(label: "Version", value: metadata.latestVersionValue)
+            detailRow(label: "Latest stable", value: metadata.latestVersionValue)
             detailRow(
                 label: "Installed",
                 value: metadata.installedVersionsValue,
@@ -139,7 +139,6 @@ struct InstalledPackageDetailMetadataSection: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.vertical, BrewSpacing.xs)
     }
 
     private func homepageRow(url: URL, title: String) -> some View {
@@ -159,7 +158,6 @@ struct InstalledPackageDetailMetadataSection: View {
             }
             Spacer(minLength: 0)
         }
-        .padding(.vertical, BrewSpacing.xs)
     }
 
     private func caveatsCallout(text: String) -> some View {
