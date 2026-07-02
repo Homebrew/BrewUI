@@ -129,7 +129,6 @@ struct InstalledPackageDetailMetadataSection: View {
                         Image(systemName: "arrow.up.right")
                             .font(.brewCaption2)
                     }
-                    .foregroundStyle(Color.brewBrandPrimary)
                 }
             } else {
                 Text(tap)
@@ -154,7 +153,6 @@ struct InstalledPackageDetailMetadataSection: View {
                     Image(systemName: "arrow.up.right")
                         .font(.brewCaption2)
                 }
-                .foregroundStyle(Color.brewBrandPrimary)
             }
             Spacer(minLength: 0)
         }
