@@ -210,7 +210,7 @@ struct InstalledPackageDetailDependentsSection: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             dependentsHeading
             if viewModel.dependentRelationships.isEmpty {
-                Text("No installed packages depend on this package.")
+                Text("No dependents.")
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
