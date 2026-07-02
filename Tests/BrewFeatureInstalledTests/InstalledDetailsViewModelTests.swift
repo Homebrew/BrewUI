@@ -280,6 +280,37 @@ struct InstalledDetailsViewModelTests {
         )
         #expect(!viewModel.isUninstalling)
     }
+
+    @Test @MainActor func `showsUpgradeAvailable is false when package is current`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(!viewModel.showsUpgradeAvailable)
+    }
+
+    @Test @MainActor func `showsUpgradeAvailable is true when package is outdated`() {
+        var outdatedDetails = details(name: "wget")
+        outdatedDetails.outdated = true
+        let viewModel = makeInstalledDetailsViewModel(
+            package: outdatedDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.showsUpgradeAvailable)
+    }
+
+    @Test @MainActor func `showsUpgradeAvailable updates when package changes to outdated`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(!viewModel.showsUpgradeAvailable)
+
+        var outdatedDetails = details(name: "wget")
+        outdatedDetails.outdated = true
+        viewModel.update(package: outdatedDetails)
+        #expect(viewModel.showsUpgradeAvailable)
+    }
 }
 
 struct InstalledDetailsViewModelUpgradeTests {

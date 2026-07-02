@@ -60,6 +60,11 @@ final class InstalledPackageDetailViewModel {
         UpgradePackageItem(package: package)
     }
 
+    /// True when an upgrade is available — mirrors ``InstalledListRowViewModel/showsUpgradeAvailable``.
+    var showsUpgradeAvailable: Bool {
+        upgradeItem.showsUpgradeChrome
+    }
+
     /// Presentation mapping for the Uninstall section.
     var uninstallItem: UninstallPackageItem {
         UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)

@@ -30,10 +30,16 @@ struct InstalledPackageDetailHeroSection: View {
                         .font(.brewTitle1)
                         .foregroundStyle(Color.brewTextPrimary)
 
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.brewTitle3)
-                        .foregroundStyle(Color.brewStatusSuccess)
-                        .accessibilityLabel("Installed")
+                    Image(
+                        systemName: viewModel.showsUpgradeAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+                    )
+                    .font(.brewTitle3)
+                    .foregroundStyle(
+                        viewModel.showsUpgradeAvailable ? Color.brewStatusWarning : Color.brewStatusSuccess
+                    )
+                    .accessibilityLabel(
+                        viewModel.showsUpgradeAvailable ? "Update available" : "Installed"
+                    )
 
                     Text(viewModel.packageKind.chrome.badgeLabel)
                         .font(.brewCaption2)
