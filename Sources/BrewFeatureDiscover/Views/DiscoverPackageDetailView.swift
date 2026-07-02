@@ -74,14 +74,15 @@ private struct DiscoverPackageDetailHeroSection: View {
     let viewModel: DiscoverPackageDetailViewModel
 
     var body: some View {
+        let chrome = viewModel.packageKindChrome
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: BrewRadius.lg)
-                    .fill(Color.brewBrandTint)
+                    .fill(iconBackgroundColor(chrome.iconBackground))
                     .frame(width: 44, height: 44)
                 Image(systemName: "cube.box.fill")
                     .font(.title2)
-                    .foregroundStyle(Color.brewBrandPrimary)
+                    .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
 
@@ -91,13 +92,19 @@ private struct DiscoverPackageDetailHeroSection: View {
                         .font(.brewTitle1)
                         .foregroundStyle(Color.brewTextPrimary)
 
-                    Text(viewModel.packageKindChrome.badgeLabel)
+                    Text(chrome.badgeLabel)
                         .font(.brewCaption2)
-                        .foregroundStyle(Color.brewBrandPrimary)
+                        .foregroundStyle(accentColor(chrome.accent))
                         .padding(.horizontal, BrewSpacing.xs)
                         .padding(.vertical, BrewSpacing.xxs)
-                        .background(Color.brewBrandTint)
-                        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+                        .background {
+                            Capsule()
+                                .fill(Color.brewSurfaceElevated)
+                        }
+                        .overlay {
+                            Capsule()
+                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        }
 
                     if viewModel.installedStatusLabel != nil {
                         DiscoverInstalledBadge()
@@ -110,6 +117,20 @@ private struct DiscoverPackageDetailHeroSection: View {
                         .foregroundStyle(Color.brewTextSecondary)
                 }
             }
+        }
+    }
+
+    private func accentColor(_ token: PackageKindAccentToken) -> Color {
+        switch token {
+        case .brandPrimary: Color.brewBrandPrimary
+        case .statusInfo: Color.brewStatusInfo
+        }
+    }
+
+    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
+        switch token {
+        case .brandTint: Color.brewBrandTint
+        case .statusInfoSubtle: Color.brewStatusInfoSubtle
         }
     }
 }

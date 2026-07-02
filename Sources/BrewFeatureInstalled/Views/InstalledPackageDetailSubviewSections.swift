@@ -13,14 +13,15 @@ struct InstalledPackageDetailHeroSection: View {
     let viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
+        let chrome = viewModel.packageKind.chrome
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: BrewRadius.lg)
-                    .fill(Color.brewBrandTint)
+                    .fill(iconBackgroundColor(chrome.iconBackground))
                     .frame(width: 44, height: 44)
                 Image(systemName: "cube.box.fill")
                     .font(.title2)
-                    .foregroundStyle(Color.brewBrandPrimary)
+                    .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
 
@@ -41,13 +42,19 @@ struct InstalledPackageDetailHeroSection: View {
                         viewModel.showsUpgradeAvailable ? "Update available" : "Installed",
                     )
 
-                    Text(viewModel.packageKind.chrome.badgeLabel)
+                    Text(chrome.badgeLabel)
                         .font(.brewCaption2)
-                        .foregroundStyle(Color.brewBrandPrimary)
+                        .foregroundStyle(accentColor(chrome.accent))
                         .padding(.horizontal, BrewSpacing.xs)
                         .padding(.vertical, BrewSpacing.xxs)
-                        .background(Color.brewBrandTint)
-                        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+                        .background {
+                            Capsule()
+                                .fill(Color.brewSurfaceElevated)
+                        }
+                        .overlay {
+                            Capsule()
+                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        }
                 }
 
                 if let subtitle = heroSubtitle {
@@ -62,6 +69,20 @@ struct InstalledPackageDetailHeroSection: View {
     private var heroSubtitle: String? {
         let trimmed = viewModel.package.description.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func accentColor(_ token: PackageKindAccentToken) -> Color {
+        switch token {
+        case .brandPrimary: Color.brewBrandPrimary
+        case .statusInfo: Color.brewStatusInfo
+        }
+    }
+
+    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
+        switch token {
+        case .brandTint: Color.brewBrandTint
+        case .statusInfoSubtle: Color.brewStatusInfoSubtle
+        }
     }
 }
 
