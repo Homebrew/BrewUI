@@ -115,13 +115,9 @@ struct DoctorView: View {
                     } header: {
                         DoctorSeveritySectionHeader(severity: group.severity)
                     } footer: {
-                        Text(
-                            "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
-                        )
-                        .font(.brewCallout)
-                        .foregroundStyle(Color.brewTextSecondary)
-                        .padding(.vertical, BrewSpacing.sm)
-                        .padding(.trailing, BrewSpacing.md)
+                        if group.id == groups.last?.id {
+                            DoctorInfoFooter()
+                        }
                     }
                 }
             }
@@ -150,6 +146,18 @@ private struct DoctorSeveritySectionHeader: View {
         Text(DoctorSeverityStyle.displayName(severity))
             .font(.brewSubheadline.weight(.semibold))
             .foregroundStyle(DoctorSeverityStyle.foreground(severity))
+    }
+}
+
+private struct DoctorInfoFooter: View {
+    var body: some View {
+        Text(
+            "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
+        )
+        .font(.brewCallout)
+        .foregroundStyle(Color.brewTextSecondary)
+        .padding(.vertical, BrewSpacing.sm)
+        .padding(.trailing, BrewSpacing.md)
     }
 }
 
