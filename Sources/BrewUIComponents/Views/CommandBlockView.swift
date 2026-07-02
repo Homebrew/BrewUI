@@ -76,7 +76,7 @@ public struct CommandBlockView: View {
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
                 copied = true
                 copyTask?.cancel()
-                copyTask = Task {
+                copyTask = Task { @MainActor in
                     try? await Task.sleep(for: .seconds(5))
                     if !Task.isCancelled {
                         copied = false
