@@ -31,14 +31,14 @@ struct InstalledPackageDetailHeroSection: View {
                         .foregroundStyle(Color.brewTextPrimary)
 
                     Image(
-                        systemName: viewModel.showsUpgradeAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
+                        systemName: viewModel.showsUpgradeAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill",
                     )
                     .font(.brewTitle3)
                     .foregroundStyle(
-                        viewModel.showsUpgradeAvailable ? Color.brewStatusWarning : Color.brewStatusSuccess
+                        viewModel.showsUpgradeAvailable ? Color.brewStatusWarning : Color.brewStatusSuccess,
                     )
                     .accessibilityLabel(
-                        viewModel.showsUpgradeAvailable ? "Update available" : "Installed"
+                        viewModel.showsUpgradeAvailable ? "Update available" : "Installed",
                     )
 
                     Text(viewModel.packageKind.chrome.badgeLabel)
