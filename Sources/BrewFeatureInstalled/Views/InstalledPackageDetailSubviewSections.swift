@@ -95,12 +95,12 @@ struct InstalledPackageDetailMetadataSection: View {
         let metadata = viewModel.metadataItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
-            detailRow(label: "Latest stable", value: metadata.latestVersionValue)
             detailRow(
                 label: "Installed",
                 value: metadata.installedVersionsValue,
                 valueColor: metadata.isOutdated ? .brewStatusWarning : .brewTextPrimary,
             )
+            detailRow(label: "Latest stable", value: metadata.latestVersionValue)
             if let dateValue = metadata.installDateValue {
                 detailRow(label: "Installed on", value: dateValue)
             }

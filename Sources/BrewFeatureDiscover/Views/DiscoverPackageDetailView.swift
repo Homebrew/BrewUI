@@ -143,16 +143,16 @@ private struct DiscoverPackageDetailMetadataSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
-            detailRow(label: "Latest stable", value: viewModel.stableVersionLabel)
-            if viewModel.showsInstallMetrics {
-                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
-            }
             if let installedVersion = viewModel.installedVersionLabel {
                 detailRow(
                     label: "Installed",
                     value: installedVersion,
                     valueColor: viewModel.isInstalledVersionOutdated ? .brewStatusWarning : .brewTextPrimary,
                 )
+            }
+            detailRow(label: "Latest stable", value: viewModel.stableVersionLabel)
+            if viewModel.showsInstallMetrics {
+                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
             }
             if let dateValue = viewModel.installDateValue {
                 detailRow(label: "Installed on", value: dateValue)
