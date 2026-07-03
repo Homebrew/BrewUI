@@ -148,6 +148,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
                     label: "Installed",
                     value: installedVersion,
                     valueColor: viewModel.isInstalledVersionOutdated ? .brewStatusWarning : .brewTextPrimary,
+                    valueFontWeight: .heavy,
                 )
             }
             detailRow(label: "Latest stable", value: viewModel.stableVersionLabel)
@@ -172,14 +173,14 @@ private struct DiscoverPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary) -> some View {
+    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .frame(width: labelWidth, alignment: .leading)
             Text(value)
-                .font(.brewCallout.weight(.medium))
+                .font(.brewCallout.weight(valueFontWeight))
                 .foregroundStyle(valueColor)
                 .textSelection(.enabled)
             Spacer(minLength: 0)
