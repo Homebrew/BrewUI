@@ -32,13 +32,14 @@ struct PackageDetailMetadataItem {
         formattedValue(package.latestVersion)
     }
 
-    /// Installed version(s), annotated with "(linked)" when the keg is active.
+    /// Installed version(s). Only annotates the active keg with "(linked)" when multiple versions
+    /// are installed side-by-side — in the common single-version case the annotation adds no information.
     var installedVersionsValue: String {
         guard !package.installedVersions.isEmpty else {
             return "—"
         }
         let joined = package.installedVersions.joined(separator: ", ")
-        guard package.linkedKeg != nil else {
+        guard package.installedVersions.count > 1, package.linkedKeg != nil else {
             return joined
         }
         return "\(joined) (linked)"

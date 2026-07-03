@@ -34,6 +34,24 @@ struct PackageDetailMetadataItemTests {
         #expect(item.installedVersionsValue == "1.0.0, 2.0.0")
     }
 
+    @Test func `linked annotation is suppressed for single installed version`() {
+        let item = PackageDetailMetadataItem(
+            package: .fixture(name: "wget", installedVersions: ["1.0.0"], linkedKeg: "1.0.0"),
+        )
+        #expect(item.installedVersionsValue == "1.0.0")
+    }
+
+    @Test func `linked annotation appears when multiple versions are installed`() {
+        let item = PackageDetailMetadataItem(
+            package: .fixture(
+                name: "wget",
+                installedVersions: ["1.0.0", "2.0.0"],
+                linkedKeg: "2.0.0",
+            ),
+        )
+        #expect(item.installedVersionsValue == "1.0.0, 2.0.0 (linked)")
+    }
+
     @Test func `homepage metadata keeps valid web URLs and host title`() {
         let item = PackageDetailMetadataItem(
             package: .fixture(name: "wget", homepage: "https://example.com/docs"),

@@ -119,7 +119,8 @@ final class DiscoverPackageDetailViewModel {
     var installedVersionLabel: String? {
         guard let pkg = installedPackage, let raw = pkg.installedVersions.first else { return nil }
         let base = InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
-        return pkg.linkedKeg != nil ? "\(base) (linked)" : base
+        let showLinked = pkg.installedVersions.count > 1 && pkg.linkedKeg != nil
+        return showLinked ? "\(base) (linked)" : base
     }
 
     var isInstalledVersionOutdated: Bool {
