@@ -244,7 +244,7 @@ struct InstalledDetailsViewModelTests {
         #expect(!viewModel.dependencyRelationships[1].isInstalledInInventory)
     }
 
-    @Test @MainActor func `update package clears dependency relationships`() async {
+    @Test @MainActor func `update package retains dependency relationships until refresh`() async {
         let viewModel = makeInstalledDetailsViewModel(
             package: InstalledBrewPackage.fixture(
                 name: "wget",
@@ -255,11 +255,16 @@ struct InstalledDetailsViewModelTests {
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: [.formula(name: "openssl@3")]),
         )
         await viewModel.refreshRelationships()
+        #expect(!viewModel.dependencyRelationships.isEmpty)
+        // Stale relationships are kept until the async refresh for the new package completes,
+        // preventing a visible flicker through an empty state on package change.
         viewModel.update(package: InstalledBrewPackage.fixture(name: "curl", kind: .formula))
+        #expect(!viewModel.dependencyRelationships.isEmpty)
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependencyRelationships.isEmpty)
     }
 
-    @Test @MainActor func `update package clears dependent relationships`() async {
+    @Test @MainActor func `update package retains dependent relationships until refresh`() async {
         let package = details(name: "openssl@3")
         let viewModel = makeInstalledDetailsViewModel(
             package: package,
@@ -269,7 +274,12 @@ struct InstalledDetailsViewModelTests {
             },
         )
         await viewModel.refreshRelationships()
+        #expect(!viewModel.dependentRelationships.isEmpty)
+        // Stale relationships are kept until the async refresh for the new package completes,
+        // preventing a visible flicker through an empty state on package change.
         viewModel.update(package: InstalledBrewPackage.fixture(name: "wget", kind: .formula))
+        #expect(!viewModel.dependentRelationships.isEmpty)
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependentRelationships.isEmpty)
     }
 

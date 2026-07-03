@@ -137,8 +137,6 @@ final class InstalledPackageDetailViewModel {
         }
         package = newPackage
         operationPhase = .idle
-        dependencyRelationships = []
-        dependentRelationships = []
         showUninstallConfirmation = false
         showUninstallBlockedCallout = false
         clearMutationErrors()
