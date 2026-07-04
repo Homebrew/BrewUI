@@ -68,46 +68,6 @@ public final class BrewEnvFileRepository: EnvFileRepository {
         isStale = true
     }
 
-    public func save(_ file: BrewEnvFile) async throws {
-        let url = locator.locate()
-        let directory = url.deletingLastPathComponent()
-        try FileManager.default.createDirectory(
-            at: directory,
-            withIntermediateDirectories: true,
-            attributes: [.posixPermissions: 0o700],
-        )
-
-        // Best-effort one-generation backup so the user has an undo path if a Save persisted a wrong
-        // value. We overwrite any prior `.bak` each save — only the most recent prior version is kept.
-        // Failures here are logged but don't block the save itself.
-        if FileManager.default.fileExists(atPath: url.path) {
-            do {
-                let backupURL = url.appendingPathExtension("bak")
-                let existing = try Data(contentsOf: url)
-                try existing.write(to: backupURL, options: .atomic)
-                try FileManager.default.setAttributes(
-                    [.posixPermissions: 0o600],
-                    ofItemAtPath: backupURL.path,
-                )
-            } catch {
-                envFileRepositoryLogger.warning(
-                    "brew.env backup failed: \(error.localizedDescription, privacy: .public)",
-                )
-            }
-        }
-
-        let rendered = try BrewEnvFileWriter.render(file)
-        let data = Data(rendered.utf8)
-        // `Data.write(options: .atomic)` writes to a temp sibling and renames into place, so a partial
-        // write never overwrites the original — the guarantee the editor relies on. We follow up with a
-        // chmod to 0600 since the file may hold `HOMEBREW_GITHUB_API_TOKEN`.
-        try data.write(to: url, options: .atomic)
-        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: url.path)
-        // Reflect the new content in the cache immediately so observers re-render without a reload step.
-        state = .loaded(file)
-        isStale = false
-    }
-
     private static func read(at url: URL) async throws -> BrewEnvFile {
         guard FileManager.default.fileExists(atPath: url.path) else {
             return BrewEnvFile()

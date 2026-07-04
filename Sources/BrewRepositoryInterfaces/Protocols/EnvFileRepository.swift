@@ -20,8 +20,6 @@ public protocol EnvFileRepository: Sendable {
     /// when no value has loaded yet. Keeps any existing `.loaded` value on screen during the refetch.
     func load(forceRefresh: Bool) async
 
-    func save(_ file: BrewEnvFile) async throws
-
     /// Marks the cached file as needing re-reading on the next `load()` call without disturbing the
     /// currently displayed value.
     func invalidate()

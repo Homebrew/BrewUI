@@ -19,14 +19,6 @@ final class ConfigViewModel {
     /// the underlying `brew.env` changes externally and the user hasn't started editing.
     private(set) var draft: BrewEnvFile = .init()
 
-    /// Tracks whether the user has touched the draft since the last sync. Lets us distinguish
-    /// "external `brew.env` change while idle" (re-sync draft) from "external change while editing"
-    /// (keep the user's edits visible).
-    private(set) var isDirty: Bool = false
-
-    /// Save-side error surfaced inline so the editor's main load state can stay `.loaded`.
-    private(set) var saveError: String?
-
     /// When the user tries to add a custom row whose key is classified as dangerous, the row sits here
     /// until they explicitly confirm. The view renders a confirmation banner driven by this value.
     private(set) var pendingDangerousCustomRow: PendingCustomRow?
@@ -93,109 +85,6 @@ final class ConfigViewModel {
         syncDraftIfClean()
     }
 
-    // MARK: - Editing
-
-    /// Sets `key` to `value` in the pending draft. No-op when the row is read-only (shell-overridden or
-    /// install-time) — the editor wires these as disabled, but the VM enforces it too as a safety net.
-    func setValue(forKey key: String, to value: String) {
-        guard !isShellOverridden(key: key), !EnvKeyCatalogue.isInstallTimeOnly(key) else {
-            return
-        }
-        draft = draft.setting(key, value: value)
-        isDirty = true
-    }
-
-    /// Removes a row from the draft. Used for toggling allowlist booleans off and for deleting custom rows.
-    func removeRow(forKey key: String) {
-        guard !isShellOverridden(key: key), !EnvKeyCatalogue.isInstallTimeOnly(key) else {
-            return
-        }
-        draft = draft.removing(key: key)
-        isDirty = true
-    }
-
-    /// Tries to add a custom `HOMEBREW_*` row to the draft.
-    ///
-    /// Returns `.rejected` for keys without the prefix, or keys already covered by the curated
-    /// allowlist or the install-time set (those should be set via their typed row instead). Returns
-    /// `.needsConfirmation` for keys classified as dangerous — the row is held in
-    /// ``pendingDangerousCustomRow`` until the caller commits via ``confirmPendingCustomRow`` or
-    /// drops it via ``cancelPendingCustomRow``. Returns `.added` when the row landed in the draft.
-    @discardableResult
-    func addCustomRow(key: String, value: String) -> AddCustomRowOutcome {
-        let trimmedKey = key.trimmingCharacters(in: .whitespaces)
-        guard trimmedKey.hasPrefix("HOMEBREW_"), trimmedKey.count > "HOMEBREW_".count else {
-            return .rejected
-        }
-        guard EnvKeyCatalogue.descriptor(forKey: trimmedKey) == nil else {
-            return .rejected
-        }
-        guard !EnvKeyCatalogue.isInstallTimeOnly(trimmedKey) else {
-            return .rejected
-        }
-        if case let .dangerous(reason) = EnvKeyCatalogue.classifyCustomKey(trimmedKey) {
-            pendingDangerousCustomRow = PendingCustomRow(key: trimmedKey, value: value, reason: reason)
-            return .needsConfirmation
-        }
-        commitCustomRow(key: trimmedKey, value: value)
-        return .added
-    }
-
-    /// Commits the row currently held in ``pendingDangerousCustomRow`` to the draft. No-op when
-    /// nothing is pending.
-    func confirmPendingCustomRow() {
-        guard let pending = pendingDangerousCustomRow else {
-            return
-        }
-        commitCustomRow(key: pending.key, value: pending.value)
-        pendingDangerousCustomRow = nil
-    }
-
-    /// Drops the pending dangerous row without writing to the draft.
-    func cancelPendingCustomRow() {
-        pendingDangerousCustomRow = nil
-    }
-
-    private func commitCustomRow(key: String, value: String) {
-        draft = draft.setting(key, value: value)
-        isDirty = true
-    }
-
-    /// Toggle binding sink. `"1"` is the on-disk truthy value; off removes the entry entirely so it
-    /// stops shadowing the default once persisted.
-    func setToggle(forKey key: String, on: Bool) {
-        if on {
-            setValue(forKey: key, to: "1")
-        } else {
-            removeRow(forKey: key)
-        }
-    }
-
-    /// String/secret binding sink. Empty input removes the row so the user can clear a value without
-    /// reaching for the row-delete affordance.
-    func setString(forKey key: String, to value: String) {
-        if value.isEmpty {
-            removeRow(forKey: key)
-        } else {
-            setValue(forKey: key, to: value)
-        }
-    }
-
-    /// Integer binding sink. Strips non-digits so paste-from-`brew config` ("12 jobs") still works,
-    /// clamps to the descriptor's range, and removes the row when the input has no digits at all.
-    func setInteger(forKey key: String, rawText: String, minimum: Int, maximum: Int) {
-        let digits = rawText.filter(\.isNumber)
-        guard !digits.isEmpty else {
-            removeRow(forKey: key)
-            return
-        }
-        guard let parsed = Int(digits) else {
-            return
-        }
-        let clamped = max(minimum, min(maximum, parsed))
-        setValue(forKey: key, to: String(clamped))
-    }
-
     /// Toggle binding source. Anything other than `"1"` is off.
     func isToggleOn(forKey key: String) -> Bool {
         draft.value(forKey: key) == "1"
@@ -218,36 +107,6 @@ final class ConfigViewModel {
         return advisory.isClean ? nil : advisory
     }
 
-    /// Discards pending edits, reverting `draft` to the loaded file.
-    func revert() {
-        guard let file = envFileState.value else {
-            return
-        }
-        draft = file
-        isDirty = false
-        saveError = nil
-    }
-
-    /// Persists `draft` via the repository. On success the cached state catches up (the repo updates
-    /// its own state) and the dirty flag clears. On failure the draft is untouched and `saveError`
-    /// carries the user-visible copy.
-    func save() async {
-        guard isDirty else {
-            return
-        }
-        let snapshot = draft
-        saveError = nil
-        do {
-            try await envFileRepository.save(snapshot)
-            isDirty = false
-        } catch {
-            saveError = String(
-                localized: "Couldn't save brew.env: \(error.localizedDescription)",
-                comment: "Configuration tab, save failure",
-            )
-        }
-    }
-
     /// Called by the view on `envFileState` changes. When the underlying file changes externally and
     /// the user hasn't started editing, mirror the new content into the draft so the editor stays in
     /// sync. When there are pending edits, leave the draft alone.
@@ -256,7 +115,7 @@ final class ConfigViewModel {
     }
 
     private func syncDraftIfClean() {
-        guard !isDirty, let file = envFileState.value else {
+        guard let file = envFileState.value else {
             return
         }
         draft = file

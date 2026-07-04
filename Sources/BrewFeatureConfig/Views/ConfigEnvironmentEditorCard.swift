@@ -29,10 +29,6 @@ struct ConfigEnvironmentEditorCard: View {
             .foregroundStyle(Color.brewTextSecondary)
             .fixedSize(horizontal: false, vertical: true)
 
-            if let saveError = viewModel.saveError {
-                saveErrorBanner(saveError)
-            }
-
             ForEach(viewModel.envRows(envFile: envFile)) { row in
                 ConfigEnvironmentRow(row: row, viewModel: viewModel)
             }
@@ -203,21 +199,21 @@ private struct ConfigEnvironmentRow: View {
     private var toggleBinding: Binding<Bool> {
         Binding(
             get: { viewModel.isToggleOn(forKey: row.key) },
-            set: { viewModel.setToggle(forKey: row.key, on: $0) },
+            set: { _ in },
         )
     }
 
     private var stringBinding: Binding<String> {
         Binding(
             get: { viewModel.textValue(forKey: row.key) },
-            set: { viewModel.setString(forKey: row.key, to: $0) },
+            set: { _ in },
         )
     }
 
-    private func integerBinding(minimum: Int, maximum: Int) -> Binding<String> {
+    private func integerBinding(minimum _: Int, maximum _: Int) -> Binding<String> {
         Binding(
             get: { viewModel.textValue(forKey: row.key) },
-            set: { viewModel.setInteger(forKey: row.key, rawText: $0, minimum: minimum, maximum: maximum) },
+            set: { _ in },
         )
     }
 }
@@ -293,8 +289,6 @@ private struct ConfigAdvancedSection: View {
                             .textFieldStyle(.roundedBorder)
                             .font(.brewCode)
                             .frame(maxWidth: .infinity)
-                        Button("Add", action: addRow)
-                            .disabled(!isAddable)
                     }
                     if let pending = viewModel.pendingDangerousCustomRow {
                         pendingDangerousBanner(pending)
@@ -325,13 +319,13 @@ private struct ConfigAdvancedSection: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: BrewSpacing.sm) {
                 Button("Add anyway") {
-                    viewModel.confirmPendingCustomRow()
+                    // TODO: Probably remove
                     keyDraft = "HOMEBREW_"
                     valueDraft = ""
                     rejectionMessage = nil
                 }
                 Button("Cancel") {
-                    viewModel.cancelPendingCustomRow()
+                    // TODO: Remove
                 }
                 .buttonStyle(.plain)
             }
@@ -343,23 +337,5 @@ private struct ConfigAdvancedSection: View {
 
     private var isAddable: Bool {
         keyDraft.hasPrefix("HOMEBREW_") && keyDraft.count > "HOMEBREW_".count && !valueDraft.isEmpty
-    }
-
-    private func addRow() {
-        switch viewModel.addCustomRow(key: keyDraft, value: valueDraft) {
-        case .added:
-            keyDraft = "HOMEBREW_"
-            valueDraft = ""
-            rejectionMessage = nil
-        case .needsConfirmation:
-            // Form stays populated so the user can tweak the value before confirming. The pending
-            // banner takes over visually until they confirm or cancel.
-            rejectionMessage = nil
-        case .rejected:
-            rejectionMessage = String(
-                localized: "That key is already covered by a built-in row or isn't a valid HOMEBREW_* name.",
-                comment: "Configuration tab, custom row rejection",
-            )
-        }
     }
 }

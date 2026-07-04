@@ -38,17 +38,6 @@ struct ConfigView: View {
     private var header: some View {
         HStack(spacing: BrewSpacing.sm) {
             Spacer(minLength: 0)
-            Button("Discard", systemImage: "arrow.uturn.backward") {
-                viewModel.revert()
-            }
-            .disabled(!viewModel.isDirty)
-            Button("Save", systemImage: "checkmark") {
-                Task { await viewModel.save() }
-            }
-            .keyboardShortcut("s", modifiers: .command)
-            .disabled(!viewModel.isDirty)
-            Divider()
-                .frame(height: 18)
             Button("Copy report", systemImage: "doc.on.doc") {
                 copyReport()
             }
