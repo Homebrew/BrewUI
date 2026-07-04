@@ -46,7 +46,7 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.installedVersionLabel == "v1.9.0")
     }
 
-    @Test @MainActor func `linked annotation appears when multiple versions are installed`() {
+    @Test @MainActor func `linked annotation appears for linked keg when multiple versions are installed`() {
         let viewModel = DiscoverPackageDetailViewModel(
             package: DiscoveryBrewPackage(package: .fixture(name: "wget"), thirtyDayInstallCount: 1),
             installedRepository: installedRepo([
@@ -56,7 +56,7 @@ struct DiscoverPackageDetailViewModelTests {
             commandFactory: StubMutatingCommandFactory(),
         )
 
-        #expect(viewModel.installedVersionLabel == "v1.9.0 (linked)")
+        #expect(viewModel.installedVersionLabel == "v2.0.0 (linked)")
     }
 
     @Test @MainActor func `cask package maps cask install command and not installed status`() {

@@ -39,6 +39,21 @@ struct DiscoverListRowViewModelTests {
         #expect(viewModel.installedVersionLabel == "v2.45.0")
     }
 
+    @Test @MainActor func `installed version label prefers linked keg over first installed version`() {
+        let viewModel = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(name: "git"),
+                thirtyDayInstallCount: 1,
+            ),
+            installedRepository: installedRepo([
+                .fixture(name: "git", installedVersions: ["1.9.0", "2.0.0"], linkedKeg: "2.0.0"),
+            ]),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        #expect(viewModel.installedVersionLabel == "v2.0.0")
+    }
+
     @Test @MainActor func `showsInstallMetrics defaults to true and can be turned off`() {
         let trendingRow = DiscoverListRowViewModel(
             discoveryPackage: DiscoveryBrewPackage(

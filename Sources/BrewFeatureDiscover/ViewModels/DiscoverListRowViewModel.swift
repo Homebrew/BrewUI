@@ -74,7 +74,9 @@ final class DiscoverListRowViewModel: Identifiable {
     }
 
     var installedVersionLabel: String? {
-        guard let raw = installedPackage?.installedVersions.first else {
+        guard let pkg = installedPackage,
+              let raw = pkg.linkedKeg ?? pkg.installedVersions.first
+        else {
             return nil
         }
         return InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
