@@ -38,8 +38,8 @@ excluded:
   - scripts
 
 line_length:
-  warning: 200
-  error: 150
+  warning: 180
+  error: 200
   ignores_comments: true
 
 file_length:
