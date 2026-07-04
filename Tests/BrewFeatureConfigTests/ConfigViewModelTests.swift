@@ -20,10 +20,7 @@ struct ConfigViewModelTests {
     )
 
     @Test @MainActor func `load groups entries into homebrew, system and build cards`() async {
-        let viewModel = ConfigViewModel(
-            repository: StubConfigRepository(snapshot: Self.snapshot),
-            envFileRepository: StubEnvFileRepository(),
-        )
+        let viewModel = ConfigViewModel(repository: StubConfigRepository(snapshot: Self.snapshot))
 
         await viewModel.load()
 
@@ -32,7 +29,6 @@ struct ConfigViewModelTests {
             return
         }
         let sections = viewModel.sections
-        // The HOMEBREW_* surface is the editor card now — it's handled separately, not in `sections`.
         #expect(sections.map(\.title) == ["Homebrew", "System", "Build settings"])
 
         let homebrew = sections.first { $0.id == "homebrew" }
@@ -47,10 +43,7 @@ struct ConfigViewModelTests {
     }
 
     @Test @MainActor func `copy report contains grouped key value lines`() async {
-        let viewModel = ConfigViewModel(
-            repository: StubConfigRepository(snapshot: Self.snapshot),
-            envFileRepository: StubEnvFileRepository(),
-        )
+        let viewModel = ConfigViewModel(repository: StubConfigRepository(snapshot: Self.snapshot))
 
         await viewModel.load()
 
@@ -65,10 +58,7 @@ struct ConfigViewModelTests {
             entries: [BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0")],
             environment: [],
         )
-        let viewModel = ConfigViewModel(
-            repository: StubConfigRepository(snapshot: snapshot),
-            envFileRepository: StubEnvFileRepository(),
-        )
+        let viewModel = ConfigViewModel(repository: StubConfigRepository(snapshot: snapshot))
 
         await viewModel.load()
 
@@ -78,7 +68,6 @@ struct ConfigViewModelTests {
     @Test @MainActor func `missing brew executable surfaces the brew-not-found state`() async {
         let viewModel = ConfigViewModel(
             repository: ThrowingConfigRepository(error: BrewLookupError.executableNotFound),
-            envFileRepository: StubEnvFileRepository(),
         )
 
         await viewModel.load()
@@ -97,7 +86,6 @@ struct ConfigViewModelTests {
             repository: ThrowingConfigRepository(
                 error: BrewCommandError.failed(exitCode: 1, stderr: "something broke"),
             ),
-            envFileRepository: StubEnvFileRepository(),
         )
 
         await viewModel.load()
@@ -109,7 +97,6 @@ struct ConfigViewModelTests {
     @Test @MainActor func `unknown errors map to a generic message`() async {
         let viewModel = ConfigViewModel(
             repository: ThrowingConfigRepository(error: ConfigOddError()),
-            envFileRepository: StubEnvFileRepository(),
         )
 
         await viewModel.load()
