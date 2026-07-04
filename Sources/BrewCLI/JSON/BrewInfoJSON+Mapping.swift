@@ -39,6 +39,7 @@ private extension BrewInfoFormula {
             outdated: outdated,
             license: BrewInfoJSON.trimmedOrNil(license),
             tap: BrewInfoJSON.trimmedOrNil(tap),
+            rubySourcePath: BrewInfoJSON.trimmedOrNil(rubySourcePath),
             installedOnRequest: firstInstall?.installedOnRequest ?? true,
             pouredFromBottle: firstInstall?.pouredFromBottle ?? false,
             installDate: installDate,

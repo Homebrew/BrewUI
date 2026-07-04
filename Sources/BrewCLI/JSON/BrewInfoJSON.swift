@@ -34,6 +34,7 @@ struct BrewInfoFormula: Decodable {
     var buildDependencies: [String]
     var recommendedDependencies: [String]
     var optionalDependencies: [String]
+    var rubySourcePath: String?
     var versions: BrewInfoFormulaVersions
     var installed: [BrewInfoFormulaInstalled]
     var linkedKeg: String?
@@ -54,6 +55,7 @@ struct BrewInfoFormula: Decodable {
         buildDependencies = container.decodeStringArray(forKey: .buildDependencies)
         recommendedDependencies = container.decodeStringArray(forKey: .recommendedDependencies)
         optionalDependencies = container.decodeStringArray(forKey: .optionalDependencies)
+        rubySourcePath = try? container.decode(String.self, forKey: .rubySourcePath)
         versions = (try? container.decode(BrewInfoFormulaVersions.self, forKey: .versions))
             ?? BrewInfoFormulaVersions(stable: nil)
         installed = (try? container.decode([BrewInfoFormulaInstalled].self, forKey: .installed))
@@ -76,6 +78,7 @@ struct BrewInfoFormula: Decodable {
         case buildDependencies = "build_dependencies"
         case recommendedDependencies = "recommended_dependencies"
         case optionalDependencies = "optional_dependencies"
+        case rubySourcePath = "ruby_source_path"
         case versions
         case installed
         case linkedKeg = "linked_keg"

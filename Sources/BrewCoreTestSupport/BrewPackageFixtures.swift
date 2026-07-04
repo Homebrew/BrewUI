@@ -39,6 +39,8 @@ public extension InstalledBrewPackage {
         installedVersions: [String] = [],
         dependencies: [HomebrewPackageID] = [],
         outdated: Bool = false,
+        tap: String? = nil,
+        rubySourcePath: String? = nil,
         linkedKeg: String? = nil,
     ) -> InstalledBrewPackage {
         InstalledBrewPackage(
@@ -53,6 +55,8 @@ public extension InstalledBrewPackage {
             ),
             installedVersions: installedVersions,
             outdated: outdated,
+            tap: tap,
+            rubySourcePath: rubySourcePath,
             linkedKeg: linkedKeg,
         )
     }
