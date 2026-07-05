@@ -39,6 +39,12 @@ struct DoctorView: View {
                         .controlSize(.small)
                         .accessibilityLabel("Re-checking")
                 }
+                if viewModel.rawDoctorOutput != nil {
+                    Button("Copy brew doctor output") {
+                        viewModel.copyDoctorOutput()
+                    }
+                    .controlSize(.small)
+                }
                 Button("Run Again") {
                     Task { await viewModel.load() }
                 }
@@ -83,58 +89,75 @@ struct DoctorView: View {
     }
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
-        List {
-            ForEach(groups) { group in
-                Section {
-                    ForEach(group.items) { item in
-                        DoctorIssueRowView(item: item)
-                            .id(item.id)
-                            .contentShape(Rectangle())
-                            .listRowBackground(
-                                viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
-                            )
-                            .onTapGesture {
-                                // Needed to suppress the default ugly blue macOS highlight state
-                                viewModel.setSelection(item.id)
-                            }
+        VStack(alignment: .leading, spacing: 0) {
+            List {
+                ForEach(groups) { group in
+                    Section {
+                        ForEach(group.items) { item in
+                            DoctorIssueRowView(item: item)
+                                .id(item.id)
+                                .contentShape(Rectangle())
+                                .listRowBackground(
+                                    RoundedRectangle(
+                                        cornerRadius: BrewRadius.lg,
+                                        style: .continuous,
+                                    )
+                                    .fill(
+                                        viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
+                                    )
+                                    .padding(.horizontal, BrewSpacing.sm),
+                                )
+                                .onTapGesture {
+                                    // Needed to suppress the default ugly blue macOS highlight state
+                                    viewModel.setSelection(item.id)
+                                }
+                        }
+                    } header: {
+                        DoctorSeveritySectionHeader(severity: group.severity)
+                    } footer: {
+                        if group.id == groups.last?.id {
+                            DoctorInfoFooter()
+                        }
                     }
-                } header: {
-                    DoctorSeveritySectionHeader(severity: group.severity, issueCount: group.items.count)
                 }
             }
-        }
-        .task(id: viewModel.shouldFocusList) {
-            isFocused = viewModel.shouldFocusList
-        }
-        .focused($isFocused)
-        .listStyle(.inset)
-        .accessibilityLabel("Doctor issues")
-        .onKeyPress(.upArrow) {
-            viewModel.selectPrevious()
-            return .handled
-        }
-        .onKeyPress(.downArrow) {
-            viewModel.selectNext()
-            return .handled
+            .task(id: viewModel.shouldFocusList) {
+                isFocused = viewModel.shouldFocusList
+            }
+            .focused($isFocused)
+            .listStyle(.inset)
+            .accessibilityLabel("Doctor issues")
+            .onKeyPress(.upArrow) {
+                viewModel.selectPrevious()
+                return .handled
+            }
+            .onKeyPress(.downArrow) {
+                viewModel.selectNext()
+                return .handled
+            }
         }
     }
 }
 
 private struct DoctorSeveritySectionHeader: View {
     let severity: DoctorSeverity
-    let issueCount: Int
 
     var body: some View {
-        HStack(spacing: BrewSpacing.xs) {
-            Text(DoctorSeverityStyle.displayName(severity))
-                .font(.brewSubheadline.weight(.semibold))
-                .foregroundStyle(DoctorSeverityStyle.foreground(severity))
-            Text("(\(issueCount))")
-                .font(.brewSubheadline)
-                .foregroundStyle(Color.brewTextSecondary)
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(DoctorSeverityStyle.displayName(severity)), \(issueCount) issues")
+        Text(DoctorSeverityStyle.displayName(severity))
+            .font(.brewSubheadline.weight(.semibold))
+            .foregroundStyle(DoctorSeverityStyle.foreground(severity))
+    }
+}
+
+private struct DoctorInfoFooter: View {
+    var body: some View {
+        Text(
+            "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
+        )
+        .font(.brewCallout)
+        .foregroundStyle(Color.brewTextSecondary)
+        .padding(.vertical, BrewSpacing.sm)
+        .padding(.trailing, BrewSpacing.md)
     }
 }
 

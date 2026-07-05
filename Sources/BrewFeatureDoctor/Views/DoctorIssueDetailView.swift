@@ -20,18 +20,20 @@ struct DoctorIssueDetailView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                heroSection
-                ForEach(Array(item.blocks.enumerated()), id: \.element.id) { index, block in
-                    blockView(block)
-                        .padding(.top, topPadding(for: block, isFirst: index == 0))
+            VStack(alignment: .leading, spacing: BrewSpacing.xl) {
+                VStack(alignment: .leading, spacing: 0) {
+                    heroSection
+                    ForEach(Array(item.blocks.enumerated()), id: \.element.id) { index, block in
+                        blockView(block)
+                            .padding(.top, topPadding(for: block, isFirst: index == 0))
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 if !item.rawBody.isEmpty {
+                    Divider()
                     rawOutputSection
-                        .padding(.top, BrewSpacing.lg)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -175,21 +177,7 @@ struct DoctorIssueDetailView: View {
     // MARK: - Raw output
 
     private var rawOutputSection: some View {
-        DisclosureGroup {
-            Text(item.rawBody)
-                .font(.brewCode)
-                .foregroundStyle(Color.brewCodeDefault)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(BrewSpacing.md)
-                .background(Color.brewTerminal)
-                .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
-                .textSelection(.enabled)
-                .padding(.top, BrewSpacing.sm)
-        } label: {
-            Text("Raw output")
-                .font(.brewSubheadline.weight(.semibold))
-                .foregroundStyle(Color.brewTextPrimary)
-        }
+        CommandBlockView(command: item.rawBody, title: "Raw output", collapsible: true)
     }
 }
 

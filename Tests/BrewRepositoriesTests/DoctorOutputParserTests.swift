@@ -369,6 +369,39 @@ struct DoctorOutputParserTests {
         #expect(roles["docs.brew.sh"] == .reference)
     }
 
+    // MARK: - Raw output
+
+    @Test func `raw output is preserved verbatim for healthy output`() {
+        let input = "Your system is ready to brew.\n"
+        let report = DoctorOutputParser.parse(input)
+        #expect(report.rawOutput == input)
+    }
+
+    @Test func `raw output is preserved verbatim when warnings are present`() {
+        let input = """
+        Warning: Something is off.
+        Here is why it matters.
+          brew upgrade git
+        """
+        let report = DoctorOutputParser.parse(input)
+        #expect(report.rawOutput == input)
+    }
+
+    @Test func `raw output includes preamble and all warning blocks`() {
+        let input = """
+        Please note that these warnings are just used to help the Homebrew maintainers
+        with debugging if you file an issue. Thanks!
+
+        Warning: First problem.
+        Detail one.
+
+        Warning: Second problem.
+        Detail two.
+        """
+        let report = DoctorOutputParser.parse(input)
+        #expect(report.rawOutput == input)
+    }
+
     // MARK: - Raw body fallback
 
     @Test func `raw body preserves the verbatim block beneath the title`() throws {

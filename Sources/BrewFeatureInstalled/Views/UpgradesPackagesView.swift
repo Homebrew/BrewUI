@@ -129,7 +129,14 @@ struct UpgradesPackagesView: View {
                 .id(package.id)
                 .contentShape(Rectangle())
                 .listRowBackground(
-                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                    RoundedRectangle(
+                        cornerRadius: BrewRadius.lg,
+                        style: .continuous,
+                    )
+                    .fill(
+                        viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                    )
+                    .padding(.horizontal, BrewSpacing.sm),
                 )
                 .onTapGesture {
                     // Needed to suppress the default ugly blue macOS highlight state

@@ -12,7 +12,7 @@ struct DoctorIssueRowView: View {
     let item: DoctorIssueItem
 
     var body: some View {
-        HStack(alignment: .top, spacing: BrewSpacing.sm) {
+        HStack(alignment: .center, spacing: BrewSpacing.sm) {
             Image(systemName: DoctorSeverityStyle.icon(item.severity))
                 .foregroundStyle(DoctorSeverityStyle.foreground(item.severity))
                 .imageScale(.medium)
@@ -30,6 +30,7 @@ struct DoctorIssueRowView: View {
             Spacer(minLength: 0)
         }
         .padding(.vertical, BrewSpacing.xs)
+        .frame(minHeight: 48)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
         .accessibilityLabel(item.accessibilityLabel)

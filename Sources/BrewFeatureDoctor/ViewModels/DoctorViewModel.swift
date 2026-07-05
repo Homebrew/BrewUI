@@ -3,6 +3,7 @@
 //  BrewFeatureDoctor
 //
 
+import AppKit
 import BrewCore
 import BrewRepositoryInterfaces
 import Foundation
@@ -80,19 +81,18 @@ final class DoctorViewModel {
         state.isLoaded
     }
 
+    var rawDoctorOutput: String? {
+        guard case let .loaded(report) = state, !report.rawOutput.isEmpty else {
+            return nil
+        }
+        return report.rawOutput
+    }
+
     var issueItems: [DoctorIssueItem] {
         guard case let .loaded(report) = state else {
             return []
         }
         return report.issues.map { DoctorIssueItem(issue: $0) }
-    }
-
-    var issueCountSubtitle: String {
-        let count = state.value?.issues.count ?? 0
-        if count == 1 {
-            return "1 issue found"
-        }
-        return "\(count) issues found"
     }
 
     /// Header chrome (Run Again button, re-check spinner) is only meaningful once a report — healthy or
@@ -116,7 +116,7 @@ final class DoctorViewModel {
         case .healthy:
             isRefreshing ? "Re-checking…" : "No problems found"
         case .issues:
-            isRefreshing ? "Re-checking…" : issueCountSubtitle
+            isRefreshing ? "Re-checking…" : "Warnings found"
         case .failed:
             "The check could not be completed"
         }
@@ -179,6 +179,12 @@ final class DoctorViewModel {
     }
 
     // MARK: - Intents
+
+    func copyDoctorOutput() {
+        guard let output = rawDoctorOutput else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(output, forType: .string)
+    }
 
     /// Runs `brew doctor` via the repository. Called on tab arrival and from "Run Again"; keeps any prior
     /// report visible while it refreshes. On a fresh load (no prior selection or a stale one), auto-

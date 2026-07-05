@@ -12,23 +12,37 @@ import SwiftUI
 public struct CommandBlockView: View {
     let commands: [String]
     let summaryText: String?
+    let title: String?
+    let collapsible: Bool
 
-    public init(command: String, summaryText: String? = nil) {
+    public init(command: String, summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
         commands = [command]
         self.summaryText = summaryText
+        self.title = title
+        self.collapsible = collapsible
+        _isExpanded = State(initialValue: !collapsible)
     }
 
-    public init(commands: [String], summaryText: String? = nil) {
+    public init(commands: [String], summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
         self.commands = commands
         self.summaryText = summaryText
+        self.title = title
+        self.collapsible = collapsible
+        _isExpanded = State(initialValue: !collapsible)
     }
+
+    @State private var copied = false
+    @State private var copyTask: Task<Void, Never>?
+    @State private var isExpanded: Bool
 
     public var body: some View {
         VStack(spacing: 0) {
             header
-            commandsBlock
-            if let summaryText {
-                footer(summaryText)
+            if isExpanded {
+                commandsBlock
+                if let summaryText {
+                    footer(summaryText)
+                }
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
@@ -40,13 +54,34 @@ public struct CommandBlockView: View {
 
     private var header: some View {
         HStack {
-            Label(headerTitle, systemImage: "terminal")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextSecondary)
+            if collapsible {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    Label(title ?? headerTitle, systemImage: isExpanded ? "chevron.down" : "chevron.right")
+                        .font(.brewCaption)
+                        .foregroundStyle(Color.brewTextSecondary)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Label(title ?? headerTitle, systemImage: "terminal")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextSecondary)
+            }
             Spacer()
-            Button(copyTitle, systemImage: "doc.on.doc") {
+            Button(copied ? "Copied" : copyTitle, systemImage: copied ? "checkmark" : "doc.on.doc") {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
+                copied = true
+                copyTask?.cancel()
+                copyTask = Task { @MainActor in
+                    try? await Task.sleep(for: .seconds(5))
+                    if !Task.isCancelled {
+                        copied = false
+                    }
+                }
             }
             .font(.brewCaption)
             .foregroundStyle(Color.brewTextSecondary)

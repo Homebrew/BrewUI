@@ -12,7 +12,7 @@ import Testing
 @MainActor
 struct DoctorSeverityStyleTests {
     @Test func `displayName names each severity`() {
-        #expect(DoctorSeverityStyle.displayName(.caution) == "Caution")
+        #expect(DoctorSeverityStyle.displayName(.caution) == "Warning")
         #expect(DoctorSeverityStyle.displayName(.danger) == "Danger")
         #expect(DoctorSeverityStyle.displayName(.unsupported) == "Unsupported")
     }
