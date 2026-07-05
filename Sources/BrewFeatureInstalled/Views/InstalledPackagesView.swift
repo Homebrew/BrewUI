@@ -29,6 +29,9 @@ struct InstalledPackagesView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
+            scopePicker
+            Divider()
+
             AsyncContentView(
                 state: viewModel.state,
                 onRetry: { Task { await viewModel.refresh() } },
@@ -45,6 +48,19 @@ struct InstalledPackagesView: View {
             prompt: "Search Installed Packages",
         )
         .focusedSceneValue(\.searchPresented, $searchPresented)
+    }
+
+    /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
+    private var scopePicker: some View {
+        Picker("Scope", selection: $viewModel.scope) {
+            Text("All").tag(InstalledPackageScope.all)
+            Text("Formulae").tag(InstalledPackageScope.formulae)
+            Text("Casks").tag(InstalledPackageScope.casks)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.bottom, BrewSpacing.md)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
