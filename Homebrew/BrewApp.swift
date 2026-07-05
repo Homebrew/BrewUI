@@ -17,6 +17,10 @@ import SwiftUI
 
 @main
 struct BrewApp: App {
+    /// Homebrew's online documentation, surfaced from the Help menu.
+    /// Force-unwrap is safe: the string is a valid literal URL verified at build time.
+    private static let documentationURL = URL(string: "https://docs.brew.sh/")!
+
     @Environment(\.scenePhase) private var scenePhase
 
     private let commandCenter: SerialBrewCommandCenter
@@ -93,6 +97,11 @@ struct BrewApp: App {
             ConsoleCommands()
             SidebarCommands()
             SearchCommands()
+            // Replace the default "Homebrew Help" item (which points at a
+            // non-existent help book) with a link to the online documentation.
+            CommandGroup(replacing: .help) {
+                Link("Homebrew Documentation", destination: Self.documentationURL)
+            }
         }
         #if DEBUG
         .commands {
