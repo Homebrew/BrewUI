@@ -28,12 +28,14 @@ public enum BrewOperationKind: String, Hashable, Sendable {
 /// the canonical ``HomebrewPackageID`` *is* the operation key. Maintenance work (e.g. a `brew doctor` fix such as
 /// `brew link a b` or `brew cleanup`) isn't tied to a single package, so it carries its own `token` for identity
 /// plus the user-facing `displayCommand` the console renders (it cannot be reconstructed from a package name).
-/// ``bulkUpgrade`` is a singleton id for `brew upgrade` (no arguments) — the Upgrades tab submits one bulk
-/// operation instead of N per-package upgrades, so a fixed case is enough.
+/// ``bulkUpgrade`` carries the ``BrewUpgradeSelection`` the Upgrades tab submitted — one batch operation
+/// instead of N per-package upgrades. The selection is part of the identity so the console renders the exact
+/// command (`brew upgrade`, `brew upgrade --formula`, `brew upgrade git slack`, …) and distinct selections
+/// don't dedupe against one another.
 public enum BrewOperationID: Hashable, Identifiable, Sendable {
     case package(HomebrewPackageID)
     case maintenance(token: String, displayCommand: String)
-    case bulkUpgrade
+    case bulkUpgrade(BrewUpgradeSelection)
 
     public var id: Self {
         self
@@ -51,10 +53,10 @@ public enum BrewOperationID: Hashable, Identifiable, Sendable {
         self = .package(packageID)
     }
 
-    /// Canonical user-facing rendering of ``bulkUpgrade`` — the literal a person would type. Shared
-    /// across the Upgrades tab's `CommandBlockView`, the console job, and the live `BulkUpgradeCommand`
-    /// so a future rename (e.g. `brew upgrade --greedy`) only needs to land here.
-    public static let bulkUpgradeDisplayCommand = "brew upgrade"
+    /// Canonical user-facing rendering of an unfiltered "Upgrade All" — the literal a person would type.
+    /// Derived from ``BrewUpgradeSelection/all`` so the plain-`brew upgrade` rendering has one home; scoped
+    /// and search-narrowed submissions render their own ``BrewUpgradeSelection/displayCommand``.
+    public static let bulkUpgradeDisplayCommand = BrewUpgradeSelection.all.displayCommand
 }
 
 /// Visibility for UI and tests — mutually exclusive with “absent” represented by ``BrewCommandCenter/phase(for:)``

@@ -200,7 +200,7 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
         NoopMutatingCommand(operationKind: kind == .formula ? .uninstallFormula : .uninstallCask)
     }
 
-    public func bulkUpgradeCommand() -> any BrewMutatingCommand {
+    public func bulkUpgradeCommand(selection _: BrewUpgradeSelection) -> any BrewMutatingCommand {
         NoopMutatingCommand(operationKind: .upgradeAll)
     }
 

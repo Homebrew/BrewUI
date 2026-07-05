@@ -103,7 +103,7 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
         unimplemented()
     }
 
-    func bulkUpgradeCommand() -> any BrewMutatingCommand {
+    func bulkUpgradeCommand(selection _: BrewUpgradeSelection) -> any BrewMutatingCommand {
         unimplemented()
     }
 

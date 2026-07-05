@@ -144,7 +144,7 @@ struct UpgradesViewModelTests {
 
         let entries = await recorder.recordedSubmitEntries
         #expect(entries.count == 1)
-        #expect(entries.first?.id == .bulkUpgrade)
+        #expect(entries.first?.id == .bulkUpgrade(.all))
         #expect(entries.first?.kind == .upgradeAll)
     }
 
@@ -233,11 +233,11 @@ struct UpgradesViewModelTests {
         // Wait for the observer to subscribe to allPhaseChanges before emitting.
         await center.waitForSubscriber()
 
-        await center.emit(id: .bulkUpgrade, phase: .running(.upgradeAll))
+        await center.emit(id: .bulkUpgrade(.all), phase: .running(.upgradeAll))
         await Self.waitUntil { vm.isUpgradingAny }
         #expect(vm.isUpgradingAny)
 
-        await center.emit(id: .bulkUpgrade, phase: .idle)
+        await center.emit(id: .bulkUpgrade(.all), phase: .idle)
         await Self.waitUntil { !vm.isUpgradingAny }
         #expect(!vm.isUpgradingAny)
     }

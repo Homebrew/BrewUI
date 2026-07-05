@@ -71,13 +71,36 @@ struct CommandJobTests {
 
     @Test func `materialize for bulk upgrade id renders the shared display command`() {
         let job = CommandJob.materialize(
-            id: .bulkUpgrade,
+            id: .bulkUpgrade(.all),
             kind: .upgradeAll,
             phase: .running(.upgradeAll),
         )
 
         #expect(job.command == BrewOperationID.bulkUpgradeDisplayCommand)
         #expect(job.command == "brew upgrade")
+    }
+
+    @Test func `materialize for a scoped bulk upgrade renders the selection's command`() {
+        let formulae = CommandJob.materialize(
+            id: .bulkUpgrade(.formulae),
+            kind: .upgradeAll,
+            phase: .running(.upgradeAll),
+        )
+        #expect(formulae.command == "brew upgrade --formula")
+
+        let casks = CommandJob.materialize(
+            id: .bulkUpgrade(.casks),
+            kind: .upgradeAll,
+            phase: .running(.upgradeAll),
+        )
+        #expect(casks.command == "brew upgrade --cask")
+
+        let explicit = CommandJob.materialize(
+            id: .bulkUpgrade(.explicit(["git", "slack"])),
+            kind: .upgradeAll,
+            phase: .running(.upgradeAll),
+        )
+        #expect(explicit.command == "brew upgrade git slack")
     }
 
     @Test func `updatePhase from running to idle sets exit code zero`() {
