@@ -94,6 +94,5 @@ struct MainWindowView: View {
             .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
             .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
             .environment(\.configRepository, PreviewSupport.makeConfigRepository())
-            .environment(\.envFileRepository, PreviewSupport.makeEnvFileRepository())
     }
 #endif

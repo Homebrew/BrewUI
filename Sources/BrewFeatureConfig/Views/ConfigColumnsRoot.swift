@@ -11,11 +11,10 @@ import SwiftUI
 /// (composed by the app's composition root) and hands it to the content view.
 public struct ConfigColumnsRoot: View {
     @Environment(\.configRepository) private var configRepository
-    @Environment(\.envFileRepository) private var envFileRepository
 
     public init() {}
 
     public var body: some View {
-        ConfigView(repository: configRepository, envFileRepository: envFileRepository)
+        ConfigView(repository: configRepository)
     }
 }

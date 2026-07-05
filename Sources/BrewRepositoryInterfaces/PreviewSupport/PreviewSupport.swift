@@ -147,18 +147,6 @@ public enum PreviewSupport {
         StubConfigRepository(snapshot: configSnapshot)
     }
 
-    @MainActor
-    public static func makeEnvFileRepository() -> any EnvFileRepository {
-        StubEnvFileRepository(file: brewEnvFile)
-    }
-
-    public static let brewEnvFile = BrewEnvFile(lines: [
-        .comment("# Managed by BrewUI — feel free to edit"),
-        .entry(key: "HOMEBREW_NO_ANALYTICS", value: "1"),
-        .entry(key: "HOMEBREW_NO_AUTO_UPDATE", value: "1"),
-        .entry(key: "HOMEBREW_MAKE_JOBS", value: "8"),
-    ])
-
     public static let configSnapshot = BrewConfigSnapshot(
         entries: [
             BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0"),

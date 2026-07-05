@@ -9,14 +9,12 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Single scrolling pane presenting `brew config` + the `HOMEBREW_*` environment, with copy/refresh.
+/// Single scrolling pane presenting `brew config` output, with copy/refresh.
 struct ConfigView: View {
     @State private var viewModel: ConfigViewModel
 
-    init(repository: any ConfigRepository, envFileRepository: any EnvFileRepository) {
-        _viewModel = State(
-            initialValue: ConfigViewModel(repository: repository, envFileRepository: envFileRepository),
-        )
+    init(repository: any ConfigRepository) {
+        _viewModel = State(initialValue: ConfigViewModel(repository: repository))
     }
 
     var body: some View {
@@ -28,27 +26,11 @@ struct ConfigView: View {
         .task {
             await viewModel.load()
         }
-        .onChange(of: viewModel.envFileState.value) { _, _ in
-            // When `brew.env` is silently revalidated (e.g. on return-to-foreground) and the user has
-            // no pending edits, sync the draft to the freshly loaded file.
-            viewModel.envFileStateDidChange()
-        }
     }
 
     private var header: some View {
         HStack(spacing: BrewSpacing.sm) {
             Spacer(minLength: 0)
-            Button("Discard", systemImage: "arrow.uturn.backward") {
-                viewModel.revert()
-            }
-            .disabled(!viewModel.isDirty)
-            Button("Save", systemImage: "checkmark") {
-                Task { await viewModel.save() }
-            }
-            .keyboardShortcut("s", modifiers: .command)
-            .disabled(!viewModel.isDirty)
-            Divider()
-                .frame(height: 18)
             Button("Copy report", systemImage: "doc.on.doc") {
                 copyReport()
             }
@@ -69,20 +51,19 @@ struct ConfigView: View {
             AsyncContentView(
                 state: viewModel.pageState,
                 onRetry: { Task { await viewModel.refresh() } },
-                loaded: { payload in
-                    loadedCards(payload: payload)
+                loaded: { snapshot in
+                    loadedCards(snapshot: snapshot)
                 },
             )
         }
     }
 
-    private func loadedCards(payload: ConfigPagePayload) -> some View {
+    private func loadedCards(snapshot: BrewConfigSnapshot) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
-                ForEach(viewModel.sections(for: payload.snapshot)) { section in
+                ForEach(viewModel.sections(for: snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }
-                ConfigEnvironmentEditorCard(viewModel: viewModel, envFile: payload.envFile)
             }
             .padding(BrewSpacing.lg)
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -135,10 +116,7 @@ struct ConfigView: View {
 
 #if DEBUG
     #Preview("Loaded") {
-        ConfigView(
-            repository: PreviewSupport.makeConfigRepository(),
-            envFileRepository: PreviewSupport.makeEnvFileRepository(),
-        )
-        .frame(width: 720, height: 600)
+        ConfigView(repository: PreviewSupport.makeConfigRepository())
+            .frame(width: 720, height: 600)
     }
 #endif

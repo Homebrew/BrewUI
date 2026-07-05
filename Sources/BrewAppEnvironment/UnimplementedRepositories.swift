@@ -90,26 +90,6 @@ final class UnimplementedConfigRepository: ConfigRepository {
     }
 }
 
-@Observable
-@MainActor
-final class UnimplementedEnvFileRepository: EnvFileRepository {
-    var state: LoadState<BrewEnvFile, any Error> {
-        unimplemented()
-    }
-
-    func load(forceRefresh _: Bool) async {
-        unimplemented()
-    }
-
-    func save(_: BrewEnvFile) async throws {
-        unimplemented()
-    }
-
-    func invalidate() {
-        unimplemented()
-    }
-}
-
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
         unimplemented()

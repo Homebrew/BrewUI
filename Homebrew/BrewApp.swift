@@ -30,7 +30,6 @@ struct BrewApp: App {
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
-    private let envFileRepository: BrewEnvFileRepository
 
     init() {
         let inventoryCache = InstalledInventoryCache()
@@ -56,7 +55,6 @@ struct BrewApp: App {
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center)
         configRepository = BrewConfigRepository.live()
-        envFileRepository = BrewEnvFileRepository.live()
     }
 
     var body: some Scene {
@@ -71,7 +69,6 @@ struct BrewApp: App {
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
-                .environment(\.envFileRepository, envFileRepository)
                 .task { await catalogueCache.prepare() }
                 .task { await installedPackagesRepository.load() }
                 .onChange(of: scenePhase) { oldPhase, newPhase in
@@ -82,7 +79,6 @@ struct BrewApp: App {
                         return
                     }
                     configRepository.invalidate()
-                    envFileRepository.invalidate()
                 }
                 .frame(
                     minWidth: BrewLayout.minWindowWidth,
