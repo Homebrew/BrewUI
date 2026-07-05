@@ -30,6 +30,12 @@ public enum PreviewSupport {
         ),
         installedVersions: ["2.45.0"],
         outdated: true,
+        license: "LGPL-2.1-only",
+        tap: "homebrew/core",
+        installedOnRequest: true,
+        pouredFromBottle: true,
+        installDate: Date(timeIntervalSinceNow: -86400 * 30),
+        linkedKeg: "2.45.0",
     )
 
     public static let currentCask = InstalledBrewPackage(
@@ -44,6 +50,9 @@ public enum PreviewSupport {
         ),
         installedVersions: ["4.39.0"],
         outdated: false,
+        tap: "homebrew/cask",
+        installedOnRequest: true,
+        linkedKeg: "4.39.0",
     )
 
     public static let discoverPreviewPackage = DiscoveryBrewPackage(
@@ -194,6 +203,12 @@ public enum PreviewSupport {
             ),
             installedVersions: ["22.14.0"],
             outdated: false,
+            license: "MIT",
+            tap: "homebrew/core",
+            installedOnRequest: true,
+            pouredFromBottle: true,
+            installDate: Date(timeIntervalSinceNow: -86400 * 7),
+            linkedKeg: "22.14.0",
         ),
         currentCask,
     ]

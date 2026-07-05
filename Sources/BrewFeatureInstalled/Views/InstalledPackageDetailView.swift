@@ -37,10 +37,6 @@ struct InstalledPackageDetailView: View {
     let package: InstalledBrewPackage
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @State private var viewModel: InstalledPackageDetailViewModel
-    @State private var expandedDependencies = false
-    @State private var expandedDependents = false
-
-    private let collapsedRelationshipCount = 3
 
     init(
         package: InstalledBrewPackage,
@@ -74,8 +70,6 @@ struct InstalledPackageDetailView: View {
         }
         .onChange(of: package) { _, newPackage in
             viewModel.update(package: newPackage)
-            expandedDependencies = false
-            expandedDependents = false
             Task {
                 await viewModel.refreshRelationships()
             }
@@ -111,21 +105,44 @@ struct InstalledPackageDetailView: View {
     private func packageDetailsSections(viewModel: InstalledPackageDetailViewModel) -> some View {
         InstalledPackageDetailMetadataSection(viewModel: viewModel)
         PackageDetailSectionDivider()
-        InstalledPackageDetailRelationshipList(
+        PackageRelationshipSection(
             title: "Dependencies",
             relationships: viewModel.dependencyRelationships,
+            emptyText: "No dependencies.",
             dotStyle: .neutral,
-            isExpanded: $expandedDependencies,
-            collapsedRelationshipCount: collapsedRelationshipCount,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
         PackageDetailSectionDivider()
-        InstalledPackageDetailUsedBySection(
+        InstalledPackageDetailDependentsSection(
             viewModel: viewModel,
-            collapsedRelationshipCount: collapsedRelationshipCount,
             onSelectInstalledPackage: onSelectInstalledPackage,
-            isExpanded: $expandedDependents,
         )
+    }
+}
+
+/// Heading + always-expanded relationship list, used for Dependencies.
+private struct PackageRelationshipSection: View {
+    let title: String
+    let relationships: [PackageRelationshipItem]
+    let emptyText: String
+    let dotStyle: PackageRelationshipDotStyle
+    let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            PackageDetailSectionHeading(title: title)
+            if relationships.isEmpty {
+                Text(emptyText)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewTextSecondary)
+            } else {
+                InstalledPackageDetailRelationshipList(
+                    relationships: relationships,
+                    dotStyle: dotStyle,
+                    onSelectInstalledPackage: onSelectInstalledPackage,
+                )
+            }
+        }
     }
 }
 

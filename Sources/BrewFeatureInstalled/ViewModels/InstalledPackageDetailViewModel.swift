@@ -60,6 +60,11 @@ final class InstalledPackageDetailViewModel {
         UpgradePackageItem(package: package)
     }
 
+    /// True when an upgrade is available — mirrors ``InstalledListRowViewModel/showsUpgradeAvailable``.
+    var showsUpgradeAvailable: Bool {
+        upgradeItem.showsUpgradeChrome
+    }
+
     /// Presentation mapping for the Uninstall section.
     var uninstallItem: UninstallPackageItem {
         UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
@@ -132,8 +137,6 @@ final class InstalledPackageDetailViewModel {
         }
         package = newPackage
         operationPhase = .idle
-        dependencyRelationships = []
-        dependentRelationships = []
         showUninstallConfirmation = false
         showUninstallBlockedCallout = false
         clearMutationErrors()

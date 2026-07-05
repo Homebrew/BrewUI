@@ -13,14 +13,15 @@ struct InstalledPackageDetailHeroSection: View {
     let viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
+        let chrome = viewModel.packageKind.chrome
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: BrewRadius.lg)
-                    .fill(Color.brewBrandTint)
+                    .fill(iconBackgroundColor(chrome.iconBackground))
                     .frame(width: 44, height: 44)
                 Image(systemName: "cube.box.fill")
                     .font(.title2)
-                    .foregroundStyle(Color.brewBrandPrimary)
+                    .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
 
@@ -30,18 +31,30 @@ struct InstalledPackageDetailHeroSection: View {
                         .font(.brewTitle1)
                         .foregroundStyle(Color.brewTextPrimary)
 
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.brewTitle3)
-                        .foregroundStyle(Color.brewStatusSuccess)
-                        .accessibilityLabel("Installed")
+                    Image(
+                        systemName: viewModel.showsUpgradeAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill",
+                    )
+                    .font(.brewTitle3)
+                    .foregroundStyle(
+                        viewModel.showsUpgradeAvailable ? Color.brewStatusWarning : Color.brewStatusSuccess,
+                    )
+                    .accessibilityLabel(
+                        viewModel.showsUpgradeAvailable ? "Update available" : "Installed",
+                    )
 
-                    Text(viewModel.packageKind.chrome.badgeLabel)
+                    Text(chrome.badgeLabel)
                         .font(.brewCaption2)
-                        .foregroundStyle(Color.brewBrandPrimary)
+                        .foregroundStyle(accentColor(chrome.accent))
                         .padding(.horizontal, BrewSpacing.xs)
                         .padding(.vertical, BrewSpacing.xxs)
-                        .background(Color.brewBrandTint)
-                        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+                        .background {
+                            Capsule()
+                                .fill(Color.brewSurfaceElevated)
+                        }
+                        .overlay {
+                            Capsule()
+                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        }
                 }
 
                 if let subtitle = heroSubtitle {
@@ -57,33 +70,100 @@ struct InstalledPackageDetailHeroSection: View {
         let trimmed = viewModel.package.description.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
     }
+
+    private func accentColor(_ token: PackageKindAccentToken) -> Color {
+        switch token {
+        case .brandPrimary: Color.brewBrandPrimary
+        case .statusInfo: Color.brewStatusInfo
+        }
+    }
+
+    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
+        switch token {
+        case .brandTint: Color.brewBrandTint
+        case .statusInfoSubtle: Color.brewStatusInfoSubtle
+        }
+    }
 }
 
 struct InstalledPackageDetailMetadataSection: View {
     let viewModel: InstalledPackageDetailViewModel
 
+    private let labelWidth: CGFloat = 100
+
     var body: some View {
         let metadata = viewModel.metadataItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
-            detailRow(label: "Version", value: metadata.latestVersionValue)
-            detailRow(label: "Installed", value: metadata.installedVersionsValue)
+            detailRow(
+                label: "Installed",
+                value: metadata.installedVersionsValue,
+                valueColor: metadata.isOutdated ? .brewStatusWarning : .brewTextPrimary,
+                valueFontWeight: .heavy,
+            )
+            detailRow(label: "Latest stable", value: metadata.latestVersionValue)
+            if let dateValue = metadata.installDateValue {
+                detailRow(label: "Installed on", value: dateValue)
+            }
+            if let reason = metadata.installReasonValue {
+                detailRow(label: "Install reason", value: reason)
+            }
+            if let license = metadata.licenseValue {
+                detailRow(label: "License", value: license)
+            }
+            if let tap = metadata.tapDisplayValue {
+                sourceRow(tap: tap, url: metadata.sourceURL)
+            }
             if let homepageURL = metadata.homepageURL {
                 homepageRow(url: homepageURL, title: metadata.homepageDisplayTitle ?? homepageURL.absoluteString)
+            }
+            if metadata.isPinned {
+                detailRow(label: "Pinned", value: "Yes")
+            }
+            if metadata.isKegOnly {
+                detailRow(label: "Keg-only", value: "Yes")
+            }
+            if let caveats = metadata.caveatsText {
+                caveatsCallout(text: caveats)
             }
         }
     }
 
-    private func detailRow(label: String, value: String) -> some View {
+    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-                .frame(width: 100, alignment: .leading)
+                .frame(width: labelWidth, alignment: .leading)
             Text(value)
-                .font(.brewCallout.weight(.medium))
-                .foregroundStyle(Color.brewTextPrimary)
+                .font(.brewCallout.weight(valueFontWeight))
+                .foregroundStyle(valueColor)
                 .textSelection(.enabled)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func sourceRow(tap: String, url: URL?) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
+            Text("Source")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+                .frame(width: labelWidth, alignment: .leading)
+            if let url {
+                Link(destination: url) {
+                    HStack(spacing: BrewSpacing.xxs) {
+                        Text(tap)
+                            .font(.brewCallout.weight(.medium))
+                        Image(systemName: "arrow.up.right")
+                            .font(.brewCaption2)
+                    }
+                }
+            } else {
+                Text(tap)
+                    .font(.brewCallout.weight(.medium))
+                    .foregroundStyle(Color.brewTextPrimary)
+                    .textSelection(.enabled)
+            }
             Spacer(minLength: 0)
         }
     }
@@ -93,7 +173,7 @@ struct InstalledPackageDetailMetadataSection: View {
             Text("Homepage")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-                .frame(width: 100, alignment: .leading)
+                .frame(width: labelWidth, alignment: .leading)
             Link(destination: url) {
                 HStack(spacing: BrewSpacing.xxs) {
                     Text(title)
@@ -101,44 +181,53 @@ struct InstalledPackageDetailMetadataSection: View {
                     Image(systemName: "arrow.up.right")
                         .font(.brewCaption2)
                 }
-                .foregroundStyle(Color.brewBrandPrimary)
             }
             Spacer(minLength: 0)
         }
-        .padding(.vertical, BrewSpacing.xs)
+    }
+
+    private func caveatsCallout(text: String) -> some View {
+        HStack(alignment: .center, spacing: BrewSpacing.sm) {
+            Image(systemName: "info.circle.fill")
+                .font(.brewSubheadline)
+                .foregroundStyle(Color.brewBrandPrimary)
+            Text(text)
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextPrimary)
+                .textSelection(.enabled)
+        }
+        .padding(BrewSpacing.sm)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.brewBrandTint)
+        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
+        .padding(.top, BrewSpacing.lg)
     }
 }
 
-struct InstalledPackageDetailUsedBySection: View {
+struct InstalledPackageDetailDependentsSection: View {
     let viewModel: InstalledPackageDetailViewModel
-    let collapsedRelationshipCount: Int
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
-    @Binding var isExpanded: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            usedByHeading
+            dependentsHeading
             if viewModel.dependentRelationships.isEmpty {
-                Text("No installed packages use this package.")
+                Text("No dependents.")
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
                 InstalledPackageDetailRelationshipList(
-                    title: "Used by",
                     relationships: viewModel.dependentRelationships,
                     dotStyle: .warning,
-                    isExpanded: $isExpanded,
-                    showsHeading: false,
-                    collapsedRelationshipCount: collapsedRelationshipCount,
                     onSelectInstalledPackage: onSelectInstalledPackage,
                 )
             }
         }
     }
 
-    private var usedByHeading: some View {
+    private var dependentsHeading: some View {
         HStack(spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "Used by")
+            PackageDetailSectionHeading(title: "Dependents")
             if let badgeTitle = viewModel.uninstallItem.usedByBlockingBadgeTitle {
                 Text(badgeTitle)
                     .font(.brewCaption2.weight(.semibold))
@@ -172,59 +261,19 @@ struct UninstallBlockedCallout: View {
 }
 
 struct InstalledPackageDetailRelationshipList: View {
-    let title: String
     let relationships: [PackageRelationshipItem]
     let dotStyle: PackageRelationshipDotStyle
-    let collapsedRelationshipCount: Int
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
-    let showsHeading: Bool
-    @Binding var isExpanded: Bool
-
-    init(
-        title: String,
-        relationships: [PackageRelationshipItem],
-        dotStyle: PackageRelationshipDotStyle,
-        isExpanded: Binding<Bool>,
-        showsHeading: Bool = true,
-        collapsedRelationshipCount: Int,
-        onSelectInstalledPackage: @escaping (InstalledBrewPackage.ID) -> Void,
-    ) {
-        self.title = title
-        self.relationships = relationships
-        self.dotStyle = dotStyle
-        _isExpanded = isExpanded
-        self.showsHeading = showsHeading
-        self.collapsedRelationshipCount = collapsedRelationshipCount
-        self.onSelectInstalledPackage = onSelectInstalledPackage
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            if showsHeading {
-                PackageDetailSectionHeading(title: title)
-            }
             if relationships.isEmpty {
-                Text("No \(title.lowercased()).")
+                Text("None.")
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
-                let visibleRelationships = visibleRelationships(relationships, isExpanded: isExpanded)
-                ForEach(visibleRelationships) { relationship in
+                ForEach(relationships) { relationship in
                     relationshipRow(relationship)
-                }
-                if relationships.count > collapsedRelationshipCount {
-                    Button {
-                        isExpanded.toggle()
-                    } label: {
-                        Text(
-                            isExpanded
-                                ? "Show less"
-                                : "+\(relationships.count - collapsedRelationshipCount) more…",
-                        )
-                        .font(.brewCallout)
-                        .foregroundStyle(Color.brewBrandPrimary)
-                    }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -261,16 +310,6 @@ struct InstalledPackageDetailRelationshipList: View {
                 ? "Open installed package \(relationship.displayName)"
                 : "\(relationship.displayName), not installed",
         )
-    }
-
-    private func visibleRelationships(
-        _ relationships: [PackageRelationshipItem],
-        isExpanded: Bool,
-    ) -> [PackageRelationshipItem] {
-        guard !isExpanded, relationships.count > collapsedRelationshipCount else {
-            return relationships
-        }
-        return Array(relationships.prefix(collapsedRelationshipCount))
     }
 }
 

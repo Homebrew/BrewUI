@@ -23,6 +23,8 @@ private extension BrewInfoFormula {
         let installedVersions = installed
             .compactMap(\.version)
             .compactMap(BrewInfoJSON.trimmedOrNil(_:))
+        let firstInstall = installed.first
+        let installDate = firstInstall?.time.map { Date(timeIntervalSince1970: $0) }
         return InstalledBrewPackage(
             package: BrewPackage(
                 name: name,
@@ -35,6 +37,16 @@ private extension BrewInfoFormula {
             ),
             installedVersions: installedVersions,
             outdated: outdated,
+            license: BrewInfoJSON.trimmedOrNil(license),
+            tap: BrewInfoJSON.trimmedOrNil(tap),
+            rubySourcePath: BrewInfoJSON.trimmedOrNil(rubySourcePath),
+            installedOnRequest: firstInstall?.installedOnRequest ?? true,
+            pouredFromBottle: firstInstall?.pouredFromBottle ?? false,
+            installDate: installDate,
+            linkedKeg: BrewInfoJSON.trimmedOrNil(linkedKeg),
+            pinned: pinned,
+            kegOnly: kegOnly,
+            caveats: BrewInfoJSON.trimmedOrNil(caveats),
         )
     }
 }
@@ -55,6 +67,8 @@ private extension BrewInfoCask {
             ),
             installedVersions: installed,
             outdated: outdated,
+            tap: BrewInfoJSON.trimmedOrNil(tap),
+            installedOnRequest: installedOnRequest,
         )
     }
 }

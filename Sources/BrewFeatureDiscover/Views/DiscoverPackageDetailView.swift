@@ -27,9 +27,6 @@ struct DiscoverPackageDetailRoot: View {
 struct DiscoverPackageDetailView: View {
     let package: DiscoveryBrewPackage
     @State private var viewModel: DiscoverPackageDetailViewModel
-    @State private var expandedDependencies = false
-
-    private let collapsedDependencyCount = 3
 
     init(
         package: DiscoveryBrewPackage,
@@ -54,11 +51,7 @@ struct DiscoverPackageDetailView: View {
                 DiscoverPackageDetailHeroSection(viewModel: viewModel)
                 DiscoverPackageDetailMetadataSection(viewModel: viewModel)
                 PackageDetailSectionDivider()
-                DiscoverPackageDetailDependenciesSection(
-                    viewModel: viewModel,
-                    collapsedCount: collapsedDependencyCount,
-                    isExpanded: $expandedDependencies,
-                )
+                DiscoverPackageDetailDependenciesSection(viewModel: viewModel)
                 if viewModel.showsInstallSection {
                     PackageDetailSectionDivider()
                     DiscoverPackageInstallSection(viewModel: viewModel)
@@ -73,7 +66,6 @@ struct DiscoverPackageDetailView: View {
         }
         .onChange(of: package) { _, newPackage in
             viewModel.update(package: newPackage)
-            expandedDependencies = false
         }
     }
 }
@@ -82,14 +74,15 @@ private struct DiscoverPackageDetailHeroSection: View {
     let viewModel: DiscoverPackageDetailViewModel
 
     var body: some View {
+        let chrome = viewModel.packageKindChrome
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: BrewRadius.lg)
-                    .fill(Color.brewBrandTint)
+                    .fill(iconBackgroundColor(chrome.iconBackground))
                     .frame(width: 44, height: 44)
                 Image(systemName: "cube.box.fill")
                     .font(.title2)
-                    .foregroundStyle(Color.brewBrandPrimary)
+                    .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
 
@@ -99,13 +92,19 @@ private struct DiscoverPackageDetailHeroSection: View {
                         .font(.brewTitle1)
                         .foregroundStyle(Color.brewTextPrimary)
 
-                    Text(viewModel.packageKindChrome.badgeLabel)
+                    Text(chrome.badgeLabel)
                         .font(.brewCaption2)
-                        .foregroundStyle(Color.brewBrandPrimary)
+                        .foregroundStyle(accentColor(chrome.accent))
                         .padding(.horizontal, BrewSpacing.xs)
                         .padding(.vertical, BrewSpacing.xxs)
-                        .background(Color.brewBrandTint)
-                        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
+                        .background {
+                            Capsule()
+                                .fill(Color.brewSurfaceElevated)
+                        }
+                        .overlay {
+                            Capsule()
+                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        }
 
                     if viewModel.installedStatusLabel != nil {
                         DiscoverInstalledBadge()
@@ -120,20 +119,53 @@ private struct DiscoverPackageDetailHeroSection: View {
             }
         }
     }
+
+    private func accentColor(_ token: PackageKindAccentToken) -> Color {
+        switch token {
+        case .brandPrimary: Color.brewBrandPrimary
+        case .statusInfo: Color.brewStatusInfo
+        }
+    }
+
+    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
+        switch token {
+        case .brandTint: Color.brewBrandTint
+        case .statusInfoSubtle: Color.brewStatusInfoSubtle
+        }
+    }
 }
 
 private struct DiscoverPackageDetailMetadataSection: View {
     let viewModel: DiscoverPackageDetailViewModel
 
+    private let labelWidth: CGFloat = 110
+
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
-            detailRow(label: "Stable version", value: viewModel.stableVersionLabel)
+            if let installedVersion = viewModel.installedVersionLabel {
+                detailRow(
+                    label: "Installed",
+                    value: installedVersion,
+                    valueColor: viewModel.isInstalledVersionOutdated ? .brewStatusWarning : .brewTextPrimary,
+                    valueFontWeight: .heavy,
+                )
+            }
+            detailRow(label: "Latest stable", value: viewModel.stableVersionLabel)
             if viewModel.showsInstallMetrics {
                 detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
             }
-            if let installedVersion = viewModel.installedVersionLabel {
-                detailRow(label: "Installed", value: installedVersion)
+            if let dateValue = viewModel.installDateValue {
+                detailRow(label: "Installed on", value: dateValue)
+            }
+            if let reason = viewModel.installReasonValue {
+                detailRow(label: "Install reason", value: reason)
+            }
+            if let license = viewModel.licenseLabel {
+                detailRow(label: "License", value: license)
+            }
+            if let tap = viewModel.tapDisplayValue {
+                sourceRow(tap: tap, url: viewModel.sourceURL)
             }
             if let url = viewModel.homepageURL {
                 homepageRow(url: url)
@@ -141,16 +173,41 @@ private struct DiscoverPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String) -> some View {
+    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-                .frame(width: 110, alignment: .leading)
+                .frame(width: labelWidth, alignment: .leading)
             Text(value)
-                .font(.brewCallout.weight(.medium))
-                .foregroundStyle(Color.brewTextPrimary)
+                .font(.brewCallout.weight(valueFontWeight))
+                .foregroundStyle(valueColor)
                 .textSelection(.enabled)
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func sourceRow(tap: String, url: URL?) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
+            Text("Source")
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+                .frame(width: labelWidth, alignment: .leading)
+            if let url {
+                Link(destination: url) {
+                    HStack(spacing: BrewSpacing.xxs) {
+                        Text(tap)
+                            .font(.brewCallout.weight(.medium))
+                        Image(systemName: "arrow.up.right")
+                            .font(.brewCaption2)
+                    }
+                }
+            } else {
+                Text(tap)
+                    .font(.brewCallout.weight(.medium))
+                    .foregroundStyle(Color.brewTextPrimary)
+                    .textSelection(.enabled)
+            }
             Spacer(minLength: 0)
         }
     }
@@ -160,7 +217,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
             Text("Homepage")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
-                .frame(width: 110, alignment: .leading)
+                .frame(width: labelWidth, alignment: .leading)
             Link(destination: url) {
                 HStack(spacing: BrewSpacing.xxs) {
                     Text(url.host ?? url.absoluteString)
@@ -168,18 +225,14 @@ private struct DiscoverPackageDetailMetadataSection: View {
                     Image(systemName: "arrow.up.right")
                         .font(.brewCaption2)
                 }
-                .foregroundStyle(Color.brewBrandPrimary)
             }
             Spacer(minLength: 0)
         }
-        .padding(.vertical, BrewSpacing.xs)
     }
 }
 
 private struct DiscoverPackageDetailDependenciesSection: View {
     let viewModel: DiscoverPackageDetailViewModel
-    let collapsedCount: Int
-    @Binding var isExpanded: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
@@ -190,8 +243,7 @@ private struct DiscoverPackageDetailDependenciesSection: View {
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
-                let visible = isExpanded ? deps : Array(deps.prefix(collapsedCount))
-                ForEach(visible, id: \.self) { name in
+                ForEach(deps, id: \.self) { name in
                     HStack(spacing: BrewSpacing.sm) {
                         Circle()
                             .fill(Color.brewTextTertiary)
@@ -202,16 +254,6 @@ private struct DiscoverPackageDetailDependenciesSection: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .padding(.vertical, BrewSpacing.xs)
-                }
-                if deps.count > collapsedCount {
-                    Button {
-                        isExpanded.toggle()
-                    } label: {
-                        Text(isExpanded ? "Show less" : "+\(deps.count - collapsedCount) more…")
-                            .font(.brewCallout)
-                            .foregroundStyle(Color.brewBrandPrimary)
-                    }
-                    .buttonStyle(.plain)
                 }
             }
         }

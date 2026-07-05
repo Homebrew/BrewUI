@@ -44,7 +44,7 @@ final class InstalledListRowViewModel {
     }
 
     var installedVersionLabel: String {
-        guard let raw = package.installedVersions.first else {
+        guard let raw = package.linkedKeg ?? package.installedVersions.first else {
             return "—"
         }
         return InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)

@@ -244,7 +244,7 @@ struct InstalledDetailsViewModelTests {
         #expect(!viewModel.dependencyRelationships[1].isInstalledInInventory)
     }
 
-    @Test @MainActor func `update package clears dependency relationships`() async {
+    @Test @MainActor func `update package retains dependency relationships until refresh`() async {
         let viewModel = makeInstalledDetailsViewModel(
             package: InstalledBrewPackage.fixture(
                 name: "wget",
@@ -255,11 +255,16 @@ struct InstalledDetailsViewModelTests {
             installedInventoryReading: StubInstalledInventoryReading(installedIDs: [.formula(name: "openssl@3")]),
         )
         await viewModel.refreshRelationships()
+        #expect(!viewModel.dependencyRelationships.isEmpty)
+        // Stale relationships are kept until the async refresh for the new package completes,
+        // preventing a visible flicker through an empty state on package change.
         viewModel.update(package: InstalledBrewPackage.fixture(name: "curl", kind: .formula))
+        #expect(!viewModel.dependencyRelationships.isEmpty)
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependencyRelationships.isEmpty)
     }
 
-    @Test @MainActor func `update package clears dependent relationships`() async {
+    @Test @MainActor func `update package retains dependent relationships until refresh`() async {
         let package = details(name: "openssl@3")
         let viewModel = makeInstalledDetailsViewModel(
             package: package,
@@ -269,7 +274,12 @@ struct InstalledDetailsViewModelTests {
             },
         )
         await viewModel.refreshRelationships()
+        #expect(!viewModel.dependentRelationships.isEmpty)
+        // Stale relationships are kept until the async refresh for the new package completes,
+        // preventing a visible flicker through an empty state on package change.
         viewModel.update(package: InstalledBrewPackage.fixture(name: "wget", kind: .formula))
+        #expect(!viewModel.dependentRelationships.isEmpty)
+        await viewModel.refreshRelationships()
         #expect(viewModel.dependentRelationships.isEmpty)
     }
 
@@ -279,6 +289,37 @@ struct InstalledDetailsViewModelTests {
             brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.uninstallFormula)),
         )
         #expect(!viewModel.isUninstalling)
+    }
+
+    @Test @MainActor func `showsUpgradeAvailable is false when package is current`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(!viewModel.showsUpgradeAvailable)
+    }
+
+    @Test @MainActor func `showsUpgradeAvailable is true when package is outdated`() {
+        var outdatedDetails = details(name: "wget")
+        outdatedDetails.outdated = true
+        let viewModel = makeInstalledDetailsViewModel(
+            package: outdatedDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.showsUpgradeAvailable)
+    }
+
+    @Test @MainActor func `showsUpgradeAvailable updates when package changes to outdated`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(!viewModel.showsUpgradeAvailable)
+
+        var outdatedDetails = details(name: "wget")
+        outdatedDetails.outdated = true
+        viewModel.update(package: outdatedDetails)
+        #expect(viewModel.showsUpgradeAvailable)
     }
 }
 

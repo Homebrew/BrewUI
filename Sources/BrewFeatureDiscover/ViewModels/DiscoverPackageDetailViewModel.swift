@@ -4,6 +4,13 @@ import BrewUIComponents
 import Foundation
 import Observation
 
+private let installDateFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateStyle = .medium
+    f.timeStyle = .none
+    return f
+}()
+
 @Observable
 @MainActor
 final class DiscoverPackageDetailViewModel {
@@ -110,10 +117,39 @@ final class DiscoverPackageDetailViewModel {
     }
 
     var installedVersionLabel: String? {
-        guard let raw = installedPackage?.installedVersions.first else {
-            return nil
-        }
-        return InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
+        guard let pkg = installedPackage,
+              let raw = pkg.linkedKeg ?? pkg.installedVersions.first else { return nil }
+        let base = InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
+        let showLinked = pkg.installedVersions.count > 1 && pkg.linkedKeg != nil
+        return showLinked ? "\(base) (linked)" : base
+    }
+
+    var isInstalledVersionOutdated: Bool {
+        installedPackage?.outdated ?? false
+    }
+
+    var installDateValue: String? {
+        guard let pkg = installedPackage, let date = pkg.installDate else { return nil }
+        let formatted = installDateFormatter.string(from: date)
+        return pkg.pouredFromBottle ? "Poured from bottle — \(formatted)" : formatted
+    }
+
+    var installReasonValue: String? {
+        guard let pkg = installedPackage else { return nil }
+        return pkg.installedOnRequest ? nil : "As dependency"
+    }
+
+    var licenseLabel: String? {
+        guard let license = installedPackage?.license, !license.isEmpty else { return nil }
+        return license
+    }
+
+    var tapDisplayValue: String? {
+        installedPackage?.tap
+    }
+
+    var sourceURL: URL? {
+        installedPackage?.formulaSourceURL
     }
 
     func update(package: DiscoveryBrewPackage) {

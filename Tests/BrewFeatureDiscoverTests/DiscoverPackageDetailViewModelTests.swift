@@ -33,6 +33,32 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.homepageURL?.absoluteString == "https://example.org")
     }
 
+    @Test @MainActor func `linked annotation is suppressed for single installed version`() {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "wget"), thirtyDayInstallCount: 1),
+            installedRepository: installedRepo([
+                .fixture(name: "wget", installedVersions: ["1.9.0"], linkedKeg: "1.9.0"),
+            ]),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        #expect(viewModel.installedVersionLabel == "v1.9.0")
+    }
+
+    @Test @MainActor func `linked annotation appears for linked keg when multiple versions are installed`() {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "wget"), thirtyDayInstallCount: 1),
+            installedRepository: installedRepo([
+                .fixture(name: "wget", installedVersions: ["1.9.0", "2.0.0"], linkedKeg: "2.0.0"),
+            ]),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        #expect(viewModel.installedVersionLabel == "v2.0.0 (linked)")
+    }
+
     @Test @MainActor func `cask package maps cask install command and not installed status`() {
         let viewModel = DiscoverPackageDetailViewModel(
             package: DiscoveryBrewPackage(

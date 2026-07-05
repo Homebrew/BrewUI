@@ -15,6 +15,32 @@ import Testing
 
 @MainActor
 struct InstalledListRowViewModelTests {
+    @Test func `installed version label prefers linked keg over first installed version`() {
+        let package = InstalledBrewPackage.fixture(
+            name: "git",
+            installedVersions: ["1.9.0", "2.0.0"],
+            linkedKeg: "2.0.0",
+        )
+        let viewModel = InstalledListRowViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.installedVersionLabel == "v2.0.0")
+    }
+
+    @Test func `installed version label falls back to first version when no linked keg`() {
+        let package = InstalledBrewPackage.fixture(
+            name: "git",
+            installedVersions: ["1.9.0", "2.0.0"],
+            linkedKeg: nil,
+        )
+        let viewModel = InstalledListRowViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.installedVersionLabel == "v1.9.0")
+    }
+
     @Test func `name uses package display name`() {
         let package = InstalledBrewPackage.fixture(
             name: "visual-studio-code",

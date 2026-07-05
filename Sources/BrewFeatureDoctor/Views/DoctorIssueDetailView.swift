@@ -208,13 +208,11 @@ private struct DoctorLinkRow: View {
                 Label(link.url.absoluteString, systemImage: "arrow.up.right.square.fill")
                     .font(.brewCallout.weight(.semibold))
             }
-            .foregroundStyle(Color.brewBrandPrimary)
         case .reference:
             Link(destination: link.url) {
                 Label(link.url.absoluteString, systemImage: "doc.text")
                     .font(.brewCallout)
             }
-            .foregroundStyle(Color.brewTextLink)
         }
     }
 }
