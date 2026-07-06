@@ -18,7 +18,6 @@ import SwiftUI
 @main
 struct BrewApp: App {
     /// Homebrew's online documentation, surfaced from the Help menu.
-    /// Force-unwrap is safe: the string is a valid literal URL verified at build time.
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
 
     @Environment(\.scenePhase) private var scenePhase
