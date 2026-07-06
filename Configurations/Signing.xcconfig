@@ -23,6 +23,8 @@ DEVELOPMENT_TEAM =
 CODE_SIGN_STYLE = Automatic
 CODE_SIGN_IDENTITY = Apple Development
 
+#include "Version.xcconfig"
+
 // Pull in local overrides LAST so they win over the fallbacks above.
 // The '?' makes this a no-op when the file is absent.
 #include? "Signing.local.xcconfig"
