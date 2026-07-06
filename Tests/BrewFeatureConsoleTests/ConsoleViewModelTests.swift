@@ -108,4 +108,53 @@ struct ConsoleViewModelTests {
 
         #expect(harness.viewModel.selectedID == running)
     }
+
+    // MARK: - shouldAutoExpandConsole
+
+    @Test func `shouldAutoExpandConsole is false with no jobs`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+
+        #expect(!harness.viewModel.shouldAutoExpandConsole)
+    }
+
+    @Test func `shouldAutoExpandConsole becomes true once a command starts running`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let id = BrewOperationID(kind: .formula, name: "gh")
+
+        await harness.emit(id: id, phase: .running(.installFormula))
+
+        #expect(harness.viewModel.shouldAutoExpandConsole)
+    }
+
+    @Test func `shouldAutoExpandConsole returns to false once the running command reaches terminal`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let id = BrewOperationID(kind: .formula, name: "gh")
+
+        await harness.emit(id: id, phase: .running(.installFormula))
+        #expect(harness.viewModel.shouldAutoExpandConsole)
+
+        await harness.emit(id: id, phase: .idle)
+        #expect(!harness.viewModel.shouldAutoExpandConsole)
+    }
+
+    @Test func `shouldAutoExpandConsole stays true while any command is still running`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let first = BrewOperationID(kind: .formula, name: "gh")
+        let second = BrewOperationID(kind: .formula, name: "ripgrep")
+
+        await harness.emit(id: first, phase: .running(.installFormula))
+        await harness.emit(id: second, phase: .running(.installFormula))
+
+        // One finishes — the other is still running, so the panel should stay open.
+        await harness.emit(id: first, phase: .idle)
+        #expect(harness.viewModel.shouldAutoExpandConsole)
+
+        // Both finished — nothing running.
+        await harness.emit(id: second, phase: .idle)
+        #expect(!harness.viewModel.shouldAutoExpandConsole)
+    }
 }

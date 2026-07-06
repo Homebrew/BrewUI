@@ -40,6 +40,13 @@ final class ConsoleViewModel {
         return nil
     }
 
+    /// Drives the console panel's auto-expand. True while a command is running (`activeJob` is
+    /// non-terminal). The view watches the rising edge of this and expands the collapsed panel so the
+    /// user sees output stream in without opening it manually; it never force-collapses.
+    var shouldAutoExpandConsole: Bool {
+        activeJob != nil
+    }
+
     /// Currently focused job for the expanded console body — explicit selection, else active, else most recent.
     var selectedJob: CommandJob? {
         if let id = selectedID, let job = repository.jobs[id] {

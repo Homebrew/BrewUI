@@ -31,5 +31,10 @@ struct ConsolePanel: View {
             }
         }
         .background(Color.brewSurface)
+        .onChange(of: viewModel.shouldAutoExpandConsole) { _, shouldExpand in
+            // Rising edge only: open the collapsed panel when a command starts. We never force-collapse,
+            // so a user who manually collapses mid-run isn't fought — the next command re-raises it.
+            if shouldExpand { expanded = true }
+        }
     }
 }
