@@ -93,20 +93,25 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
 
     private func performRefresh(for window: BrewAnalyticsWindow) async throws -> (Data, Data) {
         let formulaETag = await cache.etag(for: .formula, window: window)
-        let formulaResponse = try await apiClient.fetchFormulaInstallOnRequestAnalytics(
+        let caskETag = await cache.etag(for: .cask, window: window)
+
+        async let formulaResponse = apiClient.fetchFormulaInstallOnRequestAnalytics(
             window: window,
             etag: formulaETag,
         )
-        switch formulaResponse {
+        async let caskResponse = apiClient.fetchCaskInstallAnalytics(
+            window: window,
+            etag: caskETag,
+        )
+
+        switch try await formulaResponse {
         case .notModified:
             break
         case let .updated(data: data, etag: nextETag):
             try await cache.updateFormulaAnalytics(window: window, with: data, etag: nextETag)
         }
 
-        let caskETag = await cache.etag(for: .cask, window: window)
-        let caskResponse = try await apiClient.fetchCaskInstallAnalytics(window: window, etag: caskETag)
-        switch caskResponse {
+        switch try await caskResponse {
         case .notModified:
             break
         case let .updated(data: data, etag: nextETag):
