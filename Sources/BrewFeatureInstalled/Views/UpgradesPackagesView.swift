@@ -11,7 +11,6 @@ import SwiftUI
 /// and a friendly empty state when nothing is outdated.
 struct UpgradesPackagesView: View {
     @Bindable var viewModel: UpgradesViewModel
-    @State private var searchPresented = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -42,11 +41,11 @@ struct UpgradesPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
-            isPresented: $searchPresented,
+            isPresented: $viewModel.isSearchFieldPresented,
             placement: .toolbar,
             prompt: "Search Upgrades",
         )
-        .focusedSceneValue(\.searchPresented, $searchPresented)
+        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
     }
 
     private var header: some View {
@@ -118,11 +117,6 @@ struct UpgradesPackagesView: View {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
             .task(id: viewModel.shouldFocusList) {
-                // Don't yank focus out of an active search field: a query that filters down to
-                // zero matches removes this List from the hierarchy, and deleting the query
-                // re-inserts it — re-running this .task on appear. Grabbing focus then would kick
-                // the cursor out of the search box mid-edit.
-                guard !searchPresented else { return }
                 isFocused = viewModel.shouldFocusList
             }
             .focused($isFocused)

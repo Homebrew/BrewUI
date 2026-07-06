@@ -11,7 +11,6 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
-    @State private var searchPresented = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -43,11 +42,11 @@ struct InstalledPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
-            isPresented: $searchPresented,
+            isPresented: $viewModel.isSearchFieldPresented,
             placement: .toolbar,
             prompt: "Search Installed Packages",
         )
-        .focusedSceneValue(\.searchPresented, $searchPresented)
+        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
     }
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
@@ -84,9 +83,6 @@ struct InstalledPackagesView: View {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
             .task(id: viewModel.shouldFocusList) {
-                // Never grab focus while the search field is active — auto-focusing the list for
-                // keyboard nav must not kick the cursor out of an in-progress search.
-                guard !searchPresented else { return }
                 isFocused = viewModel.shouldFocusList
             }
             .focused($isFocused)

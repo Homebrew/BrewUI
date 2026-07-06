@@ -361,6 +361,38 @@ struct UpgradesViewModelTests {
         #expect(!vm.shouldFocusList)
     }
 
+    @Test @MainActor func `shouldFocusList is false while the search field is presented`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        vm.isSearchFieldPresented = true
+
+        // The list would otherwise steal focus when it re-appears after a query that filtered every
+        // row is deleted; gating on search presentation keeps the cursor in the search box.
+        #expect(!vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList returns to true once the search field is dismissed`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        vm.isSearchFieldPresented = true
+        #expect(!vm.shouldFocusList)
+
+        vm.isSearchFieldPresented = false
+        #expect(vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList stays false when the search field is presented but not loaded`() {
+        let vm = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(state: .loading),
+            brewCommandCenter: StubBrewCommandCenter(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        vm.isSearchFieldPresented = true
+
+        #expect(!vm.shouldFocusList)
+    }
+
     // MARK: - Helpers
 
     private static var mixedPackages: [InstalledBrewPackage] {

@@ -110,10 +110,16 @@ final class InstalledViewModel {
         return false
     }
 
-    /// Drives the list view's `@FocusState`. The list only owns keyboard focus once the inventory has
-    /// loaded — while loading or in an error state focus belongs elsewhere (or to nothing).
+    /// Mirrors the search field's presentation state (bound to `.searchable(isPresented:)`). Owned
+    /// here — rather than as view `@State` — so ``shouldFocusList`` can factor it in and stay a pure,
+    /// unit-testable decision.
+    var isSearchFieldPresented: Bool = false
+
+    /// Drives the list view's `@FocusState`. The list claims keyboard focus once the inventory has
+    /// loaded, but never while the search field is active — auto-focusing the list must not kick the
+    /// cursor out of an in-progress search.
     var shouldFocusList: Bool {
-        state.isLoaded
+        state.isLoaded && !isSearchFieldPresented
     }
 
     var packageCountSubtitle: String {
