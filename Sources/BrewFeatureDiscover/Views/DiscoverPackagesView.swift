@@ -27,7 +27,7 @@ struct DiscoverPackagesView: View {
             text: $viewModel.query,
             isPresented: $searchPresented,
             placement: .toolbar,
-            prompt: "Search Homebrew's Catalogue",
+            prompt: "Search Homebrew's Packages",
         )
         .focusedSceneValue(\.searchPresented, $searchPresented)
         .task(id: viewModel.query) {
