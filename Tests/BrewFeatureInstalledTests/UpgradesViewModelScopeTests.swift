@@ -294,9 +294,18 @@ private actor PhaseStreamingScopeCommandCenter: BrewCommandCenter {
         phaseContinuation = continuation
     }
 
-    func phase(for _: BrewOperationID) async -> BrewOperationPhase { .idle }
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] { [:] }
-    func isActive(id _: BrewOperationID) async -> Bool { false }
+    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
+        .idle
+    }
+
+    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func isActive(id _: BrewOperationID) async -> Bool {
+        false
+    }
+
     func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {}
 
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
