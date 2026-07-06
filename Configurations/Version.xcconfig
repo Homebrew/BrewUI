@@ -1,0 +1,14 @@
+// Configurations/Version.xcconfig
+//
+// Single source of truth for the app's version. Bump these when cutting a
+// release — do NOT set MARKETING_VERSION / CURRENT_PROJECT_VERSION in the
+// Xcode target settings, or those would override the values here.
+//
+// Xcode's Info.plist generation maps:
+//   MARKETING_VERSION       -> CFBundleShortVersionString  (the "1.0" shown
+//                                                            in the About panel)
+//   CURRENT_PROJECT_VERSION -> CFBundleVersion             (the build number)
+// so the standard "About Homebrew" panel picks these up automatically.
+
+MARKETING_VERSION = 1.0
+CURRENT_PROJECT_VERSION = 1

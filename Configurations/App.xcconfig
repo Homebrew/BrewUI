@@ -1,0 +1,8 @@
+// Configurations/App.xcconfig
+//
+// Base configuration for the Homebrew app target. An Xcode target can only
+// reference one base configuration file, so this composes the shared,
+// concern-specific configs: signing (developer-overridable) and the version.
+
+#include "Signing.xcconfig"
+#include "Version.xcconfig"
