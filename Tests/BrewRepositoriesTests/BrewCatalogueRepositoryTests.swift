@@ -322,11 +322,17 @@ private actor StubCatalogueAPIClient: BrewAPIClient {
         self.caskHandler = caskHandler
     }
 
-    func fetchFormulaInstallOnRequestAnalytics(window _: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
+    func fetchFormulaInstallOnRequestAnalytics(
+        window _: BrewAnalyticsWindow,
+        etag _: String?,
+    ) async throws -> CatalogueResponse<Data> {
         throw BrewAPIClientError.invalidResponse
     }
 
-    func fetchCaskInstallAnalytics(window _: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
+    func fetchCaskInstallAnalytics(
+        window _: BrewAnalyticsWindow,
+        etag _: String?,
+    ) async throws -> CatalogueResponse<Data> {
         throw BrewAPIClientError.invalidResponse
     }
 
@@ -352,11 +358,17 @@ private actor DeferredFormulaStubCatalogueAPIClient: BrewAPIClient {
     private var formulaETags: [String?] = []
     private var continuation: CheckedContinuation<CatalogueResponse<FormulaCatalogueJSON>, Error>?
 
-    func fetchFormulaInstallOnRequestAnalytics(window _: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
+    func fetchFormulaInstallOnRequestAnalytics(
+        window _: BrewAnalyticsWindow,
+        etag _: String?,
+    ) async throws -> CatalogueResponse<Data> {
         throw BrewAPIClientError.invalidResponse
     }
 
-    func fetchCaskInstallAnalytics(window _: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
+    func fetchCaskInstallAnalytics(
+        window _: BrewAnalyticsWindow,
+        etag _: String?,
+    ) async throws -> CatalogueResponse<Data> {
         throw BrewAPIClientError.invalidResponse
     }
 
