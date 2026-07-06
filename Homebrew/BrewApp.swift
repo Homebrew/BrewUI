@@ -59,6 +59,7 @@ struct BrewApp: App {
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center)
         configRepository = BrewConfigRepository.live()
+        NSWindow.allowsAutomaticWindowTabbing = false
     }
 
     var body: some Scene {
@@ -95,9 +96,9 @@ struct BrewApp: App {
             height: BrewLayout.minWindowHeight,
         )
         .commands {
-            ConsoleCommands()
-            SidebarCommands()
             SearchCommands()
+            SidebarCommands()
+            ConsoleCommands()
         }
         #if DEBUG
         .commands {
