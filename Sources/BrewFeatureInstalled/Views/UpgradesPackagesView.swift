@@ -118,6 +118,11 @@ struct UpgradesPackagesView: View {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
             .task(id: viewModel.shouldFocusList) {
+                // Don't yank focus out of an active search field: a query that filters down to
+                // zero matches removes this List from the hierarchy, and deleting the query
+                // re-inserts it — re-running this .task on appear. Grabbing focus then would kick
+                // the cursor out of the search box mid-edit.
+                guard !searchPresented else { return }
                 isFocused = viewModel.shouldFocusList
             }
             .focused($isFocused)

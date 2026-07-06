@@ -84,6 +84,9 @@ struct InstalledPackagesView: View {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
             .task(id: viewModel.shouldFocusList) {
+                // Never grab focus while the search field is active — auto-focusing the list for
+                // keyboard nav must not kick the cursor out of an in-progress search.
+                guard !searchPresented else { return }
                 isFocused = viewModel.shouldFocusList
             }
             .focused($isFocused)
