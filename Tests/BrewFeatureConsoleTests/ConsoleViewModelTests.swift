@@ -157,4 +157,35 @@ struct ConsoleViewModelTests {
         await harness.emit(id: second, phase: .idle)
         #expect(!harness.viewModel.shouldAutoExpandConsole)
     }
+
+    @Test func `autoExpandEnabled defaults to true`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+
+        #expect(harness.viewModel.autoExpandEnabled)
+    }
+
+    @Test func `shouldAutoExpandConsole is false while a command runs but auto-expand is disabled`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let id = BrewOperationID(kind: .formula, name: "gh")
+        await harness.emit(id: id, phase: .running(.installFormula))
+
+        harness.viewModel.autoExpandEnabled = false
+
+        #expect(!harness.viewModel.shouldAutoExpandConsole)
+    }
+
+    @Test func `shouldAutoExpandConsole returns to true when auto-expand is re-enabled while a command runs`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let id = BrewOperationID(kind: .formula, name: "gh")
+        await harness.emit(id: id, phase: .running(.installFormula))
+
+        harness.viewModel.autoExpandEnabled = false
+        #expect(!harness.viewModel.shouldAutoExpandConsole)
+
+        harness.viewModel.autoExpandEnabled = true
+        #expect(harness.viewModel.shouldAutoExpandConsole)
+    }
 }
