@@ -12,8 +12,7 @@ without having already been built and notarised successfully.
 2. **Release (`.github/workflows/release.yml`)** — a manual **"Run workflow"**
    step that promotes the most recent successful `main` build to a release.
 
-The marketing version lives in
-[`Configurations/Version.xcconfig`](../Configurations/Version.xcconfig)
+The marketing version lives in `Configurations/Version.xcconfig`
 (`MARKETING_VERSION`), which is the single source of truth for the version
 baked into every build.
 
