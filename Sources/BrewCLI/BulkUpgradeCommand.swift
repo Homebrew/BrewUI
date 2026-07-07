@@ -6,13 +6,16 @@
 import BrewCore
 import Foundation
 
-/// Schedules a single `brew upgrade` (no arguments) via ``BrewCommandCenter/submit``. Homebrew upgrades
-/// every outdated formula and cask in one subprocess, matching what a user would type in Terminal and
-/// the user-facing command rendered by the Upgrades tab's command block.
+/// Schedules a batch `brew upgrade` via ``BrewCommandCenter/submit`` for a ``BrewUpgradeSelection`` —
+/// everything outdated, a single kind (`--formula`/`--cask`), or an explicit list of names. Homebrew runs
+/// it in one subprocess, matching what a user would type in Terminal and the command rendered by the
+/// Upgrades tab's command block.
 ///
-/// Keep this argument list in sync with ``BrewOperationID/bulkUpgradeDisplayCommand`` — the latter is the
-/// human-readable rendering and must describe what this command actually runs.
+/// Both the argument list and the human-readable rendering come from the same ``BrewUpgradeSelection``, so
+/// what runs and what's shown can't drift.
 struct BulkUpgradeCommand: BrewMutatingCommand {
+    let selection: BrewUpgradeSelection
+
     var operationKind: BrewOperationKind {
         .upgradeAll
     }
@@ -21,7 +24,7 @@ struct BulkUpgradeCommand: BrewMutatingCommand {
         let brew = try context.brewExecutableURL()
         let output = try await context.commandRunner.run(
             executableURL: brew,
-            arguments: ["upgrade"],
+            arguments: selection.arguments,
         )
         guard output.terminationStatus == 0 else {
             throw BrewCommandError.failed(

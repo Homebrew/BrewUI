@@ -22,8 +22,8 @@ public struct LiveBrewMutatingCommandFactory: BrewMutatingCommandFactory {
         PackageUninstallCommand(kind: kind, name: name)
     }
 
-    public func bulkUpgradeCommand() -> any BrewMutatingCommand {
-        BulkUpgradeCommand()
+    public func bulkUpgradeCommand(selection: BrewUpgradeSelection) -> any BrewMutatingCommand {
+        BulkUpgradeCommand(selection: selection)
     }
 
     public func doctorFixCommand(arguments: [String]) -> any BrewMutatingCommand {

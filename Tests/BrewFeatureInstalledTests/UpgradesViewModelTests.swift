@@ -144,7 +144,7 @@ struct UpgradesViewModelTests {
 
         let entries = await recorder.recordedSubmitEntries
         #expect(entries.count == 1)
-        #expect(entries.first?.id == .bulkUpgrade)
+        #expect(entries.first?.id == .bulkUpgrade(.all))
         #expect(entries.first?.kind == .upgradeAll)
     }
 
@@ -233,11 +233,11 @@ struct UpgradesViewModelTests {
         // Wait for the observer to subscribe to allPhaseChanges before emitting.
         await center.waitForSubscriber()
 
-        await center.emit(id: .bulkUpgrade, phase: .running(.upgradeAll))
+        await center.emit(id: .bulkUpgrade(.all), phase: .running(.upgradeAll))
         await Self.waitUntil { vm.isUpgradingAny }
         #expect(vm.isUpgradingAny)
 
-        await center.emit(id: .bulkUpgrade, phase: .idle)
+        await center.emit(id: .bulkUpgrade(.all), phase: .idle)
         await Self.waitUntil { !vm.isUpgradingAny }
         #expect(!vm.isUpgradingAny)
     }
@@ -357,6 +357,38 @@ struct UpgradesViewModelTests {
             brewCommandCenter: StubBrewCommandCenter(),
             commandFactory: StubMutatingCommandFactory(),
         )
+
+        #expect(!vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList is false while the search field is presented`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        vm.isSearchFieldPresented = true
+
+        // The list would otherwise steal focus when it re-appears after a query that filtered every
+        // row is deleted; gating on search presentation keeps the cursor in the search box.
+        #expect(!vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList returns to true once the search field is dismissed`() {
+        let vm = Self.makeViewModel(packages: Self.mixedPackages)
+
+        vm.isSearchFieldPresented = true
+        #expect(!vm.shouldFocusList)
+
+        vm.isSearchFieldPresented = false
+        #expect(vm.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList stays false when the search field is presented but not loaded`() {
+        let vm = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(state: .loading),
+            brewCommandCenter: StubBrewCommandCenter(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        vm.isSearchFieldPresented = true
 
         #expect(!vm.shouldFocusList)
     }

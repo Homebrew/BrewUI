@@ -31,6 +31,19 @@ struct InstalledPackagesContent: Equatable {
     var orderedPackageIDs: [InstalledBrewPackage.ID] {
         formulaPackages.map(\.id) + caskPackages.map(\.id)
     }
+
+    /// Narrows the content to a single package kind for the scope picker. `.all` is the identity —
+    /// returning `self` keeps the original ordering intact.
+    func filtered(by scope: InstalledPackageScope) -> InstalledPackagesContent {
+        switch scope {
+        case .all:
+            self
+        case .formulae:
+            InstalledPackagesContent(packages: formulaPackages)
+        case .casks:
+            InstalledPackagesContent(packages: caskPackages)
+        }
+    }
 }
 
 @Observable
@@ -47,10 +60,21 @@ final class InstalledViewModel {
         }
     }
 
+    /// Package-kind scope picker. Filters the loaded inventory client-side alongside the search query.
+    var scope: InstalledPackageScope = .all {
+        didSet {
+            guard oldValue != scope else {
+                return
+            }
+            updateSelectionForScopeChange()
+        }
+    }
+
     private var selectedPackageID: InstalledBrewPackage.ID?
 
-    /// Projects the shared repository's inventory through the active search query. The repository is the
-    /// single source of truth; this view model owns only screen-local search and selection state.
+    /// Projects the shared repository's inventory through the active scope and search query. The
+    /// repository is the single source of truth; this view model owns only screen-local filter and
+    /// selection state.
     var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
@@ -58,7 +82,11 @@ final class InstalledViewModel {
         case let .failed(error):
             .failed(Self.userMessage(for: error))
         case let .loaded(packages):
-            .loaded(Self.filteredContent(InstalledPackagesContent(packages: packages), query: searchQuery))
+            .loaded(Self.filteredContent(
+                InstalledPackagesContent(packages: packages),
+                scope: scope,
+                query: searchQuery,
+            ))
         }
     }
 
@@ -82,10 +110,16 @@ final class InstalledViewModel {
         return false
     }
 
-    /// Drives the list view's `@FocusState`. The list only owns keyboard focus once the inventory has
-    /// loaded — while loading or in an error state focus belongs elsewhere (or to nothing).
+    /// Mirrors the search field's presentation state (bound to `.searchable(isPresented:)`). Owned
+    /// here — rather than as view `@State` — so ``shouldFocusList`` can factor it in and stay a pure,
+    /// unit-testable decision.
+    var isSearchFieldPresented: Bool = false
+
+    /// Drives the list view's `@FocusState`. The list claims keyboard focus once the inventory has
+    /// loaded, but never while the search field is active — auto-focusing the list must not kick the
+    /// cursor out of an in-progress search.
     var shouldFocusList: Bool {
-        state.isLoaded
+        state.isLoaded && !isSearchFieldPresented
     }
 
     var packageCountSubtitle: String {
@@ -209,23 +243,35 @@ final class InstalledViewModel {
         }
     }
 
+    /// Re-homes the search preview when a scope change hides the previewed row. Committed selections
+    /// are left untouched: `activeSelectedPackageID` already falls back to the first visible row while a
+    /// selection is scoped out, and restores it if the user widens the scope again.
+    private func updateSelectionForScopeChange() {
+        guard isSearchActive, !didCommitSelectionDuringSearch else {
+            return
+        }
+        searchPreviewSelectedPackageID = firstVisibleRowID()
+    }
+
     private func firstVisibleRowID() -> InstalledBrewPackage.ID? {
         allRows.first?.id
     }
 
     private static func filteredContent(
         _ content: InstalledPackagesContent,
+        scope: InstalledPackageScope,
         query: String,
     ) -> InstalledPackagesContent {
+        let scoped = content.filtered(by: scope)
         let normalizedQuery = normalizedSearchQuery(query)
         guard !normalizedQuery.isEmpty else {
-            return content
+            return scoped
         }
 
-        let filteredFormulaRows = content.formulaPackages.filter {
+        let filteredFormulaRows = scoped.formulaPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
-        let filteredCaskRows = content.caskPackages.filter {
+        let filteredCaskRows = scoped.caskPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
         return InstalledPackagesContent(

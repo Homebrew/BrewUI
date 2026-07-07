@@ -11,12 +11,16 @@ import SwiftUI
 /// and a friendly empty state when nothing is outdated.
 struct UpgradesPackagesView: View {
     @Bindable var viewModel: UpgradesViewModel
-    @State private var searchPresented = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
+
+            if viewModel.totalOutdatedCount > 0 {
+                scopePicker
+                Divider()
+            }
 
             AsyncContentView(
                 state: viewModel.state,
@@ -37,11 +41,11 @@ struct UpgradesPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
-            isPresented: $searchPresented,
+            isPresented: $viewModel.isSearchFieldPresented,
             placement: .toolbar,
             prompt: "Search Upgrades",
         )
-        .focusedSceneValue(\.searchPresented, $searchPresented)
+        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
     }
 
     private var header: some View {
@@ -77,6 +81,19 @@ struct UpgradesPackagesView: View {
             }
         }
         .padding(BrewSpacing.lg)
+    }
+
+    /// Kind filter shown whenever there is outdated inventory to narrow. Filters client-side; never refetches.
+    private var scopePicker: some View {
+        Picker("Scope", selection: $viewModel.scope) {
+            Text("All").tag(InstalledPackageScope.all)
+            Text("Formulae").tag(InstalledPackageScope.formulae)
+            Text("Casks").tag(InstalledPackageScope.casks)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.vertical, BrewSpacing.md)
     }
 
     private func upgradesList(_ content: InstalledPackagesContent) -> some View {
@@ -173,7 +190,7 @@ struct UpgradesPackagesView: View {
         }
     }
 
-    /// Shown when the search filter hides every outdated package but upgrades
+    /// Shown when the active filters (scope and/or search) hide every outdated package but upgrades
     /// still exist in the inventory — distinct from the "all caught up" state.
     private var noSearchMatchesState: some View {
         centeredEmptyState(
@@ -182,7 +199,7 @@ struct UpgradesPackagesView: View {
             actionTitle: "Show all upgrades",
             accessibilityLabel: noSearchMatchesSubtitle,
         ) {
-            viewModel.searchQuery = ""
+            viewModel.resetFilters()
         }
     }
 
@@ -238,13 +255,13 @@ struct UpgradesPackagesView: View {
         let hidden = viewModel.totalOutdatedCount
         if hidden == 1 {
             return String(
-                localized: "1 outdated package is hidden by the current search.",
-                comment: "Upgrades search-empty state with a single hidden outdated package",
+                localized: "1 outdated package is hidden by the current filters.",
+                comment: "Upgrades filter-empty state with a single hidden outdated package",
             )
         }
         return String(
-            localized: "\(hidden) outdated packages are hidden by the current search.",
-            comment: "Upgrades search-empty state with multiple hidden outdated packages",
+            localized: "\(hidden) outdated packages are hidden by the current filters.",
+            comment: "Upgrades filter-empty state with multiple hidden outdated packages",
         )
     }
 }

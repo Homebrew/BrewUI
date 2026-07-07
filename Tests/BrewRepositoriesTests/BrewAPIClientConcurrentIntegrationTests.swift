@@ -76,8 +76,8 @@ struct BrewAPIClientConcurrentIntegrationTests {
         StubURLProtocol.registerByPath(Self.discoverEndpointStubs, forHost: host)
         let client = makeSharedClient(baseURL: baseURL)
 
-        async let formulaAnalytics = client.fetchFormulaInstallOnRequestAnalytics(window: .days30)
-        async let caskAnalytics = client.fetchCaskInstallAnalytics(window: .days30)
+        async let formulaAnalytics = client.fetchFormulaInstallOnRequestAnalytics(window: .days30, etag: nil)
+        async let caskAnalytics = client.fetchCaskInstallAnalytics(window: .days30, etag: nil)
         async let formulaCatalogue = client.fetchFormulaCatalogue(etag: nil)
         async let caskCatalogue = client.fetchCaskCatalogue(etag: nil)
 
@@ -102,6 +102,8 @@ struct BrewAPIClientConcurrentIntegrationTests {
         let discoverRepository = BrewDiscoverPackagesRepository(
             apiClient: client,
             catalogueRepository: catalogueRepository,
+            cache: InMemoryDiscoverAnalyticsCache(),
+            defaultsKeyPrefix: "DiscoverAnalyticsConcurrent.\(UUID().uuidString)",
         )
 
         async let topPackagesTask = discoverRepository.loadTopPackages(limit: 1, window: .days30)
@@ -126,8 +128,8 @@ struct BrewAPIClientConcurrentIntegrationTests {
         try await withThrowingTaskGroup(of: Void.self) { group in
             for _ in 0 ..< 24 {
                 group.addTask {
-                    async let formulaAnalytics = client.fetchFormulaInstallOnRequestAnalytics(window: .days30)
-                    async let caskAnalytics = client.fetchCaskInstallAnalytics(window: .days30)
+                    async let formulaAnalytics = client.fetchFormulaInstallOnRequestAnalytics(window: .days30, etag: nil)
+                    async let caskAnalytics = client.fetchCaskInstallAnalytics(window: .days30, etag: nil)
                     async let formulaCatalogue = client.fetchFormulaCatalogue(etag: nil)
                     async let caskCatalogue = client.fetchCaskCatalogue(etag: nil)
                     _ = try await formulaAnalytics
@@ -161,6 +163,8 @@ private func makeDiscoverRepository(
             formulaNames: formulaCatalogueNames,
             caskNames: caskCatalogueNames,
         ),
+        cache: InMemoryDiscoverAnalyticsCache(),
+        defaultsKeyPrefix: "DiscoverAnalyticsConcurrent.\(UUID().uuidString)",
     )
 }
 

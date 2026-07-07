@@ -96,8 +96,8 @@ public extension CommandJob {
             userFacingCommand(kind: kind, name: packageID.name)
         case let .maintenance(_, displayCommand):
             displayCommand
-        case .bulkUpgrade:
-            BrewOperationID.bulkUpgradeDisplayCommand
+        case let .bulkUpgrade(selection):
+            selection.displayCommand
         }
         return CommandJob(
             id: id,

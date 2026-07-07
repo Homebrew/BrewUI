@@ -11,7 +11,6 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
-    @State private var searchPresented = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -29,6 +28,9 @@ struct InstalledPackagesView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
+            scopePicker
+            Divider()
+
             AsyncContentView(
                 state: viewModel.state,
                 onRetry: { Task { await viewModel.refresh() } },
@@ -40,11 +42,24 @@ struct InstalledPackagesView: View {
         }
         .searchable(
             text: $viewModel.searchQuery,
-            isPresented: $searchPresented,
+            isPresented: $viewModel.isSearchFieldPresented,
             placement: .toolbar,
             prompt: "Search Installed Packages",
         )
-        .focusedSceneValue(\.searchPresented, $searchPresented)
+        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
+    }
+
+    /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
+    private var scopePicker: some View {
+        Picker("Scope", selection: $viewModel.scope) {
+            Text("All").tag(InstalledPackageScope.all)
+            Text("Formulae").tag(InstalledPackageScope.formulae)
+            Text("Casks").tag(InstalledPackageScope.casks)
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.bottom, BrewSpacing.md)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {

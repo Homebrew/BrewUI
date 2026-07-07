@@ -40,6 +40,19 @@ final class ConsoleViewModel {
         return nil
     }
 
+    /// Mirrors the app-wide "Expand Console Panel Automatically" preference (bound from
+    /// `@AppStorage` in the view). Owned here so ``shouldAutoExpandConsole`` stays a pure,
+    /// unit-testable decision. Defaults on.
+    var autoExpandEnabled: Bool = true
+
+    /// Drives the console panel's auto-expand. True while a command is running (`activeJob` is
+    /// non-terminal) and the preference is enabled. The view watches the rising edge of this and
+    /// expands the collapsed panel so the user sees output stream in without opening it manually; it
+    /// never force-collapses.
+    var shouldAutoExpandConsole: Bool {
+        autoExpandEnabled && activeJob != nil
+    }
+
     /// Currently focused job for the expanded console body — explicit selection, else active, else most recent.
     var selectedJob: CommandJob? {
         if let id = selectedID, let job = repository.jobs[id] {

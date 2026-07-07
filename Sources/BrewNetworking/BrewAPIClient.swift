@@ -7,8 +7,17 @@ import BrewCore
 import Foundation
 
 public protocol BrewAPIClient: Sendable {
-    func fetchFormulaInstallOnRequestAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON
-    func fetchCaskInstallAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON
+    /// Returns the raw analytics JSON body so callers can persist it verbatim (the `BrewAnalyticsJSON`
+    /// DTO is lossy/`Decodable`-only and cannot be round-tripped). Supports conditional requests via
+    /// `etag`, mirroring the catalogue endpoints.
+    func fetchFormulaInstallOnRequestAnalytics(
+        window: BrewAnalyticsWindow,
+        etag: String?,
+    ) async throws -> CatalogueResponse<Data>
+    func fetchCaskInstallAnalytics(
+        window: BrewAnalyticsWindow,
+        etag: String?,
+    ) async throws -> CatalogueResponse<Data>
     func fetchFormulaCatalogue(etag: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON>
     func fetchCaskCatalogue(etag: String?) async throws -> CatalogueResponse<CaskCatalogueJSON>
 }
@@ -31,12 +40,18 @@ public struct URLSessionBrewAPIClient: BrewAPIClient {
         URLSessionBrewAPIClient(session: .shared)
     }
 
-    public func fetchFormulaInstallOnRequestAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
-        try await fetchAnalytics(for: .formulaInstallOnRequest(window: window))
+    public func fetchFormulaInstallOnRequestAnalytics(
+        window: BrewAnalyticsWindow,
+        etag: String?,
+    ) async throws -> CatalogueResponse<Data> {
+        try await fetchConditionalAnalytics(for: .formulaInstallOnRequest(window: window), etag: etag)
     }
 
-    public func fetchCaskInstallAnalytics(window: BrewAnalyticsWindow) async throws -> BrewAnalyticsJSON {
-        try await fetchAnalytics(for: .caskInstall(window: window))
+    public func fetchCaskInstallAnalytics(
+        window: BrewAnalyticsWindow,
+        etag: String?,
+    ) async throws -> CatalogueResponse<Data> {
+        try await fetchConditionalAnalytics(for: .caskInstall(window: window), etag: etag)
     }
 
     public func fetchFormulaCatalogue(etag: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON> {
@@ -47,8 +62,15 @@ public struct URLSessionBrewAPIClient: BrewAPIClient {
         try await fetchConditionalCatalogue(for: .caskCatalogue, etag: etag, as: CaskCatalogueJSON.self)
     }
 
-    private func fetchAnalytics(for endpoint: Endpoint) async throws -> BrewAnalyticsJSON {
-        let request = try makeRequest(for: endpoint)
+    private func fetchConditionalAnalytics(
+        for endpoint: Endpoint,
+        etag: String?,
+    ) async throws -> CatalogueResponse<Data> {
+        var headers: [String: String] = [:]
+        if let etag {
+            headers["If-None-Match"] = etag
+        }
+        let request = try makeRequest(for: endpoint, headers: headers)
 
         let data: Data
         let response: URLResponse
@@ -62,16 +84,16 @@ public struct URLSessionBrewAPIClient: BrewAPIClient {
             throw BrewAPIClientError.invalidResponse
         }
 
-        guard (200 ... 299).contains(httpResponse.statusCode) else {
+        switch httpResponse.statusCode {
+        case 304:
+            return .notModified
+        case 200 ... 299:
+            let responseETag = httpResponse.value(forHTTPHeaderField: "ETag")
+            return .updated(data: data, etag: responseETag)
+        default:
             let bodyData = Data(data.prefix(250))
             let bodySnippet = String(bytes: bodyData, encoding: .utf8) ?? ""
             throw BrewAPIClientError.httpStatus(code: httpResponse.statusCode, bodySnippet: bodySnippet)
-        }
-
-        do {
-            return try JSONDecoder().decode(BrewAnalyticsJSON.self, from: data)
-        } catch {
-            throw BrewAPIClientError.decoding(underlying: String(describing: error))
         }
     }
 

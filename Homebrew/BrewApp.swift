@@ -26,6 +26,7 @@ struct BrewApp: App {
     private let commandFactory: LiveBrewMutatingCommandFactory
     private let installedInventoryCache: InstalledInventoryCache
     private let catalogueCache: CatalogueCache
+    private let discoverAnalyticsCache: DiscoverAnalyticsCache
     private let installedPackagesRepository: BrewInstalledPackagesRepository
     private let commandJobsRepository: BrewCommandJobsRepository
     private let installedDependentsRepository: BrewInstalledDependentsRepository
@@ -37,12 +38,14 @@ struct BrewApp: App {
     init() {
         let inventoryCache = InstalledInventoryCache()
         let catalogue = CatalogueCache()
+        let discoverAnalytics = DiscoverAnalyticsCache()
         let center = SerialBrewCommandCenter(executionContext: .live())
         let apiClient = URLSessionBrewAPIClient.live()
         let catalogueRepo = BrewCatalogueRepository(apiClient: apiClient, cache: catalogue)
 
         installedInventoryCache = inventoryCache
         catalogueCache = catalogue
+        discoverAnalyticsCache = discoverAnalytics
         commandCenter = center
         commandFactory = LiveBrewMutatingCommandFactory()
         installedPackagesRepository = BrewInstalledPackagesRepository.live(
@@ -55,9 +58,11 @@ struct BrewApp: App {
         discoverPackagesRepository = BrewDiscoverPackagesRepository(
             apiClient: apiClient,
             catalogueRepository: catalogueRepo,
+            cache: discoverAnalytics,
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center)
         configRepository = BrewConfigRepository.live()
+        NSWindow.allowsAutomaticWindowTabbing = false
     }
 
     var body: some Scene {
@@ -73,6 +78,7 @@ struct BrewApp: App {
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
                 .task { await catalogueCache.prepare() }
+                .task { await discoverAnalyticsCache.prepare() }
                 .task { await installedPackagesRepository.load() }
                 .onChange(of: scenePhase) { oldPhase, newPhase in
                     // Mark the config + brew.env caches stale on return-to-foreground so the next visit
@@ -93,9 +99,10 @@ struct BrewApp: App {
             height: BrewLayout.minWindowHeight,
         )
         .commands {
-            ConsoleCommands()
-            SidebarCommands()
             SearchCommands()
+            SidebarCommands()
+            ConsoleCommands()
+
             // Replace the default "Homebrew Help" item (which points at a
             // non-existent help book) with a link to the online documentation.
             CommandGroup(replacing: .help) {

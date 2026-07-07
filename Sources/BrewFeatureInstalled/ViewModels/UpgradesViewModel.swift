@@ -25,6 +25,17 @@ final class UpgradesViewModel {
         }
     }
 
+    /// Package-kind scope picker. Filters the outdated inventory client-side alongside the search query
+    /// and, together with the search, decides what "Upgrade All" actually upgrades (see ``upgradeSelection``).
+    var scope: InstalledPackageScope = .all {
+        didSet {
+            guard oldValue != scope else {
+                return
+            }
+            updateSelectionForScopeChange()
+        }
+    }
+
     private var selectedPackageID: InstalledBrewPackage.ID?
 
     private var runningIDs: Set<BrewOperationID> = []
@@ -39,6 +50,7 @@ final class UpgradesViewModel {
             .loaded(
                 Self.filteredContent(
                     InstalledPackagesContent(packages: packages.filter(\.outdated)),
+                    scope: scope,
                     query: searchQuery,
                 ),
             )
@@ -78,10 +90,17 @@ final class UpgradesViewModel {
         return false
     }
 
-    /// Drives the list view's `@FocusState`. The list only owns keyboard focus once the outdated
-    /// inventory has loaded — while loading or in an error state focus belongs elsewhere.
+    /// Mirrors the search field's presentation state (bound to `.searchable(isPresented:)`). Owned
+    /// here — rather than as view `@State` — so ``shouldFocusList`` can factor it in and stay a pure,
+    /// unit-testable decision.
+    var isSearchFieldPresented: Bool = false
+
+    /// Drives the list view's `@FocusState`. The list claims keyboard focus once the outdated
+    /// inventory has loaded, but never while the search field is active: a query that filters down to
+    /// zero matches removes the list, and deleting the query re-inserts it — grabbing focus then would
+    /// yank the cursor out of the search box mid-edit.
     var shouldFocusList: Bool {
-        state.isLoaded
+        state.isLoaded && !isSearchFieldPresented
     }
 
     /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
@@ -92,8 +111,8 @@ final class UpgradesViewModel {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Upgrades tab subtitle while fetching")
         }
-        if isSearchActive {
-            return searchActiveSubtitle
+        if isFiltering {
+            return filteredSubtitle
         }
         return inventorySubtitle
     }
@@ -118,24 +137,26 @@ final class UpgradesViewModel {
         }
     }
 
-    private var searchActiveSubtitle: String {
+    /// Subtitle while a scope and/or search filter is narrowing the list: "Showing N of M upgrades", or
+    /// "No matches in M outdated packages" when the filters hide every available upgrade.
+    private var filteredSubtitle: String {
         let total = totalOutdatedCount
         let visible = outdatedCount
         if visible > 0 {
             return String(
                 localized: "Showing \(visible) of \(total) upgrades",
-                comment: "Upgrades tab subtitle while searching with at least one match",
+                comment: "Upgrades tab subtitle while filtering with at least one match",
             )
         }
         if total == 1 {
             return String(
                 localized: "No matches in 1 outdated package",
-                comment: "Upgrades tab subtitle when search hides the single available upgrade",
+                comment: "Upgrades tab subtitle when filters hide the single available upgrade",
             )
         }
         return String(
             localized: "No matches in \(total) outdated packages",
-            comment: "Upgrades tab subtitle when search hides every available upgrade",
+            comment: "Upgrades tab subtitle when filters hide every available upgrade",
         )
     }
 
@@ -175,25 +196,13 @@ final class UpgradesViewModel {
         await repository.load(forceRefresh: true)
     }
 
-    /// User-facing command rendered by the Updates header's `CommandBlockView`. Reads the canonical
-    /// literal from ``BrewOperationID/bulkUpgradeDisplayCommand`` so the view, the console job, and
-    /// the live `BulkUpgradeCommand` all share one source of truth.
-    var bulkUpgradeDisplayCommand: String {
-        BrewOperationID.bulkUpgradeDisplayCommand
-    }
-
-    /// Submits a single `brew upgrade` (no arguments) under ``BrewOperationID/bulkUpgrade``. Submit
-    /// dedupes against the in-flight id, so a re-tap while the bulk run is in progress is a no-op.
-    /// The repository's completion observer reconciles inventory on running→idle, so finished rows
-    /// drop from the list when the bulk run finishes.
-    func upgradeAll() {
-        let id = BrewOperationID.bulkUpgrade
-        let command = commandFactory.bulkUpgradeCommand()
-        Task { try? await brewCommandCenter.submit(id: id, command: command) }
-    }
-
     private var isSearchActive: Bool {
         !Self.normalizedSearchQuery(searchQuery).isEmpty
+    }
+
+    /// True when either the scope picker or the search field is narrowing the outdated inventory.
+    var isFiltering: Bool {
+        isSearchActive || scope != .all
     }
 
     /// Rows in the order the list renders them (formulae section, then casks).
@@ -238,6 +247,16 @@ final class UpgradesViewModel {
         }
     }
 
+    /// Re-homes the search preview when a scope change hides the previewed row. Committed selections are
+    /// left intact — `activeSelectedPackageID` falls back to the first visible row while a selection is
+    /// scoped out and restores it if the scope widens again. Mirrors `InstalledViewModel`.
+    private func updateSelectionForScopeChange() {
+        guard isSearchActive, !didCommitSelectionDuringSearch else {
+            return
+        }
+        searchPreviewSelectedPackageID = firstVisibleRowID()
+    }
+
     private func firstVisibleRowID() -> InstalledBrewPackage.ID? {
         allRows.first?.id
     }
@@ -249,7 +268,12 @@ final class UpgradesViewModel {
     /// don't disable the *Upgrade All* button.
     private func observePhaseChanges() async {
         let stream = await brewCommandCenter.allPhaseChanges()
-        for await (id, phase) in stream where id == .bulkUpgrade {
+        for await (id, phase) in stream {
+            // Any bulk-upgrade selection (all / --formula / --cask / explicit names) counts; unrelated
+            // installs, uninstalls, and doctor fixes on the shared stream are ignored.
+            guard case .bulkUpgrade = id else {
+                continue
+            }
             switch phase {
             case .running:
                 runningIDs.insert(id)
@@ -261,17 +285,19 @@ final class UpgradesViewModel {
 
     private static func filteredContent(
         _ content: InstalledPackagesContent,
+        scope: InstalledPackageScope,
         query: String,
     ) -> InstalledPackagesContent {
+        let scoped = content.filtered(by: scope)
         let normalizedQuery = normalizedSearchQuery(query)
         guard !normalizedQuery.isEmpty else {
-            return content
+            return scoped
         }
 
-        let filteredFormulaRows = content.formulaPackages.filter {
+        let filteredFormulaRows = scoped.formulaPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
-        let filteredCaskRows = content.caskPackages.filter {
+        let filteredCaskRows = scoped.caskPackages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
         return InstalledPackagesContent(
@@ -302,6 +328,54 @@ final class UpgradesViewModel {
         default:
             return String(localized: "Something went wrong loading packages.", comment: "Upgrades tab generic error")
         }
+    }
+}
+
+// MARK: - Upgrade action
+
+extension UpgradesViewModel {
+    /// User-facing command rendered by the Updates header's `CommandBlockView`. Derived from the same
+    /// ``BrewUpgradeSelection`` that ``upgradeAll()`` submits, so the shown command always matches what runs.
+    var bulkUpgradeDisplayCommand: String {
+        upgradeSelection.displayCommand
+    }
+
+    /// What "Upgrade All" upgrades, given the active filters:
+    /// - A search narrows the batch to the visible rows by name (`brew upgrade git slack`).
+    /// - Otherwise the scope picker maps to everything / `--formula` / `--cask`.
+    ///
+    /// The button is gated on `outdatedCount > 0`, so ``BrewUpgradeSelection/explicit(_:)`` is never
+    /// submitted with an empty name list.
+    var upgradeSelection: BrewUpgradeSelection {
+        if isSearchActive {
+            return .explicit(allRows.map(\.name))
+        }
+        switch scope {
+        case .all:
+            return .all
+        case .formulae:
+            return .formulae
+        case .casks:
+            return .casks
+        }
+    }
+
+    /// Submits one batch `brew upgrade` for ``upgradeSelection`` under ``BrewOperationID/bulkUpgrade(_:)``
+    /// carrying that selection. Submit dedupes against the in-flight id, so a re-tap with the same
+    /// selection is a no-op. The repository's completion observer reconciles inventory on running→idle,
+    /// so finished rows drop from the list when the run completes.
+    func upgradeAll() {
+        let selection = upgradeSelection
+        let id = BrewOperationID.bulkUpgrade(selection)
+        let command = commandFactory.bulkUpgradeCommand(selection: selection)
+        Task { try? await brewCommandCenter.submit(id: id, command: command) }
+    }
+
+    /// Clears both filters, restoring the full outdated list. Wired to the "Show all upgrades" affordance
+    /// on the no-matches empty state.
+    func resetFilters() {
+        searchQuery = ""
+        scope = .all
     }
 }
 

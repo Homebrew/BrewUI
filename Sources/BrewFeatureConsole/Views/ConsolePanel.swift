@@ -14,6 +14,7 @@ import SwiftUI
 struct ConsolePanel: View {
     @Binding var expanded: Bool
     @State var viewModel: ConsoleViewModel
+    @AppStorage("autoExpandConsole") private var autoExpandConsole = true
 
     init(expanded: Binding<Bool>, commandJobsRepository: any CommandJobsObserving) {
         _expanded = expanded
@@ -31,5 +32,12 @@ struct ConsolePanel: View {
             }
         }
         .background(Color.brewSurface)
+        .onAppear { viewModel.autoExpandEnabled = autoExpandConsole }
+        .onChange(of: autoExpandConsole) { _, enabled in viewModel.autoExpandEnabled = enabled }
+        .onChange(of: viewModel.shouldAutoExpandConsole) { _, shouldExpand in
+            // Rising edge only: open the collapsed panel when a command starts. We never force-collapse,
+            // so a user who manually collapses mid-run isn't fought — the next command re-raises it.
+            if shouldExpand { expanded = true }
+        }
     }
 }
