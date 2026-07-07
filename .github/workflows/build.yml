@@ -102,7 +102,7 @@ jobs:
             -project Homebrew.xcodeproj \
             -scheme Brew \
             -configuration Release \
-            -archivePath "$RUNNER_TEMP/Brew.xcarchive" \
+            -archivePath "$RUNNER_TEMP/Homebrew.xcarchive" \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
@@ -125,13 +125,13 @@ jobs:
           </plist>
           EOF
           xcodebuild -exportArchive \
-            -archivePath "$RUNNER_TEMP/Brew.xcarchive" \
+            -archivePath "$RUNNER_TEMP/Homebrew.xcarchive" \
             -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
             -exportPath "$RUNNER_TEMP/export"
 
       - name: Verify app signature from export
         run: |
-          APP_BUNDLE_PATH="$RUNNER_TEMP/export/Brew.app"
+          APP_BUNDLE_PATH="$RUNNER_TEMP/export/Homebrew.app"
           xcrun codesign -dv --verbose=4 "$APP_BUNDLE_PATH" 2>&1 | tee "$RUNNER_TEMP/app-signature.txt"
           if ! grep -q "Authority=Developer ID Application" "$RUNNER_TEMP/app-signature.txt"; then
             echo "Exported app is not signed with a Developer ID Application authority."
@@ -141,12 +141,12 @@ jobs:
       # Package the app bundle directly with --component rather than --root'ing
       # the whole export directory: xcodebuild -exportArchive also drops
       # DistributionSummary.plist, ExportOptions.plist and Packaging.log in
-      # there, and --root would install those alongside Brew.app.
+      # there, and --root would install those alongside Homebrew.app.
       - name: Build component package
         run: |
           mkdir -p "$RUNNER_TEMP/pkgs"
           pkgbuild \
-            --component "$RUNNER_TEMP/export/Brew.app" \
+            --component "$RUNNER_TEMP/export/Homebrew.app" \
             --identifier "sh.brew.app" \
             --version "$VERSION" \
             --install-location "/Applications" \
@@ -167,7 +167,7 @@ jobs:
           PKG_PATH="$RUNNER_TEMP/BrewUI-${VERSION}.pkg"
           # --synthesize reads each sub-package's identifier and version, so we
           # don't have to hardcode Homebrew's package identifier. Homebrew is
-          # listed first so it installs before Brew.app.
+          # listed first so it installs before Homebrew.app.
           productbuild --synthesize \
             --package "$RUNNER_TEMP/pkgs/Homebrew.pkg" \
             --package "$RUNNER_TEMP/pkgs/BrewUI-component.pkg" \
