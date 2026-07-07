@@ -62,10 +62,10 @@ jobs:
             exit 1
           fi
           echo "Using build run $RUN_ID"
-          gh run download "$RUN_ID" --name BrewUI-pkg --dir dist
-          PKG_PATH=$(ls dist/BrewUI-*.pkg 2>/dev/null | head -1)
+          gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
+          PKG_PATH=$(ls dist/Homebrew-*.pkg 2>/dev/null | head -1)
           if [ -z "$PKG_PATH" ]; then
-            echo "No BrewUI-*.pkg found in the downloaded artifact."
+            echo "No Homebrew-*.pkg found in the downloaded artifact."
             exit 1
           fi
           echo "PKG_PATH=$PKG_PATH" >> "$GITHUB_ENV"
@@ -119,7 +119,7 @@ jobs:
               --title "Bump marketing version to $NEXT" \
               --body "Automated version bump after releasing $TAG."
 
-      # Open a PR against Homebrew/homebrew-cask bumping the brewui cask to the
+      # Open a PR against Homebrew/homebrew-cask bumping the homebrew cask to the
       # just-released version. bump-cask-pr derives the download URL from the
       # cask template and pins the notarised package's sha256. Needs a PAT that
       # can fork homebrew-cask (GITHUB_TOKEN cannot push to another repo).
@@ -129,4 +129,4 @@ jobs:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
         run: |
           SHA=$(shasum -a 256 "$PKG_PATH" | cut -d' ' -f1)
-          brew bump-cask-pr --version "$VERSION" --sha256 "$SHA" brewui
+          brew bump-cask-pr --version "$VERSION" --sha256 "$SHA" homebrew

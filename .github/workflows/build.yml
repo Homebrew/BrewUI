@@ -152,7 +152,7 @@ jobs:
             --install-location "/Applications" \
             --sign "Developer ID Installer" \
             --keychain "$KEYCHAIN_PATH" \
-            "$RUNNER_TEMP/pkgs/BrewUI-component.pkg"
+            "$RUNNER_TEMP/pkgs/Homebrew-component.pkg"
 
       # Bundle the official Homebrew installer as a sub-package rather than
       # curling install.sh from a postinstall script (which needs network at
@@ -164,13 +164,13 @@ jobs:
 
       - name: Build distribution package
         run: |
-          PKG_PATH="$RUNNER_TEMP/BrewUI-${VERSION}.pkg"
+          PKG_PATH="$RUNNER_TEMP/Homebrew-${VERSION}.pkg"
           # --synthesize reads each sub-package's identifier and version, so we
           # don't have to hardcode Homebrew's package identifier. Homebrew is
           # listed first so it installs before Homebrew.app.
           productbuild --synthesize \
             --package "$RUNNER_TEMP/pkgs/Homebrew.pkg" \
-            --package "$RUNNER_TEMP/pkgs/BrewUI-component.pkg" \
+            --package "$RUNNER_TEMP/pkgs/Homebrew-component.pkg" \
             "$RUNNER_TEMP/distribution.xml"
           productbuild \
             --distribution "$RUNNER_TEMP/distribution.xml" \
@@ -220,7 +220,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: BrewUI-pkg
+          name: Homebrew-pkg
           path: ${{ env.PKG_PATH }}
           retention-days: 90
 

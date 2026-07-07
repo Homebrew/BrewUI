@@ -6,7 +6,7 @@ without having already been built and notarised successfully.
 1. **Build (`.github/workflows/build.yml`)** — runs on every push to `main`.
    It builds, signs, **notarises** and staples the app, packages it into a
    signed `.pkg`, generates a build attestation, and uploads the package as a
-   fixed-name `BrewUI-pkg` artifact. Pull requests run the same build as a
+   fixed-name `Homebrew-pkg` artifact. Pull requests run the same build as a
    signed-but-not-notarised dry run (no upload) to save notary quota.
 
 2. **Release (`.github/workflows/release.yml`)** — a manual **"Run workflow"**
@@ -38,7 +38,7 @@ The Release workflow then:
    next minor version (e.g. `1.0` → `1.1`). `main` is branch-protected, so this
    is a PR rather than a direct push — review and merge it.
 6. Opens a **`brew bump-cask-pr`** PR against `Homebrew/homebrew-cask` bumping
-   the `brewui` cask to the released version with the package's `sha256`.
+   the `homebrew` cask to the released version with the package's `sha256`.
 
 Editing `release.yml` triggers a **dry run** (on `push`) that exercises
 permissions without creating a tag or release.
@@ -69,7 +69,7 @@ Cask PR (used by `release.yml`):
   local-tag-then-push design already avoids leaving behind broken tags; never
   delete and recreate a tag — Git and Homebrew both handle that badly.
 - **First-time cask.** `brew bump-cask-pr` only updates an *existing* cask. The
-  very first `brewui` submission to `homebrew-cask` is a manual one-off; every
+  very first `homebrew` submission to `homebrew-cask` is a manual one-off; every
   release after that is automated.
 - **Version format.** `Version.xcconfig` currently uses the 2-part form `1.0`;
   the bump keeps that shape (`1.0` → `1.1`). To move to semver (`1.0.0`), edit
