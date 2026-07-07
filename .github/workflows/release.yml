@@ -1,207 +1,98 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
-    branches:
-      - 'release-test'
-      - 'release-workflow/**'
+  # Manual trigger used to promote the most recent main build to a release.
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version number (e.g. 1.0.0)'
-        required: true
+  # Dry run whenever the workflow itself changes, to catch breakage early.
+  push:
+    paths:
+      - .github/workflows/release.yml
+
+permissions:
+  contents: write # push the tag and create the release
+  actions: read # download the build artifact from the Build workflow
+
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: macos-26
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
 
-      # Creates a short-lived keychain isolated to this job. The 6-hour
-      # timeout (21600 s) exceeds any reasonable build duration.
-      - name: Create and unlock temporary macOS keychain
+      - name: Resolve version and tag
         run: |
-          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
-          KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
-          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
-          echo "KEYCHAIN_PASSWORD=$KEYCHAIN_PASSWORD" >> "$GITHUB_ENV"
-
-      - name: Import signing certificates
-        env:
-          APP_CERTIFICATE_BASE64: ${{ secrets.APP_APPLE_SIGNING_CERTIFICATE_BASE64 }}
-          APP_CERTIFICATE_PASSWORD: ${{ secrets.APP_APPLE_SIGNING_CERTIFICATE_PASSWORD }}
-          INSTALLER_CERTIFICATE_BASE64: ${{ secrets.PKG_APPLE_SIGNING_CERTIFICATE_BASE64 }}
-          INSTALLER_CERTIFICATE_PASSWORD: ${{ secrets.PKG_APPLE_SIGNING_CERTIFICATE_PASSWORD }}
-        run: |
-          APP_CERTIFICATE_PATH="$RUNNER_TEMP/app-certificate.p12"
-          INSTALLER_CERTIFICATE_PATH="$RUNNER_TEMP/installer-certificate.p12"
-
-          echo "$APP_CERTIFICATE_BASE64" | base64 --decode > "$APP_CERTIFICATE_PATH"
-          security import "$APP_CERTIFICATE_PATH" \
-            -k "$KEYCHAIN_PATH" \
-            -P "$APP_CERTIFICATE_PASSWORD" \
-            -T /usr/bin/codesign \
-            -T /usr/bin/pkgbuild \
-            -T /usr/bin/productbuild
-
-          echo "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode > "$INSTALLER_CERTIFICATE_PATH"
-          security import "$INSTALLER_CERTIFICATE_PATH" \
-            -k "$KEYCHAIN_PATH" \
-            -P "$INSTALLER_CERTIFICATE_PASSWORD" \
-            -T /usr/bin/codesign \
-            -T /usr/bin/pkgbuild \
-            -T /usr/bin/productbuild
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
-          CODESIGN_IDENTITIES=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" || true)
-          BASIC_IDENTITIES=$(security find-identity -v -p basic "$KEYCHAIN_PATH" || true)
-          echo "$CODESIGN_IDENTITIES"
-          echo "$BASIC_IDENTITIES"
-          if ! echo "$CODESIGN_IDENTITIES" | grep -q "Developer ID Application"; then
-            echo "Missing Developer ID Application identity in imported keychain."
+          VERSION=$(awk -F'= ' '/^MARKETING_VERSION/{gsub(/ /,"",$2); print $2; exit}' Configurations/Version.xcconfig)
+          if [ -z "$VERSION" ]; then
+            echo "Could not read MARKETING_VERSION from Configurations/Version.xcconfig"
             exit 1
           fi
-          if ! echo "$BASIC_IDENTITIES" | grep -q "Developer ID Installer"; then
-            echo "Missing Developer ID Installer identity in imported keychain."
-            exit 1
-          fi
-          rm "$APP_CERTIFICATE_PATH" "$INSTALLER_CERTIFICATE_PATH"
-
-      - name: Preflight signing configuration
-        run: |
-          echo "Using app signing identity: Developer ID Application"
-          echo "Using installer signing identity: Developer ID Installer"
-          echo "Using team ID: ${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}"
-
-      - name: Build and archive
-        run: |
-          xcodebuild archive \
-            -project Homebrew.xcodeproj \
-            -scheme Brew \
-            -configuration Release \
-            -archivePath "$RUNNER_TEMP/Brew.xcarchive" \
-            CODE_SIGN_STYLE=Manual \
-            CODE_SIGN_IDENTITY="Developer ID Application" \
-            DEVELOPMENT_TEAM="${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
-            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
-
-      - name: Export archive
-        run: |
-          cat > "$RUNNER_TEMP/ExportOptions.plist" << EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>developer-id</string>
-              <key>teamID</key>
-              <string>${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}</string>
-              <key>signingStyle</key>
-              <string>manual</string>
-          </dict>
-          </plist>
-          EOF
-          xcodebuild -exportArchive \
-            -archivePath "$RUNNER_TEMP/Brew.xcarchive" \
-            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
-            -exportPath "$RUNNER_TEMP/export"
-
-      - name: Verify app signature from export
-        run: |
-          APP_BUNDLE_PATH="$RUNNER_TEMP/export/Brew.app"
-          xcrun codesign -dv --verbose=4 "$APP_BUNDLE_PATH" 2>&1 | tee "$RUNNER_TEMP/app-signature.txt"
-          if ! grep -q "Authority=Developer ID Application" "$RUNNER_TEMP/app-signature.txt"; then
-            echo "Exported app is not signed with a Developer ID Application authority."
-            exit 1
-          fi
-
-      # Ensure the postinstall script is executable — pkgbuild will reject it
-      # otherwise. This is a safety net; the file should be committed +x.
-      - name: Mark installer scripts executable
-        run: chmod +x scripts/postinstall
-
-      - name: Build component package
-        run: |
-          # On a tag push, derive the version from the tag (strips the leading
-          # 'v'). On a manual dispatch or branch push, use the workflow input.
-          INPUT_VERSION="${{ github.event.inputs.version }}"
-          VERSION="${INPUT_VERSION:-${GITHUB_REF_NAME#v}}"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          pkgbuild \
-            --root "$RUNNER_TEMP/export" \
-            --identifier "sh.brew.app" \
-            --version "$VERSION" \
-            --install-location "/Applications" \
-            --scripts scripts \
-            --sign "Developer ID Installer" \
-            --keychain "$KEYCHAIN_PATH" \
-            "$RUNNER_TEMP/BrewUI-component.pkg"
+          echo "TAG=v$VERSION" >> "$GITHUB_ENV"
+          echo "Releasing version $VERSION (tag v$VERSION)"
 
-      - name: Build distribution package
+      # Immutable-tag safety: never try to overwrite an existing tag. If this
+      # version was already released, the version bump has not landed yet.
+      - name: Ensure tag does not already exist
         run: |
-          PKG_PATH="$RUNNER_TEMP/BrewUI-${VERSION}.pkg"
-          productbuild \
-            --package "$RUNNER_TEMP/BrewUI-component.pkg" \
-            --sign "Developer ID Installer" \
-            --keychain "$KEYCHAIN_PATH" \
-            "$PKG_PATH"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists on origin. Bump the marketing version before releasing."
+            exit 1
+          fi
+
+      # Create the tag locally now; it is only pushed once everything below has
+      # succeeded, so a failed run never leaves a dangling tag on GitHub.
+      - name: Create the tag locally
+        if: github.event_name == 'workflow_dispatch'
+        run: git tag "$TAG"
+
+      - name: Download most recent main build artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RUN_ID=$(gh run list --workflow=build.yml --branch=main --status=success \
+            --limit 1 --json databaseId --jq '.[0].databaseId')
+          if [ -z "$RUN_ID" ]; then
+            echo "No successful Build workflow run found on main. Run Build first."
+            exit 1
+          fi
+          echo "Using build run $RUN_ID"
+          gh run download "$RUN_ID" --name BrewUI-pkg --dir dist
+          PKG_PATH=$(ls dist/BrewUI-*.pkg 2>/dev/null | head -1)
+          if [ -z "$PKG_PATH" ]; then
+            echo "No BrewUI-*.pkg found in the downloaded artifact."
+            exit 1
+          fi
           echo "PKG_PATH=$PKG_PATH" >> "$GITHUB_ENV"
 
-      - name: Verify package signature
+      # Guard against promoting a stale build whose baked-in version no longer
+      # matches Configurations/Version.xcconfig.
+      - name: Verify artifact matches version
         run: |
-          pkgutil --check-signature "$PKG_PATH" | tee "$RUNNER_TEMP/pkg-signature.txt"
-          if ! grep -q "Developer ID Installer" "$RUNNER_TEMP/pkg-signature.txt"; then
-            echo "Package is not signed with a Developer ID Installer authority."
-            exit 1
-          fi
+          case "$PKG_PATH" in
+            *"$VERSION"*) echo "Artifact $PKG_PATH matches version $VERSION" ;;
+            *) echo "Artifact $PKG_PATH does not match version $VERSION"; exit 1 ;;
+          esac
 
-      - name: Notarize package
-        if: startsWith(github.ref, 'refs/tags/')
+      # On the push dry run, exercise permissions without creating anything.
+      - name: Dry run
+        if: github.event_name == 'push'
         env:
-          APPLE_ID: ${{ secrets.PKG_APPLE_ID_EMAIL }}
-          APPLE_ID_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          xcrun notarytool submit "$PKG_PATH" \
-            --apple-id "$APPLE_ID" \
-            --password "$APPLE_ID_PASSWORD" \
-            --team-id "${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
-            --wait
+          echo "Dry run — verifying permissions without side effects."
+          gh release list
+          git ls-remote --tags origin | head
 
-      - name: Staple notarization ticket to package
-        if: startsWith(github.ref, 'refs/tags/')
-        run: xcrun stapler staple "$PKG_PATH"
-
-      - name: Generate build attestation
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/attest@a1948c3f048ba23858d222213b7c278aabede763 # v4.1.1
-        with:
-          subject-path: ${{ env.PKG_PATH }}
-
-      - name: Upload package artifact (non-release runs)
-        if: "!startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: BrewUI-${{ env.VERSION }}.pkg
-          path: ${{ env.PKG_PATH }}
-          retention-days: 5
-
-      - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Push tag and create release
+        if: github.event_name == 'workflow_dispatch'
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "$PKG_PATH" --generate-notes
-
-      - name: Delete temporary keychain
-        if: always()
-        run: security delete-keychain "$KEYCHAIN_PATH"
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git push origin "$TAG"
+          gh release create "$TAG" "$PKG_PATH" --generate-notes
