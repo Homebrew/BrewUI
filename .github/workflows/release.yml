@@ -96,3 +96,25 @@ jobs:
         run: |
           git push origin "$TAG"
           gh release create "$TAG" "$PKG_PATH" --generate-notes
+
+      # Bump the marketing version for the next cycle. main is branch-protected
+      # so GITHUB_TOKEN cannot push to it directly; open a PR instead. The
+      # default bump is minor (1.0 -> 1.1); do patch/major by hand.
+      - name: Open version bump PR
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          IFS=. read -r major minor _ <<< "$VERSION"
+          NEXT="$major.$((minor + 1))"
+          sed -i '' -E "s/^MARKETING_VERSION = .*/MARKETING_VERSION = $NEXT/" Configurations/Version.xcconfig
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          BRANCH="version-bump-$NEXT"
+          git switch -C "$BRANCH"
+          git commit -am "Bump marketing version to $NEXT"
+          git push --force origin "$BRANCH"
+          gh pr view "$BRANCH" >/dev/null 2>&1 ||
+            gh pr create --base main --head "$BRANCH" \
+              --title "Bump marketing version to $NEXT" \
+              --body "Automated version bump after releasing $TAG."
