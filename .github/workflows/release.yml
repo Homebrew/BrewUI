@@ -63,11 +63,13 @@ jobs:
           fi
           echo "Using build run $RUN_ID"
           gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
-          PKG_PATH=$(ls dist/Homebrew-*.pkg 2>/dev/null | head -1)
-          if [ -z "$PKG_PATH" ]; then
+          shopt -s nullglob
+          pkgs=(dist/Homebrew-*.pkg)
+          if [ ${#pkgs[@]} -eq 0 ]; then
             echo "No Homebrew-*.pkg found in the downloaded artifact."
             exit 1
           fi
+          PKG_PATH="${pkgs[0]}"
           echo "PKG_PATH=$PKG_PATH" >> "$GITHUB_ENV"
 
       # Guard against promoting a stale build whose baked-in version no longer
