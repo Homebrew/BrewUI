@@ -143,10 +143,14 @@ jobs:
       - name: Mark installer scripts executable
         run: chmod +x scripts/postinstall
 
+      # Package the app bundle directly with --component rather than --root'ing
+      # the whole export directory: xcodebuild -exportArchive also drops
+      # DistributionSummary.plist, ExportOptions.plist and Packaging.log in
+      # there, and --root would install those alongside Brew.app.
       - name: Build component package
         run: |
           pkgbuild \
-            --root "$RUNNER_TEMP/export" \
+            --component "$RUNNER_TEMP/export/Brew.app" \
             --identifier "sh.brew.app" \
             --version "$VERSION" \
             --install-location "/Applications" \
