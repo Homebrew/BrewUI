@@ -138,32 +138,43 @@ jobs:
             exit 1
           fi
 
-      # Ensure the postinstall script is executable — pkgbuild will reject it
-      # otherwise. This is a safety net; the file should be committed +x.
-      - name: Mark installer scripts executable
-        run: chmod +x scripts/postinstall
-
       # Package the app bundle directly with --component rather than --root'ing
       # the whole export directory: xcodebuild -exportArchive also drops
       # DistributionSummary.plist, ExportOptions.plist and Packaging.log in
       # there, and --root would install those alongside Brew.app.
       - name: Build component package
         run: |
+          mkdir -p "$RUNNER_TEMP/pkgs"
           pkgbuild \
             --component "$RUNNER_TEMP/export/Brew.app" \
             --identifier "sh.brew.app" \
             --version "$VERSION" \
             --install-location "/Applications" \
-            --scripts scripts \
             --sign "Developer ID Installer" \
             --keychain "$KEYCHAIN_PATH" \
-            "$RUNNER_TEMP/BrewUI-component.pkg"
+            "$RUNNER_TEMP/pkgs/BrewUI-component.pkg"
+
+      # Bundle the official Homebrew installer as a sub-package rather than
+      # curling install.sh from a postinstall script (which needs network at
+      # install time, runs as the console user via su, and fails silently).
+      - name: Download Homebrew installer package
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/pkgs/Homebrew.pkg" \
+            https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg
 
       - name: Build distribution package
         run: |
           PKG_PATH="$RUNNER_TEMP/BrewUI-${VERSION}.pkg"
+          # --synthesize reads each sub-package's identifier and version, so we
+          # don't have to hardcode Homebrew's package identifier. Homebrew is
+          # listed first so it installs before Brew.app.
+          productbuild --synthesize \
+            --package "$RUNNER_TEMP/pkgs/Homebrew.pkg" \
+            --package "$RUNNER_TEMP/pkgs/BrewUI-component.pkg" \
+            "$RUNNER_TEMP/distribution.xml"
           productbuild \
-            --package "$RUNNER_TEMP/BrewUI-component.pkg" \
+            --distribution "$RUNNER_TEMP/distribution.xml" \
+            --package-path "$RUNNER_TEMP/pkgs" \
             --sign "Developer ID Installer" \
             --keychain "$KEYCHAIN_PATH" \
             "$PKG_PATH"
