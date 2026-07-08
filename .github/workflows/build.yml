@@ -138,43 +138,61 @@ jobs:
             exit 1
           fi
 
+      # Bundle the official Homebrew CLI installer and run it from a postinstall
+      # script. Homebrew.pkg is a *product archive* (a finished installer with
+      # its own setup scripts), so it cannot be nested as a productbuild
+      # sub-package. Instead we ship the file and invoke Apple's installer on
+      # it, which keeps Homebrew's own install logic and signature intact. This
+      # replaces the previous postinstall that curled install.sh at install
+      # time (needed network, ran as the console user via su, failed silently).
+      # The pkg is staged into the scripts directory so pkgbuild archives it
+      # alongside the postinstall and it is available on disk at install time.
+      - name: Stage Homebrew installer and postinstall script
+        run: |
+          SCRIPTS_DIR="$RUNNER_TEMP/installer-scripts"
+          mkdir -p "$SCRIPTS_DIR"
+          curl -fsSL -o "$SCRIPTS_DIR/Homebrew.pkg" \
+            https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg
+          cat > "$SCRIPTS_DIR/postinstall" <<'POSTINSTALL'
+          #!/bin/bash
+          # Installs the bundled Homebrew CLI when it is not already present, by
+          # running the official signed Homebrew.pkg staged next to this script.
+          set -euo pipefail
+
+          if [[ -x /opt/homebrew/bin/brew || -x /usr/local/bin/brew ]]; then
+            echo "postinstall: Homebrew already installed — skipping." >&2
+            exit 0
+          fi
+
+          SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+          echo "postinstall: installing bundled Homebrew…" >&2
+          installer -pkg "$SCRIPT_DIR/Homebrew.pkg" -target /
+          echo "postinstall: Homebrew installation complete." >&2
+          exit 0
+          POSTINSTALL
+          chmod +x "$SCRIPTS_DIR/postinstall"
+
       # Package the app bundle directly with --component rather than --root'ing
       # the whole export directory: xcodebuild -exportArchive also drops
       # DistributionSummary.plist, ExportOptions.plist and Packaging.log in
       # there, and --root would install those alongside Homebrew.app.
       - name: Build component package
         run: |
-          mkdir -p "$RUNNER_TEMP/pkgs"
           pkgbuild \
             --component "$RUNNER_TEMP/export/Homebrew.app" \
             --identifier "sh.brew.app" \
             --version "$VERSION" \
             --install-location "/Applications" \
+            --scripts "$RUNNER_TEMP/installer-scripts" \
             --sign "Developer ID Installer" \
             --keychain "$KEYCHAIN_PATH" \
-            "$RUNNER_TEMP/pkgs/Homebrew-component.pkg"
-
-      # Bundle the official Homebrew installer as a sub-package rather than
-      # curling install.sh from a postinstall script (which needs network at
-      # install time, runs as the console user via su, and fails silently).
-      - name: Download Homebrew installer package
-        run: |
-          curl -fsSL -o "$RUNNER_TEMP/pkgs/Homebrew.pkg" \
-            https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg
+            "$RUNNER_TEMP/Homebrew-component.pkg"
 
       - name: Build distribution package
         run: |
           PKG_PATH="$RUNNER_TEMP/Homebrew-${VERSION}.pkg"
-          # --synthesize reads each sub-package's identifier and version, so we
-          # don't have to hardcode Homebrew's package identifier. Homebrew is
-          # listed first so it installs before Homebrew.app.
-          productbuild --synthesize \
-            --package "$RUNNER_TEMP/pkgs/Homebrew.pkg" \
-            --package "$RUNNER_TEMP/pkgs/Homebrew-component.pkg" \
-            "$RUNNER_TEMP/distribution.xml"
           productbuild \
-            --distribution "$RUNNER_TEMP/distribution.xml" \
-            --package-path "$RUNNER_TEMP/pkgs" \
+            --package "$RUNNER_TEMP/Homebrew-component.pkg" \
             --sign "Developer ID Installer" \
             --keychain "$KEYCHAIN_PATH" \
             "$PKG_PATH"
