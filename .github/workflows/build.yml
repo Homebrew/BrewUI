@@ -98,6 +98,10 @@ jobs:
 
       - name: Build and archive
         run: |
+          # --timestamp requests a secure Apple timestamp (mandatory for
+          # Developer ID signing and notarisation); --options runtime enables
+          # the hardened runtime. Both are pinned here so codesign is
+          # deterministic on CI rather than relying on Xcode defaults.
           xcodebuild archive \
             -project Homebrew.xcodeproj \
             -scheme Brew \
@@ -106,7 +110,18 @@ jobs:
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
-            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH --timestamp --options runtime"
+
+      # Fail fast with a clear message if the archived app did not get a secure
+      # timestamp, rather than surfacing it later at notarisation.
+      - name: Verify archived app signature
+        run: |
+          APP="$RUNNER_TEMP/Homebrew.xcarchive/Products/Applications/Homebrew.app"
+          codesign -dv --verbose=4 "$APP" 2>&1 | tee "$RUNNER_TEMP/archive-signature.txt"
+          if ! grep -q "^Timestamp=" "$RUNNER_TEMP/archive-signature.txt"; then
+            echo "Archived app is missing a secure timestamp."
+            exit 1
+          fi
 
       - name: Export archive
         run: |
