@@ -51,7 +51,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         run: git tag "$TAG"
 
-      - name: Download most recent main build artifact
+      - name: Download most recent main build artifacts
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -62,24 +62,33 @@ jobs:
             exit 1
           fi
           echo "Using build run $RUN_ID"
+          # The .pkg is the website download; the .zip is the bare app for casks.
           gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
+          gh run download "$RUN_ID" --name Homebrew-app --dir dist
           shopt -s nullglob
           pkgs=(dist/Homebrew-*.pkg)
+          zips=(dist/Homebrew-*.zip)
           if [ ${#pkgs[@]} -eq 0 ]; then
-            echo "No Homebrew-*.pkg found in the downloaded artifact."
+            echo "No Homebrew-*.pkg found in the downloaded artifacts."
             exit 1
           fi
-          PKG_PATH="${pkgs[0]}"
-          echo "PKG_PATH=$PKG_PATH" >> "$GITHUB_ENV"
+          if [ ${#zips[@]} -eq 0 ]; then
+            echo "No Homebrew-*.zip found in the downloaded artifacts."
+            exit 1
+          fi
+          echo "PKG_PATH=${pkgs[0]}" >> "$GITHUB_ENV"
+          echo "APP_ZIP=${zips[0]}" >> "$GITHUB_ENV"
 
       # Guard against promoting a stale build whose baked-in version no longer
       # matches Configurations/Version.xcconfig.
-      - name: Verify artifact matches version
+      - name: Verify artifacts match version
         run: |
-          case "$PKG_PATH" in
-            *"$VERSION"*) echo "Artifact $PKG_PATH matches version $VERSION" ;;
-            *) echo "Artifact $PKG_PATH does not match version $VERSION"; exit 1 ;;
-          esac
+          for artifact in "$PKG_PATH" "$APP_ZIP"; do
+            case "$artifact" in
+              *"$VERSION"*) echo "Artifact $artifact matches version $VERSION" ;;
+              *) echo "Artifact $artifact does not match version $VERSION"; exit 1 ;;
+            esac
+          done
 
       # On the push dry run, exercise permissions without creating anything.
       - name: Dry run
@@ -97,7 +106,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           git push origin "$TAG"
-          gh release create "$TAG" "$PKG_PATH" --generate-notes
+          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" --generate-notes
 
       # Bump the marketing version for the next cycle. main is branch-protected
       # so GITHUB_TOKEN cannot push to it directly; open a PR instead. The
