@@ -3,10 +3,11 @@ name: Release
 on:
   # Manual trigger used to promote the most recent main build to a release.
   workflow_dispatch:
-  # Dry run whenever the workflow itself changes, to catch breakage early.
+  # THROWAWAY: run the real deploy on this branch to prove it works.
+  # Revert to `paths: [.github/workflows/release.yml]` before review.
   push:
-    paths:
-      - .github/workflows/release.yml
+    branches:
+      - worktree-release-pipeline
 
 permissions:
   contents: write # push the tag and create the release
@@ -48,15 +49,15 @@ jobs:
       # Create the tag locally now; it is only pushed once everything below has
       # succeeded, so a failed run never leaves a dangling tag on GitHub.
       - name: Create the tag locally
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/worktree-release-pipeline' # THROWAWAY: revert before review
         run: git tag "$TAG"
 
       - name: Download most recent main build artifacts
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RUN_ID=$(gh run list --workflow=build.yml --branch=main --status=success \
-            --limit 1 --json databaseId --jq '.[0].databaseId')
+          RUN_ID=$(gh run list --workflow=build.yml --branch=worktree-release-pipeline --status=success \
+            --limit 1 --json databaseId --jq '.[0].databaseId') # THROWAWAY: --branch=main before review
           if [ -z "$RUN_ID" ]; then
             echo "No successful Build workflow run found on main. Run Build first."
             exit 1
@@ -101,7 +102,7 @@ jobs:
           git ls-remote --tags origin | head
 
       - name: Push tag and create release
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/worktree-release-pipeline' # THROWAWAY: revert before review
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -112,7 +113,7 @@ jobs:
       # so GITHUB_TOKEN cannot push to it directly; open a PR instead. The
       # default bump is minor (1.0 -> 1.1); do patch/major by hand.
       - name: Open version bump PR
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/worktree-release-pipeline' # THROWAWAY: revert before review
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
