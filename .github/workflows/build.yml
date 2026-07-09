@@ -195,6 +195,15 @@ jobs:
           mkdir -p "$SCRIPTS_DIR"
           curl -fsSL -o "$SCRIPTS_DIR/Homebrew.pkg" \
             https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg
+          # Fail loudly if the download isn't a validly-signed installer (catches
+          # truncation, an HTML error page, or a tampered asset) before it gets
+          # embedded inside our own signed .pkg and shipped under our identity.
+          if ! pkgutil --check-signature "$SCRIPTS_DIR/Homebrew.pkg" \
+               | grep -q 'Status: signed by .*Developer ID'; then
+            echo "Downloaded Homebrew.pkg is not a valid signed installer — aborting." >&2
+            pkgutil --check-signature "$SCRIPTS_DIR/Homebrew.pkg" >&2 || true
+            exit 1
+          fi
           cat > "$SCRIPTS_DIR/postinstall" <<'POSTINSTALL'
           #!/bin/bash
           # Installs the bundled Homebrew CLI when it is not already present, by
