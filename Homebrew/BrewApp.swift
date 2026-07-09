@@ -20,6 +20,10 @@ struct BrewApp: App {
     /// Homebrew's online documentation, surfaced from the Help menu.
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
 
+    /// The app's GitHub issue tracker, surfaced from the Help menu so users can
+    /// file a bug or feature request without hunting for the repository.
+    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!
+
     @Environment(\.scenePhase) private var scenePhase
 
     private let commandCenter: SerialBrewCommandCenter
@@ -107,6 +111,7 @@ struct BrewApp: App {
             // non-existent help book) with a link to the online documentation.
             CommandGroup(replacing: .help) {
                 Link("Homebrew Documentation", destination: Self.documentationURL)
+                Link("Report an Issue…", destination: Self.reportIssueURL)
             }
         }
         #if DEBUG
