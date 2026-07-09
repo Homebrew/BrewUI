@@ -25,6 +25,12 @@ baked into every build.
    run went green (that produced the notarised artifact).
 2. Go to **Actions → Release → Run workflow** and run it against `main`.
 
+> **First release after this pipeline lands.** The Release workflow downloads an
+> existing successful **Build** artifact from `main` — it never builds. So the
+> very first time, the order is: merge → wait for **Build** on `main` to go green
+> → *then* run **Release**. There is no `main` artifact to promote until that
+> first build finishes.
+
 The Release workflow then:
 
 1. Reads the version from `Version.xcconfig` and forms the tag `v<version>`
@@ -42,8 +48,11 @@ The Release workflow then:
 5. Opens a **`brew bump-cask-pr`** PR against `Homebrew/homebrew-cask` bumping
    the `homebrew-app` cask to the released version with the app zip's `sha256`.
 
-Editing `release.yml` triggers a **dry run** (on `push`) that exercises
-permissions without creating a tag or release.
+Editing `release.yml` triggers a **dry run** (on `push`) that resolves the
+version, checks the tag is free, and exercises permissions — without
+downloading an artifact or creating a tag or release. Because the dry run never
+touches artifacts, it passes even before any `main` build exists (e.g. on this
+workflow's own introducing PR and on the first merge to `main`).
 
 ---
 

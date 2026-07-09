@@ -49,7 +49,11 @@ jobs:
             exit 1
           fi
 
+      # Only a real (dispatch) release touches artifacts. The push dry-run must
+      # stay artifact-free so it can pass before any main build exists (e.g. on
+      # this workflow's own introduction, and on the first merge to main).
       - name: Download most recent main build artifacts
+        if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -80,6 +84,7 @@ jobs:
       # Guard against promoting a stale build whose baked-in version no longer
       # matches Configurations/Version.xcconfig.
       - name: Verify artifacts match version
+        if: github.event_name == 'workflow_dispatch'
         run: |
           for artifact in "$PKG_PATH" "$APP_ZIP"; do
             case "$artifact" in
