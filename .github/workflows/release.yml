@@ -50,12 +50,6 @@ jobs:
             exit 1
           fi
 
-      # Create the tag locally now; it is only pushed once everything below has
-      # succeeded, so a failed run never leaves a dangling tag on GitHub.
-      - name: Create the tag locally
-        if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/worktree-release-pipeline' # THROWAWAY: revert before review
-        run: git tag "$TAG"
-
       - name: Download most recent main build artifacts
         env:
           GH_TOKEN: ${{ github.token }}
@@ -105,13 +99,16 @@ jobs:
           gh release list
           git ls-remote --tags origin | head
 
-      - name: Push tag and create release
+      # Let gh create the tag as part of release creation (--target points it at
+      # the released commit). The tag and Release are created together, so a
+      # failed release never leaves a dangling tag on the remote.
+      - name: Create release
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/worktree-release-pipeline' # THROWAWAY: revert before review
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$TAG"
-          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" --generate-notes
+          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" \
+            --target "$GITHUB_SHA" --generate-notes
 
       # Bump the marketing version for the next cycle. main is branch-protected
       # so GITHUB_TOKEN cannot push to it directly; open a PR instead. The

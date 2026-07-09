@@ -29,16 +29,17 @@ The Release workflow then:
 
 1. Reads the version from `Version.xcconfig` and forms the tag `v<version>`
    (fails if that tag already exists — see immutable tags below).
-2. Creates the tag **locally**.
-3. Downloads the most recent successful **Build** artifact from `main` and
+2. Downloads the most recent successful **Build** artifact from `main` and
    checks its filename matches the version.
-4. **Pushes the tag** and creates the GitHub Release with the notarised `.pkg`
-   attached and auto-generated notes. (Pushing the tag happens last, so a
-   failed run never leaves a dangling tag.)
-5. Opens a **version bump PR** against `main` bumping `Version.xcconfig` to the
+3. Creates the GitHub Release with `gh release create --target`, which creates
+   the tag `v<version>` at the released commit **as part of** creating the
+   Release, and attaches the notarised `.pkg` and app zip with auto-generated
+   notes. Because the tag and Release are created together, a failed run never
+   leaves a dangling tag.
+4. Opens a **version bump PR** against `main` bumping `Version.xcconfig` to the
    next minor version (e.g. `0.2.0` → `0.3.0`). `main` is branch-protected, so this
    is a PR rather than a direct push — review and merge it.
-6. Opens a **`brew bump-cask-pr`** PR against `Homebrew/homebrew-cask` bumping
+5. Opens a **`brew bump-cask-pr`** PR against `Homebrew/homebrew-cask` bumping
    the `homebrew-app` cask to the released version with the app zip's `sha256`.
 
 Editing `release.yml` triggers a **dry run** (on `push`) that exercises
@@ -66,9 +67,10 @@ Cask PR (used by `release.yml`):
 
 ## Notes and caveats
 
-- **Immutable tags.** Enable immutable tags on the repository. The
-  local-tag-then-push design already avoids leaving behind broken tags; never
-  delete and recreate a tag — Git and Homebrew both handle that badly.
+- **Immutable tags.** Enable immutable tags on the repository. Creating the tag
+  together with the Release (via `gh release create --target`) already avoids
+  leaving behind broken tags; never delete and recreate a tag — Git and
+  Homebrew both handle that badly.
 - **First-time cask.** `brew bump-cask-pr` only updates an *existing* cask. The
   very first `homebrew-app` submission to `homebrew-cask` is a manual one-off; every
   release after that is automated.
