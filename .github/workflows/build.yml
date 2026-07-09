@@ -163,7 +163,7 @@ jobs:
       # Stapling here also means the copy embedded in the pkg is notarised.
       # main only — PRs stay a signed-but-not-notarised dry run.
       - name: Notarize and staple app
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/worktree-release-pipeline') # THROWAWAY: revert before review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           APPLE_ID: ${{ secrets.PKG_APPLE_ID_EMAIL }}
           APPLE_ID_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
@@ -251,7 +251,7 @@ jobs:
       # artifact built from a push to main. PRs stay a signed-but-not-notarised
       # dry run so we don't spend notary quota on every proposed change.
       - name: Notarize package
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/worktree-release-pipeline') # THROWAWAY: revert before review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
           APPLE_ID: ${{ secrets.PKG_APPLE_ID_EMAIL }}
           APPLE_ID_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
@@ -263,21 +263,21 @@ jobs:
             --wait
 
       - name: Staple notarization ticket to package
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/worktree-release-pipeline') # THROWAWAY: revert before review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: xcrun stapler staple "$PKG_PATH"
 
       # Zip the notarised, stapled app for the cask install path. ditto (not
       # zip) is used so the bundle's symlinks and extended attributes — and the
       # stapled ticket — survive the round trip.
       - name: Create app zip for cask
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/worktree-release-pipeline') # THROWAWAY: revert before review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           APP_ZIP="$RUNNER_TEMP/Homebrew-${VERSION}.zip"
           ditto -c -k --keepParent "$RUNNER_TEMP/export/Homebrew.app" "$APP_ZIP"
           echo "APP_ZIP=$APP_ZIP" >> "$GITHUB_ENV"
 
       - name: Generate build attestation
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/worktree-release-pipeline') # THROWAWAY: revert before review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
         with:
           subject-path: |
@@ -289,7 +289,7 @@ jobs:
       # main and attaches these to the GitHub Release: the .pkg is the website
       # download (bundles Homebrew); the .zip is the bare app for the cask.
       - name: Upload package artifact
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/worktree-release-pipeline') # THROWAWAY: revert before review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Homebrew-pkg
@@ -297,7 +297,7 @@ jobs:
           retention-days: 90
 
       - name: Upload app artifact
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/worktree-release-pipeline') # THROWAWAY: revert before review
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Homebrew-app
