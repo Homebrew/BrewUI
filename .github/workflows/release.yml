@@ -25,6 +25,9 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+          # Don't persist the token in .git/config (zizmor: artipacked). The
+          # pushes below authenticate with GH_TOKEN inline instead.
+          persist-credentials: false
 
       - name: Resolve version and tag
         run: |
@@ -106,7 +109,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git push origin "$TAG"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$TAG"
           gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" --generate-notes
 
       # Bump the marketing version for the next cycle. main is branch-protected
@@ -126,7 +129,7 @@ jobs:
           BRANCH="version-bump-$NEXT"
           git switch -C "$BRANCH"
           git commit -am "Bump marketing version to $NEXT"
-          git push --force origin "$BRANCH"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
           gh pr view "$BRANCH" >/dev/null 2>&1 ||
             gh pr create --base main --head "$BRANCH" \
               --title "Bump marketing version to $NEXT" \
