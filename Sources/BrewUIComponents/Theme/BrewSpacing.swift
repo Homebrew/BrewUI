@@ -48,6 +48,12 @@ public enum BrewLayout {
     public static let installedDetailColumnMaxWidth: CGFloat = 1200
     public static let installedThreePaneMinWindowWidth: CGFloat = 960
 
+    /// Default window width.
+    public static let defaultWindowWidth: CGFloat = 1000
+
+    /// Default window height.
+    public static let defaultWindowHeight: CGFloat = 650
+
     /// Minimum supported window width.
     public static let minWindowWidth: CGFloat = 820
 
