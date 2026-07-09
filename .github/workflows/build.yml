@@ -195,13 +195,22 @@ jobs:
           mkdir -p "$SCRIPTS_DIR"
           curl -fsSL -o "$SCRIPTS_DIR/Homebrew.pkg" \
             https://github.com/Homebrew/brew/releases/latest/download/Homebrew.pkg
-          # Fail loudly if the download isn't a validly-signed installer (catches
-          # truncation, an HTML error page, or a tampered asset) before it gets
-          # embedded inside our own signed .pkg and shipped under our identity.
-          if ! pkgutil --check-signature "$SCRIPTS_DIR/Homebrew.pkg" \
-               | grep -q 'Status: signed by .*Developer ID'; then
-            echo "Downloaded Homebrew.pkg is not a valid signed installer — aborting." >&2
-            pkgutil --check-signature "$SCRIPTS_DIR/Homebrew.pkg" >&2 || true
+          # Verify the download before embedding it inside our own signed .pkg:
+          # pkgutil must report a valid signature AND the cert chain must carry
+          # Homebrew's Developer ID Installer team ID. This catches truncation,
+          # an HTML error page, and — because we pin the team ID — an asset swap
+          # to a different (even validly-signed) installer.
+          #
+          # MAINTENANCE: Homebrew signs with a *maintainer's* Developer ID, which
+          # has rotated before (Mike McQuaid 6248TWFRH6 -> Patrick Linnane
+          # 927JGANW46) and was announced only informally. If a legitimate
+          # Homebrew release starts failing here, confirm the new signer via
+          # https://github.com/orgs/Homebrew/discussions and update this ID.
+          EXPECTED_INSTALLER_TEAM_ID="927JGANW46" # Homebrew: Patrick Linnane
+          if ! sig="$(pkgutil --check-signature "$SCRIPTS_DIR/Homebrew.pkg" 2>&1)" \
+             || ! grep -q "Developer ID Installer: .*(${EXPECTED_INSTALLER_TEAM_ID})" <<<"$sig"; then
+            echo "Homebrew.pkg is not validly signed by the expected team ID (${EXPECTED_INSTALLER_TEAM_ID}) — aborting." >&2
+            echo "$sig" >&2
             exit 1
           fi
           cat > "$SCRIPTS_DIR/postinstall" <<'POSTINSTALL'
