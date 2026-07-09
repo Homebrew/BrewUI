@@ -35,7 +35,7 @@ The Release workflow then:
    attached and auto-generated notes. (Pushing the tag happens last, so a
    failed run never leaves a dangling tag.)
 5. Opens a **version bump PR** against `main` bumping `Version.xcconfig` to the
-   next minor version (e.g. `1.0` → `1.1`). `main` is branch-protected, so this
+   next minor version (e.g. `0.2.0` → `0.3.0`). `main` is branch-protected, so this
    is a PR rather than a direct push — review and merge it.
 6. Opens a **`brew bump-cask-pr`** PR against `Homebrew/homebrew-cask` bumping
    the `homebrew-app` cask to the released version with the app zip's `sha256`.
@@ -71,9 +71,9 @@ Cask PR (used by `release.yml`):
 - **First-time cask.** `brew bump-cask-pr` only updates an *existing* cask. The
   very first `homebrew-app` submission to `homebrew-cask` is a manual one-off; every
   release after that is automated.
-- **Version format.** `Version.xcconfig` currently uses the 2-part form `1.0`;
-  the bump keeps that shape (`1.0` → `1.1`). To move to semver (`1.0.0`), edit
-  `Version.xcconfig` once and adjust the bump logic in `release.yml`.
+- **Version format.** `Version.xcconfig` uses three-part semver (e.g. `0.2.0`).
+  The automated bump increments the minor and zeroes the patch
+  (`0.2.0` → `0.3.0`); do patch and major bumps by hand.
 - **Artifact retention.** Build artifacts are kept for 90 days. If you promote
   more than 90 days after the last `main` build, re-run **Build** (via its
   "Run workflow" button) first.

@@ -111,14 +111,15 @@ jobs:
 
       # Bump the marketing version for the next cycle. main is branch-protected
       # so GITHUB_TOKEN cannot push to it directly; open a PR instead. The
-      # default bump is minor (1.0 -> 1.1); do patch/major by hand.
+      # default bump increments the minor and zeroes the patch (0.2.0 -> 0.3.0);
+      # do patch/major bumps by hand.
       - name: Open version bump PR
         if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/worktree-release-pipeline' # THROWAWAY: revert before review
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           IFS=. read -r major minor _ <<< "$VERSION"
-          NEXT="$major.$((minor + 1))"
+          NEXT="$major.$((minor + 1)).0"
           sed -i '' -E "s/^MARKETING_VERSION = .*/MARKETING_VERSION = $NEXT/" Configurations/Version.xcconfig
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
