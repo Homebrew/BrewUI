@@ -5,9 +5,10 @@ without having already been built and notarised successfully.
 
 1. **Build (`.github/workflows/build.yml`)** — runs on every push to `main`.
    It builds, signs, **notarises** and staples the app, packages it into a
-   signed `.pkg`, generates a build attestation, and uploads the package as a
-   fixed-name `Homebrew-pkg` artifact. Pull requests run the same build as a
-   signed-but-not-notarised dry run (no upload) to save notary quota.
+   signed `.pkg`, generates a build attestation, and uploads fixed-name artifacts
+   (`Homebrew-pkg` for the website download and `Homebrew-app` for the cask). Pull
+   requests run the same build as a signed-but-not-notarised dry run (no upload)
+   to save notary quota.
 
 2. **Release (`.github/workflows/release.yml`)** — a manual **"Run workflow"**
    step that promotes the most recent successful `main` build to a release.
