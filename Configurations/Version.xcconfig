@@ -10,5 +10,5 @@
 //   CURRENT_PROJECT_VERSION -> CFBundleVersion             (the build number)
 // so the standard "About Homebrew" panel picks these up automatically.
 
-MARKETING_VERSION = 0.1.0
+MARKETING_VERSION = 0.2.0
 CURRENT_PROJECT_VERSION = 1
