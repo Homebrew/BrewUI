@@ -95,8 +95,8 @@ struct BrewApp: App {
                 )
         }
         .defaultSize(
-            width: BrewLayout.minWindowWidth,
-            height: BrewLayout.minWindowHeight,
+            width: BrewLayout.defaultWindowWidth,
+            height: BrewLayout.defaultWindowHeight,
         )
         .commands {
             SearchCommands()
