@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - worktree-release-pipeline # THROWAWAY: emit a push event on this branch; revert before review
   pull_request:
   workflow_dispatch:
 
