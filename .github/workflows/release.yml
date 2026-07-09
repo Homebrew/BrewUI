@@ -131,16 +131,3 @@ jobs:
             gh pr create --base main --head "$BRANCH" \
               --title "Bump marketing version to $NEXT" \
               --body "Automated version bump after releasing $TAG."
-
-      # Open a PR against Homebrew/homebrew-cask bumping the homebrew-app cask to the
-      # just-released version. The cask installs the app zip, so pin the zip's
-      # sha256; bump-cask-pr derives the download URL from the cask template.
-      # Needs a PAT that can fork homebrew-cask (GITHUB_TOKEN cannot push to
-      # another repo).
-      - name: Open Homebrew cask PR
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
-        run: |
-          SHA=$(shasum -a 256 "$APP_ZIP" | cut -d' ' -f1)
-          brew bump-cask-pr --version "$VERSION" --sha256 "$SHA" homebrew-app
