@@ -72,8 +72,8 @@
 
 - GitHub workflow linting should avoid `uses: docker://...` because org allowlist policy can reject it.
 - Preferred pattern for this repo is Homebrew-influenced and allowlist-friendly:
-  - use `Homebrew/actions/setup-homebrew@main`
-  - use `Homebrew/actions/cache-homebrew-prefix@main` to install `actionlint`/`shellcheck`
+  - use `Homebrew/actions/setup-homebrew@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1`
+  - use `Homebrew/actions/cache-homebrew-prefix@1f8e202ffddf94def7f42f6fa3a482e821489f9c # 2026.07.10.1` to install `actionlint`/`shellcheck`
   - run `actionlint` via a `run:` step
 - Actionlint remains path-scoped to workflow changes for low CI overhead.
 
