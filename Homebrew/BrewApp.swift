@@ -8,6 +8,7 @@
 import BrewAppEnvironment
 import BrewCLI
 import BrewCore
+import BrewCrashReporting
 import BrewFeatureConsole
 import BrewNetworking
 import BrewRepositories
@@ -38,8 +39,16 @@ struct BrewApp: App {
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
+    private let crashReportController: CrashReportController
 
     init() {
+        // Install crash capture first, before any other launch work, so a crash
+        // during startup is still recorded. The controller reads reports written
+        // by a *previous* launch and drives the report-it dialog.
+        let crashReportStore = CrashReportStore()
+        CrashReportInstaller.install(store: crashReportStore, environment: .current())
+        crashReportController = CrashReportController(store: crashReportStore)
+
         let inventoryCache = InstalledInventoryCache()
         let catalogue = CatalogueCache()
         let discoverAnalytics = DiscoverAnalyticsCache()
@@ -97,6 +106,7 @@ struct BrewApp: App {
                     minWidth: BrewLayout.minWindowWidth,
                     minHeight: BrewLayout.minWindowHeight,
                 )
+                .crashReportSheet(controller: crashReportController)
         }
         .defaultSize(
             width: BrewLayout.defaultWindowWidth,
