@@ -198,7 +198,7 @@ GEM
       google-protobuf (~> 4.31)
     sass-embedded (1.101.0-x86_64-linux-musl)
       google-protobuf (~> 4.31)
-    sorbet-runtime (0.6.13316)
+    sorbet-runtime (0.6.13333)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
     tomlrb (2.0.4)
