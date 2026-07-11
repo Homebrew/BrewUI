@@ -1,14 +1,17 @@
 // Configurations/Version.xcconfig
 //
-// Single source of truth for the app's version. Bump these when cutting a
-// release — do NOT set MARKETING_VERSION / CURRENT_PROJECT_VERSION in the
-// Xcode target settings, or those would override the values here.
+// These are PLACEHOLDERS ONLY. The real values are stamped into the built app
+// on every build by the "Stamp app version" build phase
+// (scripts/stamp-app-version), which derives them from git:
+//   MARKETING_VERSION       -> CFBundleShortVersionString  (nearest v* tag + how
+//                                                            far HEAD is past it)
+//   CURRENT_PROJECT_VERSION -> CFBundleVersion              (git commit count)
 //
-// Xcode's Info.plist generation maps:
-//   MARKETING_VERSION       -> CFBundleShortVersionString  (the "1.0" shown
-//                                                            in the About panel)
-//   CURRENT_PROJECT_VERSION -> CFBundleVersion             (the build number)
-// so the standard "About Homebrew" panel picks these up automatically.
+// Nothing here is bumped — by automation or by hand. The version lives in git
+// tags, not in this file. GENERATE_INFOPLIST_FILE needs *some* value to produce
+// a well-formed plist before the build phase overwrites it; that is all these
+// serve, so both local and CI builds show the real git-derived version. See
+// scripts/derive-version and docs/RELEASING.md.
 
-MARKETING_VERSION = 0.2.0
-CURRENT_PROJECT_VERSION = 1
+MARKETING_VERSION = 0.0.0
+CURRENT_PROJECT_VERSION = 0

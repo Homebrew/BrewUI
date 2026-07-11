@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Computes the build number (CFBundleVersion): the total commit count. Monotonic
+# and requires no judgement. Needs full history (fetch-depth: 0 in CI); a
+# shallow clone would always report 1.
+set -euo pipefail
+git rev-list --count HEAD

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Xcode build-phase script: stamp the built app's Info.plist with the
+# git-derived marketing version and build number, using the same scripts CI
+# uses. This is the single stamping mechanism for both local and CI builds, so a
+# local debug Homebrew.app carries the real git version rather than the xcconfig
+# placeholder.
+#
+# It must run as the LAST build phase (after "Process Info.plist" generates the
+# plist, before the implicit CodeSign) so the signature covers the stamped
+# values, and it needs ENABLE_USER_SCRIPT_SANDBOXING = NO because it shells out
+# to git. If git/tags are unavailable (e.g. building from a source tarball), the
+# derive-* scripts fall back on their own — this script does not hard-fail on
+# that.
+set -euo pipefail
+
+# Resolve the sibling scripts relative to this file so cwd does not matter.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VERSION="$("$SCRIPT_DIR/derive-version")"
+BUILD="$("$SCRIPT_DIR/derive-build-number")"
+
+PLIST="${TARGET_BUILD_DIR:?}/${INFOPLIST_PATH:?}"
+if [[ ! -f "$PLIST" ]]; then
+  echo "stamp-app-version: no Info.plist at $PLIST" >&2
+  exit 1
+fi
+
+# Set the key if it exists (GENERATE_INFOPLIST_FILE creates both), else add it.
+plist_set() {
+  local key=$1 value=$2
+  /usr/libexec/PlistBuddy -c "Set :$key $value" "$PLIST" 2>/dev/null \
+    || /usr/libexec/PlistBuddy -c "Add :$key string $value" "$PLIST"
+}
+
+plist_set CFBundleShortVersionString "$VERSION"
+plist_set CFBundleVersion "$BUILD"
+echo "stamp-app-version: stamped $VERSION ($BUILD) into $PLIST"
