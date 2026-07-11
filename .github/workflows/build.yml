@@ -24,9 +24,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          # Full history so the version/build number can be derived from git
+          # (nearest v* tag + distance, and the commit count); a shallow clone
+          # would collapse to the bootstrap fallback and ship wrong numbers.
+          fetch-depth: 0
           # Nothing here pushes; don't leave the token in .git/config where it
           # could leak into an uploaded artifact (zizmor: artipacked).
           persist-credentials: false
+
+      # fetch-depth: 0 already retrieves tags, but re-fetch defensively so
+      # git describe in the derivation scripts always sees every v* tag.
+      - name: Fetch tags
+        run: git fetch --tags --force
 
       # Creates a short-lived keychain isolated to this job. The 6-hour
       # timeout (21600 s) exceeds any reasonable build duration.
@@ -87,26 +96,34 @@ jobs:
           echo "Using installer signing identity: Developer ID Installer"
           echo "Using team ID: ${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}"
 
-      - name: Resolve marketing version
+      # Version and build number are derived from git (nearest v* tag + distance,
+      # and the commit count) so nothing is hand-bumped or checked in. These
+      # values are used to name the artifacts and the release; the app bundle
+      # itself is stamped by the "Stamp app version" build phase, which runs the
+      # same scripts during xcodebuild — see scripts/derive-version and the
+      # post-export verification below.
+      - name: Resolve marketing version and build number
+        env:
+          VERSION_BRANCH: ${{ github.ref_name }}
         run: |
-          VERSION=$(xcodebuild -showBuildSettings \
-            -project Homebrew.xcodeproj \
-            -scheme Brew \
-            -configuration Release \
-            | awk -F' = ' '/ MARKETING_VERSION /{print $2; exit}')
-          if [ -z "$VERSION" ]; then
-            echo "Could not resolve MARKETING_VERSION from build settings."
-            exit 1
-          fi
+          VERSION=$(scripts/derive-version)
+          BUILD=$(scripts/derive-build-number)
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "Building version $VERSION"
+          echo "BUILD=$BUILD" >> "$GITHUB_ENV"
+          echo "Building version $VERSION (build $BUILD)"
 
       - name: Build and archive
+        # VERSION_BRANCH is passed through so the stamp build phase, which runs
+        # git describe inside xcodebuild, resolves the same branch as the step
+        # above (the CI checkout is a detached HEAD).
+        env:
+          VERSION_BRANCH: ${{ github.ref_name }}
         run: |
           # --timestamp requests a secure Apple timestamp (mandatory for
           # Developer ID signing and notarisation); --options runtime enables
           # the hardened runtime. Both are pinned here so codesign is
-          # deterministic on CI rather than relying on Xcode defaults.
+          # deterministic on CI rather than relying on Xcode defaults. The
+          # version/build are injected by the stamp build phase, not here.
           xcodebuild archive \
             -project Homebrew.xcodeproj \
             -scheme Brew \
@@ -157,6 +174,21 @@ jobs:
             echo "Exported app is not signed with a Developer ID Application authority."
             exit 1
           fi
+
+      # Safety net: confirm the stamp build phase actually baked the derived
+      # version into the app. If it silently no-op'd (e.g. script sandboxing was
+      # re-enabled), the app would ship the xcconfig placeholder while the
+      # artifacts/release claim $VERSION — fail loudly instead.
+      - name: Verify app version matches derived version
+        run: |
+          APP_BUNDLE_PATH="$RUNNER_TEMP/export/Homebrew.app"
+          BUNDLE_VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' \
+            "$APP_BUNDLE_PATH/Contents/Info.plist")
+          if [ "$BUNDLE_VERSION" != "$VERSION" ]; then
+            echo "App version $BUNDLE_VERSION does not match derived version $VERSION."
+            exit 1
+          fi
+          echo "App version $BUNDLE_VERSION matches derived version $VERSION."
 
       # Notarise and staple the app bundle itself, before it is packaged. The
       # cask install path drops a bare Homebrew.app, so it needs its own stapled
