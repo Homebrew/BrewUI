@@ -1,8 +1,18 @@
 name: Release
 
 on:
-  # Manual trigger used to promote the most recent main build to a release.
+  # Manual trigger. `action` selects the release kind:
+  #   promote-minor — the routine case: promote the latest main build as-is.
+  #   cut-major     — deliberate X.0.0: tag main HEAD, build it fresh, publish.
   workflow_dispatch:
+    inputs:
+      action:
+        description: Release kind.
+        type: choice
+        options:
+          - promote-minor
+          - cut-major
+        default: promote-minor
   # A no-side-effect dry run whenever this workflow file itself changes.
   push:
     paths:
@@ -11,14 +21,19 @@ on:
 permissions:
   contents: write # create the release (and its tag)
   actions: read # download the build artifact from the Build workflow
-  pull-requests: write # open the version bump PR
+  id-token: write # cut-major's reusable build attests; capped by the caller
+  attestations: write
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  release:
+  # promote-minor: the routine, automatic case. Promote the most recent main
+  # build as-is (no rebuild, no version maths); the version comes from the built
+  # app itself. Also serves the push dry run.
+  promote-minor:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.action == 'promote-minor')
     runs-on: macos-26
     steps:
       - name: Checkout repository
@@ -116,3 +131,90 @@ jobs:
           gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" \
             --target "$GITHUB_SHA" --generate-notes
 
+  # cut-major: deliberate X.0.0. Compute the next major, tag main's HEAD, then
+  # build that tagged commit fresh (distance 0 -> the build carries X.0.0) and
+  # publish it. Freeze merges to main while running so HEAD is the intended
+  # commit. The tag is pushed before the build, so a failed build can leave a
+  # tag with no release — this is a deliberate, supervised action, unlike
+  # promote-minor.
+  major-tag:
+    if: github.event_name == 'workflow_dispatch' && inputs.action == 'cut-major'
+    runs-on: macos-26
+    outputs:
+      tag: ${{ steps.compute.outputs.tag }}
+      version: ${{ steps.compute.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch tags
+        run: git fetch --tags --force
+
+      - name: Compute next major and tag HEAD
+        id: compute
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          LAST=$(git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' 2>/dev/null || echo v0.0.0)
+          IFS=. read -r major _ _ <<< "${LAST#v}"
+          VERSION="$((major + 1)).0.0"
+          TAG="v$VERSION"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists on origin."
+            exit 1
+          fi
+          SHA=$(git rev-parse HEAD)
+          git tag "$TAG" "$SHA"
+          git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$TAG"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Tagged $TAG at $SHA"
+
+  # Build the tagged commit fresh, notarised and uploaded, via the reusable
+  # build workflow. secrets: inherit passes the signing/notary secrets; the
+  # notarize input turns on the release-build steps for this non-push event.
+  major-build:
+    needs: major-tag
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ needs.major-tag.outputs.tag }}
+      notarize: true
+    secrets: inherit
+
+  major-release:
+    needs: [major-tag, major-build]
+    runs-on: macos-26
+    steps:
+      - name: Download built artifacts from this run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download "${{ github.run_id }}" --name Homebrew-pkg --dir dist
+          gh run download "${{ github.run_id }}" --name Homebrew-app --dir dist
+          shopt -s nullglob
+          pkgs=(dist/Homebrew-*.pkg)
+          zips=(dist/Homebrew-*.zip)
+          if [ ${#pkgs[@]} -eq 0 ] || [ ${#zips[@]} -eq 0 ]; then
+            echo "Built artifacts are missing a Homebrew-*.pkg or Homebrew-*.zip."
+            exit 1
+          fi
+          echo "PKG_PATH=${pkgs[0]}" >> "$GITHUB_ENV"
+          echo "APP_ZIP=${zips[0]}" >> "$GITHUB_ENV"
+
+      # The tag already exists (pushed by major-tag), so gh releases onto it.
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ needs.major-tag.outputs.tag }}" "$PKG_PATH" "$APP_ZIP" \
+            --generate-notes
+
+      - name: Open Homebrew cask PR
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
+        run: |
+          SHA=$(shasum -a 256 "$APP_ZIP" | cut -d' ' -f1)
+          brew bump-cask-pr --version "${{ needs.major-tag.outputs.version }}" --sha256 "$SHA" homebrew-app
