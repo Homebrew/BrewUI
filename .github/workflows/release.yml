@@ -3,13 +3,13 @@ name: Release
 on:
   # Manual trigger used to promote the most recent main build to a release.
   workflow_dispatch:
-  # Dry run whenever the workflow itself changes, to catch breakage early.
+  # A no-side-effect dry run whenever this workflow file itself changes.
   push:
     paths:
       - .github/workflows/release.yml
 
 permissions:
-  contents: write # push the tag and create the release
+  contents: write # create the release (and its tag)
   actions: read # download the build artifact from the Build workflow
   pull-requests: write # open the version bump PR
 
@@ -25,75 +25,77 @@ jobs:
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
-          # Don't persist the token in .git/config (zizmor: artipacked). The
-          # pushes below authenticate with GH_TOKEN inline instead.
+          # Don't persist the token in .git/config (zizmor: artipacked); nothing
+          # here pushes (gh creates the tag as part of the release).
           persist-credentials: false
 
-      - name: Resolve version and tag
-        run: |
-          VERSION=$(awk -F'= ' '/^MARKETING_VERSION/{gsub(/ /,"",$2); print $2; exit}' Configurations/Version.xcconfig)
-          if [ -z "$VERSION" ]; then
-            echo "Could not read MARKETING_VERSION from Configurations/Version.xcconfig"
-            exit 1
-          fi
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "TAG=v$VERSION" >> "$GITHUB_ENV"
-          echo "Releasing version $VERSION (tag v$VERSION)"
-
-      # Immutable-tag safety: never try to overwrite an existing tag. If this
-      # version was already released, the version bump has not landed yet.
-      - name: Ensure tag does not already exist
-        run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists on origin. Bump the marketing version before releasing."
-            exit 1
-          fi
-
-      # Only a real (dispatch) release touches artifacts. The push dry-run must
-      # stay artifact-free so it can pass before any main build exists (e.g. on
-      # this workflow's own introduction, and on the first merge to main).
-      - name: Download most recent main build artifacts
+      # Download the candidate build and read the version it was stamped with:
+      # the app bundle itself names the tag, so nothing is read from a checked-in
+      # file. Capture the run's headSha so the tag lands on the exact commit the
+      # bytes were built from — main has usually moved on since the candidate
+      # built, and tagging current HEAD would point the tag at code that is not
+      # in the shipped artifacts.
+      - name: Download candidate build and resolve version
         if: github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RUN_ID=$(gh run list --workflow=build.yml --branch=main --status=success \
-            --limit 1 --json databaseId --jq '.[0].databaseId')
-          if [ -z "$RUN_ID" ]; then
-            echo "No successful Build workflow run found on main. Run Build first."
+          read -r RUN_ID HEADSHA < <(gh run list --workflow=build.yml \
+            --branch=main --status=success --limit 1 \
+            --json databaseId,headSha \
+            --jq 'if length == 0 then "" else "\(.[0].databaseId) \(.[0].headSha)" end')
+          if [ -z "$RUN_ID" ] || [ -z "$HEADSHA" ]; then
+            echo "No successful Build workflow run found. Run Build first."
             exit 1
           fi
-          echo "Using build run $RUN_ID"
+          echo "Promoting build run $RUN_ID (commit $HEADSHA)"
           # The .pkg is the website download; the .zip is the bare app for casks.
           gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
           gh run download "$RUN_ID" --name Homebrew-app --dir dist
           shopt -s nullglob
           pkgs=(dist/Homebrew-*.pkg)
           zips=(dist/Homebrew-*.zip)
-          if [ ${#pkgs[@]} -eq 0 ]; then
-            echo "No Homebrew-*.pkg found in the downloaded artifacts."
+          if [ ${#pkgs[@]} -eq 0 ] || [ ${#zips[@]} -eq 0 ]; then
+            echo "Downloaded artifacts are missing a Homebrew-*.pkg or Homebrew-*.zip."
             exit 1
           fi
-          if [ ${#zips[@]} -eq 0 ]; then
-            echo "No Homebrew-*.zip found in the downloaded artifacts."
+          # Read the marketing version authoritatively from the app bundle (the
+          # zip was made with `ditto -c -k --keepParent`, so extract with ditto).
+          ditto -x -k "${zips[0]}" dist/app
+          VERSION=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' \
+            dist/app/Homebrew.app/Contents/Info.plist)
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Unexpected version '$VERSION' read from the app bundle."
             exit 1
           fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "TAG=v$VERSION" >> "$GITHUB_ENV"
+          echo "HEADSHA=$HEADSHA" >> "$GITHUB_ENV"
           echo "PKG_PATH=${pkgs[0]}" >> "$GITHUB_ENV"
           echo "APP_ZIP=${zips[0]}" >> "$GITHUB_ENV"
 
-      # Guard against promoting a stale build whose baked-in version no longer
-      # matches Configurations/Version.xcconfig.
-      - name: Verify artifacts match version
+      # Cross-check the .pkg filename carries the same version as the app bundle,
+      # guarding against a mismatched artifact pairing.
+      - name: Verify pkg matches app version
         if: github.event_name == 'workflow_dispatch'
         run: |
-          for artifact in "$PKG_PATH" "$APP_ZIP"; do
-            case "$artifact" in
-              *"$VERSION"*) echo "Artifact $artifact matches version $VERSION" ;;
-              *) echo "Artifact $artifact does not match version $VERSION"; exit 1 ;;
-            esac
-          done
+          case "$PKG_PATH" in
+            *"$VERSION"*) echo "pkg $PKG_PATH matches version $VERSION" ;;
+            *) echo "pkg $PKG_PATH does not match app version $VERSION"; exit 1 ;;
+          esac
 
-      # On the push dry run, exercise permissions without creating anything.
+      # Immutable-tag safety: never overwrite an existing tag. If this version was
+      # already released, the released commit has not been superseded yet.
+      - name: Ensure tag does not already exist
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists on origin. Nothing to release."
+            exit 1
+          fi
+
+      # On the push dry run, exercise permissions without creating anything and
+      # without needing an artifact (so it passes before any main build exists).
       - name: Dry run
         if: github.event_name == 'push'
         env:
@@ -103,9 +105,9 @@ jobs:
           gh release list
           git ls-remote --tags origin | head
 
-      # Let gh create the tag as part of release creation (--target points it at
-      # the released commit). The tag and Release are created together, so a
-      # failed release never leaves a dangling tag on the remote.
+      # Create the tag together with the Release, on the candidate's commit
+      # (--target), so a failed release leaves no dangling tag and the tag points
+      # at the exact bytes shipped.
       - name: Create release
         if: github.event_name == 'workflow_dispatch'
         env:
@@ -114,25 +116,3 @@ jobs:
           gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" \
             --target "$GITHUB_SHA" --generate-notes
 
-      # Bump the marketing version for the next cycle. main is branch-protected
-      # so GITHUB_TOKEN cannot push to it directly; open a PR instead. The
-      # default bump increments the minor and zeroes the patch (0.2.0 -> 0.3.0);
-      # do patch/major bumps by hand.
-      - name: Open version bump PR
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          IFS=. read -r major minor _ <<< "$VERSION"
-          NEXT="$major.$((minor + 1)).0"
-          sed -i '' -E "s/^MARKETING_VERSION = .*/MARKETING_VERSION = $NEXT/" Configurations/Version.xcconfig
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          BRANCH="version-bump-$NEXT"
-          git switch -C "$BRANCH"
-          git commit -am "Bump marketing version to $NEXT"
-          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
-          gh pr view "$BRANCH" >/dev/null 2>&1 ||
-            gh pr create --base main --head "$BRANCH" \
-              --title "Bump marketing version to $NEXT" \
-              --body "Automated version bump after releasing $TAG."
