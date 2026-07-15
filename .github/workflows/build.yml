@@ -6,24 +6,44 @@ on:
       - main
   pull_request:
   workflow_dispatch:
+  # Reusable entry point for the Release workflow for minor and majors: build a specific tagged
+  # commit and notarise/upload it. Triggers stay off tags, so a release build is
+  # never re-triggered by the tag the Release workflow pushes.
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref (tag or SHA) to build. Defaults to the triggering ref.
+        required: false
+        type: string
+      version:
+        description: Marketing version to stamp instead of the git-derived one (set by the release workflow so it can build before the tag exists).
+        required: false
+        type: string
+        default: ""
+      notarize:
+        description: Notarise, staple and upload artifacts (set by the release workflow).
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.ref || github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 jobs:
   build:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: macos-26
+    env:
+      NOTARIZE: ${{ inputs.notarize == true || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          ref: ${{ inputs.ref || github.ref }}
           # Full history so the version/build number can be derived from git
           # (nearest v* tag + distance, and the commit count); a shallow clone
           # would collapse to the bootstrap fallback and ship wrong numbers.
@@ -96,28 +116,22 @@ jobs:
           echo "Using installer signing identity: Developer ID Installer"
           echo "Using team ID: ${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}"
 
-      # Version and build number are derived from git (nearest v* tag + distance,
-      # and the commit count) so nothing is hand-bumped or checked in. These
-      # values are used to name the artifacts and the release; the app bundle
-      # itself is stamped by the "Stamp app version" build phase, which runs the
-      # same scripts during xcodebuild — see scripts/derive-version and the
-      # post-export verification below.
       - name: Resolve marketing version and build number
         env:
-          VERSION_BRANCH: ${{ github.ref_name }}
+          VERSION_OVERRIDE: ${{ inputs.version }}
         run: |
-          VERSION=$(scripts/derive-version)
+          VERSION="${VERSION_OVERRIDE:-$(scripts/derive-version)}"
           BUILD=$(scripts/derive-build-number)
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
           echo "Building version $VERSION (build $BUILD)"
 
       - name: Build and archive
-        # VERSION_BRANCH is passed through so the stamp build phase, which runs
-        # git describe inside xcodebuild, resolves the same branch as the step
-        # above (the CI checkout is a detached HEAD).
+        # The stamp build phase reads MARKETING_VERSION_OVERRIDE (a release build
+        # passes the version it is releasing; other builds leave it empty and
+        # derive from git).
         env:
-          VERSION_BRANCH: ${{ github.ref_name }}
+          MARKETING_VERSION_OVERRIDE: ${{ inputs.version }}
         run: |
           # --timestamp requests a secure Apple timestamp (mandatory for
           # Developer ID signing and notarisation); --options runtime enables
@@ -190,13 +204,8 @@ jobs:
           fi
           echo "App version $BUNDLE_VERSION matches derived version $VERSION."
 
-      # Notarise and staple the app bundle itself, before it is packaged. The
-      # cask install path drops a bare Homebrew.app, so it needs its own stapled
-      # ticket — the pkg's notarisation does not travel with the extracted app.
-      # Stapling here also means the copy embedded in the pkg is notarised.
-      # main only — PRs stay a signed-but-not-notarised dry run.
       - name: Notarize and staple app
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: env.NOTARIZE == 'true'
         env:
           APPLE_ID: ${{ secrets.PKG_APPLE_ID_EMAIL }}
           APPLE_ID_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
@@ -212,15 +221,10 @@ jobs:
             --wait
           xcrun stapler staple "$APP"
 
-      # Bundle the official Homebrew CLI installer and run it from a postinstall
-      # script. Homebrew.pkg is a *product archive* (a finished installer with
+      # Homebrew.pkg is a *product archive* (a finished installer with
       # its own setup scripts), so it cannot be nested as a productbuild
       # sub-package. Instead we ship the file and invoke Apple's installer on
-      # it, which keeps Homebrew's own install logic and signature intact. This
-      # replaces the previous postinstall that curled install.sh at install
-      # time (needed network, ran as the console user via su, failed silently).
-      # The pkg is staged into the scripts directory so pkgbuild archives it
-      # alongside the postinstall and it is available on disk at install time.
+      # it, which keeps Homebrew's own install logic and signature intact.
       - name: Stage Homebrew installer and postinstall script
         run: |
           SCRIPTS_DIR="$RUNNER_TEMP/installer-scripts"
@@ -264,10 +268,6 @@ jobs:
           POSTINSTALL
           chmod +x "$SCRIPTS_DIR/postinstall"
 
-      # Package the app bundle directly with --component rather than --root'ing
-      # the whole export directory: xcodebuild -exportArchive also drops
-      # DistributionSummary.plist, ExportOptions.plist and Packaging.log in
-      # there, and --root would install those alongside Homebrew.app.
       - name: Build component package
         run: |
           pkgbuild \
@@ -298,11 +298,8 @@ jobs:
             exit 1
           fi
 
-      # Notarisation, stapling and attestation only run for the shippable
-      # artifact built from a push to main. PRs stay a signed-but-not-notarised
-      # dry run so we don't spend notary quota on every proposed change.
       - name: Notarize package
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: env.NOTARIZE == 'true'
         env:
           APPLE_ID: ${{ secrets.PKG_APPLE_ID_EMAIL }}
           APPLE_ID_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
@@ -314,33 +311,18 @@ jobs:
             --wait
 
       - name: Staple notarization ticket to package
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: env.NOTARIZE == 'true'
         run: xcrun stapler staple "$PKG_PATH"
 
-      # Zip the notarised, stapled app for the cask install path. ditto (not
-      # zip) is used so the bundle's symlinks and extended attributes — and the
-      # stapled ticket — survive the round trip.
-      - name: Create app zip for cask
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Create app zip
+        if: env.NOTARIZE == 'true'
         run: |
           APP_ZIP="$RUNNER_TEMP/Homebrew-${VERSION}.zip"
           ditto -c -k --keepParent "$RUNNER_TEMP/export/Homebrew.app" "$APP_ZIP"
           echo "APP_ZIP=$APP_ZIP" >> "$GITHUB_ENV"
 
-      - name: Generate build attestation
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
-        with:
-          subject-path: |
-            ${{ env.PKG_PATH }}
-            ${{ env.APP_ZIP }}
-
-      # Publish both deliverables as fixed-name artifacts. The release (promote)
-      # workflow downloads the most recent successful run of this workflow on
-      # main and attaches these to the GitHub Release: the .pkg is the website
-      # download (bundles Homebrew); the .zip is the bare app for the cask.
       - name: Upload package artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: env.NOTARIZE == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Homebrew-pkg
@@ -348,7 +330,7 @@ jobs:
           retention-days: 90
 
       - name: Upload app artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: env.NOTARIZE == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Homebrew-app
