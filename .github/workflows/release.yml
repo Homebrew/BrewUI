@@ -33,7 +33,7 @@ jobs:
       - name: Enforce release from main
         if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
         run: |
-          echo "::error::Releases must be cut from main (got ${{ github.ref }})."
+          echo "::error::Releases must be cut from main (got $GITHUB_REF)."
           exit 1
 
       - name: Checkout repository
@@ -65,7 +65,7 @@ jobs:
           fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Releasing $VERSION ($RELEASE_TYPE) from ${{ github.sha }}"
+          echo "Releasing $VERSION ($RELEASE_TYPE) from $GITHUB_SHA"
 
       # Dry run (push): exercise the exact same script for every bump type. Under
       # `set -e` a broken derive-version or an unparsable tag fails the run, so a
