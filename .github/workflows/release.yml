@@ -92,7 +92,14 @@ jobs:
       ref: ${{ github.sha }}
       version: ${{ needs.prepare.outputs.version }}
       notarize: true
-    secrets: inherit
+    secrets:
+      APP_APPLE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.APP_APPLE_SIGNING_CERTIFICATE_BASE64 }}
+      APP_APPLE_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.APP_APPLE_SIGNING_CERTIFICATE_PASSWORD }}
+      PKG_APPLE_SIGNING_CERTIFICATE_BASE64: ${{ secrets.PKG_APPLE_SIGNING_CERTIFICATE_BASE64 }}
+      PKG_APPLE_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.PKG_APPLE_SIGNING_CERTIFICATE_PASSWORD }}
+      PKG_APPLE_DEVELOPER_TEAM_ID: ${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}
+      PKG_APPLE_ID_EMAIL: ${{ secrets.PKG_APPLE_ID_EMAIL }}
+      PKG_APPLE_ID_APP_SPECIFIC_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
 
   release:
     needs: [prepare, build]

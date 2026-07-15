@@ -25,6 +25,21 @@ on:
         required: false
         type: boolean
         default: false
+    secrets:
+      APP_APPLE_SIGNING_CERTIFICATE_BASE64:
+        required: true
+      APP_APPLE_SIGNING_CERTIFICATE_PASSWORD:
+        required: true
+      PKG_APPLE_SIGNING_CERTIFICATE_BASE64:
+        required: true
+      PKG_APPLE_SIGNING_CERTIFICATE_PASSWORD:
+        required: true
+      PKG_APPLE_DEVELOPER_TEAM_ID:
+        required: true
+      PKG_APPLE_ID_EMAIL:
+        required: true
+      PKG_APPLE_ID_APP_SPECIFIC_PASSWORD:
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.ref || github.ref }}
