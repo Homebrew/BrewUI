@@ -4,18 +4,10 @@
 # uses. This is the single stamping mechanism for both local and CI builds, so a
 # local debug Homebrew.app carries the real git version rather than the xcconfig
 # placeholder.
-#
-# It must run as the LAST build phase (after "Process Info.plist" generates the
-# plist, before the implicit CodeSign) so the signature covers the stamped
-# values, and it needs ENABLE_USER_SCRIPT_SANDBOXING = NO because it shells out
-# to git. If git/tags are unavailable (e.g. building from a source tarball), the
-# derive-* scripts fall back on their own — this script does not hard-fail on
-# that.
 set -euo pipefail
 
-# Resolve the sibling scripts relative to this file so cwd does not matter.
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-VERSION="$("$SCRIPT_DIR/derive-version")"
+VERSION="${MARKETING_VERSION_OVERRIDE:-$("$SCRIPT_DIR/derive-version")}"
 BUILD="$("$SCRIPT_DIR/derive-build-number")"
 
 PLIST="${TARGET_BUILD_DIR:?}/${INFOPLIST_PATH:?}"
