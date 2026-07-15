@@ -1,138 +1,189 @@
 name: Release
 
 on:
-  # Manual trigger used to promote the most recent main build to a release.
   workflow_dispatch:
-  # Dry run whenever the workflow itself changes, to catch breakage early.
+    inputs:
+      release_type:
+        description: Which version component to bump.
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+  # Editing this workflow triggers a no-side-effect dry run
   push:
     paths:
       - .github/workflows/release.yml
 
 permissions:
-  contents: write # push the tag and create the release
-  actions: read # download the build artifact from the Build workflow
-  pull-requests: write # open the version bump PR
+  contents: read
 
 concurrency:
   group: release
   cancel-in-progress: false
 
 jobs:
-  release:
-    runs-on: macos-26
+  prepare:
+    runs-on: ${{ github.event_name == 'push' && 'ubuntu-latest' || 'macos-26' }}
+    outputs:
+      tag: ${{ steps.compute.outputs.tag }}
+      version: ${{ steps.compute.outputs.version }}
     steps:
+      - name: Enforce release from main
+        if: github.event_name == 'workflow_dispatch' && github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Releases must be cut from main (got ${{ github.ref }})."
+          exit 1
+
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
-          # Don't persist the token in .git/config (zizmor: artipacked). The
-          # pushes below authenticate with GH_TOKEN inline instead.
           persist-credentials: false
 
-      - name: Resolve version and tag
-        run: |
-          VERSION=$(awk -F'= ' '/^MARKETING_VERSION/{gsub(/ /,"",$2); print $2; exit}' Configurations/Version.xcconfig)
-          if [ -z "$VERSION" ]; then
-            echo "Could not read MARKETING_VERSION from Configurations/Version.xcconfig"
-            exit 1
-          fi
-          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-          echo "TAG=v$VERSION" >> "$GITHUB_ENV"
-          echo "Releasing version $VERSION (tag v$VERSION)"
+      - name: Fetch tags
+        run: git fetch --tags --force
 
-      # Immutable-tag safety: never try to overwrite an existing tag. If this
-      # version was already released, the version bump has not landed yet.
-      - name: Ensure tag does not already exist
-        run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "Tag $TAG already exists on origin. Bump the marketing version before releasing."
-            exit 1
-          fi
-
-      # Only a real (dispatch) release touches artifacts. The push dry-run must
-      # stay artifact-free so it can pass before any main build exists (e.g. on
-      # this workflow's own introduction, and on the first merge to main).
-      - name: Download most recent main build artifacts
-        if: github.event_name == 'workflow_dispatch'
+      # Real dispatch: only minor/major build fresh and so need a version
+      # computed up front; patch promotes an existing build and reads its version
+      # back later. Fails if the target tag already exists; does NOT create it.
+      - name: Compute next version
+        id: compute
+        if: github.event_name == 'workflow_dispatch' && inputs.release_type != 'patch'
         env:
-          GH_TOKEN: ${{ github.token }}
+          RELEASE_TYPE: ${{ inputs.release_type }}
         run: |
-          RUN_ID=$(gh run list --workflow=build.yml --branch=main --status=success \
-            --limit 1 --json databaseId --jq '.[0].databaseId')
-          if [ -z "$RUN_ID" ]; then
-            echo "No successful Build workflow run found on main. Run Build first."
+          # Single source of truth for the "last release tag + bump" math,
+          # shared with the in-development version derive-version computes for
+          # CI/local builds.
+          VERSION=$(scripts/derive-version --next "$RELEASE_TYPE")
+          TAG="v$VERSION"
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists on origin."
             exit 1
           fi
-          echo "Using build run $RUN_ID"
-          # The .pkg is the website download; the .zip is the bare app for casks.
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Releasing $VERSION ($RELEASE_TYPE) from ${{ github.sha }}"
+
+      # Dry run (push): exercise the exact same script for every bump type. Under
+      # `set -e` a broken derive-version or an unparsable tag fails the run, so a
+      # regression surfaces on the PR.
+      - name: Dry-run version computation
+        if: github.event_name == 'push'
+        run: |
+          echo "Next version per release_type (no tags are created):"
+          for type in patch minor major; do
+            version=$(scripts/derive-version --next "$type")
+            tag="v$version"
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+              echo "  $type -> $version  (tag $tag already exists; a real run would fail)"
+            else
+              echo "  $type -> $version  (tag $tag is free)"
+            fi
+          done
+
+  build:
+    needs: prepare
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && inputs.release_type != 'patch'
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ github.sha }}
+      version: ${{ needs.prepare.outputs.version }}
+      notarize: true
+    secrets: inherit
+
+  release:
+    needs: [prepare, build]
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the tag and release
+      actions: read # download build artifacts (this run, or the promoted main run)
+      id-token: write # attest provenance for the released artifacts
+      attestations: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TYPE: ${{ inputs.release_type }}
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Resolve artifacts and tag target
+        run: |
+          dry_run=false
+          [ "$GITHUB_EVENT_NAME" = "push" ] && dry_run=true
+
+          if [ "$dry_run" = true ] || [ "$RELEASE_TYPE" = "patch" ]; then
+            promote=$(scripts/last-main-build)
+            RUN_ID=${promote%% *}
+            TARGET=${promote##* }
+            if [ -z "$RUN_ID" ]; then
+              if [ "$dry_run" = true ]; then
+                echo "No successful main build to promote yet; nothing more to exercise."
+                exit 0
+              fi
+              echo "::error::No successful main build to promote."
+              exit 1
+            fi
+            echo "Promoting main build run $RUN_ID (commit $TARGET)."
+          else
+            RUN_ID="$GITHUB_RUN_ID"
+            TARGET="$GITHUB_SHA"
+          fi
+
           gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
           gh run download "$RUN_ID" --name Homebrew-app --dir dist
           shopt -s nullglob
           pkgs=(dist/Homebrew-*.pkg)
           zips=(dist/Homebrew-*.zip)
-          if [ ${#pkgs[@]} -eq 0 ]; then
-            echo "No Homebrew-*.pkg found in the downloaded artifacts."
+          if [ ${#pkgs[@]} -eq 0 ] || [ ${#zips[@]} -eq 0 ]; then
+            echo "::error::Downloaded artifacts are missing a Homebrew-*.pkg or Homebrew-*.zip."
             exit 1
           fi
-          if [ ${#zips[@]} -eq 0 ]; then
-            echo "No Homebrew-*.zip found in the downloaded artifacts."
+          PKG_PATH="${pkgs[0]}"
+          APP_ZIP="${zips[0]}"
+
+          base=$(basename "$PKG_PATH")
+          VERSION="${base#Homebrew-}"; VERSION="${VERSION%.pkg}"
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Could not parse a semver from artifact name '$base'."
             exit 1
           fi
-          echo "PKG_PATH=${pkgs[0]}" >> "$GITHUB_ENV"
-          echo "APP_ZIP=${zips[0]}" >> "$GITHUB_ENV"
+          TAG="v$VERSION"
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" >/dev/null 2>&1; then
+            if [ "$dry_run" = true ]; then
+              echo "Tag $TAG already exists — a real patch run would stop here (nothing new to ship)."
+              exit 0
+            fi
+            echo "::error::Tag $TAG already exists — these bytes are already released; nothing to promote."
+            exit 1
+          fi
 
-      # Guard against promoting a stale build whose baked-in version no longer
-      # matches Configurations/Version.xcconfig.
-      - name: Verify artifacts match version
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          for artifact in "$PKG_PATH" "$APP_ZIP"; do
-            case "$artifact" in
-              *"$VERSION"*) echo "Artifact $artifact matches version $VERSION" ;;
-              *) echo "Artifact $artifact does not match version $VERSION"; exit 1 ;;
-            esac
-          done
+          {
+            echo "PKG_PATH=$PKG_PATH"
+            echo "APP_ZIP=$APP_ZIP"
+            echo "VERSION=$VERSION"
+            echo "TAG=$TAG"
+            echo "TARGET=$TARGET"
+          } >> "$GITHUB_ENV"
+          echo "Releasing $TAG from $TARGET"
 
-      # On the push dry run, exercise permissions without creating anything.
-      - name: Dry run
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "Dry run — verifying permissions without side effects."
-          gh release list
-          git ls-remote --tags origin | head
+      - name: Attest build provenance
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        with:
+          subject-path: |
+            ${{ env.PKG_PATH }}
+            ${{ env.APP_ZIP }}
 
-      # Let gh create the tag as part of release creation (--target points it at
-      # the released commit). The tag and Release are created together, so a
-      # failed release never leaves a dangling tag on the remote.
-      - name: Create release
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Create tag and release
+        if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         run: |
           gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" \
-            --target "$GITHUB_SHA" --generate-notes
-
-      # Bump the marketing version for the next cycle. main is branch-protected
-      # so GITHUB_TOKEN cannot push to it directly; open a PR instead. The
-      # default bump increments the minor and zeroes the patch (0.2.0 -> 0.3.0);
-      # do patch/major bumps by hand.
-      - name: Open version bump PR
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          IFS=. read -r major minor _ <<< "$VERSION"
-          NEXT="$major.$((minor + 1)).0"
-          sed -i '' -E "s/^MARKETING_VERSION = .*/MARKETING_VERSION = $NEXT/" Configurations/Version.xcconfig
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          BRANCH="version-bump-$NEXT"
-          git switch -C "$BRANCH"
-          git commit -am "Bump marketing version to $NEXT"
-          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BRANCH"
-          gh pr view "$BRANCH" >/dev/null 2>&1 ||
-            gh pr create --base main --head "$BRANCH" \
-              --title "Bump marketing version to $NEXT" \
-              --body "Automated version bump after releasing $TAG."
+            --target "$TARGET" --generate-notes

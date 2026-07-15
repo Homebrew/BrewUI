@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Prints the latest successful main Build run as "<databaseId> <headSha>" on one
+# line, or nothing (exit 0) when there is no such run yet.
+set -euo pipefail
+
+# --json (not --jq) so gh always emits a valid JSON array, even when empty;
+# indexing [] with jq then yields "" rather than crashing under `set -e`.
+runs=$(gh run list --workflow build.yml --branch main --event push \
+  --status success --limit 1 --json databaseId,headSha)
+
+id=$(jq -r '.[0].databaseId // empty' <<<"$runs")
+sha=$(jq -r '.[0].headSha // empty' <<<"$runs")
+
+[ -n "$id" ] || exit 0
+printf '%s %s\n' "$id" "$sha"
