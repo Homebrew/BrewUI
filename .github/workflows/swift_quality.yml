@@ -81,5 +81,5 @@ jobs:
 
       - name: Run BrewUILint
         run: |
-          BREWUILINT="${{ github.workspace }}/Tools/BrewUILint/.build/release/BrewUILint"
+          BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
           find Brew Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
