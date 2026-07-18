@@ -11,7 +11,7 @@
 // tags, not in this file. GENERATE_INFOPLIST_FILE needs *some* value to produce
 // a well-formed plist before the build phase overwrites it; that is all these
 // serve, so both local and CI builds show the real git-derived version. See
-// scripts/derive-version and docs/RELEASING.md.
+// scripts/derive-version.
 
 MARKETING_VERSION = 0.0.0
 CURRENT_PROJECT_VERSION = 0
