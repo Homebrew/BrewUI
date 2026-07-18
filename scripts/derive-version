@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Computes a marketing version (CFBundleShortVersionString) from git tags and
+# prints it on one line, e.g. "0.1.1". Requires full history + tags
+# (fetch-depth: 0 + `git fetch --tags` in CI); a shallow clone silently
+# collapses to the bootstrap fallback and produces the wrong number.
+#
+# Two modes, both anchored on the nearest reachable v* release tag:
+#
+#   derive-version            In-development version for CI/local builds. A
+#                             function of that tag and how far HEAD is past it
+#                             ("distance"):
+#                               distance 0 (HEAD on a tag) -> the tag verbatim
+#                                                             (a freshly-cut
+#                                                             release built from
+#                                                             its own tag)
+#                               distance >=1 -> last release + patch (the
+#                                               cosmetic in-development version;
+#                                               patch matches the routine
+#                                               release cadence)
+#
+#   derive-version --next T   Next release version: bump component T
+#                             (patch|minor|major) off the last release tag. Used
+#                             by the Release workflow to compute the version it
+#                             is about to cut, before that tag exists.
+#
+# Both modes share the "find the last release tag and bump it" logic below, so
+# it has a single definition instead of being reimplemented in the workflow.
+set -euo pipefail
+
+# The nearest reachable release tag (v1.2.3), or v0.0.0 when there are none.
+last_release_tag() {
+  git describe --tags --abbrev=0 --match 'v[0-9]*' --exclude '*-*' 2>/dev/null \
+    || echo v0.0.0
+}
+
+# Split "v1.2.3" (or "1.2.3") into the MA/MI/PA globals
+parse_semver() {
+  local base
+  base=$(printf '%s' "${1#v}" | sed -E 's/[^0-9.]//g')
+  IFS='.' read -r MA MI PA <<< "$base"
+  MA=${MA:-0}; MI=${MI:-0}; PA=${PA:-0}
+}
+
+assert_semver() {
+  [[ "$1" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] \
+    || { echo "derive-version: invalid '$1'${2:+ ($2)}" >&2; exit 1; }
+}
+
+if [[ "${1:-}" == "--next" ]]; then
+  TYPE=${2:-}
+  parse_semver "$(last_release_tag)"
+  case "$TYPE" in
+    patch) VERSION="${MA}.${MI}.$((PA + 1))" ;;
+    minor) VERSION="${MA}.$((MI + 1)).0" ;;
+    major) VERSION="$((MA + 1)).0.0" ;;
+    *) echo "derive-version: --next needs patch|minor|major (got '${TYPE}')" >&2; exit 1 ;;
+  esac
+  assert_semver "$VERSION"
+  printf '%s\n' "$VERSION"
+  exit 0
+fi
+
+if [[ $# -gt 0 ]]; then
+  echo "derive-version: unknown argument '$1' (expected no args or --next <type>)" >&2
+  exit 1
+fi
+
+# In-development version: bump by distance past the last release tag.
+DESC=$(git describe --tags --long --match 'v[0-9]*' --exclude '*-*' 2>/dev/null \
+  || echo "v0.0.0-1-g0000000")
+
+TAG=${DESC%-*-g*}          # v0.1.0-170-ga02486f -> v0.1.0
+DIST=${DESC#"$TAG"-}       # -> 170-ga02486f
+DIST=${DIST%-g*}           # -> 170
+parse_semver "$TAG"
+
+if [[ "$DIST" -eq 0 ]]; then
+  VERSION="${MA}.${MI}.${PA}"
+else
+  VERSION="${MA}.${MI}.$((PA + 1))"
+fi
+
+assert_semver "$VERSION" "from '$DESC'"
+printf '%s\n' "$VERSION"
