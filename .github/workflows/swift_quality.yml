@@ -68,18 +68,28 @@ jobs:
         id: swift-toolchain
         run: echo "fingerprint=$(swift --version | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
+      # Cache the fully built .build tree keyed on the tool's own inputs. On an
+      # exact hit we skip `swift build` entirely (see the `if:` below) and run the
+      # restored binary directly. Skipping the build is deliberate: restoring a
+      # SwiftPM .build across a fresh checkout leaves source mtimes newer than the
+      # cached products, so any incremental `swift build` invalidates and does a
+      # full ~7min SwiftSyntax rebuild anyway. No restore-keys, so a miss builds
+      # clean rather than doing that doomed incremental rebuild on stale artifacts.
       - name: Cache BrewUILint build
+        id: brewuilint-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: Tools/BrewUILint/.build
           key: ${{ runner.os }}-brewuilint-${{ steps.swift-toolchain.outputs.fingerprint }}-${{ hashFiles('Tools/BrewUILint/Package.swift', 'Tools/BrewUILint/Package.resolved', 'Tools/BrewUILint/Sources/**', 'Tools/BrewUILint/Plugins/**') }}
-          restore-keys: |
-            ${{ runner.os }}-brewuilint-${{ steps.swift-toolchain.outputs.fingerprint }}-
 
       - name: Build BrewUILint
+        if: steps.brewuilint-cache.outputs.cache-hit != 'true'
         run: swift build --package-path Tools/BrewUILint -c release --enable-experimental-prebuilts
 
       - name: Run BrewUILint
         run: |
-          BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
+          # Use the restored/built binary directly. Do NOT go through
+          # `swift build --show-bin-path`, which re-resolves the package graph and
+          # can retrigger a build even on a cache hit.
+          BREWUILINT="${{ github.workspace }}/Tools/BrewUILint/.build/release/BrewUILint"
           find Brew Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
