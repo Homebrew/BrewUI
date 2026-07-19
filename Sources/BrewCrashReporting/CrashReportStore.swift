@@ -7,9 +7,9 @@ import Foundation
 
 /// Persists and enumerates crash reports on disk as individual
 /// `crash-<epochMillis>.log` text files — a format a signal handler can write
-/// via a raw file descriptor (see `CrashReportInstaller`), with the capture
-/// time encoded in the name so no separate index is needed. A small `Sendable`
-/// value holding only the directory, mirroring `CatalogueCache`.
+/// via a raw file descriptor (see `CrashReportInstaller`). The timestamp in the
+/// name is provided by the caller (for fatal signals it's the install-time `date`).
+/// A small `Sendable` value holding only the directory, mirroring `CatalogueCache`.
 public struct CrashReportStore: Sendable {
     private let directoryURL: URL
 
