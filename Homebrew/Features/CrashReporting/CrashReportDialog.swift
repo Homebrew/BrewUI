@@ -48,6 +48,7 @@ struct CrashReportDialog: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.largeTitle)
                 .foregroundStyle(.orange)
+                .accessibilityHidden(true)
             Text("The Homebrew app quit unexpectedly")
                 .font(.title2)
                 .fontWeight(.semibold)
