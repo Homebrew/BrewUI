@@ -25,15 +25,14 @@ private struct CrashReportSheetModifier: ViewModifier {
     }
 
     /// Bridges the read-only `currentReport` to the `Binding` `sheet(item:)`
-    /// needs. Any dismissal discards the current report, advancing the queue.
+    /// needs. The setter is intentionally inert: presentation is driven by the
+    /// getter going `nil` after the dialog's explicit discard, so acting on a
+    /// SwiftUI/system-initiated nil-set here would delete the head of the queue
+    /// with no user choice.
     private var currentReport: Binding<CrashReport?> {
         Binding(
             get: { controller.currentReport },
-            set: { newValue in
-                if newValue == nil, let current = controller.currentReport {
-                    controller.discard(current)
-                }
-            },
+            set: { _ in },
         )
     }
 }
