@@ -146,15 +146,18 @@ jobs:
 
           gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
           gh run download "$RUN_ID" --name Homebrew-app --dir dist
+          gh run download "$RUN_ID" --name Homebrew-dsyms --dir dsyms
           shopt -s nullglob
           pkgs=(dist/Homebrew-*.pkg)
           zips=(dist/Homebrew-*.zip)
-          if [ ${#pkgs[@]} -eq 0 ] || [ ${#zips[@]} -eq 0 ]; then
-            echo "::error::Downloaded artifacts are missing a Homebrew-*.pkg or Homebrew-*.zip."
+          dsyms=(dsyms/Homebrew-*.dSYMs.zip)
+          if [ ${#pkgs[@]} -eq 0 ] || [ ${#zips[@]} -eq 0 ] || [ ${#dsyms[@]} -eq 0 ]; then
+            echo "::error::Downloaded artifacts are missing a Homebrew-*.pkg, Homebrew-*.zip, or Homebrew-*.dSYMs.zip."
             exit 1
           fi
           PKG_PATH="${pkgs[0]}"
           APP_ZIP="${zips[0]}"
+          DSYM_ZIP="${dsyms[0]}"
 
           base=$(basename "$PKG_PATH")
           VERSION="${base#Homebrew-}"; VERSION="${VERSION%.pkg}"
@@ -175,6 +178,7 @@ jobs:
           {
             echo "PKG_PATH=$PKG_PATH"
             echo "APP_ZIP=$APP_ZIP"
+            echo "DSYM_ZIP=$DSYM_ZIP"
             echo "VERSION=$VERSION"
             echo "TAG=$TAG"
             echo "TARGET=$TARGET"
@@ -188,9 +192,10 @@ jobs:
           subject-path: |
             ${{ env.PKG_PATH }}
             ${{ env.APP_ZIP }}
+            ${{ env.DSYM_ZIP }}
 
       - name: Create tag and release
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         run: |
-          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" \
+          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" "$DSYM_ZIP" \
             --target "$TARGET" --generate-notes

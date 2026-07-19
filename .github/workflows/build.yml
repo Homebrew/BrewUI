@@ -336,6 +336,18 @@ jobs:
           ditto -c -k --keepParent "$RUNNER_TEMP/export/Homebrew.app" "$APP_ZIP"
           echo "APP_ZIP=$APP_ZIP" >> "$GITHUB_ENV"
 
+      - name: Zip dSYMs
+        if: env.NOTARIZE == 'true'
+        run: |
+          DSYM_ZIP="$RUNNER_TEMP/Homebrew-${VERSION}.dSYMs.zip"
+          DSYM_DIR="$RUNNER_TEMP/Homebrew.xcarchive/dSYMs"
+          if [ -z "$(ls -A "$DSYM_DIR" 2>/dev/null)" ]; then
+            echo "No dSYMs in archive — a release build must produce debug symbols."
+            exit 1
+          fi
+          ditto -c -k --keepParent "$DSYM_DIR" "$DSYM_ZIP"
+          echo "DSYM_ZIP=$DSYM_ZIP" >> "$GITHUB_ENV"
+
       - name: Upload package artifact
         if: env.NOTARIZE == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -350,6 +362,14 @@ jobs:
         with:
           name: Homebrew-app
           path: ${{ env.APP_ZIP }}
+          retention-days: 90
+
+      - name: Upload dSYMs artifact
+        if: env.NOTARIZE == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Homebrew-dsyms
+          path: ${{ env.DSYM_ZIP }}
           retention-days: 90
 
       - name: Delete temporary keychain
