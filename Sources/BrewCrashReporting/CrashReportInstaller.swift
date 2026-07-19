@@ -117,12 +117,13 @@ private let handleUncaughtException: @convention(c) (NSException) -> Void = { ex
         return
     }
 
+    let date = Date()
     let text = CrashReportFormatter.makeReportText(
         kind: "Uncaught exception \(exception.name.rawValue)",
         detail: exception.reason,
         callStack: exception.callStackSymbols,
         environment: environment,
-        date: Date(),
+        date: date,
     )
-    _ = try? store.save(text: text, date: Date())
+    _ = try? store.save(text: text, date: date)
 }
