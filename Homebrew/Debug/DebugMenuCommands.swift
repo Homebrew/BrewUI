@@ -16,9 +16,7 @@ import SwiftUI
 
                 Divider()
 
-                // Deliberately crash the app so the crash-reporting flow can be
-                // exercised: the report should appear on the next launch. These
-                // exist only in DEBUG builds.
+                // Exercises the crash-reporting flow: the report appears on next launch.
                 Menu("Force Crash") {
                     Button("Fatal Error (signal)") {
                         fatalError("Debug menu: forced fatalError")

@@ -6,19 +6,10 @@
 import Foundation
 
 /// Builds the human-readable text of a crash report.
-///
-/// Two entry points, matching the two capture paths:
-/// - ``signalReportHeader(environment:date:)`` produces the fixed header string
-///   that a signal handler writes ahead of a raw `backtrace_symbols_fd` dump.
-///   It must be fully materialised *before* the crash (at install time) because
-///   building strings inside a signal handler is not async-signal-safe.
-/// - ``makeReportText(kind:detail:callStack:environment:date:)`` builds a
-///   complete report for the uncaught-exception path, where Foundation is safe
-///   to use.
 public enum CrashReportFormatter {
-    /// The header written before a signal handler's raw stack dump. The call
-    /// stack itself is appended by `backtrace_symbols_fd`, so this ends with a
-    /// `Call stack:` marker and trailing newline.
+    /// The header a signal handler writes before its raw `backtrace_symbols_fd`
+    /// dump, so it ends with a `Call stack:` marker and newline. Must be built
+    /// before the crash — string building is not async-signal-safe.
     public static func signalReportHeader(
         environment: CrashReportEnvironment,
         date: Date,
@@ -33,7 +24,6 @@ public enum CrashReportFormatter {
         """ + "\n"
     }
 
-    /// A complete report for the uncaught-exception path.
     public static func makeReportText(
         kind: String,
         detail: String?,
@@ -61,8 +51,6 @@ public enum CrashReportFormatter {
         environment: CrashReportEnvironment,
         date: Date,
     ) -> String {
-        // `ISO8601Format()` is a `Sendable` value-type formatter — stable,
-        // sortable, and readable in a GitHub issue.
         """
         Date: \(date.ISO8601Format())
         App version: \(environment.appVersion) (\(environment.buildNumber))

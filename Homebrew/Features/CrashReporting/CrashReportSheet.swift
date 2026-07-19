@@ -8,10 +8,6 @@ import SwiftUI
 
 /// Loads any crash reports left by a previous launch and presents
 /// ``CrashReportDialog`` for them one at a time.
-///
-/// Lives as a `ViewModifier` so `BrewApp` can attach it to the main window with
-/// a single call while keeping observation of the `@Observable` controller
-/// anchored inside a real view body.
 private struct CrashReportSheetModifier: ViewModifier {
     @Bindable var controller: CrashReportController
 
@@ -28,10 +24,8 @@ private struct CrashReportSheetModifier: ViewModifier {
             }
     }
 
-    /// Bridges the controller's read-only `currentReport` to the `Binding` that
-    /// `sheet(item:)` needs. Dismissing the sheet (e.g. via the report/discard
-    /// buttons or the window) discards the current report, which advances the
-    /// queue to the next one — or closes the sheet when none remain.
+    /// Bridges the read-only `currentReport` to the `Binding` `sheet(item:)`
+    /// needs. Any dismissal discards the current report, advancing the queue.
     private var currentReport: Binding<CrashReport?> {
         Binding(
             get: { controller.currentReport },
@@ -45,7 +39,6 @@ private struct CrashReportSheetModifier: ViewModifier {
 }
 
 extension View {
-    /// Presents the post-crash reporting dialog for `controller`'s pending reports.
     func crashReportSheet(controller: CrashReportController) -> some View {
         modifier(CrashReportSheetModifier(controller: controller))
     }

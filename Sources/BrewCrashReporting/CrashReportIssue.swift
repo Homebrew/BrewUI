@@ -8,16 +8,12 @@ import Foundation
 /// Builds a pre-filled "new issue" URL on the app's GitHub repository from a
 /// crash report, so a user can file it with one click.
 public enum CrashReportIssue {
-    /// The app's GitHub repository.
     public static let repositoryURL = URL(string: "https://github.com/Homebrew/BrewUI")!
 
-    /// GitHub rejects issue URLs whose body is too long. Keep the encoded body
-    /// well under GitHub's ~8k URL ceiling; anything longer is truncated with a
-    /// note asking the user to attach the full log.
+    /// Kept under GitHub's ~8k URL ceiling; longer logs are truncated.
     static let maxBodyLength = 6000
 
-    /// A pre-filled new-issue URL. The user still reviews and submits it on
-    /// GitHub — nothing is sent automatically.
+    /// A pre-filled new-issue URL. Nothing is sent until the user submits it on GitHub.
     public static func url(for report: CrashReport) -> URL {
         var components = URLComponents(
             url: repositoryURL.appendingPathComponent("issues/new"),
@@ -27,8 +23,6 @@ public enum CrashReportIssue {
             URLQueryItem(name: "title", value: "Crash: \(report.summary)"),
             URLQueryItem(name: "body", value: body(for: report)),
         ]
-        // `URLComponents` leaves some sub-delimiters unescaped; GitHub is happy
-        // with the default encoding, so `components.url` is sufficient.
         return components.url ?? repositoryURL
     }
 

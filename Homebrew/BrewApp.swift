@@ -18,11 +18,7 @@ import SwiftUI
 
 @main
 struct BrewApp: App {
-    /// Homebrew's online documentation, surfaced from the Help menu.
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
-
-    /// The app's GitHub issue tracker, surfaced from the Help menu so users can
-    /// file a bug or feature request without hunting for the repository.
     private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!
 
     @Environment(\.scenePhase) private var scenePhase
@@ -42,9 +38,7 @@ struct BrewApp: App {
     private let crashReportController: CrashReportController
 
     init() {
-        // Install crash capture first, before any other launch work, so a crash
-        // during startup is still recorded. The controller reads reports written
-        // by a *previous* launch and drives the report-it dialog.
+        // Install crash capture before any other launch work so startup crashes are recorded.
         let crashReportStore = CrashReportStore()
         CrashReportInstaller.install(store: crashReportStore, environment: .current())
         crashReportController = CrashReportController(store: crashReportStore)
