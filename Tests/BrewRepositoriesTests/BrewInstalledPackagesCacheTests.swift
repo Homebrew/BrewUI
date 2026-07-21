@@ -6,7 +6,6 @@
 import BrewCLI
 import BrewCore
 import BrewCoreTestSupport
-import BrewNetworking
 @testable import BrewRepositories
 import BrewRepositoryInterfaces
 import BrewServicesTestSupport

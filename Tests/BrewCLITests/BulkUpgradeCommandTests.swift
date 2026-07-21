@@ -5,7 +5,6 @@
 
 @testable import BrewCLI
 import BrewCore
-import BrewServicesTestSupport
 import Foundation
 import Testing
 

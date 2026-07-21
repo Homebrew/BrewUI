@@ -5,13 +5,10 @@
 //  Created by Graeme Arthur on 6/3/2026.
 //
 
-import BrewCLI
 import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureInstalled
 import BrewRepositories
-import BrewRepositoryInterfaces
-import BrewServicesTestSupport
 import Testing
 
 struct BrewTests {

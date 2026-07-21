@@ -4,8 +4,6 @@
 //
 
 import BrewCore
-import BrewRepositoryInterfaces
-import BrewUIComponents
 import Foundation
 
 /// Presentation mapping for Installed detail metadata content.

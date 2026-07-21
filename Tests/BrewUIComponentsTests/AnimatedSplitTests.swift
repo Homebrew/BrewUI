@@ -3,7 +3,6 @@
 //  BrewTests
 //
 
-import BrewCore
 @testable import BrewUIComponents
 import Foundation
 import Testing

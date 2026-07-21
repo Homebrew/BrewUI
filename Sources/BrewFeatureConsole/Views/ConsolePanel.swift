@@ -3,7 +3,6 @@
 //  Brew
 //
 
-import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
