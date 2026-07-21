@@ -13,38 +13,6 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-// MARK: - Snapshots (one logical assertion per load test)
-
-struct VMStateSnapshot: Equatable {
-    var state: LoadState<InstalledPackagesContent, String>
-    var formulaPackages: [InstalledBrewPackage]
-    var caskPackages: [InstalledBrewPackage]
-    var selectedPackageID: InstalledBrewPackage.ID?
-    var totalPackageCount: Int
-
-    /// Rows cleared, load finished, after a failed `load()`.
-    static func emptyAfterLoad(userFacingError: String) -> VMStateSnapshot {
-        VMStateSnapshot(
-            state: .failed(userFacingError),
-            formulaPackages: [],
-            caskPackages: [],
-            selectedPackageID: nil,
-            totalPackageCount: 0,
-        )
-    }
-}
-
-@MainActor
-func snapshot(_ vm: InstalledViewModel) -> VMStateSnapshot {
-    VMStateSnapshot(
-        state: vm.state,
-        formulaPackages: vm.loadedFormulaPackages,
-        caskPackages: vm.loadedCaskPackages,
-        selectedPackageID: vm.selectedPackage?.id,
-        totalPackageCount: vm.totalPackageCount,
-    )
-}
-
 @MainActor
 func makeInstalledViewModel(repository: BrewInstalledPackagesRepository) -> InstalledViewModel {
     InstalledViewModel(repository: repository)
