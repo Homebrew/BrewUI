@@ -8,6 +8,7 @@
 import BrewAppEnvironment
 import BrewCLI
 import BrewCore
+import BrewCrashReporting
 import BrewFeatureConsole
 import BrewNetworking
 import BrewRepositories
@@ -17,8 +18,8 @@ import SwiftUI
 
 @main
 struct BrewApp: App {
-    /// Homebrew's online documentation, surfaced from the Help menu.
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
+    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!
 
     @Environment(\.scenePhase) private var scenePhase
 
@@ -34,8 +35,14 @@ struct BrewApp: App {
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
+    private let crashReportController: CrashReportController
 
     init() {
+        // Install crash capture before any other launch work so startup crashes are recorded.
+        let crashReportStore = CrashReportStore()
+        CrashReportInstaller.install(store: crashReportStore, environment: .current())
+        crashReportController = CrashReportController(store: crashReportStore)
+
         let inventoryCache = InstalledInventoryCache()
         let catalogue = CatalogueCache()
         let discoverAnalytics = DiscoverAnalyticsCache()
@@ -93,6 +100,7 @@ struct BrewApp: App {
                     minWidth: BrewLayout.minWindowWidth,
                     minHeight: BrewLayout.minWindowHeight,
                 )
+                .crashReportSheet(controller: crashReportController)
         }
         .defaultSize(
             width: BrewLayout.defaultWindowWidth,
@@ -107,6 +115,7 @@ struct BrewApp: App {
             // non-existent help book) with a link to the online documentation.
             CommandGroup(replacing: .help) {
                 Link("Homebrew Documentation", destination: Self.documentationURL)
+                Link("Report an Issue…", destination: Self.reportIssueURL)
             }
         }
         #if DEBUG

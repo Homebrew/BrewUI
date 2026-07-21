@@ -8,6 +8,7 @@ let package = Package(
     ],
     products: [
         .library(name: "BrewCore", targets: ["BrewCore"]),
+        .library(name: "BrewCrashReporting", targets: ["BrewCrashReporting"]),
         .library(name: "BrewUIComponents", targets: ["BrewUIComponents"]),
         .library(name: "BrewCLI", targets: ["BrewCLI"]),
         .library(name: "BrewNetworking", targets: ["BrewNetworking"]),
@@ -25,6 +26,13 @@ let package = Package(
     targets: [
         .target(
             name: "BrewCore",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewCrashReporting",
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -172,6 +180,14 @@ let package = Package(
 
         // MARK: - Test targets
 
+        .testTarget(
+            name: "BrewCrashReportingTests",
+            dependencies: ["BrewCrashReporting"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
         .testTarget(
             name: "BrewCoreTests",
             dependencies: ["BrewCore", "BrewCoreTestSupport"],

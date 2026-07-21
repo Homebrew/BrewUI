@@ -146,15 +146,29 @@ jobs:
 
           gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
           gh run download "$RUN_ID" --name Homebrew-app --dir dist
+          # The dSYMs artifact only exists on builds cut after it was introduced,
+          # so a dry run promoting an older main build won't have one. Tolerate
+          # that here; a real release still requires it (checked below).
+          gh run download "$RUN_ID" --name Homebrew-dsyms --dir dsyms || true
           shopt -s nullglob
           pkgs=(dist/Homebrew-*.pkg)
           zips=(dist/Homebrew-*.zip)
+          dsyms=(dsyms/Homebrew-*.dSYMs.zip)
           if [ ${#pkgs[@]} -eq 0 ] || [ ${#zips[@]} -eq 0 ]; then
             echo "::error::Downloaded artifacts are missing a Homebrew-*.pkg or Homebrew-*.zip."
             exit 1
           fi
           PKG_PATH="${pkgs[0]}"
           APP_ZIP="${zips[0]}"
+          if [ ${#dsyms[@]} -gt 0 ]; then
+            DSYM_ZIP="${dsyms[0]}"
+          elif [ "$dry_run" = true ]; then
+            DSYM_ZIP=""
+            echo "::warning::No Homebrew-*.dSYMs.zip on run $RUN_ID; tolerated for this dry run (real releases require it)."
+          else
+            echo "::error::Downloaded artifacts are missing a Homebrew-*.dSYMs.zip."
+            exit 1
+          fi
 
           base=$(basename "$PKG_PATH")
           VERSION="${base#Homebrew-}"; VERSION="${VERSION%.pkg}"
@@ -175,6 +189,7 @@ jobs:
           {
             echo "PKG_PATH=$PKG_PATH"
             echo "APP_ZIP=$APP_ZIP"
+            echo "DSYM_ZIP=$DSYM_ZIP"
             echo "VERSION=$VERSION"
             echo "TAG=$TAG"
             echo "TARGET=$TARGET"
@@ -188,9 +203,10 @@ jobs:
           subject-path: |
             ${{ env.PKG_PATH }}
             ${{ env.APP_ZIP }}
+            ${{ env.DSYM_ZIP }}
 
       - name: Create tag and release
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         run: |
-          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" \
+          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" "$DSYM_ZIP" \
             --target "$TARGET" --generate-notes
