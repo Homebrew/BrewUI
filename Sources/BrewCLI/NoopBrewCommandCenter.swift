@@ -24,15 +24,6 @@ public actor NoopBrewCommandCenter: BrewCommandCenter {
         return .idle
     }
 
-    public func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    public func isActive(id: BrewOperationID) async -> Bool {
-        _ = id
-        return false
-    }
-
     public func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         _ = id
         return AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
@@ -43,13 +34,6 @@ public actor NoopBrewCommandCenter: BrewCommandCenter {
 
     public func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    public func outputChanges(for id: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        _ = id
-        return AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }

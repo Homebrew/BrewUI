@@ -83,22 +83,31 @@ struct DoctorViewModelTests {
         )
     }
 
+    /// The issue items in the order the view renders them — grouped by descending severity — mirroring
+    /// `DoctorView`'s `DoctorIssueGroup.grouped(from:)` call. Tests assert against this production
+    /// projection rather than a raw `report.issues` mapping.
+    private static func displayedItems(_ report: DoctorReport) -> [DoctorIssueItem] {
+        DoctorIssueGroup.grouped(from: report).flatMap(\.items)
+    }
+
     @Test func `projects loaded issues and selects the first`() async {
-        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
+        let report = Self.issuesReport()
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: report))
         await viewModel.load()
+        let items = Self.displayedItems(report)
 
         #expect(viewModel.presentation == .issues)
-        #expect(viewModel.issueItems.count == 2)
-        #expect(viewModel.issueItems.first?.title == "You have unlinked kegs in your Cellar.")
-        #expect(viewModel.issueItems.first?.hasRunnableFix == true)
-        #expect(viewModel.issueItems.last?.hasRunnableFix == false)
-        #expect(viewModel.selectedIssueID == viewModel.issueItems.first?.id)
+        #expect(items.count == 2)
+        #expect(items.first?.title == "You have unlinked kegs in your Cellar.")
+        #expect(items.first?.hasRunnableFix == true)
+        #expect(items.last?.hasRunnableFix == false)
+        #expect(viewModel.selectedIssueID == items.first?.id)
     }
 
     @Test func `projects healthy report`() {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
         #expect(viewModel.presentation == .healthy)
-        #expect(viewModel.issueItems.isEmpty)
+        #expect(viewModel.orderedIssueIDs.isEmpty)
     }
 
     @Test func `projects a failure into a user-facing message`() {
@@ -111,22 +120,24 @@ struct DoctorViewModelTests {
     }
 
     @Test func `setSelection changes the selected issue`() {
-        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
-        let secondID = viewModel.issueItems[1].id
+        let report = Self.issuesReport()
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: report))
+        let secondID = Self.displayedItems(report)[1].id
         viewModel.setSelection(secondID)
         #expect(viewModel.selectedIssueID == secondID)
         #expect(viewModel.selectedIssue?.title == "Some installed formulae are deprecated.")
     }
 
     @Test func `runFix submits a doctorFix maintenance operation`() async {
+        let report = Self.cleanupReport()
         let center = Self.recordingCenter(cleanupExitCode: 0)
         let viewModel = Self.viewModel(
-            repository: StubDoctorRepository(report: Self.cleanupReport()),
+            repository: StubDoctorRepository(report: report),
             commandCenter: center,
             commandFactory: LiveBrewMutatingCommandFactory(),
         )
 
-        viewModel.runFix(for: viewModel.issueItems[0])
+        viewModel.runFix(for: Self.displayedItems(report)[0])
         let entries = await waitForSubmitEntries(on: center)
 
         #expect(entries.count == 1)
@@ -135,26 +146,29 @@ struct DoctorViewModelTests {
     }
 
     @Test func `isFixRunning is false for an item without a runnable fix`() {
-        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
+        let report = Self.issuesReport()
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: report))
         // The deprecated-formulae issue (index 1) has no runnable block, so no fix token to track.
-        let nonRunnable = viewModel.issueItems[1]
+        let nonRunnable = Self.displayedItems(report)[1]
         #expect(nonRunnable.fixToken == nil)
         #expect(viewModel.isFixRunning(nonRunnable) == false)
     }
 
     @Test func `fixError is nil for an item without a runnable fix`() {
-        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
-        #expect(viewModel.fixError(viewModel.issueItems[1]) == nil)
+        let report = Self.issuesReport()
+        let viewModel = Self.viewModel(repository: StubDoctorRepository(report: report))
+        #expect(viewModel.fixError(Self.displayedItems(report)[1]) == nil)
     }
 
     @Test func `runFix surfaces an inline error when the fix fails`() async {
+        let report = Self.cleanupReport()
         let center = Self.recordingCenter(cleanupExitCode: 1, stderr: "could not clean")
         let viewModel = Self.viewModel(
-            repository: StubDoctorRepository(report: Self.cleanupReport()),
+            repository: StubDoctorRepository(report: report),
             commandCenter: center,
             commandFactory: LiveBrewMutatingCommandFactory(),
         )
-        let item = viewModel.issueItems[0]
+        let item = Self.displayedItems(report)[0]
 
         viewModel.runFix(for: item)
         await waitUntil({ viewModel.fixError(item) != nil }, "fix error surfaced")
@@ -227,7 +241,7 @@ struct DoctorViewModelTests {
         let viewModel = Self.viewModel(repository: repository)
 
         await viewModel.load()
-        let thirdID = viewModel.issueItems[2].id
+        let thirdID = Self.displayedItems(initial)[2].id
         viewModel.setSelection(thirdID)
         #expect(viewModel.selectedIssueID == thirdID)
 
@@ -247,7 +261,7 @@ struct DoctorViewModelTests {
         let viewModel = Self.viewModel(repository: repository)
 
         await viewModel.load()
-        let secondID = viewModel.issueItems[1].id
+        let secondID = Self.displayedItems(report)[1].id
         viewModel.setSelection(secondID)
 
         await viewModel.load()

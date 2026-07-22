@@ -36,14 +36,6 @@ public actor ControllableJobsCommandCenter: BrewCommandCenter {
         .idle
     }
 
-    public func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    public func isActive(id _: BrewOperationID) async -> Bool {
-        false
-    }
-
     public func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
@@ -59,12 +51,6 @@ public actor ControllableJobsCommandCenter: BrewCommandCenter {
                 }
             }
             registerAllPhaseListener(token: token, continuation: continuation)
-        }
-    }
-
-    public func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
         }
     }
 

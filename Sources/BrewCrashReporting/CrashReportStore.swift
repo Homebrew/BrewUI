@@ -17,10 +17,6 @@ public struct CrashReportStore: Sendable {
         self.directoryURL = directoryURL ?? Self.defaultDirectoryURL()
     }
 
-    public var directory: URL {
-        directoryURL
-    }
-
     public func reportFileURL(for date: Date) -> URL {
         let millis = Int((date.timeIntervalSince1970 * 1000).rounded())
         return directoryURL.appendingPathComponent("crash-\(millis).log")

@@ -21,11 +21,6 @@ struct PackageDetailMetadataItem {
         self.package = package
     }
 
-    /// User-facing command for package details transparency.
-    var infoCommand: String {
-        "brew info \(package.name)"
-    }
-
     var latestVersionValue: String {
         formattedValue(package.latestVersion)
     }

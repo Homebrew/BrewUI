@@ -90,7 +90,6 @@ struct SerialBrewCommandCenterTests {
         try await center.submit(id: id, command: EmptyMutatingCommand())
 
         #expect(await center.phase(for: id) == .idle)
-        #expect(await !center.isActive(id: id))
     }
 
     @Test func `records failure with OperationFailure and clears in flight slot`() async throws {
@@ -110,23 +109,6 @@ struct SerialBrewCommandCenterTests {
             return
         }
         #expect(!failure.userFacingMessage.isEmpty)
-        #expect(await !center.isActive(id: id))
-    }
-
-    @Test func `phaseByID exposes tracked entries`() async throws {
-        let center = makeCenter()
-        let id = BrewOperationID(kind: .formula, name: "snapshot")
-        #expect(await center.phaseByID().isEmpty)
-
-        do {
-            try await center.submit(id: id, command: ThrowingMutatingCommand())
-        } catch {
-            _ = error
-        }
-
-        let map = await center.phaseByID()
-        #expect(map[id] != nil)
-        #expect(await center.phase(for: id) == map[id])
     }
 
     @Test func `mutating command uses injected mock runner not real brew`() async throws {

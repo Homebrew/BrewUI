@@ -9,14 +9,6 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-private actor OutputLineCollector {
-    private(set) var lines: [BrewCommandOutputLine] = []
-
-    func append(_ line: BrewCommandOutputLine) {
-        lines.append(line)
-    }
-}
-
 private actor AllOutputCollector {
     private(set) var events: [(BrewOperationID, BrewCommandOutputLine)] = []
 
@@ -52,14 +44,14 @@ private func makeOutputTestCenter() -> SerialBrewCommandCenter {
 }
 
 struct SerialBrewCommandCenterOutputTests {
-    @Test func `outputChanges for id delivers lines emitted via the sink in order`() async throws {
+    @Test func `output for an id delivers lines emitted via the sink in order`() async throws {
         let center = makeOutputTestCenter()
         let id = BrewOperationID(kind: .formula, name: "output-order")
-        let stream = await center.outputChanges(for: id)
-        let collector = OutputLineCollector()
+        let stream = await center.allOutputChanges()
+        let collector = AllOutputCollector()
         let collect = Task {
-            for await line in stream {
-                await collector.append(line)
+            for await pair in stream {
+                await collector.append(id: pair.0, line: pair.1)
             }
         }
         defer { collect.cancel() }
@@ -75,7 +67,7 @@ struct SerialBrewCommandCenterOutputTests {
         )
         try await Task.sleep(for: .milliseconds(80))
 
-        let lines = await collector.lines
+        let lines = await collector.events.filter { $0.0 == id }.map(\.1)
         #expect(lines.map(\.text) == ["one", "two", "warn", "three"])
         #expect(lines.map(\.stream) == [.stdout, .stdout, .stderr, .stdout])
     }
@@ -110,21 +102,21 @@ struct SerialBrewCommandCenterOutputTests {
         #expect(textsB == ["b1"])
     }
 
-    @Test func `outputChanges multicasts to multiple subscribers`() async throws {
+    @Test func `output multicasts to multiple subscribers`() async throws {
         let center = makeOutputTestCenter()
         let id = BrewOperationID(kind: .formula, name: "output-multi")
-        let streamA = await center.outputChanges(for: id)
-        let streamB = await center.outputChanges(for: id)
-        let collectorA = OutputLineCollector()
-        let collectorB = OutputLineCollector()
+        let streamA = await center.allOutputChanges()
+        let streamB = await center.allOutputChanges()
+        let collectorA = AllOutputCollector()
+        let collectorB = AllOutputCollector()
         let taskA = Task {
-            for await line in streamA {
-                await collectorA.append(line)
+            for await pair in streamA {
+                await collectorA.append(id: pair.0, line: pair.1)
             }
         }
         let taskB = Task {
-            for await line in streamB {
-                await collectorB.append(line)
+            for await pair in streamB {
+                await collectorB.append(id: pair.0, line: pair.1)
             }
         }
         defer {
@@ -138,8 +130,8 @@ struct SerialBrewCommandCenterOutputTests {
         )
         try await Task.sleep(for: .milliseconds(80))
 
-        let textsA = await collectorA.lines.map(\.text)
-        let textsB = await collectorB.lines.map(\.text)
+        let textsA = await collectorA.events.map(\.1.text)
+        let textsB = await collectorB.events.map(\.1.text)
         #expect(textsA == ["x", "y"])
         #expect(textsB == ["x", "y"])
     }
@@ -147,11 +139,11 @@ struct SerialBrewCommandCenterOutputTests {
     @Test func `output listener removed on stream termination`() async throws {
         let center = makeOutputTestCenter()
         let id = BrewOperationID(kind: .formula, name: "output-cleanup")
-        let stream = await center.outputChanges(for: id)
-        let collector = OutputLineCollector()
+        let stream = await center.allOutputChanges()
+        let collector = AllOutputCollector()
         let collect = Task {
-            for await line in stream {
-                await collector.append(line)
+            for await pair in stream {
+                await collector.append(id: pair.0, line: pair.1)
             }
         }
         collect.cancel()
@@ -163,7 +155,7 @@ struct SerialBrewCommandCenterOutputTests {
         )
         try await Task.sleep(for: .milliseconds(80))
 
-        let lines = await collector.lines
-        #expect(lines.isEmpty)
+        let events = await collector.events
+        #expect(events.isEmpty)
     }
 }
