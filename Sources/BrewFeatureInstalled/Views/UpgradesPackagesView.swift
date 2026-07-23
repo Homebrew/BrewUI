@@ -39,13 +39,6 @@ struct UpgradesPackagesView: View {
                 },
             )
         }
-        .searchable(
-            text: $viewModel.searchQuery,
-            isPresented: $viewModel.isSearchFieldPresented,
-            placement: .toolbar,
-            prompt: "Search Upgrades",
-        )
-        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
     }
 
     private var header: some View {

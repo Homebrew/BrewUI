@@ -58,14 +58,19 @@ struct MainWindowView: View {
     @ViewBuilder
     private var featureColumn: some View {
         switch selectedSidebarItem {
-        case .installed:
-            InstalledColumnsRoot(deepLinkSelection: $pendingInstalledSelection)
-                .navigationTitle("Installed")
-                .navigationSubtitle("Browse or search your installed packages")
-        case .upgrades:
-            UpgradesColumnsRoot()
-                .navigationTitle("Upgrades")
-                .navigationSubtitle("Review and upgrade outdated packages")
+        // Installed and Upgrades share one persistent view so the toolbar search field keeps a
+        // stable identity across switches between them (see `InstalledUpgradesRoot`).
+        case .installed, .upgrades:
+            InstalledUpgradesRoot(
+                mode: selectedSidebarItem == .upgrades ? .upgrades : .installed,
+                deepLinkSelection: $pendingInstalledSelection,
+            )
+            .navigationTitle(selectedSidebarItem == .upgrades ? "Upgrades" : "Installed")
+            .navigationSubtitle(
+                selectedSidebarItem == .upgrades
+                    ? "Review and upgrade outdated packages"
+                    : "Browse or search your installed packages",
+            )
         case .discover:
             DiscoverColumnsRoot()
                 .navigationTitle("Discover")

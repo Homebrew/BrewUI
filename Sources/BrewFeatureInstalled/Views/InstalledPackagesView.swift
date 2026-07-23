@@ -40,13 +40,6 @@ struct InstalledPackagesView: View {
                 },
             )
         }
-        .searchable(
-            text: $viewModel.searchQuery,
-            isPresented: $viewModel.isSearchFieldPresented,
-            placement: .toolbar,
-            prompt: "Search Installed Packages",
-        )
-        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
     }
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.

@@ -4,39 +4,12 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-public struct InstalledColumnsRoot: View {
-    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
-    @Binding private var deepLinkSelection: InstalledBrewPackage.ID?
-
-    public init(deepLinkSelection: Binding<InstalledBrewPackage.ID?> = .constant(nil)) {
-        _deepLinkSelection = deepLinkSelection
-    }
-
-    public var body: some View {
-        InstalledColumns(
-            installedPackagesRepository: installedPackagesRepository,
-            deepLinkSelection: $deepLinkSelection,
-        )
-    }
-}
-
-/// Feature-owned content/detail columns for the main window.
+/// Feature-owned content/detail columns for the Installed tab. The view model is owned by
+/// ``InstalledUpgradesContainer`` so it (and the shared toolbar search field) survives switching
+/// between the Installed and Upgrades tabs.
 struct InstalledColumns: View {
-    @State var viewModel: InstalledViewModel
+    let viewModel: InstalledViewModel
     @Binding var deepLinkSelection: InstalledBrewPackage.ID?
-
-    init(
-        installedPackagesRepository: any InstalledPackagesRepository,
-        deepLinkSelection: Binding<InstalledBrewPackage.ID?>,
-    ) {
-        _viewModel = State(
-            initialValue: .init(
-                repository: installedPackagesRepository,
-                initialSelection: deepLinkSelection.wrappedValue,
-            ),
-        )
-        _deepLinkSelection = deepLinkSelection
-    }
 
     var body: some View {
         HSplitView {
@@ -70,8 +43,14 @@ struct InstalledColumns: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .onAppear {
-            if deepLinkSelection != nil { deepLinkSelection = nil }
+        // The view model now persists across tab switches, so a deep link can't be applied via the
+        // model's initialiser. Apply it whenever the pending selection changes (and on first
+        // appearance), then clear it. `initial: true` covers arriving at the tab with a selection
+        // already queued; `setSelection` sets it directly, so it works before the list has loaded.
+        .onChange(of: deepLinkSelection, initial: true) { _, pending in
+            guard let pending else { return }
+            viewModel.setSelection(pending)
+            deepLinkSelection = nil
         }
     }
 }
