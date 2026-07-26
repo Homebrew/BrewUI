@@ -58,8 +58,8 @@ struct MainWindowView: View {
     @ViewBuilder
     private var featureColumn: some View {
         switch selectedSidebarItem {
-        // Installed and Upgrades share one persistent view so the toolbar search field keeps a
-        // stable identity across switches between them (see `InstalledUpgradesRoot`).
+        // One combined case keeps the shared toolbar search field alive across the switch
+        // (see `InstalledUpgradesRoot`).
         case .installed, .upgrades:
             InstalledUpgradesRoot(
                 mode: selectedSidebarItem == .upgrades ? .upgrades : .installed,

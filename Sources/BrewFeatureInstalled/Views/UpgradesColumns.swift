@@ -4,10 +4,6 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Feature-owned content/detail columns for the Upgrades tab. Mirrors ``InstalledColumns`` but
-/// projects only outdated packages and adds an Upgrade All affordance. The view model is owned by
-/// ``InstalledUpgradesContainer`` so it (and the shared toolbar search field) survives switching
-/// between the Installed and Upgrades tabs.
 struct UpgradesColumns: View {
     let viewModel: UpgradesViewModel
     let navigateToInstalledPackage: @MainActor (InstalledBrewPackage.ID) -> Void

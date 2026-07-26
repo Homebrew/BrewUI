@@ -4,9 +4,6 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Feature-owned content/detail columns for the Installed tab. The view model is owned by
-/// ``InstalledUpgradesContainer`` so it (and the shared toolbar search field) survives switching
-/// between the Installed and Upgrades tabs.
 struct InstalledColumns: View {
     let viewModel: InstalledViewModel
     @Binding var deepLinkSelection: InstalledBrewPackage.ID?
@@ -43,10 +40,8 @@ struct InstalledColumns: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // The view model now persists across tab switches, so a deep link can't be applied via the
-        // model's initialiser. Apply it whenever the pending selection changes (and on first
-        // appearance), then clear it. `initial: true` covers arriving at the tab with a selection
-        // already queued; `setSelection` sets it directly, so it works before the list has loaded.
+        // The view model persists across tab switches, so a deep link can't go through its init.
+        // `initial: true` covers arriving with a selection already queued.
         .onChange(of: deepLinkSelection, initial: true) { _, pending in
             guard let pending else { return }
             viewModel.setSelection(pending)
