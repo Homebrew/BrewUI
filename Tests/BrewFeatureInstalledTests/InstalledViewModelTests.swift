@@ -14,7 +14,7 @@ import Foundation
 import Testing
 
 struct InstalledViewModelTests {
-    @Test @MainActor func `load produces expected package sections`() async {
+    @Test @MainActor func `load exposes formula and cask rows in one list`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git", kind: .formula)],
             casks: [.fixture(name: "slack", kind: .cask)],
@@ -73,7 +73,7 @@ struct InstalledViewModelTests {
         vm.setSelection(ordered[0])
         vm.selectNext()
         #expect(vm.selectedPackage?.id == ordered[1])
-        // Crosses the formulae → casks section boundary.
+        // Steps from a formula to a cask within the single interleaved list.
         vm.selectNext()
         #expect(vm.selectedPackage?.id == ordered[2])
         // Clamps at the final row.
