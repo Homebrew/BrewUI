@@ -17,8 +17,8 @@ struct DiscoverInstalledBadge: View {
         }
         .font(.brewCaption2)
         .foregroundStyle(Color.brewStatusSuccess)
-        .padding(.horizontal, BrewSpacing.xs)
-        .padding(.vertical, BrewSpacing.xxs)
+        .padding(.horizontal, BrewSpacing.sm)
+        .padding(.vertical, BrewSpacing.xs)
         .background {
             Capsule()
                 .fill(Color.brewStatusSuccessSubtle)

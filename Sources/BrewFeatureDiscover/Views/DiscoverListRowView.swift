@@ -107,8 +107,8 @@ struct DiscoverListRowView: View {
         Text(viewModel.packageKindChrome.badgeLabel)
             .font(.brewCaption2)
             .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
-            .padding(.horizontal, BrewSpacing.xs)
-            .padding(.vertical, BrewSpacing.xxs)
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.vertical, BrewSpacing.xs)
             .background {
                 Capsule()
                     .fill(Color.brewSurfaceElevated)

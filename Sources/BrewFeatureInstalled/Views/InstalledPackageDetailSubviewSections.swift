@@ -45,8 +45,8 @@ struct InstalledPackageDetailHeroSection: View {
                     Text(chrome.badgeLabel)
                         .font(.brewCaption2)
                         .foregroundStyle(accentColor(chrome.accent))
-                        .padding(.horizontal, BrewSpacing.xs)
-                        .padding(.vertical, BrewSpacing.xxs)
+                        .padding(.horizontal, BrewSpacing.sm)
+                        .padding(.vertical, BrewSpacing.xs)
                         .background {
                             Capsule()
                                 .fill(Color.brewSurfaceElevated)
