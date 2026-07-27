@@ -40,6 +40,9 @@ struct InstalledPackagesView: View {
                 },
             )
         }
+        .task {
+            await viewModel.load()
+        }
     }
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.

@@ -39,6 +39,9 @@ struct UpgradesPackagesView: View {
                 },
             )
         }
+        .task {
+            await viewModel.load()
+        }
     }
 
     private var header: some View {
