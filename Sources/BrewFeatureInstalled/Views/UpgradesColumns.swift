@@ -4,45 +4,9 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-public struct UpgradesColumnsRoot: View {
-    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
-    @Environment(\.brewCommandCenter) private var brewCommandCenter
-    @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
-    @Environment(\.navigateToInstalledPackage) private var navigateToInstalledPackage
-
-    public init() {}
-
-    public var body: some View {
-        UpgradesColumns(
-            installedPackagesRepository: installedPackagesRepository,
-            brewCommandCenter: brewCommandCenter,
-            mutatingCommandFactory: mutatingCommandFactory,
-            navigateToInstalledPackage: navigateToInstalledPackage,
-        )
-    }
-}
-
-/// Feature-owned content/detail columns for the Upgrades tab. Mirrors `InstalledColumns`
-/// but projects only outdated packages and adds an Upgrade All affordance.
 struct UpgradesColumns: View {
-    @State var viewModel: UpgradesViewModel
-    private let navigateToInstalledPackage: @MainActor (InstalledBrewPackage.ID) -> Void
-
-    init(
-        installedPackagesRepository: any InstalledPackagesRepository,
-        brewCommandCenter: any BrewCommandCenter,
-        mutatingCommandFactory: any BrewMutatingCommandFactory,
-        navigateToInstalledPackage: @escaping @MainActor (InstalledBrewPackage.ID) -> Void,
-    ) {
-        _viewModel = State(
-            initialValue: UpgradesViewModel(
-                repository: installedPackagesRepository,
-                brewCommandCenter: brewCommandCenter,
-                commandFactory: mutatingCommandFactory,
-            ),
-        )
-        self.navigateToInstalledPackage = navigateToInstalledPackage
-    }
+    let viewModel: UpgradesViewModel
+    let navigateToInstalledPackage: @MainActor (InstalledBrewPackage.ID) -> Void
 
     var body: some View {
         HSplitView {
