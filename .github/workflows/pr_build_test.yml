@@ -106,6 +106,13 @@ jobs:
           set -o pipefail
           xcrun swift test --package-path Tools/BrewUILint | tee swift-test-brewuilint.log
 
+      - name: Cache Homebrew prefix
+        uses: Homebrew/actions/cache-homebrew-prefix@18fcb8e3e06b4247c676c506750dc95ea7226479 # 2026.07.13.1
+        with:
+          brewfile: true
+          uninstall: true
+          workflow-key: pr-build-test
+
       - name: Cache Mint packages
         id: mint-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -118,7 +125,6 @@ jobs:
       - name: Install Mintfile packages
         if: steps.mint-cache.outputs.cache-hit != 'true'
         run: mint bootstrap --mintfile Mintfile
-
       - name: Periphery dead-code scan
         run: |
           set -o pipefail
