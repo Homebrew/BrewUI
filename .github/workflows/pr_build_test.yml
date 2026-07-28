@@ -16,6 +16,7 @@ on:
       - "Package.resolved"
       - "Tools/BrewUILint/**"
       - "scripts/test"
+      - "Brewfile"
       - "Mintfile"
       - ".periphery.yml"
       - ".periphery-baseline.json"
