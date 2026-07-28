@@ -7,12 +7,9 @@ import BrewCore
 import BrewUIComponents
 import SwiftUI
 
-/// Builds the styled `AttributedString` the console renders for one output line, mapping the
-/// terminal-palette colours parsed by ``ANSIParser`` onto SwiftUI colours.
-///
-/// Spans without an explicit foreground fall back to `defaultColor` (the stream's colour: red for
-/// stderr, primary for stdout) so an uncoloured line looks exactly as it did before ANSI support.
-/// Bold spans get a bold monospaced font; every other run inherits the `Text`'s base font.
+/// Spans without an explicit foreground fall back to `defaultColor` so an uncoloured line looks exactly
+/// as it did before ANSI support. Bold spans get a bold monospaced font; every other run is left
+/// fontless so it inherits the `Text`'s base font — setting a font on all runs would defeat that.
 enum ANSIConsoleText {
     static func attributed(for line: BrewCommandOutputLine, defaultColor: Color) -> AttributedString {
         var result = AttributedString()

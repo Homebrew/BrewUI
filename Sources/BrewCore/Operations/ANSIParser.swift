@@ -83,8 +83,6 @@ public enum ANSIParser {
                 continue
             }
 
-            // Consume the escape sequence starting at `index`; `skipEscape` returns the index just past it
-            // and, for an SGR sequence, the parameter string to apply.
             let (next, sgrParameters) = skipEscape(scalars, from: index)
             if let sgrParameters {
                 let newStyle = apply(sgrParameters, to: style)
@@ -106,12 +104,6 @@ public enum ANSIParser {
         parse(input).map(\.text).joined()
     }
 
-    /// Advances past the escape sequence beginning at `start` (which must point at ESC).
-    ///
-    /// Returns the index of the first scalar after the sequence, plus — only for a CSI sequence ending
-    /// in `m` — the raw parameter substring (e.g. `"1;31"`) so the caller can apply it as SGR. Every
-    /// other sequence (other CSI final bytes, OSC, two-byte escapes, a trailing lone ESC) is consumed
-    /// and reported with `nil` parameters so it is dropped from the output.
     private static func skipEscape(
         _ scalars: [Unicode.Scalar],
         from start: Int,
@@ -132,8 +124,6 @@ public enum ANSIParser {
         }
     }
 
-    /// Walks a CSI sequence's parameter/intermediate bytes to its final byte (0x40–0x7E). Yields the
-    /// parameter substring when the final byte is `m` (SGR); otherwise `nil`.
     private static func skipControlSequence(
         _ scalars: [Unicode.Scalar],
         paramsStart: Int,
@@ -150,7 +140,6 @@ public enum ANSIParser {
             parameters.unicodeScalars.append(scalar)
             cursor += 1
         }
-        // Unterminated sequence: consume to end of line.
         return (next: scalars.count, sgrParameters: nil)
     }
 
@@ -169,11 +158,8 @@ public enum ANSIParser {
         return scalars.count
     }
 
-    /// Applies one SGR parameter string (e.g. `"0"`, `"1;31"`, `"38;5;12"`) to `style`.
-    ///
-    /// An empty parameter string is treated as a reset (`ESC[m` == `ESC[0m`). Extended-colour
-    /// introducers (`38;5;n`, `38;2;r;g;b`) have their trailing arguments consumed so following codes
-    /// aren't misread, but they resolve to the default foreground rather than an approximated colour.
+    /// Applies one SGR parameter string to `style`. An empty parameter string is treated as a reset
+    /// (`ESC[m` == `ESC[0m`).
     private static func apply(_ parameters: String, to style: ANSIStyle) -> ANSIStyle {
         let codes = parameters.isEmpty
             ? [0]
@@ -197,8 +183,8 @@ public enum ANSIParser {
             case 90...97:
                 result.foreground = brightColor(forOffset: code - 90)
             case 38:
-                // Extended foreground: `38;5;n` (index 1 arg) or `38;2;r;g;b` (3 args). Skip the introducer
-                // arguments and leave the foreground at default.
+                // Extended foreground (256-colour/truecolour): consume the introducer's arguments so the
+                // following codes aren't misread, but leave the foreground at default rather than approximate.
                 index += extendedColorArgumentCount(after: codes, from: index)
                 result.foreground = nil
             default:
