@@ -3,7 +3,6 @@
 //  BrewRepositoryInterfaces
 //
 
-import BrewCore
 import Foundation
 
 /// App-scoped source of truth for installed/outdated package state: the observable inventory plus the

@@ -91,7 +91,11 @@ struct ConfigViewModelTests {
         await viewModel.load()
 
         #expect(!viewModel.isBrewNotFound)
-        #expect(viewModel.errorMessage == "something broke")
+        guard case let .failed(message) = viewModel.pageState else {
+            Issue.record("expected a failed page state")
+            return
+        }
+        #expect(message == "something broke")
     }
 
     @Test @MainActor func `unknown errors map to a generic message`() async {
@@ -101,7 +105,11 @@ struct ConfigViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.errorMessage == "Couldn't read the Homebrew configuration.")
+        guard case let .failed(message) = viewModel.pageState else {
+            Issue.record("expected a failed page state")
+            return
+        }
+        #expect(message == "Couldn't read the Homebrew configuration.")
     }
 }
 

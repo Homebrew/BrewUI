@@ -3,12 +3,8 @@
 //  BrewTests
 //
 
-import BrewCLI
 import BrewCore
-import BrewCoreTestSupport
 @testable import BrewFeatureDiscover
-import BrewRepositoryInterfaces
-import BrewServicesTestSupport
 import Foundation
 import Testing
 

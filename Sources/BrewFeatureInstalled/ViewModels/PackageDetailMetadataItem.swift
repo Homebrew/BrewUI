@@ -4,8 +4,6 @@
 //
 
 import BrewCore
-import BrewRepositoryInterfaces
-import BrewUIComponents
 import Foundation
 
 /// Presentation mapping for Installed detail metadata content.
@@ -21,11 +19,6 @@ struct PackageDetailMetadataItem {
 
     init(package: InstalledBrewPackage) {
         self.package = package
-    }
-
-    /// User-facing command for package details transparency.
-    var infoCommand: String {
-        "brew info \(package.name)"
     }
 
     var latestVersionValue: String {

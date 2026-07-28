@@ -100,8 +100,8 @@ struct InstalledListRowView: View {
             Text(viewModel.kind.chrome.badgeLabel)
                 .font(.brewCaption2)
                 .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
-                .padding(.horizontal, BrewSpacing.xs)
-                .padding(.vertical, BrewSpacing.xxs)
+                .padding(.horizontal, BrewSpacing.sm)
+                .padding(.vertical, BrewSpacing.xs)
                 .background {
                     Capsule()
                         .fill(Color.brewSurfaceElevated)
@@ -160,20 +160,6 @@ struct InstalledListRowView: View {
         case .statusInfoSubtle:
             Color.brewStatusInfoSubtle
         }
-    }
-}
-
-struct InstalledSectionHeader: View {
-    let title: String
-    let count: Int
-
-    var body: some View {
-        Text("\(title) (\(count))")
-            .font(.brewCaption2)
-            .foregroundStyle(Color.brewTextTertiary)
-            .textCase(.uppercase)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityAddTraits(.isHeader)
     }
 }
 

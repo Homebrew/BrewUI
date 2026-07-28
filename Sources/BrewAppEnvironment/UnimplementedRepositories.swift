@@ -137,23 +137,11 @@ actor UnimplementedBrewCommandCenter: BrewCommandCenter {
         unimplemented()
     }
 
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        unimplemented()
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        unimplemented()
-    }
-
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         unimplemented()
     }
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
-        unimplemented()
-    }
-
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
         unimplemented()
     }
 

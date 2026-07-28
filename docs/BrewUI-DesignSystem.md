@@ -5,7 +5,7 @@
 
 ---
 
-## 1. Design Principles
+## 1. Design principles
 
 | Principle | Description |
 |---|---|
@@ -17,7 +17,7 @@
 
 ---
 
-## 2. Brand Palette (Source Colours)
+## 2. Brand palette (source colours)
 
 These are the raw named colours extracted from the brew.sh visual identity. They are the foundation from which semantic tokens below are derived. Do not use these directly in components — use the semantic tokens in Section 4.
 
@@ -54,7 +54,7 @@ Blue Info     #5B9BD5   // Informational / link
 
 ## 3. Typography
 
-### 3.1 Type Scale
+### 3.1 Type scale
 
 The brew.sh site uses a clean sans-serif for prose and a monospaced font for all code/commands. The macOS app follows the same two-family split, but anchors to system fonts for native rendering quality.
 
@@ -68,7 +68,7 @@ The brew.sh site uses a clean sans-serif for prose and a monospaced font for all
 | **Code / Command** | SF Mono Regular | `.body` with `.monospaced()` | Command output, brew commands |
 | **Code Bold** | SF Mono Semibold | `.body` with `.monospaced()` | Command verb highlight (e.g. `brew install`) |
 
-### 3.2 Size Ramp
+### 3.2 Size ramp
 
 | Token | Size (pt) | Line Height | Usage |
 |---|---|---|---|
@@ -84,7 +84,7 @@ The brew.sh site uses a clean sans-serif for prose and a monospaced font for all
 
 ---
 
-## 4. Semantic Colour Tokens
+## 4. Semantic colour tokens
 
 All component and layout work should reference these tokens only. Values are given for both **light** and **dark** modes.
 
@@ -113,7 +113,7 @@ All component and layout work should reference these tokens only. Values are giv
 | `color.text.codeOutput` | `#C8C8C8` | `#C8C8C8` | Standard stdout in console |
 | `color.text.codeError` | `#FF7B72` | `#FF7B72` | stderr / error output in console |
 
-### 4.3 Brand / Accent
+### 4.3 Brand / accent
 
 > **Accent colour strategy:** macOS does not expose whether a user has customised their system accent colour, so it is not possible to fall back to amber only when the system default is active. Instead, BrewUI uses a deliberate split: **system accent for all standard SwiftUI controls** (applied via `.tint()` at the root), and **Homebrew amber for fully custom BrewUI-owned components** where `.tint()` has no effect. This respects user preference on system controls while applying clear brand identity where BrewUI has full ownership. See Section 5 for the per-component breakdown.
 
@@ -124,7 +124,7 @@ All component and layout work should reference these tokens only. Values are giv
 | `color.brand.primaryPressed` | `Amber 600 #E8971C` | `Amber 600 #E8971C` | Pressed/active state on custom brand elements |
 | `color.brand.tint` | `Amber 100 #FEF3DC` | `rgba(251,176,64, 0.12)` | Sidebar selected item background, package row highlight |
 
-### 4.4 Semantic Status
+### 4.4 Semantic status
 
 | Token | Light | Dark | Usage |
 |---|---|---|---|
@@ -137,7 +137,7 @@ All component and layout work should reference these tokens only. Values are giv
 | `color.status.info` | `Blue Info #5B9BD5` | `#7AB3E0` | Info alerts, update notifications |
 | `color.status.infoSubtle` | `#EBF3FB` | `rgba(91,155,213,0.15)` | Info row tint |
 
-### 4.5 Borders & Separators
+### 4.5 Borders & separators
 
 | Token | Light | Dark | Usage |
 |---|---|---|---|
@@ -148,7 +148,7 @@ All component and layout work should reference these tokens only. Values are giv
 
 ---
 
-## 5. Component Tokens
+## 5. Component tokens
 
 System accent vs. Homebrew amber — the boundary
 
@@ -181,7 +181,7 @@ BrewUI uses a fully custom primary button style — this is one of the component
 | `button.destructive.foreground` | `#FFFFFF` | `#FFFFFF` | |
 | `button.cornerRadius` | `6pt` | `6pt` | |
 
-### 5.2 Text Fields / Search
+### 5.2 Text fields / search
 
 Text fields use the system focus ring (system accent) rather than an amber override. The border token is used for the unfocused state only.
 
@@ -194,7 +194,7 @@ Text fields use the system focus ring (system accent) rather than an amber overr
 | `textField.placeholder` | `Cellar 400 #9C9C96` | `Hops 400 #6B6B6B` | |
 | `textField.cornerRadius` | `6pt` | `6pt` | |
 
-### 5.3 List Rows
+### 5.3 List rows
 
 Standard `List` selection uses the system accent. The amber tint is applied only to custom package rows with a distinct "selected for action" state (e.g. queued for batch install).
 
@@ -218,7 +218,7 @@ The sidebar active item indicator is a custom drawn element — amber applies he
 | `sidebar.itemSelected.foreground` | `Amber 600 #E8971C` | `Amber 400 #FCC96B` | **Custom amber** |
 | `sidebar.itemSelected.indicator` | `Amber 500 #FBB040` | `Amber 500 #FBB040` | Leading edge pill/bar indicator |
 
-### 5.5 Progress & Install State
+### 5.5 Progress & install state
 
 Progress indicators during install/upgrade operations are a core BrewUI-branded moment — amber applies.
 
@@ -239,7 +239,7 @@ Progress indicators during install/upgrade operations are a core BrewUI-branded 
 | `badge.cornerRadius` | `4pt` | `4pt` |
 | `badge.fontSize` | `fontSize.caption (11pt)` | `fontSize.caption (11pt)` |
 
-### 5.7 Command Console
+### 5.7 Command console
 
 The console is intentionally always dark — this is the "terminal roots" principle in action. It does not invert to a light surface in light mode. It uses a fixed palette.
 
@@ -262,7 +262,7 @@ The console is intentionally always dark — this is the "terminal roots" princi
 
 ---
 
-## 6. Spacing & Layout
+## 6. Spacing & layout
 
 Follows an 8pt base grid, with a 4pt half-step for tight internal spacing.
 
@@ -282,7 +282,7 @@ Follows an 8pt base grid, with a 4pt half-step for tight internal spacing.
 
 ---
 
-## 7. Corner Radii
+## 7. Corner radii
 
 | Token | Value | Usage |
 |---|---|---|
@@ -293,7 +293,7 @@ Follows an 8pt base grid, with a 4pt half-step for tight internal spacing.
 
 ---
 
-## 8. Elevation & Shadow
+## 8. Elevation & shadow
 
 macOS uses vibrancy and material layers rather than heavy shadows. Use `.ultraThinMaterial` / `.regularMaterial` SwiftUI modifiers where possible. The tokens below are for contexts where explicit shadows are required (e.g. floating panels in non-vibrancy contexts).
 
@@ -329,7 +329,7 @@ macOS uses vibrancy and material layers rather than heavy shadows. Use `.ultraTh
 
 ---
 
-## 10. Motion & Animation
+## 10. Motion & animation
 
 Follow macOS standard animation curves. Avoid custom spring configs unless matching system defaults.
 
@@ -342,7 +342,7 @@ Follow macOS standard animation curves. Avoid custom spring configs unless match
 
 ---
 
-## 11. Accessibility Targets
+## 11. Accessibility targets
 
 | Requirement | Value |
 |---|---|
