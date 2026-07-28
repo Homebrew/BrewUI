@@ -187,6 +187,10 @@ public enum ANSIParser {
                 // following codes aren't misread, but leave the foreground at default rather than approximate.
                 index += extendedColorArgumentCount(after: codes, from: index)
                 result.foreground = nil
+            case 48:
+                // Extended background: not modelled and not rendered, but its arguments must still be
+                // consumed so palette/RGB values aren't misread as independent SGR codes (e.g. 31 → red).
+                index += extendedColorArgumentCount(after: codes, from: index)
             default:
                 break
             }

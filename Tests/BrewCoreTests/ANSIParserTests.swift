@@ -131,6 +131,21 @@ struct ANSIParserTests {
         #expect(spans == [ANSISpan(text: "X", style: ANSIStyle(foreground: .green))])
     }
 
+    @Test func `extended background introducer is consumed without touching the foreground`() {
+        // 48;5;31 is a 256-colour background; its 31 must not be read as a red foreground, and the
+        // trailing 1 must still apply as bold.
+        let spans = ANSIParser.parse("\u{1B}[48;5;31;1mX")
+
+        #expect(spans == [ANSISpan(text: "X", style: ANSIStyle(foreground: nil, bold: true))])
+    }
+
+    @Test func `truecolour background introducer consumes its three arguments`() {
+        // 48;2;10;20;30 is a truecolour background; the following 32 (green) must still be read as a foreground.
+        let spans = ANSIParser.parse("\u{1B}[48;2;10;20;30;32mX")
+
+        #expect(spans == [ANSISpan(text: "X", style: ANSIStyle(foreground: .green))])
+    }
+
     @Test func `non-SGR CSI sequences are stripped`() {
         // ESC[2K clears the line, ESC[1A moves the cursor up — both dropped, leaving only visible text.
         let spans = ANSIParser.parse("\u{1B}[2K\u{1B}[1Aprogress")
