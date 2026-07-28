@@ -34,12 +34,12 @@ struct ConsoleBody: View {
                     for: line,
                     defaultColor: line.stream == .stderr ? Color.brewStatusError : Color.brewTextPrimary,
                 ))
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 1, leading: BrewSpacing.lg, bottom: 1, trailing: BrewSpacing.lg))
-                    .id(line.id)
+                .font(.system(.body, design: .monospaced))
+                .textSelection(.enabled)
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 1, leading: BrewSpacing.lg, bottom: 1, trailing: BrewSpacing.lg))
+                .id(line.id)
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)

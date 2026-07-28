@@ -176,11 +176,11 @@ public enum ANSIParser {
                 result.bold = true
             case 22:
                 result.bold = false
-            case 30...37:
+            case 30 ... 37:
                 result.foreground = standardColor(forOffset: code - 30)
             case 39:
                 result.foreground = nil
-            case 90...97:
+            case 90 ... 97:
                 result.foreground = brightColor(forOffset: code - 90)
             case 38:
                 // Extended foreground (256-colour/truecolour): consume the introducer's arguments so the
