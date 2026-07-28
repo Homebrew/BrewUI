@@ -117,7 +117,7 @@ struct ANSIParserTests {
         #expect(spans == [ANSISpan(text: "text", style: .default)])
     }
 
-    @Test func `256-colour introducer is consumed and following codes still parse`() {
+    @Test func `extended 256-colour introducer is consumed and following codes still parse`() {
         // 38;5;12 selects a palette colour we don't model; the trailing bold must still apply.
         let spans = ANSIParser.parse("\u{1B}[38;5;12;1mX")
 
