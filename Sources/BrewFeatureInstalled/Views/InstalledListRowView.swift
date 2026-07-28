@@ -163,20 +163,6 @@ struct InstalledListRowView: View {
     }
 }
 
-struct InstalledSectionHeader: View {
-    let title: String
-    let count: Int
-
-    var body: some View {
-        Text("\(title) (\(count))")
-            .font(.brewCaption2)
-            .foregroundStyle(Color.brewTextTertiary)
-            .textCase(.uppercase)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityAddTraits(.isHeader)
-    }
-}
-
 #if DEBUG
 
     #Preview("Formula with upgrade") {

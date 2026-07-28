@@ -9,7 +9,6 @@ import BrewCoreTestSupport
 @testable import BrewFeatureInstalled
 import BrewRepositories
 @testable import BrewRepositoryInterfaces
-import BrewServicesTestSupport
 import Testing
 
 @MainActor

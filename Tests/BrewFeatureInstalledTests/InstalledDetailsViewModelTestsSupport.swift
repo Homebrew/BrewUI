@@ -4,7 +4,6 @@ import BrewCoreTestSupport
 @testable import BrewFeatureInstalled
 import BrewRepositories
 @testable import BrewRepositoryInterfaces
-import BrewServicesTestSupport
 import Foundation
 import Testing
 
@@ -19,15 +18,6 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
         fixedPhase
     }
 
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        if case .running = fixedPhase { return true }
-        return false
-    }
-
     func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {}
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
@@ -38,12 +28,6 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }
@@ -65,14 +49,6 @@ actor ThrowingSubmitCommandCenter: BrewCommandCenter {
         .idle
     }
 
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        false
-    }
-
     func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
         throw error
     }
@@ -85,12 +61,6 @@ actor ThrowingSubmitCommandCenter: BrewCommandCenter {
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }
@@ -114,14 +84,6 @@ actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
         runningPhase
     }
 
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        true
-    }
-
     func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
         submitCallCount += 1
     }
@@ -138,12 +100,6 @@ actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
         }
     }
 
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
     func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
         AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
@@ -156,14 +112,6 @@ actor SubmitRecordingCommandCenter: BrewCommandCenter {
 
     func phase(for _: BrewOperationID) async -> BrewOperationPhase {
         .idle
-    }
-
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        false
     }
 
     func submit(id: BrewOperationID, command: any BrewMutatingCommand) async throws {
@@ -189,12 +137,6 @@ actor SubmitRecordingCommandCenter: BrewCommandCenter {
         }
     }
 
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
     func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
         AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
@@ -207,14 +149,6 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
     private var continuation: CheckedContinuation<Void, Never>?
     func phase(for _: BrewOperationID) async -> BrewOperationPhase {
         .idle
-    }
-
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        submitCallCount > 0
     }
 
     func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
@@ -240,12 +174,6 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }

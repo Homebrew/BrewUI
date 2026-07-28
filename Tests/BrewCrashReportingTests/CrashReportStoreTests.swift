@@ -65,9 +65,11 @@ struct CrashReportStoreTests {
     }
 
     @Test func `unrelated files in the directory are ignored`() throws {
-        let store = makeTemporaryStore()
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CrashReportStoreTests-\(UUID().uuidString)", isDirectory: true)
+        let store = CrashReportStore(directoryURL: directory)
         try store.ensureDirectoryExists()
-        try Data("noise".utf8).write(to: store.directory.appendingPathComponent("notes.txt"))
+        try Data("noise".utf8).write(to: directory.appendingPathComponent("notes.txt"))
         let saved = try store.save(text: "boom", date: Date(timeIntervalSince1970: 1000))
 
         #expect(store.pendingReports() == [saved])

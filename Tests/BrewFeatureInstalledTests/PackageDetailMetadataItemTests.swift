@@ -3,22 +3,14 @@
 //  BrewTests
 //
 
-import BrewCLI
 import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureInstalled
 import BrewRepositories
-import BrewRepositoryInterfaces
-import BrewServicesTestSupport
 import Foundation
 import Testing
 
 struct PackageDetailMetadataItemTests {
-    @Test func `info command uses package name`() {
-        let item = PackageDetailMetadataItem(package: InstalledBrewPackage.fixture(name: "wget", kind: .formula))
-        #expect(item.infoCommand == "brew info wget")
-    }
-
     @Test func `metadata values normalize missing versions to em dash`() {
         let item = PackageDetailMetadataItem(
             package: .fixture(name: "wget", latestVersion: " ", installedVersions: []),

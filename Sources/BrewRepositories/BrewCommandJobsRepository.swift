@@ -3,7 +3,6 @@
 //  Brew
 //
 
-import BrewCLI
 import BrewCore
 import BrewRepositoryInterfaces
 import Foundation

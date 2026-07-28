@@ -6,11 +6,11 @@
 import Foundation
 
 /// Builds the human-readable text of a crash report.
-public enum CrashReportFormatter {
+enum CrashReportFormatter {
     /// The header a signal handler writes before its raw `backtrace_symbols_fd`
     /// dump, so it ends with a `Call stack:` marker and newline. Must be built
     /// before the crash — string building is not async-signal-safe.
-    public static func signalReportHeader(
+    static func signalReportHeader(
         environment: CrashReportEnvironment,
         date: Date,
     ) -> String {
@@ -24,7 +24,7 @@ public enum CrashReportFormatter {
         """ + "\n"
     }
 
-    public static func makeReportText(
+    static func makeReportText(
         kind: String,
         detail: String?,
         callStack: [String],

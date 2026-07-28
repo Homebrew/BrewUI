@@ -13,11 +13,6 @@ struct PackageInstallCommand: BrewMutatingCommand {
     let packageName: String
     let kind: InstalledPackageKind
 
-    init(package: DiscoveryBrewPackage) {
-        packageName = package.name
-        kind = package.kind
-    }
-
     init(kind: InstalledPackageKind, name: String) {
         packageName = name
         self.kind = kind
