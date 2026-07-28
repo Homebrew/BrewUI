@@ -22,15 +22,26 @@ public struct BrewCommandService: BrewCommandRunning {
         process.standardError = errPipe
         process.standardInput = FileHandle.nullDevice
 
+        // Reading the sink once here (rather than per chunk) snapshots the value while the TaskLocal scope is active.
+        // When no console is observing, `sink` is nil and the drain skips the line-splitting work.
+        let sink = BrewCommandOutputContext.sink
+
+        // A console is observing this command, so its output is destined for the console panel rather than a
+        // parser. Homebrew strips colour when stdout isn't a TTY (which a `Pipe` never is); `HOMEBREW_COLOR`
+        // forces it back on, and `CLICOLOR_FORCE` does the same for the BSD-convention tools brew shells out to.
+        // We only force colour on the streamed path so parsed read commands (`brew config`, `--json`) stay clean.
+        if sink != nil {
+            var environment = ProcessInfo.processInfo.environment
+            environment["HOMEBREW_COLOR"] = "1"
+            environment["CLICOLOR_FORCE"] = "1"
+            process.environment = environment
+        }
+
         do {
             try process.run()
         } catch {
             throw BrewCommandError.launchFailed(underlying: String(describing: error))
         }
-
-        // Reading the sink once here (rather than per chunk) snapshots the value while the TaskLocal scope is active.
-        // When no console is observing, `sink` is nil and the drain skips the line-splitting work.
-        let sink = BrewCommandOutputContext.sink
 
         let processController = ProcessController(process)
         return try await withTaskCancellationHandler(operation: {
