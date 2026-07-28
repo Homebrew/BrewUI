@@ -39,6 +39,18 @@ struct CommandJobExportTests {
         #expect(job.formattedOutputForExport() == "==> downloading\n[stderr] warning: x\n==> linking")
     }
 
+    @Test func `formattedOutputForExport strips ANSI colour codes`() {
+        let job = CommandJob.materialize(
+            id: BrewOperationID(kind: .formula, name: "gh"),
+            kind: .installFormula,
+            phase: .running(.installFormula),
+        )
+        job.appendOutput(BrewCommandOutputLine(stream: .stdout, text: "\u{1B}[1;34m==>\u{1B}[0m Pouring"))
+        job.appendOutput(BrewCommandOutputLine(stream: .stderr, text: "\u{1B}[31mWarning:\u{1B}[0m x"))
+
+        #expect(job.formattedOutputForExport() == "==> Pouring\n[stderr] Warning: x")
+    }
+
     @Test func `formattedOutputForExport on empty buffer is empty string`() {
         let job = CommandJob.materialize(
             id: BrewOperationID(kind: .formula, name: "gh"),

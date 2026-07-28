@@ -19,14 +19,16 @@ extension CommandJob {
     }
 
     /// Plain-text dump of the output buffer for clipboard / save use. `stderr` lines get a `[stderr] ` prefix
-    /// so a reader can disambiguate without losing the timeline.
+    /// so a reader can disambiguate without losing the timeline. ANSI colour codes are stripped so exported
+    /// logs are plain text, matching what the reader sees on screen.
     func formattedOutputForExport() -> String {
         output.map { line in
+            let text = ANSIParser.plainText(line.text)
             switch line.stream {
             case .stdout:
-                line.text
+                return text
             case .stderr:
-                "[stderr] \(line.text)"
+                return "[stderr] \(text)"
             }
         }
         .joined(separator: "\n")
