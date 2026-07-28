@@ -50,7 +50,13 @@ permissions:
 
 jobs:
   build:
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    # Dependabot PRs don't get the Actions signing secrets (they only see the
+    # separate Dependabot secrets store), so a signed build can't run for them —
+    # skip the job entirely rather than fail on an empty certificate import.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: macos-26
     env:
       NOTARIZE: ${{ inputs.notarize == true || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
