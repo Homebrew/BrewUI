@@ -132,7 +132,6 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
 
         let kind = command.operationKind
         let queue = workQueue
-        let ctx = executionContext
 
         // An internal AsyncStream serves as a thread-safe, FIFO-ordered buffer between the subprocess reader threads
         // (which call `sink` synchronously) and the actor's listener-broadcast (which requires actor isolation).
@@ -140,9 +139,14 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         let (lineStream, lineContinuation) = AsyncStream<BrewCommandOutputLine>.makeStream(
             bufferingPolicy: .unbounded,
         )
-        let outputSink: @Sendable (BrewCommandOutputLine) -> Void = { line in
+
+        // Attach the console stream to a per-operation copy of the context; commands forward it into the runner,
+        // which streams lines here and forces colour. Read commands run with the base (console-less) context.
+        var operationContext = executionContext
+        operationContext.console = ConsoleOutputStream { line in
             lineContinuation.yield(line)
         }
+        let ctx = operationContext
 
         let drainTask = Task { [weak self] in
             for await line in lineStream {
@@ -151,10 +155,8 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         }
 
         let task = Task<Void, Error> {
-            try await BrewCommandOutputContext.$sink.withValue(outputSink) {
-                try await queue.run {
-                    try await command.run(in: ctx)
-                }
+            try await queue.run {
+                try await command.run(in: ctx)
             }
         }
 

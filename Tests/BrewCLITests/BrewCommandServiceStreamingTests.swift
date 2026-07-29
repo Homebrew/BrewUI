@@ -11,20 +11,19 @@ import Foundation
 import Testing
 
 struct BrewCommandServiceStreamingTests {
-    @Test func `run with task-local sink emits each stdout line as it arrives`() async throws {
+    @Test func `run with console stream emits each stdout line as it arrives`() async throws {
         let service = BrewCommandService()
         let executable = URL(fileURLWithPath: "/bin/zsh")
         let collector = OutputCollector()
 
-        let sink: @Sendable (BrewCommandOutputLine) -> Void = { line in
+        let console = ConsoleOutputStream { line in
             collector.append(line)
         }
-        let output: CommandOutput = try await BrewCommandOutputContext.$sink.withValue(sink) {
-            try await service.run(
-                executableURL: executable,
-                arguments: ["-lc", "printf 'one\\ntwo\\nthree\\n'"],
-            )
-        }
+        let output = try await service.run(
+            executableURL: executable,
+            arguments: ["-lc", "printf 'one\\ntwo\\nthree\\n'"],
+            console: console,
+        )
 
         #expect(output.standardOutput == "one\ntwo\nthree\n")
         let lines = collector.allLines()
@@ -32,20 +31,19 @@ struct BrewCommandServiceStreamingTests {
         #expect(stdoutLines == ["one", "two", "three"])
     }
 
-    @Test func `run with task-local sink flushes trailing line lacking newline`() async throws {
+    @Test func `run with console stream flushes trailing line lacking newline`() async throws {
         let service = BrewCommandService()
         let executable = URL(fileURLWithPath: "/bin/zsh")
         let collector = OutputCollector()
 
-        let sink: @Sendable (BrewCommandOutputLine) -> Void = { line in
+        let console = ConsoleOutputStream { line in
             collector.append(line)
         }
-        let output: CommandOutput = try await BrewCommandOutputContext.$sink.withValue(sink) {
-            try await service.run(
-                executableURL: executable,
-                arguments: ["-lc", "printf 'hello-out'; printf 'hello-err' >&2"],
-            )
-        }
+        let output = try await service.run(
+            executableURL: executable,
+            arguments: ["-lc", "printf 'hello-out'; printf 'hello-err' >&2"],
+            console: console,
+        )
 
         #expect(output.standardOutput == "hello-out")
         #expect(output.standardError == "hello-err")
@@ -54,20 +52,19 @@ struct BrewCommandServiceStreamingTests {
         #expect(lines.contains { $0.stream == .stderr && $0.text == "hello-err" })
     }
 
-    @Test func `run with task-local sink separates stdout and stderr streams`() async throws {
+    @Test func `run with console stream separates stdout and stderr streams`() async throws {
         let service = BrewCommandService()
         let executable = URL(fileURLWithPath: "/bin/zsh")
         let collector = OutputCollector()
 
-        let sink: @Sendable (BrewCommandOutputLine) -> Void = { line in
+        let console = ConsoleOutputStream { line in
             collector.append(line)
         }
-        _ = try await BrewCommandOutputContext.$sink.withValue(sink) {
-            try await service.run(
-                executableURL: executable,
-                arguments: ["-lc", "printf 'out1\\n'; printf 'err1\\n' >&2; printf 'out2\\n'"],
-            )
-        }
+        _ = try await service.run(
+            executableURL: executable,
+            arguments: ["-lc", "printf 'out1\\n'; printf 'err1\\n' >&2; printf 'out2\\n'"],
+            console: console,
+        )
 
         let lines = collector.allLines()
         let stdout = lines.filter { $0.stream == .stdout }.map(\.text)
@@ -76,7 +73,7 @@ struct BrewCommandServiceStreamingTests {
         #expect(stderr == ["err1"])
     }
 
-    @Test func `run without task-local sink preserves byte-exact CommandOutput`() async throws {
+    @Test func `run without a console stream preserves byte-exact CommandOutput`() async throws {
         let service = BrewCommandService()
         let executable = URL(fileURLWithPath: "/bin/zsh")
 

@@ -24,6 +24,7 @@ struct DoctorFixCommand: BrewMutatingCommand {
         let output = try await context.commandRunner.run(
             executableURL: brew,
             arguments: arguments,
+            console: context.console,
         )
         guard output.terminationStatus == 0 else {
             throw BrewCommandError.failed(

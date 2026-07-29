@@ -22,7 +22,11 @@ public actor DoctorReadCommand: BrewMutatingCommand {
 
     public func run(in context: BrewCommandExecutionContext) async throws {
         let brew = try context.brewExecutableURL()
-        let output = try await context.commandRunner.run(executableURL: brew, arguments: ["doctor"])
+        let output = try await context.commandRunner.run(
+            executableURL: brew,
+            arguments: ["doctor"],
+            console: context.console,
+        )
         // `brew doctor` exits non-zero when it finds warnings — normal, not an error. Capture both
         // streams and let the parser decide; the runner's sink has already broadcast lines to the console.
         //

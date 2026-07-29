@@ -25,6 +25,7 @@ struct BulkUpgradeCommand: BrewMutatingCommand {
         let output = try await context.commandRunner.run(
             executableURL: brew,
             arguments: selection.arguments,
+            console: context.console,
         )
         guard output.terminationStatus == 0 else {
             throw BrewCommandError.failed(

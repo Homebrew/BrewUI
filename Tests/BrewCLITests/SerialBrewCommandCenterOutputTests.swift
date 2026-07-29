@@ -26,7 +26,7 @@ private actor AllOutputCollector {
     }
 }
 
-/// Emits a fixed set of lines through ``BrewCommandOutputContext/sink`` — exercises the sink
+/// Emits a fixed set of lines through the context's ``ConsoleOutputStream`` — exercises the sink
 /// plumbing without invoking a real subprocess.
 private struct EmitOutputCommand: BrewMutatingCommand {
     let lines: [(BrewCommandOutputLine.Stream, String)]
@@ -36,9 +36,8 @@ private struct EmitOutputCommand: BrewMutatingCommand {
     }
 
     func run(in context: BrewCommandExecutionContext) async throws {
-        _ = context
         for (stream, text) in lines {
-            BrewCommandOutputContext.sink?(BrewCommandOutputLine(stream: stream, text: text))
+            context.console?.sink(BrewCommandOutputLine(stream: stream, text: text))
             try await Task.sleep(for: .milliseconds(2))
         }
     }
