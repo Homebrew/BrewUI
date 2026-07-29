@@ -78,7 +78,7 @@ GEM
     http_parser.rb (0.8.1)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    io-event (1.19.1)
+    io-event (1.19.3)
     jekyll (4.4.1)
       addressable (~> 2.4)
       base64 (~> 0.2)
@@ -198,7 +198,7 @@ GEM
       google-protobuf (~> 4.31)
     sass-embedded (1.101.0-x86_64-linux-musl)
       google-protobuf (~> 4.31)
-    sorbet-runtime (0.6.13333)
+    sorbet-runtime (0.6.13359)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
     tomlrb (2.0.4)
@@ -209,7 +209,7 @@ GEM
       ethon (>= 0.18.0)
     unicode-display_width (2.6.0)
     webrick (1.9.2)
-    yard (0.9.44)
+    yard (0.9.45)
     yard-sorbet (0.9.0)
       sorbet-runtime
       yard
