@@ -45,6 +45,22 @@ struct DoctorReadCommandTests {
         #expect(await command.capturedOutput == "ok line\nWarning: detail")
     }
 
+    @Test func `strips ANSI colour codes from captured output`() async throws {
+        // Console streaming forces HOMEBREW_COLOR, so brew doctor colourises its warning prefix/headers.
+        // The captured copy feeds the colour-blind parser, so it must come back plain.
+        let command = DoctorReadCommand()
+        let runner = StubbedCommandRunner(
+            output: CommandOutput(
+                standardOutput: "\u{1B}[1;34m==>\u{1B}[0m Checking",
+                standardError: "\u{1B}[31mWarning:\u{1B}[0m unlinked kegs",
+                terminationStatus: 1,
+            ),
+        )
+        try await command.run(in: Self.context(runner: runner))
+
+        #expect(await command.capturedOutput == "==> Checking\nWarning: unlinked kegs")
+    }
+
     @Test func `returns empty when both streams are empty`() async throws {
         let command = DoctorReadCommand()
         let runner = StubbedCommandRunner(

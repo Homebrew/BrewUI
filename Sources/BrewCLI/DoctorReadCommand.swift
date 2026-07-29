@@ -24,9 +24,12 @@ public actor DoctorReadCommand: BrewMutatingCommand {
         let brew = try context.brewExecutableURL()
         let output = try await context.commandRunner.run(executableURL: brew, arguments: ["doctor"])
         // `brew doctor` exits non-zero when it finds warnings — normal, not an error. Capture both
-        // streams and let the parser decide; the runner's task-local sink has already broadcast lines
-        // to the console.
-        capturedOutput = combinedOutput(of: output)
+        // streams and let the parser decide; the runner's sink has already broadcast lines to the console.
+        //
+        // Strip ANSI here: console streaming forces `HOMEBREW_COLOR`, so `brew doctor` emits colour codes
+        // around `Warning:`/headers. The console lines keep them (rendered), but `DoctorOutputParser` is
+        // colour-blind, so the copy we hand it must be plain or block classification misfires.
+        capturedOutput = ANSIParser.plainText(combinedOutput(of: output))
     }
 
     private func combinedOutput(of output: CommandOutput) -> String {
