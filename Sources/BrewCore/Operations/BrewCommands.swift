@@ -40,7 +40,7 @@ public enum BrewCommands {
         BrewCommand(operationKind: .doctorFix, arguments: arguments)
     }
 
-    /// `brew doctor` — read-only; its output is parsed, so it is run in capture mode (no forced colour).
+    /// `brew doctor` — read-only; run in capture mode so the repository gets its output back to strip + parse.
     public static func doctorRead() -> BrewCommand {
         BrewCommand(operationKind: .doctorRead, arguments: ["doctor"])
     }

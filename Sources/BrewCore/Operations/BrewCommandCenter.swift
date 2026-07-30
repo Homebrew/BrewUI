@@ -34,9 +34,10 @@ public protocol BrewCommandCenter: Actor {
 
     /// Run `command` keyed by `id`, returning its faithful ``CommandOutput`` for inspection/parsing.
     ///
-    /// Streams to the console (as a pill) but does **not** force colour — the output is going to be consumed,
-    /// so it stays clean. A non-zero exit is **not** treated as a failure (e.g. `brew doctor` exits non-zero on
-    /// warnings); inspect ``CommandOutput/terminationStatus`` if you care.
+    /// Streams to the console as a **coloured** pill (all scheduled work is user-visible), so the returned
+    /// bytes may contain ANSI colour — callers that parse must strip it (see `BrewDoctorRepository`). A
+    /// non-zero exit is **not** treated as a failure (e.g. `brew doctor` exits non-zero on warnings); inspect
+    /// ``CommandOutput/terminationStatus`` if you care.
     ///
     /// **Concurrency:** Conforming types such as ``SerialBrewCommandCenter`` run work **serially**.
     /// **Idempotence:** A second call for the same `id` while the first is in flight awaits and returns the same output.

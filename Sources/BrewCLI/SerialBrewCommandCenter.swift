@@ -22,8 +22,9 @@ private actor SerialBrewWorkQueue {
     }
 }
 
-/// Whether a scheduled run's output is captured (parsed) or purely displayed. Drives two coupled policies:
-/// colour (display only) and non-zero-exit handling (a failure only when we expect success).
+/// Whether a scheduled run's output is captured (returned to the caller) or purely displayed. Drives
+/// non-zero-exit handling: a failure only when we expect success (`.display`), not when capturing (a
+/// `brew doctor` warning exit is normal).
 private enum BrewExecutionMode {
     case capture
     case display
@@ -137,8 +138,9 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         _ = try await perform(command, id: id, mode: .display)
     }
 
-    /// The single run algorithm: serialise, stream lines to listeners, track phase, and (in `.display` mode)
-    /// force colour and treat a non-zero exit as a failure. Returns the faithful ``CommandOutput``.
+    /// The single run algorithm: serialise, stream lines to listeners, force colour (all scheduled work is a
+    /// user-visible console pill), track phase, and — in `.display` mode — treat a non-zero exit as a failure.
+    /// Returns the faithful ``CommandOutput``; capture callers that parse it strip ANSI at their boundary.
     private func perform(
         _ command: BrewCommand,
         id: BrewOperationID,
@@ -158,7 +160,7 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         )
         let options = BrewRunOptions(
             lineObserver: { line in lineContinuation.yield(line) },
-            forceColor: mode == .display,
+            forceColor: true,
         )
 
         let drainTask = Task { [weak self] in
