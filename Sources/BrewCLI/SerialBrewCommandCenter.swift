@@ -17,9 +17,16 @@ private typealias AllOutputStreamTermination =
 
 /// Runs async mutating work strictly one-at-a-time, including across `await` inside commands (serial policy).
 private actor SerialBrewWorkQueue {
-    func run(_ work: @Sendable @escaping () async throws -> Void) async rethrows {
+    func run<T: Sendable>(_ work: @Sendable @escaping () async throws -> T) async rethrows -> T {
         try await work()
     }
+}
+
+/// Whether a scheduled run's output is captured (parsed) or purely displayed. Drives two coupled policies:
+/// colour (display only) and non-zero-exit handling (a failure only when we expect success).
+private enum BrewExecutionMode {
+    case capture
+    case display
 }
 
 private struct PhaseStreamListener {
@@ -48,7 +55,7 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
     private let workQueue = SerialBrewWorkQueue()
 
     private var trackedPhasesByID: [BrewOperationID: BrewOperationPhase] = [:]
-    private var inflightByID: [BrewOperationID: Task<Void, Error>] = [:]
+    private var inflightByID: [BrewOperationID: Task<CommandOutput, Error>] = [:]
     private var phaseListenersByID: [BrewOperationID: [PhaseStreamListener]] = [:]
     private var allPhaseListeners: [AllPhaseStreamListener] = []
     private var outputListenersByID: [BrewOperationID: [OutputStreamListener]] = [:]
@@ -121,32 +128,38 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         }
     }
 
-    public func submit(
+    @discardableResult
+    public func run(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
+        try await perform(command, id: id, mode: .capture)
+    }
+
+    public func runExpectingSuccess(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await perform(command, id: id, mode: .display)
+    }
+
+    /// The single run algorithm: serialise, stream lines to listeners, track phase, and (in `.display` mode)
+    /// force colour and treat a non-zero exit as a failure. Returns the faithful ``CommandOutput``.
+    private func perform(
+        _ command: BrewCommand,
         id: BrewOperationID,
-        command: any BrewMutatingCommand,
-    ) async throws {
+        mode: BrewExecutionMode,
+    ) async throws -> CommandOutput {
         if let existing = inflightByID[id] {
-            try await existing.value
-            return
+            return try await existing.value
         }
 
         let kind = command.operationKind
-        let queue = workQueue
 
         // An internal AsyncStream serves as a thread-safe, FIFO-ordered buffer between the subprocess reader threads
-        // (which call `sink` synchronously) and the actor's listener-broadcast (which requires actor isolation).
+        // (which call the observer synchronously) and the actor's listener-broadcast (which requires actor isolation).
         // Yielding into a continuation is Sendable + thread-safe; a single drain Task pulls in order onto the actor.
         let (lineStream, lineContinuation) = AsyncStream<BrewCommandOutputLine>.makeStream(
             bufferingPolicy: .unbounded,
         )
-
-        // Attach the console stream to a per-operation copy of the context; commands forward it into the runner,
-        // which streams lines here and forces colour. Read commands run with the base (console-less) context.
-        var operationContext = executionContext
-        operationContext.console = ConsoleOutputStream { line in
-            lineContinuation.yield(line)
-        }
-        let ctx = operationContext
+        let options = BrewRunOptions(
+            lineObserver: { line in lineContinuation.yield(line) },
+            forceColor: mode == .display,
+        )
 
         let drainTask = Task { [weak self] in
             for await line in lineStream {
@@ -154,29 +167,53 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
             }
         }
 
-        let task = Task<Void, Error> {
-            try await queue.run {
-                try await command.run(in: ctx)
-            }
-        }
-
+        let task = executionTask(command: command, options: options, mode: mode)
         inflightByID[id] = task
         defer { inflightByID[id] = nil }
 
         trackedPhasesByID[id] = .running(kind)
         notifyPhaseListeners(for: id)
         do {
-            try await task.value
+            let output = try await task.value
             lineContinuation.finish()
             await drainTask.value
             trackedPhasesByID[id] = nil
             notifyPhaseListeners(for: id)
+            return output
         } catch {
             lineContinuation.finish()
             await drainTask.value
             trackedPhasesByID[id] = .failed(reason: OperationFailure(catching: error))
             notifyPhaseListeners(for: id)
             throw error
+        }
+    }
+
+    /// Builds the serialised subprocess task: resolve `brew`, run it, and — in `.display` mode — turn a
+    /// non-zero exit into a failure inside the task so the tracked phase reflects it.
+    private func executionTask(
+        command: BrewCommand,
+        options: BrewRunOptions,
+        mode: BrewExecutionMode,
+    ) -> Task<CommandOutput, Error> {
+        let queue = workQueue
+        let ctx = executionContext
+        return Task {
+            try await queue.run {
+                let brew = try ctx.brewExecutableURL()
+                let output = try await ctx.commandRunner.run(
+                    executableURL: brew,
+                    arguments: command.arguments,
+                    options: options,
+                )
+                if mode == .display, output.terminationStatus != 0 {
+                    throw BrewCommandError.failed(
+                        exitCode: output.terminationStatus,
+                        stderr: output.standardError,
+                    )
+                }
+                return output
+            }
         }
     }
 

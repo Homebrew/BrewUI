@@ -10,14 +10,10 @@ import Foundation
 public struct BrewCommandService: BrewCommandRunning {
     public init() {}
 
-    public func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
-        try await run(executableURL: executableURL, arguments: arguments, console: nil)
-    }
-
     public func run(
         executableURL: URL,
         arguments: [String],
-        console: ConsoleOutputStream?,
+        options: BrewRunOptions,
     ) async throws -> CommandOutput {
         try Task.checkCancellation()
 
@@ -30,14 +26,13 @@ public struct BrewCommandService: BrewCommandRunning {
         process.standardError = errPipe
         process.standardInput = FileHandle.nullDevice
 
-        // When no console is observing, `sink` is nil and the drain skips the line-splitting work.
-        let sink = console?.sink
+        // When nothing is observing, `sink` is nil and the drain skips the line-splitting work.
+        let sink = options.lineObserver
 
-        // A console is observing this command, so its output is destined for the console panel rather than a
-        // parser. Homebrew strips colour when stdout isn't a TTY (which a `Pipe` never is); `HOMEBREW_COLOR`
-        // forces it back on, and `CLICOLOR_FORCE` does the same for the BSD-convention tools brew shells out to.
-        // We only force colour on the streamed path so parsed read commands (`brew config`, `--json`) stay clean.
-        if console != nil {
+        // Homebrew strips colour when stdout isn't a TTY (which a `Pipe` never is); `HOMEBREW_COLOR` forces it
+        // back on, and `CLICOLOR_FORCE` does the same for the BSD-convention tools brew shells out to. Only ever
+        // set for display-only output (the scheduler never sets it for output that will be parsed).
+        if options.forceColor {
             var environment = ProcessInfo.processInfo.environment
             environment["HOMEBREW_COLOR"] = "1"
             environment["CLICOLOR_FORCE"] = "1"

@@ -26,81 +26,86 @@ private actor AllPhaseStreamCollector {
     }
 }
 
-private func makeSerialCommandCenterForTests() -> SerialBrewCommandCenter {
+private let successOutput = CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+
+/// A plain command value used wherever the test only cares about scheduling, not argv.
+private let noopCommand = BrewCommand(operationKind: .upgradeFormula, arguments: ["noop"])
+
+private func makeCenter(runner: any BrewCommandRunning) -> SerialBrewCommandCenter {
     let ctx = BrewCommandExecutionContext(
-        commandRunner: MockBrewCommandRunner(responses: [:]),
+        commandRunner: runner,
         locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
     )
     return SerialBrewCommandCenter(executionContext: ctx)
 }
 
-struct SerialBrewCommandCenterTests {
-    private func makeCenter() -> SerialBrewCommandCenter {
-        makeSerialCommandCenterForTests()
-    }
+private func makeSucceedingCenter() -> SerialBrewCommandCenter {
+    makeCenter(runner: ClosureRunner { _ in successOutput })
+}
 
+struct SerialBrewCommandCenterTests {
     @Test func `serializes operations so second runs after first`() async throws {
-        let center = makeCenter()
+        let collector = OrderCollector()
+        // Commands are inert data now, so the ordering/sleep behaviour lives in the runner, keyed by argv.
+        let center = makeCenter(runner: ClosureRunner { argv in
+            if argv == ["a"] {
+                await collector.append("a-start")
+                try await Task.sleep(for: .milliseconds(20))
+                await collector.append("a-end")
+            } else {
+                await collector.append("b")
+            }
+            return successOutput
+        })
         let idA = BrewOperationID(kind: .formula, name: "a")
         let idB = BrewOperationID(kind: .formula, name: "b")
-        let collector = OrderCollector()
 
-        try await center.submit(
-            id: idA,
-            command: OrderingSleepCommand(collector: collector, prefix: "a"),
-        )
-        try await center.submit(
-            id: idB,
-            command: AppendTokenCommand(collector: collector, token: "b"),
-        )
+        try await center.runExpectingSuccess(BrewCommand(operationKind: .upgradeFormula, arguments: ["a"]), id: idA)
+        try await center.runExpectingSuccess(BrewCommand(operationKind: .upgradeFormula, arguments: ["b"]), id: idB)
 
         let order = await collector.snapshot()
         #expect(order == ["a-start", "a-end", "b"])
     }
 
     @Test func `duplicate id coalesces to a single command body`() async throws {
-        let center = makeCenter()
-        let id = BrewOperationID(kind: .formula, name: "git")
         let counter = InvocationCounter()
+        let center = makeCenter(runner: ClosureRunner { _ in
+            await counter.increment()
+            try await Task.sleep(for: .milliseconds(30))
+            return successOutput
+        })
+        let id = BrewOperationID(kind: .formula, name: "git")
 
-        let first = Task {
-            try await center.submit(
-                id: id,
-                command: SlowIncrementCommand(counter: counter),
-            )
-        }
+        let first = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
         try await Task.sleep(for: .milliseconds(5))
-        let second = Task {
-            try await center.submit(
-                id: id,
-                command: SlowIncrementCommand(counter: counter),
-            )
-        }
+        let second = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
 
         try await first.value
         try await second.value
-        let count = await counter.value
-        #expect(count == 1)
+        #expect(await counter.value == 1)
     }
 
     @Test func `clears running phase on success`() async throws {
-        let center = makeCenter()
+        let center = makeSucceedingCenter()
         let id = BrewOperationID(kind: .formula, name: "ok")
         #expect(await center.phase(for: id) == .idle)
 
-        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await center.runExpectingSuccess(noopCommand, id: id)
 
         #expect(await center.phase(for: id) == .idle)
         #expect(await !center.isActive(id: id))
     }
 
     @Test func `records failure with OperationFailure and clears in flight slot`() async throws {
-        let center = makeCenter()
+        // A non-zero exit is a failure in `.display` mode (runExpectingSuccess).
+        let center = makeCenter(runner: ClosureRunner { _ in
+            CommandOutput(standardOutput: "", standardError: "boom", terminationStatus: 1)
+        })
         let id = BrewOperationID(kind: .formula, name: "bad")
 
         do {
-            try await center.submit(id: id, command: ThrowingMutatingCommand())
-            Issue.record("expected submit to throw")
+            try await center.runExpectingSuccess(noopCommand, id: id)
+            Issue.record("expected run to throw")
         } catch {
             _ = error
         }
@@ -114,13 +119,29 @@ struct SerialBrewCommandCenterTests {
         #expect(await !center.isActive(id: id))
     }
 
+    @Test func `capture mode returns output and does not treat a non-zero exit as failure`() async throws {
+        // `brew doctor` exits non-zero on warnings — capture mode surfaces the output, not a failure.
+        let center = makeCenter(runner: ClosureRunner { _ in
+            CommandOutput(standardOutput: "warnings", standardError: "", terminationStatus: 1)
+        })
+        let id = BrewOperationID(kind: .formula, name: "doctor")
+
+        let output = try await center.run(BrewCommand(operationKind: .doctorRead, arguments: ["doctor"]), id: id)
+
+        #expect(output.standardOutput == "warnings")
+        #expect(output.terminationStatus == 1)
+        #expect(await center.phase(for: id) == .idle)
+    }
+
     @Test func `phaseByID exposes tracked entries`() async throws {
-        let center = makeCenter()
+        let center = makeCenter(runner: ClosureRunner { _ in
+            CommandOutput(standardOutput: "", standardError: "boom", terminationStatus: 1)
+        })
         let id = BrewOperationID(kind: .formula, name: "snapshot")
         #expect(await center.phaseByID().isEmpty)
 
         do {
-            try await center.submit(id: id, command: ThrowingMutatingCommand())
+            try await center.runExpectingSuccess(noopCommand, id: id)
         } catch {
             _ = error
         }
@@ -130,25 +151,22 @@ struct SerialBrewCommandCenterTests {
         #expect(await center.phase(for: id) == map[id])
     }
 
-    @Test func `mutating command uses injected mock runner not real brew`() async throws {
+    @Test func `runs the injected mock runner not real brew`() async throws {
         let argv = ["upgrade", "demo-formula"]
         let runner = MockBrewCommandRunner(responses: [
             argv: CommandOutput(standardOutput: "mock-ok", standardError: "", terminationStatus: 0),
         ])
-        let ctx = BrewCommandExecutionContext(
-            commandRunner: runner,
-            locator: BrewExecutableLocator(overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL),
-        )
-        let center = SerialBrewCommandCenter(executionContext: ctx)
+        let center = makeCenter(runner: runner)
         let id = BrewOperationID(kind: .formula, name: "demo-formula")
 
-        try await center.submit(id: id, command: RunMockedArgvCommand(arguments: argv))
+        let output = try await center.run(BrewCommand(operationKind: .upgradeFormula, arguments: argv), id: id)
 
+        #expect(output.standardOutput == "mock-ok")
         #expect(await center.phase(for: id) == .idle)
     }
 
     @Test func `phaseChanges streams initial idle then running and idle on success`() async throws {
-        let center = makeCenter()
+        let center = makeSucceedingCenter()
         let id = BrewOperationID(kind: .formula, name: "stream-success")
         let stream = await center.phaseChanges(for: id)
         let collector = PhaseStreamCollector()
@@ -159,7 +177,7 @@ struct SerialBrewCommandCenterTests {
         }
         defer { collect.cancel() }
 
-        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await center.runExpectingSuccess(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let values = await collector.phases
         #expect(values.count >= 3)
@@ -171,7 +189,7 @@ struct SerialBrewCommandCenterTests {
     }
 
     @Test func `phaseChanges multicast delivers to two subscribers`() async throws {
-        let center = makeCenter()
+        let center = makeSucceedingCenter()
         let id = BrewOperationID(kind: .formula, name: "multi-stream")
         let streamA = await center.phaseChanges(for: id)
         let streamB = await center.phaseChanges(for: id)
@@ -192,7 +210,7 @@ struct SerialBrewCommandCenterTests {
             taskB.cancel()
         }
 
-        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await center.runExpectingSuccess(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let countA = await collectorA.phases.count
         let countB = await collectorB.phases.count
@@ -201,27 +219,21 @@ struct SerialBrewCommandCenterTests {
     }
 
     @Test func `recording wrapper logs each submit while duplicate id coalesces body`() async throws {
+        let counter = InvocationCounter()
         let ctx = BrewCommandExecutionContext(
-            commandRunner: MockBrewCommandRunner(responses: [:]),
+            commandRunner: ClosureRunner { _ in
+                await counter.increment()
+                try await Task.sleep(for: .milliseconds(30))
+                return successOutput
+            },
             locator: BrewExecutableLocator(overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL),
         )
         let center = RecordingSerialBrewCommandCenter(executionContext: ctx)
         let id = BrewOperationID(kind: .formula, name: "git")
-        let counter = InvocationCounter()
 
-        let first = Task {
-            try await center.submit(
-                id: id,
-                command: SlowIncrementCommand(counter: counter),
-            )
-        }
+        let first = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
         try await Task.sleep(for: .milliseconds(5))
-        let second = Task {
-            try await center.submit(
-                id: id,
-                command: SlowIncrementCommand(counter: counter),
-            )
-        }
+        let second = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
 
         try await first.value
         try await second.value
@@ -235,7 +247,7 @@ struct SerialBrewCommandCenterTests {
 
 struct SerialBrewAllPhaseStreamTests {
     @Test func `allPhaseChanges emits transitions across multiple ids without per id subscriber`() async throws {
-        let center = makeSerialCommandCenterForTests()
+        let center = makeSucceedingCenter()
         let idA = BrewOperationID(kind: .formula, name: "all-phase-a")
         let idB = BrewOperationID(kind: .formula, name: "all-phase-b")
         let stream = await center.allPhaseChanges()
@@ -247,8 +259,8 @@ struct SerialBrewAllPhaseStreamTests {
         }
         defer { collect.cancel() }
 
-        try await center.submit(id: idA, command: EmptyMutatingCommand())
-        try await center.submit(id: idB, command: EmptyMutatingCommand())
+        try await center.runExpectingSuccess(noopCommand, id: idA)
+        try await center.runExpectingSuccess(noopCommand, id: idB)
         try await Task.sleep(for: .milliseconds(80))
         let events = await collector.events
         let eventsForA = events.filter { $0.0 == idA }.map(\.1)
@@ -266,7 +278,7 @@ struct SerialBrewAllPhaseStreamTests {
     }
 
     @Test func `allPhaseChanges multicast delivers same events to two subscribers`() async throws {
-        let center = makeSerialCommandCenterForTests()
+        let center = makeSucceedingCenter()
         let id = BrewOperationID(kind: .formula, name: "all-phase-multi")
         let streamA = await center.allPhaseChanges()
         let streamB = await center.allPhaseChanges()
@@ -287,7 +299,7 @@ struct SerialBrewAllPhaseStreamTests {
             taskB.cancel()
         }
 
-        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await center.runExpectingSuccess(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let eventsA = await collectorA.events
         let eventsB = await collectorB.events
@@ -300,7 +312,7 @@ struct SerialBrewAllPhaseStreamTests {
     }
 
     @Test func `allPhaseChanges removes listener on stream termination`() async throws {
-        let center = makeSerialCommandCenterForTests()
+        let center = makeSucceedingCenter()
         let id = BrewOperationID(kind: .formula, name: "all-phase-cleanup")
         let stream = await center.allPhaseChanges()
         let collector = AllPhaseStreamCollector()
@@ -312,7 +324,7 @@ struct SerialBrewAllPhaseStreamTests {
         collect.cancel()
         try await Task.sleep(for: .milliseconds(20))
 
-        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await center.runExpectingSuccess(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let eventsAfterCancel = await collector.events
         #expect(eventsAfterCancel.isEmpty)
@@ -326,7 +338,7 @@ struct SerialBrewAllPhaseStreamTests {
         }
         defer { collect2.cancel() }
 
-        try await center.submit(id: id, command: EmptyMutatingCommand())
+        try await center.runExpectingSuccess(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let eventsFresh = await collector2.events
         #expect(eventsFresh.count >= 2)
@@ -334,28 +346,15 @@ struct SerialBrewAllPhaseStreamTests {
     }
 }
 
-// MARK: - Test commands
+// MARK: - Test doubles
 
-private struct EmptyMutatingCommand: BrewMutatingCommand {
-    var operationKind: BrewOperationKind {
-        .upgradeFormula
-    }
+/// Runner whose behaviour is a closure of the argv. Commands are inert data now, so tests drive
+/// sleep/throw/counting/ordering from the runner instead of a custom command type.
+private struct ClosureRunner: BrewCommandRunning {
+    let body: @Sendable ([String]) async throws -> CommandOutput
 
-    func run(in context: BrewCommandExecutionContext) async throws {
-        _ = context
-    }
-}
-
-private struct ThrowingMutatingCommand: BrewMutatingCommand {
-    struct TestError: Error {}
-
-    var operationKind: BrewOperationKind {
-        .upgradeFormula
-    }
-
-    func run(in context: BrewCommandExecutionContext) async throws {
-        _ = context
-        throw TestError()
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        try await body(arguments)
     }
 }
 
@@ -371,69 +370,10 @@ private actor OrderCollector {
     }
 }
 
-private struct OrderingSleepCommand: BrewMutatingCommand {
-    let collector: OrderCollector
-    let prefix: String
-
-    var operationKind: BrewOperationKind {
-        .upgradeFormula
-    }
-
-    func run(in context: BrewCommandExecutionContext) async throws {
-        _ = context
-        await collector.append("\(prefix)-start")
-        try await Task.sleep(for: .milliseconds(20))
-        await collector.append("\(prefix)-end")
-    }
-}
-
-private struct AppendTokenCommand: BrewMutatingCommand {
-    let collector: OrderCollector
-    let token: String
-
-    var operationKind: BrewOperationKind {
-        .upgradeFormula
-    }
-
-    func run(in context: BrewCommandExecutionContext) async throws {
-        _ = context
-        await collector.append(token)
-    }
-}
-
 private actor InvocationCounter {
     private(set) var value = 0
 
     func increment() {
         value += 1
-    }
-}
-
-private struct SlowIncrementCommand: BrewMutatingCommand {
-    let counter: InvocationCounter
-
-    var operationKind: BrewOperationKind {
-        .upgradeFormula
-    }
-
-    func run(in context: BrewCommandExecutionContext) async throws {
-        _ = context
-        await counter.increment()
-        try await Task.sleep(for: .milliseconds(30))
-    }
-}
-
-private struct RunMockedArgvCommand: BrewMutatingCommand {
-    let arguments: [String]
-
-    var operationKind: BrewOperationKind {
-        .upgradeFormula
-    }
-
-    func run(in context: BrewCommandExecutionContext) async throws {
-        let url = try context.brewExecutableURL()
-        let out = try await context.commandRunner.run(executableURL: url, arguments: arguments)
-        #expect(out.standardOutput == "mock-ok")
-        #expect(out.terminationStatus == 0)
     }
 }

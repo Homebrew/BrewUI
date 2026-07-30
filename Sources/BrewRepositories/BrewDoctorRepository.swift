@@ -70,9 +70,11 @@ public final class BrewDoctorRepository: DoctorRepository {
         }
         defer { isRefreshing = false }
 
-        let command = DoctorReadCommand()
+        let output: CommandOutput
         do {
-            try await commandCenter.submit(id: Self.operationID, command: command)
+            // `.doctorRead` runs in capture mode: not colourised (its output is parsed) and a non-zero exit
+            // (warnings) is not a failure. So the combined text below is already plain — no ANSI to strip.
+            output = try await commandCenter.run(BrewCommands.doctorRead(), id: Self.operationID)
         } catch is CancellationError {
             return
         } catch {
@@ -85,7 +87,17 @@ public final class BrewDoctorRepository: DoctorRepository {
             }
             return
         }
-        let combined = await command.capturedOutput
-        state = .loaded(DoctorOutputParser.parse(combined))
+        state = .loaded(DoctorOutputParser.parse(Self.combinedOutput(of: output)))
+    }
+
+    /// Combines stdout + stderr (stdout first) into the single text ``DoctorOutputParser`` expects.
+    private static func combinedOutput(of output: CommandOutput) -> String {
+        if output.standardError.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return output.standardOutput
+        }
+        if output.standardOutput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return output.standardError
+        }
+        return output.standardOutput + "\n" + output.standardError
     }
 }

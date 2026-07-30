@@ -403,7 +403,7 @@ private func expectCallCount(atLeast target: Int, runner: CountingInfoRunner) as
 private actor CountingInfoRunner: BrewCommandRunning {
     private(set) var callCount = 0
 
-    func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         callCount += 1
         return CommandOutput(
             standardOutput: #"{ "formulae": [], "casks": [] }"#,
@@ -466,10 +466,12 @@ private actor ControllableAllPhasesCommandCenter: BrewCommandCenter {
         }
     }
 
-    func submit(
-        id _: BrewOperationID,
-        command _: any BrewMutatingCommand,
-    ) async throws {}
+    @discardableResult
+    func run(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+        CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func runExpectingSuccess(_: BrewCommand, id _: BrewOperationID) async throws {}
 
     func emitPhase(id: BrewOperationID, phase: BrewOperationPhase) {
         for listener in allPhaseListeners {

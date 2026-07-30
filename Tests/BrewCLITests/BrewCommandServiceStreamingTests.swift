@@ -16,13 +16,11 @@ struct BrewCommandServiceStreamingTests {
         let executable = URL(fileURLWithPath: "/bin/zsh")
         let collector = OutputCollector()
 
-        let console = ConsoleOutputStream { line in
-            collector.append(line)
-        }
+        let options = BrewRunOptions(lineObserver: { line in collector.append(line) })
         let output = try await service.run(
             executableURL: executable,
             arguments: ["-lc", "printf 'one\\ntwo\\nthree\\n'"],
-            console: console,
+            options: options,
         )
 
         #expect(output.standardOutput == "one\ntwo\nthree\n")
@@ -36,13 +34,11 @@ struct BrewCommandServiceStreamingTests {
         let executable = URL(fileURLWithPath: "/bin/zsh")
         let collector = OutputCollector()
 
-        let console = ConsoleOutputStream { line in
-            collector.append(line)
-        }
+        let options = BrewRunOptions(lineObserver: { line in collector.append(line) })
         let output = try await service.run(
             executableURL: executable,
             arguments: ["-lc", "printf 'hello-out'; printf 'hello-err' >&2"],
-            console: console,
+            options: options,
         )
 
         #expect(output.standardOutput == "hello-out")
@@ -57,13 +53,11 @@ struct BrewCommandServiceStreamingTests {
         let executable = URL(fileURLWithPath: "/bin/zsh")
         let collector = OutputCollector()
 
-        let console = ConsoleOutputStream { line in
-            collector.append(line)
-        }
+        let options = BrewRunOptions(lineObserver: { line in collector.append(line) })
         _ = try await service.run(
             executableURL: executable,
             arguments: ["-lc", "printf 'out1\\n'; printf 'err1\\n' >&2; printf 'out2\\n'"],
-            console: console,
+            options: options,
         )
 
         let lines = collector.allLines()

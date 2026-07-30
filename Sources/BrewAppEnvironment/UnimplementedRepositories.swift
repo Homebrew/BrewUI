@@ -91,23 +91,23 @@ final class UnimplementedConfigRepository: ConfigRepository {
 }
 
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
-    func installCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
+    func installCommand(kind _: HomebrewPackageKind, name _: String) -> BrewCommand {
         unimplemented()
     }
 
-    func upgradeCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
+    func upgradeCommand(kind _: HomebrewPackageKind, name _: String) -> BrewCommand {
         unimplemented()
     }
 
-    func uninstallCommand(kind _: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
+    func uninstallCommand(kind _: HomebrewPackageKind, name _: String) -> BrewCommand {
         unimplemented()
     }
 
-    func bulkUpgradeCommand(selection _: BrewUpgradeSelection) -> any BrewMutatingCommand {
+    func bulkUpgradeCommand(selection _: BrewUpgradeSelection) -> BrewCommand {
         unimplemented()
     }
 
-    func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
+    func doctorFixCommand(arguments _: [String]) -> BrewCommand {
         unimplemented()
     }
 }
@@ -161,7 +161,11 @@ actor UnimplementedBrewCommandCenter: BrewCommandCenter {
         unimplemented()
     }
 
-    func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
+    func run(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+        unimplemented()
+    }
+
+    func runExpectingSuccess(_: BrewCommand, id _: BrewOperationID) async throws {
         unimplemented()
     }
 }

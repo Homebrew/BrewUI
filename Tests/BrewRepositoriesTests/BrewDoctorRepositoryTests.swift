@@ -129,7 +129,7 @@ private actor SequencedCommandRunner: BrewCommandRunning {
         self.steps = steps
     }
 
-    func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         guard !steps.isEmpty else {
             return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
         }

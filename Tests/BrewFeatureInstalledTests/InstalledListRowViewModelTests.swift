@@ -191,9 +191,15 @@ private actor PhaseSequenceCommandCenter: BrewCommandCenter {
         }
     }
 
-    func submit(id: BrewOperationID, command: any BrewMutatingCommand) async throws {
+    @discardableResult
+    func run(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
         _ = id
         _ = command
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func runExpectingSuccess(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await run(command, id: id)
     }
 
     func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {

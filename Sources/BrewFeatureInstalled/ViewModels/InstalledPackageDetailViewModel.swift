@@ -188,7 +188,7 @@ final class InstalledPackageDetailViewModel {
     private func submitMutation(
         action: PackageMutationAction,
         operationID: BrewOperationID,
-        command: any BrewMutatingCommand,
+        command: BrewCommand,
     ) {
         guard !isMutatingPackage else {
             return
@@ -198,7 +198,7 @@ final class InstalledPackageDetailViewModel {
         mutationTask?.cancel()
         mutationTask = Task { @MainActor [self] in
             do {
-                try await brewCommandCenter.submit(id: operationID, command: command)
+                try await brewCommandCenter.runExpectingSuccess(command, id: operationID)
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {

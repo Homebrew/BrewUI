@@ -5,24 +5,15 @@
 
 import Foundation
 
-/// Dependencies for mutating `brew` subprocess work passed into ``BrewMutatingCommand/run(in:)``.
+/// Dependency bundle the ``BrewCommandCenter`` uses to run commands: how to spawn a subprocess and how to
+/// locate the `brew` executable.
 public struct BrewCommandExecutionContext: Sendable {
     public var commandRunner: BrewCommandRunning
     public var locator: BrewExecutableLocating
 
-    /// Present when this command's output is streamed to the console (and thus wants colour). The command
-    /// center sets it per-operation; commands forward it into ``BrewCommandRunning/run(executableURL:arguments:console:)``.
-    /// Nil for direct/parsed use, so read commands stay clean.
-    public var console: ConsoleOutputStream?
-
-    public init(
-        commandRunner: BrewCommandRunning,
-        locator: BrewExecutableLocating,
-        console: ConsoleOutputStream? = nil,
-    ) {
+    public init(commandRunner: BrewCommandRunning, locator: BrewExecutableLocating) {
         self.commandRunner = commandRunner
         self.locator = locator
-        self.console = console
     }
 
     public func brewExecutableURL() throws -> URL {

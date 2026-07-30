@@ -29,24 +29,20 @@ public struct LoginShellBrewCommandRunner: BrewCommandRunning {
         self.shellResolver = shellResolver
     }
 
-    public func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
-        try await run(executableURL: executableURL, arguments: arguments, console: nil)
-    }
-
     public func run(
         executableURL: URL,
         arguments: [String],
-        console: ConsoleOutputStream?,
+        options: BrewRunOptions,
     ) async throws -> CommandOutput {
         let shell = shellResolver.resolve()
         let shellCommand = Self.shellCommand(for: shell)
         let shellArguments = Self.shellArguments(executableURL: executableURL, arguments: arguments)
-        // Forward `console` so the wrapped subprocess still streams + colours — the default protocol
+        // Forward `options` so the wrapped subprocess still streams + colours — the default protocol
         // implementation would drop it, silently disabling colour on the production login-shell path.
         return try await underlying.run(
             executableURL: shell,
             arguments: ["-l", "-i", "-c", shellCommand] + shellArguments,
-            console: console,
+            options: options,
         )
     }
 
