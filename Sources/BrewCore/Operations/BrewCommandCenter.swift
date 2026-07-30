@@ -34,8 +34,8 @@ public protocol BrewCommandCenter: Actor {
 
     /// Run `command` keyed by `id`, returning its faithful ``CommandOutput`` for inspection/parsing.
     ///
-    /// Streams to the console as a **coloured** pill (all scheduled work is user-visible), so the returned
-    /// bytes may contain ANSI colour — callers that parse must strip it (see `BrewDoctorRepository`). A
+    /// Output is broadcast as it arrives (see ``outputChanges(for:)``) with colour forced on, so the returned
+    /// bytes may contain ANSI codes — callers that parse must strip them (see `BrewDoctorRepository`). A
     /// non-zero exit is **not** treated as a failure (e.g. `brew doctor` exits non-zero on warnings); inspect
     /// ``CommandOutput/terminationStatus`` if you care.
     ///
@@ -44,7 +44,7 @@ public protocol BrewCommandCenter: Actor {
     @discardableResult
     func run(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput
 
-    /// Run `command` for display: stream **and** force colour in the console, discard the output, and throw
+    /// Run `command` for display: broadcast its output with colour forced on, discard the result, and throw
     /// ``BrewCommandError/failed(exitCode:stderr:)`` on a non-zero exit. For mutations (install/upgrade/…).
     func runExpectingSuccess(_ command: BrewCommand, id: BrewOperationID) async throws
 }

@@ -8,9 +8,9 @@ import Foundation
 /// How a subprocess run should surface its output.
 ///
 /// Streaming and colour are orthogonal. Background reads use neither (silent, colourless, buffered);
-/// console-shown work uses both. Because colourised output may also be parsed (`brew doctor` is a coloured
-/// pill *and* parsed), the rule is the defensive one: any consumer that parses strips ANSI first — colour is
-/// a display concern the parser must ignore.
+/// output shown to the user uses both. Because colourised output may also be parsed (`brew doctor` is shown
+/// in colour *and* parsed), the rule is the defensive one: any consumer that parses strips ANSI first —
+/// colour is a display concern the parser must ignore.
 public struct BrewRunOptions: Sendable {
     /// Called with each `\n`-delimited line as it arrives, for live console display. Nil = buffered, no streaming.
     public var lineObserver: (@Sendable (BrewCommandOutputLine) -> Void)?

@@ -72,7 +72,7 @@ public final class BrewDoctorRepository: DoctorRepository {
 
         let output: CommandOutput
         do {
-            // `.doctorRead` shows as a coloured console pill, so its output carries ANSI codes; `combinedOutput`
+            // `.doctorRead` output is shown in the console in colour, so it carries ANSI codes; `combinedOutput`
             // strips them before parsing. A non-zero exit (warnings) is not a failure.
             output = try await commandCenter.run(BrewCommands.doctorRead(), id: Self.operationID)
         } catch is CancellationError {
@@ -91,7 +91,7 @@ public final class BrewDoctorRepository: DoctorRepository {
     }
 
     /// Combines stdout + stderr (stdout first) into the single text ``DoctorOutputParser`` expects, stripping
-    /// ANSI colour — the doctor pill is colourised for display, but the colour-blind parser needs plain text.
+    /// ANSI colour — doctor output is colourised for display, but the colour-blind parser needs plain text.
     private static func combinedOutput(of output: CommandOutput) -> String {
         let combined: String
         if output.standardError.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

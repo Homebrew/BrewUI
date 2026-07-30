@@ -138,8 +138,8 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         _ = try await perform(command, id: id, mode: .display)
     }
 
-    /// The single run algorithm: serialise, stream lines to listeners, force colour (all scheduled work is a
-    /// user-visible console pill), track phase, and — in `.display` mode — treat a non-zero exit as a failure.
+    /// The single run algorithm: serialise, broadcast output lines to listeners, force colour (all scheduled
+    /// work is shown to the user), track phase, and — in `.display` mode — treat a non-zero exit as a failure.
     /// Returns the faithful ``CommandOutput``; capture callers that parse it strip ANSI at their boundary.
     private func perform(
         _ command: BrewCommand,
