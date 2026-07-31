@@ -37,7 +37,7 @@ public protocol BrewCommandCenter: Actor {
     /// Output is broadcast as it arrives (see ``outputChanges(for:)``) with colour forced on, so the returned
     /// bytes may contain ANSI codes — callers that parse must strip them (see `BrewDoctorRepository`). A
     /// non-zero exit is **not** treated as a failure (e.g. `brew doctor` exits non-zero on warnings); inspect
-    /// ``CommandOutput/terminationStatus`` if you care. For reads (`brew doctor`, list, info).
+    /// ``CommandOutput/terminationStatus`` if you care. For reads whose output is needed back (`brew doctor`).
     ///
     /// **Concurrency:** Conforming types such as ``SerialBrewCommandCenter`` run work **serially**.
     /// **Idempotence:** A second call for the same `id` while the first is in flight awaits and returns the same output.

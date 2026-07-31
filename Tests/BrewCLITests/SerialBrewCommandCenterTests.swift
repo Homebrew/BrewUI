@@ -46,7 +46,7 @@ private func makeSucceedingCenter() -> SerialBrewCommandCenter {
 struct SerialBrewCommandCenterTests {
     @Test func `serializes operations so second runs after first`() async throws {
         let collector = OrderCollector()
-        // Commands are inert data now, so the ordering/sleep behaviour lives in the runner, keyed by argv.
+        // Commands are inert data, so the ordering/sleep behaviour lives in the runner, keyed by argv.
         let center = makeCenter(runner: ClosureRunner { argv in
             if argv == ["a"] {
                 await collector.append("a-start")
@@ -348,8 +348,8 @@ struct SerialBrewAllPhaseStreamTests {
 
 // MARK: - Test doubles
 
-/// Runner whose behaviour is a closure of the argv. Commands are inert data now, so tests drive
-/// sleep/throw/counting/ordering from the runner instead of a custom command type.
+/// Runner whose behaviour is a closure of the argv. Commands are inert data, so tests drive
+/// sleep/throw/counting/ordering from the runner, keyed by argv.
 private struct ClosureRunner: BrewCommandRunning {
     let body: @Sendable ([String]) async throws -> CommandOutput
 
