@@ -60,8 +60,8 @@ struct SerialBrewCommandCenterTests {
         let idA = BrewOperationID(kind: .formula, name: "a")
         let idB = BrewOperationID(kind: .formula, name: "b")
 
-        try await center.runExpectingSuccess(BrewCommand(operationKind: .upgradeFormula, arguments: ["a"]), id: idA)
-        try await center.runExpectingSuccess(BrewCommand(operationKind: .upgradeFormula, arguments: ["b"]), id: idB)
+        try await center.perform(BrewCommand(operationKind: .upgradeFormula, arguments: ["a"]), id: idA)
+        try await center.perform(BrewCommand(operationKind: .upgradeFormula, arguments: ["b"]), id: idB)
 
         let order = await collector.snapshot()
         #expect(order == ["a-start", "a-end", "b"])
@@ -76,9 +76,9 @@ struct SerialBrewCommandCenterTests {
         })
         let id = BrewOperationID(kind: .formula, name: "git")
 
-        let first = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
+        let first = Task { try await center.perform(noopCommand, id: id) }
         try await Task.sleep(for: .milliseconds(5))
-        let second = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
+        let second = Task { try await center.perform(noopCommand, id: id) }
 
         try await first.value
         try await second.value
@@ -90,21 +90,21 @@ struct SerialBrewCommandCenterTests {
         let id = BrewOperationID(kind: .formula, name: "ok")
         #expect(await center.phase(for: id) == .idle)
 
-        try await center.runExpectingSuccess(noopCommand, id: id)
+        try await center.perform(noopCommand, id: id)
 
         #expect(await center.phase(for: id) == .idle)
         #expect(await !center.isActive(id: id))
     }
 
     @Test func `records failure with OperationFailure and clears in flight slot`() async throws {
-        // A non-zero exit is a failure in `.display` mode (runExpectingSuccess).
+        // A non-zero exit is a failure in `.display` mode (perform).
         let center = makeCenter(runner: ClosureRunner { _ in
             CommandOutput(standardOutput: "", standardError: "boom", terminationStatus: 1)
         })
         let id = BrewOperationID(kind: .formula, name: "bad")
 
         do {
-            try await center.runExpectingSuccess(noopCommand, id: id)
+            try await center.perform(noopCommand, id: id)
             Issue.record("expected run to throw")
         } catch {
             _ = error
@@ -126,7 +126,7 @@ struct SerialBrewCommandCenterTests {
         })
         let id = BrewOperationID(kind: .formula, name: "doctor")
 
-        let output = try await center.run(BrewCommand(operationKind: .doctorRead, arguments: ["doctor"]), id: id)
+        let output = try await center.capture(BrewCommand(operationKind: .doctorRead, arguments: ["doctor"]), id: id)
 
         #expect(output.standardOutput == "warnings")
         #expect(output.terminationStatus == 1)
@@ -141,7 +141,7 @@ struct SerialBrewCommandCenterTests {
         #expect(await center.phaseByID().isEmpty)
 
         do {
-            try await center.runExpectingSuccess(noopCommand, id: id)
+            try await center.perform(noopCommand, id: id)
         } catch {
             _ = error
         }
@@ -159,7 +159,7 @@ struct SerialBrewCommandCenterTests {
         let center = makeCenter(runner: runner)
         let id = BrewOperationID(kind: .formula, name: "demo-formula")
 
-        let output = try await center.run(BrewCommand(operationKind: .upgradeFormula, arguments: argv), id: id)
+        let output = try await center.capture(BrewCommand(operationKind: .upgradeFormula, arguments: argv), id: id)
 
         #expect(output.standardOutput == "mock-ok")
         #expect(await center.phase(for: id) == .idle)
@@ -177,7 +177,7 @@ struct SerialBrewCommandCenterTests {
         }
         defer { collect.cancel() }
 
-        try await center.runExpectingSuccess(noopCommand, id: id)
+        try await center.perform(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let values = await collector.phases
         #expect(values.count >= 3)
@@ -210,7 +210,7 @@ struct SerialBrewCommandCenterTests {
             taskB.cancel()
         }
 
-        try await center.runExpectingSuccess(noopCommand, id: id)
+        try await center.perform(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let countA = await collectorA.phases.count
         let countB = await collectorB.phases.count
@@ -231,9 +231,9 @@ struct SerialBrewCommandCenterTests {
         let center = RecordingSerialBrewCommandCenter(executionContext: ctx)
         let id = BrewOperationID(kind: .formula, name: "git")
 
-        let first = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
+        let first = Task { try await center.perform(noopCommand, id: id) }
         try await Task.sleep(for: .milliseconds(5))
-        let second = Task { try await center.runExpectingSuccess(noopCommand, id: id) }
+        let second = Task { try await center.perform(noopCommand, id: id) }
 
         try await first.value
         try await second.value
@@ -259,8 +259,8 @@ struct SerialBrewAllPhaseStreamTests {
         }
         defer { collect.cancel() }
 
-        try await center.runExpectingSuccess(noopCommand, id: idA)
-        try await center.runExpectingSuccess(noopCommand, id: idB)
+        try await center.perform(noopCommand, id: idA)
+        try await center.perform(noopCommand, id: idB)
         try await Task.sleep(for: .milliseconds(80))
         let events = await collector.events
         let eventsForA = events.filter { $0.0 == idA }.map(\.1)
@@ -299,7 +299,7 @@ struct SerialBrewAllPhaseStreamTests {
             taskB.cancel()
         }
 
-        try await center.runExpectingSuccess(noopCommand, id: id)
+        try await center.perform(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let eventsA = await collectorA.events
         let eventsB = await collectorB.events
@@ -324,7 +324,7 @@ struct SerialBrewAllPhaseStreamTests {
         collect.cancel()
         try await Task.sleep(for: .milliseconds(20))
 
-        try await center.runExpectingSuccess(noopCommand, id: id)
+        try await center.perform(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let eventsAfterCancel = await collector.events
         #expect(eventsAfterCancel.isEmpty)
@@ -338,7 +338,7 @@ struct SerialBrewAllPhaseStreamTests {
         }
         defer { collect2.cancel() }
 
-        try await center.runExpectingSuccess(noopCommand, id: id)
+        try await center.perform(noopCommand, id: id)
         try await Task.sleep(for: .milliseconds(80))
         let eventsFresh = await collector2.events
         #expect(eventsFresh.count >= 2)

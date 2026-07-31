@@ -198,7 +198,7 @@ final class InstalledPackageDetailViewModel {
         mutationTask?.cancel()
         mutationTask = Task { @MainActor [self] in
             do {
-                try await brewCommandCenter.runExpectingSuccess(command, id: operationID)
+                try await brewCommandCenter.perform(command, id: operationID)
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {

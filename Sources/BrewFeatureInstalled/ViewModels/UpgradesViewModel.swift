@@ -368,7 +368,7 @@ extension UpgradesViewModel {
         let selection = upgradeSelection
         let id = BrewOperationID.bulkUpgrade(selection)
         let command = commandFactory.bulkUpgradeCommand(selection: selection)
-        Task { try? await brewCommandCenter.runExpectingSuccess(command, id: id) }
+        Task { try? await brewCommandCenter.perform(command, id: id) }
     }
 
     /// Clears both filters, restoring the full outdated list. Wired to the "Show all upgrades" affordance

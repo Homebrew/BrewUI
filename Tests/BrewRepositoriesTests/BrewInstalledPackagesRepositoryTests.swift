@@ -467,11 +467,11 @@ private actor ControllableAllPhasesCommandCenter: BrewCommandCenter {
     }
 
     @discardableResult
-    func run(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }
 
-    func runExpectingSuccess(_: BrewCommand, id _: BrewOperationID) async throws {}
+    func perform(_: BrewCommand, id _: BrewOperationID) async throws {}
 
     func emitPhase(id: BrewOperationID, phase: BrewOperationPhase) {
         for listener in allPhaseListeners {

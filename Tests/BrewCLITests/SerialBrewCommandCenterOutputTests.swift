@@ -69,7 +69,7 @@ struct SerialBrewCommandCenterOutputTests {
         }
         defer { collect.cancel() }
 
-        try await center.run(command("go"), id: id)
+        try await center.capture(command("go"), id: id)
         try await Task.sleep(for: .milliseconds(80))
 
         let lines = await collector.lines
@@ -92,8 +92,8 @@ struct SerialBrewCommandCenterOutputTests {
         }
         defer { collect.cancel() }
 
-        try await center.run(command("a"), id: idA)
-        try await center.run(command("b"), id: idB)
+        try await center.capture(command("a"), id: idA)
+        try await center.capture(command("b"), id: idB)
         try await Task.sleep(for: .milliseconds(80))
 
         let events = await collector.events
@@ -123,7 +123,7 @@ struct SerialBrewCommandCenterOutputTests {
             taskB.cancel()
         }
 
-        try await center.run(command("go"), id: id)
+        try await center.capture(command("go"), id: id)
         try await Task.sleep(for: .milliseconds(80))
 
         #expect(await collectorA.lines.map(\.text) == ["x", "y"])
@@ -143,7 +143,7 @@ struct SerialBrewCommandCenterOutputTests {
         collect.cancel()
         try await Task.sleep(for: .milliseconds(20))
 
-        try await center.run(command("go"), id: id)
+        try await center.capture(command("go"), id: id)
         try await Task.sleep(for: .milliseconds(80))
 
         #expect(await collector.lines.isEmpty)

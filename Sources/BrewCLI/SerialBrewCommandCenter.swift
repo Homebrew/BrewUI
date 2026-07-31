@@ -130,18 +130,18 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
     }
 
     @discardableResult
-    public func run(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
-        try await perform(command, id: id, mode: .capture)
+    public func capture(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
+        try await run(command, id: id, mode: .capture)
     }
 
-    public func runExpectingSuccess(_ command: BrewCommand, id: BrewOperationID) async throws {
-        _ = try await perform(command, id: id, mode: .display)
+    public func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await run(command, id: id, mode: .display)
     }
 
     /// The single run algorithm: serialise, broadcast output lines to listeners, force colour (all scheduled
     /// work is shown to the user), track phase, and — in `.display` mode — treat a non-zero exit as a failure.
     /// Returns the faithful ``CommandOutput``; capture callers that parse it strip ANSI at their boundary.
-    private func perform(
+    private func run(
         _ command: BrewCommand,
         id: BrewOperationID,
         mode: BrewExecutionMode,

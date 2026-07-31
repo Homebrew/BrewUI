@@ -34,7 +34,7 @@ struct NoopBrewCommandCenterTests {
         let center = noopCenter(runner: CountingRunner(counter: counter))
         let id = BrewOperationID(kind: .cask, name: "slack")
 
-        try await center.runExpectingSuccess(sampleCommand, id: id)
+        try await center.perform(sampleCommand, id: id)
 
         #expect(await counter.value == 1)
         #expect(await center.phase(for: id) == .idle)
@@ -47,7 +47,7 @@ struct NoopBrewCommandCenterTests {
         let id = BrewOperationID(kind: .formula, name: "broken")
 
         await #expect(throws: ThrowingRunner.TestError.self) {
-            try await center.runExpectingSuccess(sampleCommand, id: id)
+            try await center.perform(sampleCommand, id: id)
         }
         #expect(await center.phase(for: id) == .idle)
     }

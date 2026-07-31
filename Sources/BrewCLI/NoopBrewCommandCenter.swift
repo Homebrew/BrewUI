@@ -66,13 +66,13 @@ public actor NoopBrewCommandCenter: BrewCommandCenter {
     }
 
     @discardableResult
-    public func run(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
+    public func capture(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
         _ = id
         let brew = try executionContext.brewExecutableURL()
         return try await executionContext.commandRunner.run(executableURL: brew, arguments: command.arguments)
     }
 
-    public func runExpectingSuccess(_ command: BrewCommand, id: BrewOperationID) async throws {
-        _ = try await run(command, id: id)
+    public func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await capture(command, id: id)
     }
 }

@@ -175,12 +175,12 @@ public actor StubBrewCommandCenter: BrewCommandCenter {
     }
 
     @discardableResult
-    public func run(_ command: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+    public func capture(_ command: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         _ = command
         return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }
 
-    public func runExpectingSuccess(_ command: BrewCommand, id _: BrewOperationID) async throws {
+    public func perform(_ command: BrewCommand, id _: BrewOperationID) async throws {
         _ = command
     }
 }

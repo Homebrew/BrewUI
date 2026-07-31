@@ -81,12 +81,12 @@ public actor ControllableJobsCommandCenter: BrewCommandCenter {
     }
 
     @discardableResult
-    public func run(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+    public func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         // Inert double: the repository under test only consumes the "all" streams, never this return.
         CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }
 
-    public func runExpectingSuccess(_: BrewCommand, id _: BrewOperationID) async throws {}
+    public func perform(_: BrewCommand, id _: BrewOperationID) async throws {}
 
     public func emitPhase(id: BrewOperationID, phase: BrewOperationPhase) {
         for listener in allPhaseListeners {

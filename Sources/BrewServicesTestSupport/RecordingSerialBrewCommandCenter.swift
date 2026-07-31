@@ -46,13 +46,13 @@ public actor RecordingSerialBrewCommandCenter: BrewCommandCenter {
     }
 
     @discardableResult
-    public func run(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
+    public func capture(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
         recordedSubmitEntries.append((id, command.operationKind))
-        return try await inner.run(command, id: id)
+        return try await inner.capture(command, id: id)
     }
 
-    public func runExpectingSuccess(_ command: BrewCommand, id: BrewOperationID) async throws {
+    public func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
         recordedSubmitEntries.append((id, command.operationKind))
-        try await inner.runExpectingSuccess(command, id: id)
+        try await inner.perform(command, id: id)
     }
 }

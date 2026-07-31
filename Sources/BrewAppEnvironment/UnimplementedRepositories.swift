@@ -161,11 +161,11 @@ actor UnimplementedBrewCommandCenter: BrewCommandCenter {
         unimplemented()
     }
 
-    func run(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         unimplemented()
     }
 
-    func runExpectingSuccess(_: BrewCommand, id _: BrewOperationID) async throws {
+    func perform(_: BrewCommand, id _: BrewOperationID) async throws {
         unimplemented()
     }
 }
