@@ -5,7 +5,8 @@
 
 import Foundation
 
-/// Dependencies for mutating `brew` subprocess work passed into ``BrewMutatingCommand/run(in:)``.
+/// Dependency bundle the ``BrewCommandCenter`` uses to run commands: how to spawn a subprocess and how to
+/// locate the `brew` executable.
 public struct BrewCommandExecutionContext: Sendable {
     public var commandRunner: BrewCommandRunning
     public var locator: BrewExecutableLocating

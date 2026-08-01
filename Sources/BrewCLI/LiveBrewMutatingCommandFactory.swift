@@ -6,27 +6,27 @@
 import BrewCore
 import Foundation
 
-/// Production factory vending the concrete `brew` command types from this module.
+/// Production factory: a thin adapter over ``BrewCommands`` value builders.
 public struct LiveBrewMutatingCommandFactory: BrewMutatingCommandFactory {
     public init() {}
 
-    public func installCommand(kind: HomebrewPackageKind, name: String) -> any BrewMutatingCommand {
-        PackageInstallCommand(kind: kind, name: name)
+    public func installCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.install(name, kind: kind)
     }
 
-    public func upgradeCommand(kind: HomebrewPackageKind, name: String) -> any BrewMutatingCommand {
-        PackageUpgradeCommand(kind: kind, name: name)
+    public func upgradeCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.upgrade(name, kind: kind)
     }
 
-    public func uninstallCommand(kind: HomebrewPackageKind, name: String) -> any BrewMutatingCommand {
-        PackageUninstallCommand(kind: kind, name: name)
+    public func uninstallCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.uninstall(name, kind: kind)
     }
 
-    public func bulkUpgradeCommand(selection: BrewUpgradeSelection) -> any BrewMutatingCommand {
-        BulkUpgradeCommand(selection: selection)
+    public func bulkUpgradeCommand(selection: BrewUpgradeSelection) -> BrewCommand {
+        BrewCommands.bulkUpgrade(selection)
     }
 
-    public func doctorFixCommand(arguments: [String]) -> any BrewMutatingCommand {
-        DoctorFixCommand(arguments: arguments)
+    public func doctorFixCommand(arguments: [String]) -> BrewCommand {
+        BrewCommands.doctorFix(arguments: arguments)
     }
 }

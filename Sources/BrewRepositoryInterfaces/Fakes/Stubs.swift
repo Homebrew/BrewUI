@@ -160,37 +160,38 @@ public actor StubBrewCommandCenter: BrewCommandCenter {
         }
     }
 
-    public func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {}
+    @discardableResult
+    public func capture(_ command: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+        _ = command
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    public func perform(_ command: BrewCommand, id _: BrewOperationID) async throws {
+        _ = command
+    }
 }
 
-/// Command that does nothing when run — for previews/tests that submit without touching `brew`.
-struct NoopMutatingCommand: BrewMutatingCommand {
-    let operationKind: BrewOperationKind
-
-    func run(in _: BrewCommandExecutionContext) async throws {}
-}
-
-/// Factory vending no-op commands, so view models can be exercised without `brew`.
+/// Factory vending real ``BrewCommand`` values, so view models can be exercised without `brew`.
 public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
     public init() {}
 
-    public func installCommand(kind: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
-        NoopMutatingCommand(operationKind: kind == .formula ? .installFormula : .installCask)
+    public func installCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.install(name, kind: kind)
     }
 
-    public func upgradeCommand(kind: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
-        NoopMutatingCommand(operationKind: kind == .formula ? .upgradeFormula : .upgradeCask)
+    public func upgradeCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.upgrade(name, kind: kind)
     }
 
-    public func uninstallCommand(kind: HomebrewPackageKind, name _: String) -> any BrewMutatingCommand {
-        NoopMutatingCommand(operationKind: kind == .formula ? .uninstallFormula : .uninstallCask)
+    public func uninstallCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.uninstall(name, kind: kind)
     }
 
-    public func bulkUpgradeCommand(selection _: BrewUpgradeSelection) -> any BrewMutatingCommand {
-        NoopMutatingCommand(operationKind: .upgradeAll)
+    public func bulkUpgradeCommand(selection: BrewUpgradeSelection) -> BrewCommand {
+        BrewCommands.bulkUpgrade(selection)
     }
 
-    public func doctorFixCommand(arguments _: [String]) -> any BrewMutatingCommand {
-        NoopMutatingCommand(operationKind: .doctorFix)
+    public func doctorFixCommand(arguments: [String]) -> BrewCommand {
+        BrewCommands.doctorFix(arguments: arguments)
     }
 }

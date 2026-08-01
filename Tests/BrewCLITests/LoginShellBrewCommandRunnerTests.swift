@@ -138,7 +138,7 @@ private actor InvocationRecorder: BrewCommandRunning {
         invocations.first
     }
 
-    func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
+    func run(executableURL: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         invocations.append(RecordedInvocation(executableURL: executableURL, arguments: arguments))
         return stubbedOutput
     }

@@ -65,6 +65,28 @@ struct BrewDoctorRepositoryTests {
         #expect(dataItems == ["openssl@3"])
     }
 
+    @Test func `ANSI colour codes in doctor output are stripped before parsing`() async {
+        // Doctor output is colourised for display, so its captured output carries ANSI codes; the parser
+        // is colour-blind, so they must be stripped or block classification misfires.
+        let stderr = """
+        \u{1B}[31mWarning:\u{1B}[0m You have unlinked kegs in your Cellar.
+        Run `brew link` on these:
+          openssl@3
+        """
+        let repository = Self.makeRepository(runner: Self.fixedRunner(stderr: stderr, exitCode: 1))
+        await repository.load()
+
+        let issue = repository.state.value?.issues.first
+        #expect(repository.state.value?.issues.count == 1)
+        let dataItems = issue?.blocks.flatMap { block -> [String] in
+            guard case let .data(items) = block.content else {
+                return []
+            }
+            return items
+        }
+        #expect(dataItems == ["openssl@3"])
+    }
+
     @Test func `missing brew executable leaves a failed state`() async {
         let repository = Self.makeRepository(
             runner: MockBrewCommandRunner(responses: [:]),
@@ -129,7 +151,7 @@ private actor SequencedCommandRunner: BrewCommandRunning {
         self.steps = steps
     }
 
-    func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         guard !steps.isEmpty else {
             return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
         }

@@ -34,7 +34,11 @@ public struct MockBrewCommandRunner: BrewCommandRunning {
         behaviors = responses.mapValues { .output($0) }
     }
 
-    public func run(executableURL _: URL, arguments: [String]) async throws -> CommandOutput {
+    public func run(
+        executableURL _: URL,
+        arguments: [String],
+        options _: BrewRunOptions,
+    ) async throws -> CommandOutput {
         guard let behavior = behaviors[arguments] else {
             throw BrewCommandError.failed(exitCode: 99, stderr: "unmocked: \(arguments.joined(separator: " "))")
         }
@@ -58,7 +62,11 @@ public actor QueuedBrewInfoRunner: BrewCommandRunning {
         }
     }
 
-    public func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+    public func run(
+        executableURL _: URL,
+        arguments _: [String],
+        options _: BrewRunOptions,
+    ) async throws -> CommandOutput {
         let output = outputs[min(index, outputs.count - 1)]
         if index < outputs.count - 1 {
             index += 1

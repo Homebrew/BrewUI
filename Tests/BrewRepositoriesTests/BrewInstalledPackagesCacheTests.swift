@@ -80,7 +80,7 @@ struct BrewInstalledPackagesCacheTests {
 private final class CountingInstalledInfoJSONRunner: BrewCommandRunning, @unchecked Sendable {
     private(set) var loadCallCount = 0
 
-    func run(executableURL _: URL, arguments: [String]) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         guard arguments == ["info", "--installed", "--json=v2"] else {
             throw BrewCommandError.failed(exitCode: 99, stderr: "unmocked: \(arguments.joined(separator: " "))")
         }

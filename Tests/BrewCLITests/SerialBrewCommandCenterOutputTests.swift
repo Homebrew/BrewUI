@@ -17,35 +17,39 @@ private actor AllOutputCollector {
     }
 }
 
-/// Emits a fixed set of lines through ``BrewCommandOutputContext/sink`` — exercises the sink
-/// plumbing without invoking a real subprocess.
-private struct EmitOutputCommand: BrewMutatingCommand {
-    let lines: [(BrewCommandOutputLine.Stream, String)]
+/// Runner that emits a fixed set of lines (keyed by argv) through the run options' observer — exercises the
+/// streaming plumbing without a real subprocess. Commands are inert data, so the lines live on the runner.
+private struct LineEmittingRunner: BrewCommandRunning {
+    let linesFor: @Sendable ([String]) -> [(BrewCommandOutputLine.Stream, String)]
 
-    var operationKind: BrewOperationKind {
-        .upgradeFormula
-    }
-
-    func run(in context: BrewCommandExecutionContext) async throws {
-        _ = context
-        for (stream, text) in lines {
-            BrewCommandOutputContext.sink?(BrewCommandOutputLine(stream: stream, text: text))
+    func run(executableURL _: URL, arguments: [String], options: BrewRunOptions) async throws -> CommandOutput {
+        for (stream, text) in linesFor(arguments) {
+            options.lineObserver?(BrewCommandOutputLine(stream: stream, text: text))
             try await Task.sleep(for: .milliseconds(2))
         }
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }
 }
 
-private func makeOutputTestCenter() -> SerialBrewCommandCenter {
+private func makeOutputTestCenter(
+    _ linesFor: @escaping @Sendable ([String]) -> [(BrewCommandOutputLine.Stream, String)],
+) -> SerialBrewCommandCenter {
     let ctx = BrewCommandExecutionContext(
-        commandRunner: MockBrewCommandRunner(responses: [:]),
+        commandRunner: LineEmittingRunner(linesFor: linesFor),
         locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
     )
     return SerialBrewCommandCenter(executionContext: ctx)
 }
 
+private func command(_ argv: String) -> BrewCommand {
+    BrewCommand(operationKind: .upgradeFormula, arguments: [argv])
+}
+
 struct SerialBrewCommandCenterOutputTests {
-    @Test func `output for an id delivers lines emitted via the sink in order`() async throws {
-        let center = makeOutputTestCenter()
+    @Test func `output for an id delivers lines emitted via the runner in order`() async throws {
+        let center = makeOutputTestCenter { _ in
+            [(.stdout, "one"), (.stdout, "two"), (.stderr, "warn"), (.stdout, "three")]
+        }
         let id = BrewOperationID(kind: .formula, name: "output-order")
         let stream = await center.allOutputChanges()
         let collector = AllOutputCollector()
@@ -56,15 +60,7 @@ struct SerialBrewCommandCenterOutputTests {
         }
         defer { collect.cancel() }
 
-        try await center.submit(
-            id: id,
-            command: EmitOutputCommand(lines: [
-                (.stdout, "one"),
-                (.stdout, "two"),
-                (.stderr, "warn"),
-                (.stdout, "three"),
-            ]),
-        )
+        try await center.capture(command("go"), id: id)
         try await Task.sleep(for: .milliseconds(80))
 
         let lines = await collector.events.filter { $0.0 == id }.map(\.1)
@@ -73,7 +69,9 @@ struct SerialBrewCommandCenterOutputTests {
     }
 
     @Test func `allOutputChanges emits lines for any id with no initial replay`() async throws {
-        let center = makeOutputTestCenter()
+        let center = makeOutputTestCenter { argv in
+            argv == ["a"] ? [(.stdout, "a1"), (.stdout, "a2")] : [(.stdout, "b1")]
+        }
         let idA = BrewOperationID(kind: .formula, name: "all-a")
         let idB = BrewOperationID(kind: .formula, name: "all-b")
         let stream = await center.allOutputChanges()
@@ -85,25 +83,17 @@ struct SerialBrewCommandCenterOutputTests {
         }
         defer { collect.cancel() }
 
-        try await center.submit(
-            id: idA,
-            command: EmitOutputCommand(lines: [(.stdout, "a1"), (.stdout, "a2")]),
-        )
-        try await center.submit(
-            id: idB,
-            command: EmitOutputCommand(lines: [(.stdout, "b1")]),
-        )
+        try await center.capture(command("a"), id: idA)
+        try await center.capture(command("b"), id: idB)
         try await Task.sleep(for: .milliseconds(80))
 
         let events = await collector.events
-        let textsA = events.filter { $0.0 == idA }.map(\.1.text)
-        let textsB = events.filter { $0.0 == idB }.map(\.1.text)
-        #expect(textsA == ["a1", "a2"])
-        #expect(textsB == ["b1"])
+        #expect(events.filter { $0.0 == idA }.map(\.1.text) == ["a1", "a2"])
+        #expect(events.filter { $0.0 == idB }.map(\.1.text) == ["b1"])
     }
 
     @Test func `output multicasts to multiple subscribers`() async throws {
-        let center = makeOutputTestCenter()
+        let center = makeOutputTestCenter { _ in [(.stdout, "x"), (.stdout, "y")] }
         let id = BrewOperationID(kind: .formula, name: "output-multi")
         let streamA = await center.allOutputChanges()
         let streamB = await center.allOutputChanges()
@@ -124,10 +114,7 @@ struct SerialBrewCommandCenterOutputTests {
             taskB.cancel()
         }
 
-        try await center.submit(
-            id: id,
-            command: EmitOutputCommand(lines: [(.stdout, "x"), (.stdout, "y")]),
-        )
+        try await center.capture(command("go"), id: id)
         try await Task.sleep(for: .milliseconds(80))
 
         let textsA = await collectorA.events.map(\.1.text)
@@ -137,7 +124,7 @@ struct SerialBrewCommandCenterOutputTests {
     }
 
     @Test func `output listener removed on stream termination`() async throws {
-        let center = makeOutputTestCenter()
+        let center = makeOutputTestCenter { _ in [(.stdout, "lost")] }
         let id = BrewOperationID(kind: .formula, name: "output-cleanup")
         let stream = await center.allOutputChanges()
         let collector = AllOutputCollector()
@@ -149,10 +136,7 @@ struct SerialBrewCommandCenterOutputTests {
         collect.cancel()
         try await Task.sleep(for: .milliseconds(20))
 
-        try await center.submit(
-            id: id,
-            command: EmitOutputCommand(lines: [(.stdout, "lost")]),
-        )
+        try await center.capture(command("go"), id: id)
         try await Task.sleep(for: .milliseconds(80))
 
         let events = await collector.events

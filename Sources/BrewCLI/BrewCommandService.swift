@@ -10,7 +10,11 @@ import Foundation
 public struct BrewCommandService: BrewCommandRunning {
     public init() {}
 
-    public func run(executableURL: URL, arguments: [String]) async throws -> CommandOutput {
+    public func run(
+        executableURL: URL,
+        arguments: [String],
+        options: BrewRunOptions,
+    ) async throws -> CommandOutput {
         try Task.checkCancellation()
 
         let process = Process()
@@ -22,15 +26,24 @@ public struct BrewCommandService: BrewCommandRunning {
         process.standardError = errPipe
         process.standardInput = FileHandle.nullDevice
 
+        // When nothing is observing, `sink` is nil and the drain skips the line-splitting work.
+        let sink = options.lineObserver
+
+        // Homebrew strips colour when stdout isn't a TTY (which a `Pipe` never is); `HOMEBREW_COLOR` forces it
+        // back on, and `CLICOLOR_FORCE` does the same for the BSD-convention tools brew shells out to. Only ever
+        // set for display-only output (the scheduler never sets it for output that will be parsed).
+        if options.forceColor {
+            var environment = ProcessInfo.processInfo.environment
+            environment["HOMEBREW_COLOR"] = "1"
+            environment["CLICOLOR_FORCE"] = "1"
+            process.environment = environment
+        }
+
         do {
             try process.run()
         } catch {
             throw BrewCommandError.launchFailed(underlying: String(describing: error))
         }
-
-        // Reading the sink once here (rather than per chunk) snapshots the value while the TaskLocal scope is active.
-        // When no console is observing, `sink` is nil and the drain skips the line-splitting work.
-        let sink = BrewCommandOutputContext.sink
 
         let processController = ProcessController(process)
         return try await withTaskCancellationHandler(operation: {

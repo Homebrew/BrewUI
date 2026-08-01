@@ -18,7 +18,13 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
         fixedPhase
     }
 
-    func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {}
+    @discardableResult
+    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+        CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func perform(_: BrewCommand, id _: BrewOperationID) async throws {}
+
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             continuation.yield(fixedPhase)
@@ -49,8 +55,13 @@ actor ThrowingSubmitCommandCenter: BrewCommandCenter {
         .idle
     }
 
-    func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
+    @discardableResult
+    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         throw error
+    }
+
+    func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await capture(command, id: id)
     }
 
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
@@ -84,8 +95,14 @@ actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
         runningPhase
     }
 
-    func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
+    @discardableResult
+    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         submitCallCount += 1
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await capture(command, id: id)
     }
 
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
@@ -114,8 +131,14 @@ actor SubmitRecordingCommandCenter: BrewCommandCenter {
         .idle
     }
 
-    func submit(id: BrewOperationID, command: any BrewMutatingCommand) async throws {
+    @discardableResult
+    func capture(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
         recordedSubmitEntries.append((id, command.operationKind))
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await capture(command, id: id)
     }
 
     func waitForSubmitCallCount(_ expected: Int) async {
@@ -151,9 +174,15 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
         .idle
     }
 
-    func submit(id _: BrewOperationID, command _: any BrewMutatingCommand) async throws {
+    @discardableResult
+    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         submitCallCount += 1
         await withCheckedContinuation { continuation in self.continuation = continuation }
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await capture(command, id: id)
     }
 
     func resolveSubmit() {

@@ -176,7 +176,7 @@ private struct SequentialBrewCommandRunner: BrewCommandRunning {
         cursor = Cursor()
     }
 
-    func run(executableURL _: URL, arguments _: [String]) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         let index = cursor.next()
         let behaviour = behaviours[min(index, behaviours.count - 1)]
         switch behaviour {

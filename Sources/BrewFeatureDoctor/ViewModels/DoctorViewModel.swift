@@ -233,7 +233,7 @@ final class DoctorViewModel {
                 }
             }
             do {
-                try await brewCommandCenter.submit(id: operationID, command: command)
+                try await brewCommandCenter.perform(command, id: operationID)
             } catch {
                 if error is CancellationError {
                     runningFixTokens.remove(token)

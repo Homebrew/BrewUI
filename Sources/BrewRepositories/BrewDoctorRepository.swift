@@ -17,15 +17,14 @@ private let doctorRepositoryLogger = Logger(
 
 /// App-scoped observable that runs `brew doctor` through ``BrewCommandCenter`` and parses its output.
 ///
-/// Routing through the center is what makes the run appear in the bottom console (as a pill the user can
+/// Routing through the center is what makes the run appear in the bottom console (as a job the user can
 /// open to watch live output) alongside install / upgrade / fix ops — same plumbing, no parallel channel.
-/// The actual parsed report is captured by the ``DoctorReadCommand`` instance, which the repo reads after
-/// submit completes.
+/// The report is parsed from the ``CommandOutput`` returned by ``BrewCommandCenter/capture(_:id:)``.
 ///
 /// Long-lived so the report survives leaving and returning to the Doctor tab. `load()` is
 /// **stale-while-revalidate**: an existing report stays on screen (`isRefreshing` flips on) while the
 /// re-check runs; only the very first load shows `.loading`. Concurrent `load()` calls coalesce onto one
-/// in-flight `Task`, and re-submitting the same operation id reuses the existing console pill rather
+/// in-flight `Task`, and re-running the same operation id reuses the existing console job rather
 /// than spawning a new one.
 @Observable
 @MainActor
@@ -70,9 +69,11 @@ public final class BrewDoctorRepository: DoctorRepository {
         }
         defer { isRefreshing = false }
 
-        let command = DoctorReadCommand()
+        let output: CommandOutput
         do {
-            try await commandCenter.submit(id: Self.operationID, command: command)
+            // `.doctorRead` output is shown in the console in colour, so it carries ANSI codes; `combinedOutput`
+            // strips them before parsing. A non-zero exit (warnings) is not a failure.
+            output = try await commandCenter.capture(BrewCommands.doctorRead(), id: Self.operationID)
         } catch is CancellationError {
             return
         } catch {
@@ -85,7 +86,19 @@ public final class BrewDoctorRepository: DoctorRepository {
             }
             return
         }
-        let combined = await command.capturedOutput
-        state = .loaded(DoctorOutputParser.parse(combined))
+        state = .loaded(DoctorOutputParser.parse(Self.combinedOutput(of: output)))
+    }
+
+    /// Combines stdout + stderr (stdout first) into the single text ``DoctorOutputParser`` expects, stripping
+    /// ANSI colour — doctor output is colourised for display, but the colour-blind parser needs plain text.
+    private static func combinedOutput(of output: CommandOutput) -> String {
+        let combined: String = if output.standardError.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            output.standardOutput
+        } else if output.standardOutput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            output.standardError
+        } else {
+            output.standardOutput + "\n" + output.standardError
+        }
+        return ANSIParser.plainText(combined)
     }
 }

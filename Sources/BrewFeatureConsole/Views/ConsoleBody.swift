@@ -30,14 +30,16 @@ struct ConsoleBody: View {
     private func outputList(for job: CommandJob) -> some View {
         ScrollViewReader { proxy in
             List(job.output) { line in
-                Text(line.text)
-                    .font(.system(.body, design: .monospaced))
-                    .foregroundStyle(line.stream == .stderr ? Color.brewStatusError : Color.brewTextPrimary)
-                    .textSelection(.enabled)
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 1, leading: BrewSpacing.lg, bottom: 1, trailing: BrewSpacing.lg))
-                    .id(line.id)
+                Text(ANSIConsoleText.attributed(
+                    for: line,
+                    defaultColor: line.stream == .stderr ? Color.brewStatusError : Color.brewTextPrimary,
+                ))
+                .font(.system(.body, design: .monospaced))
+                .textSelection(.enabled)
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top: 1, leading: BrewSpacing.lg, bottom: 1, trailing: BrewSpacing.lg))
+                .id(line.id)
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
