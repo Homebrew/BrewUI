@@ -5,8 +5,6 @@
 
 @testable import BrewCLI
 import BrewCore
-import BrewCoreTestSupport
-import BrewServicesTestSupport
 import Foundation
 import Testing
 
@@ -20,13 +18,11 @@ private func noopCenter(runner: any BrewCommandRunning) -> NoopBrewCommandCenter
 }
 
 struct NoopBrewCommandCenterTests {
-    @Test func `phase and activity stay empty while idle`() async {
+    @Test func `phase stays idle while no work is submitted`() async {
         let center = NoopBrewCommandCenter.forTesting()
         let id = BrewOperationID(kind: .formula, name: "hello")
 
         #expect(await center.phase(for: id) == .idle)
-        #expect(await center.phaseByID().isEmpty)
-        #expect(await !center.isActive(id: id))
     }
 
     @Test func `run executes the command without tracking phase`() async throws {
@@ -38,8 +34,6 @@ struct NoopBrewCommandCenterTests {
 
         #expect(await counter.value == 1)
         #expect(await center.phase(for: id) == .idle)
-        #expect(await center.phaseByID().isEmpty)
-        #expect(await !center.isActive(id: id))
     }
 
     @Test func `run propagates thrown errors`() async {

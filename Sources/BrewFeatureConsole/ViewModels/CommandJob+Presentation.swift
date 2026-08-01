@@ -5,7 +5,6 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
-import BrewUIComponents
 import Foundation
 
 extension CommandJob {

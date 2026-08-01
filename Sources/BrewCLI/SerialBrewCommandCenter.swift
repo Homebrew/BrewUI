@@ -9,9 +9,6 @@ import Foundation
 private typealias AllPhaseStreamTermination =
     AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation.Termination
 
-private typealias OutputStreamTermination =
-    AsyncStream<BrewCommandOutputLine>.Continuation.Termination
-
 private typealias AllOutputStreamTermination =
     AsyncStream<(BrewOperationID, BrewCommandOutputLine)>.Continuation.Termination
 
@@ -40,11 +37,6 @@ private struct AllPhaseStreamListener {
     let continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation
 }
 
-private struct OutputStreamListener {
-    let token: UUID
-    let continuation: AsyncStream<BrewCommandOutputLine>.Continuation
-}
-
 private struct AllOutputStreamListener {
     let token: UUID
     let continuation: AsyncStream<(BrewOperationID, BrewCommandOutputLine)>.Continuation
@@ -59,7 +51,6 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
     private var inflightByID: [BrewOperationID: Task<CommandOutput, Error>] = [:]
     private var phaseListenersByID: [BrewOperationID: [PhaseStreamListener]] = [:]
     private var allPhaseListeners: [AllPhaseStreamListener] = []
-    private var outputListenersByID: [BrewOperationID: [OutputStreamListener]] = [:]
     private var allOutputListeners: [AllOutputStreamListener] = []
 
     public init(executionContext: BrewCommandExecutionContext) {
@@ -68,17 +59,6 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
 
     public func phase(for id: BrewOperationID) async -> BrewOperationPhase {
         trackedPhasesByID[id] ?? .idle
-    }
-
-    public func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        trackedPhasesByID
-    }
-
-    public func isActive(id: BrewOperationID) async -> Bool {
-        if case .running = trackedPhasesByID[id] ?? .idle {
-            return true
-        }
-        return false
     }
 
     public func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
@@ -102,18 +82,6 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
                 }
             }
             registerAllPhaseListener(token: token, continuation: continuation)
-        }
-    }
-
-    public func outputChanges(for id: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
-            let token = UUID()
-            continuation.onTermination = { @Sendable (_: OutputStreamTermination) in
-                Task {
-                    await self.removeOutputListener(id: id, token: token)
-                }
-            }
-            registerOutputListener(id: id, token: token, continuation: continuation)
         }
     }
 
@@ -254,27 +222,6 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         allPhaseListeners.removeAll { $0.token == token }
     }
 
-    private func registerOutputListener(
-        id: BrewOperationID,
-        token: UUID,
-        continuation: AsyncStream<BrewCommandOutputLine>.Continuation,
-    ) {
-        let listener = OutputStreamListener(token: token, continuation: continuation)
-        outputListenersByID[id, default: []].append(listener)
-    }
-
-    private func removeOutputListener(id: BrewOperationID, token: UUID) {
-        guard var listeners = outputListenersByID[id] else {
-            return
-        }
-        listeners.removeAll { $0.token == token }
-        if listeners.isEmpty {
-            outputListenersByID[id] = nil
-        } else {
-            outputListenersByID[id] = listeners
-        }
-    }
-
     private func registerAllOutputListener(
         token: UUID,
         continuation: AsyncStream<(BrewOperationID, BrewCommandOutputLine)>.Continuation,
@@ -300,11 +247,6 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
     }
 
     private func notifyOutputListeners(id: BrewOperationID, line: BrewCommandOutputLine) {
-        if let listeners = outputListenersByID[id] {
-            for listener in listeners {
-                listener.continuation.yield(line)
-            }
-        }
         for listener in allOutputListeners {
             listener.continuation.yield((id, line))
         }

@@ -444,14 +444,6 @@ private actor PhaseStreamingCommandCenter: BrewCommandCenter {
         .idle
     }
 
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id _: BrewOperationID) async -> Bool {
-        false
-    }
-
     @discardableResult
     func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
@@ -470,10 +462,6 @@ private actor PhaseStreamingCommandCenter: BrewCommandCenter {
         }
         subscriberWaiters.removeAll()
         return phaseStream
-    }
-
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream { $0.finish() }
     }
 
     func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {

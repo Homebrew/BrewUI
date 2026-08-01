@@ -5,7 +5,6 @@
 
 @testable import BrewCLI
 import BrewCore
-import BrewCoreTestSupport
 import BrewServicesTestSupport
 import Foundation
 import Testing
@@ -93,7 +92,6 @@ struct SerialBrewCommandCenterTests {
         try await center.perform(noopCommand, id: id)
 
         #expect(await center.phase(for: id) == .idle)
-        #expect(await !center.isActive(id: id))
     }
 
     @Test func `records failure with OperationFailure and clears in flight slot`() async throws {
@@ -116,7 +114,6 @@ struct SerialBrewCommandCenterTests {
             return
         }
         #expect(!failure.userFacingMessage.isEmpty)
-        #expect(await !center.isActive(id: id))
     }
 
     @Test func `capture mode returns output and does not treat a non-zero exit as failure`() async throws {
@@ -131,24 +128,6 @@ struct SerialBrewCommandCenterTests {
         #expect(output.standardOutput == "warnings")
         #expect(output.terminationStatus == 1)
         #expect(await center.phase(for: id) == .idle)
-    }
-
-    @Test func `phaseByID exposes tracked entries`() async throws {
-        let center = makeCenter(runner: ClosureRunner { _ in
-            CommandOutput(standardOutput: "", standardError: "boom", terminationStatus: 1)
-        })
-        let id = BrewOperationID(kind: .formula, name: "snapshot")
-        #expect(await center.phaseByID().isEmpty)
-
-        do {
-            try await center.perform(noopCommand, id: id)
-        } catch {
-            _ = error
-        }
-
-        let map = await center.phaseByID()
-        #expect(map[id] != nil)
-        #expect(await center.phase(for: id) == map[id])
     }
 
     @Test func `runs the injected mock runner not real brew`() async throws {

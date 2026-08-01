@@ -61,13 +61,6 @@ extension ConfigViewModel {
         return error is BrewLookupError
     }
 
-    var errorMessage: String {
-        guard case let .failed(error) = state else {
-            return ""
-        }
-        return userMessage(for: error)
-    }
-
     // MARK: - Grouping
 
     enum ConfigGroup {

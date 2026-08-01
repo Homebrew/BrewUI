@@ -100,6 +100,15 @@ The pre-commit hook formats and lints **staged** Swift files (SwiftFormat/SwiftL
 
 If a test failure surfaces a real regression that's out of scope for the current turn, surface it to the user rather than silently skipping it — never paper over a red test with `.disabled` or `--filter` exclusions without flagging.
 
+### Dead-code analysis (Periphery)
+
+`.github/workflows/pr_build_test.yml` runs [Periphery](https://github.com/peripheryapp/periphery) (pinned in `Mintfile`) after the Xcode build, reusing that build's index store (`--index-store-path DerivedData/Index.noindex/DataStore --skip-build`) so it adds no second build. It scans the **Xcode project** (config in `.periphery.yml`) so the `Homebrew/` app counts as a consumer of the SwiftPM modules — this reports unused code across the whole program, including dead `public` API, which a package-only scan cannot.
+
+The check is **baseline-gated**: it fails a PR only on dead code **not** already recorded in `.periphery-baseline.json` (via `--strict --baseline`). This grandfathers the existing tail so only newly introduced dead code blocks a merge.
+
+- **Seeding / regenerating the baseline:** it can't be generated in the agent sandbox (needs a working `xcodebuild` app build). If `.periphery-baseline.json` is absent, the CI step writes one and uploads it as the `periphery-baseline` artifact without gating — download it, commit it, and the gate activates. To refresh it intentionally (after a deliberate change to the unused set), regenerate on a machine/CI where the app builds: build `Brew-Unit` with `-derivedDataPath DerivedData`, then `mint run periphery scan --index-store-path DerivedData/Index.noindex/DataStore --skip-build --write-baseline .periphery-baseline.json`.
+- **Known-implicit usage is already retained** via `.periphery.yml` (`retain_swift_ui_previews`, `retain_codable_properties`, `retain_assign_only_properties`). For a genuine one-off that Periphery still can't see, annotate the declaration with `// periphery:ignore` (or `// periphery:ignore:all` for a type and its members) rather than widening the baseline.
+
 ---
 
 ## What Lives Where

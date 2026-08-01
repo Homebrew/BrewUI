@@ -1,0 +1,16 @@
+# Periphery — dead-code (unused declaration) analysis.
+# Run in CI by .github/workflows/pr_build_test.yml; see AGENTS.md for the workflow.
+#
+# We scan the Xcode PROJECT (not the bare SwiftPM package) so the Homebrew app is included as a
+# consumer of the SwiftPM library modules. That means `retain_public` stays FALSE: public API that
+# not even the app uses is genuinely dead and should be reported. (Scanning the package alone would
+# force retain_public and blind us to dead public API, while also flagging the whole app-only UI tree
+# as a false positive.)
+project: Homebrew.xcodeproj
+schemes:
+  - Brew-Unit # host-app unit-test scheme — builds the app + every SPM module + unit tests
+
+# Retain the declaration classes that are used implicitly (Periphery can't see these as "reads"):
+retain_swift_ui_previews: true # `#Preview` bodies aren't indexed as usage
+retain_codable_properties: true # decoded/encoded stored properties on Codable types
+retain_assign_only_properties: true # e.g. Hashable/Equatable key structs read only via synthesis

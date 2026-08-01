@@ -88,13 +88,6 @@ final class DoctorViewModel {
         return report.rawOutput
     }
 
-    var issueItems: [DoctorIssueItem] {
-        guard case let .loaded(report) = state else {
-            return []
-        }
-        return report.issues.map { DoctorIssueItem(issue: $0) }
-    }
-
     /// Header chrome (Run Again button, re-check spinner) is only meaningful once a report — healthy or
     /// with issues — is on screen. Hidden during the initial load and on failure (the failure surface owns
     /// its own retry affordance via ``AsyncContentView``).

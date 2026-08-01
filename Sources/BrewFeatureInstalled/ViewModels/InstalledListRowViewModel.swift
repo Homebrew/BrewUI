@@ -4,7 +4,6 @@
 //
 
 import BrewCore
-import BrewRepositoryInterfaces
 import BrewUIComponents
 import Foundation
 import Observation
@@ -22,10 +21,6 @@ final class InstalledListRowViewModel {
     private(set) var showsUpgradeBusy: Bool = false
     private(set) var showsUninstallBusy: Bool = false
     private let brewCommandCenter: BrewCommandCenter
-
-    var id: HomebrewPackageID {
-        package.id
-    }
 
     var name: String {
         package.displayName

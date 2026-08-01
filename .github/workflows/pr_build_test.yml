@@ -16,6 +16,10 @@ on:
       - "Package.resolved"
       - "Tools/BrewUILint/**"
       - "scripts/test"
+      - "Brewfile"
+      - "Mintfile"
+      - ".periphery.yml"
+      - ".periphery-baseline.json"
       - ".github/workflows/pr_build_test.yml"
   pull_request:
     types: [opened, reopened, synchronize]
@@ -31,6 +35,9 @@ on:
       - "Package.resolved"
       - "Tools/BrewUILint/**"
       - "scripts/test"
+      - "Mintfile"
+      - ".periphery.yml"
+      - ".periphery-baseline.json"
       - ".github/workflows/pr_build_test.yml"
 
 permissions:
@@ -44,10 +51,12 @@ jobs:
   build-and-test:
     name: Build + unit tests
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 25
+    env:
+      MINT_PATH: ${{ github.workspace }}/mint
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Resolve package dependencies
         run: xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
@@ -58,6 +67,7 @@ jobs:
           xcodebuild test \
             -project Homebrew.xcodeproj \
             -scheme Brew-Unit \
+            -derivedDataPath DerivedData \
             -destination "platform=macOS" \
             -skipPackagePluginValidation \
             -skipMacroValidation \
@@ -96,6 +106,56 @@ jobs:
         run: |
           set -o pipefail
           xcrun swift test --package-path Tools/BrewUILint | tee swift-test-brewuilint.log
+
+      - name: Cache Homebrew prefix
+        uses: Homebrew/actions/cache-homebrew-prefix@df4b09108a1de9d6f995fe68f302b3f68bd6d2ef # 2026.07.20.1
+        with:
+          brewfile: true
+          uninstall: true
+          workflow-key: pr-build-test
+
+      - name: Cache Mint packages
+        id: mint-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('**/Mintfile') }}
+          restore-keys: |
+            ${{ runner.os }}-mint-
+
+      - name: Install Mintfile packages
+        if: steps.mint-cache.outputs.cache-hit != 'true'
+        run: mint bootstrap --mintfile Mintfile
+      - name: Periphery dead-code scan
+        run: |
+          set -o pipefail
+          # Reuse the index store produced by the xcodebuild test step (no second build).
+          index="DerivedData/Index.noindex/DataStore"
+          if [ ! -d "$index" ]; then
+            index="$(find DerivedData -type d -name DataStore -path '*Index*' | head -n 1)"
+          fi
+          echo "Using index store: $index"
+          if [ -f .periphery-baseline.json ]; then
+            mint run periphery scan \
+              --index-store-path "$index" --skip-build \
+              --baseline .periphery-baseline.json --strict \
+              --relative-results --format github-actions
+          else
+            echo "::warning::No .periphery-baseline.json committed yet — writing a seed baseline (this run does NOT gate). Download the 'periphery-baseline' artifact from this run, commit it as .periphery-baseline.json, and subsequent PRs will fail only on newly introduced dead code."
+            mint run periphery scan \
+              --index-store-path "$index" --skip-build \
+              --write-baseline .periphery-baseline.json \
+              --relative-results
+          fi
+
+      - name: Upload periphery seed baseline
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: periphery-baseline
+          path: .periphery-baseline.json
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Upload logs on failure
         if: failure() || cancelled()

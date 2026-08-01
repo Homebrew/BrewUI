@@ -92,13 +92,12 @@ public final class BrewDoctorRepository: DoctorRepository {
     /// Combines stdout + stderr (stdout first) into the single text ``DoctorOutputParser`` expects, stripping
     /// ANSI colour — doctor output is colourised for display, but the colour-blind parser needs plain text.
     private static func combinedOutput(of output: CommandOutput) -> String {
-        let combined: String
-        if output.standardError.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            combined = output.standardOutput
+        let combined: String = if output.standardError.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            output.standardOutput
         } else if output.standardOutput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            combined = output.standardError
+            output.standardError
         } else {
-            combined = output.standardOutput + "\n" + output.standardError
+            output.standardOutput + "\n" + output.standardError
         }
         return ANSIParser.plainText(combined)
     }

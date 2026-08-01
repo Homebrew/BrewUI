@@ -3,7 +3,6 @@ import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureDiscover
 import BrewRepositoryInterfaces
-import BrewServicesTestSupport
 import Testing
 
 struct DiscoverListRowViewModelTests {

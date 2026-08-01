@@ -21,24 +21,12 @@ public actor RecordingSerialBrewCommandCenter: BrewCommandCenter {
         await inner.phase(for: id)
     }
 
-    public func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        await inner.phaseByID()
-    }
-
-    public func isActive(id: BrewOperationID) async -> Bool {
-        await inner.isActive(id: id)
-    }
-
     public func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         await inner.phaseChanges(for: id)
     }
 
     public func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         await inner.allPhaseChanges()
-    }
-
-    public func outputChanges(for id: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        await inner.outputChanges(for: id)
     }
 
     public func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {

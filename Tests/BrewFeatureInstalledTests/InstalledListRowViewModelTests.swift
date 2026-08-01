@@ -8,8 +8,6 @@ import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureInstalled
 import BrewRepositories
-import BrewRepositoryInterfaces
-import BrewServicesTestSupport
 import Foundation
 import Testing
 
@@ -177,20 +175,6 @@ private actor PhaseSequenceCommandCenter: BrewCommandCenter {
         return phases.last ?? .idle
     }
 
-    func phaseByID() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func isActive(id: BrewOperationID) async -> Bool {
-        _ = id
-        return phases.contains { phase in
-            if case .running = phase {
-                return true
-            }
-            return false
-        }
-    }
-
     @discardableResult
     func capture(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
         _ = id
@@ -214,12 +198,6 @@ private actor PhaseSequenceCommandCenter: BrewCommandCenter {
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func outputChanges(for _: BrewOperationID) async -> AsyncStream<BrewCommandOutputLine> {
-        AsyncStream<BrewCommandOutputLine>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()
         }
     }

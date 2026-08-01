@@ -7,14 +7,14 @@ import Foundation
 
 /// Builds a pre-filled "new issue" URL on the app's GitHub repository from a
 /// crash report, so a user can file it with one click.
-public enum CrashReportIssue {
-    public static let repositoryURL = URL(string: "https://github.com/Homebrew/BrewUI")!
+enum CrashReportIssue {
+    static let repositoryURL = URL(string: "https://github.com/Homebrew/BrewUI")!
 
     /// Kept under GitHub's ~8k URL ceiling; longer logs are truncated.
     static let maxBodyLength = 6000
 
     /// A pre-filled new-issue URL. Nothing is sent until the user submits it on GitHub.
-    public static func url(for report: CrashReport) -> URL {
+    static func url(for report: CrashReport) -> URL {
         var components = URLComponents(
             url: repositoryURL.appendingPathComponent("issues/new"),
             resolvingAgainstBaseURL: false,
