@@ -180,17 +180,17 @@ final class DiscoverViewModel {
             : String(localized: "Popular Casks", comment: "Discover trending casks section header")
     }
 
-    /// Loaded packages of the active mode, scope-filtered and sorted, in display order. Drives selection.
+    /// Loaded packages of the active mode, scope-filtered, in display order. Drives selection.
     var visiblePackages: [DiscoveryBrewPackage] {
         guard case let .loaded(packages) = activeState else {
             return []
         }
         var visible: [DiscoveryBrewPackage] = []
         if showsFormulaeSection {
-            visible += Self.sortedSection(packages, kind: .formula)
+            visible += Self.section(packages, kind: .formula)
         }
         if showsCasksSection {
-            visible += Self.sortedSection(packages, kind: .cask)
+            visible += Self.section(packages, kind: .cask)
         }
         return visible
     }
@@ -204,23 +204,14 @@ final class DiscoverViewModel {
 
     // MARK: - Helpers
 
-    static func sortedSection(
+    /// Packages of one kind, in the order the source handed them down. Ranking is the source's job:
+    /// trending arrives in the backend's install-rank order, search in the catalogue's match order — the
+    /// view model never re-sorts, it only partitions by kind.
+    static func section(
         _ packages: [DiscoveryBrewPackage],
         kind: HomebrewPackageKind,
     ) -> [DiscoveryBrewPackage] {
-        packages
-            .filter { $0.kind == kind }
-            .sorted(by: sortByPopularityThenName)
-    }
-
-    private static func sortByPopularityThenName(
-        _ lhs: DiscoveryBrewPackage,
-        _ rhs: DiscoveryBrewPackage,
-    ) -> Bool {
-        if lhs.thirtyDayInstallCount == rhs.thirtyDayInstallCount {
-            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
-        }
-        return lhs.thirtyDayInstallCount > rhs.thirtyDayInstallCount
+        packages.filter { $0.kind == kind }
     }
 
     private static func userMessage(for error: Error, searching: Bool) -> String {

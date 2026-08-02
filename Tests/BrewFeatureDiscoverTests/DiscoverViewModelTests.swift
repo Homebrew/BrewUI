@@ -105,7 +105,7 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
-    @Test @MainActor func `load selects first visible row by popularity`() async {
+    @Test @MainActor func `load selects the first visible row`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -170,7 +170,9 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
     }
 
-    @Test @MainActor func `rows with equal install count are sorted alphabetically`() async {
+    @Test @MainActor func `visible packages preserve the source order within a kind`() async {
+        // The view model never re-ranks — rows appear in the order the repository handed them down
+        // (here: the backend's install rank), not alphabetically or by count.
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -188,7 +190,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.visiblePackages.map(\.name) == ["git", "node", "wget"])
+        #expect(viewModel.visiblePackages.map(\.name) == ["wget", "git", "node"])
     }
 
     @Test @MainActor func `visible packages partition by kind formulae first then casks`() async {
@@ -447,7 +449,8 @@ struct DiscoverViewModelTests {
 
         #expect(viewModel.isSearching)
         #expect(!viewModel.showsInstallMetrics)
-        #expect(viewModel.visiblePackages.map(\.name) == ["imagemagick", "ripgrep"])
+        // Results preserve the catalogue's match order (the view model never re-sorts them).
+        #expect(viewModel.visiblePackages.map(\.name) == ["ripgrep", "imagemagick"])
         // Search results all surface a zero install count (catalogue search has no analytics).
         #expect(viewModel.selectedPackage?.thirtyDayInstallCount == 0)
     }
