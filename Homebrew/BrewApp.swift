@@ -84,8 +84,17 @@ struct BrewApp: App {
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
-                .task { await catalogueCache.prepare() }
-                .task { await discoverAnalyticsCache.prepare() }
+                .task {
+                    // Warm the on-disk caches, then preload Discover's trending list so the tab is
+                    // snappy on first open. Ordered so enrichment reads the just-prepared caches rather
+                    // than racing them into a needless network fetch (correctness holds either way — the
+                    // repositories fetch when a cache is empty). The list survives tab switches and only
+                    // revalidates on return once the analytics cache goes stale.
+                    async let catalogue: Void = catalogueCache.prepare()
+                    async let analytics: Void = discoverAnalyticsCache.prepare()
+                    _ = await (catalogue, analytics)
+                    await discoverPackagesRepository.load()
+                }
                 .task { await installedPackagesRepository.load() }
                 .onChange(of: scenePhase) { oldPhase, newPhase in
                     // Mark the config + brew.env caches stale on return-to-foreground so the next visit
