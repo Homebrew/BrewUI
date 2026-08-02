@@ -19,7 +19,7 @@ import Observation
 final class ConsoleViewModel {
     @ObservationIgnored private let repository: any CommandJobsObserving
 
-    var selectedID: BrewOperationID?
+    var selectedID: CommandJobID?
 
     init(repository: any CommandJobsObserving) {
         self.repository = repository
@@ -88,11 +88,11 @@ final class ConsoleViewModel {
         return ConsoleStatusPresentation(dotState: .idle, summary: .idle, isRunning: false)
     }
 
-    func select(id: BrewOperationID) {
+    func select(id: CommandJobID) {
         selectedID = id
     }
 
-    func dismiss(id: BrewOperationID) {
+    func dismiss(id: CommandJobID) {
         if selectedID == id {
             selectedID = nil
         }

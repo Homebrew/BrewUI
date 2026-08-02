@@ -19,9 +19,9 @@ struct BrewCommandJobsRepositoryTests {
 
         await harness.emit(id: id, phase: .running(.installFormula))
 
-        #expect(harness.repository.jobs[id] != nil)
-        #expect(harness.repository.orderedIDs == [id])
-        #expect(harness.repository.jobs[id]?.command == "brew install gh")
+        #expect(harness.job(for: id) != nil)
+        #expect(harness.orderedOperationIDs == [id])
+        #expect(harness.job(for: id)?.command == "brew install gh")
     }
 
     @Test func `idle phase for unknown id is ignored (initial replay artifact)`() async {
@@ -43,7 +43,7 @@ struct BrewCommandJobsRepositoryTests {
         await harness.emit(id: id, phase: .running(.installFormula))
         await harness.emit(id: id, phase: .idle)
 
-        let job = harness.repository.jobs[id]
+        let job = harness.job(for: id)
         #expect(job?.isTerminal == true)
         #expect(job?.succeeded == true)
     }
@@ -59,12 +59,12 @@ struct BrewCommandJobsRepositoryTests {
 
         harness.repository.clearCompleted()
 
-        #expect(harness.repository.jobs[done] == nil)
-        #expect(harness.repository.jobs[running] != nil)
-        #expect(harness.repository.orderedIDs == [running])
+        #expect(harness.job(for: done) == nil)
+        #expect(harness.job(for: running) != nil)
+        #expect(harness.orderedOperationIDs == [running])
     }
 
-    @Test func `remove drops a single job and prunes orderedIDs`() async {
+    @Test func `remove drops a single job and prunes orderedIDs`() async throws {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
         let first = BrewOperationID(kind: .formula, name: "gh")
@@ -72,24 +72,24 @@ struct BrewCommandJobsRepositoryTests {
         await harness.emit(id: first, phase: .running(.installFormula))
         await harness.emit(id: second, phase: .running(.installFormula))
 
-        harness.repository.remove(id: first)
+        try harness.repository.remove(id: #require(harness.job(for: first)?.id))
 
-        #expect(harness.repository.jobs[first] == nil)
-        #expect(harness.repository.jobs[second] != nil)
-        #expect(harness.repository.orderedIDs == [second])
+        #expect(harness.job(for: first) == nil)
+        #expect(harness.job(for: second) != nil)
+        #expect(harness.orderedOperationIDs == [second])
     }
 
     @Test func `remove for unknown id is a no-op`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
         let known = BrewOperationID(kind: .formula, name: "gh")
-        let unknown = BrewOperationID(kind: .formula, name: "never-running")
         await harness.emit(id: known, phase: .running(.installFormula))
 
-        harness.repository.remove(id: unknown)
+        // A tab id that was never materialized — removing it must be a no-op.
+        harness.repository.remove(id: CommandJobID())
 
-        #expect(harness.repository.jobs[known] != nil)
-        #expect(harness.repository.orderedIDs == [known])
+        #expect(harness.job(for: known) != nil)
+        #expect(harness.orderedOperationIDs == [known])
     }
 
     @Test func `streamed output appends to the matching job's output buffer`() async {
@@ -101,7 +101,7 @@ struct BrewCommandJobsRepositoryTests {
         await harness.emit(id: id, output: BrewCommandOutputLine(stream: .stdout, text: "==> fetching"))
         await harness.emit(id: id, output: BrewCommandOutputLine(stream: .stderr, text: "warn"))
 
-        let job = harness.repository.jobs[id]
+        let job = harness.job(for: id)
         #expect(job?.output.count == 2)
         #expect(job?.output[0].text == "==> fetching")
         #expect(job?.output[1].stream == .stderr)

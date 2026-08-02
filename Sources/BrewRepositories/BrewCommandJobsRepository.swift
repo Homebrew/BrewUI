@@ -17,8 +17,13 @@ import Observation
 @Observable
 @MainActor
 public final class BrewCommandJobsRepository: CommandJobsObserving {
-    public private(set) var jobs: [BrewOperationID: CommandJob] = [:]
-    public private(set) var orderedIDs: [BrewOperationID] = []
+    public private(set) var jobs: [CommandJobID: CommandJob] = [:]
+    public private(set) var orderedIDs: [CommandJobID] = []
+
+    /// Routing map: the console job (tab) that live phase/output updates for a given ``BrewOperationID``
+    /// belong to. The command center reuses a ``BrewOperationID`` across successive operations on the same
+    /// package, so this indirection is what lets us route updates without conflating distinct runs.
+    @ObservationIgnored private var liveJobByOperationID: [BrewOperationID: CommandJobID] = [:]
 
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
     @ObservationIgnored private var phaseObserverTask: Task<Void, Never>?
@@ -42,12 +47,14 @@ public final class BrewCommandJobsRepository: CommandJobsObserving {
     /// Drop a single job from the cache. In-flight operations keep running in the command center —
     /// this only removes the console-side projection, and any subsequent phase update for the dropped
     /// id is ignored by ``handlePhase(id:phase:)``.
-    public func remove(id: BrewOperationID) {
+    public func remove(id: CommandJobID) {
         guard jobs[id] != nil else {
             return
         }
         jobs[id] = nil
         orderedIDs.removeAll { $0 == id }
+        // Drop any live routing that pointed at this tab so a later run for that operation starts fresh.
+        liveJobByOperationID = liveJobByOperationID.filter { $0.value != id }
     }
 
     /// Remove all terminal jobs from the cache. In-flight jobs are preserved.
@@ -58,11 +65,12 @@ public final class BrewCommandJobsRepository: CommandJobsObserving {
             jobs[id] = nil
         }
         orderedIDs = preservedIDs
+        liveJobByOperationID = liveJobByOperationID.filter { !removedIDs.contains($0.value) }
     }
 
     /// Applies a phase transition from ``observePhases()`` to the cache.
-    private func handlePhase(id: BrewOperationID, phase: BrewOperationPhase) {
-        if let existing = jobs[id] {
+    private func handlePhase(id operationID: BrewOperationID, phase: BrewOperationPhase) {
+        if let liveID = liveJobByOperationID[operationID], let existing = jobs[liveID] {
             existing.updatePhase(phase)
             return
         }
@@ -72,16 +80,17 @@ public final class BrewCommandJobsRepository: CommandJobsObserving {
         guard case let .running(kind) = phase else {
             return
         }
-        let job = CommandJob.materialize(id: id, kind: kind, phase: phase)
-        jobs[id] = job
-        orderedIDs.append(id)
+        let job = CommandJob.materialize(id: operationID, kind: kind, phase: phase)
+        jobs[job.id] = job
+        orderedIDs.append(job.id)
+        liveJobByOperationID[operationID] = job.id
     }
 
-    /// Appends a streamed output line from ``observeOutput()`` to the matching job.
+    /// Appends a streamed output line from ``observeOutput()`` to the job currently live for that operation.
     /// Output lines for unknown ids are dropped: a job materializes from its first
     /// ``BrewOperationPhase/running`` transition, which is always observed before any subprocess emits output.
-    private func handleOutput(id: BrewOperationID, line: BrewCommandOutputLine) {
-        guard let job = jobs[id] else {
+    private func handleOutput(id operationID: BrewOperationID, line: BrewCommandOutputLine) {
+        guard let liveID = liveJobByOperationID[operationID], let job = jobs[liveID] else {
             return
         }
         job.appendOutput(line)

@@ -21,14 +21,14 @@ struct ConsoleViewModelTests {
         await harness.emit(id: first, phase: .running(.installFormula))
         await harness.emit(id: second, phase: .running(.installFormula))
 
-        #expect(harness.viewModel.activeJob?.id == second)
+        #expect(harness.viewModel.activeJob?.operationID == second)
 
         await harness.emit(id: second, phase: .idle)
 
-        #expect(harness.viewModel.activeJob?.id == first)
+        #expect(harness.viewModel.activeJob?.operationID == first)
     }
 
-    @Test func `selectedJob prefers explicit selection over active or recent`() async {
+    @Test func `selectedJob prefers explicit selection over active or recent`() async throws {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
         let first = BrewOperationID(kind: .formula, name: "gh")
@@ -36,9 +36,9 @@ struct ConsoleViewModelTests {
         await harness.emit(id: first, phase: .running(.installFormula))
         await harness.emit(id: second, phase: .running(.installFormula))
 
-        harness.viewModel.select(id: first)
+        try harness.viewModel.select(id: #require(harness.job(for: first)?.id))
 
-        #expect(harness.viewModel.selectedJob?.id == first)
+        #expect(harness.viewModel.selectedJob?.operationID == first)
     }
 
     @Test func `selectedJob falls back to active when nothing is explicitly selected`() async {
@@ -48,51 +48,53 @@ struct ConsoleViewModelTests {
         await harness.emit(id: running, phase: .running(.installFormula))
 
         #expect(harness.viewModel.selectedID == nil)
-        #expect(harness.viewModel.selectedJob?.id == running)
+        #expect(harness.viewModel.selectedJob?.operationID == running)
     }
 
-    @Test func `dismiss clears selection and removes the job from the repository`() async {
+    @Test func `dismiss clears selection and removes the job from the repository`() async throws {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
         let id = BrewOperationID(kind: .formula, name: "gh")
         await harness.emit(id: id, phase: .running(.installFormula))
-        harness.viewModel.select(id: id)
+        let jobID = try #require(harness.job(for: id)?.id)
+        harness.viewModel.select(id: jobID)
 
-        harness.viewModel.dismiss(id: id)
+        harness.viewModel.dismiss(id: jobID)
 
         #expect(harness.viewModel.selectedID == nil)
-        #expect(harness.repository.jobs[id] == nil)
+        #expect(harness.job(for: id) == nil)
     }
 
-    @Test func `dismiss for a non-selected job leaves selection intact`() async {
+    @Test func `dismiss for a non-selected job leaves selection intact`() async throws {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
         let selected = BrewOperationID(kind: .formula, name: "gh")
         let other = BrewOperationID(kind: .formula, name: "ripgrep")
         await harness.emit(id: selected, phase: .running(.installFormula))
         await harness.emit(id: other, phase: .running(.installFormula))
-        harness.viewModel.select(id: selected)
+        let selectedJobID = try #require(harness.job(for: selected)?.id)
+        harness.viewModel.select(id: selectedJobID)
 
-        harness.viewModel.dismiss(id: other)
+        try harness.viewModel.dismiss(id: #require(harness.job(for: other)?.id))
 
-        #expect(harness.viewModel.selectedID == selected)
-        #expect(harness.repository.jobs[other] == nil)
+        #expect(harness.viewModel.selectedID == selectedJobID)
+        #expect(harness.job(for: other) == nil)
     }
 
-    @Test func `clearCompleted clears selection if the selected job was terminal`() async {
+    @Test func `clearCompleted clears selection if the selected job was terminal`() async throws {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
         let id = BrewOperationID(kind: .formula, name: "gh")
         await harness.emit(id: id, phase: .running(.installFormula))
         await harness.emit(id: id, phase: .idle)
-        harness.viewModel.select(id: id)
+        try harness.viewModel.select(id: #require(harness.job(for: id)?.id))
 
         harness.viewModel.clearCompleted()
 
         #expect(harness.viewModel.selectedID == nil)
     }
 
-    @Test func `clearCompleted preserves selection if the selected job is still running`() async {
+    @Test func `clearCompleted preserves selection if the selected job is still running`() async throws {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
         let running = BrewOperationID(kind: .formula, name: "gh")
@@ -100,11 +102,12 @@ struct ConsoleViewModelTests {
         await harness.emit(id: running, phase: .running(.installFormula))
         await harness.emit(id: done, phase: .running(.installFormula))
         await harness.emit(id: done, phase: .idle)
-        harness.viewModel.select(id: running)
+        let runningJobID = try #require(harness.job(for: running)?.id)
+        harness.viewModel.select(id: runningJobID)
 
         harness.viewModel.clearCompleted()
 
-        #expect(harness.viewModel.selectedID == running)
+        #expect(harness.viewModel.selectedID == runningJobID)
     }
 
     // MARK: - shouldAutoExpandConsole
