@@ -5,19 +5,24 @@
 
 import BrewCore
 import Foundation
+import Observation
 
-public protocol DiscoverPackagesRepository: Sendable {
-    func loadTopPackages(
-        limit: Int,
-        window: BrewAnalyticsWindow,
-    ) async throws -> DiscoverTopPackagesSnapshot
+/// App-scoped source of truth for Discover's trending list: an observable load state plus a cache-first
+/// load. A single observable so any surface renders from one fetch and the composition root can preload
+/// it at launch. The default traps — the composition root must inject a live instance.
+@MainActor
+public protocol DiscoverPackagesRepository: Observable, Sendable {
+    /// Trending packages — top formulae followed by top casks — in the backend's install-rank order.
+    var state: LoadState<[DiscoveryBrewPackage], any Error> { get }
+
+    /// Cache-first by default: fresh in-memory data returns instantly; stale data revalidates while the
+    /// prior list stays on screen; an empty/failed state fetches. `forceRefresh` always fetches.
+    func load(forceRefresh: Bool) async
 }
 
+@MainActor
 public extension DiscoverPackagesRepository {
-    func loadTopPackages(
-        limit: Int = 10,
-        window: BrewAnalyticsWindow = .days30,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        try await loadTopPackages(limit: limit, window: window)
+    func load() async {
+        await load(forceRefresh: false)
     }
 }

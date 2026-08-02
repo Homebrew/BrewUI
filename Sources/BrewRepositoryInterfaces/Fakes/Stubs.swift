@@ -39,19 +39,22 @@ public final class StubInstalledPackagesRepository: InstalledPackagesRepository 
     }
 }
 
-public struct StubDiscoverPackagesRepository: DiscoverPackagesRepository {
-    private let snapshot: DiscoverTopPackagesSnapshot
+/// Loaded-state trending list backed by a fixed snapshot (or an explicit state). `load` is a no-op so
+/// the preset state stays put — mirrors ``StubInstalledPackagesRepository``.
+@Observable
+@MainActor
+public final class StubDiscoverPackagesRepository: DiscoverPackagesRepository {
+    public private(set) var state: LoadState<[DiscoveryBrewPackage], any Error>
 
     public init(snapshot: DiscoverTopPackagesSnapshot) {
-        self.snapshot = snapshot
+        state = .loaded(snapshot.topFormulae + snapshot.topCasks)
     }
 
-    public func loadTopPackages(
-        limit _: Int,
-        window _: BrewAnalyticsWindow,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        snapshot
+    public init(state: LoadState<[DiscoveryBrewPackage], any Error>) {
+        self.state = state
     }
+
+    public func load(forceRefresh _: Bool) async {}
 }
 
 @Observable

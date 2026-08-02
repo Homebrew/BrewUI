@@ -15,7 +15,7 @@ import Testing
 struct BrewDiscoverPackagesRepositoryTests {
     // MARK: - Enrichment behaviour
 
-    @Test @MainActor func `loadTopPackages sorts descending and applies limit`() async throws {
+    @Test @MainActor func `load exposes ranked packages and applies limit`() async throws {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let (repository, _) = makeRepository(
@@ -24,30 +24,20 @@ struct BrewDiscoverPackagesRepositoryTests {
             formulaCatalogueNames: ["wget", "bat", "fd"],
             caskCatalogueNames: ["iterm2", "raycast", "docker-desktop"],
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
 
-        let snapshot = try await repository.loadTopPackages(limit: 2, window: .days30)
-        #expect(snapshot.topFormulae == [
+        await repository.load()
+
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
             discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
-        ])
-        #expect(snapshot.topCasks == [
-            discoveryPackage(
-                name: "raycast",
-                kind: .cask,
-                thirtyDayInstallCount: 450,
-                latestVersion: "2.0.0",
-            ),
-            discoveryPackage(
-                name: "iterm2",
-                kind: .cask,
-                thirtyDayInstallCount: 400,
-                latestVersion: "2.0.0",
-            ),
+            discoveryPackage(name: "raycast", kind: .cask, thirtyDayInstallCount: 450, latestVersion: "2.0.0"),
+            discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 400, latestVersion: "2.0.0"),
         ])
     }
 
-    @Test @MainActor func `loadTopPackages parses string counts and honors backend rank`() async throws {
+    @Test @MainActor func `load parses string counts and honors backend rank`() async throws {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let formulaAnalytics = analyticsData(
@@ -87,14 +77,16 @@ struct BrewDiscoverPackagesRepositoryTests {
             defaultsKeyPrefix: prefix,
         )
 
-        let snapshot = try await repository.loadTopPackages(limit: 10, window: .days30)
-        #expect(snapshot.topFormulae == [
+        await repository.load()
+
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "alpha", thirtyDayInstallCount: 400, latestVersion: "1.0.0"),
             discoveryPackage(name: "beta", thirtyDayInstallCount: 400, latestVersion: "1.0.0"),
+            discoveryPackage(name: "gamma", kind: .cask, thirtyDayInstallCount: 40, latestVersion: "2.0.0"),
         ])
     }
 
-    @Test @MainActor func `loadTopPackages excludes analytics entries missing from catalogue`() async throws {
+    @Test @MainActor func `load excludes analytics entries missing from catalogue`() async throws {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let (repository, _) = makeRepository(
@@ -105,15 +97,15 @@ struct BrewDiscoverPackagesRepositoryTests {
             defaultsKeyPrefix: prefix,
         )
 
-        let snapshot = try await repository.loadTopPackages(limit: 10, window: .days30)
-        #expect(snapshot.topFormulae == [
+        await repository.load()
+
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
             discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
         ])
-        #expect(snapshot.topCasks.isEmpty)
     }
 
-    @Test @MainActor func `loadTopPackages advances past unmatched analytics to fill limit`() async throws {
+    @Test @MainActor func `load advances past unmatched analytics to fill limit`() async throws {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let (repository, _) = makeRepository(
@@ -122,16 +114,18 @@ struct BrewDiscoverPackagesRepositoryTests {
             formulaCatalogueNames: ["bat", "wget"],
             caskCatalogueNames: [],
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
 
-        let snapshot = try await repository.loadTopPackages(limit: 2, window: .days30)
-        #expect(snapshot.topFormulae == [
+        await repository.load()
+
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
             discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
         ])
     }
 
-    @Test @MainActor func `loadTopPackages returns empty lists when limit is zero`() async throws {
+    @Test @MainActor func `load returns an empty list when limit is zero`() async throws {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let analyticsPayload = analyticsData(
@@ -154,14 +148,15 @@ struct BrewDiscoverPackagesRepositoryTests {
             formulaCatalogueNames: ["wget"],
             caskCatalogueNames: ["wget"],
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 0,
         )
 
-        let snapshot = try await repository.loadTopPackages(limit: 0, window: .days30)
-        #expect(snapshot.topFormulae.isEmpty)
-        #expect(snapshot.topCasks.isEmpty)
+        await repository.load()
+
+        #expect(try #require(repository.state.value).isEmpty)
     }
 
-    @Test @MainActor func `loadTopPackages forwards client errors`() async throws {
+    @Test @MainActor func `load surfaces client errors as a failed state`() async {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let repository = BrewDiscoverPackagesRepository(
@@ -170,9 +165,14 @@ struct BrewDiscoverPackagesRepositoryTests {
             cache: InMemoryDiscoverAnalyticsCache(),
             defaultsKeyPrefix: prefix,
         )
-        await #expect(throws: BrewAPIClientError.self) {
-            _ = try await repository.loadTopPackages(limit: 10, window: .days30)
+
+        await repository.load()
+
+        guard case let .failed(error) = repository.state else {
+            Issue.record("expected failed state")
+            return
         }
+        #expect(error is BrewAPIClientError)
     }
 
     // MARK: - 24-hour caching
@@ -186,10 +186,13 @@ struct BrewDiscoverPackagesRepositoryTests {
             formulaCatalogueNames: ["bat", "wget", "fd"],
             caskCatalogueNames: ["iterm2", "raycast", "docker-desktop"],
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
 
-        let first = try await repository.loadTopPackages(limit: 2, window: .days30)
-        let second = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
+        let first = try #require(repository.state.value)
+        await repository.load()
+        let second = try #require(repository.state.value)
 
         #expect(first == second)
         // One formula + one cask fetch on the cold load; the warm load hits neither endpoint.
@@ -212,12 +215,13 @@ struct BrewDiscoverPackagesRepositoryTests {
             caskCatalogueNames: [],
             cache: cache,
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
         markFresh(repository, window: .days30)
 
-        let snapshot = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
 
-        #expect(snapshot.topFormulae == [
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
             discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
         ])
@@ -241,19 +245,20 @@ struct BrewDiscoverPackagesRepositoryTests {
             caskCatalogueNames: [],
             cache: cache,
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
         markStale(repository, window: .days30)
 
-        let snapshot = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
 
-        #expect(snapshot.topFormulae == [
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
             discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
         ])
         #expect(await spy.analyticsCallCount == 2)
     }
 
-    @Test @MainActor func `load refetches once the ttl has elapsed`() async throws {
+    @Test @MainActor func `load refetches once the ttl has elapsed`() async {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let (repository, spy) = makeRepository(
@@ -262,14 +267,15 @@ struct BrewDiscoverPackagesRepositoryTests {
             formulaCatalogueNames: ["bat", "wget"],
             caskCatalogueNames: [],
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
 
-        _ = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
         #expect(await spy.analyticsCallCount == 2)
 
         // Simulate more than 24h passing since the last refresh.
         markStale(repository, window: .days30)
-        _ = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
 
         #expect(await spy.analyticsCallCount == 4)
     }
@@ -294,12 +300,13 @@ struct BrewDiscoverPackagesRepositoryTests {
             ),
             cache: cache,
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
         markStale(repository, window: .days30)
 
-        let snapshot = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
 
-        #expect(snapshot.topFormulae == [
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
             discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
         ])
@@ -307,7 +314,7 @@ struct BrewDiscoverPackagesRepositoryTests {
         #expect(await spy.analyticsCallCount == 2)
         #expect(await spy.receivedFormulaETags == [#""formula-e1""#])
         // ...and the refreshed timestamp means the next load serves from cache with no fetch.
-        _ = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
         #expect(await spy.analyticsCallCount == 2)
     }
 
@@ -320,16 +327,19 @@ struct BrewDiscoverPackagesRepositoryTests {
             formulaCatalogueNames: ["bat", "wget"],
             caskCatalogueNames: [],
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
             pendingError: BrewAPIClientError.transport(underlying: "offline"),
         )
 
-        await #expect(throws: BrewAPIClientError.self) {
-            _ = try await repository.loadTopPackages(limit: 2, window: .days30)
+        await repository.load()
+        guard case .failed = repository.state else {
+            Issue.record("expected failed state after the first load")
+            return
         }
 
         // The failed attempt left the window stale, so a second load retries and succeeds.
-        let snapshot = try await repository.loadTopPackages(limit: 2, window: .days30)
-        #expect(snapshot.topFormulae == [
+        await repository.load()
+        #expect(try #require(repository.state.value) == [
             discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
             discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
         ])
@@ -345,14 +355,19 @@ struct BrewDiscoverPackagesRepositoryTests {
             formulaCatalogueNames: ["bat", "wget", "fd"],
             caskCatalogueNames: ["iterm2", "raycast", "docker-desktop"],
             defaultsKeyPrefix: prefix,
+            topPackagesLimit: 2,
         )
 
-        async let first = repository.loadTopPackages(limit: 2, window: .days30)
-        async let second = repository.loadTopPackages(limit: 2, window: .days30)
-        let firstSnapshot = try await first
-        let secondSnapshot = try await second
+        async let first: Void = repository.load()
+        async let second: Void = repository.load()
+        _ = await (first, second)
 
-        #expect(firstSnapshot == secondSnapshot)
+        #expect(try #require(repository.state.value) == [
+            discoveryPackage(name: "bat", thirtyDayInstallCount: 1500, latestVersion: "1.0.0"),
+            discoveryPackage(name: "wget", thirtyDayInstallCount: 500, latestVersion: "1.0.0"),
+            discoveryPackage(name: "raycast", kind: .cask, thirtyDayInstallCount: 450, latestVersion: "2.0.0"),
+            discoveryPackage(name: "iterm2", kind: .cask, thirtyDayInstallCount: 400, latestVersion: "2.0.0"),
+        ])
         #expect(await spy.analyticsCallCount == 2)
     }
 
@@ -374,8 +389,10 @@ struct BrewDiscoverPackagesRepositoryTests {
             caskCatalogueNames: [],
             cache: firstCache,
             defaultsKeyPrefix: fixture.repositoryDefaultsPrefix,
+            topPackagesLimit: 2,
         )
-        let firstSnapshot = try await firstRepository.loadTopPackages(limit: 2, window: .days30)
+        await firstRepository.load()
+        let firstPackages = try #require(firstRepository.state.value)
         #expect(await firstSpy.analyticsCallCount == 2)
 
         // Second launch: a brand-new cache instance reads the persisted bytes from disk.
@@ -391,14 +408,15 @@ struct BrewDiscoverPackagesRepositoryTests {
             caskCatalogueNames: [],
             cache: secondCache,
             defaultsKeyPrefix: fixture.repositoryDefaultsPrefix,
+            topPackagesLimit: 2,
         )
-        let relaunchSnapshot = try await secondRepository.loadTopPackages(limit: 2, window: .days30)
-        #expect(relaunchSnapshot == firstSnapshot)
+        await secondRepository.load()
+        #expect(try #require(secondRepository.state.value) == firstPackages)
         #expect(await secondSpy.analyticsCallCount == 0)
 
         // Once 24h has elapsed, the relaunched repository refetches.
         markStale(secondRepository, window: .days30)
-        _ = try await secondRepository.loadTopPackages(limit: 2, window: .days30)
+        await secondRepository.load()
         #expect(await secondSpy.analyticsCallCount == 2)
     }
 }
@@ -602,6 +620,7 @@ private func makeRepository(
     caskCatalogueNames: [String],
     cache: any DiscoverAnalyticsCaching = InMemoryDiscoverAnalyticsCache(),
     defaultsKeyPrefix: String,
+    topPackagesLimit: Int = 10,
     pendingError: (any Error)? = nil,
 ) -> (BrewDiscoverPackagesRepository, SpyBrewAPIClient) {
     let spy = SpyBrewAPIClient(
@@ -617,6 +636,7 @@ private func makeRepository(
         ),
         cache: cache,
         defaultsKeyPrefix: defaultsKeyPrefix,
+        topPackagesLimit: topPackagesLimit,
     )
     return (repository, spy)
 }

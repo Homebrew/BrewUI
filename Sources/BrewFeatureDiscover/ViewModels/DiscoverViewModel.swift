@@ -17,8 +17,6 @@ final class DiscoverViewModel {
     @ObservationIgnored private let discoverPackagesRepository: any DiscoverPackagesRepository
     @ObservationIgnored private let catalogueRepository: any CatalogueRepository
     @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
-    @ObservationIgnored private let topPackagesLimit: Int
-    @ObservationIgnored private let analyticsWindow: BrewAnalyticsWindow
     @ObservationIgnored private let searchResultsLimit: Int
 
     var query: String = "" {
@@ -39,8 +37,20 @@ final class DiscoverViewModel {
         }
     }
 
-    /// Catalogue top packages shown on the landing (empty-query) state.
-    private(set) var trending: LoadState<[DiscoveryBrewPackage], String> = .loading
+    /// Catalogue top packages shown on the landing (empty-query) state. Projected from the app-scoped
+    /// ``DiscoverPackagesRepository`` so cold-start preloading and tab switches share one fetch; the
+    /// repository's `Error` is mapped to user-facing copy here.
+    var trending: LoadState<[DiscoveryBrewPackage], String> {
+        switch discoverPackagesRepository.state {
+        case .loading:
+            .loading
+        case let .loaded(packages):
+            .loaded(packages)
+        case let .failed(error):
+            .failed(Self.userMessage(for: error, searching: false))
+        }
+    }
+
     /// Catalogue search results shown while the query is non-empty.
     private(set) var results: LoadState<[DiscoveryBrewPackage], String> = .loaded([])
     private(set) var selectedPackageID: BrewPackage.ID?
@@ -49,15 +59,11 @@ final class DiscoverViewModel {
         discoverPackagesRepository: any DiscoverPackagesRepository,
         catalogueRepository: any CatalogueRepository,
         installedRepository: any InstalledPackageStatusReading,
-        topPackagesLimit: Int = 10,
-        analyticsWindow: BrewAnalyticsWindow = .days30,
         searchResultsLimit: Int = 50,
     ) {
         self.discoverPackagesRepository = discoverPackagesRepository
         self.catalogueRepository = catalogueRepository
         self.installedRepository = installedRepository
-        self.topPackagesLimit = topPackagesLimit
-        self.analyticsWindow = analyticsWindow
         self.searchResultsLimit = searchResultsLimit
     }
 
@@ -281,17 +287,10 @@ extension DiscoverViewModel {
 // MARK: - Loading
 
 extension DiscoverViewModel {
-    func load() async {
-        trending = .loading
-        do {
-            let snapshot = try await discoverPackagesRepository.loadTopPackages(
-                limit: topPackagesLimit,
-                window: analyticsWindow,
-            )
-            trending = .loaded(snapshot.topFormulae + snapshot.topCasks)
-        } catch {
-            trending = .failed(Self.userMessage(for: error, searching: false))
-        }
+    /// Delegates to the app-scoped repository (cache-first; `forceRefresh` for the retry affordance),
+    /// then re-anchors selection against whatever rows are now visible.
+    func load(forceRefresh: Bool = false) async {
+        await discoverPackagesRepository.load(forceRefresh: forceRefresh)
         synchronizeSelectionWithVisibleRows()
     }
 
@@ -322,7 +321,7 @@ extension DiscoverViewModel {
         if isSearching {
             await search()
         } else {
-            await load()
+            await load(forceRefresh: true)
         }
     }
 }
