@@ -49,8 +49,8 @@ struct BrewDiscoverPackagesRepositoryTests {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "alpha": [{ "number": 1, "formula": "alpha", "count": "400" }],
-                "beta": [{ "number": 2, "formula": "beta", "count": "400" }]
+                "alpha": [{ "formula": "alpha", "count": "400" }],
+                "beta": [{ "formula": "beta", "count": "400" }]
               }
             }
             """,
@@ -64,7 +64,7 @@ struct BrewDiscoverPackagesRepositoryTests {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "gamma": [{ "number": 1, "cask": "gamma", "count": "40" }]
+                "gamma": [{ "cask": "gamma", "count": "40" }]
               }
             }
             """,
@@ -137,7 +137,7 @@ struct BrewDiscoverPackagesRepositoryTests {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "wget": [{ "number": 1, "formula": "wget", "count": "10" }]
+                "wget": [{ "formula": "wget", "count": "10" }]
               }
             }
             """,
@@ -545,9 +545,9 @@ private enum DiscoverAnalyticsFixtures {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "wget": [{ "number": 2, "formula": "wget", "count": "500" }],
-                "bat": [{ "number": 1, "formula": "bat", "count": "1,500" }],
-                "fd": [{ "number": 3, "formula": "fd", "count": "300" }]
+                "wget": [{ "formula": "wget", "count": "500" }],
+                "bat": [{ "formula": "bat", "count": "1,500" }],
+                "fd": [{ "formula": "fd", "count": "300" }]
               }
             }
             """,
@@ -564,9 +564,9 @@ private enum DiscoverAnalyticsFixtures {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "iterm2": [{ "number": 2, "cask": "iterm2", "count": "400" }],
-                "raycast": [{ "number": 1, "cask": "raycast", "count": "450" }],
-                "docker-desktop": [{ "number": 3, "cask": "docker-desktop", "count": "50" }]
+                "iterm2": [{ "cask": "iterm2", "count": "400" }],
+                "raycast": [{ "cask": "raycast", "count": "450" }],
+                "docker-desktop": [{ "cask": "docker-desktop", "count": "50" }]
               }
             }
             """,
@@ -598,9 +598,9 @@ private enum DiscoverAnalyticsFixtures {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "missing": [{ "number": 1, "formula": "missing", "count": "2,000" }],
-                "bat": [{ "number": 2, "formula": "bat", "count": "1,500" }],
-                "wget": [{ "number": 3, "formula": "wget", "count": "500" }]
+                "missing": [{ "formula": "missing", "count": "2,000" }],
+                "bat": [{ "formula": "bat", "count": "1,500" }],
+                "wget": [{ "formula": "wget", "count": "500" }]
               }
             }
             """,

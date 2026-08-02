@@ -25,8 +25,8 @@ struct BrewAPIClientURLSessionIntegrationTests {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "wget": [{ "number": 1, "formula": "wget", "count": "1,000" }],
-                "bat": [{ "number": 2, "formula": "bat", "count": "200" }]
+                "wget": [{ "formula": "wget", "count": "1,000" }],
+                "bat": [{ "formula": "bat", "count": "200" }]
               }
             }
             """.utf8,
@@ -206,7 +206,7 @@ struct BrewAPIClientURLSessionIntegrationTests {
                   "start_date": "2026-04-17",
                   "end_date": "2026-05-17",
                   "formulae": {
-                    "\(name)": [{ "number": 1, "formula": "\(name)", "count": "100" }]
+                    "\(name)": [{ "formula": "\(name)", "count": "100" }]
                   }
                 }
                 """.utf8,
@@ -226,7 +226,7 @@ struct BrewAPIClientURLSessionIntegrationTests {
                   "start_date": "2026-04-17",
                   "end_date": "2026-05-17",
                   "formulae": {
-                    "\(name)": [{ "number": 1, "cask": "\(name)", "count": "50" }]
+                    "\(name)": [{ "cask": "\(name)", "count": "50" }]
                   }
                 }
                 """.utf8,

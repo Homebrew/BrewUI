@@ -27,9 +27,9 @@ public struct BrewAnalyticsJSON: Decodable, Sendable {
     let casks: [String: [Entry]]?
 
     /// A single analytics row. Mirrors the wire verbatim: `count` is the comma-grouped string Homebrew
-    /// sends ("1,234,567"), parsed to an `Int` only during mapping.
+    /// sends ("1,234,567"), parsed to an `Int` only during mapping. The API carries no rank field, so
+    /// ranking is derived from `count` during mapping.
     struct Entry: Decodable {
-        let number: Int
         let formula: String?
         let cask: String?
         let count: String
@@ -57,9 +57,9 @@ public enum BrewAnalyticsMappingError: Error, Equatable {
 }
 
 public extension BrewAnalyticsJSON {
-    /// Flattens the keyed buckets into package counts in the backend's published rank order (`number`).
-    /// The client never re-ranks by install count — it defers to the server's ordering, including the
-    /// server's own tie-breaking.
+    /// Flattens the keyed buckets into package counts ranked by install count (descending), with a
+    /// name tie-break for a stable order. The API keys entries alphabetically and carries no rank
+    /// field, so `count` is the only ranking signal — the ranking is reconstructed here.
     func rankedPackageCounts() throws -> [BrewAnalyticsPackageCount] {
         guard let bucket = formulae ?? casks else {
             throw BrewAnalyticsMappingError.missingPackageBucket
@@ -67,30 +67,37 @@ public extension BrewAnalyticsJSON {
         return try bucket.values
             .compactMap(\.first)
             .map { try $0.packageCount() }
-            .sorted { $0.rank < $1.rank }
+            .sorted(by: BrewAnalyticsPackageCount.byInstallCountDescendingThenName)
     }
 }
 
 public struct BrewAnalyticsPackageCount: Hashable, Sendable {
     public let reference: HomebrewPackageID
     public let count: Int
-    /// The backend's `number` field — the authoritative rank used to order counts.
-    public let rank: Int
 
     public var name: String {
         reference.name
     }
 
-    public init(reference: HomebrewPackageID, count: Int, rank: Int) {
+    public init(reference: HomebrewPackageID, count: Int) {
         self.reference = reference
         self.count = count
-        self.rank = rank
+    }
+
+    static func byInstallCountDescendingThenName(
+        _ lhs: BrewAnalyticsPackageCount,
+        _ rhs: BrewAnalyticsPackageCount,
+    ) -> Bool {
+        if lhs.count == rhs.count {
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
+        return lhs.count > rhs.count
     }
 }
 
 private extension BrewAnalyticsJSON.Entry {
     func packageCount() throws -> BrewAnalyticsPackageCount {
-        try BrewAnalyticsPackageCount(reference: reference(), count: parsedCount(), rank: number)
+        try BrewAnalyticsPackageCount(reference: reference(), count: parsedCount())
     }
 
     func reference() throws -> HomebrewPackageID {

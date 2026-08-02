@@ -288,7 +288,7 @@ private extension StubURLProtocol.StubbedResult {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "wget": [{ "number": 1, "formula": "wget", "count": "100" }]
+                "wget": [{ "formula": "wget", "count": "100" }]
               }
             }
             """.utf8,
@@ -306,7 +306,7 @@ private extension StubURLProtocol.StubbedResult {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "iterm2": [{ "number": 1, "cask": "iterm2", "count": "50" }]
+                "iterm2": [{ "cask": "iterm2", "count": "50" }]
               }
             }
             """.utf8,

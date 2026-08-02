@@ -258,6 +258,10 @@ let package = Package(
                 "BrewCLI",
                 "BrewCore",
                 "BrewRepositoryInterfaces",
+                // Concrete repository + API-client types, so the trending integration test can wire the
+                // real BrewDiscoverPackagesRepository into the view model end-to-end.
+                "BrewRepositories",
+                "BrewNetworking",
                 "BrewCoreTestSupport",
                 "BrewServicesTestSupport",
             ],
