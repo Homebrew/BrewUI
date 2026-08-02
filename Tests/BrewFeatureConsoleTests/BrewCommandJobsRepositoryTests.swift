@@ -48,6 +48,49 @@ struct BrewCommandJobsRepositoryTests {
         #expect(job?.succeeded == true)
     }
 
+    @Test func `re-running an operation after it finishes opens a separate tab`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        // The command center reuses one BrewOperationID per package across operations.
+        let id = BrewOperationID(kind: .formula, name: "gh")
+
+        // Install runs to completion...
+        await harness.emit(id: id, phase: .running(.installFormula))
+        await harness.emit(id: id, output: BrewCommandOutputLine(stream: .stdout, text: "Pouring gh"))
+        await harness.emit(id: id, phase: .idle)
+
+        // ...then the same package is uninstalled under the same operation id.
+        await harness.emit(id: id, phase: .running(.uninstallFormula))
+        await harness.emit(id: id, output: BrewCommandOutputLine(stream: .stdout, text: "Uninstalling gh"))
+
+        // Two distinct tabs, each with its own command and output — not one reused tab.
+        #expect(harness.repository.orderedIDs.count == 2)
+        let jobs = harness.repository.orderedIDs.compactMap { harness.repository.jobs[$0] }
+        #expect(jobs.map(\.command) == ["brew install gh", "brew uninstall gh"])
+        #expect(jobs.first?.output.map(\.text) == ["Pouring gh"])
+        #expect(jobs.last?.output.map(\.text) == ["Uninstalling gh"])
+        #expect(jobs.first?.isTerminal == true)
+        #expect(jobs.last?.isTerminal == false)
+    }
+
+    @Test func `output arriving after a job finishes still lands on that finished job`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let id = BrewOperationID(kind: .formula, name: "gh")
+
+        await harness.emit(id: id, phase: .running(.installFormula))
+        await harness.emit(id: id, phase: .idle)
+        // Phase and output ride separate streams with no cross-stream ordering, so a trailing output
+        // line can be observed after the terminal phase. It must still land on the finished run, not be
+        // dropped for want of a routing entry — routing stays put until the next `.running` reuses the id.
+        await harness.emit(id: id, output: BrewCommandOutputLine(stream: .stdout, text: "==> Summary"))
+
+        let job = harness.job(for: id)
+        #expect(job?.isTerminal == true)
+        #expect(job?.output.map(\.text) == ["==> Summary"])
+        #expect(harness.repository.orderedIDs.count == 1)
+    }
+
     @Test func `clearCompleted removes terminal jobs but preserves in-flight`() async {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()

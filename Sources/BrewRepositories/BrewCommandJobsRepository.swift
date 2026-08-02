@@ -71,8 +71,18 @@ public final class BrewCommandJobsRepository: CommandJobsObserving {
     /// Applies a phase transition from ``observePhases()`` to the cache.
     private func handlePhase(id operationID: BrewOperationID, phase: BrewOperationPhase) {
         if let liveID = liveJobByOperationID[operationID], let existing = jobs[liveID] {
-            existing.updatePhase(phase)
-            return
+            // A fresh `.running` for an operation whose routed job has already finished means the command
+            // center is reusing the id for a new operation on the same package (e.g. uninstall after install).
+            // Open a new tab rather than reviving the finished one — but only on that new `.running`. We keep
+            // routing on the finished job until then so any output the command center buffered before this
+            // transition (phase and output ride separate streams with no cross-stream ordering) still lands
+            // on the run it belongs to instead of being dropped.
+            if case .running = phase, existing.isTerminal {
+                // Fall through to materialize a new job below, repointing routing to it.
+            } else {
+                existing.updatePhase(phase)
+                return
+            }
         }
 
         // Only materialize new jobs from a `.running` transition — `.idle` for an unknown id
