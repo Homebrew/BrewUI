@@ -25,8 +25,8 @@ struct BrewAPIClientURLSessionIntegrationTests {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "wget": [{ "formula": "wget", "count": "1,000" }],
-                "bat": [{ "formula": "bat", "count": "200" }]
+                "wget": [{ "number": 1, "formula": "wget", "count": "1,000" }],
+                "bat": [{ "number": 2, "formula": "bat", "count": "200" }]
               }
             }
             """.utf8,
@@ -137,8 +137,8 @@ struct BrewAPIClientURLSessionIntegrationTests {
 
         let formula = try JSONDecoder().decode(BrewAnalyticsJSON.self, from: formulaData)
         let cask = try JSONDecoder().decode(BrewAnalyticsJSON.self, from: caskData)
-        #expect(formula.packageCounts.first?.name == "wget")
-        #expect(cask.packageCounts.first?.name == "iterm2")
+        #expect(try formula.rankedPackageCounts().first?.name == "wget")
+        #expect(try cask.rankedPackageCounts().first?.name == "iterm2")
         #expect(StubURLProtocol.requests(forHost: host).count == 2)
     }
 
@@ -206,7 +206,7 @@ struct BrewAPIClientURLSessionIntegrationTests {
                   "start_date": "2026-04-17",
                   "end_date": "2026-05-17",
                   "formulae": {
-                    "\(name)": [{ "formula": "\(name)", "count": "100" }]
+                    "\(name)": [{ "number": 1, "formula": "\(name)", "count": "100" }]
                   }
                 }
                 """.utf8,
@@ -226,7 +226,7 @@ struct BrewAPIClientURLSessionIntegrationTests {
                   "start_date": "2026-04-17",
                   "end_date": "2026-05-17",
                   "formulae": {
-                    "\(name)": [{ "cask": "\(name)", "count": "50" }]
+                    "\(name)": [{ "number": 1, "cask": "\(name)", "count": "50" }]
                   }
                 }
                 """.utf8,

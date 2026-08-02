@@ -156,8 +156,8 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         var results: [DiscoveryBrewPackage] = []
         results.reserveCapacity(validatedLimit)
 
-        let sortedCounts = analytics.packageCounts.sorted(by: sortByInstallCountDescendingThenNameAscending)
-        for entry in sortedCounts {
+        // Counts arrive in the backend's published rank order; we never re-rank, just enrich in order.
+        for entry in try analytics.rankedPackageCounts() {
             guard let package = try await catalogueRepository.package(for: entry.reference) else {
                 continue
             }
@@ -172,16 +172,6 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
             }
         }
         return results
-    }
-
-    private func sortByInstallCountDescendingThenNameAscending(
-        _ lhs: BrewAnalyticsPackageCount,
-        _ rhs: BrewAnalyticsPackageCount,
-    ) -> Bool {
-        if lhs.count == rhs.count {
-            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
-        }
-        return lhs.count > rhs.count
     }
 
     private func updateLastRefresh(window: BrewAnalyticsWindow) {

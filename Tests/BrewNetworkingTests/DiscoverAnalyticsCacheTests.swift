@@ -144,7 +144,7 @@ private struct TestFixture {
               "start_date": "2026-04-17",
               "end_date": "2026-05-17",
               "formulae": {
-                "\(name)": [{ "\(key)": "\(name)", "count": "100" }]
+                "\(name)": [{ "number": 1, "\(key)": "\(name)", "count": "100" }]
               }
             }
             """.utf8,
