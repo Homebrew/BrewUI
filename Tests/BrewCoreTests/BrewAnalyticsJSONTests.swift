@@ -127,6 +127,31 @@ struct BrewAnalyticsJSONTests {
         }
     }
 
+    @Test func `throws when a package key carries an empty entry array`() throws {
+        // An empty array (rather than the usual single-entry one) must surface as an error instead of
+        // being silently dropped, which would shrink the ranking without any signal.
+        let json = Data(
+            """
+            {
+              "category": "install-on-request",
+              "total_items": 2,
+              "total_count": 1200,
+              "start_date": "2026-04-17",
+              "end_date": "2026-05-17",
+              "formulae": {
+                "wget": [{ "formula": "wget", "count": "1000" }],
+                "bat": []
+              }
+            }
+            """.utf8,
+        )
+
+        let decoded = try JSONDecoder().decode(BrewAnalyticsJSON.self, from: json)
+        #expect(throws: BrewAnalyticsMappingError.emptyPackageEntries(key: "bat")) {
+            _ = try decoded.rankedPackageCounts()
+        }
+    }
+
     @Test func `throws when entry package identity is missing`() throws {
         let json = Data(
             """

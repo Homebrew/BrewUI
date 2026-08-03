@@ -47,6 +47,7 @@ public struct BrewAnalyticsJSON: Decodable, Sendable {
 /// Raised while mapping a decoded analytics response into domain package counts.
 public enum BrewAnalyticsMappingError: Error, Equatable {
     case missingPackageBucket
+    case emptyPackageEntries(key: String)
     case missingPackageIdentity
     case conflictingPackageIdentity
     case malformedCount(String)
@@ -54,14 +55,19 @@ public enum BrewAnalyticsMappingError: Error, Equatable {
 
 public extension BrewAnalyticsJSON {
     /// Package counts ranked by install count (descending, name tie-break). The API carries no rank
-    /// field, so `count` is the only ranking signal.
+    /// field, so `count` is the only ranking signal. Every key must carry an entry: an empty array
+    /// throws rather than being dropped, so a malformed payload can't silently shrink the ranking.
     func rankedPackageCounts() throws -> [BrewAnalyticsPackageCount] {
         guard let bucket = formulae ?? casks else {
             throw BrewAnalyticsMappingError.missingPackageBucket
         }
-        return try bucket.values
-            .compactMap(\.first)
-            .map { try $0.packageCount() }
+        return try bucket
+            .map { key, entries in
+                guard let entry = entries.first else {
+                    throw BrewAnalyticsMappingError.emptyPackageEntries(key: key)
+                }
+                return try entry.packageCount()
+            }
             .sorted(by: BrewAnalyticsPackageCount.byInstallCountDescendingThenName)
     }
 }
