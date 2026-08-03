@@ -20,11 +20,9 @@ public struct BrewAnalyticsJSON: Decodable, Sendable {
     public let startDate: String
     public let endDate: String
 
-    // The cask-install endpoint reuses the `formulae` key, so kind is read from each entry, not the bucket.
     let formulae: [String: [Entry]]?
     let casks: [String: [Entry]]?
 
-    /// `count` is the comma-grouped string Homebrew sends ("1,234,567"); the API carries no rank field.
     struct Entry: Decodable {
         let formula: String?
         let cask: String?
@@ -55,8 +53,7 @@ public enum BrewAnalyticsMappingError: Error, Equatable {
 
 public extension BrewAnalyticsJSON {
     /// Package counts ranked by install count (descending, name tie-break). The API carries no rank
-    /// field, so `count` is the only ranking signal. Every key must carry an entry: an empty array
-    /// throws rather than being dropped, so a malformed payload can't silently shrink the ranking.
+    /// field, so `count` is the only ranking signal; a key with an empty entry array throws.
     func rankedPackageCounts() throws -> [BrewAnalyticsPackageCount] {
         guard let bucket = formulae ?? casks else {
             throw BrewAnalyticsMappingError.missingPackageBucket
@@ -117,7 +114,6 @@ private extension BrewAnalyticsJSON.Entry {
         }
     }
 
-    /// Strip the wire's group separators ("1,234" → 1234) before parsing.
     func parsedCount() throws -> Int {
         let digitsOnly = count.filter(\.isNumber)
         guard !digitsOnly.isEmpty, let value = Int(digitsOnly) else {

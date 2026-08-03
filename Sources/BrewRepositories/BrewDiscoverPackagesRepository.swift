@@ -42,7 +42,6 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     @ObservationIgnored private let analyticsWindow: BrewAnalyticsWindow
     @ObservationIgnored private var loadTask: Task<Void, Never>?
 
-    /// `defaultsKeyPrefix` namespaces lastRefresh timestamps in `UserDefaults.standard` so tests isolate.
     public init(
         apiClient: any BrewAPIClient,
         catalogueRepository: any CatalogueRepository,
@@ -86,7 +85,6 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     }
 
     private func refresh() async {
-        // Keep any existing list on screen while revalidating; only show loading with nothing to show.
         if case .loaded = state {} else {
             state = .loading
         }
@@ -95,7 +93,6 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         } catch is CancellationError {
             return
         } catch {
-            // Keep showing cached data if we have any; only surface an error with nothing to show.
             if case .loaded = state {
                 discoverRepositoryLogger.error(
                     "Discover trending revalidation failed: \(error.localizedDescription, privacy: .public)",
@@ -176,7 +173,6 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         var results: [DiscoveryBrewPackage] = []
         results.reserveCapacity(validatedLimit)
 
-        // Already ranked; enrich in order and stop once we hit the limit.
         for entry in try analytics.rankedPackageCounts() {
             guard let package = try await catalogueRepository.package(for: entry.reference) else {
                 continue

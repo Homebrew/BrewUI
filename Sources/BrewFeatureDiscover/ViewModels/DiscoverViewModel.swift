@@ -36,8 +36,6 @@ final class DiscoverViewModel {
         }
     }
 
-    /// Projected from the app-scoped repository so preload and tab switches share one fetch; its `Error`
-    /// is mapped to user-facing copy here.
     var trending: LoadState<[DiscoveryBrewPackage], String> {
         switch discoverPackagesRepository.state {
         case .loading:
@@ -78,8 +76,6 @@ final class DiscoverViewModel {
         isSearching ? results : trending
     }
 
-    /// The list only owns keyboard focus on the trending landing once loaded; during a search, focus
-    /// belongs to the catalogue search field.
     var shouldFocusList: Bool {
         trending.isLoaded && !isSearching
     }
@@ -201,8 +197,6 @@ final class DiscoverViewModel {
 
     // MARK: - Helpers
 
-    // Filter-only: ranking is the source's job (trending by install count, search by match order), so
-    // this never re-sorts.
     static func section(
         _ packages: [DiscoveryBrewPackage],
         kind: HomebrewPackageKind,

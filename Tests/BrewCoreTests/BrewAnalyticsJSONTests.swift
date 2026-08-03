@@ -7,10 +7,6 @@ import BrewCore
 import Foundation
 import Testing
 
-/// Coverage for the analytics DTO. `BrewAnalyticsJSON` is a thin wire mirror (synthesized decode), so
-/// these fixtures split into two groups: decode-time failures (missing/mistyped required fields) and
-/// mapping-time failures raised by ``BrewAnalyticsJSON/rankedPackageCounts()`` (bad buckets/entries).
-/// The live API keys entries by name with no rank field, so ranking is derived from `count`.
 struct BrewAnalyticsJSONTests {
     @Test func `decodes formula counts and flattens buckets`() throws {
         let json = Data(
@@ -39,8 +35,6 @@ struct BrewAnalyticsJSONTests {
     }
 
     @Test func `ranks package counts by install count with a name tie-break`() throws {
-        // Keys are alphabetical (like the live API) and unrelated to rank; ordering comes from `count`,
-        // with equal counts broken by name so the order is stable.
         let json = Data(
             """
             {
@@ -84,7 +78,6 @@ struct BrewAnalyticsJSONTests {
     }
 
     @Test func `throws when required fields are missing`() throws {
-        // `total_count` is absent, so the synthesized decode fails before any mapping is attempted.
         let json = Data(
             """
             {
@@ -105,7 +98,6 @@ struct BrewAnalyticsJSONTests {
     }
 
     @Test func `throws when entry count is malformed`() throws {
-        // `count` mirrors the wire as a String, so this decodes fine and fails during mapping.
         let json = Data(
             """
             {
@@ -128,8 +120,6 @@ struct BrewAnalyticsJSONTests {
     }
 
     @Test func `throws when a package key carries an empty entry array`() throws {
-        // An empty array (rather than the usual single-entry one) must surface as an error instead of
-        // being silently dropped, which would shrink the ranking without any signal.
         let json = Data(
             """
             {

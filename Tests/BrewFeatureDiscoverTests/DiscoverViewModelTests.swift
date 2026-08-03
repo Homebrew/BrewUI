@@ -171,8 +171,6 @@ struct DiscoverViewModelTests {
     }
 
     @Test @MainActor func `visible packages preserve the source order within a kind`() async {
-        // The view model never re-ranks — rows appear in the order the repository handed them down
-        // (here: the backend's install rank), not alphabetically or by count.
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -278,7 +276,6 @@ struct DiscoverViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        // Trending projects the repository's .loading state (e.g. tab opened mid-preload).
         #expect(viewModel.paneHeading == "Trending")
         #expect(viewModel.subtitleText == "Loading packages…")
         #expect(!viewModel.isSubtitleError)
@@ -447,7 +444,6 @@ struct DiscoverViewModelTests {
 
         #expect(viewModel.isSearching)
         #expect(!viewModel.showsInstallMetrics)
-        // Results preserve the catalogue's match order (the view model never re-sorts them).
         #expect(viewModel.visiblePackages.map(\.name) == ["ripgrep", "imagemagick"])
         // Search results all surface a zero install count (catalogue search has no analytics).
         #expect(viewModel.selectedPackage?.thirtyDayInstallCount == 0)
@@ -604,7 +600,6 @@ struct DiscoverViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        // The list only takes focus once trending has loaded; here the repository is still loading.
         #expect(!viewModel.shouldFocusList)
     }
 
@@ -666,7 +661,6 @@ private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepositor
         state = .loaded(snapshot.topFormulae + snapshot.topCasks)
     }
 
-    /// Re-projects the current snapshot, so tests can mutate `snapshot` then reload to see the change.
     func load(forceRefresh _: Bool) async {
         state = .loaded(snapshot.topFormulae + snapshot.topCasks)
     }

@@ -13,10 +13,6 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-/// End-to-end coverage from `DiscoverViewModel` down through the real `BrewDiscoverPackagesRepository`,
-/// decoding a payload shaped like the live Homebrew analytics API. This guards the seam that broke once:
-/// the API keys entries by package name (alphabetically), the objects carry only `formula`/`cask` +
-/// `count` (a comma-grouped string, and **no** rank field), so ranking must be derived from `count`.
 struct DiscoverTrendingIntegrationTests {
     @Test func `trending loads and ranks live-shaped analytics by install count`() async {
         let viewModel = makeViewModel(
@@ -32,8 +28,6 @@ struct DiscoverTrendingIntegrationTests {
             Issue.record("expected trending to load; got \(viewModel.trending)")
             return
         }
-        // Ranked by count descending within each kind (formulae then casks), regardless of the
-        // alphabetical key order in the payload.
         #expect(viewModel.visiblePackages.map(\.name) == ["wget", "bat", "a2ps", "raycast", "iterm2"])
         #expect(viewModel.selectedPackage?.id == .formula(name: "wget"))
     }
@@ -56,8 +50,6 @@ struct DiscoverTrendingIntegrationTests {
 
     // MARK: - Fixtures
 
-    /// Mirrors the live `install-on-request` response: name-keyed objects (alphabetical), string counts,
-    /// no rank field. Counts intentionally do not follow key order.
     private static let liveShapedFormulaAnalytics = Data(
         """
         {
@@ -141,8 +133,6 @@ private func catalogueCask(named name: String) -> BrewPackage {
     )
 }
 
-/// Returns fixed analytics bytes for both windows; catalogue endpoints are never exercised by the
-/// discover repository (enrichment goes through the injected catalogue repository).
 private struct StubAnalyticsAPIClient: BrewAPIClient {
     let formula: Data
     let cask: Data

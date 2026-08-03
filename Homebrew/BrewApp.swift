@@ -85,9 +85,6 @@ struct BrewApp: App {
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
                 .task {
-                    // Warm the on-disk caches before preloading Discover so enrichment reads them rather
-                    // than racing into a needless fetch (correctness holds either way — an empty cache
-                    // just triggers a fetch).
                     async let catalogue: Void = catalogueCache.prepare()
                     async let analytics: Void = discoverAnalyticsCache.prepare()
                     _ = await (catalogue, analytics)
