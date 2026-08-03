@@ -6,8 +6,8 @@
 import BrewCore
 
 extension InstalledPackagesContent: Placeholdable {
-    /// A small mixed-kind stub so the redacted skeleton renders both the Formulae and Casks
-    /// sections at plausible heights. Distinct ids keep `ForEach` happy under `.redacted`.
+    /// A small mixed-kind stub so the redacted skeleton renders a plausible interleaved list of
+    /// formula and cask rows. Distinct ids keep `ForEach` happy under `.redacted`.
     static var placeholder: InstalledPackagesContent {
         let formulae = (0 ..< 3).map { index in
             InstalledBrewPackage(

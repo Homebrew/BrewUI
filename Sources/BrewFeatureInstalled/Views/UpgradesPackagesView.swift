@@ -95,16 +95,8 @@ struct UpgradesPackagesView: View {
     private func upgradesList(_ content: InstalledPackagesContent) -> some View {
         ScrollViewReader { proxy in
             List {
-                if content.shouldShowFormulaeSection {
-                    Section("Formulae") {
-                        sectionContent(for: content.formulaPackages)
-                    }
-                }
-
-                if content.shouldShowCasksSection {
-                    Section("Casks") {
-                        sectionContent(for: content.caskPackages)
-                    }
+                ForEach(content.packages) { package in
+                    row(for: package)
                 }
             }
             .listStyle(.inset)
@@ -136,30 +128,24 @@ struct UpgradesPackagesView: View {
         }
     }
 
-    private func sectionContent(for packages: [InstalledBrewPackage]) -> some View {
-        ForEach(packages) { package in
-            listRow(for: package)
-                .id(package.id)
-                .contentShape(Rectangle())
-                .listRowBackground(
-                    RoundedRectangle(
-                        cornerRadius: BrewRadius.lg,
-                        style: .continuous,
-                    )
-                    .fill(
-                        viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                    )
-                    .padding(.horizontal, BrewSpacing.sm),
-                )
-                .onTapGesture {
-                    // Needed to suppress the default ugly blue macOS highlight state
-                    viewModel.setSelection(package.id)
-                }
-        }
-    }
-
-    private func listRow(for package: InstalledBrewPackage) -> some View {
+    private func row(for package: InstalledBrewPackage) -> some View {
         InstalledListRowRoot(package: package)
+            .id(package.id)
+            .contentShape(Rectangle())
+            .listRowBackground(
+                RoundedRectangle(
+                    cornerRadius: BrewRadius.lg,
+                    style: .continuous,
+                )
+                .fill(
+                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
+                )
+                .padding(.horizontal, BrewSpacing.sm),
+            )
+            .onTapGesture {
+                // Needed to suppress the default ugly blue macOS highlight state
+                viewModel.setSelection(package.id)
+            }
     }
 
     private func scrollToSelection(

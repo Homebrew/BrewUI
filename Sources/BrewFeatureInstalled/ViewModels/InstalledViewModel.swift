@@ -10,15 +10,9 @@ import Foundation
 import Observation
 
 struct InstalledPackagesContent: Equatable {
+    /// Formulae and casks interleaved into a single list, ordered as the repository sorted them
+    /// (by name across both kinds). The per-row kind badge keeps casks and formulae distinguishable.
     var packages: [InstalledBrewPackage]
-
-    var shouldShowFormulaeSection: Bool {
-        !formulaPackages.isEmpty
-    }
-
-    var shouldShowCasksSection: Bool {
-        !caskPackages.isEmpty
-    }
 
     var formulaPackages: [InstalledBrewPackage] {
         packages.filter { $0.kind == .formula }
@@ -29,7 +23,7 @@ struct InstalledPackagesContent: Equatable {
     }
 
     var orderedPackageIDs: [InstalledBrewPackage.ID] {
-        formulaPackages.map(\.id) + caskPackages.map(\.id)
+        packages.map(\.id)
     }
 
     /// Narrows the content to a single package kind for the scope picker. `.all` is the identity —
@@ -268,15 +262,10 @@ final class InstalledViewModel {
             return scoped
         }
 
-        let filteredFormulaRows = scoped.formulaPackages.filter {
+        let filteredRows = scoped.packages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
-        let filteredCaskRows = scoped.caskPackages.filter {
-            $0.name.localizedCaseInsensitiveContains(normalizedQuery)
-        }
-        return InstalledPackagesContent(
-            packages: filteredFormulaRows + filteredCaskRows,
-        )
+        return InstalledPackagesContent(packages: filteredRows)
     }
 
     private static func normalizedSearchQuery(_ query: String) -> String {
