@@ -37,7 +37,7 @@ struct BrewDiscoverPackagesRepositoryTests {
         ])
     }
 
-    @Test @MainActor func `load parses string counts and honors backend rank`() async throws {
+    @Test @MainActor func `load parses string counts and breaks equal counts by name`() async throws {
         let prefix = uniquePrefix()
         defer { cleanup(prefix) }
         let formulaAnalytics = analyticsData(
