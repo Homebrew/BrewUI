@@ -182,7 +182,7 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         var results: [DiscoveryBrewPackage] = []
         results.reserveCapacity(validatedLimit)
 
-        // Counts arrive in the backend's published rank order; we never re-rank, just enrich in order.
+        // Derive rank from `count` (see `BrewAnalyticsJSON.rankedPackageCounts()`), then enrich in that order.
         for entry in try analytics.rankedPackageCounts() {
             guard let package = try await catalogueRepository.package(for: entry.reference) else {
                 continue
