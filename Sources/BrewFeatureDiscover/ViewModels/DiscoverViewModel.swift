@@ -4,7 +4,6 @@ import BrewUIComponents
 import Foundation
 import Observation
 
-/// Package-kind filter for the Discover search field's scope picker.
 enum DiscoverSearchScope: CaseIterable, Equatable {
     case all
     case formulae
@@ -37,9 +36,8 @@ final class DiscoverViewModel {
         }
     }
 
-    /// Catalogue top packages shown on the landing (empty-query) state. Projected from the app-scoped
-    /// ``DiscoverPackagesRepository`` so cold-start preloading and tab switches share one fetch; the
-    /// repository's `Error` is mapped to user-facing copy here.
+    /// Projected from the app-scoped repository so preload and tab switches share one fetch; its `Error`
+    /// is mapped to user-facing copy here.
     var trending: LoadState<[DiscoveryBrewPackage], String> {
         switch discoverPackagesRepository.state {
         case .loading:
@@ -51,7 +49,6 @@ final class DiscoverViewModel {
         }
     }
 
-    /// Catalogue search results shown while the query is non-empty.
     private(set) var results: LoadState<[DiscoveryBrewPackage], String> = .loaded([])
     private(set) var selectedPackageID: BrewPackage.ID?
 
@@ -73,18 +70,16 @@ final class DiscoverViewModel {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    /// Empty query → trending landing; non-empty → search results.
     var isSearching: Bool {
         !normalizedQuery.isEmpty
     }
 
-    /// The load state the view renders for the current mode.
     var activeState: LoadState<[DiscoveryBrewPackage], String> {
         isSearching ? results : trending
     }
 
-    /// Drives the list view's `@FocusState`. The list only owns keyboard focus on the trending landing
-    /// once it has loaded — while a search is active focus belongs to the catalogue search field.
+    /// The list only owns keyboard focus on the trending landing once loaded; during a search, focus
+    /// belongs to the catalogue search field.
     var shouldFocusList: Bool {
         trending.isLoaded && !isSearching
     }
@@ -96,7 +91,6 @@ final class DiscoverViewModel {
 
     // MARK: - Heading
 
-    /// Editorial heading for the list pane, driven by the display mode and result count.
     var paneHeading: String {
         guard isSearching else {
             return String(localized: "Trending", comment: "Discover list heading, trending landing")
@@ -148,7 +142,6 @@ final class DiscoverViewModel {
         )
     }
 
-    /// The trending landing decorates its subhead with an upward-trend glyph once data is loaded.
     var showsSubtitleTrendIcon: Bool {
         if case .loaded = activeState, !isSearching {
             return true
@@ -173,7 +166,6 @@ final class DiscoverViewModel {
         scope != .formulae
     }
 
-    /// Trending mode frames sections editorially ("Popular"); search mode drops the framing.
     var formulaeSectionTitle: String {
         isSearching
             ? String(localized: "Formulae", comment: "Discover formulae section header while searching")
@@ -186,7 +178,6 @@ final class DiscoverViewModel {
             : String(localized: "Popular Casks", comment: "Discover trending casks section header")
     }
 
-    /// Loaded packages of the active mode, scope-filtered, in display order. Drives selection.
     var visiblePackages: [DiscoveryBrewPackage] {
         guard case let .loaded(packages) = activeState else {
             return []
@@ -210,9 +201,8 @@ final class DiscoverViewModel {
 
     // MARK: - Helpers
 
-    /// Packages of one kind, in the order the source handed them down. Ranking is the source's job:
-    /// trending arrives in the backend's install-rank order, search in the catalogue's match order — the
-    /// view model never re-sorts, it only partitions by kind.
+    // Filter-only: ranking is the source's job (trending by install count, search by match order), so
+    // this never re-sorts.
     static func section(
         _ packages: [DiscoveryBrewPackage],
         kind: HomebrewPackageKind,
@@ -287,15 +277,11 @@ extension DiscoverViewModel {
 // MARK: - Loading
 
 extension DiscoverViewModel {
-    /// Delegates to the app-scoped repository (cache-first; `forceRefresh` for the retry affordance),
-    /// then re-anchors selection against whatever rows are now visible.
     func load(forceRefresh: Bool = false) async {
         await discoverPackagesRepository.load(forceRefresh: forceRefresh)
         synchronizeSelectionWithVisibleRows()
     }
 
-    /// Issues a catalogue search for the current query. Empty queries skip the call and clear results so
-    /// the view falls back to the trending landing.
     func search() async {
         guard isSearching else {
             results = .loaded([])
@@ -316,7 +302,6 @@ extension DiscoverViewModel {
         synchronizeSelectionWithVisibleRows()
     }
 
-    /// Re-runs whichever load backs the active mode — wired to the error state's Retry affordance.
     func reloadActive() async {
         if isSearching {
             await search()

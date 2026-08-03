@@ -11,9 +11,8 @@ public enum BrewAnalyticsWindow: String, CaseIterable, Sendable {
     case days90 = "90d"
 }
 
-/// Thin, faithful mirror of a Homebrew analytics API response. Decoding stays dumb — field-for-field
-/// with the wire shape (synthesized `Decodable`, snake_case keys only) — and the flatten/validate/rank
-/// transformation lives in ``rankedPackageCounts()`` rather than in `init(from:)`.
+/// Faithful mirror of a Homebrew analytics API response. Decoding is field-for-field with the wire
+/// shape; the flatten/validate/rank transformation lives in ``rankedPackageCounts()``.
 public struct BrewAnalyticsJSON: Decodable, Sendable {
     public let category: String
     public let totalItems: Int
@@ -21,14 +20,11 @@ public struct BrewAnalyticsJSON: Decodable, Sendable {
     public let startDate: String
     public let endDate: String
 
-    /// Homebrew keys the ranking under a package-name → single-entry-array map. The cask-install
-    /// endpoint reuses the `formulae` key, so kind is taken from each entry, not the bucket name.
+    // The cask-install endpoint reuses the `formulae` key, so kind is read from each entry, not the bucket.
     let formulae: [String: [Entry]]?
     let casks: [String: [Entry]]?
 
-    /// A single analytics row. Mirrors the wire verbatim: `count` is the comma-grouped string Homebrew
-    /// sends ("1,234,567"), parsed to an `Int` only during mapping. The API carries no rank field, so
-    /// ranking is derived from `count` during mapping.
+    /// `count` is the comma-grouped string Homebrew sends ("1,234,567"); the API carries no rank field.
     struct Entry: Decodable {
         let formula: String?
         let cask: String?
@@ -57,9 +53,8 @@ public enum BrewAnalyticsMappingError: Error, Equatable {
 }
 
 public extension BrewAnalyticsJSON {
-    /// Flattens the keyed buckets into package counts ranked by install count (descending), with a
-    /// name tie-break for a stable order. The API keys entries alphabetically and carries no rank
-    /// field, so `count` is the only ranking signal — the ranking is reconstructed here.
+    /// Package counts ranked by install count (descending, name tie-break). The API carries no rank
+    /// field, so `count` is the only ranking signal.
     func rankedPackageCounts() throws -> [BrewAnalyticsPackageCount] {
         guard let bucket = formulae ?? casks else {
             throw BrewAnalyticsMappingError.missingPackageBucket
@@ -116,7 +111,7 @@ private extension BrewAnalyticsJSON.Entry {
         }
     }
 
-    /// Strips the wire's group separators ("1,234" → 1234); mirrors the old lossy count decode.
+    /// Strip the wire's group separators ("1,234" → 1234) before parsing.
     func parsedCount() throws -> Int {
         let digitsOnly = count.filter(\.isNumber)
         guard !digitsOnly.isEmpty, let value = Int(digitsOnly) else {

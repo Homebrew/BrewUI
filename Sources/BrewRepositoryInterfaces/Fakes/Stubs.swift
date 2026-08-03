@@ -39,8 +39,7 @@ public final class StubInstalledPackagesRepository: InstalledPackagesRepository 
     }
 }
 
-/// Loaded-state trending list backed by a fixed snapshot (or an explicit state). `load` is a no-op so
-/// the preset state stays put — mirrors ``StubInstalledPackagesRepository``.
+/// Trending list backed by a fixed snapshot (or explicit state); `load` is a no-op.
 @Observable
 @MainActor
 public final class StubDiscoverPackagesRepository: DiscoverPackagesRepository {

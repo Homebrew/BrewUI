@@ -19,20 +19,17 @@ enum DiscoverPackagesRepositoryError: Error, Equatable {
     case cacheMissingAfterRefresh(window: BrewAnalyticsWindow)
 }
 
-/// App-scoped observable source of truth for Discover's trending list.
-///
-/// Long-lived `@Observable` injected into the SwiftUI environment and preloaded at launch, so the tab
-/// renders instantly on first open. Homebrew publishes install analytics once per day, so the raw
-/// analytics responses are cached to disk (via ``DiscoverAnalyticsCaching``) and only refetched when
-/// older than `ttl`; the enriched trending list is held in ``state`` for the session. Mirrors
-/// ``BrewInstalledPackagesRepository``: IO/persistence lives in the cache actor, UI state lives here.
+/// App-scoped observable source of truth for Discover's trending list, injected into the environment
+/// and preloaded at launch. Homebrew publishes install analytics once a day, so raw responses are
+/// cached to disk (via ``DiscoverAnalyticsCaching``) and only refetched past `ttl`; the enriched list
+/// lives in ``state`` for the session. Mirrors ``BrewInstalledPackagesRepository``.
 @Observable
 @MainActor
 public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     public static let defaultTTL: TimeInterval = 86400
 
-    /// Drives loading/loaded/error chrome. Carries the underlying `Error` on failure — presentation
-    /// layers map it to user-facing copy. Prior loaded data stays put when a revalidation fails.
+    /// Carries the underlying `Error` on failure; presentation maps it to copy. Prior loaded data stays
+    /// put when a revalidation fails.
     public private(set) var state: LoadState<[DiscoveryBrewPackage], any Error> = .loading
 
     @ObservationIgnored private let apiClient: any BrewAPIClient
@@ -45,8 +42,7 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     @ObservationIgnored private let analyticsWindow: BrewAnalyticsWindow
     @ObservationIgnored private var loadTask: Task<Void, Never>?
 
-    /// `defaultsKeyPrefix` is the test seam for `UserDefaults.standard`; tests pass a unique prefix to
-    /// isolate their lastRefresh timestamps from each other and from production data.
+    /// `defaultsKeyPrefix` namespaces lastRefresh timestamps in `UserDefaults.standard` so tests isolate.
     public init(
         apiClient: any BrewAPIClient,
         catalogueRepository: any CatalogueRepository,
@@ -74,7 +70,7 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     // MARK: - Lifecycle
 
     /// Cache-first: fresh in-memory data returns instantly; stale/empty/failed state fetches. A single
-    /// `loadTask` coalesces the launch preload with the tab's on-appear load into one fetch.
+    /// `loadTask` coalesces concurrent callers (e.g. launch preload and tab on-appear) into one fetch.
     public func load(forceRefresh: Bool) async {
         if !forceRefresh, case .loaded = state, !isStale(window: analyticsWindow) {
             return
@@ -119,8 +115,6 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         return formulae + casks
     }
 
-    /// Returns the cached analytics bytes for `window`, refetching over the network only when the cache
-    /// is stale or the bytes are unexpectedly absent.
     private func freshAnalyticsData(window: BrewAnalyticsWindow) async throws -> (Data, Data) {
         if !isStale(window: window),
            let formulaData = await cache.formulaAnalyticsData(window: window),
@@ -182,7 +176,7 @@ public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         var results: [DiscoveryBrewPackage] = []
         results.reserveCapacity(validatedLimit)
 
-        // Derive rank from `count` (see `BrewAnalyticsJSON.rankedPackageCounts()`), then enrich in that order.
+        // Already ranked; enrich in order and stop once we hit the limit.
         for entry in try analytics.rankedPackageCounts() {
             guard let package = try await catalogueRepository.package(for: entry.reference) else {
                 continue

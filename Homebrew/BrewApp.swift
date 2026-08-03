@@ -85,11 +85,9 @@ struct BrewApp: App {
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
                 .task {
-                    // Warm the on-disk caches, then preload Discover's trending list so the tab is
-                    // snappy on first open. Ordered so enrichment reads the just-prepared caches rather
-                    // than racing them into a needless network fetch (correctness holds either way — the
-                    // repositories fetch when a cache is empty). The list survives tab switches and only
-                    // revalidates on return once the analytics cache goes stale.
+                    // Warm the on-disk caches before preloading Discover so enrichment reads them rather
+                    // than racing into a needless fetch (correctness holds either way — an empty cache
+                    // just triggers a fetch).
                     async let catalogue: Void = catalogueCache.prepare()
                     async let analytics: Void = discoverAnalyticsCache.prepare()
                     _ = await (catalogue, analytics)
