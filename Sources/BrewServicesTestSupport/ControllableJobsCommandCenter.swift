@@ -29,11 +29,16 @@ public actor ControllableJobsCommandCenter: BrewCommandCenter {
 
     private var allPhaseListeners: [AllPhaseStreamListener] = []
     private var allOutputListeners: [AllOutputStreamListener] = []
+    private var trackedPhasesByID: [BrewOperationID: BrewOperationPhase] = [:]
 
     public init() {}
 
-    public func phase(for _: BrewOperationID) async -> BrewOperationPhase {
-        .idle
+    public func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+        trackedPhasesByID[id] ?? .idle
+    }
+
+    public func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        trackedPhasesByID
     }
 
     public func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
@@ -75,6 +80,12 @@ public actor ControllableJobsCommandCenter: BrewCommandCenter {
     public func perform(_: BrewCommand, id _: BrewOperationID) async throws {}
 
     public func emitPhase(id: BrewOperationID, phase: BrewOperationPhase) {
+        // Mirror the real center's bookkeeping so runningPhases()/phase(for:) reflect what was emitted.
+        if case .idle = phase {
+            trackedPhasesByID[id] = nil
+        } else {
+            trackedPhasesByID[id] = phase
+        }
         for listener in allPhaseListeners {
             listener.continuation.yield((id, phase))
         }

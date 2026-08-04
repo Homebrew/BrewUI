@@ -7,15 +7,22 @@ import BrewRepositories
 import Foundation
 import Testing
 
+/// Reports a fixed phase for one operation id, seeding `runningPhases()` when that phase is running.
 actor ConstantPhaseCommandCenter: BrewCommandCenter {
     private let fixedPhase: BrewOperationPhase
+    private let operationID: BrewOperationID
 
-    init(phase: BrewOperationPhase) {
+    init(phase: BrewOperationPhase, id: BrewOperationID = .package(.formula(name: "wget"))) {
         fixedPhase = phase
+        operationID = id
     }
 
-    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
-        fixedPhase
+    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+        id == operationID ? fixedPhase : .idle
+    }
+
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        fixedPhase.isRunning ? [operationID: fixedPhase] : [:]
     }
 
     @discardableResult
@@ -55,6 +62,10 @@ actor ThrowingSubmitCommandCenter: BrewCommandCenter {
         .idle
     }
 
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
     @discardableResult
     func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         throw error
@@ -83,21 +94,38 @@ actor ThrowingSubmitCommandCenter: BrewCommandCenter {
     }
 }
 
+/// On each submit, latches the operation into a running phase retained for `runningPhases()` and broadcast
+/// on `allPhaseChanges()`, so a tracker sees it in-flight whether it subscribes before or after. Never idles.
 actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
+    private struct Listener {
+        let token: UUID
+        let continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation
+    }
+
     private(set) var submitCallCount: Int = 0
     private let runningPhase: BrewOperationPhase
+    private var trackedPhasesByID: [BrewOperationID: BrewOperationPhase] = [:]
+    private var listeners: [Listener] = []
 
     init(phase: BrewOperationPhase = .running(.upgradeFormula)) {
         runningPhase = phase
     }
 
-    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
-        runningPhase
+    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+        trackedPhasesByID[id] ?? .idle
+    }
+
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        trackedPhasesByID
     }
 
     @discardableResult
-    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+    func capture(_: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
         submitCallCount += 1
+        trackedPhasesByID[id] = runningPhase
+        for listener in listeners {
+            listener.continuation.yield((id, runningPhase))
+        }
         return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }
 
@@ -106,21 +134,32 @@ actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
     }
 
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
-        AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
-            continuation.yield(runningPhase)
-        }
+        AsyncStream { $0.finish() }
     }
 
     func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
         AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
+            let token = UUID()
+            continuation.onTermination = { @Sendable _ in
+                Task { await self.removeListener(token: token) }
+            }
+            registerListener(token: token, continuation: continuation)
         }
     }
 
     func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
-        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
+        AsyncStream { $0.finish() }
+    }
+
+    private func registerListener(
+        token: UUID,
+        continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation,
+    ) {
+        listeners.append(Listener(token: token, continuation: continuation))
+    }
+
+    private func removeListener(token: UUID) {
+        listeners.removeAll { $0.token == token }
     }
 }
 
@@ -129,6 +168,10 @@ actor SubmitRecordingCommandCenter: BrewCommandCenter {
 
     func phase(for _: BrewOperationID) async -> BrewOperationPhase {
         .idle
+    }
+
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
     }
 
     @discardableResult
@@ -172,6 +215,10 @@ actor DeferredSubmitCommandCenter: BrewCommandCenter {
     private var continuation: CheckedContinuation<Void, Never>?
     func phase(for _: BrewOperationID) async -> BrewOperationPhase {
         .idle
+    }
+
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
     }
 
     @discardableResult

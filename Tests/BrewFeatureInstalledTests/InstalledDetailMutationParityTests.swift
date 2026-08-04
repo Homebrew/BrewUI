@@ -86,11 +86,34 @@ struct InstalledDetailMutationParityTests {
         }
     }
 
+    @Test func `covering bulk upgrade marks detail upgrading and blocks the individual upgrade`() async {
+        var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        package.outdated = true
+        // An "Upgrade All" already running when the detail appears — delivered via the seed snapshot.
+        let center = BulkUpgradeRunningCommandCenter(running: [.bulkUpgrade(.all): .running(.upgradeAll)])
+        let viewModel = makeInstalledDetailsViewModel(package: package, brewCommandCenter: center)
+
+        await viewModel.observeRowUpdates()
+
+        #expect(viewModel.isUpgrading)
+        #expect(viewModel.isMutatingPackage)
+
+        // The per-package upgrade must be a no-op while the covering batch runs.
+        viewModel.upgradeSelectedPackage()
+        for _ in 0 ..< 20 {
+            await Task.yield()
+        }
+        #expect(await center.performedIDs.isEmpty)
+    }
+
     @Test func `observeRowUpdates clears blocked callout when uninstall starts`() async {
         let package = details(name: "ada-url")
         let viewModel = makeInstalledDetailsViewModel(
             package: package,
-            brewCommandCenter: ConstantPhaseCommandCenter(phase: .running(.uninstallFormula)),
+            brewCommandCenter: ConstantPhaseCommandCenter(
+                phase: .running(.uninstallFormula),
+                id: .package(package.id),
+            ),
             installedDependentsRepository: StubInstalledDependentsRepository { packageID in
                 packageID == package.id ? [InstalledBrewPackage.fixture(name: "curl")] : []
             },
@@ -105,5 +128,46 @@ struct InstalledDetailMutationParityTests {
         await waitForUninstalling(on: viewModel)
 
         #expect(!viewModel.showUninstallBlockedCallout)
+    }
+}
+
+/// Seeds a fixed `runningPhases()` snapshot and records every submitted id, so a test can assert an
+/// individual mutation was suppressed while a bulk upgrade runs.
+private actor BulkUpgradeRunningCommandCenter: BrewCommandCenter {
+    private(set) var performedIDs: [BrewOperationID] = []
+    private let running: [BrewOperationID: BrewOperationPhase]
+
+    init(running: [BrewOperationID: BrewOperationPhase]) {
+        self.running = running
+    }
+
+    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
+        running[id] ?? .idle
+    }
+
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        running
+    }
+
+    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        AsyncStream { $0.finish() }
+    }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream { $0.finish() }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream { $0.finish() }
+    }
+
+    @discardableResult
+    func capture(_: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
+        performedIDs.append(id)
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
+        _ = try await capture(command, id: id)
     }
 }

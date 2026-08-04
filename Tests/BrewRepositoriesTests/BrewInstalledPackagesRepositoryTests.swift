@@ -427,6 +427,10 @@ private actor ControllableAllPhasesCommandCenter: BrewCommandCenter {
         .idle
     }
 
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             continuation.finish()

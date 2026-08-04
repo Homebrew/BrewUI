@@ -4,7 +4,6 @@
 //
 
 import BrewCore
-import BrewUIComponents
 import Foundation
 import Observation
 
@@ -17,10 +16,14 @@ enum InstalledListRowVersionPresentation: Equatable {
 @MainActor
 final class InstalledListRowViewModel {
     private(set) var package: InstalledBrewPackage
+    @ObservationIgnored private let operationObserver: PackageOperationObserver
     private var operationPhase: BrewOperationPhase = .idle
     private(set) var showsUpgradeBusy: Bool = false
     private(set) var showsUninstallBusy: Bool = false
-    private let brewCommandCenter: BrewCommandCenter
+
+    var operationSubject: PackageOperationSubject {
+        PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
+    }
 
     var name: String {
         package.displayName
@@ -94,7 +97,7 @@ final class InstalledListRowViewModel {
 
     init(package: InstalledBrewPackage, brewCommandCenter: BrewCommandCenter) {
         self.package = package
-        self.brewCommandCenter = brewCommandCenter
+        operationObserver = PackageOperationObserver(commandCenter: brewCommandCenter)
     }
 
     func update(package newPackage: InstalledBrewPackage) {
@@ -108,9 +111,7 @@ final class InstalledListRowViewModel {
     }
 
     func observeRowUpdates() async {
-        let operationID = BrewOperationID(package: package)
-        let stream = await brewCommandCenter.phaseChanges(for: operationID)
-        for await phase in stream {
+        for await phase in operationObserver.phases(for: operationSubject) {
             let oldPhase = operationPhase
             operationPhase = phase
             showsUpgradeBusy = InstalledUpgradeBusyPresentation.showsUpgradeBusy(

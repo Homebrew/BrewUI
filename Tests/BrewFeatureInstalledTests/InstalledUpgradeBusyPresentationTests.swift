@@ -67,6 +67,35 @@ struct InstalledUpgradeBusyPresentationTests {
         )
     }
 
+    @Test func `running bulk upgrade shows busy like an individual upgrade`() {
+        // A package swept up in an "Upgrade All" runs under `.upgradeAll`; the tracker only feeds this
+        // method bulk phases that actually cover the package.
+        #expect(
+            InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: .idle,
+                newPhase: .running(.upgradeAll),
+                isPackageOutdated: true,
+            ),
+        )
+    }
+
+    @Test func `bulk upgrade running to idle stays busy while snapshot still outdated`() {
+        #expect(
+            InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: .running(.upgradeAll),
+                newPhase: .idle,
+                isPackageOutdated: true,
+            ),
+        )
+        #expect(
+            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
+                oldPhase: .running(.upgradeAll),
+                newPhase: .idle,
+                isPackageOutdated: false,
+            ),
+        )
+    }
+
     @Test func `running uninstall phase does not show upgrade busy`() {
         #expect(
             !InstalledUpgradeBusyPresentation.showsUpgradeBusy(

@@ -74,6 +74,33 @@ struct InstalledListRowViewModelTests {
         #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
     }
 
+    @Test func `covering bulk upgrade shows busy on the row`() async {
+        var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        package.outdated = true
+        // A running "Upgrade All" (`.upgradeAll` under a `.bulkUpgrade` id) that covers this outdated formula.
+        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeAll)], id: .bulkUpgrade(.all))
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+
+        await viewModel.observeRowUpdates()
+
+        #expect(viewModel.showsUpgradeBusy)
+        #expect(viewModel.showsOperationBusy)
+        #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
+    }
+
+    @Test func `bulk formula upgrade does not show busy on an outdated cask row`() async {
+        var package = InstalledBrewPackage.fixture(name: "figma", kind: .cask)
+        package.outdated = true
+        // `brew upgrade --formula` never touches a cask, so its row must stay idle.
+        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeAll)], id: .bulkUpgrade(.formulae))
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+
+        await viewModel.observeRowUpdates()
+
+        #expect(!viewModel.showsUpgradeBusy)
+        #expect(!viewModel.showsOperationBusy)
+    }
+
     @Test func `observeRowUpdates latches uninstall busy after running to idle`() async {
         let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         let center = PhaseSequenceCommandCenter(phases: [.running(.uninstallFormula), .idle])
@@ -163,16 +190,22 @@ struct InstalledListRowViewModelTests {
     }
 }
 
+/// Replays a fixed phase sequence for one operation id on `allPhaseChanges()`, then finishes.
 private actor PhaseSequenceCommandCenter: BrewCommandCenter {
     private let phases: [BrewOperationPhase]
+    private let operationID: BrewOperationID
 
-    init(phases: [BrewOperationPhase]) {
+    init(phases: [BrewOperationPhase], id: BrewOperationID = .package(.formula(name: "git"))) {
         self.phases = phases
+        operationID = id
     }
 
     func phase(for id: BrewOperationID) async -> BrewOperationPhase {
-        _ = id
-        return phases.last ?? .idle
+        id == operationID ? (phases.last ?? .idle) : .idle
+    }
+
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
     }
 
     @discardableResult
@@ -186,25 +219,20 @@ private actor PhaseSequenceCommandCenter: BrewCommandCenter {
         _ = try await capture(command, id: id)
     }
 
-    func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
-        _ = id
-        return AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
+    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        AsyncStream { $0.finish() }
+    }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
             for phase in phases {
-                continuation.yield(phase)
+                continuation.yield((operationID, phase))
             }
             continuation.finish()
         }
     }
 
-    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
-        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
     func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
-        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
+        AsyncStream { $0.finish() }
     }
 }

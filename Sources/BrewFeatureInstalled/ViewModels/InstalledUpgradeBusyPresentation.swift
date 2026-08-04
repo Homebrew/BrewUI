@@ -6,13 +6,9 @@
 import BrewCore
 import Foundation
 
-/// Derived presentation for "upgrade in progress" chrome when observing ``BrewOperationPhase`` for an installed row.
-///
-/// ``BrewCommandCenter`` can report ``BrewOperationPhase/idle`` before ``InstalledViewModel`` finishes
-/// `refresh()` and pushes an updated ``BrewPackage``; while the snapshot still shows ``BrewPackage/outdated``,
-/// keep showing busy state.
-///
-/// Only upgrade operation kinds are matched; uninstall busy state is handled by ``InstalledUninstallBusyPresentation``.
+/// "Upgrade in progress" chrome for an installed row, individual or a covering "Upgrade All"
+/// (``BrewOperationKind/upgradeAll``). The command center can report `idle` before the inventory refresh
+/// lands, so busy is held through `running → idle` while the snapshot is still outdated.
 enum InstalledUpgradeBusyPresentation {
     static func showsUpgradeBusy(
         oldPhase: BrewOperationPhase,
@@ -32,7 +28,7 @@ enum InstalledUpgradeBusyPresentation {
 private extension BrewOperationPhase {
     var isRunningUpgrade: Bool {
         switch self {
-        case .running(.upgradeFormula), .running(.upgradeCask):
+        case .running(.upgradeFormula), .running(.upgradeCask), .running(.upgradeAll):
             true
         default:
             false
