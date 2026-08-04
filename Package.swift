@@ -258,6 +258,8 @@ let package = Package(
                 "BrewCLI",
                 "BrewCore",
                 "BrewRepositoryInterfaces",
+                "BrewRepositories",
+                "BrewNetworking",
                 "BrewCoreTestSupport",
                 "BrewServicesTestSupport",
             ],
