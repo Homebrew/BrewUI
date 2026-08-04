@@ -121,15 +121,15 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
 @Observable
 @MainActor
 final class UnimplementedCommandJobsObserving: CommandJobsObserving {
-    var jobs: [BrewOperationID: CommandJob] {
+    var jobs: [CommandJobID: CommandJob] {
         unimplemented()
     }
 
-    var orderedIDs: [BrewOperationID] {
+    var orderedIDs: [CommandJobID] {
         unimplemented()
     }
 
-    func remove(id _: BrewOperationID) {
+    func remove(id _: CommandJobID) {
         unimplemented()
     }
 

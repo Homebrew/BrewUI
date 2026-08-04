@@ -11,8 +11,8 @@ import Observation
 /// Refines `Observable` so SwiftUI tracks `jobs`/`orderedIDs` reads through the existential.
 @MainActor
 public protocol CommandJobsObserving: Observable, Sendable {
-    var jobs: [BrewOperationID: CommandJob] { get }
-    var orderedIDs: [BrewOperationID] { get }
-    func remove(id: BrewOperationID)
+    var jobs: [CommandJobID: CommandJob] { get }
+    var orderedIDs: [CommandJobID] { get }
+    func remove(id: CommandJobID)
     func clearCompleted()
 }

@@ -6,6 +6,7 @@
 import BrewCore
 @testable import BrewFeatureConsole
 import BrewRepositories
+import BrewRepositoryInterfaces
 import BrewServicesTestSupport
 import Foundation
 
@@ -42,6 +43,20 @@ final class ConsoleJobsHarness {
     func emit(id: BrewOperationID, output line: BrewCommandOutputLine) async {
         await center.emitOutput(id: id, line: line)
         await settle()
+    }
+
+    /// The most recent console job routed from a given operation id. Tests drive the repository by
+    /// ``BrewOperationID`` (the command center's key) but the cache is now keyed by per-run
+    /// ``CommandJobID``, so this bridges the two for assertions.
+    func job(for operationID: BrewOperationID) -> CommandJob? {
+        repository.orderedIDs
+            .compactMap { repository.jobs[$0] }
+            .last { $0.operationID == operationID }
+    }
+
+    /// Operation ids of the ordered jobs, in tab order — the operation-keyed view of ``orderedIDs``.
+    var orderedOperationIDs: [BrewOperationID] {
+        repository.orderedIDs.compactMap { repository.jobs[$0]?.operationID }
     }
 
     private func settle() async {

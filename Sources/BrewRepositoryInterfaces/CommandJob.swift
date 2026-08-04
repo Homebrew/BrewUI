@@ -6,9 +6,24 @@
 import BrewCore
 import Foundation
 
+/// Per-run identity for a console job (tab).
+///
+/// Deliberately distinct from ``BrewOperationID``, which the command center *reuses* as a routing/dedup
+/// key across successive operations on the same package (install, then upgrade, then uninstall of `gh` all
+/// share one ``BrewOperationID``). Each materialized ``CommandJob`` mints a fresh ``CommandJobID`` so those
+/// successive runs surface as separate tabs rather than collapsing onto the first one.
+public struct CommandJobID: Hashable, Sendable {
+    private let rawValue: UUID
+
+    public init() {
+        rawValue = UUID()
+    }
+}
+
 /// One brew command's lifecycle as observed by the console UI: identity, phase, streamed output, and final exit code.
 ///
-/// Reuses ``BrewOperationID`` from the command center (do not mint a new identity).
+/// Carries its own per-run ``CommandJobID`` (the tab identity) plus the ``BrewOperationID`` it was routed by
+/// (the command center's key — see ``CommandJobID`` for why they differ).
 /// Derives ``exitCode`` from phase transitions because ``BrewOperationPhase`` does not itself carry one:
 /// `.running → .idle` ⇒ exit 0; `.failed(.brewCommand(exitCode, _))` ⇒ that exit code; other failure cases ⇒ `-1`.
 ///
@@ -17,7 +32,8 @@ import Foundation
 @Observable
 @MainActor
 public final class CommandJob: Identifiable {
-    public let id: BrewOperationID
+    public let id: CommandJobID
+    public let operationID: BrewOperationID
     public let command: String
     public let startedAt: Date
 
@@ -28,13 +44,14 @@ public final class CommandJob: Identifiable {
     private let maxOutputLines: Int
 
     public init(
-        id: BrewOperationID,
+        operationID: BrewOperationID,
         command: String,
         startedAt: Date,
         phase: BrewOperationPhase,
         maxOutputLines: Int = 50000,
     ) {
-        self.id = id
+        id = CommandJobID()
+        self.operationID = operationID
         self.command = command
         self.startedAt = startedAt
         self.phase = phase
@@ -100,7 +117,7 @@ public extension CommandJob {
             selection.displayCommand
         }
         return CommandJob(
-            id: id,
+            operationID: id,
             command: command,
             startedAt: now,
             phase: phase,
