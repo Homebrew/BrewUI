@@ -77,7 +77,6 @@ struct InstalledListRowViewModelTests {
     @Test func `covering bulk upgrade shows busy on the row`() async {
         var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         package.outdated = true
-        // A running "Upgrade All" (`.upgradeAll` under a `.bulkUpgrade` id) that covers this outdated formula.
         let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeAll)], id: .bulkUpgrade(.all))
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
 
@@ -190,7 +189,6 @@ struct InstalledListRowViewModelTests {
     }
 }
 
-/// Replays a fixed phase sequence for one operation id on `allPhaseChanges()`, then finishes.
 private actor PhaseSequenceCommandCenter: BrewCommandCenter {
     private let phases: [BrewOperationPhase]
     private let operationID: BrewOperationID

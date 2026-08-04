@@ -83,7 +83,6 @@ struct PackageOperationObserverTests {
     }
 }
 
-/// One-shot `allPhaseChanges()` preloaded with `events` then finished, plus a fixed `runningPhases()`.
 private actor FakeCommandCenter: BrewCommandCenter {
     private let events: [(BrewOperationID, BrewOperationPhase)]
     private let running: [BrewOperationID: BrewOperationPhase]

@@ -131,8 +131,6 @@ struct InstalledDetailMutationParityTests {
     }
 }
 
-/// Seeds a fixed `runningPhases()` snapshot and records every submitted id, so a test can assert an
-/// individual mutation was suppressed while a bulk upgrade runs.
 private actor BulkUpgradeRunningCommandCenter: BrewCommandCenter {
     private(set) var performedIDs: [BrewOperationID] = []
     private let running: [BrewOperationID: BrewOperationPhase]

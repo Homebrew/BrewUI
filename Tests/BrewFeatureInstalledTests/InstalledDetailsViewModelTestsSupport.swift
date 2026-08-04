@@ -7,7 +7,6 @@ import BrewRepositories
 import Foundation
 import Testing
 
-/// Reports a fixed phase for one operation id, seeding `runningPhases()` when that phase is running.
 actor ConstantPhaseCommandCenter: BrewCommandCenter {
     private let fixedPhase: BrewOperationPhase
     private let operationID: BrewOperationID
