@@ -137,8 +137,8 @@ struct BrewAPIClientURLSessionIntegrationTests {
 
         let formula = try JSONDecoder().decode(BrewAnalyticsJSON.self, from: formulaData)
         let cask = try JSONDecoder().decode(BrewAnalyticsJSON.self, from: caskData)
-        #expect(formula.packageCounts.first?.name == "wget")
-        #expect(cask.packageCounts.first?.name == "iterm2")
+        #expect(try formula.rankedPackageCounts().first?.name == "wget")
+        #expect(try cask.rankedPackageCounts().first?.name == "iterm2")
         #expect(StubURLProtocol.requests(forHost: host).count == 2)
     }
 

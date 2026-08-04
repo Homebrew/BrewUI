@@ -36,8 +36,14 @@ final class UnimplementedInstalledPackagesRepository: InstalledPackagesRepositor
     }
 }
 
-struct UnimplementedDiscoverPackagesRepository: DiscoverPackagesRepository {
-    func loadTopPackages(limit _: Int, window _: BrewAnalyticsWindow) async throws -> DiscoverTopPackagesSnapshot {
+@Observable
+@MainActor
+final class UnimplementedDiscoverPackagesRepository: DiscoverPackagesRepository {
+    var state: LoadState<[DiscoveryBrewPackage], any Error> {
+        unimplemented()
+    }
+
+    func load(forceRefresh _: Bool) async {
         unimplemented()
     }
 }

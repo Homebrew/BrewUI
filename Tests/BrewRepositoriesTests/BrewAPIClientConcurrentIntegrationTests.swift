@@ -29,12 +29,15 @@ struct BrewAPIClientConcurrentIntegrationTests {
             apiClient: client,
             formulaCatalogueNames: ["wget"],
             caskCatalogueNames: ["iterm2"],
+            topPackagesLimit: 1,
         )
 
-        let snapshot = try await repository.loadTopPackages(limit: 1, window: .days30)
+        await repository.load()
 
-        #expect(snapshot.topFormulae.first?.reference == .formula(name: "wget"))
-        #expect(snapshot.topCasks.first?.reference == .cask(token: "iterm2"))
+        #expect(try #require(repository.state.value).map(\.reference) == [
+            .formula(name: "wget"),
+            .cask(token: "iterm2"),
+        ])
         #expect(StubURLProtocol.requests(forHost: host).count == 2)
     }
 
@@ -103,18 +106,21 @@ struct BrewAPIClientConcurrentIntegrationTests {
             catalogueRepository: catalogueRepository,
             cache: InMemoryDiscoverAnalyticsCache(),
             defaultsKeyPrefix: "DiscoverAnalyticsConcurrent.\(UUID().uuidString)",
+            topPackagesLimit: 1,
         )
 
-        async let topPackagesTask = discoverRepository.loadTopPackages(limit: 1, window: .days30)
+        async let topPackagesTask: Void = discoverRepository.load()
         async let formulaCatalogueTask = catalogueRepository.package(for: .formula(name: "wget"))
         async let caskCatalogueTask = catalogueRepository.package(for: .cask(token: "iterm2"))
 
-        let snapshot = try await topPackagesTask
+        _ = await topPackagesTask
         _ = try await formulaCatalogueTask
         _ = try await caskCatalogueTask
 
-        #expect(snapshot.topFormulae.count == 1)
-        #expect(snapshot.topCasks.count == 1)
+        #expect(try #require(discoverRepository.state.value).map(\.reference) == [
+            .formula(name: "wget"),
+            .cask(token: "iterm2"),
+        ])
         #expect(StubURLProtocol.requests(forHost: host).count == 2)
     }
 
@@ -154,6 +160,7 @@ private func makeDiscoverRepository(
     apiClient: URLSessionBrewAPIClient,
     formulaCatalogueNames: [String],
     caskCatalogueNames: [String],
+    topPackagesLimit: Int = 10,
 ) async throws -> BrewDiscoverPackagesRepository {
     try await BrewDiscoverPackagesRepository(
         apiClient: apiClient,
@@ -164,6 +171,7 @@ private func makeDiscoverRepository(
         ),
         cache: InMemoryDiscoverAnalyticsCache(),
         defaultsKeyPrefix: "DiscoverAnalyticsConcurrent.\(UUID().uuidString)",
+        topPackagesLimit: topPackagesLimit,
     )
 }
 

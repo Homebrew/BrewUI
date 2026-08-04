@@ -85,11 +85,11 @@ private struct DiscoverPackageSections: View {
     let packages: [DiscoveryBrewPackage]
 
     private var formulae: [DiscoveryBrewPackage] {
-        viewModel.showsFormulaeSection ? DiscoverViewModel.sortedSection(packages, kind: .formula) : []
+        viewModel.showsFormulaeSection ? DiscoverViewModel.section(packages, kind: .formula) : []
     }
 
     private var casks: [DiscoveryBrewPackage] {
-        viewModel.showsCasksSection ? DiscoverViewModel.sortedSection(packages, kind: .cask) : []
+        viewModel.showsCasksSection ? DiscoverViewModel.section(packages, kind: .cask) : []
     }
 
     var body: some View {

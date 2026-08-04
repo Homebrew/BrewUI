@@ -84,8 +84,12 @@ struct BrewApp: App {
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
-                .task { await catalogueCache.prepare() }
-                .task { await discoverAnalyticsCache.prepare() }
+                .task {
+                    async let catalogue: Void = catalogueCache.prepare()
+                    async let analytics: Void = discoverAnalyticsCache.prepare()
+                    _ = await (catalogue, analytics)
+                    await discoverPackagesRepository.load()
+                }
                 .task { await installedPackagesRepository.load() }
                 .onChange(of: scenePhase) { oldPhase, newPhase in
                     // Mark the config + brew.env caches stale on return-to-foreground so the next visit

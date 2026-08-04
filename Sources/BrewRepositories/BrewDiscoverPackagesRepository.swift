@@ -7,32 +7,41 @@ import BrewCore
 import BrewNetworking
 import BrewRepositoryInterfaces
 import Foundation
+import Observation
+import OSLog
+
+private let discoverRepositoryLogger = Logger(
+    subsystem: "Homebrew.BrewUI",
+    category: "BrewDiscoverPackagesRepository",
+)
 
 enum DiscoverPackagesRepositoryError: Error, Equatable {
     case cacheMissingAfterRefresh(window: BrewAnalyticsWindow)
 }
 
-/// Discover top-package repository with a 24-hour analytics cache.
-///
-/// Homebrew publishes install analytics once per day, so the raw analytics responses are cached to
-/// disk (via ``DiscoverAnalyticsCaching``) and only refetched when older than `ttl`. Staleness is
-/// tracked with a per-window `lastRefresh` timestamp in `UserDefaults`, mirroring
-/// `BrewCatalogueRepository`. Catalogue enrichment (name/description/version lookups) is re-run on
-/// every call from the cached analytics — that path is already cached by the catalogue repository.
-public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
+/// App-scoped observable source of truth for Discover's trending list, injected into the environment
+/// and preloaded at launch. Homebrew publishes install analytics once a day, so raw responses are
+/// cached to disk (via ``DiscoverAnalyticsCaching``) and only refetched past `ttl`; the enriched list
+/// lives in ``state`` for the session. Mirrors ``BrewInstalledPackagesRepository``.
+@Observable
+@MainActor
+public final class BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
     public static let defaultTTL: TimeInterval = 86400
 
-    private let apiClient: any BrewAPIClient
-    private let catalogueRepository: any CatalogueRepository
-    private let cache: any DiscoverAnalyticsCaching
-    private let defaultsKeyPrefix: String
-    private let now: @Sendable () -> Date
-    private let ttl: TimeInterval
+    /// Carries the underlying `Error` on failure; presentation maps it to copy. Prior loaded data stays
+    /// put when a revalidation fails.
+    public private(set) var state: LoadState<[DiscoveryBrewPackage], any Error> = .loading
 
-    private var refreshTasks: [BrewAnalyticsWindow: Task<(Data, Data), Error>] = [:]
+    @ObservationIgnored private let apiClient: any BrewAPIClient
+    @ObservationIgnored private let catalogueRepository: any CatalogueRepository
+    @ObservationIgnored private let cache: any DiscoverAnalyticsCaching
+    @ObservationIgnored private let defaultsKeyPrefix: String
+    @ObservationIgnored private let now: @Sendable () -> Date
+    @ObservationIgnored private let ttl: TimeInterval
+    @ObservationIgnored private let topPackagesLimit: Int
+    @ObservationIgnored private let analyticsWindow: BrewAnalyticsWindow
+    @ObservationIgnored private var loadTask: Task<Void, Never>?
 
-    /// `defaultsKeyPrefix` is the test seam for `UserDefaults.standard`; tests pass a unique prefix
-    /// to isolate their lastRefresh timestamps from each other and from production data.
     public init(
         apiClient: any BrewAPIClient,
         catalogueRepository: any CatalogueRepository,
@@ -40,6 +49,8 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         defaultsKeyPrefix: String = "DiscoverAnalytics",
         now: @escaping @Sendable () -> Date = Date.init,
         ttl: TimeInterval = BrewDiscoverPackagesRepository.defaultTTL,
+        topPackagesLimit: Int = 10,
+        analyticsWindow: BrewAnalyticsWindow = .days30,
     ) {
         self.apiClient = apiClient
         self.catalogueRepository = catalogueRepository
@@ -47,22 +58,60 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         self.defaultsKeyPrefix = defaultsKeyPrefix
         self.now = now
         self.ttl = ttl
+        self.topPackagesLimit = topPackagesLimit
+        self.analyticsWindow = analyticsWindow
     }
 
     nonisolated func lastRefreshKey(for window: BrewAnalyticsWindow) -> String {
         "\(defaultsKeyPrefix).analytics.\(window.rawValue).lastRefresh"
     }
 
-    public func loadTopPackages(
-        limit: Int = 10,
-        window: BrewAnalyticsWindow = .days30,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        let (formulaData, caskData) = try await freshAnalyticsData(window: window)
-        return try await enrichedSnapshot(formulaData: formulaData, caskData: caskData, limit: limit)
+    // MARK: - Lifecycle
+
+    /// Cache-first: fresh in-memory data returns instantly; stale/empty/failed state fetches. A single
+    /// `loadTask` coalesces concurrent callers (e.g. launch preload and tab on-appear) into one fetch.
+    public func load(forceRefresh: Bool) async {
+        if !forceRefresh, case .loaded = state, !isStale(window: analyticsWindow) {
+            return
+        }
+        if let loadTask {
+            await loadTask.value
+            return
+        }
+        let task = Task { await self.refresh() }
+        loadTask = task
+        await task.value
+        loadTask = nil
     }
 
-    /// Returns the cached analytics bytes for `window`, refetching over the network only when the
-    /// cache is stale or the bytes are unexpectedly absent.
+    private func refresh() async {
+        if case .loaded = state {} else {
+            state = .loading
+        }
+        do {
+            state = try await .loaded(fetchTopPackages())
+        } catch is CancellationError {
+            return
+        } catch {
+            if case .loaded = state {
+                discoverRepositoryLogger.error(
+                    "Discover trending revalidation failed: \(error.localizedDescription, privacy: .public)",
+                )
+            } else {
+                state = .failed(error)
+            }
+        }
+    }
+
+    // MARK: - Fetch / enrichment
+
+    private func fetchTopPackages() async throws -> [DiscoveryBrewPackage] {
+        let (formulaData, caskData) = try await freshAnalyticsData(window: analyticsWindow)
+        let formulae = try await topPackages(from: Self.decodeAnalytics(formulaData), limit: topPackagesLimit)
+        let casks = try await topPackages(from: Self.decodeAnalytics(caskData), limit: topPackagesLimit)
+        return formulae + casks
+    }
+
     private func freshAnalyticsData(window: BrewAnalyticsWindow) async throws -> (Data, Data) {
         if !isStale(window: window),
            let formulaData = await cache.formulaAnalyticsData(window: window),
@@ -70,25 +119,7 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         {
             return (formulaData, caskData)
         }
-        return try await refreshAwaitingSharedTask(for: window)
-    }
-
-    /// Coalesces concurrent refreshes for the same window so simultaneous view appearances trigger a
-    /// single network round-trip (mirrors `BrewCatalogueRepository.refreshAwaitingSharedTask`).
-    private func refreshAwaitingSharedTask(for window: BrewAnalyticsWindow) async throws -> (Data, Data) {
-        if let existing = refreshTasks[window] {
-            return try await existing.value
-        }
-        let task = Task { try await self.performRefresh(for: window) }
-        refreshTasks[window] = task
-        do {
-            let value = try await task.value
-            refreshTasks[window] = nil
-            return value
-        } catch {
-            refreshTasks[window] = nil
-            throw error
-        }
+        return try await performRefresh(for: window)
     }
 
     private func performRefresh(for window: BrewAnalyticsWindow) async throws -> (Data, Data) {
@@ -130,20 +161,6 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         return (formulaData, caskData)
     }
 
-    private func enrichedSnapshot(
-        formulaData: Data,
-        caskData: Data,
-        limit: Int,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        let formulaAnalytics = try Self.decodeAnalytics(formulaData)
-        let caskAnalytics = try Self.decodeAnalytics(caskData)
-
-        let formulae = try await topPackages(from: formulaAnalytics, limit: limit)
-        let casks = try await topPackages(from: caskAnalytics, limit: limit)
-
-        return DiscoverTopPackagesSnapshot(topFormulae: formulae, topCasks: casks)
-    }
-
     private func topPackages(
         from analytics: BrewAnalyticsJSON,
         limit: Int,
@@ -156,8 +173,7 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
         var results: [DiscoveryBrewPackage] = []
         results.reserveCapacity(validatedLimit)
 
-        let sortedCounts = analytics.packageCounts.sorted(by: sortByInstallCountDescendingThenNameAscending)
-        for entry in sortedCounts {
+        for entry in try analytics.rankedPackageCounts() {
             guard let package = try await catalogueRepository.package(for: entry.reference) else {
                 continue
             }
@@ -172,16 +188,6 @@ public actor BrewDiscoverPackagesRepository: DiscoverPackagesRepository {
             }
         }
         return results
-    }
-
-    private func sortByInstallCountDescendingThenNameAscending(
-        _ lhs: BrewAnalyticsPackageCount,
-        _ rhs: BrewAnalyticsPackageCount,
-    ) -> Bool {
-        if lhs.count == rhs.count {
-            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
-        }
-        return lhs.count > rhs.count
     }
 
     private func updateLastRefresh(window: BrewAnalyticsWindow) {

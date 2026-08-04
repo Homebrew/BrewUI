@@ -53,8 +53,8 @@ struct DiscoverViewModelTests {
 
     @Test @MainActor func `load maps discover repository transport errors to underlying message`() async {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(
-                error: BrewAPIClientError.transport(underlying: "offline"),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                state: .failed(BrewAPIClientError.transport(underlying: "offline")),
             ),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
@@ -71,7 +71,7 @@ struct DiscoverViewModelTests {
 
     @Test @MainActor func `load maps unknown discover repository errors to generic message`() async {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(state: .failed(DiscoverOddError())),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
@@ -105,7 +105,7 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedPackage?.id == .formula(name: "git"))
     }
 
-    @Test @MainActor func `load selects first visible row by popularity`() async {
+    @Test @MainActor func `load selects the first visible row`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -170,7 +170,7 @@ struct DiscoverViewModelTests {
         #expect(viewModel.selectedPackage?.id == .formula(name: "node"))
     }
 
-    @Test @MainActor func `rows with equal install count are sorted alphabetically`() async {
+    @Test @MainActor func `visible packages preserve the source order within a kind`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
                 snapshot: DiscoverTopPackagesSnapshot(
@@ -188,7 +188,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.visiblePackages.map(\.name) == ["git", "node", "wget"])
+        #expect(viewModel.visiblePackages.map(\.name) == ["wget", "git", "node"])
     }
 
     @Test @MainActor func `visible packages partition by kind formulae first then casks`() async {
@@ -271,14 +271,11 @@ struct DiscoverViewModelTests {
 
     @Test @MainActor func `subtitle reflects loading state`() {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
-            ),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(state: .loading),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
-        // VM starts in .loading before load() is called
         #expect(viewModel.paneHeading == "Trending")
         #expect(viewModel.subtitleText == "Loading packages…")
         #expect(!viewModel.isSubtitleError)
@@ -303,7 +300,7 @@ struct DiscoverViewModelTests {
 
     @Test @MainActor func `subtitle reflects error state`() async {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(state: .failed(DiscoverOddError())),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
@@ -447,7 +444,7 @@ struct DiscoverViewModelTests {
 
         #expect(viewModel.isSearching)
         #expect(!viewModel.showsInstallMetrics)
-        #expect(viewModel.visiblePackages.map(\.name) == ["imagemagick", "ripgrep"])
+        #expect(viewModel.visiblePackages.map(\.name) == ["ripgrep", "imagemagick"])
         // Search results all surface a zero install count (catalogue search has no analytics).
         #expect(viewModel.selectedPackage?.thirtyDayInstallCount == 0)
     }
@@ -598,20 +595,17 @@ struct DiscoverViewModelTests {
 
     @Test @MainActor func `shouldFocusList is false while trending is still loading`() {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
-            ),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(state: .loading),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
-        // trending starts as .loading and load() has not been awaited yet.
         #expect(!viewModel.shouldFocusList)
     }
 
     @Test @MainActor func `shouldFocusList is false when trending failed to load`() async {
         let viewModel = DiscoverViewModel(
-            discoverPackagesRepository: ThrowingDiscoverPackagesRepository(error: DiscoverOddError()),
+            discoverPackagesRepository: StubDiscoverPackagesRepository(state: .failed(DiscoverOddError())),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
@@ -640,47 +634,35 @@ struct DiscoverViewModelTests {
     }
 }
 
+@Observable
 @MainActor
-private struct StubDiscoverPackagesRepository: DiscoverPackagesRepository {
-    let snapshot: DiscoverTopPackagesSnapshot
+private final class StubDiscoverPackagesRepository: DiscoverPackagesRepository {
+    private(set) var state: LoadState<[DiscoveryBrewPackage], any Error>
 
-    func loadTopPackages(
-        limit _: Int,
-        window _: BrewAnalyticsWindow,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        snapshot
+    init(snapshot: DiscoverTopPackagesSnapshot) {
+        state = .loaded(snapshot.topFormulae + snapshot.topCasks)
     }
+
+    init(state: LoadState<[DiscoveryBrewPackage], any Error>) {
+        self.state = state
+    }
+
+    func load(forceRefresh _: Bool) async {}
 }
 
+@Observable
 @MainActor
 private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepository {
     var snapshot: DiscoverTopPackagesSnapshot
+    private(set) var state: LoadState<[DiscoveryBrewPackage], any Error>
 
     init(snapshot: DiscoverTopPackagesSnapshot) {
         self.snapshot = snapshot
+        state = .loaded(snapshot.topFormulae + snapshot.topCasks)
     }
 
-    func loadTopPackages(
-        limit _: Int,
-        window _: BrewAnalyticsWindow,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        snapshot
-    }
-}
-
-@MainActor
-private struct ThrowingDiscoverPackagesRepository: DiscoverPackagesRepository {
-    let error: Error
-
-    init(error: Error = DiscoverOddError()) {
-        self.error = error
-    }
-
-    func loadTopPackages(
-        limit _: Int,
-        window _: BrewAnalyticsWindow,
-    ) async throws -> DiscoverTopPackagesSnapshot {
-        throw error
+    func load(forceRefresh _: Bool) async {
+        state = .loaded(snapshot.topFormulae + snapshot.topCasks)
     }
 }
 

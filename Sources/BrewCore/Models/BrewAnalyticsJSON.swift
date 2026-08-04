@@ -11,55 +11,22 @@ public enum BrewAnalyticsWindow: String, CaseIterable, Sendable {
     case days90 = "90d"
 }
 
-/// Strict schema for Homebrew analytics API responses.
+/// Faithful mirror of a Homebrew analytics API response. Decoding is field-for-field with the wire
+/// shape; the flatten/validate/rank transformation lives in ``rankedPackageCounts()``.
 public struct BrewAnalyticsJSON: Decodable, Sendable {
     public let category: String
     public let totalItems: Int
     public let totalCount: Int
     public let startDate: String
     public let endDate: String
-    private let parsedPackageCounts: [BrewAnalyticsPackageCount]
 
-    public var packageCounts: [BrewAnalyticsPackageCount] {
-        parsedPackageCounts
-    }
+    let formulae: [String: [Entry]]?
+    let casks: [String: [Entry]]?
 
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        category = try container.decodeNonEmptyString(forKey: .category)
-        totalItems = try container.decodeRequiredIntLossy(forKey: .totalItems)
-        totalCount = try container.decodeRequiredIntLossy(forKey: .totalCount)
-        startDate = try container.decodeNonEmptyString(forKey: .startDate)
-        endDate = try container.decodeNonEmptyString(forKey: .endDate)
-
-        let packageBuckets: [String: [BrewAnalyticsEntry]]
-        if container.contains(.formulae) {
-            packageBuckets = try container.decode([String: [BrewAnalyticsEntry]].self, forKey: .formulae)
-        } else if container.contains(.casks) {
-            packageBuckets = try container.decode([String: [BrewAnalyticsEntry]].self, forKey: .casks)
-        } else {
-            throw DecodingError.keyNotFound(
-                CodingKeys.formulae,
-                DecodingError.Context(
-                    codingPath: container.codingPath,
-                    debugDescription: "Expected formulae or casks analytics buckets.",
-                ),
-            )
-        }
-
-        parsedPackageCounts = try packageBuckets.map { bucketName, entries in
-            let normalizedBucket = bucketName.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let firstEntry = entries.first else {
-                throw DecodingError.dataCorrupted(
-                    DecodingError.Context(
-                        codingPath: container.codingPath,
-                        debugDescription: "Analytics bucket '\(normalizedBucket)' has no entries.",
-                    ),
-                )
-            }
-            let reference = try firstEntry.requiredReference(codingPath: container.codingPath)
-            return BrewAnalyticsPackageCount(reference: reference, count: firstEntry.count)
-        }
+    struct Entry: Decodable {
+        let formula: String?
+        let cask: String?
+        let count: String
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -70,6 +37,35 @@ public struct BrewAnalyticsJSON: Decodable, Sendable {
         case endDate = "end_date"
         case formulae
         case casks
+    }
+}
+
+// MARK: - Mapping
+
+/// Raised while mapping a decoded analytics response into domain package counts.
+public enum BrewAnalyticsMappingError: Error, Equatable {
+    case missingPackageBucket
+    case emptyPackageEntries(key: String)
+    case missingPackageIdentity
+    case conflictingPackageIdentity
+    case malformedCount(String)
+}
+
+public extension BrewAnalyticsJSON {
+    /// Package counts ranked by install count (descending, name tie-break). The API carries no rank
+    /// field, so `count` is the only ranking signal; a key with an empty entry array throws.
+    func rankedPackageCounts() throws -> [BrewAnalyticsPackageCount] {
+        guard let bucket = formulae ?? casks else {
+            throw BrewAnalyticsMappingError.missingPackageBucket
+        }
+        return try bucket
+            .map { key, entries in
+                guard let entry = entries.first else {
+                    throw BrewAnalyticsMappingError.emptyPackageEntries(key: key)
+                }
+                return try entry.packageCount()
+            }
+            .sorted(by: BrewAnalyticsPackageCount.byInstallCountDescendingThenName)
     }
 }
 
@@ -85,21 +81,24 @@ public struct BrewAnalyticsPackageCount: Hashable, Sendable {
         self.reference = reference
         self.count = count
     }
+
+    static func byInstallCountDescendingThenName(
+        _ lhs: BrewAnalyticsPackageCount,
+        _ rhs: BrewAnalyticsPackageCount,
+    ) -> Bool {
+        if lhs.count == rhs.count {
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
+        return lhs.count > rhs.count
+    }
 }
 
-private struct BrewAnalyticsEntry: Decodable {
-    let formula: String?
-    let cask: String?
-    let count: Int
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        formula = try container.decodeIfPresent(String.self, forKey: .formula)
-        cask = try container.decodeIfPresent(String.self, forKey: .cask)
-        count = try container.decodeRequiredIntLossy(forKey: .count)
+private extension BrewAnalyticsJSON.Entry {
+    func packageCount() throws -> BrewAnalyticsPackageCount {
+        try BrewAnalyticsPackageCount(reference: reference(), count: parsedCount())
     }
 
-    func requiredReference(codingPath: [CodingKey]) throws -> HomebrewPackageID {
+    func reference() throws -> HomebrewPackageID {
         let formulaName = Self.trimmedOrNil(formula)
         let caskToken = Self.trimmedOrNil(cask)
 
@@ -109,63 +108,23 @@ private struct BrewAnalyticsEntry: Decodable {
         case let (nil, .some(token)):
             return .cask(token: token)
         case (.none, .none):
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: codingPath,
-                    debugDescription: "Analytics entry must include formula or cask.",
-                ),
-            )
+            throw BrewAnalyticsMappingError.missingPackageIdentity
         case (.some, .some):
-            throw DecodingError.dataCorrupted(
-                DecodingError.Context(
-                    codingPath: codingPath,
-                    debugDescription: "Analytics entry cannot include both formula and cask.",
-                ),
-            )
+            throw BrewAnalyticsMappingError.conflictingPackageIdentity
         }
     }
 
-    private enum CodingKeys: String, CodingKey {
-        case formula
-        case cask
-        case count
+    func parsedCount() throws -> Int {
+        let digitsOnly = count.filter(\.isNumber)
+        guard !digitsOnly.isEmpty, let value = Int(digitsOnly) else {
+            throw BrewAnalyticsMappingError.malformedCount(count)
+        }
+        return value
     }
 
-    private static func trimmedOrNil(_ value: String?) -> String? {
+    static func trimmedOrNil(_ value: String?) -> String? {
         guard let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else {
             return nil
-        }
-        return trimmed
-    }
-}
-
-private extension KeyedDecodingContainer {
-    func decodeRequiredIntLossy(forKey key: Key) throws -> Int {
-        if let value = try? decode(Int.self, forKey: key) {
-            return value
-        }
-        if let stringValue = try? decode(String.self, forKey: key) {
-            let digitsOnly = stringValue.filter(\.isNumber)
-            if let parsedValue = Int(digitsOnly) {
-                return parsedValue
-            }
-        }
-        throw DecodingError.dataCorruptedError(
-            forKey: key,
-            in: self,
-            debugDescription: "Expected an integer-compatible analytics count.",
-        )
-    }
-
-    func decodeNonEmptyString(forKey key: Key) throws -> String {
-        let value = try decode(String.self, forKey: key)
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            throw DecodingError.dataCorruptedError(
-                forKey: key,
-                in: self,
-                debugDescription: "Expected non-empty string.",
-            )
         }
         return trimmed
     }

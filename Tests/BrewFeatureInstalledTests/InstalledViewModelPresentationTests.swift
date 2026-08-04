@@ -10,22 +10,6 @@ import BrewRepositories
 import Foundation
 import Testing
 
-private struct SectionVisibilitySnapshot: Equatable {
-    var formulae: Bool
-    var casks: Bool
-}
-
-@MainActor
-private func sectionVisibility(_ vm: InstalledViewModel) -> SectionVisibilitySnapshot {
-    guard case let .loaded(content) = vm.state else {
-        return SectionVisibilitySnapshot(formulae: false, casks: false)
-    }
-    return SectionVisibilitySnapshot(
-        formulae: content.shouldShowFormulaeSection,
-        casks: content.shouldShowCasksSection,
-    )
-}
-
 struct InstalledViewModelPresentationTests {
     @Test @MainActor func `selectedPackage is nil for initial loading state`() {
         let vm = makeInstalledViewModel(
@@ -52,26 +36,6 @@ struct InstalledViewModelPresentationTests {
         let vm = makeInstalledViewModel(repository: missingBrewInstalledRepository())
         await vm.load()
         #expect(!vm.shouldShowInitialLoadingIndicator)
-    }
-
-    @Test @MainActor func `section visibility shows both sections when formulae and casks present`() async {
-        let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [.fixture(name: "f", kind: .formula)],
-            casks: [.fixture(name: "c", kind: .cask)],
-        )
-        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: true))
-    }
-
-    @Test @MainActor func `section visibility shows only formulae when no casks`() async {
-        let vm = await InstalledFeatureTestSupport.loadedViewModel(
-            formulae: [.fixture(name: "f", kind: .formula)],
-        )
-        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: true, casks: false))
-    }
-
-    @Test @MainActor func `section visibility hides all sections when empty loaded snapshot`() async {
-        let vm = await InstalledFeatureTestSupport.loadedViewModel()
-        #expect(sectionVisibility(vm) == SectionVisibilitySnapshot(formulae: false, casks: false))
     }
 
     @Test @MainActor func `totalPackageCount sums formula and cask rows`() async {
