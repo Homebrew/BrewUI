@@ -41,4 +41,19 @@ public enum BrewUpgradeSelection: Hashable, Sendable {
     public var displayCommand: String {
         "brew " + arguments.joined(separator: " ")
     }
+
+    /// Whether a running batch `brew upgrade` for this selection includes the given package. `explicit`
+    /// matches by name regardless of `isOutdated`; the kind-scoped cases require it.
+    public func covers(packageID: HomebrewPackageID, isOutdated: Bool) -> Bool {
+        switch self {
+        case .all:
+            isOutdated
+        case .formulae:
+            isOutdated && packageID.kind == .formula
+        case .casks:
+            isOutdated && packageID.kind == .cask
+        case let .explicit(names):
+            names.contains(packageID.name)
+        }
+    }
 }

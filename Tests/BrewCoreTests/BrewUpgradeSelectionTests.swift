@@ -48,4 +48,37 @@ struct BrewUpgradeSelectionTests {
         #expect(BrewOperationID.bulkUpgrade(.explicit(["git"])) != BrewOperationID.bulkUpgrade(.explicit(["wget"])))
         #expect(BrewOperationID.bulkUpgrade(.formulae) == BrewOperationID.bulkUpgrade(.formulae))
     }
+
+    // MARK: - covers(packageID:isOutdated:)
+
+    private static let outdatedFormula = HomebrewPackageID.formula(name: "git")
+    private static let currentFormula = HomebrewPackageID.formula(name: "wget")
+    private static let outdatedCask = HomebrewPackageID.cask(token: "figma")
+
+    @Test func `all covers only outdated packages of either kind`() {
+        #expect(BrewUpgradeSelection.all.covers(packageID: Self.outdatedFormula, isOutdated: true))
+        #expect(BrewUpgradeSelection.all.covers(packageID: Self.outdatedCask, isOutdated: true))
+        #expect(!BrewUpgradeSelection.all.covers(packageID: Self.currentFormula, isOutdated: false))
+    }
+
+    @Test func `formulae covers outdated formulae but never casks`() {
+        #expect(BrewUpgradeSelection.formulae.covers(packageID: Self.outdatedFormula, isOutdated: true))
+        #expect(!BrewUpgradeSelection.formulae.covers(packageID: Self.outdatedFormula, isOutdated: false))
+        // A --formula run must not light up an outdated cask.
+        #expect(!BrewUpgradeSelection.formulae.covers(packageID: Self.outdatedCask, isOutdated: true))
+    }
+
+    @Test func `casks covers outdated casks but never formulae`() {
+        #expect(BrewUpgradeSelection.casks.covers(packageID: Self.outdatedCask, isOutdated: true))
+        #expect(!BrewUpgradeSelection.casks.covers(packageID: Self.outdatedCask, isOutdated: false))
+        #expect(!BrewUpgradeSelection.casks.covers(packageID: Self.outdatedFormula, isOutdated: true))
+    }
+
+    @Test func `explicit covers named packages regardless of outdated flag`() {
+        let selection = BrewUpgradeSelection.explicit(["git", "figma"])
+        // Named directly, so the snapshot's outdated flag is irrelevant.
+        #expect(selection.covers(packageID: Self.outdatedFormula, isOutdated: false))
+        #expect(selection.covers(packageID: Self.outdatedCask, isOutdated: false))
+        #expect(!selection.covers(packageID: Self.currentFormula, isOutdated: true))
+    }
 }
