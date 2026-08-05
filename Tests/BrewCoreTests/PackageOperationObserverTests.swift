@@ -55,6 +55,33 @@ struct PackageOperationObserverTests {
         #expect(phases == [.running(.upgradeFormula)])
     }
 
+    @Test func `seeds the package's own operation over a covering bulk upgrade when both run`() async {
+        // Both are tracked as running; the seed must reflect this package's own operation, not an
+        // arbitrary covering entry, so the row shows the right operation type from the first phase.
+        let center = FakeCommandCenter(running: [
+            .package(Self.gitFormula): .running(.upgradeFormula),
+            .bulkUpgrade(.all): .running(.upgradeAll),
+        ])
+        let phases = await Self.collect(
+            PackageOperationObserver(commandCenter: center),
+            Self.subject(Self.gitFormula, outdated: true),
+        )
+        #expect(phases == [.running(.upgradeFormula)])
+    }
+
+    @Test func `seeds a covering bulk upgrade when the package op is tracked but not running`() async {
+        // A stale `.failed` package entry must not suppress seeding the covering bulk upgrade in flight.
+        let center = FakeCommandCenter(running: [
+            .package(Self.gitFormula): .failed(reason: .brewExecutableNotFound),
+            .bulkUpgrade(.all): .running(.upgradeAll),
+        ])
+        let phases = await Self.collect(
+            PackageOperationObserver(commandCenter: center),
+            Self.subject(Self.gitFormula, outdated: true),
+        )
+        #expect(phases == [.running(.upgradeAll)])
+    }
+
     @Test func `ignores operations for other packages`() async {
         let center = FakeCommandCenter(events: [(.package(Self.wgetFormula), .running(.upgradeFormula))])
         let phases = await Self.collect(PackageOperationObserver(commandCenter: center), Self.subject(Self.gitFormula))

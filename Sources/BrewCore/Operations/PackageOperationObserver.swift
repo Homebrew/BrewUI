@@ -46,8 +46,17 @@ public struct PackageOperationObserver: Sendable {
             let task = Task {
                 let stream = await commandCenter.allPhaseChanges()
                 let running = await commandCenter.runningPhases()
-                if let seeded = running.first(where: { subject.includes($0.key) && $0.value.isRunning }) {
-                    continuation.yield(seeded.value)
+                // Prefer the package's own operation over any covering bulk upgrade when both are tracked
+                // as running: `runningPhases()` is an unordered dictionary, so seeding an arbitrary covering
+                // entry could represent the wrong operation type (and miss the package op's initial `.running`,
+                // which the replay-less stream never re-delivers) until the next transition.
+                let seeded: BrewOperationPhase? = if let packagePhase = running[.package(subject.packageID)], packagePhase.isRunning {
+                    packagePhase
+                } else {
+                    running.first(where: { subject.includes($0.key) && $0.value.isRunning })?.value
+                }
+                if let seeded {
+                    continuation.yield(seeded)
                 }
                 for await (id, phase) in stream where subject.includes(id) {
                     continuation.yield(phase)
