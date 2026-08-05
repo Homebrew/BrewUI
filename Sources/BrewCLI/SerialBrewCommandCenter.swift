@@ -61,6 +61,10 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         trackedPhasesByID[id] ?? .idle
     }
 
+    public func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        trackedPhasesByID
+    }
+
     public func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             let token = UUID()

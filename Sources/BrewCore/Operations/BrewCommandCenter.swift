@@ -10,6 +10,10 @@ public protocol BrewCommandCenter: Actor {
     /// Snapshot for UI — ``BrewOperationPhase/idle`` when no state is tracked for `id`.
     func phase(for id: BrewOperationID) async -> BrewOperationPhase
 
+    /// Snapshot of every non-idle operation currently tracked, so a surface subscribing to
+    /// ``allPhaseChanges()`` (which has no initial replay) can seed itself with work already in flight.
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase]
+
     /// Push-based phase updates for `id` — yields the current phase once when subscribed, then each subsequent phase transition.
     /// Cancel the consuming task (e.g. end of a SwiftUI ``View/task``) and unregister via ``AsyncStream/Continuation/onTermination``.
     func phaseChanges(for id: BrewOperationID) async -> AsyncStream<BrewOperationPhase>

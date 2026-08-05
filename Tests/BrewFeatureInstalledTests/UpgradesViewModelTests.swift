@@ -444,6 +444,10 @@ private actor PhaseStreamingCommandCenter: BrewCommandCenter {
         .idle
     }
 
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
     @discardableResult
     func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
         CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)

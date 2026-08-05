@@ -143,6 +143,10 @@ public actor StubBrewCommandCenter: BrewCommandCenter {
         .idle
     }
 
+    public func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
     public func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
         AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
             continuation.yield(.idle)

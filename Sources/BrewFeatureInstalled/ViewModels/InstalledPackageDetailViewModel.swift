@@ -5,7 +5,6 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
-import BrewUIComponents
 import Foundation
 import Observation
 
@@ -17,21 +16,22 @@ final class InstalledPackageDetailViewModel {
     private let installedDependentsRepository: any InstalledDependentsRepository
     private let installedInventoryReading: any InstalledInventoryReading
     private var mutationTask: Task<Void, Never>?
+    @ObservationIgnored private let operationObserver: PackageOperationObserver
+    private var operationPhase: BrewOperationPhase = .idle
 
     private(set) var package: InstalledBrewPackage
-    /// Latest phase from the command center stream (see ``observeRowUpdates()``); drives mutation chrome.
-    private var operationPhase: BrewOperationPhase = .idle
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
     private(set) var upgradeErrorMessage: String?
     /// Inline message when uninstall fails; cleared when a new uninstall starts.
     private(set) var uninstallErrorMessage: String?
 
-    /// True while upgrade work is in flight (`CONVENTIONS.md` — transparency / guardrails).
     private(set) var isUpgrading: Bool = false
-    /// True while uninstall work is in flight.
     private(set) var isUninstalling: Bool = false
-    /// Disables both mutation affordances while a package mutation is in progress.
     private(set) var isMutatingPackage: Bool = false
+
+    var operationSubject: PackageOperationSubject {
+        PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
+    }
 
     /// Drives the uninstall confirmation dialog.
     var showUninstallConfirmation: Bool = false
@@ -106,6 +106,7 @@ final class InstalledPackageDetailViewModel {
         self.commandFactory = commandFactory
         self.installedDependentsRepository = installedDependentsRepository
         self.installedInventoryReading = installedInventoryReading
+        operationObserver = PackageOperationObserver(commandCenter: brewCommandCenter)
     }
 
     /// Refreshes both dependency and dependent relationships for the current package.
@@ -137,6 +138,9 @@ final class InstalledPackageDetailViewModel {
         }
         package = newPackage
         operationPhase = .idle
+        isUpgrading = false
+        isUninstalling = false
+        isMutatingPackage = false
         showUninstallConfirmation = false
         showUninstallBlockedCallout = false
         clearMutationErrors()
@@ -162,11 +166,8 @@ final class InstalledPackageDetailViewModel {
         )
     }
 
-    /// Run while the installed detail column shows this ``package/id`` (`InstalledListRowView` pattern).
     func observeRowUpdates() async {
-        let operationID = BrewOperationID(package: package)
-        let stream = await brewCommandCenter.phaseChanges(for: operationID)
-        for await phase in stream {
+        for await phase in operationObserver.phases(for: operationSubject) {
             let oldPhase = operationPhase
             operationPhase = phase
             isUpgrading = InstalledUpgradeBusyPresentation.showsUpgradeBusy(

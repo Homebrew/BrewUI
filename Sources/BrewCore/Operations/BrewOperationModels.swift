@@ -65,4 +65,11 @@ public enum BrewOperationPhase: Equatable, Sendable {
     case idle
     case running(BrewOperationKind)
     case failed(reason: OperationFailure)
+
+    public var isRunning: Bool {
+        if case .running = self {
+            return true
+        }
+        return false
+    }
 }

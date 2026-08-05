@@ -41,7 +41,7 @@ struct InstalledListRowView: View {
         Group {
             rowContent(viewModel: viewModel)
         }
-        .task(id: package.id) {
+        .task(id: viewModel.operationSubject) {
             await viewModel.observeRowUpdates()
         }
         .onChange(of: package) { _, new in

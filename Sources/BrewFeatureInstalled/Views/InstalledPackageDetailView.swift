@@ -66,6 +66,8 @@ struct InstalledPackageDetailView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .task(id: package.id) {
             await viewModel.refreshRelationships()
+        }
+        .task(id: viewModel.operationSubject) {
             await viewModel.observeRowUpdates()
         }
         .onChange(of: package) { _, newPackage in
