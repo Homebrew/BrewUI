@@ -5,7 +5,7 @@ GEM
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     afm (1.0.0)
-    async (2.44.1)
+    async (2.44.0)
       console (~> 1.29)
       fiber-annotation
       io-event (~> 1.11)
@@ -20,7 +20,7 @@ GEM
       fiber-annotation
       fiber-local (~> 1.1)
       json
-    csv (3.3.6)
+    csv (3.3.5)
     em-websocket (0.5.3)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0)
@@ -50,7 +50,7 @@ GEM
       bigdecimal
       rake (~> 13.3)
     hashery (2.1.2)
-    html-proofer (5.2.2)
+    html-proofer (5.2.1)
       addressable (~> 2.3)
       async (~> 2.1)
       benchmark (~> 0.5)
@@ -166,7 +166,7 @@ GEM
       google-protobuf (~> 4.31)
     sass-embedded (1.102.0-x86_64-linux-gnu)
       google-protobuf (~> 4.31)
-    sorbet-runtime (0.6.13403)
+    sorbet-runtime (0.6.13359)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
     tomlrb (2.0.4)
@@ -181,7 +181,7 @@ GEM
       sorbet-runtime
       yard
     yell (2.2.2)
-    zeitwerk (2.8.3)
+    zeitwerk (2.8.2)
 
 PLATFORMS
   aarch64-linux-gnu
@@ -210,7 +210,7 @@ CHECKSUMS
   Ascii85 (2.0.1) sha256=15cb5d941808543cbb9e7e6aea3c8ec3877f154c3461e8b3673e97f7ecedbe5a
   addressable (2.9.0) sha256=7fdf6ac3660f7f4e867a0838be3f6cf722ace541dd97767fa42bc6cfa980c7af
   afm (1.0.0) sha256=5bd4d6f6241e7014ef090985ec6f4c3e9745f6de0828ddd58bc1efdd138f4545
-  async (2.44.1) sha256=079bce0d019fb27cc58ec110fd9b9af4991d97b801d1c6cc6def1d1954dcf9b2
+  async (2.44.0) sha256=888e0edda9643fac7bbdfd3073fee1713d62a586dbebaefbcc579e505c166a5a
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   benchmark (0.5.0) sha256=465df122341aedcb81a2a24b4d3bd19b6c67c1530713fd533f3ff034e419236c
   bigdecimal (3.3.1) sha256=eaa01e228be54c4f9f53bf3cc34fe3d5e845c31963e7fcc5bedb05a4e7d52218
@@ -218,7 +218,7 @@ CHECKSUMS
   colorator (1.1.0) sha256=e2f85daf57af47d740db2a32191d1bdfb0f6503a0dfbc8327d0c9154d5ddfc38
   concurrent-ruby (1.3.8) sha256=b2f1be836e968ccc78ccfce277ea79c72a88633f22306782c16ff23fb415d1e1
   console (1.37.0) sha256=8093b286c2595a063849c098594fee5155ecc7967d36f3aa8cbe7569c8f3efd7
-  csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
+  csv (3.3.5) sha256=6e5134ac3383ef728b7f02725d9872934f523cb40b961479f69cf3afa6c8e73f
   em-websocket (0.5.3) sha256=f56a92bde4e6cb879256d58ee31f124181f68f8887bd14d53d5d9a292758c6a8
   ethon (0.18.0) sha256=b598afc9f30448cb068b850714b7d6948e941476095d04f90a4ac65b8d6efcb2
   eventmachine (1.2.7) sha256=994016e42aa041477ba9cff45cbe50de2047f25dd418eba003e84f0d16560972
@@ -235,7 +235,7 @@ CHECKSUMS
   google-protobuf (4.35.1-x86_64-darwin) sha256=66b62b4df00931018a692806df66393efa960d6d2b7da69735187249f950d3ee
   google-protobuf (4.35.1-x86_64-linux-gnu) sha256=c786439087512a3fbd199e9897d265b855f951d4027e218ea55e858d45969edd
   hashery (2.1.2) sha256=d239cc2310401903f6b79d458c2bbef5bf74c46f3f974ae9c1061fb74a404862
-  html-proofer (5.2.2) sha256=6e5e63c89ef9413246eeffaeba8dd03db62546992d7a2b85d166ac2a5903a241
+  html-proofer (5.2.1) sha256=fdd958a7cbf9c3255fb96fe7cfc4e611f64e2706e469488a3326309ad007d2fd
   http_parser.rb (0.8.1) sha256=9ae8df145b39aa5398b2f90090d651c67bd8e2ebfe4507c966579f641e11097a
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   io-event (1.19.4) sha256=c291146e2e70849b9d6b64078f8e98f0154bfd3bc4f9759861ff13e9895e0cce
@@ -283,7 +283,7 @@ CHECKSUMS
   sass-embedded (1.102.0-arm64-darwin) sha256=8e18b2dd94b232c2dd73984c579f77bbc1a066028f4675c8989ac34fa40d14dc
   sass-embedded (1.102.0-x86_64-darwin) sha256=3e78c6ac5be0ba4236d075bd044a49d0f515d54799f7d6f253c71d325ffedac0
   sass-embedded (1.102.0-x86_64-linux-gnu) sha256=9815b7604123a9a44a65d44d5e58e7af1c7005174b745cda83bad4c9e3760ab3
-  sorbet-runtime (0.6.13403) sha256=8545fc4cd55fbf820f2000f6d13c0ea1c2e5f7b67369e76ebf39fea81fc490b3
+  sorbet-runtime (0.6.13359) sha256=5edcd198c678d69f07ec2758b9d0f277bce2e322efd7d5bd902a34c1056a2e5a
   terminal-table (3.0.2) sha256=f951b6af5f3e00203fb290a669e0a85c5dd5b051b3b023392ccfd67ba5abae91
   tomlrb (2.0.4) sha256=262f77947ac3ac9b3366a0a5940ecd238300c553e2e14f22009e2afcd2181b99
   ttfunk (1.8.0) sha256=a7cbc7e489cc46e979dde04d34b5b9e4f5c8f1ee5fc6b1a7be39b829919d20ca
@@ -293,7 +293,7 @@ CHECKSUMS
   yard (0.9.45) sha256=52e211493f7cb8a3ebf7e104a25a1e73937a3103092545d34cb88fafebb3dc51
   yard-sorbet (0.9.0) sha256=03d1aa461b9e9c82b886919a13aa3e09fcf4d1852239d2967ed97e92723ffe21
   yell (2.2.2) sha256=1d166f3cc3b6dc49a59778ea7156ed6d8de794c15106d48ffd6cbb061b9b26bc
-  zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
+  zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
 
 RUBY VERSION
   ruby 4.0.6
