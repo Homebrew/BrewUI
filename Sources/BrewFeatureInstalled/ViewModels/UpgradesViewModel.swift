@@ -387,9 +387,6 @@ extension UpgradesViewModel {
     /// What "Upgrade All" upgrades, given the active filters:
     /// - A search narrows the batch to the visible rows by name (`brew upgrade git slack`).
     /// - Otherwise the scope picker maps to everything / `--formula` / `--cask`.
-    ///
-    /// A search matching nothing falls back to the scope: ``BrewUpgradeSelection/explicit(_:)`` with an
-    /// empty name list would display — and run — as a bare `brew upgrade`, the opposite of what it means.
     var upgradeSelection: BrewUpgradeSelection {
         if isSearchActive, !allRows.isEmpty {
             return .explicit(allRows.map(\.name))

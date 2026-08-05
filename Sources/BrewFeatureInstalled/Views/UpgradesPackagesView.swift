@@ -58,7 +58,6 @@ struct UpgradesPackagesView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            // Held at a constant height whatever the filters match, so the list below doesn't jump.
             if viewModel.state.isLoaded {
                 CommandBlockView(
                     command: viewModel.bulkUpgradeDisplayCommand,
@@ -93,13 +92,13 @@ struct UpgradesPackagesView: View {
 
     private var nothingToUpgradeIndicator: some View {
         HStack {
-            Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.brewStatusSuccess).font(.brewBody)
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Color.brewStatusSuccess)
+                .accessibilityHidden(true)
             Text(viewModel.emptyUpgradeActionTitle)
-                .font(.brewBody)
                 .foregroundStyle(Color.brewTextSecondary)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(viewModel.emptyUpgradeActionTitle)
         }
+        .font(.brewBody)
     }
 
     /// Kind filter shown whenever there is outdated inventory to narrow. Filters client-side; never refetches.

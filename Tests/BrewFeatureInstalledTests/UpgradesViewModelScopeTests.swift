@@ -190,7 +190,6 @@ struct UpgradesViewModelScopeTests {
 
         vm.searchQuery = "no-such-package"
 
-        // An empty `.explicit([])` would display and run as a bare `brew upgrade`.
         #expect(vm.outdatedCount == 0)
         #expect(vm.upgradeSelection == .all)
         #expect(vm.bulkUpgradeDisplayCommand == "brew upgrade")
@@ -226,7 +225,6 @@ struct UpgradesViewModelScopeTests {
         vm.searchQuery = "wget"
         #expect(vm.bulkUpgradeSummary == "Upgrades the 1 package matching your search")
 
-        // No matches falls back to the scope selection, so the summary follows it.
         vm.searchQuery = "no-such-package"
         #expect(vm.bulkUpgradeSummary == "Upgrades every outdated package")
     }
@@ -241,7 +239,6 @@ struct UpgradesViewModelScopeTests {
         #expect(vm.isFilteringOutEveryUpgrade)
         #expect(vm.emptyUpgradeActionTitle == "Nothing to upgrade here")
 
-        // Nothing outdated at all: not a filtering problem, even with a filter applied.
         let upToDate = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: false),
         ])
