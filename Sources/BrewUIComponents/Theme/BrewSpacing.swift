@@ -48,6 +48,10 @@ public enum BrewLayout {
     public static let installedDetailColumnMaxWidth: CGFloat = 1200
     public static let installedThreePaneMinWindowWidth: CGFloat = 960
 
+    /// Call-to-action row in a pane header. Clears a `.regular` bordered button, so pinning the row to it
+    /// leaves the button's own metrics alone while giving anything that stands in for it the same height.
+    public static let headerActionHeight: CGFloat = 28
+
     /// Default window width.
     public static let defaultWindowWidth: CGFloat = 1000
 

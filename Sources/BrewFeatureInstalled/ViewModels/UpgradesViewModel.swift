@@ -332,14 +332,63 @@ extension UpgradesViewModel {
         upgradeSelection.displayCommand
     }
 
+    var bulkUpgradeSummary: String {
+        switch upgradeSelection {
+        case .all:
+            String(
+                localized: "Upgrades every outdated package",
+                comment: "Upgrades header command summary for an unfiltered batch",
+            )
+        case .formulae:
+            String(
+                localized: "Upgrades every outdated formula",
+                comment: "Upgrades header command summary scoped to formulae",
+            )
+        case .casks:
+            String(
+                localized: "Upgrades every outdated cask",
+                comment: "Upgrades header command summary scoped to casks",
+            )
+        case let .explicit(names):
+            Self.searchedUpgradeSummary(count: names.count)
+        }
+    }
+
+    private static func searchedUpgradeSummary(count: Int) -> String {
+        if count == 1 {
+            return String(
+                localized: "Upgrades the 1 package matching your search",
+                comment: "Upgrades header command summary for a single searched package",
+            )
+        }
+        return String(
+            localized: "Upgrades the \(count) packages matching your search",
+            comment: "Upgrades header command summary for multiple searched packages",
+        )
+    }
+
+    var isFilteringOutEveryUpgrade: Bool {
+        outdatedCount == 0 && totalOutdatedCount > 0
+    }
+
+    var emptyUpgradeActionTitle: String {
+        if isFilteringOutEveryUpgrade {
+            return String(
+                localized: "Nothing to upgrade here",
+                comment: "Upgrades header stand-in when filters hide every available upgrade",
+            )
+        }
+        return String(
+            localized: "Nothing to upgrade",
+            comment: "Upgrades header stand-in when no package is outdated",
+        )
+    }
+
     /// What "Upgrade All" upgrades, given the active filters:
     /// - A search narrows the batch to the visible rows by name (`brew upgrade git slack`).
     /// - Otherwise the scope picker maps to everything / `--formula` / `--cask`.
-    ///
-    /// The button is gated on `outdatedCount > 0`, so ``BrewUpgradeSelection/explicit(_:)`` is never
-    /// submitted with an empty name list.
     var upgradeSelection: BrewUpgradeSelection {
-        if isSearchActive {
+        if isSearchActive, !allRows.isEmpty {
             return .explicit(allRows.map(\.name))
         }
         switch scope {

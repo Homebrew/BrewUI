@@ -185,6 +185,83 @@ struct UpgradesViewModelScopeTests {
         #expect(vm.upgradeSelection == .explicit(["git"]))
     }
 
+    @Test @MainActor func `upgradeSelection falls back to the scope when a search matches nothing`() {
+        let vm = Self.makeViewModel(packages: Self.mixedOutdated)
+
+        vm.searchQuery = "no-such-package"
+
+        #expect(vm.outdatedCount == 0)
+        #expect(vm.upgradeSelection == .all)
+        #expect(vm.bulkUpgradeDisplayCommand == "brew upgrade")
+
+        vm.scope = .casks
+        #expect(vm.upgradeSelection == .casks)
+        #expect(vm.bulkUpgradeDisplayCommand == "brew upgrade --cask")
+    }
+
+    // MARK: - bulkUpgradeSummary
+
+    @Test @MainActor func `bulkUpgradeSummary describes the scoped selection`() {
+        let vm = Self.makeViewModel(packages: Self.mixedOutdated)
+        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated package")
+
+        vm.scope = .formulae
+        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated formula")
+
+        vm.scope = .casks
+        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated cask")
+    }
+
+    @Test @MainActor func `bulkUpgradeSummary counts the searched packages`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: true),
+            .fixture(name: "github", kind: .cask, outdated: true),
+            .fixture(name: "wget", kind: .formula, outdated: true),
+        ])
+
+        vm.searchQuery = "git"
+        #expect(vm.bulkUpgradeSummary == "Upgrades the 2 packages matching your search")
+
+        vm.searchQuery = "wget"
+        #expect(vm.bulkUpgradeSummary == "Upgrades the 1 package matching your search")
+
+        vm.searchQuery = "no-such-package"
+        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated package")
+    }
+
+    // MARK: - Empty upgrade action
+
+    @Test @MainActor func `isFilteringOutEveryUpgrade distinguishes hidden upgrades from none`() {
+        let vm = Self.makeViewModel(packages: Self.mixedOutdated)
+        #expect(!vm.isFilteringOutEveryUpgrade)
+
+        vm.searchQuery = "no-such-package"
+        #expect(vm.isFilteringOutEveryUpgrade)
+        #expect(vm.emptyUpgradeActionTitle == "Nothing to upgrade here")
+
+        let upToDate = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: false),
+        ])
+        #expect(!upToDate.isFilteringOutEveryUpgrade)
+        #expect(upToDate.emptyUpgradeActionTitle == "Nothing to upgrade")
+
+        upToDate.scope = .casks
+        #expect(!upToDate.isFilteringOutEveryUpgrade)
+        #expect(upToDate.emptyUpgradeActionTitle == "Nothing to upgrade")
+    }
+
+    @Test @MainActor func `scope that hides every upgrade reports the filtered title`() {
+        let vm = Self.makeViewModel(packages: [
+            .fixture(name: "git", kind: .formula, outdated: true),
+        ])
+
+        vm.scope = .casks
+
+        #expect(vm.outdatedCount == 0)
+        #expect(vm.isFilteringOutEveryUpgrade)
+        #expect(vm.emptyUpgradeActionTitle == "Nothing to upgrade here")
+    }
+
     // MARK: - upgradeAll submission
 
     @Test @MainActor func `upgradeAll submits the scoped selection as both id and command`() async {

@@ -58,12 +58,21 @@ struct UpgradesPackagesView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            if viewModel.outdatedCount > 0 {
+            if viewModel.state.isLoaded {
                 CommandBlockView(
                     command: viewModel.bulkUpgradeDisplayCommand,
-                    summaryText: "Upgrades every outdated package",
+                    summaryText: viewModel.bulkUpgradeSummary,
                 )
 
+                upgradeAction
+            }
+        }
+        .padding(BrewSpacing.lg)
+    }
+
+    private var upgradeAction: some View {
+        Group {
+            if viewModel.outdatedCount > 0 {
                 Button {
                     viewModel.upgradeAll()
                 } label: {
@@ -74,9 +83,22 @@ struct UpgradesPackagesView: View {
                 .keyboardShortcut("u", modifiers: [.command, .shift])
                 .disabled(viewModel.isUpgradingAny)
                 .accessibilityLabel("Upgrade all \(viewModel.outdatedCount) packages")
+            } else {
+                nothingToUpgradeIndicator
             }
         }
-        .padding(BrewSpacing.lg)
+        .frame(height: BrewLayout.headerActionHeight)
+    }
+
+    private var nothingToUpgradeIndicator: some View {
+        HStack {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Color.brewStatusSuccess)
+                .accessibilityHidden(true)
+            Text(viewModel.emptyUpgradeActionTitle)
+                .foregroundStyle(Color.brewTextSecondary)
+        }
+        .font(.brewBody)
     }
 
     /// Kind filter shown whenever there is outdated inventory to narrow. Filters client-side; never refetches.
@@ -261,6 +283,21 @@ struct UpgradesPackagesView: View {
             .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
             .task {
                 await viewModel.load()
+            }
+            .frame(minWidth: 360, minHeight: 500)
+    }
+
+    #Preview("Upgrades list - filtered to nothing") {
+        let viewModel = UpgradesViewModel(
+            repository: PreviewSupport.makeInstalledPackagesRepository(),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            commandFactory: PreviewSupport.mutatingCommandFactory,
+        )
+        UpgradesPackagesView(viewModel: viewModel)
+            .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
+            .task {
+                await viewModel.load()
+                viewModel.searchQuery = "no-such-package"
             }
             .frame(minWidth: 360, minHeight: 500)
     }
