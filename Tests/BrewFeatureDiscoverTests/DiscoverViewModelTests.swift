@@ -632,6 +632,64 @@ struct DiscoverViewModelTests {
 
         #expect(!viewModel.shouldFocusList)
     }
+
+    @Test @MainActor func `shouldFocusList is false while the search field is presented`() async {
+        let viewModel = await loadedTrendingViewModel()
+
+        viewModel.isSearchFieldPresented = true
+
+        #expect(!viewModel.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList returns to true once the search field is dismissed`() async {
+        let viewModel = await loadedTrendingViewModel()
+
+        viewModel.isSearchFieldPresented = true
+        #expect(!viewModel.shouldFocusList)
+
+        viewModel.isSearchFieldPresented = false
+        #expect(viewModel.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList stays false when the query is cleared while the field is presented`() async {
+        let viewModel = await loadedTrendingViewModel()
+
+        viewModel.isSearchFieldPresented = true
+        viewModel.query = "git"
+        #expect(!viewModel.shouldFocusList)
+
+        viewModel.query = ""
+
+        #expect(!viewModel.shouldFocusList)
+    }
+
+    @Test @MainActor func `shouldFocusList stays false when the field is presented but trending has not loaded`() {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(state: .loading),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+
+        viewModel.isSearchFieldPresented = true
+
+        #expect(!viewModel.shouldFocusList)
+    }
+
+    @MainActor
+    private func loadedTrendingViewModel() async -> DiscoverViewModel {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(
+                    topFormulae: [discoveryPackage(name: "git", thirtyDayInstallCount: 100)],
+                    topCasks: [],
+                ),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+        await viewModel.load()
+        return viewModel
+    }
 }
 
 @Observable

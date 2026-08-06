@@ -5,7 +5,6 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
-    @State private var searchPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -24,11 +23,11 @@ struct DiscoverPackagesView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .searchable(
             text: $viewModel.query,
-            isPresented: $searchPresented,
+            isPresented: $viewModel.isSearchFieldPresented,
             placement: .toolbar,
             prompt: "Search Homebrew's Packages",
         )
-        .focusedSceneValue(\.searchPresented, $searchPresented)
+        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
             try? await Task.sleep(for: .milliseconds(250))
