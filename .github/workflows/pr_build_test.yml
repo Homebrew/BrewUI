@@ -41,12 +41,20 @@ on:
       - ".periphery.yml"
       - ".periphery-baseline.json"
       - ".github/workflows/pr_build_test.yml"
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: "Optional xcodebuild -only-testing filter for the UI suite"
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  # A dispatched run has no pull request to key on; fall back to the ref so manual
+  # runs on the same branch still supersede each other.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -185,9 +193,16 @@ jobs:
           persist-credentials: false
 
       - name: Build and run UI tests (Brew-UI scheme)
+        # Through env rather than interpolated into the script body, so the input cannot inject shell.
+        env:
+          TEST_FILTER: ${{ inputs.test_filter }}
         run: |
           set -o pipefail
-          scripts/test-ui | tee xcodebuild-ui.log
+          if [[ -n "${TEST_FILTER}" ]]; then
+            scripts/test-ui -only-testing:"${TEST_FILTER}" | tee xcodebuild-ui.log
+          else
+            scripts/test-ui | tee xcodebuild-ui.log
+          fi
 
       - name: Upload logs on failure
         if: failure() || cancelled()
