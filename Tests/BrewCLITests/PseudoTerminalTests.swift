@@ -48,20 +48,42 @@ struct PseudoTerminalTests {
         #expect(output.trimmingCharacters(in: .whitespacesAndNewlines) == "30 100")
     }
 
-    @Test func `read returns nil once the child and the local replica are gone`() throws {
+    @Test func `read reports end of input once the child and the local replica are gone`() throws {
         let terminal = try PseudoTerminal()
         let process = try startProcess(script: "printf 'done\\n'", terminal: terminal)
         terminal.closeReplica()
 
-        var chunks: [Data] = []
-        while let chunk = terminal.read() {
-            chunks.append(chunk)
-        }
+        let output = drainToEndOfInput(terminal)
         process.waitUntilExit()
         terminal.closePrimary()
 
-        // The loop terminating at all is the assertion: a leaked replica descriptor would hang it forever.
-        #expect(chunks.map { String(bytes: $0, encoding: .utf8) ?? "" }.joined() == "done\n")
+        // The drain terminating at all is the assertion: a leaked replica descriptor would hang it forever.
+        #expect(output == "done\n")
+    }
+
+    @Test func `read times out rather than blocking while the terminal is idle`() throws {
+        let terminal = try PseudoTerminal()
+        // No child at all, and the replica is still held open here — so there is nothing to read and no
+        // end-of-input either. An unbounded read would park forever; this must come back promptly.
+        defer {
+            terminal.closeReplica()
+            terminal.closePrimary()
+        }
+
+        let outcome = terminal.read(timeout: .milliseconds(50))
+
+        #expect(outcome == .timedOut)
+    }
+
+    @Test func `read reports end of input when only the local replica is closed`() throws {
+        let terminal = try PseudoTerminal()
+        terminal.closeReplica()
+        defer { terminal.closePrimary() }
+
+        // Never spawned a child, so closing the replica leaves no writers at all.
+        let outcome = terminal.read(timeout: .milliseconds(50))
+
+        #expect(outcome == .endOfInput)
     }
 
     @Test func `closing twice is harmless`() throws {
@@ -89,13 +111,27 @@ private extension PseudoTerminalTests {
         let process = try startProcess(script: script, terminal: terminal)
         terminal.closeReplica()
 
-        var data = Data()
-        while let chunk = terminal.read() {
-            data.append(chunk)
-        }
+        let output = drainToEndOfInput(terminal)
         process.waitUntilExit()
         terminal.closePrimary()
 
+        return output
+    }
+
+    /// Reads until end-of-input, ignoring idle timeouts. Safe here because every script under test
+    /// terminates on its own; production drains additionally stop once the child has exited.
+    func drainToEndOfInput(_ terminal: PseudoTerminal) -> String {
+        var data = Data()
+        loop: while true {
+            switch terminal.read() {
+            case let .data(chunk):
+                data.append(chunk)
+            case .timedOut:
+                continue
+            case .endOfInput:
+                break loop
+            }
+        }
         return String(bytes: data, encoding: .utf8) ?? ""
     }
 

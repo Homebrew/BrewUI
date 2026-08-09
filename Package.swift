@@ -33,9 +33,6 @@ let package = Package(
         // needs. Confined to `BrewCLI` behind the `BrewCommandRunning` protocol, so it has exactly one conformer.
         // Version pinned exactly, per the same convention.
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", exact: "1.0.0"),
-        // Already in the graph as swift-subprocess's own dependency; declared explicitly because
-        // `BrewCLI` names `FileDescriptor` directly when handing the pty replica to `Subprocess`.
-        .package(url: "https://github.com/apple/swift-system", exact: "1.8.0"),
     ],
     targets: [
         // Dependency-free by design: linked by both the app and the BrewUITests target, so it must
@@ -87,7 +84,6 @@ let package = Package(
             dependencies: [
                 "BrewCore",
                 .product(name: "Subprocess", package: "swift-subprocess"),
-                .product(name: "SystemPackage", package: "swift-system"),
             ],
             swiftSettings: [
                 .defaultIsolation(nil),

@@ -6,7 +6,7 @@
 import BrewCore
 import Darwin
 import Foundation
-import SystemPackage
+import System
 
 /// An allocated pseudo-terminal pair, used to give `brew` a real terminal on stdout/stderr.
 ///
@@ -94,30 +94,52 @@ final class PseudoTerminal: @unchecked Sendable {
         close(primaryFD)
     }
 
-    /// One blocking read from the primary. Returns `nil` at end-of-input (the child and every other
-    /// writer have gone away), otherwise the bytes read. `EINTR` is retried rather than surfaced.
-    func read() -> Data? {
-        var buffer = [UInt8](repeating: 0, count: 4096)
-        while true {
-            let bytesRead = buffer.withUnsafeMutableBytes { raw -> Int in
-                guard let base = raw.baseAddress else {
-                    return 0
-                }
-                return Darwin.read(primaryFD, base, raw.count)
-            }
+    /// The result of one bounded read from the primary.
+    enum ReadOutcome: Equatable {
+        /// Bytes were read.
+        case data(Data)
+        /// Nothing arrived within the timeout. The terminal is still open.
+        case timedOut
+        /// No writers remain: the child and everything it spawned have closed their end.
+        case endOfInput
+    }
 
-            if bytesRead > 0 {
-                return Data(buffer[0 ..< bytesRead])
-            }
-            if bytesRead == 0 {
-                return nil
-            }
-            // `EIO` here is the normal "last writer closed" signal on Darwin, not a fault.
-            if errno == EINTR {
-                continue
-            }
-            return nil
+    /// One read from the primary, waiting at most `timeout` for bytes to arrive.
+    ///
+    /// The timeout exists because end-of-input is driven by *descriptors*, not by process exit: any
+    /// grandchild that inherited the replica (a `curl`, a cask's installer) holds the terminal open after
+    /// `brew` itself exits. An unbounded read would hang the drain — and with it the console job — until
+    /// that straggler happened to finish. Returning ``ReadOutcome/timedOut`` lets the caller notice the
+    /// child is gone and stop on its own terms.
+    func read(timeout: Duration = .milliseconds(100)) -> ReadOutcome {
+        var descriptor = pollfd(fd: primaryFD, events: Int16(POLLIN), revents: 0)
+        let milliseconds = Int32(clamping: timeout.components.seconds * 1000
+            + Int64(timeout.components.attoseconds / 1_000_000_000_000_000))
+
+        let ready = poll(&descriptor, 1, milliseconds)
+        if ready == 0 {
+            return .timedOut
         }
+        if ready < 0 {
+            return errno == EINTR ? .timedOut : .endOfInput
+        }
+
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        let bytesRead = buffer.withUnsafeMutableBytes { raw -> Int in
+            guard let base = raw.baseAddress else {
+                return 0
+            }
+            return Darwin.read(primaryFD, base, raw.count)
+        }
+
+        if bytesRead > 0 {
+            return .data(Data(buffer[0 ..< bytesRead]))
+        }
+        if bytesRead < 0, errno == EINTR || errno == EAGAIN {
+            return .timedOut
+        }
+        // Both `0` and `-1`/`EIO` mean the last writer closed; `EIO` is the normal Darwin path here.
+        return .endOfInput
     }
 
     /// Puts the replica into a mode that hands back exactly the bytes the child wrote.
