@@ -73,7 +73,7 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Documentation:** Use [DocC](https://www.swift.org/documentation/docc/) / Xcode doc comments for non-obvious `public` / `internal` API. Inline `//` explains **why**, not **what**.
 
-**Accessibility:** Meaningful labels (and hints where needed) on interactive controls; keyboard shortcuts where it matters. **UI test IDs:** shared constants in `Utilities/AccessibilityIdentifiers.swift` — see [`ARCHITECTURE.md`](ARCHITECTURE.md) — **File organisation**; do not duplicate strings in the test target.
+**Accessibility:** Meaningful labels (and hints where needed) on interactive controls; keyboard shortcuts where it matters. **UI test IDs:** the `AXID` enum in [`Sources/BrewAccessibilityID/`](Sources/BrewAccessibilityID/), linked by both the app and `BrewUITests`. Attach it with `.axid(_:)`; never write a raw identifier string in a view or a test. Identity is orthogonal to labels — keep `accessibilityLabel` for VoiceOver.
 
 **Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub only **boundaries**: `BrewCommandRunning` (subprocess) and, when needed, `BrewExecutableLocating` (e.g. `MissingBrewExecutableLocator` for “brew not found”). Prefer **slice tests** that use the real `BrewInstalledPackagesRepository` (and thus real parsing) with those fakes; shared helpers live under [`BrewTests/TestSupport/`](BrewTests/TestSupport/). Pure presentation tests may use `InstalledViewModel`’s `init(testing…)` without a repository. Cover errors and async paths, not only happy paths. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for layer flow.
 
