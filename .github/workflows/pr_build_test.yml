@@ -1,4 +1,4 @@
-name: Build and Unit Tests
+name: Build and Test
 
 on:
   push:
@@ -16,6 +16,7 @@ on:
       - "Package.resolved"
       - "Tools/BrewUILint/**"
       - "scripts/test"
+      - "scripts/test-ui"
       - "Brewfile"
       - "Mintfile"
       - ".periphery.yml"
@@ -35,6 +36,7 @@ on:
       - "Package.resolved"
       - "Tools/BrewUILint/**"
       - "scripts/test"
+      - "scripts/test-ui"
       - "Mintfile"
       - ".periphery.yml"
       - ".periphery-baseline.json"
@@ -49,7 +51,7 @@ concurrency:
 
 jobs:
   build-and-test:
-    name: Build + unit tests
+    name: Build + unit/integration tests
     runs-on: macos-26
     timeout-minutes: 25
     env:
@@ -166,4 +168,30 @@ jobs:
             xcodebuild.log
             swift-test-brewkit.log
             swift-test-brewuilint.log
+          retention-days: 7
+
+  ui-test:
+    name: UI tests
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The job uploads artifacts on failure; a persisted token in .git/config could ride along.
+          persist-credentials: false
+
+      - name: Build and run UI tests (Brew-UI scheme)
+        run: |
+          set -o pipefail
+          scripts/test-ui | tee xcodebuild-ui.log
+
+      - name: Upload logs on failure
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-test-logs
+          path: |
+            xcodebuild-ui.log
+            UITestResults.xcresult
           retention-days: 7

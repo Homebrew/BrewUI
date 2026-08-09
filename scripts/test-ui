@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# test-ui — build and run the BrewUITests suite (Brew-UI scheme).
+#
+# Mirrors what CI runs in .github/workflows/pr_build_test.yml, so green
+# locally means green on CI. Launches real app windows — see
+# BrewUITests/TROUBLESHOOTING.md before running this on a machine you're
+# actively using (keep the screen unlocked, don't touch the keyboard/mouse
+# mid-run).
+#
+# Pass extra xcodebuild args through, e.g. to scope to one test while
+# iterating:
+#   scripts/test-ui -only-testing:BrewUITests/ConsoleUITests
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+echo "==> Resolving package dependencies"
+xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
+
+echo "==> BrewUITests (Brew-UI scheme)"
+rm -rf UITestResults.xcresult
+# No -derivedDataPath override: a project-relative DerivedData path reproducibly makes the test
+# runner hang for ~5 minutes before failing with "The test runner hung before establishing
+# connection" on a real Mac, even though the identical run against the default
+# ~/Library/Developer/Xcode/DerivedData location passes in seconds. Root cause not chased down
+# further than that — use the default location rather than the one that's confirmed broken.
+xcodebuild test \
+  -project Homebrew.xcodeproj \
+  -scheme Brew-UI \
+  -destination "platform=macOS" \
+  -resultBundlePath UITestResults.xcresult \
+  -skipPackagePluginValidation \
+  -skipMacroValidation \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY=- \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO \
+  "$@"
+
+echo "==> UI tests passed."
