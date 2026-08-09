@@ -11,9 +11,11 @@ import SwiftUI
 /// as it did before ANSI support. Bold spans get a bold monospaced font; every other run is left
 /// fontless so it inherits the `Text`'s base font — setting a font on all runs would defeat that.
 enum ANSIConsoleText {
+    /// Renders the line's already-resolved spans. Resolution happens where the line is built — off the
+    /// main actor, once — rather than being re-parsed on every render pass.
     static func attributed(for line: BrewCommandOutputLine, defaultColor: Color) -> AttributedString {
         var result = AttributedString()
-        for span in ANSIParser.parse(line.text) {
+        for span in line.spans {
             var piece = AttributedString(span.text)
             piece.foregroundColor = span.style.foreground.map(color(for:)) ?? defaultColor
             if span.style.bold {
