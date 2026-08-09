@@ -59,6 +59,14 @@ struct BrewCommandServicePseudoTerminalTests {
         #expect(output.standardError.isEmpty)
     }
 
+    @Test func `a child reading stdin gets EOF instead of blocking on the terminal`() async throws {
+        // The hang worth guarding against: an interactive rc file that reads stdin would block forever if
+        // stdin were wired to the pty, since nothing ever writes to it. It stays on /dev/null instead.
+        let output = try await run(script: "read line; printf 'survived'", usesPseudoTerminal: true)
+
+        #expect(output.standardOutput.contains("survived"))
+    }
+
     @Test func `pseudo-terminal run reports a non-zero exit code`() async throws {
         let output = try await run(script: "exit 7", usesPseudoTerminal: true)
 
