@@ -52,6 +52,21 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         }
     }
 
+    /// Takes the context rather than building its own runner, so the composition root points every
+    /// brew invocation at one place: production's login shell, or a UI test's fake executable.
+    public convenience init(
+        executionContext: BrewCommandExecutionContext,
+        cache: InstalledInventoryCache,
+        commandCenter: any BrewCommandCenter,
+    ) {
+        self.init(
+            commandRunner: executionContext.commandRunner,
+            locator: executionContext.locator,
+            cache: cache,
+            commandCenter: commandCenter,
+        )
+    }
+
     isolated deinit {
         completionObserverTask?.cancel()
     }
@@ -64,8 +79,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         commandCenter: any BrewCommandCenter,
     ) -> BrewInstalledPackagesRepository {
         BrewInstalledPackagesRepository(
-            commandRunner: LoginShellBrewCommandRunner(),
-            locator: BrewExecutableLocator(),
+            executionContext: .live(),
             cache: cache,
             commandCenter: commandCenter,
         )
