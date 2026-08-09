@@ -98,6 +98,11 @@ private extension BrewCommandService {
 
     /// Drains the terminal to end-of-input, emitting lines through `sink` as they arrive.
     ///
+    /// Output goes through ``TerminalLineAssembler`` rather than being split on newlines, because a
+    /// terminal's redraws are separated by carriage returns rather than newlines — a whole download is
+    /// one "line" by that measure. The assembler resolves the overwrites and reports the line while it is
+    /// still being drawn, which is what lets the console animate a progress bar in place.
+    ///
     /// Stops early when the child has exited and a full poll interval has passed with nothing to read.
     /// That combination — process gone, terminal quiet — is what distinguishes "finished" from "a
     /// grandchild is still holding the descriptor open", which would otherwise stall here indefinitely.
@@ -110,15 +115,18 @@ private extension BrewCommandService {
             // `read` parks on `poll`; run it on a GCD worker rather than the cooperative pool.
             DispatchQueue.global(qos: .utility).async {
                 var fullOutput = Data()
-                var lineBuffer = Data()
+                var undecoded = Data()
+                var assembler = TerminalLineAssembler()
 
                 loop: while true {
                     switch terminal.read() {
                     case let .data(chunk):
                         fullOutput.append(chunk)
                         if sink != nil {
-                            lineBuffer.append(chunk)
-                            emitCompleteLines(from: &lineBuffer, stream: .stdout, sink: sink)
+                            undecoded.append(chunk)
+                            for event in assembler.consume(takeDecodableUTF8Prefix(&undecoded)) {
+                                emit(event, sink: sink)
+                            }
                         }
                     case .timedOut:
                         if gate.isOpen {
@@ -129,10 +137,48 @@ private extension BrewCommandService {
                     }
                 }
 
-                flushPartialLine(lineBuffer, stream: .stdout, sink: sink)
+                // Output that ended without a trailing newline is settled by the stream ending.
+                if let sink, let trailing = assembler.flush() {
+                    sink(BrewCommandOutputLine(stream: .stdout, line: trailing, isComplete: true))
+                }
                 continuation.resume(returning: fullOutput)
             }
         }
+    }
+
+    /// Forwards one assembler event as an output line. Everything from a terminal is reported on
+    /// ``BrewCommandOutputLine/Stream/stdout``: one device carries both streams, so they cannot be told apart.
+    static func emit(_ event: TerminalLineEvent, sink: (@Sendable (BrewCommandOutputLine) -> Void)?) {
+        guard let sink else {
+            return
+        }
+        switch event {
+        case let .committed(line):
+            sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: true))
+        case let .revised(line):
+            sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: false))
+        }
+    }
+
+    /// Takes the longest valid UTF-8 prefix of `buffer`, leaving any trailing bytes behind.
+    ///
+    /// Terminal reads land on arbitrary byte boundaries, so a multi-byte character can be split across two
+    /// reads. Holding the remainder until the rest arrives keeps such a character intact instead of
+    /// dropping it. A sequence can be at most four bytes, so at most three trailing bytes are ever held;
+    /// beyond that the bytes are genuinely undecodable and one is dropped so the drain cannot stall.
+    static func takeDecodableUTF8Prefix(_ buffer: inout Data) -> String {
+        guard !buffer.isEmpty else {
+            return ""
+        }
+        for dropped in 0 ... min(3, buffer.count) {
+            let candidate = buffer.prefix(buffer.count - dropped)
+            if let text = String(bytes: candidate, encoding: .utf8) {
+                buffer = Data(buffer.dropFirst(candidate.count))
+                return text
+            }
+        }
+        buffer = Data(buffer.dropFirst())
+        return ""
     }
 }
 

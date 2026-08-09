@@ -87,7 +87,7 @@ struct BrewCommandServicePseudoTerminalTests {
         #expect(output.standardOutput == "10%\r50%\r100%\n")
     }
 
-    @Test func `pseudo-terminal run flushes a trailing line lacking a newline`() async throws {
+    @Test func `pseudo-terminal run settles a trailing line lacking a newline`() async throws {
         let collector = OutputCollector()
 
         _ = try await run(
@@ -96,7 +96,38 @@ struct BrewCommandServicePseudoTerminalTests {
             lineObserver: { collector.append($0) },
         )
 
-        #expect(collector.allLines().map(\.text) == ["no-newline"])
+        // Reported first as an in-progress revision, then settled when the stream ends.
+        let last = collector.allLines().last
+        #expect(last?.text == "no-newline" && last?.isComplete == true)
+    }
+
+    @Test func `a progress redraw settles into one complete line`() async throws {
+        // The reported bug, end to end: many carriage-return redraws must leave one settled line, with
+        // the intermediate states reported as revisions of it rather than as separate lines.
+        let collector = OutputCollector()
+
+        _ = try await run(
+            script: "printf '10%%\\r50%%\\r100%%\\n'",
+            usesPseudoTerminal: true,
+            lineObserver: { collector.append($0) },
+        )
+
+        let settled = collector.allLines().filter(\.isComplete).map(\.text)
+        #expect(settled == ["100%"])
+    }
+
+    @Test func `intermediate redraw states are reported as revisions`() async throws {
+        let collector = OutputCollector()
+
+        _ = try await run(
+            script: "printf '10%%\\r'; sleep 0.1; printf '50%%\\r'; sleep 0.1; printf '100%%\\n'",
+            usesPseudoTerminal: true,
+            lineObserver: { collector.append($0) },
+        )
+
+        // Separated by sleeps so they arrive as distinct reads, which is what a real download looks like.
+        let revisions = collector.allLines().filter { !$0.isComplete }.map(\.text)
+        #expect(revisions == ["10%", "50%"])
     }
 
     @Test func `pseudo-terminal run survives output larger than the terminal buffer`() async throws {
