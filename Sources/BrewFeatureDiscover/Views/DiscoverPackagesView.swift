@@ -1,3 +1,4 @@
+import BrewAccessibilityID
 import BrewCore
 import BrewUIComponents
 import SwiftUI
@@ -21,6 +22,12 @@ struct DiscoverPackagesView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .accessibilityElement(children: .contain)
+        .axid(.discoverScreen)
+        // `.searchable` injects its field into the window toolbar, and SwiftUI offers no hook to
+        // put an accessibility identifier on it — an `.axid` here would land on this content and
+        // overwrite `.discoverScreen`. `AXID.discoverSearchField` therefore stays unattached until
+        // the field is custom; query it via `app.searchFields` for now.
         .searchable(
             text: $viewModel.query,
             isPresented: $viewModel.isSearchFieldPresented,
@@ -107,6 +114,7 @@ private struct DiscoverPackageSections: View {
             }
             .listStyle(.inset)
             .accessibilityLabel("Discover packages")
+            .axid(.discoverList)
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
@@ -157,6 +165,7 @@ private struct DiscoverPackageSections: View {
                         // Needed to suppress the default ugly blue macOS highlight state
                         viewModel.setSelection(package.id)
                     }
+                    .axid(.discoverRow(token: package.name))
             }
         }
     }

@@ -34,6 +34,11 @@ DerivedData/
 .DerivedData/
 build/
 
+# Test artifacts. scripts/test-ui writes a result bundle at the repo root; code
+# coverage drops .profraw files wherever a test-instrumented binary was run.
+*.xcresult
+*.profraw
+
 # Swift Package Manager
 .build/
 .swiftpm/

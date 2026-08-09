@@ -5,6 +5,7 @@
 //  Created by Graeme Arthur on 17/6/2026.
 //
 
+import BrewAccessibilityID
 import SwiftUI
 
 /// Primary navigation items for the main window sidebar.
@@ -26,6 +27,18 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
         case .discover: "Discover"
         case .doctor: "Doctor"
         case .configuration: "Configuration"
+        }
+    }
+
+    /// Test-facing identity for this destination. Kept as an explicit mapping rather than a
+    /// `rawValue` bridge so renaming a case here can never silently repoint a UI test.
+    var axDestination: AXID.SidebarDestination {
+        switch self {
+        case .installed: .installed
+        case .upgrades: .upgrades
+        case .discover: .discover
+        case .doctor: .doctor
+        case .configuration: .configuration
         }
     }
 }

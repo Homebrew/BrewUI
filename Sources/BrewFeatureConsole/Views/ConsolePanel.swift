@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAccessibilityID
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
@@ -31,6 +32,8 @@ struct ConsolePanel: View {
             }
         }
         .background(Color.brewSurface)
+        .accessibilityElement(children: .contain)
+        .axid(.console)
         .onAppear { viewModel.autoExpandEnabled = autoExpandConsole }
         .onChange(of: autoExpandConsole) { _, enabled in viewModel.autoExpandEnabled = enabled }
         .onChange(of: viewModel.shouldAutoExpandConsole) { _, shouldExpand in

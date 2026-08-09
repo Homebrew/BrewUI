@@ -44,10 +44,17 @@ struct BrewApp: App {
         crashReportController = CrashReportController(store: crashReportStore)
 
         let inventoryCache = InstalledInventoryCache()
-        let catalogue = CatalogueCache()
-        let discoverAnalytics = DiscoverAnalyticsCache()
-        let center = SerialBrewCommandCenter(executionContext: .live())
-        let apiClient = URLSessionBrewAPIClient.live()
+        // nil in every production launch, so both process-boundary seams below fall through to the
+        // live wiring untouched.
+        let uiTesting = BrewUITestingLaunchConfiguration.current()
+        // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
+        let fixtures = Self.installFixtures(uiTesting: uiTesting)
+        let catalogue = Self.makeCatalogueCache(fixtures: fixtures)
+        let discoverAnalytics = Self.makeDiscoverAnalyticsCache(fixtures: fixtures)
+        // One context for every brew invocation: command center, installed inventory and `brew config`.
+        let executionContext = Self.executionContext(uiTesting: uiTesting, fixtures: fixtures)
+        let center = SerialBrewCommandCenter(executionContext: executionContext)
+        let apiClient = Self.makeAPIClient(uiTesting: uiTesting)
         let catalogueRepo = BrewCatalogueRepository(apiClient: apiClient, cache: catalogue)
 
         installedInventoryCache = inventoryCache
@@ -55,7 +62,8 @@ struct BrewApp: App {
         discoverAnalyticsCache = discoverAnalytics
         commandCenter = center
         commandFactory = LiveBrewMutatingCommandFactory()
-        installedPackagesRepository = BrewInstalledPackagesRepository.live(
+        installedPackagesRepository = BrewInstalledPackagesRepository(
+            executionContext: executionContext,
             cache: inventoryCache,
             commandCenter: center,
         )
@@ -66,10 +74,100 @@ struct BrewApp: App {
             apiClient: apiClient,
             catalogueRepository: catalogueRepo,
             cache: discoverAnalytics,
+            defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center)
-        configRepository = BrewConfigRepository.live()
+        configRepository = BrewConfigRepository(executionContext: executionContext)
         NSWindow.allowsAutomaticWindowTabbing = false
+    }
+
+    /// Cleared at launch, so a previous run's ETag or refresh timestamp cannot decide this run's fetches.
+    private static let uiTestingDefaultsPrefix = "UITesting."
+
+    /// Fatal on failure by design: continuing without fixtures would surface later as a product bug.
+    private static func installFixtures(
+        uiTesting: BrewUITestingLaunchConfiguration?,
+    ) -> BrewUITestingFixtureInstaller.Installation? {
+        guard let uiTesting else {
+            return nil
+        }
+        do {
+            return try BrewUITestingFixtureInstaller.install(
+                payload: uiTesting.payload,
+                scenario: uiTesting.scenario,
+            )
+        } catch {
+            fatalError("UI-test fixtures could not be installed: \(error)")
+        }
+    }
+
+    /// Network seam. Under `-uiTesting` with a scenario, requests are served in-process by
+    /// ``BrewUITestingStubURLProtocol`` on a private ephemeral session; otherwise this is `live()`.
+    private static func makeAPIClient(uiTesting: BrewUITestingLaunchConfiguration?) -> any BrewAPIClient {
+        guard let uiTesting, uiTesting.scenario != nil else {
+            return URLSessionBrewAPIClient.live()
+        }
+        return URLSessionBrewAPIClient.stubbed(protocolClasses: [BrewUITestingStubURLProtocol.self])
+    }
+
+    /// Catalogue cache seam. Under `-uiTesting` the bytes land in the run's container, so fixtures
+    /// cannot outlive the run or overwrite a real install's cache.
+    private static func makeCatalogueCache(
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> CatalogueCache {
+        guard let fixtures else {
+            return CatalogueCache()
+        }
+        clearUITestingDefaults()
+        return CatalogueCache(
+            cacheDirectoryURL: fixtures.containerURL.appendingPathComponent(
+                "CatalogueCache",
+                isDirectory: true,
+            ),
+            defaultsKeyPrefix: defaultsKeyPrefix(base: "CatalogueCache", fixtures: fixtures),
+        )
+    }
+
+    /// Analytics cache seam. Same isolation rationale as ``makeCatalogueCache(fixtures:)``.
+    private static func makeDiscoverAnalyticsCache(
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> DiscoverAnalyticsCache {
+        guard let fixtures else {
+            return DiscoverAnalyticsCache()
+        }
+        return DiscoverAnalyticsCache(
+            cacheDirectoryURL: fixtures.containerURL.appendingPathComponent(
+                "DiscoverAnalytics",
+                isDirectory: true,
+            ),
+            defaultsKeyPrefix: defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
+        )
+    }
+
+    private static func defaultsKeyPrefix(
+        base: String,
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> String {
+        fixtures == nil ? base : uiTestingDefaultsPrefix + base
+    }
+
+    private static func clearUITestingDefaults() {
+        let defaults = UserDefaults.standard
+        for key in defaults.dictionaryRepresentation().keys where key.hasPrefix(uiTestingDefaultsPrefix) {
+            defaults.removeObject(forKey: key)
+        }
+    }
+
+    /// Shell seam. A UI-test launch that installed no fake resolves nothing, rather than falling back
+    /// to the machine's real Homebrew.
+    private static func executionContext(
+        uiTesting: BrewUITestingLaunchConfiguration?,
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> BrewCommandExecutionContext {
+        guard uiTesting != nil else {
+            return .live()
+        }
+        return .uiTesting(brewURL: fixtures?.fakeBrewURL)
     }
 
     var body: some Scene {

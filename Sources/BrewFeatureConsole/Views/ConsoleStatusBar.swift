@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAccessibilityID
 import BrewUIComponents
 import SwiftUI
 
@@ -15,8 +16,14 @@ struct ConsoleStatusBar: View {
     var body: some View {
         let presentation = viewModel.statusPresentation
         HStack(spacing: BrewSpacing.md) {
-            ConsoleStatusDot(state: presentation.dotState)
-            summaryText(presentation.summary)
+            // Combined into one element so the whole "<command> — done" / "— failed · exit N"
+            // sentence reads as a single string to VoiceOver and to UI tests.
+            HStack(spacing: BrewSpacing.md) {
+                ConsoleStatusDot(state: presentation.dotState)
+                summaryText(presentation.summary)
+            }
+            .accessibilityElement(children: .combine)
+            .axid(.consoleStatus)
             Spacer(minLength: BrewSpacing.sm)
             if presentation.isRunning {
                 ProgressView()
@@ -31,6 +38,8 @@ struct ConsoleStatusBar: View {
             }
             .buttonStyle(.borderless)
             .help(expanded ? "Hide console" : "Show console")
+            .accessibilityLabel(expanded ? "Hide console" : "Show console")
+            .axid(.consoleToggle)
         }
         .padding(.horizontal, BrewSpacing.lg)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)

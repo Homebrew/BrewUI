@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAccessibilityID
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -44,6 +45,7 @@ struct ConsoleBody: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(Color.brewSurfaceElevated)
+            .axid(.consoleOutput)
             .onAppear {
                 if let last = job.output.last {
                     proxy.scrollTo(last.id, anchor: .bottom)

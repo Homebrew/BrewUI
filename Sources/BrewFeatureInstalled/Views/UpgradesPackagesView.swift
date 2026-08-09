@@ -3,6 +3,7 @@
 //  BrewFeatureInstalled
 //
 
+import BrewAccessibilityID
 import BrewCore
 import BrewUIComponents
 import SwiftUI
@@ -39,6 +40,8 @@ struct UpgradesPackagesView: View {
                 },
             )
         }
+        .accessibilityElement(children: .contain)
+        .axid(.upgradesScreen)
         .task {
             await viewModel.load()
         }
@@ -123,6 +126,7 @@ struct UpgradesPackagesView: View {
             }
             .listStyle(.inset)
             .accessibilityLabel("Outdated packages")
+            .axid(.upgradesList)
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
@@ -168,6 +172,7 @@ struct UpgradesPackagesView: View {
                 // Needed to suppress the default ugly blue macOS highlight state
                 viewModel.setSelection(package.id)
             }
+            .axid(.upgradesRow(token: package.name))
     }
 
     private func scrollToSelection(

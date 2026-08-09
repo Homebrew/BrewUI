@@ -3,6 +3,7 @@
 //  BrewFeatureDoctor
 //
 
+import BrewAccessibilityID
 import BrewCore
 import BrewUIComponents
 import SwiftUI
@@ -20,6 +21,8 @@ struct DoctorView: View {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .accessibilityElement(children: .contain)
+        .axid(.doctorScreen)
     }
 
     private var header: some View {

@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAccessibilityID
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -29,6 +30,8 @@ struct ConsoleToolbar: View {
             }
             .buttonStyle(.borderless)
             .help("Hide console")
+            .accessibilityLabel("Hide console")
+            .axid(.consoleToggle)
         }
         .padding(.horizontal, BrewSpacing.md)
         .frame(height: BrewLayout.consoleToolbarHeight)

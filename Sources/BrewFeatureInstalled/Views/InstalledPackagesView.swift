@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAccessibilityID
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -40,6 +41,8 @@ struct InstalledPackagesView: View {
                 },
             )
         }
+        .accessibilityElement(children: .contain)
+        .axid(.installedScreen)
         .task {
             await viewModel.load()
         }
@@ -67,6 +70,7 @@ struct InstalledPackagesView: View {
             }
             .listStyle(.inset)
             .accessibilityLabel("Installed packages")
+            .axid(.installedList)
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
@@ -112,6 +116,7 @@ struct InstalledPackagesView: View {
                 // Needed to suppress the default ugly blue macOS highlight state
                 viewModel.setSelection(package.id)
             }
+            .axid(.installedRow(token: package.name))
     }
 
     private func scrollToSelection(

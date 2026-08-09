@@ -40,6 +40,18 @@ public struct URLSessionBrewAPIClient: BrewAPIClient {
         URLSessionBrewAPIClient(session: .shared)
     }
 
+    /// Test seam: a client whose `URLSession` routes every request through the given `URLProtocol`
+    /// classes, so no traffic leaves the process.
+    ///
+    /// The protocol classes are set on a per-session configuration rather than registered globally
+    /// via `URLProtocol.registerClass(_:)` — a global registration would also intercept `.shared`,
+    /// and therefore any other client in the process.
+    public static func stubbed(protocolClasses: [AnyClass], baseURL: URL? = nil) -> URLSessionBrewAPIClient {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = protocolClasses
+        return URLSessionBrewAPIClient(session: URLSession(configuration: configuration), baseURL: baseURL)
+    }
+
     public func fetchFormulaInstallOnRequestAnalytics(
         window: BrewAnalyticsWindow,
         etag: String?,

@@ -1,4 +1,5 @@
 import AppKit
+import BrewAccessibilityID
 import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
@@ -61,6 +62,8 @@ struct DiscoverPackageDetailView: View {
             .padding(BrewSpacing.xl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .accessibilityElement(children: .contain)
+        .axid(.packageDetail)
         .task(id: package) {
             await viewModel.observeInstallUpdates()
         }
@@ -286,6 +289,7 @@ private struct DiscoverPackageInstallSection: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(viewModel.isInstalling)
                 .accessibilityLabel(Text("Install"))
+                .axid(.installButton)
 
                 if let installErrorMessage = viewModel.installErrorMessage {
                     Text(installErrorMessage)

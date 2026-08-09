@@ -40,13 +40,19 @@ public final class BrewConfigRepository: ConfigRepository {
         self.locator = locator
     }
 
+    /// Takes the context rather than building its own runner, so the composition root points every
+    /// brew invocation at one place: production's login shell, or a UI test's fake executable.
+    public convenience init(executionContext: BrewCommandExecutionContext) {
+        self.init(
+            commandRunner: executionContext.commandRunner,
+            locator: executionContext.locator,
+        )
+    }
+
     /// Production wiring: brew is spawned through the user's login + interactive shell
     /// (``LoginShellBrewCommandRunner``) so `brew config` reflects the same environment as Terminal.
     public static func live() -> BrewConfigRepository {
-        BrewConfigRepository(
-            commandRunner: LoginShellBrewCommandRunner(),
-            locator: BrewExecutableLocator(),
-        )
+        BrewConfigRepository(executionContext: .live())
     }
 
     public func load(forceRefresh: Bool) async {

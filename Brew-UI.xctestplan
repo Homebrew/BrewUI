@@ -9,7 +9,10 @@
     }
   ],
   "defaultOptions" : {
-    "testTimeoutsEnabled" : true
+    "screenshotDestination" : "testRunnerAndAttachments",
+    "testExecutionOrdering" : "random",
+    "testTimeoutsEnabled" : true,
+    "uiTestingScreenshotsLifetime" : "deleteOnSuccess"
   },
   "testTargets" : [
     {

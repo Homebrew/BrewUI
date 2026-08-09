@@ -4,6 +4,7 @@
 //
 
 import AppKit
+import BrewAccessibilityID
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -23,6 +24,8 @@ struct ConfigView: View {
             content
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .accessibilityElement(children: .contain)
+        .axid(.configScreen)
         .task {
             await viewModel.load()
         }
@@ -79,6 +82,7 @@ struct ConfigView: View {
                 comment: "Configuration tab, brew-not-found message",
             ),
         )
+        .axid(.brewNotFoundState)
     }
 
     private func emptyState(

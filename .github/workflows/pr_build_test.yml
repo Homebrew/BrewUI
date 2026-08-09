@@ -1,4 +1,4 @@
-name: Build and Unit Tests
+name: Build and Test
 
 on:
   push:
@@ -16,6 +16,7 @@ on:
       - "Package.resolved"
       - "Tools/BrewUILint/**"
       - "scripts/test"
+      - "scripts/test-ui"
       - "Brewfile"
       - "Mintfile"
       - ".periphery.yml"
@@ -35,21 +36,30 @@ on:
       - "Package.resolved"
       - "Tools/BrewUILint/**"
       - "scripts/test"
+      - "scripts/test-ui"
       - "Mintfile"
       - ".periphery.yml"
       - ".periphery-baseline.json"
       - ".github/workflows/pr_build_test.yml"
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: "Optional xcodebuild -only-testing filter for the UI suite"
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  # A dispatched run has no pull request to key on; fall back to the ref so manual
+  # runs on the same branch still supersede each other.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   build-and-test:
-    name: Build + unit tests
+    name: Build + unit/integration tests
     runs-on: macos-26
     timeout-minutes: 25
     env:
@@ -57,6 +67,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The job uploads artifacts on failure; a persisted token in .git/config could ride along.
+          persist-credentials: false
 
       - name: Resolve package dependencies
         run: xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
@@ -166,4 +179,37 @@ jobs:
             xcodebuild.log
             swift-test-brewkit.log
             swift-test-brewuilint.log
+          retention-days: 7
+
+  ui-test:
+    name: UI tests
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The job uploads artifacts on failure; a persisted token in .git/config could ride along.
+          persist-credentials: false
+
+      - name: Build and run UI tests (Brew-UI scheme)
+        # Through env rather than interpolated into the script body, so the input cannot inject shell.
+        env:
+          TEST_FILTER: ${{ inputs.test_filter }}
+        run: |
+          set -o pipefail
+          if [[ -n "${TEST_FILTER}" ]]; then
+            scripts/test-ui -only-testing:"${TEST_FILTER}" | tee xcodebuild-ui.log
+          else
+            scripts/test-ui | tee xcodebuild-ui.log
+          fi
+
+      - name: Upload logs on failure
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ui-test-logs
+          path: |
+            xcodebuild-ui.log
+            UITestResults.xcresult
           retention-days: 7
