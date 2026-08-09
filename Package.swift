@@ -7,6 +7,8 @@ let package = Package(
         .macOS("26.0"),
     ],
     products: [
+        .library(name: "BrewAccessibilityID", targets: ["BrewAccessibilityID"]),
+        .library(name: "BrewUITestContract", targets: ["BrewUITestContract"]),
         .library(name: "BrewCore", targets: ["BrewCore"]),
         .library(name: "BrewCrashReporting", targets: ["BrewCrashReporting"]),
         .library(name: "BrewUIComponents", targets: ["BrewUIComponents"]),
@@ -24,6 +26,25 @@ let package = Package(
         .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
     ],
     targets: [
+        // Dependency-free by design: linked by both the app and the BrewUITests target, so it must
+        // not drag app code into the test bundle.
+        .target(
+            name: "BrewAccessibilityID",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        // Dependency-free for the same reason as BrewAccessibilityID: the BrewUITests target links it,
+        // so it must not drag app code into the test bundle. Holds the launch contract — the
+        // environment key names and the fixture payload — so both sides spell them once.
+        .target(
+            name: "BrewUITestContract",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
         .target(
             name: "BrewCore",
             swiftSettings: [
@@ -40,7 +61,7 @@ let package = Package(
         ),
         .target(
             name: "BrewUIComponents",
-            dependencies: ["BrewCore"],
+            dependencies: ["BrewAccessibilityID", "BrewCore"],
             resources: [
                 .process("Resources/Media.xcassets"),
             ],
@@ -115,6 +136,7 @@ let package = Package(
         .target(
             name: "BrewFeatureConsole",
             dependencies: [
+                "BrewAccessibilityID",
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
@@ -128,6 +150,7 @@ let package = Package(
         .target(
             name: "BrewFeatureInstalled",
             dependencies: [
+                "BrewAccessibilityID",
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
@@ -141,6 +164,7 @@ let package = Package(
         .target(
             name: "BrewFeatureDiscover",
             dependencies: [
+                "BrewAccessibilityID",
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
@@ -154,6 +178,7 @@ let package = Package(
         .target(
             name: "BrewFeatureDoctor",
             dependencies: [
+                "BrewAccessibilityID",
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
@@ -167,6 +192,7 @@ let package = Package(
         .target(
             name: "BrewFeatureConfig",
             dependencies: [
+                "BrewAccessibilityID",
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
@@ -180,6 +206,14 @@ let package = Package(
 
         // MARK: - Test targets
 
+        .testTarget(
+            name: "BrewAccessibilityIDTests",
+            dependencies: ["BrewAccessibilityID"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
         .testTarget(
             name: "BrewCrashReportingTests",
             dependencies: ["BrewCrashReporting"],

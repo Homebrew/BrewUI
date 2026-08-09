@@ -22,6 +22,10 @@
 		EEAA110B00000000000000BB /* BrewFeatureDoctor in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100B00000000000000CB /* BrewFeatureDoctor */; };
 		EEAA110C00000000000000BC /* BrewFeatureConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100C00000000000000CC /* BrewFeatureConfig */; };
 		EEAA110D00000000000000BD /* BrewCrashReporting in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100D00000000000000CD /* BrewCrashReporting */; };
+		EEAA110E00000000000000BE /* BrewAccessibilityID in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100E00000000000000CE /* BrewAccessibilityID */; };
+		EEAA110F00000000000000BF /* BrewAccessibilityID in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100F00000000000000CF /* BrewAccessibilityID */; };
+		EEAA111000000000000000C0 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101000000000000000D0 /* BrewUITestContract */; };
+		EEAA111100000000000000C1 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101100000000000000D1 /* BrewUITestContract */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,6 +93,8 @@
 				EEAA110B00000000000000BB /* BrewFeatureDoctor in Frameworks */,
 				EEAA110C00000000000000BC /* BrewFeatureConfig in Frameworks */,
 				EEAA110D00000000000000BD /* BrewCrashReporting in Frameworks */,
+				EEAA110E00000000000000BE /* BrewAccessibilityID in Frameworks */,
+				EEAA111000000000000000C0 /* BrewUITestContract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +109,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEAA110F00000000000000BF /* BrewAccessibilityID in Frameworks */,
+				EEAA111100000000000000C1 /* BrewUITestContract in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,6 +186,8 @@
 				EEAA100B00000000000000CB /* BrewFeatureDoctor */,
 				EEAA100C00000000000000CC /* BrewFeatureConfig */,
 				EEAA100D00000000000000CD /* BrewCrashReporting */,
+				EEAA100E00000000000000CE /* BrewAccessibilityID */,
+				EEAA101000000000000000D0 /* BrewUITestContract */,
 			);
 			productName = Brew;
 			productReference = EEC39EBF2F5AB4B900269514 /* Homebrew.app */;
@@ -224,6 +234,8 @@
 			);
 			name = BrewUITests;
 			packageProductDependencies = (
+				EEAA100F00000000000000CF /* BrewAccessibilityID */,
+				EEAA101100000000000000D1 /* BrewUITestContract */,
 			);
 			productName = BrewUITests;
 			productReference = EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */;
@@ -505,7 +517,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "\U00a9 Homebrew contributors. AGPLv3.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© Homebrew contributors. AGPLv3.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -534,7 +546,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "\U00a9 Homebrew contributors. AGPLv3.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© Homebrew contributors. AGPLv3.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -591,6 +603,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
+				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -607,6 +620,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
+				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -741,6 +755,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewCrashReporting;
+		};
+		EEAA100E00000000000000CE /* BrewAccessibilityID */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewAccessibilityID;
+		};
+		EEAA100F00000000000000CF /* BrewAccessibilityID */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewAccessibilityID;
+		};
+		EEAA101000000000000000D0 /* BrewUITestContract */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewUITestContract;
+		};
+		EEAA101100000000000000D1 /* BrewUITestContract */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewUITestContract;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
