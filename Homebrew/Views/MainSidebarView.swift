@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAccessibilityID
 import BrewFeatureInstalled
 import BrewUIComponents
 import SwiftUI
@@ -75,6 +76,10 @@ struct MainSidebarView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color.brewSurface)
+        // `.contain` makes the sidebar itself an addressable container element without flattening
+        // the rows inside it, so UI tests can scope a query to the sidebar.
+        .accessibilityElement(children: .contain)
+        .axid(.sidebar)
     }
 
     @ViewBuilder
@@ -107,6 +112,7 @@ struct MainSidebarView: View {
         .buttonStyle(.plain)
         .accessibilityLabel(title)
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .axid(.sidebarItem(item.axDestination))
     }
 }
 

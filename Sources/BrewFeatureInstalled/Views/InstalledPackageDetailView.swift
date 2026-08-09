@@ -4,6 +4,7 @@
 //
 
 import AppKit
+import BrewAccessibilityID
 import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
@@ -64,6 +65,8 @@ struct InstalledPackageDetailView: View {
             detailScrollContent(viewModel: viewModel)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .accessibilityElement(children: .contain)
+        .axid(.packageDetail)
         .task(id: package.id) {
             await viewModel.refreshRelationships()
             await viewModel.observeRowUpdates()
@@ -184,6 +187,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                 .disabled(viewModel.isMutatingPackage)
                 .accessibilityLabel(uninstall.primaryButtonTitle)
                 .accessibilityHint(uninstall.blockedPrimaryButtonAccessibilityHint ?? "")
+                .axid(.uninstallButton)
                 .confirmationDialog(
                     uninstall.confirmationTitle,
                     isPresented: $viewModel.showUninstallConfirmation,
@@ -246,6 +250,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                         .buttonStyle(.borderedProminent)
                         .disabled(viewModel.isUpgrading)
                         .accessibilityLabel(title)
+                        .axid(.upgradeButton)
                     }
                 }
                 if let upgradeError = viewModel.upgradeErrorMessage {

@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAccessibilityID
 import BrewCore
 import SwiftUI
 
@@ -68,12 +69,14 @@ struct ErrorStateView: View {
                 .multilineTextAlignment(.center)
             if let onRetry {
                 Button("Retry", action: onRetry)
+                    .axid(.errorRetryButton)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(BrewSpacing.lg)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(message)
+        .axid(.errorState)
     }
 }
 
