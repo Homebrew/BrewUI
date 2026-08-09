@@ -81,8 +81,18 @@ public final class CommandJob: Identifiable {
         }
     }
 
+    /// Appends a line, or replaces the trailing one when it was still being drawn.
+    ///
+    /// A terminal-backed run reports a line repeatedly while a progress bar redraws it, marking it
+    /// incomplete until a newline settles it. Those revisions replace the row in place — keeping its
+    /// identity, so anything keyed on `id` treats it as the same row changing rather than a new one —
+    /// which is what makes a progress bar animate instead of accumulating hundreds of rows.
     public func appendOutput(_ line: BrewCommandOutputLine) {
-        output.append(line)
+        if let last = output.last, !last.isComplete {
+            output[output.count - 1] = line.adoptingIdentity(of: last)
+        } else {
+            output.append(line)
+        }
         if output.count > maxOutputLines {
             output.removeFirst(output.count - maxOutputLines)
         }
