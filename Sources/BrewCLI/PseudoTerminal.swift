@@ -46,9 +46,13 @@ final class PseudoTerminal: @unchecked Sendable {
         var replica: Int32 = -1
         var size = winsize(ws_row: rows, ws_col: columns, ws_xpixel: 0, ws_ypixel: 0)
 
-        guard openpty(&primary, &replica, nil, nil, &size) == 0 else {
+        let result = openpty(&primary, &replica, nil, nil, &size)
+        // Captured before anything else runs: building the message allocates, and an allocation can make
+        // syscalls of its own that overwrite `errno` — which reports a nonsense code for the real failure.
+        let failureCode = errno
+        guard result == 0 else {
             throw BrewCommandError.launchFailed(
-                underlying: "openpty failed: \(String(cString: strerror(errno)))",
+                underlying: "openpty failed: \(String(cString: strerror(failureCode))) (\(failureCode))",
             )
         }
 
