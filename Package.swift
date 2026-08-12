@@ -26,12 +26,10 @@ let package = Package(
         .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
     ],
     dependencies: [
-        // Justification (`CONVENTIONS.md` — Dependencies): running `brew` under a pseudo-terminal needs
-        // `setsid()` between fork and exec so the pty becomes the child's *controlling* terminal.
-        // `Foundation.Process` has no hook there and structurally cannot express it; `Subprocess` exposes it as
-        // `PlatformOptions.createSession`, along with the fd hand-off and process-group teardown the pty path
-        // needs. Confined to `BrewCLI` behind the `BrewCommandRunning` protocol, so it has exactly one conformer.
-        // Version pinned exactly, per the same convention.
+        // Justification (`CONVENTIONS.md` — Dependencies): a controlling-terminal pty needs `setsid()`
+        // between fork and exec, which `Foundation.Process` cannot express. `Subprocess` exposes it as
+        // `PlatformOptions.createSession`, plus the fd hand-off and process-group teardown the pty path
+        // needs. Confined to `BrewCLI` behind `BrewCommandRunning`, which has one production conformer.
         .package(url: "https://github.com/swiftlang/swift-subprocess.git", exact: "1.0.0"),
     ],
     targets: [

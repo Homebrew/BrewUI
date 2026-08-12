@@ -104,16 +104,13 @@ public enum ANSIParser {
         parse(input).map(\.text).joined()
     }
 
-    /// A CSI (Control Sequence Introducer) sequence, split into its parameters and the final byte that
-    /// says what it does — `m` for styling, `K` for erase-in-line, and so on.
+    /// A CSI sequence: its parameters, and the final byte saying what it does (`m` styling, `K` erase).
     struct ControlSequence: Equatable {
         let parameters: String
         let finalByte: Unicode.Scalar
     }
 
-    /// Scans the escape sequence starting at `start`, returning the index just past it and — for CSI
-    /// sequences — what it was. Shared with ``TerminalLineAssembler``, which needs the same scanning but
-    /// acts on more than just `m`.
+    /// Shared with ``TerminalLineAssembler``, which needs the same scanning but acts on more than `m`.
     static func scanEscape(
         _ scalars: [Unicode.Scalar],
         from start: Int,

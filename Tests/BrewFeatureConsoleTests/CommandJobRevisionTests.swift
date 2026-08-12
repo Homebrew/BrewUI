@@ -21,8 +21,6 @@ struct CommandJobRevisionTests {
     }
 
     @Test func `a revision keeps the row's identity`() {
-        // Identity stability is what makes the row animate in place instead of being torn down and
-        // rebuilt by anything keyed on `id`.
         let job = makeJob()
         job.appendOutput(line("10%", isComplete: false))
         let originalID = job.output[0].id
@@ -52,7 +50,6 @@ struct CommandJobRevisionTests {
     }
 
     @Test func `a whole progress bar leaves a single row behind`() {
-        // End to end for the reported bug: many revisions, one settled row.
         let job = makeJob()
 
         for percent in stride(from: 0, through: 100, by: 5) {

@@ -8,8 +8,8 @@ import BrewCore
 import Foundation
 import Testing
 
-/// The mode → run-options mapping is the safety property behind the pty work: output that gets parsed must
-/// keep stdout and stderr apart, which only the pipe path does.
+/// The safety property behind the pty work: output that gets parsed must keep stdout and stderr apart,
+/// which only the pipe path does.
 struct SerialBrewCommandCenterRunOptionsTests {
     @Test func `display work runs against a pseudo-terminal`() async throws {
         let recorder = RunOptionsRecorder()
@@ -68,7 +68,7 @@ private func makeCenter(_ recorder: RunOptionsRecorder) -> SerialBrewCommandCent
     return SerialBrewCommandCenter(executionContext: context)
 }
 
-/// Captures the ``BrewRunOptions`` the center hands down, without spawning anything.
+/// Captures the options the center hands down, without spawning anything.
 private struct RecordingRunner: BrewCommandRunning {
     let recorder: RunOptionsRecorder
 

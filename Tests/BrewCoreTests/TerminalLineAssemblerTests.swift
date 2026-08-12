@@ -12,7 +12,6 @@ struct TerminalLineAssemblerTests {
     @Test func `a newline commits the line`() {
         var assembler = TerminalLineAssembler()
 
-        // No trailing revision: the line committed, so nothing is left in progress to revise.
         let events = assembler.consume("hello\n")
 
         #expect(events == [.committed(line("hello"))])
@@ -45,7 +44,7 @@ struct TerminalLineAssemblerTests {
     }
 
     @Test func `a full-width redraw replaces the previous one entirely`() {
-        // What curl actually does: pad each redraw to the terminal width so it covers what came before.
+        // curl pads each redraw to the terminal width so it covers what came before.
         var assembler = TerminalLineAssembler()
 
         let events = assembler.consume("##        6.3%\r######   50.0%")
@@ -54,7 +53,6 @@ struct TerminalLineAssemblerTests {
     }
 
     @Test func `a whole progress bar collapses to one committed line`() {
-        // The reported bug in miniature: hundreds of redraws must settle into a single row, not hundreds.
         var assembler = TerminalLineAssembler()
 
         var events: [TerminalLineEvent] = []
@@ -67,10 +65,9 @@ struct TerminalLineAssemblerTests {
     }
 
     @Test func `a shorter redraw leaves the tail of the longer line behind`() {
-        // Terminal behaviour, not a quirk: \r only moves the cursor, it does not clear.
+        // `\r` only moves the cursor, it does not clear: "short" covers the first five columns and
+        // "r text" from the original survives underneath.
         var assembler = TerminalLineAssembler()
-
-        // "short" covers the first five columns; "r text" from the original survives underneath.
         let events = assembler.consume("longer text\rshort")
 
         #expect(events.last == .revised(line("shortr text")))
@@ -123,8 +120,7 @@ struct TerminalLineAssemblerTests {
     }
 
     @Test func `escape sequences do not occupy columns`() {
-        // The reason styling is tracked per cell rather than left in the text: counting escape bytes as
-        // visible columns would land every subsequent overwrite in the wrong place.
+        // Why styling is per cell: counting escape bytes as columns would misplace every overwrite.
         var assembler = TerminalLineAssembler()
 
         let events = assembler.consume("\u{1B}[31mabcde\u{1B}[0m\rX")
@@ -173,7 +169,6 @@ struct TerminalLineAssemblerTests {
     }
 
     @Test func `one revision is emitted per chunk, however much it contains`() {
-        // A progress bar writes faster than any UI needs to repaint; one event per write keeps that bounded.
         var assembler = TerminalLineAssembler()
 
         let events = assembler.consume("1%\r2%\r3%\r4%\r5%")

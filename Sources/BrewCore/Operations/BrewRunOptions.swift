@@ -15,19 +15,14 @@ public struct BrewRunOptions: Sendable {
     /// Called with each `\n`-delimited line as it arrives, for live console display. Nil = buffered, no streaming.
     public var lineObserver: (@Sendable (BrewCommandOutputLine) -> Void)?
 
-    /// Force Homebrew to emit ANSI colour, which it strips off a non-TTY (a pipe). Set for console-shown work
-    /// that stays pipe-backed. Redundant when ``usesPseudoTerminal`` is set — a terminal gets colour anyway.
+    /// Homebrew strips colour off a non-TTY. Redundant when ``usesPseudoTerminal`` is set.
     public var forceColor: Bool
 
-    /// Run the subprocess against a pseudo-terminal instead of pipes, so `isatty` is true in the child.
+    /// Run against a pseudo-terminal instead of pipes, so `isatty` is true in the child: Homebrew emits
+    /// its progress rendering, and libc line-buffers instead of block-buffering.
     ///
-    /// Two consequences, both wanted for console-shown work: Homebrew and the tools it shells out to emit
-    /// their progress rendering, and libc switches from block buffering to line buffering so output arrives
-    /// as it is produced rather than in multi-kilobyte bursts.
-    ///
-    /// The cost is that a single terminal device carries both streams, so stdout and stderr arrive merged
-    /// and every line is attributed to ``BrewCommandOutputLine/Stream/stdout``. Runs whose output gets
-    /// parsed should leave this off and stay on pipes, where the two streams remain distinct.
+    /// The cost is that one device carries both streams, so they arrive merged and every line is
+    /// attributed to ``BrewCommandOutputLine/Stream/stdout``. Runs whose output gets parsed stay on pipes.
     public var usesPseudoTerminal: Bool
 
     public init(

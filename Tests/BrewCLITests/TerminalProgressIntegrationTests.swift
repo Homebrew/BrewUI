@@ -9,12 +9,11 @@ import BrewRepositoryInterfaces
 import Foundation
 import Testing
 
-/// End to end across the boundary the bug actually spanned: a real subprocess writing terminal redraws,
-/// through the drain and the assembler, into the console's job buffer.
+/// End to end: a real subprocess writing terminal redraws, through the drain and assembler, into the
+/// console's job buffer.
 @Suite(.serialized)
 struct TerminalProgressIntegrationTests {
-    /// Mimics a Homebrew download: plain lines around a `curl`-style bar that redraws hundreds of times,
-    /// padded to width, with no newline until it finishes.
+    /// A `curl`-style bar redrawing hundreds of times, padded to width, with no newline until it ends.
     private static let downloadScript = """
     printf '==> Downloading https://ghcr.io/v2/homebrew/core/go/manifests/1.26.5\\n'
     for i in $(seq 1 600); do
@@ -43,7 +42,6 @@ struct TerminalProgressIntegrationTests {
     }
 
     @Test func `a bar still being drawn occupies exactly one row`() async throws {
-        // Mid-download rather than after it: the row exists, is not settled, and has not multiplied.
         let script = "for i in $(seq 1 50); do printf '#### %s pct\\r' $i; done; sleep 0.2"
         let rows = try await runIntoJob(script: script)
 
@@ -52,8 +50,8 @@ struct TerminalProgressIntegrationTests {
 }
 
 private extension TerminalProgressIntegrationTests {
-    /// Runs `script` on a pseudo-terminal and replays the streamed lines into a ``CommandJob``, exactly as
-    /// the console does, returning the rows the user would see.
+    /// Replays the streamed lines into a ``CommandJob`` as the console does, returning the rows a user
+    /// would see.
     func runIntoJob(script: String) async throws -> [BrewCommandOutputLine] {
         let collector = LineCollector()
         let service = BrewCommandService()

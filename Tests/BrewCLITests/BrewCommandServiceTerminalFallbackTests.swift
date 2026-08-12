@@ -8,9 +8,9 @@ import BrewCore
 import Foundation
 import Testing
 
-/// A run that asks for a terminal but cannot get one degrades to pipes rather than failing. The pty
-/// device pool is far smaller than `kern.tty.ptmx_max` advertises, so allocation failure is a real
-/// environmental outcome, and losing Homebrew's progress rendering beats losing the install.
+/// A run that asks for a terminal but cannot get one degrades to pipes rather than failing: the device
+/// pool is small, so allocation failure is a real outcome, and losing progress rendering beats losing
+/// the install.
 struct BrewCommandServiceTerminalFallbackTests {
     @Test func `a run whose terminal cannot be allocated still succeeds`() async throws {
         let output = try await runWithUnavailableTerminal(script: "printf 'ran anyway'")
@@ -27,7 +27,6 @@ struct BrewCommandServiceTerminalFallbackTests {
     }
 
     @Test func `the fallback keeps stdout and stderr apart`() async throws {
-        // Pipes carry the two streams separately, unlike the single device a terminal presents.
         let output = try await runWithUnavailableTerminal(
             script: "printf 'out' ; printf 'err' >&2",
         )
@@ -36,8 +35,7 @@ struct BrewCommandServiceTerminalFallbackTests {
     }
 
     @Test func `the fallback still asks Homebrew for colour`() async throws {
-        // The terminal was what supplied colour; without it Homebrew has to be told, or a display run
-        // would silently lose its colouring as well as its progress rendering.
+        // The terminal was what supplied colour, so without it Homebrew has to be told.
         let output = try await runWithUnavailableTerminal(script: "printf '%s' \"$HOMEBREW_COLOR\"")
 
         #expect(output.standardOutput == "1")
@@ -54,7 +52,6 @@ struct BrewCommandServiceTerminalFallbackTests {
     }
 
     @Test func `a genuine launch failure is not swallowed by the fallback`() async throws {
-        // Only allocation failure degrades; a command that cannot run must still fail.
         let service = BrewCommandService(makeTerminal: { throw TerminalUnavailable() })
 
         await #expect(throws: (any Error).self) {
@@ -67,8 +64,8 @@ struct BrewCommandServiceTerminalFallbackTests {
     }
 
     @Test func `the fallback options drop the terminal and force colour`() {
-        // Asserted on the shaping directly rather than by reading HOMEBREW_COLOR out of a child, which
-        // would depend on whatever the developer happens to export.
+        // Asserted on the shaping rather than reading HOMEBREW_COLOR out of a child, which would depend
+        // on whatever the developer exports.
         let fallback = BrewCommandService.colourisedPipeFallback(
             from: BrewRunOptions(forceColor: false, usesPseudoTerminal: true),
         )
@@ -77,7 +74,6 @@ struct BrewCommandServiceTerminalFallbackTests {
     }
 
     @Test func `the fallback options keep the caller's line observer`() {
-        // Losing the observer here would silently stop the console streaming on the degraded path.
         let fallback = BrewCommandService.colourisedPipeFallback(
             from: BrewRunOptions(lineObserver: { _ in }, usesPseudoTerminal: true),
         )

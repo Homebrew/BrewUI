@@ -17,15 +17,13 @@ struct BrewCommandServicePseudoTerminalTests {
     }
 
     @Test func `pipe run leaves the child without a tty`() async throws {
-        // The contrast that justifies the whole feature: same command, same runner, no terminal.
         let output = try await run(script: "test -t 1 && printf 'tty' || printf 'not-tty'", usesPseudoTerminal: false)
 
         #expect(output.standardOutput == "not-tty")
     }
 
     @Test func `pseudo-terminal run sets TERM for the child`() async throws {
-        // A GUI process launched from Finder inherits no TERM; without one, tools treat the terminal as
-        // capability-less and suppress exactly the colour and progress output the pty was allocated for.
+        // A GUI process launched from Finder inherits no TERM, and tools then suppress colour.
         let output = try await run(script: "printf '%s' \"$TERM\"", usesPseudoTerminal: true)
 
         #expect(output.standardOutput == "xterm-256color")
@@ -44,8 +42,7 @@ struct BrewCommandServicePseudoTerminalTests {
     }
 
     @Test func `pseudo-terminal run merges stderr into the stdout stream`() async throws {
-        // Documents the trade-off rather than a preference: one terminal device carries both streams, so
-        // stderr cannot be told apart. Runs whose output is parsed stay on pipes for this reason.
+        // One device carries both streams, so stderr cannot be told apart.
         let output = try await run(
             script: "printf 'out\\n'; printf 'err\\n' >&2",
             usesPseudoTerminal: true,
@@ -61,8 +58,7 @@ struct BrewCommandServicePseudoTerminalTests {
     }
 
     @Test func `a child reading stdin gets EOF instead of blocking on the terminal`() async throws {
-        // The hang worth guarding against: an interactive rc file that reads stdin would block forever if
-        // stdin were wired to the pty, since nothing ever writes to it. It stays on /dev/null instead.
+        // An rc file reading stdin would block forever if stdin were the pty; it stays on /dev/null.
         let output = try await run(script: "read line; printf 'survived'", usesPseudoTerminal: true)
 
         #expect(output.standardOutput.contains("survived"))
@@ -81,8 +77,7 @@ struct BrewCommandServicePseudoTerminalTests {
     }
 
     @Test func `pseudo-terminal run preserves carriage-return progress redraws`() async throws {
-        // The payoff case: a progress meter rewriting one line arrives byte-for-byte, ready for a console
-        // that interprets \r. The kernel's own \n → \r\n rewrite stays off, so the only \r is the child's.
+        // The kernel's own \n to \r\n rewrite stays off, so the only \r here is the child's.
         let output = try await run(script: "printf '10%%\\r50%%\\r100%%\\n'", usesPseudoTerminal: true)
 
         #expect(output.standardOutput == "10%\r50%\r100%\n")
@@ -97,14 +92,11 @@ struct BrewCommandServicePseudoTerminalTests {
             lineObserver: { collector.append($0) },
         )
 
-        // Reported first as an in-progress revision, then settled when the stream ends.
         let last = collector.allLines().last
         #expect(last?.text == "no-newline" && last?.isComplete == true)
     }
 
     @Test func `a progress redraw settles into one complete line`() async throws {
-        // The reported bug, end to end: many carriage-return redraws must leave one settled line, with
-        // the intermediate states reported as revisions of it rather than as separate lines.
         let collector = OutputCollector()
 
         _ = try await run(
@@ -126,13 +118,12 @@ struct BrewCommandServicePseudoTerminalTests {
             lineObserver: { collector.append($0) },
         )
 
-        // Separated by sleeps so they arrive as distinct reads, which is what a real download looks like.
+        // Separated by sleeps so they arrive as distinct reads.
         let revisions = collector.allLines().filter { !$0.isComplete }.map(\.text)
         #expect(revisions == ["10%", "50%"])
     }
 
     @Test func `pseudo-terminal run survives output larger than the terminal buffer`() async throws {
-        // A pty's kernel buffer is far smaller than a pipe's, so a stalled drain would deadlock here.
         let output = try await run(
             script: "for i in $(seq 1 5000); do printf 'line %d\\n' $i; done",
             usesPseudoTerminal: true,
@@ -151,19 +142,16 @@ struct BrewCommandServicePseudoTerminalTests {
             )
         }
 
-        // Give the spawn a moment to get as far as the child before cancelling it.
         try await Task.sleep(for: .milliseconds(200))
         task.cancel()
 
-        // The assertion is that this returns at all: an unreaped drain or an un-signalled child would
-        // leave the await hanging for the full 30 seconds.
+        // Returning at all is the assertion: an un-signalled child would hang for the full 30 seconds.
         let result = await task.result
         #expect(throws: Never.self) { try Self.assertCompleted(result) }
     }
 
     @Test func `cancelling a pseudo-terminal run also stops what the child spawned`() async throws {
-        // The reason the run creates its own session: teardown signals the whole process group, so a
-        // cancelled install stops the curl or git it was waiting on instead of orphaning it.
+        // Teardown signals the whole process group, so a cancelled install stops what it spawned.
         let service = BrewCommandService()
         let task = Task {
             try await service.run(
@@ -197,18 +185,17 @@ private extension BrewCommandServicePseudoTerminalTests {
         )
     }
 
-    /// A cancelled run may either throw or return a signalled status; both are "it stopped". Only a hang
-    /// would fail the test, by never producing a result at all.
+    /// A cancelled run may throw or return a signalled status; both mean it stopped. Only a hang fails.
     static func assertCompleted(_ result: Result<CommandOutput, any Error>) throws {
         if case let .failure(error) = result, !(error is CancellationError) {
             throw error
         }
     }
 
-    /// An implausible sleep duration, used purely as a unique needle for `pgrep`.
+    /// A unique needle for `pgrep`.
     static let grandchildMarker = "31337"
 
-    /// How many grandchildren carrying the marker are currently alive.
+
     static func grandchildCount() -> Int {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
@@ -222,9 +209,8 @@ private extension BrewCommandServicePseudoTerminalTests {
     }
 }
 
-/// Thread-safe collector for streamed lines. Appends synchronously (under a lock) inside the sink, so that
-/// — because `BrewCommandService.run` only returns after every sink call has been made — all lines are
-/// recorded by the time a test reads them.
+/// `run` only returns after every sink call has been made, so all lines are recorded by the time a test
+/// reads them.
 // swiftlint:disable:next unchecked_sendable
 private final class OutputCollector: @unchecked Sendable {
     private let lock = NSLock()

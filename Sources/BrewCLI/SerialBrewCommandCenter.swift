@@ -130,10 +130,9 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         let (lineStream, lineContinuation) = AsyncStream<BrewCommandOutputLine>.makeStream(
             bufferingPolicy: .unbounded,
         )
-        // `.display` work is only ever shown, so it runs against a pty and gets Homebrew's own colour and
-        // progress rendering. `.capture` work is parsed by its caller and stays on pipes, where stdout and
-        // stderr remain distinct — it still asks for colour explicitly, since a pipe would otherwise
-        // strip it and `brew doctor` is shown *and* parsed.
+        // `.display` work is only shown, so it runs against a pty. `.capture` work is parsed by its
+        // caller and stays on pipes, where the streams remain distinct; it still asks for colour, since a
+        // pipe strips it and `brew doctor` is shown *and* parsed.
         let options = BrewRunOptions(
             lineObserver: { line in lineContinuation.yield(line) },
             forceColor: mode == .capture,
