@@ -7,6 +7,11 @@
 import Foundation
 import Testing
 
+/// Serialized: this suite allocates real pty devices, and the pool is small — measured at ~36 on a
+/// development machine, well below what `kern.tty.ptmx_max` advertises. Left to run in parallel with
+/// each other, these tests exhaust it and fail with ENXIO. Nothing in the app contends this way, since
+/// the command center runs one subprocess at a time.
+@Suite(.serialized)
 struct PseudoTerminalTests {
     @Test func `child spawned on the replica sees a terminal on stdout`() throws {
         let output = try runOnPseudoTerminal(script: "test -t 1 && printf 'tty' || printf 'not-tty'")

@@ -11,6 +11,7 @@ import Testing
 
 /// End to end across the boundary the bug actually spanned: a real subprocess writing terminal redraws,
 /// through the drain and the assembler, into the console's job buffer.
+@Suite(.serialized)
 struct TerminalProgressIntegrationTests {
     /// Mimics a Homebrew download: plain lines around a `curl`-style bar that redraws hundreds of times,
     /// padded to width, with no newline until it finishes.

@@ -8,6 +8,7 @@ import BrewCore
 import Foundation
 import Testing
 
+@Suite(.serialized)
 struct BrewCommandServicePseudoTerminalTests {
     @Test func `pseudo-terminal run gives the child a tty on stdout`() async throws {
         let output = try await run(script: "test -t 1 && printf 'tty' || printf 'not-tty'", usesPseudoTerminal: true)
