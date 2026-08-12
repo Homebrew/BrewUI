@@ -10,7 +10,17 @@ import System
 
 /// Subprocess runner for Homebrew CLI (`ARCHITECTURE.md` — Command execution).
 public struct BrewCommandService: BrewCommandRunning {
-    public init() {}
+    private let makeTerminal: @Sendable () throws -> PseudoTerminal
+
+    public init() {
+        self.init(makeTerminal: { try PseudoTerminal() })
+    }
+
+    /// Seam for testing the pty-allocation failure path, which is otherwise only reachable by exhausting
+    /// the machine's pty devices.
+    init(makeTerminal: @escaping @Sendable () throws -> PseudoTerminal) {
+        self.makeTerminal = makeTerminal
+    }
 
     public func run(
         executableURL: URL,
@@ -19,8 +29,9 @@ public struct BrewCommandService: BrewCommandRunning {
     ) async throws -> CommandOutput {
         try Task.checkCancellation()
 
-        if options.usesPseudoTerminal {
+        if options.usesPseudoTerminal, let terminal = allocateTerminal() {
             return try await runOnPseudoTerminal(
+                terminal: terminal,
                 executableURL: executableURL,
                 arguments: arguments,
                 options: options,
@@ -29,8 +40,29 @@ public struct BrewCommandService: BrewCommandRunning {
         return try await runOnPipes(
             executableURL: executableURL,
             arguments: arguments,
-            options: options,
+            // A run that asked for a terminal and did not get one still wants colour: the terminal was
+            // the thing supplying it, so on this path Homebrew has to be told explicitly.
+            options: options.usesPseudoTerminal ? Self.colourisedPipeFallback(from: options) : options,
         )
+    }
+
+    /// Allocates a pty, or returns nil so the caller degrades to pipes.
+    ///
+    /// Allocation is an environmental resource that can genuinely run out — the device pool is much
+    /// smaller than `kern.tty.ptmx_max` suggests. Failing an install outright over it would be a poor
+    /// trade when the command runs perfectly well on pipes; the cost of degrading is Homebrew's progress
+    /// rendering, not the operation.
+    private func allocateTerminal() -> PseudoTerminal? {
+        try? makeTerminal()
+    }
+
+    /// The pipe-path options for a run that wanted a terminal: colour forced back on, streaming and
+    /// everything else preserved.
+    static func colourisedPipeFallback(from options: BrewRunOptions) -> BrewRunOptions {
+        var fallback = options
+        fallback.usesPseudoTerminal = false
+        fallback.forceColor = true
+        return fallback
     }
 }
 
@@ -44,11 +76,11 @@ private extension BrewCommandService {
     /// ``BrewCommandOutputLine/Stream/stdout``. ``CommandOutput/standardError`` is empty for these runs;
     /// callers that need the streams apart must stay on the pipe path.
     func runOnPseudoTerminal(
+        terminal: PseudoTerminal,
         executableURL: URL,
         arguments: [String],
         options: BrewRunOptions,
     ) async throws -> CommandOutput {
-        let terminal = try PseudoTerminal()
         let childHasExited = TerminalDrainGate()
         let sink = options.lineObserver
 
