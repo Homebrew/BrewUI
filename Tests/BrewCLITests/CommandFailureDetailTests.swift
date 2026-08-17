@@ -8,8 +8,8 @@ import BrewCore
 import Foundation
 import Testing
 
-/// The regression these guard: display work runs on a terminal, which merges the streams and so leaves
-/// `standardError` empty. Reading only stderr reduced every failed install to a bare exit code.
+/// A terminal merges the streams, so `standardError` is empty; reading only stderr reduced every failed
+/// install to a bare exit code.
 struct CommandFailureDetailTests {
     @Test func `stderr is preferred when the run kept the streams apart`() {
         let output = makeOutput(standardOutput: "progress noise", standardError: "Error: pipe failure")

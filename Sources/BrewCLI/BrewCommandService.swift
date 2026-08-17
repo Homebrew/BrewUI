@@ -71,10 +71,8 @@ private extension BrewCommandService {
     /// ``BrewCommandOutputLine/Stream/stdout``, and ``CommandOutput/standardError`` is empty. Callers that
     /// need the streams apart must stay on the pipe path.
     ///
-    /// ``CommandOutput/standardOutput`` is the *assembled* transcript, not the verbatim bytes: on a
-    /// terminal the raw bytes are a cursor script, in which a whole download is one line carrying every
-    /// intermediate redraw. Resolving the overwrites is what makes the text usable as the diagnostic for
-    /// a failed run, which is the only thing that reads it on this path.
+    /// ``CommandOutput/standardOutput`` is the assembled transcript, not the verbatim bytes: raw pty
+    /// bytes are a cursor script in which a whole download is one line of redraws.
     func runOnPseudoTerminal(
         terminal: PseudoTerminal,
         executableURL: URL,
@@ -132,9 +130,6 @@ private extension BrewCommandService {
     ///
     /// Stops once the child has exited and a poll interval has passed with nothing to read. Waiting for
     /// end-of-input instead would stall on any grandchild still holding the descriptor open.
-    ///
-    /// Returns the settled lines as one transcript. The assembler runs whether or not anyone is
-    /// streaming, because that transcript is the run's only readable output.
     static func drainTerminal(
         _ terminal: PseudoTerminal,
         sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
@@ -175,8 +170,7 @@ private extension BrewCommandService {
                     transcript += trailing.text
                     sink?(BrewCommandOutputLine(stream: .stdout, line: trailing, isComplete: true))
                 }
-                // Surfaced rather than swallowed: the exit status may still say success, and without this
-                // the truncation is indistinguishable from the command simply having said less.
+                // The exit status may still say success, so truncation has to say so itself.
                 if let readFailure {
                     let notice = truncationNotice(errno: readFailure)
                     transcript += transcript.isEmpty || transcript.hasSuffix("\n") ? notice : "\n" + notice
@@ -243,7 +237,6 @@ private extension BrewCommandService {
 
             try Task.checkCancellation()
             let (outData, errData) = result.closureResult
-            // Lossy on purpose: one undecodable byte would otherwise discard the whole output.
             return CommandOutput(
                 standardOutput: UTF8StreamDecoder.lossyString(outData),
                 standardError: UTF8StreamDecoder.lossyString(errData),
@@ -286,8 +279,6 @@ private extension BrewCommandService {
 // MARK: - Shared helpers
 
 private extension BrewCommandService {
-    /// Undecodable bytes become U+FFFD rather than costing the line it sits in, which the failable
-    /// initialiser would have dropped from the stream entirely.
     static func emitCompleteLines(
         from buffer: inout Data,
         stream: BrewCommandOutputLine.Stream,

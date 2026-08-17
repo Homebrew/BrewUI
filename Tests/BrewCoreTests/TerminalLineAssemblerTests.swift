@@ -201,7 +201,6 @@ struct TerminalLineAssemblerTests {
     // MARK: - Within-line cursor movement
 
     @Test func `absolute column addressing overwrites like a carriage return`() {
-        // ESC[1G is what several progress renderers use where curl uses \r.
         var assembler = TerminalLineAssembler()
 
         let events = assembler.consume("10%\u{1B}[1G100%\n")
@@ -266,7 +265,6 @@ struct TerminalLineAssemblerTests {
     }
 
     @Test func `an absurd column request cannot blow the line up`() {
-        // A malformed sequence would otherwise have the next write pad every cell up to it.
         var assembler = TerminalLineAssembler()
 
         let events = assembler.consume("a\u{1B}[999999999CX\n")
@@ -284,7 +282,6 @@ struct TerminalLineAssemblerTests {
     // MARK: - Erasing
 
     @Test func `erasing to the start of the line uses the current style, not the old one`() {
-        // A terminal erases with the active attribute; keeping the old one leaves a stale colour behind.
         var assembler = TerminalLineAssembler()
 
         let events = assembler.consume("\u{1B}[31mred\u{1B}[0m\u{1B}[1K\n")
@@ -299,7 +296,7 @@ struct TerminalLineAssemblerTests {
 
         let events = assembler.consume("abcde\r\u{1B}[2C\u{1B}[1KX\n")
 
-        // ESC[1K blanks columns 0 through 2 inclusive; the cursor stays at column 2, where X then lands.
+        // Blanks columns 0-2; the cursor stays at column 2, where X then lands.
         #expect(events.compactMap(\.committedText) == ["  Xde"])
     }
 }

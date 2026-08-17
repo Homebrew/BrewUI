@@ -46,8 +46,7 @@ public struct TerminalLineAssembler: Sendable {
 
     private static let escape: Unicode.Scalar = "\u{1B}"
 
-    /// Well past any real terminal width. A malformed or hostile `ESC[999999999C` would otherwise ask
-    /// for a column the next write has to pad every cell up to.
+    /// Well past any real width; caps what a malformed `ESC[999999999C` makes the next write pad.
     private static let maxColumn = 4096
 
     private var cells: [Cell] = []
@@ -142,8 +141,7 @@ public struct TerminalLineAssembler: Sendable {
         column += 1
     }
 
-    /// Returns whether the sequence changed the visible line. Moving the cursor never does on its own —
-    /// the write that follows is what shows.
+    /// Returns whether the sequence changed the visible line; moving the cursor never does on its own.
     private mutating func apply(_ control: ANSIParser.ControlSequence) -> Bool {
         switch control.finalByte {
         case "m":
@@ -152,8 +150,7 @@ public struct TerminalLineAssembler: Sendable {
         case "K":
             return eraseInLine(mode: Self.parameter(control, default: 0))
         case "G":
-            // Absolute column, 1-based. Several progress renderers use this where `curl` uses `\r`, so
-            // ignoring it would let a redraw append instead of overwrite.
+            // Absolute column, 1-based. Some progress renderers use this where `curl` uses `\r`.
             move(to: Self.parameter(control, default: 1) - 1)
             return false
         case "C":
@@ -171,7 +168,6 @@ public struct TerminalLineAssembler: Sendable {
         column = min(Self.maxColumn, max(0, target))
     }
 
-    /// The first CSI parameter, or the sequence's documented default when it is absent or unreadable.
     private static func parameter(_ control: ANSIParser.ControlSequence, default fallback: Int) -> Int {
         guard let first = control.parameters.split(separator: ";").first, let value = Int(first) else {
             return fallback
@@ -180,9 +176,8 @@ public struct TerminalLineAssembler: Sendable {
     }
 
     /// Erase to end of line (0, the default), to the start (1), or all of it (2). Erasing to the start
-    /// blanks cells rather than removing them, so the cursor keeps its column. Blanks take the *current*
-    /// style, which is what a terminal erases with — carrying the old one over would leave a stale
-    /// background behind.
+    /// blanks cells rather than removing them, so the cursor keeps its column, and blanks take the
+    /// current style, which is what a terminal erases with.
     private mutating func eraseInLine(mode: Int) -> Bool {
         switch mode {
         case 0:

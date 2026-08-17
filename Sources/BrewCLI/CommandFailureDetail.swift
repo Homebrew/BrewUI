@@ -6,14 +6,10 @@
 import BrewCore
 import Foundation
 
-/// Picks the text that explains a non-zero exit.
-///
-/// A pipe-backed run keeps the streams apart, so stderr is the answer. A terminal-backed run merges them
-/// into one device, leaving ``CommandOutput/standardError`` empty and the transcript as the only account
-/// of what went wrong — without this, every failed install would reach the user as a bare exit code.
+/// Picks the text that explains a non-zero exit. A terminal-backed run merges the streams, leaving
+/// ``CommandOutput/standardError`` empty and the transcript as the only account of what went wrong.
 enum CommandFailureDetail {
-    /// Brew's own errors are the last thing it prints, and this text goes into an error banner rather
-    /// than a log pane, so the transcript is trimmed to its tail.
+    /// It goes into an error banner, not a log pane, and brew prints its errors last.
     static let maxTranscriptLines = 20
 
     static func detail(from output: CommandOutput) -> String {

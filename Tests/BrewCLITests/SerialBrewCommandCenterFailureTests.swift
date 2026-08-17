@@ -8,8 +8,8 @@ import BrewCore
 import Foundation
 import Testing
 
-/// Display work runs on a terminal, which merges the streams and leaves `standardError` empty. These pin
-/// the consequence: what the user is told when an install fails has to come from the merged transcript.
+/// A terminal-backed run leaves `standardError` empty, so what the user is told when an install fails
+/// has to come from the merged transcript.
 struct SerialBrewCommandCenterFailureTests {
     @Test func `a failed display run reports brew's own message`() async throws {
         let center = makeCenter(
@@ -33,7 +33,6 @@ struct SerialBrewCommandCenterFailureTests {
             id: .maintenance(token: "install", displayCommand: "brew install wget"),
         )
 
-        // `OperationFailure` falls back to a generic string only when it is handed nothing to say.
         #expect(await failureMessage(from: center) == "Error: disk full")
     }
 

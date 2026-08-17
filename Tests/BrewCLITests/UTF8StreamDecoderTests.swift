@@ -22,7 +22,6 @@ struct UTF8StreamDecoderTests {
     }
 
     @Test func `a sequence split across reads is held back and then completed`() {
-        // "é" is 0xC3 0xA9; the read ended between its two bytes.
         var buffer = Data([0x61, 0xC3])
 
         #expect(UTF8StreamDecoder.takeDecodablePrefix(&buffer) == "a")
@@ -34,7 +33,6 @@ struct UTF8StreamDecoderTests {
     }
 
     @Test func `a four-byte sequence split at every boundary still reassembles`() {
-        // U+1F600, 0xF0 0x9F 0x98 0x80.
         let emoji: [UInt8] = [0xF0, 0x9F, 0x98, 0x80]
 
         for split in 1 ..< emoji.count {
@@ -46,8 +44,6 @@ struct UTF8StreamDecoderTests {
         }
     }
 
-    /// The bug this replaced held back only trailing bytes, so a bad byte anywhere else made the whole
-    /// chunk undecodable and cost a *leading* byte per read instead.
     @Test func `an invalid byte mid-buffer costs one character, not the text around it`() {
         var buffer = Data([0x41] + [0xFF] + Array("BC".utf8))
 
@@ -57,9 +53,9 @@ struct UTF8StreamDecoderTests {
         #expect(buffer.isEmpty)
     }
 
+    /// Bad bytes arriving faster than they are consumed used to grow the buffer without bound, stalling
+    /// every later line behind them.
     @Test func `invalid bytes never accumulate, however many arrive`() {
-        // The failure mode being guarded: bad bytes arriving faster than they are consumed grew the
-        // buffer without bound and stalled every later line behind it.
         var buffer = Data()
 
         for _ in 0 ..< 100 {
@@ -71,7 +67,6 @@ struct UTF8StreamDecoderTests {
     }
 
     @Test func `an always-invalid lead byte is not mistaken for an incomplete sequence`() {
-        // 0xC0 and 0xF5 can never start a sequence, so waiting for continuations would stall forever.
         for leadByte in [UInt8(0xC0), UInt8(0xC1), UInt8(0xF5), UInt8(0xFF)] {
             #expect(UTF8StreamDecoder.incompleteTrailingSequenceLength(Data([leadByte])) == 0)
         }
@@ -89,7 +84,6 @@ struct UTF8StreamDecoderTests {
     }
 
     @Test func `orphaned continuation bytes are passed through rather than held`() {
-        // No lead byte within reach, so holding them back would stall the stream.
         #expect(UTF8StreamDecoder.incompleteTrailingSequenceLength(Data([0x80, 0x80, 0x80])) == 0)
     }
 }

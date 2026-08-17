@@ -12,20 +12,15 @@ import Foundation
 /// colour *and* parsed), the rule is the defensive one: any consumer that parses strips ANSI first —
 /// colour is a display concern the parser must ignore.
 public struct BrewRunOptions: Sendable {
-    /// Where the child's stdout and stderr go. This decides what the child sees from `isatty`, whether
-    /// the two streams stay distinguishable, and therefore where colour comes from — one choice, so it
-    /// is one value rather than a set of flags that can contradict each other.
+    /// Where the child's stdout and stderr go.
     public enum OutputChannel: Equatable, Sendable {
-        /// Separate pipes, so stdout and stderr stay distinct. The path for output that gets parsed.
+        /// Separate pipes, so the streams stay distinct. The path for output that gets parsed.
         /// Homebrew strips colour off a pipe, hence the explicit ask.
         case pipes(forceColor: Bool)
 
         /// A pseudo-terminal, so `isatty` is true in the child: Homebrew emits its own progress
-        /// rendering and libc line-buffers instead of block-buffering. Colour needs no asking for.
-        ///
-        /// The cost is that one device carries both streams, so they arrive merged, every line is
-        /// attributed to ``BrewCommandOutputLine/Stream/stdout``, and ``CommandOutput/standardError``
-        /// comes back empty. Runs whose output gets parsed must use ``pipes(forceColor:)``.
+        /// rendering and libc line-buffers. One device carries both streams, so they arrive merged,
+        /// every line is attributed to stdout, and ``CommandOutput/standardError`` comes back empty.
         case pseudoTerminal
     }
 

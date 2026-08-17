@@ -76,16 +76,14 @@ struct BrewCommandServicePseudoTerminalTests {
         #expect(output.terminationStatus == 128 + SIGTERM)
     }
 
+    /// The raw bytes are asserted at the device level in `PseudoTerminalTests`.
     @Test func `pseudo-terminal run resolves carriage-return redraws into settled text`() async throws {
-        // The returned output is the assembled transcript, not the cursor script that produced it — the
-        // raw bytes are asserted at the device level in PseudoTerminalTests.
         let output = try await run(script: "printf '10%%\\r50%%\\r100%%\\n'", channel: .pseudoTerminal)
 
         #expect(output.standardOutput == "100%\n")
     }
 
     @Test func `pseudo-terminal output is the diagnostic a failed run reports`() async throws {
-        // The merged device leaves standardError empty, so this is the only account of the failure.
         let output = try await run(
             script: "printf 'Downloading\\n'; printf 'Error: no such cask\\n' >&2; exit 1",
             channel: .pseudoTerminal,

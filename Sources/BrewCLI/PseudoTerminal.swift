@@ -14,11 +14,9 @@ import System
 /// The replica must be closed in this process once the child is spawned. While any replica descriptor
 /// stays open here the kernel sees a potential writer, so reads on the primary never report EOF.
 ///
-/// The descriptors never change after `init`, so ``read(timeout:)`` touches `primaryFD` without taking
-/// the lock — which guards only the closed flags, and which `read` could not hold anyway, since it parks
-/// for as long as the child stays quiet. What is *not* safe is closing the primary while a read is
-/// parked on it: the descriptor number would be freed and could be reused underneath the parked `poll`.
-/// See the ordering requirement on ``closePrimary()``.
+/// The descriptors never change after `init`, so ``read(timeout:)`` touches `primaryFD` unlocked; the
+/// lock guards only the closed flags, and `read` could not hold it anyway while parked on `poll`. What
+/// is unsafe is closing the primary out from under a parked read — see ``closePrimary()``.
 // swiftlint:disable:next unchecked_sendable
 final class PseudoTerminal: @unchecked Sendable {
     /// Non-zero because `openpty` defaults to 0x0, which some tools read as "not a real terminal" and
@@ -73,8 +71,7 @@ final class PseudoTerminal: @unchecked Sendable {
         close(replicaFD)
     }
 
-    /// Idempotent. Must not be called while a ``read(timeout:)`` is in flight — see the note on the
-    /// type. Callers let the drain finish first.
+    /// Idempotent. Must not be called while a ``read(timeout:)`` is in flight; let the drain finish.
     func closePrimary() {
         lock.lock()
         defer { lock.unlock() }
@@ -91,8 +88,7 @@ final class PseudoTerminal: @unchecked Sendable {
         case timedOut
         /// No writers remain: the ordinary end of a run.
         case endOfInput
-        /// The descriptor itself went bad, so no more output can be read. Kept distinct from
-        /// ``endOfInput`` so a truncated run is not silently reported as a complete one.
+        /// The descriptor went bad. Distinct from ``endOfInput`` so truncation is not read as success.
         case failed(errno: Int32)
     }
 
@@ -112,8 +108,8 @@ final class PseudoTerminal: @unchecked Sendable {
             let pollCode = errno
             return pollCode == EINTR ? .timedOut : .failed(errno: pollCode)
         }
-        // `POLLHUP` is the ordinary hang-up and falls through to `read`; `POLLNVAL` means the descriptor
-        // is not open at all, which `read` would report indistinguishably from a clean finish.
+        // `POLLHUP` is the ordinary hang-up and falls through to `read`; `POLLNVAL` is a dead fd, which
+        // `read` would report indistinguishably from a clean finish.
         if descriptor.revents & Int16(POLLNVAL) != 0 {
             return .failed(errno: EBADF)
         }
@@ -140,7 +136,6 @@ final class PseudoTerminal: @unchecked Sendable {
         return readCode == EIO ? .endOfInput : .failed(errno: readCode)
     }
 
-    /// `strerror`'s text plus the raw code, so a report is actionable without a second lookup.
     static func describe(errno code: Int32) -> String {
         "\(String(cString: strerror(code))) (\(code))"
     }

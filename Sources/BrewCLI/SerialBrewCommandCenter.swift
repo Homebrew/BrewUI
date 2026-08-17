@@ -184,8 +184,7 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
                     options: options,
                 )
                 if mode == .display, output.terminationStatus != 0 {
-                    // Display work runs on a terminal, which merges the streams and so leaves
-                    // `standardError` empty; the transcript is what carries brew's message.
+                    // A terminal merges the streams, so `standardError` is empty here.
                     throw BrewCommandError.failed(
                         exitCode: output.terminationStatus,
                         stderr: CommandFailureDetail.detail(from: output),
