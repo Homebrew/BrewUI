@@ -197,6 +197,111 @@ struct TerminalLineAssemblerTests {
 
         #expect(assembler.consume("").isEmpty)
     }
+
+    // MARK: - Within-line cursor movement
+
+    @Test func `absolute column addressing overwrites like a carriage return`() {
+        // ESC[1G is what several progress renderers use where curl uses \r.
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("10%\u{1B}[1G100%\n")
+
+        #expect(events.compactMap(\.committedText) == ["100%"])
+    }
+
+    @Test func `absolute column addressing is one-based`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("abcde\u{1B}[3GX\n")
+
+        #expect(events.compactMap(\.committedText) == ["abXde"])
+    }
+
+    @Test func `a bare column sequence defaults to the first column`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("abc\u{1B}[GX\n")
+
+        #expect(events.compactMap(\.committedText) == ["Xbc"])
+    }
+
+    @Test func `cursor back steps over written cells`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("abcde\u{1B}[2DXY\n")
+
+        #expect(events.compactMap(\.committedText) == ["abcXY"])
+    }
+
+    @Test func `cursor forward skips cells without erasing them`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("abcde\r\u{1B}[2CX\n")
+
+        #expect(events.compactMap(\.committedText) == ["abXde"])
+    }
+
+    @Test func `cursor forward past the end pads with spaces`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("ab\u{1B}[3CX\n")
+
+        #expect(events.compactMap(\.committedText) == ["ab   X"])
+    }
+
+    @Test func `a bare movement sequence defaults to one column`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("abcde\r\u{1B}[CX\n")
+
+        #expect(events.compactMap(\.committedText) == ["aXcde"])
+    }
+
+    @Test func `cursor back cannot move past the start of the line`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("ab\u{1B}[99DX\n")
+
+        #expect(events.compactMap(\.committedText) == ["Xb"])
+    }
+
+    @Test func `an absurd column request cannot blow the line up`() {
+        // A malformed sequence would otherwise have the next write pad every cell up to it.
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("a\u{1B}[999999999CX\n")
+
+        #expect((events.compactMap(\.committedText).first?.count ?? 0) <= 4097)
+    }
+
+    @Test func `moving the cursor alone does not report a revision`() {
+        var assembler = TerminalLineAssembler()
+        _ = assembler.consume("abc")
+
+        #expect(assembler.consume("\u{1B}[1G").isEmpty)
+    }
+
+    // MARK: - Erasing
+
+    @Test func `erasing to the start of the line uses the current style, not the old one`() {
+        // A terminal erases with the active attribute; keeping the old one leaves a stale colour behind.
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("\u{1B}[31mred\u{1B}[0m\u{1B}[1K\n")
+
+        #expect(events.compactMap(\.committedLine).first?.spans == [
+            ANSISpan(text: "   ", style: .default),
+        ])
+    }
+
+    @Test func `erasing to the start blanks cells without moving the cursor`() {
+        var assembler = TerminalLineAssembler()
+
+        let events = assembler.consume("abcde\r\u{1B}[2C\u{1B}[1KX\n")
+
+        // ESC[1K blanks columns 0 through 2 inclusive; the cursor stays at column 2, where X then lands.
+        #expect(events.compactMap(\.committedText) == ["  Xde"])
+    }
 }
 
 private func line(_ text: String) -> TerminalLine {
