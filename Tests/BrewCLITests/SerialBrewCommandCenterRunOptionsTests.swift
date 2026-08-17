@@ -20,7 +20,7 @@ struct SerialBrewCommandCenterRunOptionsTests {
             id: .maintenance(token: "install", displayCommand: "brew install wget"),
         )
 
-        #expect(recorder.recorded()?.usesPseudoTerminal == true)
+        #expect(recorder.recorded()?.output == .pseudoTerminal)
     }
 
     @Test func `capture work stays on pipes`() async throws {
@@ -32,7 +32,7 @@ struct SerialBrewCommandCenterRunOptionsTests {
             id: .maintenance(token: "doctor", displayCommand: "brew doctor"),
         )
 
-        #expect(recorder.recorded()?.usesPseudoTerminal == false)
+        #expect(recorder.recorded()?.output == .pipes(forceColor: true))
     }
 
     @Test func `capture work still forces colour, which a pipe would otherwise strip`() async throws {
@@ -44,7 +44,7 @@ struct SerialBrewCommandCenterRunOptionsTests {
             id: .maintenance(token: "doctor", displayCommand: "brew doctor"),
         )
 
-        #expect(recorder.recorded()?.forceColor == true)
+        #expect(recorder.recorded()?.output == .pipes(forceColor: true))
     }
 
     @Test func `display work does not force colour, because a terminal already supplies it`() async throws {
@@ -56,7 +56,7 @@ struct SerialBrewCommandCenterRunOptionsTests {
             id: .maintenance(token: "install", displayCommand: "brew install wget"),
         )
 
-        #expect(recorder.recorded()?.forceColor == false)
+        #expect(recorder.recorded()?.output == .pseudoTerminal)
     }
 }
 

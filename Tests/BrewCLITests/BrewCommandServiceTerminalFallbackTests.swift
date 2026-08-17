@@ -58,7 +58,7 @@ struct BrewCommandServiceTerminalFallbackTests {
             try await service.run(
                 executableURL: URL(fileURLWithPath: "/nonexistent/executable"),
                 arguments: [],
-                options: BrewRunOptions(usesPseudoTerminal: true),
+                options: BrewRunOptions(output: .pseudoTerminal),
             )
         }
     }
@@ -66,16 +66,16 @@ struct BrewCommandServiceTerminalFallbackTests {
     @Test func `the fallback options drop the terminal and force colour`() {
         // Asserted on the shaping rather than reading HOMEBREW_COLOR out of a child, which would depend
         // on whatever the developer exports.
-        let fallback = BrewCommandService.colourisedPipeFallback(
-            from: BrewRunOptions(forceColor: false, usesPseudoTerminal: true),
+        let fallback = BrewCommandService.pipeFallback(
+            from: BrewRunOptions(output: .pseudoTerminal),
         )
 
-        #expect(fallback.usesPseudoTerminal == false && fallback.forceColor)
+        #expect(fallback.output == .pipes(forceColor: true))
     }
 
     @Test func `the fallback options keep the caller's line observer`() {
-        let fallback = BrewCommandService.colourisedPipeFallback(
-            from: BrewRunOptions(lineObserver: { _ in }, usesPseudoTerminal: true),
+        let fallback = BrewCommandService.pipeFallback(
+            from: BrewRunOptions(lineObserver: { _ in }, output: .pseudoTerminal),
         )
 
         #expect(fallback.lineObserver != nil)
@@ -91,7 +91,7 @@ private extension BrewCommandServiceTerminalFallbackTests {
         return try await service.run(
             executableURL: URL(fileURLWithPath: "/bin/zsh"),
             arguments: ["-c", script],
-            options: BrewRunOptions(lineObserver: lineObserver, usesPseudoTerminal: true),
+            options: BrewRunOptions(lineObserver: lineObserver, output: .pseudoTerminal),
         )
     }
 }

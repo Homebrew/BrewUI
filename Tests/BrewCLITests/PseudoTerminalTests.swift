@@ -124,9 +124,12 @@ private extension PseudoTerminalTests {
                 continue
             case .endOfInput:
                 break loop
+            case let .failed(code):
+                Issue.record("reading the terminal failed: \(PseudoTerminal.describe(errno: code))")
+                break loop
             }
         }
-        return String(bytes: data, encoding: .utf8) ?? ""
+        return UTF8StreamDecoder.lossyString(data)
     }
 
     /// `Foundation.Process` deliberately, to exercise ``PseudoTerminal`` independently of the runner.

@@ -29,7 +29,18 @@ public struct BrewCommandService: BrewCommandRunning {
     ) async throws -> CommandOutput {
         try Task.checkCancellation()
 
-        if options.usesPseudoTerminal, let terminal = allocateTerminal() {
+        switch options.output {
+        case .pipes:
+            return try await runOnPipes(executableURL: executableURL, arguments: arguments, options: options)
+
+        case .pseudoTerminal:
+            guard let terminal = allocateTerminal() else {
+                return try await runOnPipes(
+                    executableURL: executableURL,
+                    arguments: arguments,
+                    options: Self.pipeFallback(from: options),
+                )
+            }
             return try await runOnPseudoTerminal(
                 terminal: terminal,
                 executableURL: executableURL,
@@ -37,12 +48,6 @@ public struct BrewCommandService: BrewCommandRunning {
                 options: options,
             )
         }
-        return try await runOnPipes(
-            executableURL: executableURL,
-            arguments: arguments,
-            // The terminal was what supplied colour, so on this path Homebrew has to be told explicitly.
-            options: options.usesPseudoTerminal ? Self.colourisedPipeFallback(from: options) : options,
-        )
     }
 
     /// Nil rather than throwing: the device pool is much smaller than `kern.tty.ptmx_max` suggests, and
@@ -51,10 +56,10 @@ public struct BrewCommandService: BrewCommandRunning {
         try? makeTerminal()
     }
 
-    static func colourisedPipeFallback(from options: BrewRunOptions) -> BrewRunOptions {
+    /// The terminal was what supplied colour, so on pipes Homebrew has to be told explicitly.
+    static func pipeFallback(from options: BrewRunOptions) -> BrewRunOptions {
         var fallback = options
-        fallback.usesPseudoTerminal = false
-        fallback.forceColor = true
+        fallback.output = .pipes(forceColor: true)
         return fallback
     }
 }
@@ -65,6 +70,11 @@ private extension BrewCommandService {
     /// One device serves both streams, so they arrive interleaved, every line is reported as
     /// ``BrewCommandOutputLine/Stream/stdout``, and ``CommandOutput/standardError`` is empty. Callers that
     /// need the streams apart must stay on the pipe path.
+    ///
+    /// ``CommandOutput/standardOutput`` is the *assembled* transcript, not the verbatim bytes: on a
+    /// terminal the raw bytes are a cursor script, in which a whole download is one line carrying every
+    /// intermediate redraw. Resolving the overwrites is what makes the text usable as the diagnostic for
+    /// a failed run, which is the only thing that reads it on this path.
     func runOnPseudoTerminal(
         terminal: PseudoTerminal,
         executableURL: URL,
@@ -76,13 +86,13 @@ private extension BrewCommandService {
 
         // Started before the spawn: the drain times out until there is something to read, and this
         // process still holds the replica open, so it cannot see a premature end-of-input.
-        async let drained: Data = Self.drainTerminal(terminal, sink: sink, gate: childHasExited)
+        async let drained: String = Self.drainTerminal(terminal, sink: sink, gate: childHasExited)
 
         do {
             let result = try await Subprocess.run(
                 .path(FilePath(executableURL.path)),
                 arguments: Arguments(arguments),
-                environment: Self.environment(for: options, isTerminal: true),
+                environment: Self.environment(for: options),
                 platformOptions: Self.platformOptions(),
                 input: .none,
                 output: .fileDescriptor(terminal.replicaDescriptor, closeAfterSpawningProcess: false),
@@ -94,12 +104,12 @@ private extension BrewCommandService {
             )
 
             childHasExited.open()
-            let data = await drained
+            let transcript = await drained
             terminal.closePrimary()
             try Task.checkCancellation()
 
             return CommandOutput(
-                standardOutput: String(bytes: data, encoding: .utf8) ?? "",
+                standardOutput: transcript,
                 standardError: "",
                 terminationStatus: Self.exitCode(from: result.terminationStatus),
             )
@@ -122,27 +132,31 @@ private extension BrewCommandService {
     ///
     /// Stops once the child has exited and a poll interval has passed with nothing to read. Waiting for
     /// end-of-input instead would stall on any grandchild still holding the descriptor open.
+    ///
+    /// Returns the settled lines as one transcript. The assembler runs whether or not anyone is
+    /// streaming, because that transcript is the run's only readable output.
     static func drainTerminal(
         _ terminal: PseudoTerminal,
         sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
         gate: TerminalDrainGate,
-    ) async -> Data {
-        await withCheckedContinuation { (continuation: CheckedContinuation<Data, Never>) in
+    ) async -> String {
+        await withCheckedContinuation { (continuation: CheckedContinuation<String, Never>) in
             // `read` parks on `poll`; run it on a GCD worker rather than the cooperative pool.
             DispatchQueue.global(qos: .utility).async {
-                var fullOutput = Data()
+                var transcript = ""
                 var undecoded = Data()
                 var assembler = TerminalLineAssembler()
+                var readFailure: Int32?
 
                 loop: while true {
                     switch terminal.read() {
                     case let .data(chunk):
-                        fullOutput.append(chunk)
-                        if sink != nil {
-                            undecoded.append(chunk)
-                            for event in assembler.consume(takeDecodableUTF8Prefix(&undecoded)) {
-                                emit(event, sink: sink)
+                        undecoded.append(chunk)
+                        for event in assembler.consume(UTF8StreamDecoder.takeDecodablePrefix(&undecoded)) {
+                            if case let .committed(line) = event {
+                                transcript += line.text + "\n"
                             }
+                            emit(event, sink: sink)
                         }
                     case .timedOut:
                         if gate.isOpen {
@@ -150,16 +164,31 @@ private extension BrewCommandService {
                         }
                     case .endOfInput:
                         break loop
+                    case let .failed(code):
+                        readFailure = code
+                        break loop
                     }
                 }
 
                 // Output that ended without a trailing newline is settled by the stream ending.
-                if let sink, let trailing = assembler.flush() {
-                    sink(BrewCommandOutputLine(stream: .stdout, line: trailing, isComplete: true))
+                if let trailing = assembler.flush() {
+                    transcript += trailing.text
+                    sink?(BrewCommandOutputLine(stream: .stdout, line: trailing, isComplete: true))
                 }
-                continuation.resume(returning: fullOutput)
+                // Surfaced rather than swallowed: the exit status may still say success, and without this
+                // the truncation is indistinguishable from the command simply having said less.
+                if let readFailure {
+                    let notice = truncationNotice(errno: readFailure)
+                    transcript += transcript.isEmpty || transcript.hasSuffix("\n") ? notice : "\n" + notice
+                    sink?(BrewCommandOutputLine(stream: .stderr, text: notice))
+                }
+                continuation.resume(returning: transcript)
             }
         }
+    }
+
+    static func truncationNotice(errno code: Int32) -> String {
+        "[output truncated: could not read the pseudo-terminal: \(PseudoTerminal.describe(errno: code))]"
     }
 
     /// Everything from a terminal is reported on stdout: one device carries both streams.
@@ -173,24 +202,6 @@ private extension BrewCommandService {
         case let .revised(line):
             sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: false))
         }
-    }
-
-    /// Reads land on arbitrary byte boundaries, so a multi-byte character can be split across two of them.
-    /// A sequence is at most four bytes, so at most three trailing bytes are ever held back; beyond that
-    /// the bytes are undecodable and one is dropped so the drain cannot stall.
-    static func takeDecodableUTF8Prefix(_ buffer: inout Data) -> String {
-        guard !buffer.isEmpty else {
-            return ""
-        }
-        for dropped in 0 ... min(3, buffer.count) {
-            let candidate = buffer.prefix(buffer.count - dropped)
-            if let text = String(bytes: candidate, encoding: .utf8) {
-                buffer = Data(buffer.dropFirst(candidate.count))
-                return text
-            }
-        }
-        buffer = Data(buffer.dropFirst())
-        return ""
     }
 }
 
@@ -209,7 +220,7 @@ private extension BrewCommandService {
             let result = try await Subprocess.run(
                 .path(FilePath(executableURL.path)),
                 arguments: Arguments(arguments),
-                environment: Self.environment(for: options, isTerminal: false),
+                environment: Self.environment(for: options),
                 platformOptions: Self.platformOptions(),
                 input: .none,
                 output: .sequence,
@@ -232,9 +243,10 @@ private extension BrewCommandService {
 
             try Task.checkCancellation()
             let (outData, errData) = result.closureResult
+            // Lossy on purpose: one undecodable byte would otherwise discard the whole output.
             return CommandOutput(
-                standardOutput: String(bytes: outData, encoding: .utf8) ?? "",
-                standardError: String(bytes: errData, encoding: .utf8) ?? "",
+                standardOutput: UTF8StreamDecoder.lossyString(outData),
+                standardError: UTF8StreamDecoder.lossyString(errData),
                 terminationStatus: Self.exitCode(from: result.terminationStatus),
             )
         } catch is CancellationError {
@@ -274,7 +286,8 @@ private extension BrewCommandService {
 // MARK: - Shared helpers
 
 private extension BrewCommandService {
-    /// Lines whose bytes aren't valid UTF-8 are dropped from the stream, but remain in the verbatim bytes.
+    /// Undecodable bytes become U+FFFD rather than costing the line it sits in, which the failable
+    /// initialiser would have dropped from the stream entirely.
     static func emitCompleteLines(
         from buffer: inout Data,
         stream: BrewCommandOutputLine.Stream,
@@ -285,10 +298,7 @@ private extension BrewCommandService {
         }
         while let newlineIndex = buffer.firstIndex(of: 0x0A) {
             let offset = buffer.distance(from: buffer.startIndex, to: newlineIndex)
-            let lineData = buffer.prefix(offset)
-            if let lineText = String(bytes: lineData, encoding: .utf8) {
-                sink(BrewCommandOutputLine(stream: stream, text: lineText))
-            }
+            sink(BrewCommandOutputLine(stream: stream, text: UTF8StreamDecoder.lossyString(buffer.prefix(offset))))
             buffer = Data(buffer.dropFirst(offset + 1))
         }
     }
@@ -298,10 +308,10 @@ private extension BrewCommandService {
         stream: BrewCommandOutputLine.Stream,
         sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
     ) {
-        guard let sink, !buffer.isEmpty, let text = String(bytes: buffer, encoding: .utf8) else {
+        guard let sink, !buffer.isEmpty else {
             return
         }
-        sink(BrewCommandOutputLine(stream: stream, text: text))
+        sink(BrewCommandOutputLine(stream: stream, text: UTF8StreamDecoder.lossyString(buffer)))
     }
 
     /// `createSession` is what makes the pty a *controlling* terminal rather than merely a terminal-shaped
@@ -319,14 +329,13 @@ private extension BrewCommandService {
     /// Homebrew strips colour off a non-TTY, so the pipe path forces it back on (`CLICOLOR_FORCE` covers
     /// the BSD-convention tools brew shells out to). The terminal path needs `TERM` instead: a GUI process
     /// launched from Finder inherits none, and without it tools treat the terminal as capability-less.
-    static func environment(for options: BrewRunOptions, isTerminal: Bool) -> Environment {
-        if isTerminal {
-            return .inherit.updating(["TERM": "xterm-256color"])
+    static func environment(for options: BrewRunOptions) -> Environment {
+        switch options.output {
+        case .pseudoTerminal:
+            .inherit.updating(["TERM": "xterm-256color"])
+        case let .pipes(forceColor):
+            forceColor ? .inherit.updating(["HOMEBREW_COLOR": "1", "CLICOLOR_FORCE": "1"]) : .inherit
         }
-        guard options.forceColor else {
-            return .inherit
-        }
-        return .inherit.updating(["HOMEBREW_COLOR": "1", "CLICOLOR_FORCE": "1"])
     }
 
     /// A signalled child becomes `128 + signal`, the shell convention, keeping "non-zero means failure".

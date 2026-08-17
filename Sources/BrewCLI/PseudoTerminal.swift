@@ -13,8 +13,12 @@ import System
 ///
 /// The replica must be closed in this process once the child is spawned. While any replica descriptor
 /// stays open here the kernel sees a potential writer, so reads on the primary never report EOF.
-// `read` deliberately touches `primaryFD` unlocked: it parks for as long as the child is quiet, and
-// holding the lock across it would deadlock `closeReplica`.
+///
+/// The descriptors never change after `init`, so ``read(timeout:)`` touches `primaryFD` without taking
+/// the lock — which guards only the closed flags, and which `read` could not hold anyway, since it parks
+/// for as long as the child stays quiet. What is *not* safe is closing the primary while a read is
+/// parked on it: the descriptor number would be freed and could be reused underneath the parked `poll`.
+/// See the ordering requirement on ``closePrimary()``.
 // swiftlint:disable:next unchecked_sendable
 final class PseudoTerminal: @unchecked Sendable {
     /// Non-zero because `openpty` defaults to 0x0, which some tools read as "not a real terminal" and
@@ -23,8 +27,8 @@ final class PseudoTerminal: @unchecked Sendable {
     static let defaultRows: UInt16 = 40
 
     private let lock = NSLock()
-    private var primaryFD: Int32
-    private var replicaFD: Int32
+    private let primaryFD: Int32
+    private let replicaFD: Int32
     private var isPrimaryClosed = false
     private var isReplicaClosed = false
 
@@ -38,9 +42,7 @@ final class PseudoTerminal: @unchecked Sendable {
         // that overwrite `errno`.
         let failureCode = errno
         guard result == 0 else {
-            throw BrewCommandError.launchFailed(
-                underlying: "openpty failed: \(String(cString: strerror(failureCode))) (\(failureCode))",
-            )
+            throw BrewCommandError.launchFailed(underlying: "openpty failed: \(Self.describe(errno: failureCode))")
         }
 
         primaryFD = primary
@@ -71,7 +73,8 @@ final class PseudoTerminal: @unchecked Sendable {
         close(replicaFD)
     }
 
-    /// Idempotent.
+    /// Idempotent. Must not be called while a ``read(timeout:)`` is in flight — see the note on the
+    /// type. Callers let the drain finish first.
     func closePrimary() {
         lock.lock()
         defer { lock.unlock() }
@@ -86,8 +89,11 @@ final class PseudoTerminal: @unchecked Sendable {
         case data(Data)
         /// Nothing arrived within the timeout; the terminal is still open.
         case timedOut
-        /// No writers remain.
+        /// No writers remain: the ordinary end of a run.
         case endOfInput
+        /// The descriptor itself went bad, so no more output can be read. Kept distinct from
+        /// ``endOfInput`` so a truncated run is not silently reported as a complete one.
+        case failed(errno: Int32)
     }
 
     /// The timeout exists because end-of-input is driven by descriptors, not process exit: a grandchild
@@ -103,7 +109,13 @@ final class PseudoTerminal: @unchecked Sendable {
             return .timedOut
         }
         if ready < 0 {
-            return errno == EINTR ? .timedOut : .endOfInput
+            let pollCode = errno
+            return pollCode == EINTR ? .timedOut : .failed(errno: pollCode)
+        }
+        // `POLLHUP` is the ordinary hang-up and falls through to `read`; `POLLNVAL` means the descriptor
+        // is not open at all, which `read` would report indistinguishably from a clean finish.
+        if descriptor.revents & Int16(POLLNVAL) != 0 {
+            return .failed(errno: EBADF)
         }
 
         var buffer = [UInt8](repeating: 0, count: 4096)
@@ -113,15 +125,24 @@ final class PseudoTerminal: @unchecked Sendable {
             }
             return Darwin.read(primaryFD, base, raw.count)
         }
+        let readCode = errno
 
         if bytesRead > 0 {
             return .data(Data(buffer[0 ..< bytesRead]))
         }
-        if bytesRead < 0, errno == EINTR || errno == EAGAIN {
+        if bytesRead == 0 {
+            return .endOfInput
+        }
+        if readCode == EINTR || readCode == EAGAIN {
             return .timedOut
         }
-        // Both `0` and `-1`/`EIO` mean the last writer closed; `EIO` is the normal Darwin path.
-        return .endOfInput
+        // `EIO` is Darwin's normal report that the last writer closed; anything else is a real fault.
+        return readCode == EIO ? .endOfInput : .failed(errno: readCode)
+    }
+
+    /// `strerror`'s text plus the raw code, so a report is actionable without a second lookup.
+    static func describe(errno code: Int32) -> String {
+        "\(String(cString: strerror(code))) (\(code))"
     }
 
     /// Clearing `OPOST` disables `ONLCR`, which would otherwise rewrite every `\n` as `\r\n` and leave a

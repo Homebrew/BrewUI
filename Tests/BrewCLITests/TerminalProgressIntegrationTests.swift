@@ -59,7 +59,7 @@ private extension TerminalProgressIntegrationTests {
         _ = try await service.run(
             executableURL: URL(fileURLWithPath: "/bin/zsh"),
             arguments: ["-c", script],
-            options: BrewRunOptions(lineObserver: { collector.append($0) }, usesPseudoTerminal: true),
+            options: BrewRunOptions(lineObserver: { collector.append($0) }, output: .pseudoTerminal),
         )
 
         return await MainActor.run {

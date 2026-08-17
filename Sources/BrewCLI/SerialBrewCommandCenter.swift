@@ -135,8 +135,7 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         // pipe strips it and `brew doctor` is shown *and* parsed.
         let options = BrewRunOptions(
             lineObserver: { line in lineContinuation.yield(line) },
-            forceColor: mode == .capture,
-            usesPseudoTerminal: mode == .display,
+            output: mode == .display ? .pseudoTerminal : .pipes(forceColor: true),
         )
 
         let drainTask = Task { [weak self] in
@@ -185,9 +184,11 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
                     options: options,
                 )
                 if mode == .display, output.terminationStatus != 0 {
+                    // Display work runs on a terminal, which merges the streams and so leaves
+                    // `standardError` empty; the transcript is what carries brew's message.
                     throw BrewCommandError.failed(
                         exitCode: output.terminationStatus,
-                        stderr: output.standardError,
+                        stderr: CommandFailureDetail.detail(from: output),
                     )
                 }
                 return output
