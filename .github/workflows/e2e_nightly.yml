@@ -1,0 +1,64 @@
+name: Live E2E Canaries
+
+# Deliberately off the PR path: this suite runs the app with production wiring
+# against real Homebrew and the real network, so it can go red for reasons that
+# have nothing to do with the change under review. It is a contract canary — if
+# Homebrew changes its JSON shape or CLI output and breaks a happy path, this
+# goes red while the deterministic per-PR suite stays green.
+#
+# It mutates real brew state (installs and uninstalls `hello`), which is safe
+# here because the runner is ephemeral. Run it by hand before cutting a release.
+on:
+  schedule:
+    # 05:00 UTC nightly — after the tap's own nightly churn, well before the day starts.
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: "Optional xcodebuild -only-testing filter for the live suite"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  # Serial by workflow, not by ref: two runs would fight over one machine's brew state.
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    name: Live end-to-end canaries
+    # GitHub's macOS runners ship with Homebrew installed and have egress to
+    # formulae.brew.sh and ghcr.io, which is what this suite requires.
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The job uploads artifacts on failure; a persisted token in .git/config could ride along.
+          persist-credentials: false
+
+      - name: Run live end-to-end canaries (Brew-E2E test plan)
+        # Through env rather than interpolated into the script body, so the input cannot inject shell.
+        env:
+          TEST_FILTER: ${{ inputs.test_filter }}
+        run: |
+          set -o pipefail
+          if [[ -n "${TEST_FILTER}" ]]; then
+            scripts/test-e2e -only-testing:"${TEST_FILTER}" | tee xcodebuild-e2e.log
+          else
+            scripts/test-e2e | tee xcodebuild-e2e.log
+          fi
+
+      - name: Upload logs on failure
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-logs
+          path: |
+            xcodebuild-e2e.log
+            E2ETestResults.xcresult
+          retention-days: 7

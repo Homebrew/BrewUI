@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#
+# test-e2e — run the live end-to-end canaries (Brew-E2E test plan).
+#
+# THIS MUTATES REAL HOMEBREW STATE. It installs and uninstalls the formula
+# `hello` on this machine, hits formulae.brew.sh and ghcr.io for real, and runs
+# the app with production wiring (no -uiTesting). Nothing may depend on `hello`
+# being present or absent — see BrewUITests/E2E/README.md.
+#
+# This is NOT the per-PR suite; that is scripts/test-ui (Brew-UI test plan),
+# which is deterministic and never touches real brew. Run this nightly, and by
+# hand before cutting a release.
+#
+# Same window/focus caveats as scripts/test-ui — see BrewUITests/TROUBLESHOOTING.md
+# before running it on a machine you're actively using.
+#
+# Pass extra xcodebuild args through, e.g. to scope to one test:
+#   scripts/test-e2e -only-testing:BrewUITests/ReadOnlyE2ETests
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+if [[ ! -x /opt/homebrew/bin/brew && ! -x /usr/local/bin/brew ]]; then
+  echo "error: the live suite needs Homebrew installed on this machine." >&2
+  exit 1
+fi
+
+echo "==> Resolving package dependencies"
+xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
+
+echo "==> BrewUITests live canaries (Brew-E2E test plan)"
+rm -rf E2ETestResults.xcresult
+# No -derivedDataPath override, for the reason documented in scripts/test-ui.
+xcodebuild test \
+  -project Homebrew.xcodeproj \
+  -scheme Brew-UI \
+  -testPlan Brew-E2E \
+  -destination "platform=macOS" \
+  -resultBundlePath E2ETestResults.xcresult \
+  -skipPackagePluginValidation \
+  -skipMacroValidation \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY=- \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGNING_ALLOWED=NO \
+  "$@"
+
+echo "==> Live end-to-end canaries passed."
