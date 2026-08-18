@@ -41,7 +41,10 @@ enum BrewApp {
     /// `launch()` can leave the app frontmost with a populated menu bar and no window at all, and a
     /// windowless app has an empty accessibility tree — so every query fails for a reason unrelated to
     /// what it asked for. Only the "reopen" AppleEvent a Dock click sends reliably creates the window.
-    private static func activate(_ app: XCUIApplication) {
+    ///
+    /// Not private: the live suite launches through ``BrewE2EApp`` rather than through this type, and
+    /// the problem this solves is a macOS one that has nothing to do with how the app is wired.
+    static func activate(_ app: XCUIApplication) {
         app.activate()
         _ = app.wait(for: .runningForeground, timeout: BrewUITestTimeout.launch)
         guard app.windows.count == 0 else { return }
