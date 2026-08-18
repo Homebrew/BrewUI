@@ -83,9 +83,9 @@ public enum ANSIParser {
                 continue
             }
 
-            let (next, sgrParameters) = skipEscape(scalars, from: index)
-            if let sgrParameters {
-                let newStyle = apply(sgrParameters, to: style)
+            let (next, control) = scanEscape(scalars, from: index)
+            if let control, control.finalByte == "m" {
+                let newStyle = apply(control.parameters, to: style)
                 if newStyle != style {
                     flush()
                     style = newStyle
@@ -104,43 +104,52 @@ public enum ANSIParser {
         parse(input).map(\.text).joined()
     }
 
-    private static func skipEscape(
+    /// A CSI sequence: its parameters, and the final byte saying what it does (`m` styling, `K` erase).
+    struct ControlSequence: Equatable {
+        let parameters: String
+        let finalByte: Unicode.Scalar
+    }
+
+    /// Shared with ``TerminalLineAssembler``, which needs the same scanning but acts on more than `m`.
+    static func scanEscape(
         _ scalars: [Unicode.Scalar],
         from start: Int,
-    ) -> (next: Int, sgrParameters: String?) {
+    ) -> (next: Int, control: ControlSequence?) {
         let afterEscape = start + 1
         guard afterEscape < scalars.count else {
-            return (next: scalars.count, sgrParameters: nil)
+            return (next: scalars.count, control: nil)
         }
 
         switch scalars[afterEscape] {
         case "[":
-            return skipControlSequence(scalars, paramsStart: afterEscape + 1)
+            return scanControlSequence(scalars, paramsStart: afterEscape + 1)
         case "]":
-            return (next: skipOperatingSystemCommand(scalars, from: afterEscape + 1), sgrParameters: nil)
+            return (next: skipOperatingSystemCommand(scalars, from: afterEscape + 1), control: nil)
         default:
             // Two-byte escape such as ESC ( or ESC =; drop ESC and the byte that follows it.
-            return (next: afterEscape + 1, sgrParameters: nil)
+            return (next: afterEscape + 1, control: nil)
         }
     }
 
-    private static func skipControlSequence(
+    private static func scanControlSequence(
         _ scalars: [Unicode.Scalar],
         paramsStart: Int,
-    ) -> (next: Int, sgrParameters: String?) {
+    ) -> (next: Int, control: ControlSequence?) {
         var cursor = paramsStart
         var parameters = ""
         while cursor < scalars.count {
             let scalar = scalars[cursor]
             // Final bytes are in 0x40...0x7E; parameter/intermediate bytes (digits, ';', ' ', etc.) precede them.
             if scalar.value >= 0x40, scalar.value <= 0x7E {
-                let isSGR = scalar == "m"
-                return (next: cursor + 1, sgrParameters: isSGR ? parameters : nil)
+                return (
+                    next: cursor + 1,
+                    control: ControlSequence(parameters: parameters, finalByte: scalar),
+                )
             }
             parameters.unicodeScalars.append(scalar)
             cursor += 1
         }
-        return (next: scalars.count, sgrParameters: nil)
+        return (next: scalars.count, control: nil)
     }
 
     /// Skips an OSC sequence, which runs until BEL (0x07) or the ST terminator (ESC `\`).
@@ -160,7 +169,7 @@ public enum ANSIParser {
 
     /// Applies one SGR parameter string to `style`. An empty parameter string is treated as a reset
     /// (`ESC[m` == `ESC[0m`).
-    private static func apply(_ parameters: String, to style: ANSIStyle) -> ANSIStyle {
+    static func apply(_ parameters: String, to style: ANSIStyle) -> ANSIStyle {
         let codes = parameters.isEmpty
             ? [0]
             : parameters.split(separator: ";", omittingEmptySubsequences: false).map { Int($0) ?? 0 }

@@ -25,6 +25,13 @@ let package = Package(
         .library(name: "BrewFeatureDoctor", targets: ["BrewFeatureDoctor"]),
         .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
     ],
+    dependencies: [
+        // Justification (`CONVENTIONS.md` — Dependencies): a controlling-terminal pty needs `setsid()`
+        // between fork and exec, which `Foundation.Process` cannot express. `Subprocess` exposes it as
+        // `PlatformOptions.createSession`, plus the fd hand-off and process-group teardown the pty path
+        // needs. Confined to `BrewCLI` behind `BrewCommandRunning`, which has one production conformer.
+        .package(url: "https://github.com/swiftlang/swift-subprocess.git", exact: "1.0.0"),
+    ],
     targets: [
         // Dependency-free by design: linked by both the app and the BrewUITests target, so it must
         // not drag app code into the test bundle.
@@ -72,7 +79,10 @@ let package = Package(
         ),
         .target(
             name: "BrewCLI",
-            dependencies: ["BrewCore"],
+            dependencies: [
+                "BrewCore",
+                .product(name: "Subprocess", package: "swift-subprocess"),
+            ],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),

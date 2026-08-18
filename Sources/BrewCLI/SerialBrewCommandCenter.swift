@@ -130,9 +130,12 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         let (lineStream, lineContinuation) = AsyncStream<BrewCommandOutputLine>.makeStream(
             bufferingPolicy: .unbounded,
         )
+        // `.display` work is only shown, so it runs against a pty. `.capture` work is parsed by its
+        // caller and stays on pipes, where the streams remain distinct; it still asks for colour, since a
+        // pipe strips it and `brew doctor` is shown *and* parsed.
         let options = BrewRunOptions(
             lineObserver: { line in lineContinuation.yield(line) },
-            forceColor: true,
+            output: mode == .display ? .pseudoTerminal : .pipes(forceColor: true),
         )
 
         let drainTask = Task { [weak self] in
@@ -181,9 +184,10 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
                     options: options,
                 )
                 if mode == .display, output.terminationStatus != 0 {
+                    // A terminal merges the streams, so `standardError` is empty here.
                     throw BrewCommandError.failed(
                         exitCode: output.terminationStatus,
-                        stderr: output.standardError,
+                        stderr: CommandFailureDetail.detail(from: output),
                     )
                 }
                 return output

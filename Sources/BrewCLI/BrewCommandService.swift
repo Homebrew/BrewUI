@@ -5,10 +5,22 @@
 
 import BrewCore
 import Foundation
+import Subprocess
+import System
 
 /// Subprocess runner for Homebrew CLI (`ARCHITECTURE.md` — Command execution).
 public struct BrewCommandService: BrewCommandRunning {
-    public init() {}
+    private let makeTerminal: @Sendable () throws -> PseudoTerminal
+
+    public init() {
+        self.init(makeTerminal: { try PseudoTerminal() })
+    }
+
+    /// Seam for testing the allocation-failure path, otherwise reachable only by exhausting the
+    /// machine's pty devices.
+    init(makeTerminal: @escaping @Sendable () throws -> PseudoTerminal) {
+        self.makeTerminal = makeTerminal
+    }
 
     public func run(
         executableURL: URL,
@@ -17,136 +29,333 @@ public struct BrewCommandService: BrewCommandRunning {
     ) async throws -> CommandOutput {
         try Task.checkCancellation()
 
-        let process = Process()
-        process.executableURL = executableURL
-        process.arguments = arguments
-        let outPipe = Pipe()
-        let errPipe = Pipe()
-        process.standardOutput = outPipe
-        process.standardError = errPipe
-        process.standardInput = FileHandle.nullDevice
+        switch options.output {
+        case .pipes:
+            return try await runOnPipes(executableURL: executableURL, arguments: arguments, options: options)
 
-        // When nothing is observing, `sink` is nil and the drain skips the line-splitting work.
+        case .pseudoTerminal:
+            guard let terminal = allocateTerminal() else {
+                return try await runOnPipes(
+                    executableURL: executableURL,
+                    arguments: arguments,
+                    options: Self.pipeFallback(from: options),
+                )
+            }
+            return try await runOnPseudoTerminal(
+                terminal: terminal,
+                executableURL: executableURL,
+                arguments: arguments,
+                options: options,
+            )
+        }
+    }
+
+    /// Nil rather than throwing: the device pool is much smaller than `kern.tty.ptmx_max` suggests, and
+    /// failing an install over it is a poor trade when the command runs fine on pipes.
+    private func allocateTerminal() -> PseudoTerminal? {
+        try? makeTerminal()
+    }
+
+    /// The terminal was what supplied colour, so on pipes Homebrew has to be told explicitly.
+    static func pipeFallback(from options: BrewRunOptions) -> BrewRunOptions {
+        var fallback = options
+        fallback.output = .pipes(forceColor: true)
+        return fallback
+    }
+}
+
+// MARK: - Pseudo-terminal execution
+
+private extension BrewCommandService {
+    /// One device serves both streams, so they arrive interleaved, every line is reported as
+    /// ``BrewCommandOutputLine/Stream/stdout``, and ``CommandOutput/standardError`` is empty. Callers that
+    /// need the streams apart must stay on the pipe path.
+    ///
+    /// ``CommandOutput/standardOutput`` is the assembled transcript, not the verbatim bytes: raw pty
+    /// bytes are a cursor script in which a whole download is one line of redraws.
+    func runOnPseudoTerminal(
+        terminal: PseudoTerminal,
+        executableURL: URL,
+        arguments: [String],
+        options: BrewRunOptions,
+    ) async throws -> CommandOutput {
+        let childHasExited = TerminalDrainGate()
         let sink = options.lineObserver
 
-        // Homebrew strips colour when stdout isn't a TTY (which a `Pipe` never is); `HOMEBREW_COLOR` forces it
-        // back on, and `CLICOLOR_FORCE` does the same for the BSD-convention tools brew shells out to. Only ever
-        // set for display-only output (the scheduler never sets it for output that will be parsed).
-        if options.forceColor {
-            var environment = ProcessInfo.processInfo.environment
-            environment["HOMEBREW_COLOR"] = "1"
-            environment["CLICOLOR_FORCE"] = "1"
-            process.environment = environment
-        }
+        // Started before the spawn: the drain times out until there is something to read, and this
+        // process still holds the replica open, so it cannot see a premature end-of-input.
+        async let drained: String = Self.drainTerminal(terminal, sink: sink, gate: childHasExited)
 
         do {
-            try process.run()
-        } catch {
-            throw BrewCommandError.launchFailed(underlying: String(describing: error))
-        }
-
-        let processController = ProcessController(process)
-        return try await withTaskCancellationHandler(operation: {
-            // Drain pipes concurrently while the subprocess runs.
-            // Large outputs (for example `brew info --installed --json=v2`) can deadlock
-            // if we wait for exit before reading from stdout/stderr.
-            async let outRead = Self.drainPipe(
-                handle: outPipe.fileHandleForReading,
-                stream: .stdout,
-                sink: sink,
-            )
-            async let errRead = Self.drainPipe(
-                handle: errPipe.fileHandleForReading,
-                stream: .stderr,
-                sink: sink,
+            let result = try await Subprocess.run(
+                .path(FilePath(executableURL.path)),
+                arguments: Arguments(arguments),
+                environment: Self.environment(for: options),
+                platformOptions: Self.platformOptions(),
+                input: .none,
+                output: .fileDescriptor(terminal.replicaDescriptor, closeAfterSpawningProcess: false),
+                error: .fileDescriptor(terminal.replicaDescriptor, closeAfterSpawningProcess: false),
+                body: { _ in
+                    // Runs once the child is spawned, the only safe moment to drop our replica copy.
+                    terminal.closeReplica()
+                },
             )
 
-            let terminationStatus = await Self.waitForExit(process)
-            let outData = await outRead
-            let errData = await errRead
+            childHasExited.open()
+            let transcript = await drained
+            terminal.closePrimary()
             try Task.checkCancellation()
 
-            let stdout = String(bytes: outData, encoding: .utf8) ?? ""
-            let stderr = String(bytes: errData, encoding: .utf8) ?? ""
             return CommandOutput(
-                standardOutput: stdout,
-                standardError: stderr,
-                terminationStatus: terminationStatus,
+                standardOutput: transcript,
+                standardError: "",
+                terminationStatus: Self.exitCode(from: result.terminationStatus),
             )
-        }, onCancel: {
-            processController.terminateIfRunning()
-        })
+        } catch {
+            // Reap the drain before rethrowing, so no thread is left parked on the primary.
+            terminal.closeReplica()
+            childHasExited.open()
+            _ = await drained
+            terminal.closePrimary()
+
+            if error is CancellationError {
+                throw error
+            }
+            throw BrewCommandError.launchFailed(underlying: String(describing: error))
+        }
     }
 
-    /// Drains a subprocess pipe to EOF, returning the raw bytes verbatim for ``CommandOutput``.
-    /// When `sink` is non-nil, also emits each `\n`-terminated line through it as bytes arrive — the trailing
-    /// partial line (no terminating newline) is flushed on EOF if non-empty. Lines whose bytes aren't valid UTF-8
-    /// are dropped from the stream (they remain in the verbatim byte return).
-    private static func drainPipe(
-        handle: FileHandle,
-        stream: BrewCommandOutputLine.Stream,
+    /// Goes through ``TerminalLineAssembler`` rather than splitting on newlines: a terminal's redraws are
+    /// separated by carriage returns, so by the newline measure a whole download is one line.
+    ///
+    /// Stops once the child has exited and a poll interval has passed with nothing to read. Waiting for
+    /// end-of-input instead would stall on any grandchild still holding the descriptor open.
+    static func drainTerminal(
+        _ terminal: PseudoTerminal,
         sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
-    ) async -> Data {
-        await withCheckedContinuation { (continuation: CheckedContinuation<Data, Never>) in
-            // `availableData` blocks; run on a GCD worker thread (matches `readAllData` behavior).
+        gate: TerminalDrainGate,
+    ) async -> String {
+        await withCheckedContinuation { (continuation: CheckedContinuation<String, Never>) in
+            // `read` parks on `poll`; run it on a GCD worker rather than the cooperative pool.
             DispatchQueue.global(qos: .utility).async {
-                var fullOutput = Data()
-                var lineBuffer = Data()
-                while true {
-                    let chunk = handle.availableData
-                    if chunk.isEmpty {
-                        if let sink, !lineBuffer.isEmpty,
-                           let final = String(data: lineBuffer, encoding: .utf8)
-                        {
-                            sink(BrewCommandOutputLine(stream: stream, text: final))
-                        }
-                        break
-                    }
-                    fullOutput.append(chunk)
-                    if let sink {
-                        lineBuffer.append(chunk)
-                        while let newlineIndex = lineBuffer.firstIndex(of: 0x0A) {
-                            let offset = lineBuffer.distance(from: lineBuffer.startIndex, to: newlineIndex)
-                            let lineData = lineBuffer.prefix(offset)
-                            if let lineText = String(data: lineData, encoding: .utf8) {
-                                sink(BrewCommandOutputLine(stream: stream, text: lineText))
+                var transcript = ""
+                var undecoded = Data()
+                var assembler = TerminalLineAssembler()
+                var readFailure: Int32?
+
+                loop: while true {
+                    switch terminal.read() {
+                    case let .data(chunk):
+                        undecoded.append(chunk)
+                        for event in assembler.consume(UTF8StreamDecoder.takeDecodablePrefix(&undecoded)) {
+                            if case let .committed(line) = event {
+                                transcript += line.text + "\n"
                             }
-                            lineBuffer = Data(lineBuffer.dropFirst(offset + 1))
+                            emit(event, sink: sink)
                         }
+                    case .timedOut:
+                        if gate.isOpen {
+                            break loop
+                        }
+                    case .endOfInput:
+                        break loop
+                    case let .failed(code):
+                        readFailure = code
+                        break loop
                     }
                 }
-                continuation.resume(returning: fullOutput)
+
+                // Output that ended without a trailing newline is settled by the stream ending.
+                if let trailing = assembler.flush() {
+                    transcript += trailing.text
+                    sink?(BrewCommandOutputLine(stream: .stdout, line: trailing, isComplete: true))
+                }
+                // The exit status may still say success, so truncation has to say so itself.
+                if let readFailure {
+                    let notice = truncationNotice(errno: readFailure)
+                    transcript += transcript.isEmpty || transcript.hasSuffix("\n") ? notice : "\n" + notice
+                    sink?(BrewCommandOutputLine(stream: .stderr, text: notice))
+                }
+                continuation.resume(returning: transcript)
             }
         }
     }
 
-    private static func waitForExit(_ process: Process) async -> Int32 {
-        await withCheckedContinuation { continuation in
-            // `waitUntilExit` blocks; run on a GCD worker thread.
-            DispatchQueue.global(qos: .utility).async {
-                process.waitUntilExit()
-                continuation.resume(returning: process.terminationStatus)
-            }
+    static func truncationNotice(errno code: Int32) -> String {
+        "[output truncated: could not read the pseudo-terminal: \(PseudoTerminal.describe(errno: code))]"
+    }
+
+    /// Everything from a terminal is reported on stdout: one device carries both streams.
+    static func emit(_ event: TerminalLineEvent, sink: (@Sendable (BrewCommandOutputLine) -> Void)?) {
+        guard let sink else {
+            return
+        }
+        switch event {
+        case let .committed(line):
+            sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: true))
+        case let .revised(line):
+            sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: false))
         }
     }
 }
 
-// `process` is the only non-Sendable stored state, and every access to it goes through `lock`; the
-// sole mutating call (`terminate`) runs under that lock, so concurrent use is serialised.
-// swiftlint:disable:next unchecked_sendable
-private final class ProcessController: @unchecked Sendable {
-    private let lock = NSLock()
-    private let process: Process
+// MARK: - Pipe execution
 
-    init(_ process: Process) {
-        self.process = process
+private extension BrewCommandService {
+    /// No terminal, so stdout and stderr stay distinct. The path for output that will be parsed.
+    func runOnPipes(
+        executableURL: URL,
+        arguments: [String],
+        options: BrewRunOptions,
+    ) async throws -> CommandOutput {
+        let sink = options.lineObserver
+
+        do {
+            let result = try await Subprocess.run(
+                .path(FilePath(executableURL.path)),
+                arguments: Arguments(arguments),
+                environment: Self.environment(for: options),
+                platformOptions: Self.platformOptions(),
+                input: .none,
+                output: .sequence,
+                error: .sequence,
+                body: { execution in
+                    // Drained concurrently: waiting for exit before reading deadlocks on large outputs.
+                    async let outRead = Self.drainSequence(
+                        execution.standardOutput,
+                        stream: .stdout,
+                        sink: sink,
+                    )
+                    async let errRead = Self.drainSequence(
+                        execution.standardError,
+                        stream: .stderr,
+                        sink: sink,
+                    )
+                    return await (outRead, errRead)
+                },
+            )
+
+            try Task.checkCancellation()
+            let (outData, errData) = result.closureResult
+            return CommandOutput(
+                standardOutput: UTF8StreamDecoder.lossyString(outData),
+                standardError: UTF8StreamDecoder.lossyString(errData),
+                terminationStatus: Self.exitCode(from: result.terminationStatus),
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw BrewCommandError.launchFailed(underlying: String(describing: error))
+        }
     }
 
-    func terminateIfRunning() {
+    /// Returns the bytes verbatim for ``CommandOutput``, emitting `\n`-terminated lines as they arrive.
+    static func drainSequence(
+        _ sequence: SubprocessOutputSequence,
+        stream: BrewCommandOutputLine.Stream,
+        sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
+    ) async -> Data {
+        var fullOutput = Data()
+        var lineBuffer = Data()
+
+        do {
+            for try await buffer in sequence {
+                let chunk = buffer.withUnsafeBytes { Data($0) }
+                fullOutput.append(chunk)
+                if sink != nil {
+                    lineBuffer.append(chunk)
+                    emitCompleteLines(from: &lineBuffer, stream: stream, sink: sink)
+                }
+            }
+        } catch {
+            // A mid-stream read failure still yields what was collected; the exit status decides success.
+        }
+
+        flushPartialLine(lineBuffer, stream: stream, sink: sink)
+        return fullOutput
+    }
+}
+
+// MARK: - Shared helpers
+
+private extension BrewCommandService {
+    static func emitCompleteLines(
+        from buffer: inout Data,
+        stream: BrewCommandOutputLine.Stream,
+        sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
+    ) {
+        guard let sink else {
+            return
+        }
+        while let newlineIndex = buffer.firstIndex(of: 0x0A) {
+            let offset = buffer.distance(from: buffer.startIndex, to: newlineIndex)
+            sink(BrewCommandOutputLine(stream: stream, text: UTF8StreamDecoder.lossyString(buffer.prefix(offset))))
+            buffer = Data(buffer.dropFirst(offset + 1))
+        }
+    }
+
+    static func flushPartialLine(
+        _ buffer: Data,
+        stream: BrewCommandOutputLine.Stream,
+        sink: (@Sendable (BrewCommandOutputLine) -> Void)?,
+    ) {
+        guard let sink, !buffer.isEmpty else {
+            return
+        }
+        sink(BrewCommandOutputLine(stream: stream, text: UTF8StreamDecoder.lossyString(buffer)))
+    }
+
+    /// `createSession` is what makes the pty a *controlling* terminal rather than merely a terminal-shaped
+    /// descriptor, and puts the child and its descendants in one process group. Teardown then signals the
+    /// whole group, so cancelling an install stops the `curl` or `git` it is waiting on.
+    static func platformOptions() -> PlatformOptions {
+        var platformOptions = PlatformOptions()
+        platformOptions.createSession = true
+        platformOptions.teardownSequence = [
+            .gracefulShutDown(toProcessGroup: true, allowedDurationToNextStep: .seconds(2)),
+        ]
+        return platformOptions
+    }
+
+    /// Homebrew strips colour off a non-TTY, so the pipe path forces it back on (`CLICOLOR_FORCE` covers
+    /// the BSD-convention tools brew shells out to). The terminal path needs `TERM` instead: a GUI process
+    /// launched from Finder inherits none, and without it tools treat the terminal as capability-less.
+    static func environment(for options: BrewRunOptions) -> Environment {
+        switch options.output {
+        case .pseudoTerminal:
+            .inherit.updating(["TERM": "xterm-256color"])
+        case let .pipes(forceColor):
+            forceColor ? .inherit.updating(["HOMEBREW_COLOR": "1", "CLICOLOR_FORCE": "1"]) : .inherit
+        }
+    }
+
+    /// A signalled child becomes `128 + signal`, the shell convention, keeping "non-zero means failure".
+    static func exitCode(from status: TerminationStatus) -> Int32 {
+        switch status {
+        case let .exited(code):
+            code
+        case let .signaled(signal):
+            128 + signal
+        }
+    }
+}
+
+/// Tells the drain the child has exited, so a quiet terminal means "finished" rather than "waiting".
+/// Set from the task awaiting the subprocess, read from the drain's GCD worker, hence the lock.
+// swiftlint:disable:next unchecked_sendable
+private final class TerminalDrainGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var opened = false
+
+    var isOpen: Bool {
         lock.lock()
         defer { lock.unlock() }
-        if process.isRunning {
-            process.terminate()
-        }
+        return opened
+    }
+
+    func open() {
+        lock.lock()
+        defer { lock.unlock() }
+        opened = true
     }
 }

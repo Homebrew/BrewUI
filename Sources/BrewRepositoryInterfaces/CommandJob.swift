@@ -81,8 +81,14 @@ public final class CommandJob: Identifiable {
         }
     }
 
+    /// Appends, or replaces the trailing row when it was still being drawn. Revisions keep the row's
+    /// identity, so a redrawing progress bar animates rather than accumulating hundreds of rows.
     public func appendOutput(_ line: BrewCommandOutputLine) {
-        output.append(line)
+        if let last = output.last, !last.isComplete {
+            output[output.count - 1] = line.adoptingIdentity(of: last)
+        } else {
+            output.append(line)
+        }
         if output.count > maxOutputLines {
             output.removeFirst(output.count - maxOutputLines)
         }
