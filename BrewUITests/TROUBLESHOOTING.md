@@ -52,6 +52,24 @@ green on a real Mac. Kept here because every cause below will bite again if the 
    build across steps, for instance) needs to be tested end-to-end on a real Mac before trusting it —
    the failure mode gives no clue it's about the path.
 
+8. **`CODE_SIGNING_ALLOWED=NO` leaves the test runner with a signature that no longer matches its
+   contents, and macOS calls that "damaged".** The symptom is a Gatekeeper dialog — *"BrewUITests-Runner
+   is damaged and can't be opened. You should move it to the Bin."* — followed ~300s later by
+   `The test runner hung before establishing connection.` The dialog is the cause; the hang is just
+   xcodebuild waiting on a runner macOS refused to start.
+
+   `BrewUITests-Runner.app` is a copy of Xcode's `XCTRunner.app` template, which arrives **already
+   signed by Apple** (`codesign -dvv` on a broken one reports `Identifier=com.apple.XCTRunner`). The
+   build then inserts our `.xctest` into `Contents/PlugIns` and, with signing disallowed, never
+   re-signs — so the retained seal is invalid: `codesign -v --deep --strict` says *"code has no
+   resources but signature indicates they must be present"*. Allowing signing with
+   `CODE_SIGN_IDENTITY=-` fixes it: the runner is ad-hoc signed as `sh.brew.BrewUITests.xctrunner`
+   with a valid seal, and ad-hoc needs no identity, team or profile, so it works on CI too.
+
+   **Watch for:** `scripts/test-ui` and the `ui-test` CI job still pass `CODE_SIGNING_ALLOWED=NO`.
+   That is the same latent defect — if the deterministic suite ever starts failing this way, drop
+   the flag there as well rather than hunting the hang.
+
 ## Debugging gotcha specific to this environment
 
 Running a diagnostic shell command (even a quick `osascript` query) *while* a test is polling
