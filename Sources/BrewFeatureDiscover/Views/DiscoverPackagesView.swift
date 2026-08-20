@@ -7,6 +7,13 @@ import SwiftUI
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
 
+    /// Whether the toolbar field is on screen. Pure view chrome — no model decision depends on it.
+    @State private var isSearchFieldPresented = false
+
+    /// Whether the toolbar field holds the cursor. This — not `.searchable(isPresented:)` — is what
+    /// ⌘F drives, and what the model mirrors to decide whether the list may claim focus.
+    @FocusState private var isSearchFieldFocused: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
@@ -30,11 +37,23 @@ struct DiscoverPackagesView: View {
         // the field is custom; query it via `app.searchFields` for now.
         .searchable(
             text: $viewModel.query,
-            isPresented: $viewModel.isSearchFieldPresented,
+            isPresented: $isSearchFieldPresented,
             placement: .toolbar,
             prompt: "Search Homebrew's Packages",
         )
-        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
+        .searchFocused($isSearchFieldFocused)
+        .focusedSceneValue(\.focusSearchField, focusSearchField)
+        // Mirror real cursor state into the model so `shouldFocusList` stays a pure, unit-testable
+        // decision, and so the list never yanks the cursor out of a live search.
+        .onChange(of: isSearchFieldFocused, initial: true) { _, focused in
+            viewModel.isSearchFieldPresented = focused
+        }
+        // Keep the field on screen while a query is active.
+        .onChange(of: viewModel.query, initial: true) { _, query in
+            if !query.isEmpty {
+                isSearchFieldPresented = true
+            }
+        }
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
             try? await Task.sleep(for: .milliseconds(250))
@@ -42,6 +61,20 @@ struct DiscoverPackagesView: View {
                 return
             }
             await viewModel.search()
+        }
+    }
+
+    /// ⌘F. Marks the model before moving the cursor: the package list auto-focuses itself off
+    /// `shouldFocusList`, so a list re-inserted in the gap would otherwise pull the cursor straight
+    /// back out. Captures the two locations rather than `self` so it stays valid past this body pass.
+    private var focusSearchField: FocusSearchFieldAction {
+        let presented = $isSearchFieldPresented
+        let focused = $isSearchFieldFocused
+        let viewModel = viewModel
+        return FocusSearchFieldAction {
+            viewModel.isSearchFieldPresented = true
+            presented.wrappedValue = true
+            focused.wrappedValue = true
         }
     }
 

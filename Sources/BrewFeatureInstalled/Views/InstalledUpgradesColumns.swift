@@ -43,6 +43,15 @@ public struct InstalledUpgradesRoot: View {
 struct InstalledUpgradesContainer: View {
     @State private var installed: InstalledViewModel
     @State private var upgrades: UpgradesViewModel
+
+    /// Whether the toolbar field is on screen. Pure view chrome — no model decision depends on it,
+    /// so it stays here rather than being mirrored into a view model.
+    @State private var isSearchFieldPresented = false
+
+    /// Whether the toolbar field holds the cursor. This — not `.searchable(isPresented:)` — is what
+    /// ⌘F drives, and what the models mirror to decide whether the list may claim focus.
+    @FocusState private var isSearchFieldFocused: Bool
+
     private let mode: InstalledUpgradesRoot.Mode
     private let navigateToInstalledPackage: @MainActor (InstalledBrewPackage.ID) -> Void
     @Binding private var deepLinkSelection: InstalledBrewPackage.ID?
@@ -77,11 +86,44 @@ struct InstalledUpgradesContainer: View {
         content
             .searchable(
                 text: activeSearchQuery,
-                isPresented: activeSearchPresented,
+                isPresented: $isSearchFieldPresented,
                 placement: .toolbar,
                 prompt: activeSearchPrompt,
             )
-            .focusedSceneValue(\.searchPresented, activeSearchPresented)
+            .searchFocused($isSearchFieldFocused)
+            .focusedSceneValue(\.focusSearchField, focusSearchField)
+            // Mirror real cursor state into both models so `shouldFocusList` stays a pure,
+            // unit-testable decision, and so the list never yanks the cursor out of a live search.
+            .onChange(of: isSearchFieldFocused, initial: true) { _, focused in
+                installed.isSearchFieldPresented = focused
+                upgrades.isSearchFieldPresented = focused
+            }
+            // Keeps a filtered list's field on screen — and, just as importantly, is what registers
+            // this view as an observer of the query. A `Binding`'s getter is lazy, so handing
+            // `.searchable` `$model.searchQuery` establishes no Observation dependency on the view
+            // that hosts the field; without a read here, a model-side query change (`resetFilters`)
+            // would reach the list but not the toolbar.
+            .onChange(of: activeSearchQuery.wrappedValue, initial: true) { _, query in
+                if !query.isEmpty {
+                    isSearchFieldPresented = true
+                }
+            }
+    }
+
+    /// ⌘F. Marks the models before moving the cursor: the package list auto-focuses itself off
+    /// `shouldFocusList`, so a list re-inserted in the gap would otherwise pull the cursor straight
+    /// back out. Captures the two locations rather than `self` so it stays valid past this body pass.
+    private var focusSearchField: FocusSearchFieldAction {
+        let presented = $isSearchFieldPresented
+        let focused = $isSearchFieldFocused
+        let installed = installed
+        let upgrades = upgrades
+        return FocusSearchFieldAction {
+            installed.isSearchFieldPresented = true
+            upgrades.isSearchFieldPresented = true
+            presented.wrappedValue = true
+            focused.wrappedValue = true
+        }
     }
 
     @ViewBuilder private var content: some View {
@@ -97,13 +139,6 @@ struct InstalledUpgradesContainer: View {
         switch mode {
         case .installed: $installed.searchQuery
         case .upgrades: $upgrades.searchQuery
-        }
-    }
-
-    private var activeSearchPresented: Binding<Bool> {
-        switch mode {
-        case .installed: $installed.isSearchFieldPresented
-        case .upgrades: $upgrades.isSearchFieldPresented
         }
     }
 
