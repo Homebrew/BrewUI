@@ -76,9 +76,8 @@ final class DiscoverViewModel {
         isSearching ? results : trending
     }
 
-    /// Mirrors whether the toolbar search field holds the cursor (`.searchFocused`); lives here so
-    /// ``shouldFocusList`` can factor it in. Tracks *focus*, not `.searchable(isPresented:)`: a
-    /// macOS toolbar field stays presented after the cursor leaves it.
+    /// Mirrors `.searchFocused`. Focus, not `.searchable(isPresented:)`: a macOS toolbar field stays
+    /// presented after the cursor leaves it. Lives here so ``shouldFocusList`` stays unit-testable.
     var isSearchFieldFocused: Bool = false
 
     /// Never claims focus while the cursor is in the search field — clearing the query back to empty

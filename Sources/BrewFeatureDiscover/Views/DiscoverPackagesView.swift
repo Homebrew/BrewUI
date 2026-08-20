@@ -7,11 +7,9 @@ import SwiftUI
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
 
-    /// Whether the toolbar field is on screen. Pure view chrome — no model decision depends on it.
+    /// Presentation and focus are separate: a macOS toolbar field stays presented after the cursor
+    /// leaves it, so only the focus state answers "is the user typing in the search box".
     @State private var isSearchFieldPresented = false
-
-    /// Whether the toolbar field holds the cursor. This — not `.searchable(isPresented:)` — is what
-    /// ⌘F drives, and what the model mirrors to decide whether the list may claim focus.
     @FocusState private var isSearchFieldFocused: Bool
 
     var body: some View {
@@ -43,12 +41,10 @@ struct DiscoverPackagesView: View {
         )
         .searchFocused($isSearchFieldFocused)
         .focusedSceneValue(\.focusSearchField, focusSearchField)
-        // Mirror real cursor state into the model so `shouldFocusList` stays a pure, unit-testable
-        // decision, and so the list never yanks the cursor out of a live search.
+        // `shouldFocusList` lives in the model so it stays unit-testable.
         .onChange(of: isSearchFieldFocused, initial: true) { _, focused in
             viewModel.isSearchFieldFocused = focused
         }
-        // Keep the field on screen while a query is active.
         .onChange(of: viewModel.query, initial: true) { _, query in
             if !query.isEmpty {
                 isSearchFieldPresented = true
@@ -64,9 +60,8 @@ struct DiscoverPackagesView: View {
         }
     }
 
-    /// ⌘F. Marks the model before moving the cursor: the package list auto-focuses itself off
-    /// `shouldFocusList`, so a list re-inserted in the gap would otherwise pull the cursor straight
-    /// back out. Captures the two locations rather than `self` so it stays valid past this body pass.
+    /// Marks the model before moving the cursor — the list auto-focuses off `shouldFocusList` and
+    /// would otherwise claim it straight back.
     private var focusSearchField: FocusSearchFieldAction {
         let presented = $isSearchFieldPresented
         let focused = $isSearchFieldFocused

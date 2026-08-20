@@ -20,13 +20,9 @@ public struct SearchCommands: Commands {
     }
 }
 
-/// What ⌘F does to the pane that publishes it.
-///
-/// An action rather than the `Binding<Bool>` this used to be. `.searchable(isPresented:)` tracks
-/// *presentation*, not focus: a macOS toolbar search field stays presented after the cursor leaves
-/// it, so writing `true` over an already-`true` binding was not a state change and SwiftUI did
-/// nothing with it — ⌘F went dead once the field had been shown. Panes implement this by driving a
-/// real `@FocusState` through `.searchFocused(_:)`, which cannot fall out of step with the cursor.
+/// An action rather than a `Binding<Bool>`: `.searchable(isPresented:)` tracks presentation, not
+/// focus, and a macOS toolbar field stays presented after the cursor leaves it — so setting that
+/// binding `true` again was no state change and moved nothing. Panes drive `.searchFocused` instead.
 public struct FocusSearchFieldAction {
     private let handler: @MainActor () -> Void
 
