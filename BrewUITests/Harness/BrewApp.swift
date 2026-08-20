@@ -42,8 +42,7 @@ enum BrewApp {
     /// windowless app has an empty accessibility tree — so every query fails for a reason unrelated to
     /// what it asked for. Only the "reopen" AppleEvent a Dock click sends reliably creates the window.
     ///
-    /// Not private: the live suite launches through ``BrewE2EApp`` rather than through this type, and
-    /// the problem this solves is a macOS one that has nothing to do with how the app is wired.
+    /// Not private: ``BrewE2EApp`` launches its own app and hits the same macOS behaviour.
     static func activate(_ app: XCUIApplication) {
         app.activate()
         _ = app.wait(for: .runningForeground, timeout: BrewUITestTimeout.launch)

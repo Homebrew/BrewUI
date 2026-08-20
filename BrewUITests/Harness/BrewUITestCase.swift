@@ -33,9 +33,8 @@ class BrewUITestCase: XCTestCase {
         super.tearDown()
     }
 
-    /// Registers an app the case launched for itself, so `tearDown` terminates it exactly as
-    /// ``launch(_:file:line:)`` does. The live suite (`BrewUITests/E2E`) launches through its own
-    /// harness — different wiring, same reason not to leak a process into the next test.
+    /// Registers an app the case launched for itself — the live suite in `BrewUITests/E2E` — so
+    /// `tearDown` terminates it exactly as ``launch(_:file:line:)`` does.
     @discardableResult
     func track(_ app: XCUIApplication) -> XCUIApplication {
         launchedApp = app

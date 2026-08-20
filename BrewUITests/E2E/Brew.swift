@@ -5,18 +5,12 @@
 
 import Foundation
 
-/// Runs the machine's real `brew` from the *test* process, to arrange and clean up live-suite state.
-///
-/// This is a fixture actuator, not the code under test. The app reaches brew its own way — login
-/// shell, `BrewExecutableLocator`, `BrewCommandService` — and that path is what the live tests act
-/// through. Setup and cleanup deliberately take the short route instead: a broken arrange should read
-/// as a broken fixture here, not as a missing row three screens into the flow under test.
+/// Runs the machine's real `brew` from the test process, to arrange and clean up live-suite state.
+/// A fixture actuator, never the code under test: the tests act through the app's own path to brew.
 nonisolated enum Brew {
-    /// Homebrew's determinism switches, applied to every brew this suite causes to run — the one the
-    /// app spawns (``BrewE2EApp`` puts them in the launch environment, and `BrewCommandService`
-    /// inherits) and the ones below. `HOMEBREW_NO_AUTO_UPDATE` is the load-bearing one: without it an
-    /// install can spend minutes updating the tap first, which reads as a hung test rather than a slow
-    /// one. The rest keep a canary run from touching anything it doesn't own.
+    /// Applied to every brew this suite causes to run, including the app's own — ``BrewE2EApp`` puts
+    /// these in the launch environment. Without `HOMEBREW_NO_AUTO_UPDATE` an install can spend minutes
+    /// updating the tap first, which reads as a hung test.
     static let determinismEnvironment = [
         "HOMEBREW_NO_AUTO_UPDATE": "1",
         "HOMEBREW_NO_ANALYTICS": "1",
@@ -24,9 +18,7 @@ nonisolated enum Brew {
         "HOMEBREW_NO_ENV_HINTS": "1",
     ]
 
-    /// Same order as `BrewExecutableLocator`: Apple Silicon prefix, then Intel. Spelled again rather
-    /// than imported because the test target links no product code, and because a fixture actuator
-    /// resolving brew *differently* from the app is a difference worth being able to see.
+    /// Mirrors `BrewExecutableLocator`, spelled again because the test target links no product code.
     private static let candidatePaths = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]
 
     static func executableURL() throws -> URL {
@@ -35,7 +27,7 @@ nonisolated enum Brew {
                 return URL(fileURLWithPath: path)
             }
             // `isExecutableFile(atPath:)` tests the symlink node rather than its destination, and both
-            // prefixes ship `bin/brew` as a symlink — same fallback `BrewExecutableLocator` makes.
+            // prefixes ship `bin/brew` as a symlink.
             let resolved = URL(fileURLWithPath: path).resolvingSymlinksInPath()
             if FileManager.default.isExecutableFile(atPath: resolved.path) {
                 return resolved
@@ -44,21 +36,20 @@ nonisolated enum Brew {
         throw BrewFixtureError.brewNotFound(searched: candidatePaths)
     }
 
-    /// Called from `setUp` so a runner without Homebrew fails by name, immediately. Left to the tests,
-    /// the same machine fails several minutes later on an element query, saying nothing about why.
+    /// Called from `setUp`, so a machine without Homebrew fails by name rather than several minutes
+    /// later on an element query.
     static func requireAvailable() throws {
         _ = try executableURL()
     }
 
-    /// Best-effort clean slate, called before and after every mutating test. Nothing here is
-    /// actionable: uninstalling something that isn't installed exits non-zero — which is exactly what
-    /// "already clean" looks like — and teardown runs where there is no test left to fail.
+    /// Best-effort clean slate: uninstalling something that isn't installed exits non-zero, which is
+    /// exactly what "already clean" looks like.
     static func forceUninstall(_ token: String) {
         _ = try? invoke(["uninstall", "--force", token])
     }
 
-    /// Arrange step: anything but success is a broken fixture, so it throws with brew's own output
-    /// attached instead of leaving the test to fail later on an absent row.
+    /// Arrange step, throwing with brew's own output attached rather than leaving the test to fail
+    /// later on an absent row.
     static func run(_ arguments: String...) throws {
         let result = try invoke(arguments)
         guard result.status == 0 else {
@@ -76,11 +67,8 @@ nonisolated enum Brew {
         process.arguments = arguments
         process.environment = ProcessInfo.processInfo.environment
             .merging(determinismEnvironment) { _, determinism in determinism }
-        // Null stdin, so a brew that decides to prompt gets EOF rather than waiting out the test's
-        // whole time allowance.
+        // A brew that decides to prompt gets EOF rather than the test's whole time allowance.
         process.standardInput = FileHandle.nullDevice
-        // One pipe for both streams, drained to EOF *before* waiting: an install writes far more than
-        // a pipe buffer holds, and a child blocked writing into a full pipe never exits.
         let pipe = Pipe()
         process.standardOutput = pipe
         process.standardError = pipe
@@ -94,26 +82,23 @@ nonisolated enum Brew {
             )
         }
 
+        // Drained to EOF before waiting: an install writes more than a pipe buffer holds, and a child
+        // blocked writing into a full pipe never exits.
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
-        // Only ever read by a human out of a failure message, so undecodable bytes say so rather than
-        // being silently lost.
         let output = String(bytes: data, encoding: .utf8)
             ?? "(brew wrote \(data.count) bytes that are not valid UTF-8)"
         return (process.terminationStatus, output)
     }
 }
 
-/// Live-harness failure, kept distinct from any product error so it never reads as an app problem —
-/// the same separation ``FakeBrewError`` makes for the deterministic suite.
+/// Live-harness failure, kept distinct from any product error so it never reads as an app problem.
 enum BrewFixtureError: LocalizedError, CustomStringConvertible {
     case brewNotFound(searched: [String])
     case couldNotRun(command: String, underlying: any Error)
     case commandFailed(command: String, status: Int32, output: String)
 
-    /// XCTest reports a thrown error's `localizedDescription`, which for a plain `Error` is the
-    /// useless "operation couldn't be completed" boilerplate — these are thrown out of `setUp`, where
-    /// that string is the only thing anyone sees.
+    /// These are thrown out of `setUp`, where XCTest reports `localizedDescription` and nothing else.
     var errorDescription: String? {
         description
     }
@@ -137,7 +122,7 @@ enum BrewFixtureError: LocalizedError, CustomStringConvertible {
         }
     }
 
-    /// The last lines only: a failed install prints its whole transcript, and the reason is at the end.
+    /// A failed install prints its whole transcript; the reason is at the end.
     private static func tail(of output: String, lines: Int = 20) -> String {
         let all = output.split(separator: "\n", omittingEmptySubsequences: false)
         return all.suffix(lines).joined(separator: "\n")

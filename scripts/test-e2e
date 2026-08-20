@@ -34,11 +34,10 @@ echo "==> BrewUITests live canaries (Brew-E2E test plan)"
 rm -rf E2ETestResults.xcresult
 # No -derivedDataPath override, for the reason documented in scripts/test-ui.
 #
-# Signing is ALLOWED here — identity "-" ad-hoc signs, which needs no identity, team or profile, so
-# it works on a bare CI runner too. CODE_SIGNING_ALLOWED=NO does not mean "unsigned runner", it means
-# "runner left carrying Apple's XCTRunner.app signature over contents we have since replaced": the
-# seal no longer matches, macOS refuses to launch it as "damaged", and the run dies 300s later as
-# "The test runner hung before establishing connection." See BrewUITests/TROUBLESHOOTING.md.
+# Signing stays ALLOWED: identity "-" ad-hoc signs, needing no identity, team or profile, so this
+# works on a bare CI runner too. CODE_SIGNING_ALLOWED=NO instead leaves the runner carrying Apple's
+# XCTRunner.app signature over contents the build has replaced, which macOS rejects as "damaged"
+# (BrewUITests/TROUBLESHOOTING.md #8).
 xcodebuild test \
   -project Homebrew.xcodeproj \
   -scheme Brew-UI \

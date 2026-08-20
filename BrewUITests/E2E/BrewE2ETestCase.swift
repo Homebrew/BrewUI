@@ -5,17 +5,13 @@
 
 import XCTest
 
-/// Base class for the live suite. It inherits the deterministic suite's process hygiene — stop on
-/// first failure, one app per test, terminated in `tearDown` — and changes exactly one thing: the
-/// launch is production wiring against real brew and the real network (``BrewE2EApp``).
+/// Base class for the live suite: the deterministic suite's process hygiene, with production wiring
+/// against real brew and the real network (``BrewE2EApp``) in place of the stubbed launch.
 ///
-/// State isolation is split deliberately: tests **arrange and clean up by shelling out** to the real
-/// brew (``Brew``), and **act through the UI** using the same page objects the stubbed suite uses.
+/// Tests arrange and clean up by shelling out (``Brew``), and act through the shared page objects.
 class BrewE2ETestCase: BrewUITestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
-        // Fail by name, before a launch, on a machine that has no Homebrew — every test here is
-        // meaningless without one, and each would otherwise fail slowly and misleadingly.
         try Brew.requireAvailable()
     }
 

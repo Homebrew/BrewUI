@@ -1,13 +1,9 @@
 name: Live E2E Canaries
 
-# Deliberately off the PR path: this suite runs the app with production wiring
-# against real Homebrew and the real network, so it can go red for reasons that
-# have nothing to do with the change under review. It is a contract canary — if
-# Homebrew changes its JSON shape or CLI output and breaks a happy path, this
-# goes red while the deterministic per-PR suite stays green.
-#
-# It mutates real brew state (installs and uninstalls `hello`), which is safe
-# here because the runner is ephemeral. Run it by hand before cutting a release.
+# Off the PR path: real Homebrew and real network, so it can go red for reasons
+# that have nothing to do with the change under review. It also installs and
+# uninstalls `hello`, which is safe here because the runner is ephemeral.
+# See BrewUITests/E2E/README.md.
 on:
   schedule:
     # 05:00 UTC nightly — after the tap's own nightly churn, well before the day starts.
