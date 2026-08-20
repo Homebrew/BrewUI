@@ -63,13 +63,16 @@ final class BrewUISearchField {
     @discardableResult
     func assertValue(
         _ expected: String,
+        timeout: TimeInterval = BrewUITestTimeout.default,
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
+        let matches = NSPredicate(format: "value == %@", expected)
+        let expectation = XCTNSPredicateExpectation(predicate: matches, object: element)
         XCTAssertEqual(
-            value,
-            expected,
-            "Keystrokes did not reach the search field",
+            XCTWaiter().wait(for: [expectation], timeout: timeout),
+            .completed,
+            "Keystrokes did not reach the search field: wanted \(expected), got \(value)",
             file: file,
             line: line,
         )

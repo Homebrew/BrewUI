@@ -48,33 +48,35 @@ final class SearchFocusUITests: BrewUITestCase {
     @MainActor
     func testCommandFFocusesUpgradesSearchField() {
         let upgrades = launch(.installedBasic).sidebar.goToUpgrades()
+        upgrades.assertHasPackage("ripgrep")
 
         upgrades.searchField
             .pressFindShortcut()
-            .typeAtCursor("zzz")
-            .assertValue("zzz")
+            .typeAtCursor("rip")
+            .assertValue("rip")
 
-        upgrades.assertDoesNotHavePackage("ripgrep")
+        upgrades.assertHasPackage("ripgrep")
     }
 
     @MainActor
     func testCommandFRefocusesUpgradesSearchFieldAfterCursorLeaves() {
         let upgrades = launch(.installedBasic).sidebar.goToUpgrades()
+        upgrades.assertHasPackage("ripgrep")
 
         upgrades.searchField
             .pressFindShortcut()
             .typeAtCursor("rip")
-        upgrades.assertHasPackage("ripgrep")
+            .assertValue("rip")
 
         upgrades.list.row("ripgrep").tap()
 
         upgrades.searchField
             .pressFindShortcut()
             .selectAllAtCursor()
-            .typeAtCursor("zzz")
-            .assertValue("zzz")
+            .typeAtCursor("ripgrep")
+            .assertValue("ripgrep")
 
-        upgrades.assertDoesNotHavePackage("ripgrep")
+        upgrades.assertHasPackage("ripgrep")
     }
 
     // MARK: - Discover
