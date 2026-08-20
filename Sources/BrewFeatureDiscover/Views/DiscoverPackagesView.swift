@@ -46,7 +46,7 @@ struct DiscoverPackagesView: View {
         // Mirror real cursor state into the model so `shouldFocusList` stays a pure, unit-testable
         // decision, and so the list never yanks the cursor out of a live search.
         .onChange(of: isSearchFieldFocused, initial: true) { _, focused in
-            viewModel.isSearchFieldPresented = focused
+            viewModel.isSearchFieldFocused = focused
         }
         // Keep the field on screen while a query is active.
         .onChange(of: viewModel.query, initial: true) { _, query in
@@ -72,7 +72,7 @@ struct DiscoverPackagesView: View {
         let focused = $isSearchFieldFocused
         let viewModel = viewModel
         return FocusSearchFieldAction {
-            viewModel.isSearchFieldPresented = true
+            viewModel.isSearchFieldFocused = true
             presented.wrappedValue = true
             focused.wrappedValue = true
         }

@@ -361,34 +361,34 @@ struct UpgradesViewModelTests {
         #expect(!vm.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList is false while the search field is presented`() {
+    @Test @MainActor func `shouldFocusList is false while the search field holds the cursor`() {
         let vm = Self.makeViewModel(packages: Self.mixedPackages)
 
-        vm.isSearchFieldPresented = true
+        vm.isSearchFieldFocused = true
 
         // The list would otherwise steal focus when it re-appears after a query that filtered every
         // row is deleted; gating on search presentation keeps the cursor in the search box.
         #expect(!vm.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList returns to true once the search field is dismissed`() {
+    @Test @MainActor func `shouldFocusList returns to true once the search field loses the cursor`() {
         let vm = Self.makeViewModel(packages: Self.mixedPackages)
 
-        vm.isSearchFieldPresented = true
+        vm.isSearchFieldFocused = true
         #expect(!vm.shouldFocusList)
 
-        vm.isSearchFieldPresented = false
+        vm.isSearchFieldFocused = false
         #expect(vm.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList stays false when the search field is presented but not loaded`() {
+    @Test @MainActor func `shouldFocusList stays false when the search field holds the cursor but nothing is loaded`() {
         let vm = UpgradesViewModel(
             repository: StubInstalledPackagesRepository(state: .loading),
             brewCommandCenter: StubBrewCommandCenter(),
             commandFactory: StubMutatingCommandFactory(),
         )
 
-        vm.isSearchFieldPresented = true
+        vm.isSearchFieldFocused = true
 
         #expect(!vm.shouldFocusList)
     }

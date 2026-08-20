@@ -633,28 +633,28 @@ struct DiscoverViewModelTests {
         #expect(!viewModel.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList is false while the search field is presented`() async {
+    @Test @MainActor func `shouldFocusList is false while the search field holds the cursor`() async {
         let viewModel = await loadedTrendingViewModel()
 
-        viewModel.isSearchFieldPresented = true
+        viewModel.isSearchFieldFocused = true
 
         #expect(!viewModel.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList returns to true once the search field is dismissed`() async {
+    @Test @MainActor func `shouldFocusList returns to true once the search field loses the cursor`() async {
         let viewModel = await loadedTrendingViewModel()
 
-        viewModel.isSearchFieldPresented = true
+        viewModel.isSearchFieldFocused = true
         #expect(!viewModel.shouldFocusList)
 
-        viewModel.isSearchFieldPresented = false
+        viewModel.isSearchFieldFocused = false
         #expect(viewModel.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList stays false when the query is cleared while the field is presented`() async {
+    @Test @MainActor func `shouldFocusList stays false when the query is cleared while the field holds the cursor`() async {
         let viewModel = await loadedTrendingViewModel()
 
-        viewModel.isSearchFieldPresented = true
+        viewModel.isSearchFieldFocused = true
         viewModel.query = "git"
         #expect(!viewModel.shouldFocusList)
 
@@ -663,14 +663,14 @@ struct DiscoverViewModelTests {
         #expect(!viewModel.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList stays false when the field is presented but trending has not loaded`() {
+    @Test @MainActor func `shouldFocusList stays false when the field holds the cursor but trending has not loaded`() {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(state: .loading),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
         )
 
-        viewModel.isSearchFieldPresented = true
+        viewModel.isSearchFieldFocused = true
 
         #expect(!viewModel.shouldFocusList)
     }

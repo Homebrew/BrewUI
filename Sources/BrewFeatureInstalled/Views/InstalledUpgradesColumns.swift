@@ -95,8 +95,8 @@ struct InstalledUpgradesContainer: View {
             // Mirror real cursor state into both models so `shouldFocusList` stays a pure,
             // unit-testable decision, and so the list never yanks the cursor out of a live search.
             .onChange(of: isSearchFieldFocused, initial: true) { _, focused in
-                installed.isSearchFieldPresented = focused
-                upgrades.isSearchFieldPresented = focused
+                installed.isSearchFieldFocused = focused
+                upgrades.isSearchFieldFocused = focused
             }
             // Keeps a filtered list's field on screen — and, just as importantly, is what registers
             // this view as an observer of the query. A `Binding`'s getter is lazy, so handing
@@ -119,8 +119,8 @@ struct InstalledUpgradesContainer: View {
         let installed = installed
         let upgrades = upgrades
         return FocusSearchFieldAction {
-            installed.isSearchFieldPresented = true
-            upgrades.isSearchFieldPresented = true
+            installed.isSearchFieldFocused = true
+            upgrades.isSearchFieldFocused = true
             presented.wrappedValue = true
             focused.wrappedValue = true
         }

@@ -104,16 +104,18 @@ final class InstalledViewModel {
         return false
     }
 
-    /// Mirrors the search field's presentation state (bound to `.searchable(isPresented:)`). Owned
-    /// here — rather than as view `@State` — so ``shouldFocusList`` can factor it in and stay a pure,
-    /// unit-testable decision.
-    var isSearchFieldPresented: Bool = false
+    /// Mirrors whether the toolbar search field holds the cursor (`.searchFocused`). Owned here —
+    /// rather than as view `@State` — so ``shouldFocusList`` can factor it in and stay a pure,
+    /// unit-testable decision. Tracks *focus*, not `.searchable(isPresented:)`: on macOS a toolbar
+    /// field stays presented after the cursor leaves it, so presentation is no signal at all for
+    /// whether stealing focus would interrupt someone.
+    var isSearchFieldFocused: Bool = false
 
     /// Drives the list view's `@FocusState`. The list claims keyboard focus once the inventory has
     /// loaded, but never while the search field is active — auto-focusing the list must not kick the
     /// cursor out of an in-progress search.
     var shouldFocusList: Bool {
-        state.isLoaded && !isSearchFieldPresented
+        state.isLoaded && !isSearchFieldFocused
     }
 
     var packageCountSubtitle: String {

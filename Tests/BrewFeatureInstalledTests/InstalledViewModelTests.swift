@@ -298,25 +298,25 @@ struct InstalledViewModelTests {
         #expect(!vm.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList is false while the search field is presented`() async {
+    @Test @MainActor func `shouldFocusList is false while the search field holds the cursor`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git", kind: .formula)],
         )
 
-        vm.isSearchFieldPresented = true
+        vm.isSearchFieldFocused = true
 
         #expect(!vm.shouldFocusList)
     }
 
-    @Test @MainActor func `shouldFocusList returns to true once the search field is dismissed`() async {
+    @Test @MainActor func `shouldFocusList returns to true once the search field loses the cursor`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git", kind: .formula)],
         )
 
-        vm.isSearchFieldPresented = true
+        vm.isSearchFieldFocused = true
         #expect(!vm.shouldFocusList)
 
-        vm.isSearchFieldPresented = false
+        vm.isSearchFieldFocused = false
         #expect(vm.shouldFocusList)
     }
 }
