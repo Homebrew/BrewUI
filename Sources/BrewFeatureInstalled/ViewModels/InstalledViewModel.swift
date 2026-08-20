@@ -104,8 +104,6 @@ final class InstalledViewModel {
         return false
     }
 
-    /// Mirrors `.searchFocused`. Focus, not `.searchable(isPresented:)`: a macOS toolbar field stays
-    /// presented after the cursor leaves it. Lives here so ``shouldFocusList`` stays unit-testable.
     var isSearchFieldFocused: Bool = false
 
     /// Drives the list view's `@FocusState`. The list claims keyboard focus once the inventory has

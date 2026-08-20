@@ -5,14 +5,7 @@
 
 import XCTest
 
-/// ⌘F on each searchable tab, driven by keyboard alone.
-///
-/// Every assertion here is that typed characters landed *in the field*, never that the field looks
-/// focused: the shortcut's whole job is to move the cursor, and only text arriving proves it moved.
-/// Nothing in this file may click the search field — see ``BrewUISearchField/activate(timeout:file:line:)``.
-///
-/// The re-focus cases are the regression. ⌘F used to write `true` into a presentation binding that
-/// was already `true` once the field had been shown, so the second press onwards did nothing at all.
+/// ⌘F on each searchable tab. Nothing here may click the search field.
 final class SearchFocusUITests: BrewUITestCase {
     // MARK: - Installed
 
@@ -39,8 +32,6 @@ final class SearchFocusUITests: BrewUITestCase {
             .typeAtCursor("wget")
         installed.assertDoesNotHavePackage("iterm2")
 
-        // Moves the cursor out while leaving the field on screen and populated — the state the old
-        // presentation binding could not tell apart from "the user is still typing".
         installed.list.row("wget").tap()
 
         installed.searchField
@@ -124,8 +115,6 @@ final class SearchFocusUITests: BrewUITestCase {
 
     // MARK: - Tab switching
 
-    /// The Installed and Upgrades tabs share one `.searchable`, re-routed per tab. ⌘F has to keep
-    /// reaching whichever one is on screen, and the query it lands in has to be that tab's own.
     @MainActor
     func testCommandFReachesBothTabsSharingOneSearchField() {
         let installed = launch(.installedBasic)

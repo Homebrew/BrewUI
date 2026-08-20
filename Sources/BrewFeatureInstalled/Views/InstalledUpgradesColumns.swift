@@ -44,8 +44,6 @@ struct InstalledUpgradesContainer: View {
     @State private var installed: InstalledViewModel
     @State private var upgrades: UpgradesViewModel
 
-    /// Presentation and focus are separate: a macOS toolbar field stays presented after the cursor
-    /// leaves it, so only the focus state answers "is the user typing in the search box".
     @State private var isSearchFieldPresented = false
     @FocusState private var isSearchFieldFocused: Bool
 
@@ -89,14 +87,12 @@ struct InstalledUpgradesContainer: View {
             )
             .searchFocused($isSearchFieldFocused)
             .focusedSceneValue(\.focusSearchField, focusSearchField)
-            // `shouldFocusList` lives in the models so it stays unit-testable.
             .onChange(of: isSearchFieldFocused, initial: true) { _, focused in
                 installed.isSearchFieldFocused = focused
                 upgrades.isSearchFieldFocused = focused
             }
-            // Also this view's only read of the query: a Binding's getter is lazy, so the one handed
-            // to `.searchable` registers no Observation dependency and model-side query changes
-            // (`resetFilters`) would never reach the field.
+            // Also this view's only read of the query, which is what subscribes it to changes:
+            // the binding handed to `.searchable` is lazy and subscribes to nothing.
             .onChange(of: activeSearchQuery.wrappedValue, initial: true) { _, query in
                 if !query.isEmpty {
                     isSearchFieldPresented = true
@@ -104,8 +100,7 @@ struct InstalledUpgradesContainer: View {
             }
     }
 
-    /// Marks the models before moving the cursor — the list auto-focuses off `shouldFocusList` and
-    /// would otherwise claim it straight back.
+    /// Order matters: the list auto-focuses off `shouldFocusList` and would claim the cursor back.
     private var focusSearchField: FocusSearchFieldAction {
         let presented = $isSearchFieldPresented
         let focused = $isSearchFieldFocused

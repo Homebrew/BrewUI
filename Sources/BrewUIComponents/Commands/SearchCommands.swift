@@ -20,9 +20,7 @@ public struct SearchCommands: Commands {
     }
 }
 
-/// An action rather than a `Binding<Bool>`: `.searchable(isPresented:)` tracks presentation, not
-/// focus, and a macOS toolbar field stays presented after the cursor leaves it — so setting that
-/// binding `true` again was no state change and moved nothing. Panes drive `.searchFocused` instead.
+/// An action, not a `Binding<Bool>`: re-setting an already-`true` binding moves nothing.
 public struct FocusSearchFieldAction {
     private let handler: @MainActor () -> Void
 
@@ -37,6 +35,5 @@ public struct FocusSearchFieldAction {
 }
 
 public extension FocusedValues {
-    /// Published by whichever pane owns a search field; invoked by ``SearchCommands`` on ⌘F.
     @Entry var focusSearchField: FocusSearchFieldAction?
 }

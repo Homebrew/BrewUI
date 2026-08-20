@@ -7,8 +7,6 @@ import SwiftUI
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
 
-    /// Presentation and focus are separate: a macOS toolbar field stays presented after the cursor
-    /// leaves it, so only the focus state answers "is the user typing in the search box".
     @State private var isSearchFieldPresented = false
     @FocusState private var isSearchFieldFocused: Bool
 
@@ -41,7 +39,6 @@ struct DiscoverPackagesView: View {
         )
         .searchFocused($isSearchFieldFocused)
         .focusedSceneValue(\.focusSearchField, focusSearchField)
-        // `shouldFocusList` lives in the model so it stays unit-testable.
         .onChange(of: isSearchFieldFocused, initial: true) { _, focused in
             viewModel.isSearchFieldFocused = focused
         }
@@ -60,8 +57,7 @@ struct DiscoverPackagesView: View {
         }
     }
 
-    /// Marks the model before moving the cursor — the list auto-focuses off `shouldFocusList` and
-    /// would otherwise claim it straight back.
+    /// Order matters: the list auto-focuses off `shouldFocusList` and would claim the cursor back.
     private var focusSearchField: FocusSearchFieldAction {
         let presented = $isSearchFieldPresented
         let focused = $isSearchFieldFocused

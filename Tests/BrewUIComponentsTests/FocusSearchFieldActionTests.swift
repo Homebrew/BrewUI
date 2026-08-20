@@ -7,7 +7,6 @@
 import Foundation
 import Testing
 
-/// Repeat presses are the point: the `Binding<Bool>` this replaced went dead once it was `true`.
 @MainActor
 struct FocusSearchFieldActionTests {
     @Test func `invoking the action runs its handler`() {

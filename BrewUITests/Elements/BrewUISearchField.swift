@@ -21,11 +21,7 @@ final class BrewUISearchField {
         app.searchFields.firstMatch
     }
 
-    /// Puts the cursor in the field by clicking it, for callers whose subject is the *search*.
-    ///
-    /// The trailing click means this proves nothing about ⌘F, whatever the shortcut above it did —
-    /// which is how a completely dead ⌘F once kept a green suite. ``SearchFocusUITests`` covers the
-    /// shortcut on its own terms; do not reach for this there.
+    /// Clicks the field, so it proves nothing about ⌘F. ``SearchFocusUITests`` covers that.
     @discardableResult
     func activate(
         timeout: TimeInterval = BrewUITestTimeout.default,
@@ -45,23 +41,19 @@ final class BrewUISearchField {
         return self
     }
 
-    /// Presses ⌘F and returns. No click, no wait, no assertion — a caller testing the shortcut has
-    /// to be able to watch it fail.
     @discardableResult
     func pressFindShortcut() -> Self {
         app.typeKey("f", modifierFlags: .command)
         return self
     }
 
-    /// Types at the app, so the text lands only where the cursor already is. `element.typeText`
-    /// focuses the element first, which would answer the question the caller is asking.
+    /// At the app, not the element: `element.typeText` would focus the field first.
     @discardableResult
     func typeAtCursor(_ text: String) -> Self {
         app.typeText(text)
         return self
     }
 
-    /// Select-all at the cursor, so a follow-up ``typeAtCursor(_:)`` replaces rather than appends.
     @discardableResult
     func selectAllAtCursor() -> Self {
         app.typeKey("a", modifierFlags: .command)
