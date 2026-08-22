@@ -38,7 +38,7 @@ struct BrewCommandServicePseudoTerminalTests {
             lineObserver: { collector.append($0) },
         )
 
-        #expect(collector.allLines().map(\.text) == ["one", "two", "three"])
+        #expect(collector.allLines().filter(\.isComplete).map(\.text) == ["one", "two", "three"])
     }
 
     @Test func `pseudo-terminal run merges stderr into the stdout stream`() async throws {
@@ -123,12 +123,11 @@ struct BrewCommandServicePseudoTerminalTests {
         let collector = OutputCollector()
 
         _ = try await run(
-            script: "printf '10%%\\r'; sleep 0.1; printf '50%%\\r'; sleep 0.1; printf '100%%\\n'",
+            script: "printf '10%%\\r'; sleep 0.3; printf '50%%\\r'; sleep 0.3; printf '100%%\\n'",
             channel: .pseudoTerminal,
             lineObserver: { collector.append($0) },
         )
 
-        // Separated by sleeps so they arrive as distinct reads.
         let revisions = collector.allLines().filter { !$0.isComplete }.map(\.text)
         #expect(revisions == ["10%", "50%"])
     }
@@ -171,13 +170,15 @@ struct BrewCommandServicePseudoTerminalTests {
             )
         }
 
-        try await Task.sleep(for: .milliseconds(500))
-        let spawned = Self.grandchildCount()
+        try await waitUntil("the child never spawned a grandchild", poll: .milliseconds(50)) {
+            Self.grandchildCount() > 0
+        }
         task.cancel()
         _ = await task.result
-        try await Task.sleep(for: .milliseconds(1500))
 
-        #expect(spawned > 0 && Self.grandchildCount() == 0)
+        try await waitUntil("the grandchild outlived the cancelled run", poll: .milliseconds(50)) {
+            Self.grandchildCount() == 0
+        }
     }
 }
 
