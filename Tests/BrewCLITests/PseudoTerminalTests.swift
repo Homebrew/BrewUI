@@ -49,13 +49,10 @@ struct PseudoTerminalTests {
     @Test func `read reports end of input once the child and the local replica are gone`() throws {
         let terminal = try PseudoTerminal()
         let process = try startProcess(script: "printf 'done\\n'", terminal: terminal)
-        terminal.closeReplica()
-
-        let output = drainToEndOfInput(terminal)
-        process.waitUntilExit()
-        terminal.closePrimary()
 
         // Terminating at all is the assertion: a leaked replica descriptor would hang this forever.
+        let output = collectOutput(of: process, on: terminal)
+
         #expect(output == "done\n")
     }
 
@@ -96,7 +93,6 @@ struct PseudoTerminalTests {
 }
 
 private extension PseudoTerminalTests {
-    /// Runs `script` with the replica as stdout+stderr and drains the primary to end-of-input.
     func runOnPseudoTerminal(
         columns: UInt16 = PseudoTerminal.defaultColumns,
         rows: UInt16 = PseudoTerminal.defaultRows,
@@ -104,24 +100,52 @@ private extension PseudoTerminalTests {
     ) throws -> String {
         let terminal = try PseudoTerminal(columns: columns, rows: rows)
         let process = try startProcess(script: script, terminal: terminal)
-        terminal.closeReplica()
+        let output = collectOutput(of: process, on: terminal)
 
-        let output = drainToEndOfInput(terminal)
-        process.waitUntilExit()
-        terminal.closePrimary()
+        #expect(process.terminationStatus == 0, "the child exited \(process.terminationStatus)")
 
         return output
     }
 
-    /// Ignores idle timeouts; safe because every script under test terminates on its own.
-    func drainToEndOfInput(_ terminal: PseudoTerminal) -> String {
+    func collectOutput(of process: Process, on terminal: PseudoTerminal) -> String {
         var data = Data()
+
+        live: while true {
+            switch terminal.read(timeout: .milliseconds(25)) {
+            case let .data(chunk):
+                data.append(chunk)
+            case .timedOut:
+                if !process.isRunning {
+                    break live
+                }
+            case .endOfInput:
+                Issue.record("end of input arrived while this process still held the replica open")
+                break live
+            case let .failed(code):
+                Issue.record("reading the terminal failed: \(PseudoTerminal.describe(errno: code))")
+                break live
+            }
+        }
+        process.waitUntilExit()
+
+        terminal.closeReplica()
+        drainToEndOfInput(terminal, into: &data)
+        terminal.closePrimary()
+
+        return UTF8StreamDecoder.lossyString(data)
+    }
+
+    func drainToEndOfInput(_ terminal: PseudoTerminal, into data: inout Data) {
+        let deadline = Date().addingTimeInterval(10)
         loop: while true {
             switch terminal.read() {
             case let .data(chunk):
                 data.append(chunk)
             case .timedOut:
-                continue
+                if Date() > deadline {
+                    Issue.record("end of input never arrived: a replica descriptor is still open somewhere")
+                    break loop
+                }
             case .endOfInput:
                 break loop
             case let .failed(code):
@@ -129,7 +153,6 @@ private extension PseudoTerminalTests {
                 break loop
             }
         }
-        return UTF8StreamDecoder.lossyString(data)
     }
 
     /// `Foundation.Process` deliberately, to exercise ``PseudoTerminal`` independently of the runner.
