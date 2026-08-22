@@ -68,16 +68,24 @@ struct SerialBrewCommandCenterTests {
 
     @Test func `duplicate id coalesces to a single command body`() async throws {
         let counter = InvocationCounter()
+        let gate = TestGate()
         let center = makeCenter(runner: ClosureRunner { _ in
             await counter.increment()
-            try await Task.sleep(for: .milliseconds(30))
+            await gate.wait()
             return successOutput
         })
         let id = BrewOperationID(kind: .formula, name: "git")
 
         let first = Task { try await center.perform(noopCommand, id: id) }
-        try await Task.sleep(for: .milliseconds(5))
-        let second = Task { try await center.perform(noopCommand, id: id) }
+        try await waitUntil { await counter.value == 1 }
+
+        let submitting = InvocationCounter()
+        let second = Task {
+            await submitting.increment()
+            try await center.perform(noopCommand, id: id)
+        }
+        try await waitUntil { await submitting.value == 1 }
+        await gate.open()
 
         try await first.value
         try await second.value
@@ -157,7 +165,7 @@ struct SerialBrewCommandCenterTests {
         defer { collect.cancel() }
 
         try await center.perform(noopCommand, id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil { await collector.phases.count >= 3 }
         let values = await collector.phases
         #expect(values.count >= 3)
         #expect(values.first == .idle)
@@ -190,7 +198,11 @@ struct SerialBrewCommandCenterTests {
         }
 
         try await center.perform(noopCommand, id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil {
+            let countA = await collectorA.phases.count
+            let countB = await collectorB.phases.count
+            return countA >= 3 && countB >= 3
+        }
         let countA = await collectorA.phases.count
         let countB = await collectorB.phases.count
         #expect(countA >= 3)
@@ -199,10 +211,11 @@ struct SerialBrewCommandCenterTests {
 
     @Test func `recording wrapper logs each submit while duplicate id coalesces body`() async throws {
         let counter = InvocationCounter()
+        let gate = TestGate()
         let ctx = BrewCommandExecutionContext(
             commandRunner: ClosureRunner { _ in
                 await counter.increment()
-                try await Task.sleep(for: .milliseconds(30))
+                await gate.wait()
                 return successOutput
             },
             locator: BrewExecutableLocator(overrideURL: InstalledPackagesTestSupport.fakeBrewExecutableURL),
@@ -211,8 +224,10 @@ struct SerialBrewCommandCenterTests {
         let id = BrewOperationID(kind: .formula, name: "git")
 
         let first = Task { try await center.perform(noopCommand, id: id) }
-        try await Task.sleep(for: .milliseconds(5))
+        try await waitUntil { await counter.value == 1 }
         let second = Task { try await center.perform(noopCommand, id: id) }
+        try await waitUntil { await center.recordedSubmitEntries.count == 2 }
+        await gate.open()
 
         try await first.value
         try await second.value
@@ -240,7 +255,7 @@ struct SerialBrewAllPhaseStreamTests {
 
         try await center.perform(noopCommand, id: idA)
         try await center.perform(noopCommand, id: idB)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil { await collector.events.count >= 4 }
         let events = await collector.events
         let eventsForA = events.filter { $0.0 == idA }.map(\.1)
         let eventsForB = events.filter { $0.0 == idB }.map(\.1)
@@ -279,7 +294,11 @@ struct SerialBrewAllPhaseStreamTests {
         }
 
         try await center.perform(noopCommand, id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil {
+            let countA = await collectorA.events.count
+            let countB = await collectorB.events.count
+            return countA >= 2 && countB >= 2
+        }
         let eventsA = await collectorA.events
         let eventsB = await collectorB.events
         #expect(eventsA.count == eventsB.count)
@@ -301,10 +320,20 @@ struct SerialBrewAllPhaseStreamTests {
             }
         }
         collect.cancel()
-        try await Task.sleep(for: .milliseconds(20))
+        await collect.value
+
+        let witnessStream = await center.allPhaseChanges()
+        let witness = AllPhaseStreamCollector()
+        let observe = Task {
+            for await pair in witnessStream {
+                await witness.append(id: pair.0, phase: pair.1)
+            }
+        }
 
         try await center.perform(noopCommand, id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil { await witness.events.count >= 2 }
+        observe.cancel()
+
         let eventsAfterCancel = await collector.events
         #expect(eventsAfterCancel.isEmpty)
 
@@ -318,7 +347,7 @@ struct SerialBrewAllPhaseStreamTests {
         defer { collect2.cancel() }
 
         try await center.perform(noopCommand, id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil { await collector2.events.count >= 2 }
         let eventsFresh = await collector2.events
         #expect(eventsFresh.count >= 2)
         #expect(eventsFresh.first?.0 == id)
