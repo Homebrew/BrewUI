@@ -102,7 +102,7 @@ If a test failure surfaces a real regression that's out of scope for the current
 
 ### Live end-to-end canaries (`scripts/test-e2e`) — never run unasked
 
-`scripts/test-e2e` (test plan `Brew-E2E`, sources in `BrewUITests/E2E/`) runs the app against **real Homebrew and the real network**, and **installs and uninstalls the formula `hello` on the machine it runs on**. It is not part of any quality gate: it runs nightly on an ephemeral CI runner and by hand before a release. Do not run it to "check the UI tests" — that's `scripts/test-ui`, which is deterministic and touches nothing. See `BrewUITests/E2E/README.md`.
+`scripts/test-e2e` (test plan `Brew-E2E`, sources in `BrewUITests/E2E/`) runs the app against **real Homebrew and the real network**, and **installs and uninstalls the formula `hello` on the machine it runs on**. CI runs it on an ephemeral runner for every pull request, and it is run by hand before a release. Do not run it to "check the UI tests" — that's `scripts/test-ui`, which is deterministic and touches nothing. See `BrewUITests/E2E/README.md`.
 
 ### Dead-code analysis (Periphery)
 

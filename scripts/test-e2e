@@ -7,9 +7,9 @@
 # the app with production wiring (no -uiTesting). Nothing may depend on `hello`
 # being present or absent — see BrewUITests/E2E/README.md.
 #
-# This is NOT the per-PR suite; that is scripts/test-ui (Brew-UI test plan),
-# which is deterministic and never touches real brew. Run this nightly, and by
-# hand before cutting a release.
+# CI runs this on every pull request as its own job. Run it by hand before
+# cutting a release. It is not the deterministic suite; that is scripts/test-ui
+# (Brew-UI test plan), which never touches real brew.
 #
 # Same window/focus caveats as scripts/test-ui — see BrewUITests/TROUBLESHOOTING.md
 # before running it on a machine you're actively using.

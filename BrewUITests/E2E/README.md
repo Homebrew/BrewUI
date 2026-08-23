@@ -2,10 +2,11 @@
 
 A small suite that runs the app with **production wiring** against **real Homebrew** and the **real
 network**. Everything else in `BrewUITests` stubs the two process boundaries and is deterministic;
-this does not, and is deliberately kept off the per-PR path.
+this does not.
 
-Run it with `scripts/test-e2e` (test plan `Brew-E2E`). `scripts/test-ui` (test plan `Brew-UI`) is the
-per-PR suite and skips these tests by name.
+Run it with `scripts/test-e2e` (test plan `Brew-E2E`). It runs on every pull request as its own job,
+separate from the deterministic suite: `scripts/test-ui` (test plan `Brew-UI`) skips these tests by
+name, so a live failure never reads as a failure of the fixture-backed suite.
 
 ## What it is for
 
@@ -63,9 +64,9 @@ reads as a fixture failure rather than as a red assertion inside the flow under 
 - The same Accessibility/Automation permissions the deterministic UI suite needs — see
   `../TROUBLESHOOTING.md`.
 
-## Schedule
+## When it runs
 
-- **Nightly** via `.github/workflows/e2e_nightly.yml` (cron, plus manual dispatch).
+- **On every pull request** via `.github/workflows/e2e.yml`, plus manual dispatch.
 - **Before cutting a release**, by hand: `scripts/test-e2e`. That is the moment you most want to know
   brew has not shifted under the app. The release workflow itself is deliberately not wired to it.
 
@@ -82,5 +83,5 @@ the GitHub run, and as plain text locally. It never fails a run by itself.
 The evidence lives in the result bundle: `BrewUITestCase.record(_:)` attaches a screenshot of the
 whole screen to every failure. Both it and the plan use the `keepAlways` lifetime, because the
 interesting screenshot belongs to a failed *attempt* of a test that ultimately passed, and
-`deleteOnSuccess` prunes exactly that. The nightly job uploads the bundle when the run fails **and**
+`deleteOnSuccess` prunes exactly that. The job uploads the bundle when the run fails **and**
 when a test only passed on a retry, so that screenshot is not thrown away with the green run.

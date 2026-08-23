@@ -1,13 +1,11 @@
 name: Live E2E Canaries
 
-# Off the PR path: real Homebrew and real network, so it can go red for reasons
-# that have nothing to do with the change under review. It also installs and
-# uninstalls `hello`, which is safe here because the runner is ephemeral.
+# Real Homebrew and real network: this installs and uninstalls `hello` on the
+# runner, which is safe because the runner is ephemeral.
 # See BrewUITests/E2E/README.md.
 on:
-  schedule:
-    # 05:00 UTC nightly — after the tap's own nightly churn, well before the day starts.
-    - cron: "0 5 * * *"
+  pull_request:
+    types: [opened, reopened, synchronize]
   workflow_dispatch:
     inputs:
       test_filter:
@@ -19,9 +17,10 @@ permissions:
   contents: read
 
 concurrency:
-  # Serial by workflow, not by ref: two runs would fight over one machine's brew state.
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
+  # A dispatched run has no pull request to key on; fall back to the ref so manual
+  # runs on the same branch still supersede each other.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   e2e:
