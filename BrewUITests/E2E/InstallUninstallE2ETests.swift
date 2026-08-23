@@ -5,10 +5,8 @@
 
 import XCTest
 
-/// The mutating canaries: a real catalogue decode, a real subprocess under the user's login shell, a
-/// real bottle poured from ghcr.io, and the real `brew info` refresh that follows.
-///
-/// `hello` is owned by this suite and nothing may depend on it — see `E2E/README.md`.
+/// The mutating canaries: real catalogue decode, real subprocess, real bottle, real `brew info`
+/// refresh. `hello` is owned by this suite and nothing may depend on it — see `E2E/README.md`.
 final class InstallUninstallE2ETests: BrewE2ETestCase {
     private let canary = "hello"
 
@@ -17,8 +15,7 @@ final class InstallUninstallE2ETests: BrewE2ETestCase {
         Brew.forceUninstall(canary)
     }
 
-    /// Cleans up after ``BrewUITestCase/tearDown()`` has terminated the app, so it never contends with
-    /// a running app for Homebrew's lock.
+    /// After ``BrewUITestCase/tearDown()`` has terminated the app, so it never contends for brew's lock.
     override func tearDown() {
         super.tearDown()
         Brew.forceUninstall(canary)
@@ -40,8 +37,7 @@ final class InstallUninstallE2ETests: BrewE2ETestCase {
 
         installed.sidebar
             .goToInstalled()
-            // A real machine's inventory is long and the list virtualizes, so an installed row may
-            // never render unfiltered.
+            // A real inventory is long and the list virtualizes, so the row may never render unfiltered.
             .search(for: canary)
             .assertHasPackage(canary, timeout: BrewE2ETimeout.command)
     }

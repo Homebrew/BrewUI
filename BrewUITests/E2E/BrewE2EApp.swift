@@ -5,12 +5,9 @@
 
 import XCTest
 
-/// Launches the app with **no** `-uiTesting` argument, so `BrewApp.init()` falls through to `.live()`
-/// on both seams: real login shell, real `brew`, real `URLSession.shared`.
-///
-/// The only injection is ``Brew/determinismEnvironment``. `BrewCommandService` inherits the process
-/// environment, and a login shell adds to exported variables rather than clearing them, so those
-/// survive `-l -i`.
+/// Launches with **no** `-uiTesting` argument, so `BrewApp.init()` takes `.live()`: real login shell,
+/// real `brew`, real network. The injected determinism environment survives `-l -i` because a login
+/// shell adds to exported variables rather than clearing them.
 @MainActor
 enum BrewE2EApp {
     static func launch() -> XCUIApplication {
@@ -24,9 +21,8 @@ enum BrewE2EApp {
     }
 }
 
-/// Live-run timeouts, an order of magnitude above ``BrewUITestTimeout`` because the work behind them
-/// is real. Generous on purpose: off the PR path a slow pass costs minutes, while a tight bound costs
-/// a canary that cries wolf about the network.
+/// Live-run timeouts. Generous on purpose: a slow pass costs minutes, a tight bound costs a canary
+/// that cries wolf about the network.
 enum BrewE2ETimeout {
     /// Launch plus the first real `brew info --installed --json=v2` on a populated machine.
     static let launch: TimeInterval = 120

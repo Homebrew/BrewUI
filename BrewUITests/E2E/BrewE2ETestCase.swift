@@ -5,10 +5,8 @@
 
 import XCTest
 
-/// Base class for the live suite: the deterministic suite's process hygiene, with production wiring
-/// against real brew and the real network (``BrewE2EApp``) in place of the stubbed launch.
-///
-/// Tests arrange and clean up by shelling out (``Brew``), and act through the shared page objects.
+/// Base class for the live suite: ``BrewUITestCase``'s process hygiene, with ``BrewE2EApp``'s
+/// production wiring in place of the stubbed launch.
 class BrewE2ETestCase: BrewUITestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()

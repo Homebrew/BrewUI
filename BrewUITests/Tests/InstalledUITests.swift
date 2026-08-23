@@ -5,8 +5,8 @@
 
 import XCTest
 
-/// The Installed tab end to end: the fake writes `--json=v2` to a real pipe, the real service drains
-/// it, the real repository decodes it, and these rows are what SwiftUI made of the result.
+/// The fake writes `--json=v2` to a real pipe, the real service drains it, the real repository decodes
+/// it, and these rows are what SwiftUI made of that.
 final class InstalledUITests: BrewUITestCase {
     @MainActor
     func testRendersFormulaeAndCasksTogether() {
@@ -44,8 +44,7 @@ final class InstalledUITests: BrewUITestCase {
             .assertDoesNotHavePackage("wget")
     }
 
-    /// Real inventories overrun a pipe buffer. The runner drains concurrently with the process;
-    /// reading after `waitUntilExit` would deadlock on exactly this input.
+    /// Reading after `waitUntilExit` rather than draining concurrently would deadlock on this input.
     @MainActor
     func testRendersAnInventoryLargerThanOnePipeBuffer() {
         launch(.installedLarge)

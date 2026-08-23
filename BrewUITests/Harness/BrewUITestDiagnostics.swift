@@ -5,9 +5,8 @@
 
 import XCTest
 
-/// What the app looked like when an element wasn't found. "Expected installed.screen to exist within
-/// 60s" is true and explains nothing: it cannot tell an app that never opened a window from one whose
-/// identifiers are wrong, and those have nothing in common.
+/// What the app looked like when an element wasn't found: "does not exist" cannot tell an app that
+/// never opened a window from one whose identifiers are wrong.
 @MainActor
 enum BrewUITestDiagnostics {
     static func report(for app: XCUIApplication) -> String {
@@ -15,8 +14,7 @@ enum BrewUITestDiagnostics {
             return "The app is not running — it exited or never launched."
         }
 
-        // A backgrounded app keeps an empty accessibility tree, so every query fails for a reason
-        // unrelated to the element asked for.
+        // A backgrounded app keeps an empty accessibility tree, so every query fails regardless.
         guard app.state == .runningForeground else {
             return "The app is running but not in the foreground (state: \(app.state.rawValue))."
         }
@@ -29,8 +27,7 @@ enum BrewUITestDiagnostics {
             """
         }
 
-        // Verbose, but the only thing that answers "wrong identifier or wrong screen" without another
-        // round trip.
+        // Verbose, but it answers "wrong identifier or wrong screen" without another round trip.
         return """
         The app has \(windows) window(s). Identifiers currently in the tree:
         \(identifiers(in: app).joined(separator: "\n"))

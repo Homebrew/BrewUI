@@ -5,16 +5,15 @@
 
 import Foundation
 
-/// Everything a scenario puts on disk. `brewFiles` are keyed as ``FakeBrew`` looks them up, argv
-/// joined with `_` plus a role suffix; `httpFiles` by request path with `/` replaced by `_`.
+/// `brewFiles` are keyed as ``FakeBrew`` looks them up, argv joined with `_` plus a role suffix;
+/// `httpFiles` by request path with `/` replaced by `_`.
 struct FixtureSet {
     var brewFiles: [String: Data] = [:]
     var httpFiles: [String: Data] = [:]
 }
 
 /// The fixture sets behind ``BrewUITestScenario``. Every scenario answers the whole read-only command
-/// surface, because a missing fixture exits 64 and surfaces as an unrelated error state elsewhere in
-/// the UI. Mutating commands are added only where a scenario exercises one.
+/// surface, because a missing fixture exits 64 and surfaces as an unrelated error state.
 enum ScenarioFixtures {
     /// Both a fixture file name and the key a mutating command rewrites, so it is spelled once.
     static let installedInfoKey = "info_--installed_--json=v2"
@@ -242,16 +241,14 @@ enum ScenarioFixtures {
         [
             "api_formula.json": json(packages.filter { $0.kind == .formula }.map(\.catalogueFormulaJSON)),
             "api_cask.json": json(packages.filter { $0.kind == .cask }.map(\.catalogueCaskJSON)),
-            // A stable ETag on the catalogue so a second launch in the same run exercises the real
-            // client's If-None-Match / 304 path rather than always taking the 200 branch.
+            // A stable ETag, so a second launch in the same run takes the client's 304 path.
             "api_formula.json.etag": text("\"formula-fixture\""),
             "api_cask.json.etag": text("\"cask-fixture\""),
         ]
     }
 
     /// `rankedPackageCounts()` reads `formulae ?? casks`, so the cask response must **omit** the
-    /// `formulae` key rather than send an empty object — an empty-but-present bucket wins the `??`
-    /// and the casks would never be read.
+    /// `formulae` key: an empty-but-present bucket wins the `??` and the casks go unread.
     private static func analyticsFiles(
         formulae: [(FixturePackage, Int)],
         casks: [(FixturePackage, Int)],
@@ -306,8 +303,7 @@ enum ScenarioFixtures {
         Data(value.utf8)
     }
 
-    /// Serialising rather than hand-writing JSON literals: a fixture that isn't valid JSON would fail
-    /// as a confusing decode error inside the app rather than here, at the point of the mistake.
+    /// Serialised rather than hand-written, so invalid JSON fails here rather than inside the app.
     private static func json(_ object: Any) -> Data {
         guard let data = try? JSONSerialization.data(withJSONObject: object, options: [.sortedKeys]) else {
             preconditionFailure("Fixture is not JSON-serialisable: \(object)")

@@ -23,7 +23,7 @@ struct DiscoverScreen: Screen {
         BrewUISearchField(app)
     }
 
-    /// The view debounces for 250 ms, so callers wait on the resulting row rather than on a sleep.
+    /// The view debounces, so callers wait on the resulting row rather than on a sleep.
     @discardableResult
     func search(for query: String, file: StaticString = #filePath, line: UInt = #line) -> Self {
         searchField.type(query, file: file, line: line)

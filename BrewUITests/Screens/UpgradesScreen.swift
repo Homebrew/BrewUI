@@ -6,9 +6,8 @@
 import BrewAccessibilityID
 import XCTest
 
-/// The Upgrades tab: the outdated slice of the same inventory the Installed tab renders. Its rows
-/// carry their own identity so an assertion can't be satisfied by the Installed list of the same
-/// package.
+/// The outdated slice of the Installed inventory, with its own row identity so an assertion cannot be
+/// satisfied by the Installed row for the same package.
 @MainActor
 struct UpgradesScreen: Screen {
     let app: XCUIApplication

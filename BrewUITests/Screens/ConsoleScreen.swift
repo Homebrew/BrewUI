@@ -6,8 +6,8 @@
 import BrewAccessibilityID
 import XCTest
 
-/// The console panel pinned to the bottom of every screen. Output lives in the expanded body and the
-/// terminal success/failure sentence in the collapsed strip, so assertions say which side they need.
+/// The console panel: output lives in the expanded body, the success/failure sentence in the
+/// collapsed strip, so assertions say which side they need.
 @MainActor
 struct ConsoleScreen: Screen {
     let app: XCUIApplication
@@ -39,10 +39,7 @@ struct ConsoleScreen: Screen {
     }
 
     /// The toggle's label is the state read: exactly one of "Show console" / "Hide console" is mounted.
-    ///
-    /// Expansion is `@SceneStorage`-backed so it survives launches, and the app auto-expands on its own
-    /// when a command starts. Read-decide-act would race that, so this waits for the state it wants
-    /// first and only clicks if that settles the other way.
+    /// The app auto-expands when a command starts, so this waits for the state it wants before clicking.
     @discardableResult
     private func setExpanded(
         _ expanded: Bool,
@@ -68,8 +65,7 @@ struct ConsoleScreen: Screen {
         return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 
-    /// A line reaching the body is proof the run streamed through the real pipe drain rather than
-    /// arriving as one blob at exit.
+    /// A line in the body is proof the run streamed rather than arriving as one blob at exit.
     @discardableResult
     func assertOutputContains(
         _ substring: String,
@@ -78,8 +74,7 @@ struct ConsoleScreen: Screen {
         line: UInt = #line,
     ) -> Self {
         expand(file: file, line: line)
-        // macOS exposes text through the accessibility *value*, with no label at all, so matching on
-        // label alone silently never matches.
+        // macOS exposes text through the accessibility *value*, never the label.
         let predicate = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)
         let match = output.element.descendants(matching: .any).matching(predicate).firstMatch
         XCTAssertTrue(

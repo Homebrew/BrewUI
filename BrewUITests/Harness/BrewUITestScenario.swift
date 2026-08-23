@@ -5,18 +5,14 @@
 
 import Foundation
 
-/// The world a UI-test launch runs against: one fixture set, read by both seams once the app has
-/// installed it — the fake `brew` serves `<scenario>/brew`, the stubbed `URLSession` `<scenario>/http`.
-///
-/// Because both seams are data, an error case is a different fixture rather than different code: a 500
-/// is a `.status` file, a failing install an `.exitcode` file.
+/// The world a launch runs against: the fake `brew` serves `<scenario>/brew`, the stubbed `URLSession`
+/// `<scenario>/http`. Both seams are data, so an error case is a fixture rather than different code.
 enum BrewUITestScenario: String, CaseIterable {
     /// Nothing installed, empty catalogue, healthy doctor.
     case empty
     /// Two formulae and two casks installed; one formula is outdated.
     case installedBasic
-    /// Enough formulae that `brew info` overruns a pipe buffer, so the runner's concurrent drain is
-    /// what keeps the subprocess from deadlocking.
+    /// Enough formulae that `brew info` overruns a pipe buffer, which only a concurrent drain survives.
     case installedLarge
     /// `brew doctor` reports warnings and exits non-zero, which is data rather than failure.
     case doctorHasIssues

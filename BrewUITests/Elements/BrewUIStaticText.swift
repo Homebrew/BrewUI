@@ -17,8 +17,7 @@ final class BrewUIStaticText: BrewUIElement {
         element.label
     }
 
-    /// What VoiceOver would read. On macOS a combined element's `Text` children populate the
-    /// accessibility *value*, and `label` stays empty unless set explicitly.
+    /// On macOS a combined element's `Text` children populate the *value*, leaving `label` empty.
     private var effectiveText: String {
         let label = element.label
         guard label.isEmpty else {

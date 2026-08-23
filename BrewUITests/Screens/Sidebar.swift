@@ -6,8 +6,7 @@
 import BrewAccessibilityID
 import XCTest
 
-/// Primary navigation. Each destination returns its screen already waited for, so navigating and
-/// asserting it loaded are one call.
+/// Primary navigation. Each destination returns its screen already waited for.
 @MainActor
 struct Sidebar: Screen {
     let app: XCUIApplication

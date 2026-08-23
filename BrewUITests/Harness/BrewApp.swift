@@ -7,11 +7,9 @@ import AppKit
 import BrewUITestContract
 import XCTest
 
-/// Launches the app under test against a scenario.
-///
-/// Both seams are stubbed *inside the app process*: a `URLProtocol` registered here would run in the
-/// test process and never see the app's traffic, and this process cannot rely on writing anywhere the
-/// app is allowed to execute from. So the fixture tree travels in the launch environment instead.
+/// Launches the app under test against a scenario. The fixture tree travels in the launch environment
+/// because both seams are stubbed inside the app process, and a `URLProtocol` registered out here
+/// would never see the app's traffic.
 @MainActor
 enum BrewApp {
     /// The payload compresses well, so approaching this means a fixture grew by an order of magnitude.
@@ -25,8 +23,7 @@ enum BrewApp {
         }
 
         let app = XCUIApplication()
-        // The trailing "YES" keeps `NSUserDefaults`' argument-domain parser from swallowing whatever
-        // launch argument comes next as this flag's value.
+        // The trailing "YES" stops the argument-domain parser swallowing the next argument as a value.
         app.launchArguments += [BrewUITestingEnvironmentKey.launchArgument, "YES"]
         app.launchEnvironment[BrewUITestingEnvironmentKey.scenario] = scenario.rawValue
         app.launchEnvironment[BrewUITestingEnvironmentKey.payload] = encoded
@@ -38,11 +35,8 @@ enum BrewApp {
     /// `XCUIApplication` does not expose this, so it is spelled rather than derived.
     private static let appBundleIdentifier = "sh.brew.app"
 
-    /// `launch()` can leave the app frontmost with a populated menu bar and no window at all, and a
-    /// windowless app has an empty accessibility tree — so every query fails for a reason unrelated to
-    /// what it asked for. Only the "reopen" AppleEvent a Dock click sends reliably creates the window.
-    ///
-    /// Not private: ``BrewE2EApp`` launches its own app and hits the same macOS behaviour.
+    /// `launch()` can leave the app frontmost with no window at all, and a windowless app has an empty
+    /// accessibility tree. Only the "reopen" AppleEvent a Dock click sends reliably creates one.
     static func activate(_ app: XCUIApplication) {
         app.activate()
         _ = app.wait(for: .runningForeground, timeout: BrewUITestTimeout.launch)
@@ -51,9 +45,7 @@ enum BrewApp {
         _ = app.windows.firstMatch.waitForExistence(timeout: BrewUITestTimeout.launch)
     }
 
-    /// `NSWorkspace` rather than `open -b`, which resolves by bundle identifier alone: a developer
-    /// machine may have a real install carrying the same identifier, and reopening *that* would steal
-    /// focus from the build under test. Matching the executable path keeps it on the right instance.
+    /// `NSWorkspace` rather than `open -b`: a real install with the same bundle identifier would win.
     private static func reopen() {
         guard let target = NSWorkspace.shared.runningApplications
             .filter({ $0.bundleIdentifier == appBundleIdentifier })

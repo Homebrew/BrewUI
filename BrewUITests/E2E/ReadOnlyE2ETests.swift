@@ -5,11 +5,8 @@
 
 import XCTest
 
-/// The canaries that mutate nothing, so they need no isolation of their own.
-///
-/// Doctor is absent by design: its output is entirely machine-state dependent, so there is no stable
-/// happy path to assert. Upgrades is visited but not asserted on, because a live machine cannot be
-/// guaranteed a deterministically outdated package. Both are covered at Tier 2.
+/// The canaries that mutate nothing. Doctor is absent and Upgrades goes unasserted because neither
+/// has a happy path a live machine can be relied on to produce; both are covered at Tier 2.
 final class ReadOnlyE2ETests: BrewE2ETestCase {
     @MainActor
     func testVisitsEverySidebarDestinationAgainstRealData() {
@@ -21,8 +18,7 @@ final class ReadOnlyE2ETests: BrewE2ETestCase {
         installed.sidebar.goToInstalled()
     }
 
-    /// That the row exists is the contract — that the catalogue was fetched and decoded. What it says
-    /// about `wget` is not.
+    /// That the row exists is the contract; what it says about `wget` is not.
     @MainActor
     func testSearchFindsAPackageInTheRealCatalogue() {
         launchLive()
@@ -32,8 +28,7 @@ final class ReadOnlyE2ETests: BrewE2ETestCase {
             .assertHasPackage("wget", timeout: BrewE2ETimeout.catalogue)
     }
 
-    /// Keys only, never values: the values are machine-specific by definition, which is why this reads
-    /// shape rather than content.
+    /// Keys only: the values are machine-specific by definition.
     @MainActor
     func testConfigurationRendersRealBrewConfigOutput() {
         launchLive()

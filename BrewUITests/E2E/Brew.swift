@@ -5,12 +5,11 @@
 
 import Foundation
 
-/// Runs the machine's real `brew` from the test process, to arrange and clean up live-suite state.
-/// A fixture actuator, never the code under test: the tests act through the app's own path to brew.
+/// Arranges and cleans up live-suite state through the machine's real `brew`, never as the code under
+/// test: the tests themselves act through the app's own path to brew.
 nonisolated enum Brew {
-    /// Applied to every brew this suite causes to run, including the app's own — ``BrewE2EApp`` puts
-    /// these in the launch environment. Without `HOMEBREW_NO_AUTO_UPDATE` an install can spend minutes
-    /// updating the tap first, which reads as a hung test.
+    /// Applied to every brew this suite runs, the app's included. Without `HOMEBREW_NO_AUTO_UPDATE` an
+    /// install can spend minutes updating the tap first, which reads as a hung test.
     static let determinismEnvironment = [
         "HOMEBREW_NO_AUTO_UPDATE": "1",
         "HOMEBREW_NO_ANALYTICS": "1",
@@ -26,8 +25,7 @@ nonisolated enum Brew {
             if FileManager.default.isExecutableFile(atPath: path) {
                 return URL(fileURLWithPath: path)
             }
-            // `isExecutableFile(atPath:)` tests the symlink node rather than its destination, and both
-            // prefixes ship `bin/brew` as a symlink.
+            // `isExecutableFile(atPath:)` tests the symlink node, and `bin/brew` is one.
             let resolved = URL(fileURLWithPath: path).resolvingSymlinksInPath()
             if FileManager.default.isExecutableFile(atPath: resolved.path) {
                 return resolved
@@ -36,20 +34,17 @@ nonisolated enum Brew {
         throw BrewFixtureError.brewNotFound(searched: candidatePaths)
     }
 
-    /// Called from `setUp`, so a machine without Homebrew fails by name rather than several minutes
-    /// later on an element query.
+    /// Called from `setUp`, so a machine without Homebrew fails by name rather than on an element query.
     static func requireAvailable() throws {
         _ = try executableURL()
     }
 
-    /// Best-effort clean slate: uninstalling something that isn't installed exits non-zero, which is
-    /// exactly what "already clean" looks like.
+    /// Best effort: uninstalling what isn't installed exits non-zero, which is "already clean".
     static func forceUninstall(_ token: String) {
         _ = try? invoke(["uninstall", "--force", token])
     }
 
-    /// Arrange step, throwing with brew's own output attached rather than leaving the test to fail
-    /// later on an absent row.
+    /// Arrange step, throwing with brew's own output rather than failing later on an absent row.
     static func run(_ arguments: String...) throws {
         let result = try invoke(arguments)
         guard result.status == 0 else {
@@ -82,8 +77,7 @@ nonisolated enum Brew {
             )
         }
 
-        // Drained to EOF before waiting: an install writes more than a pipe buffer holds, and a child
-        // blocked writing into a full pipe never exits.
+        // Drained before waiting: a child blocked writing into a full pipe never exits.
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
         let output = String(bytes: data, encoding: .utf8)

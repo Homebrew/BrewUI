@@ -6,8 +6,8 @@
 import BrewAccessibilityID
 import XCTest
 
-/// One type per surface. Screens own where things are, tests own what should be true, and actions
-/// return the screen they navigate to so an illegal sequence fails to compile.
+/// One type per surface. Actions return the screen they navigate to, so an illegal sequence fails to
+/// compile rather than at runtime.
 @MainActor
 protocol Screen {
     var app: XCUIApplication { get }
