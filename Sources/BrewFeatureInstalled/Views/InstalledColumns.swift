@@ -7,11 +7,13 @@ import SwiftUI
 struct InstalledColumns: View {
     let viewModel: InstalledViewModel
     @Binding var deepLinkSelection: InstalledBrewPackage.ID?
+    @FocusState.Binding var focus: SearchFocusTarget?
 
     var body: some View {
         HSplitView {
             InstalledPackagesView(
                 viewModel: viewModel,
+                focus: $focus,
             )
             .frame(
                 minWidth: BrewLayout.installedListColumnMinWidth,

@@ -7,10 +7,11 @@ import SwiftUI
 struct UpgradesColumns: View {
     let viewModel: UpgradesViewModel
     let navigateToInstalledPackage: @MainActor (InstalledBrewPackage.ID) -> Void
+    @FocusState.Binding var focus: SearchFocusTarget?
 
     var body: some View {
         HSplitView {
-            UpgradesPackagesView(viewModel: viewModel)
+            UpgradesPackagesView(viewModel: viewModel, focus: $focus)
                 .frame(
                     minWidth: BrewLayout.installedListColumnMinWidth,
                     idealWidth: BrewLayout.installedListColumnIdealWidth,
