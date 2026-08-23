@@ -11,7 +11,7 @@
   "defaultOptions" : {
     "defaultTestExecutionTimeAllowance" : 600,
     "maximumTestExecutionTimeAllowance" : 900,
-    "maximumTestRepetitions" : 2,
+    "maximumTestRepetitions" : 3,
     "screenshotDestination" : "testRunnerAndAttachments",
     "testRepetitionMode" : "retryOnFailure",
     "testTimeoutsEnabled" : true,

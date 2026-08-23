@@ -33,6 +33,35 @@ class BrewUITestCase: XCTestCase {
         super.tearDown()
     }
 
+    /// Attaches what the screen looked like at the moment of the failure, which is the one thing the
+    /// message cannot carry: a missing element and a dialog covering the app read identically in
+    /// text. `keepAlways` so the shot survives a plan that prunes on success, which is what a retried
+    /// test's failed attempt would otherwise be pruned by.
+    ///
+    /// An issue recorded off the main thread goes unillustrated rather than risking a crash inside
+    /// the failure path; every assertion in the suite runs on the main thread.
+    override func record(_ issue: XCTIssue) {
+        if let screenshot = mainScreenPNG() {
+            // Attached as PNG data rather than as the `XCUIScreenshot`, which cannot cross out of the
+            // main actor: `add(_:)` belongs to this nonisolated test case, `Data` is sendable.
+            let attachment = XCTAttachment(data: screenshot, uniformTypeIdentifier: "public.png")
+            attachment.name = "Failure: \(name)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+        super.record(issue)
+    }
+
+    private func mainScreenPNG() -> Data? {
+        guard Thread.isMainThread else {
+            return nil
+        }
+        // swiftlint:disable:next assume_isolated
+        return MainActor.assumeIsolated {
+            XCUIScreen.main.screenshot().pngRepresentation
+        }
+    }
+
     /// Registers an app the case launched for itself — the live suite in `BrewUITests/E2E` — so
     /// `tearDown` terminates it exactly as ``launch(_:file:line:)`` does.
     @discardableResult

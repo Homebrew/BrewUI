@@ -69,5 +69,18 @@ reads as a fixture failure rather than as a red assertion inside the flow under 
 - **Before cutting a release**, by hand: `scripts/test-e2e`. That is the moment you most want to know
   brew has not shifted under the app. The release workflow itself is deliberately not wired to it.
 
-The plan runs serially with generous per-test timeouts and retry-on-failure = 1 — enough to absorb a
-transient network blip, low enough that it cannot mask a real contract break.
+The plan runs serially with generous per-test timeouts and retries a failing test twice (three runs
+in all), which absorbs a transient network blip.
+
+## When a retry hides something
+
+A retry that turns red into green is exactly how a real contract break gets mistaken for weather, so
+a passing run says when it needed one. `scripts/annotate-flaky-tests` reads the result bundle after
+every run and names any test that took more than one run to pass — as a `::warning::` annotation on
+the GitHub run, and as plain text locally. It never fails a run by itself.
+
+The evidence lives in the result bundle: `BrewUITestCase.record(_:)` attaches a screenshot of the
+whole screen to every failure. Both it and the plan use the `keepAlways` lifetime, because the
+interesting screenshot belongs to a failed *attempt* of a test that ultimately passed, and
+`deleteOnSuccess` prunes exactly that. The nightly job uploads the bundle when the run fails **and**
+when a test only passed on a retry, so that screenshot is not thrown away with the green run.

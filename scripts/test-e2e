@@ -32,6 +32,9 @@ xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
 
 echo "==> BrewUITests live canaries (Brew-E2E test plan)"
 rm -rf E2ETestResults.xcresult
+# On exit rather than after the run: the plan retries a failing test, so a green result can still
+# have a flake behind it, and a red one is exactly when you want to know a retry was involved.
+trap 'scripts/annotate-flaky-tests E2ETestResults.xcresult || true' EXIT
 # No -derivedDataPath override, for the reason documented in scripts/test-ui.
 #
 # Signing stays ALLOWED: identity "-" ad-hoc signs, needing no identity, team or profile, so this
