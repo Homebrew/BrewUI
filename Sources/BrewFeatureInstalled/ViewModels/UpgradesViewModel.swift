@@ -90,19 +90,6 @@ final class UpgradesViewModel {
         return false
     }
 
-    /// Mirrors the search field's presentation state (bound to `.searchable(isPresented:)`). Owned
-    /// here — rather than as view `@State` — so ``shouldFocusList`` can factor it in and stay a pure,
-    /// unit-testable decision.
-    var isSearchFieldPresented: Bool = false
-
-    /// Drives the list view's `@FocusState`. The list claims keyboard focus once the outdated
-    /// inventory has loaded, but never while the search field is active: a query that filters down to
-    /// zero matches removes the list, and deleting the query re-inserts it — grabbing focus then would
-    /// yank the cursor out of the search box mid-edit.
-    var shouldFocusList: Bool {
-        state.isLoaded && !isSearchFieldPresented
-    }
-
     /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
     /// inventory when no search is active, and "Showing N of M" / "No matches
     /// in M outdated packages" once a query narrows the list. The window-chrome

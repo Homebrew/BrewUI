@@ -21,6 +21,10 @@ struct UpgradesScreen: Screen {
         BrewUIList(app, .upgradesList, rowID: { AXID.upgradesRow(token: $0) })
     }
 
+    var searchField: BrewUISearchField {
+        BrewUISearchField(app)
+    }
+
     @discardableResult
     func assertHasPackage(
         _ token: String,

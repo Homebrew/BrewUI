@@ -12,7 +12,7 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
-    @FocusState private var isFocused: Bool
+    @FocusState.Binding var focus: SearchFocusTarget?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -74,10 +74,7 @@ struct InstalledPackagesView: View {
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
-            .task(id: viewModel.shouldFocusList) {
-                isFocused = viewModel.shouldFocusList
-            }
-            .focused($isFocused)
+            .focused($focus, equals: .list)
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, in: content, with: proxy)
             }
@@ -137,9 +134,9 @@ struct InstalledPackagesView: View {
 
     #Preview("Installed list - loaded") {
         let viewModel = InstalledViewModel(repository: PreviewSupport.makeInstalledPackagesRepository())
-        InstalledPackagesView(
-            viewModel: viewModel,
-        )
+        SearchFocusPreviewHost { focus in
+            InstalledPackagesView(viewModel: viewModel, focus: focus)
+        }
         .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
         .task {
             await viewModel.load()
@@ -151,9 +148,9 @@ struct InstalledPackagesView: View {
         let viewModel = InstalledViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
         )
-        InstalledPackagesView(
-            viewModel: viewModel,
-        )
+        SearchFocusPreviewHost { focus in
+            InstalledPackagesView(viewModel: viewModel, focus: focus)
+        }
         .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
         .task {
             await viewModel.load()

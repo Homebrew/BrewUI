@@ -7,6 +7,9 @@ import SwiftUI
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
 
+    @State private var searchFocus = SearchFocusArbiter()
+    @FocusState private var focus: SearchFocusTarget?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
@@ -16,7 +19,7 @@ struct DiscoverPackagesView: View {
                 state: viewModel.activeState,
                 onRetry: { Task { await viewModel.reloadActive() } },
                 loaded: { packages in
-                    DiscoverPackageSections(viewModel: viewModel, packages: packages)
+                    DiscoverPackageSections(viewModel: viewModel, packages: packages, focus: $focus)
                 },
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -30,11 +33,38 @@ struct DiscoverPackagesView: View {
         // the field is custom; query it via `app.searchFields` for now.
         .searchable(
             text: $viewModel.query,
-            isPresented: $viewModel.isSearchFieldPresented,
+            isPresented: searchFieldPresented,
             placement: .toolbar,
             prompt: "Search Homebrew's Packages",
         )
-        .focusedSceneValue(\.searchPresented, $viewModel.isSearchFieldPresented)
+        .searchFocused($focus, equals: .searchField)
+        .focusedSceneValue(\.focusSearchField, focusSearchField)
+        .onChange(of: searchFocus.target) { _, target in
+            focus = target
+        }
+        .onChange(of: focus) { _, focus in
+            searchFocus.focusDidChange(to: focus)
+        }
+        .onChange(of: searchFocus.isSearchFieldPresented) { _, presented in
+            guard presented else {
+                return
+            }
+            // The field only reaches the toolbar after this update commits, so a ⌘F that had to
+            // present it first has to wait a turn before it can be handed the keyboard.
+            Task { @MainActor in
+                searchFocus.searchFieldDidPresent()
+            }
+        }
+        .onChange(of: canFocusList, initial: true) { _, canFocus in
+            if canFocus {
+                searchFocus.contentDidLoad()
+            }
+        }
+        .onChange(of: viewModel.query, initial: true) { _, query in
+            if !query.isEmpty {
+                searchFocus.searchFieldDidPresent()
+            }
+        }
         .task(id: viewModel.query) {
             // Debounce so intermediate keystrokes don't each fire a search; cancellation handles the rest.
             try? await Task.sleep(for: .milliseconds(250))
@@ -43,6 +73,30 @@ struct DiscoverPackagesView: View {
             }
             await viewModel.search()
         }
+    }
+
+    private var focusSearchField: FocusSearchFieldAction {
+        FocusSearchFieldAction {
+            searchFocus.requestSearchFocus()
+        }
+    }
+
+    private var searchFieldPresented: Binding<Bool> {
+        Binding(
+            get: { searchFocus.isSearchFieldPresented },
+            set: { presented in
+                if presented {
+                    searchFocus.searchFieldDidPresent()
+                } else {
+                    searchFocus.searchFieldDidDismiss()
+                }
+            },
+        )
+    }
+
+    /// Clearing the query back to empty must not kick the cursor out of the search field.
+    private var canFocusList: Bool {
+        viewModel.trending.isLoaded && !viewModel.isSearching
     }
 
     private var header: some View {
@@ -84,11 +138,10 @@ struct DiscoverPackagesView: View {
 /// Sectioned Discover list, split by package kind and filtered by the active scope. Renders an inline
 /// empty-state message when a visible section has no rows (e.g. a scope filter that excludes everything).
 private struct DiscoverPackageSections: View {
-    @FocusState private var isFocused: Bool
-
     let viewModel: DiscoverViewModel
     /// The redacted-placeholder or loaded packages handed down by `AsyncContentView` for this render.
     let packages: [DiscoveryBrewPackage]
+    @FocusState.Binding var focus: SearchFocusTarget?
 
     private var formulae: [DiscoveryBrewPackage] {
         viewModel.showsFormulaeSection ? DiscoverViewModel.section(packages, kind: .formula) : []
@@ -118,10 +171,7 @@ private struct DiscoverPackageSections: View {
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
             }
-            .task(id: viewModel.shouldFocusList) {
-                isFocused = viewModel.shouldFocusList
-            }
-            .focused($isFocused)
+            .focused($focus, equals: .list)
             .onChange(of: viewModel.selectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, with: proxy)
             }

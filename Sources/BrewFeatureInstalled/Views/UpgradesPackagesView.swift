@@ -12,7 +12,7 @@ import SwiftUI
 /// and a friendly empty state when nothing is outdated.
 struct UpgradesPackagesView: View {
     @Bindable var viewModel: UpgradesViewModel
-    @FocusState private var isFocused: Bool
+    @FocusState.Binding var focus: SearchFocusTarget?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -130,10 +130,7 @@ struct UpgradesPackagesView: View {
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
-            .task(id: viewModel.shouldFocusList) {
-                isFocused = viewModel.shouldFocusList
-            }
-            .focused($isFocused)
+            .focused($focus, equals: .list)
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, in: content, with: proxy)
             }
@@ -284,12 +281,14 @@ struct UpgradesPackagesView: View {
             brewCommandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
         )
-        UpgradesPackagesView(viewModel: viewModel)
-            .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
-            .task {
-                await viewModel.load()
-            }
-            .frame(minWidth: 360, minHeight: 500)
+        SearchFocusPreviewHost { focus in
+            UpgradesPackagesView(viewModel: viewModel, focus: focus)
+        }
+        .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
+        .task {
+            await viewModel.load()
+        }
+        .frame(minWidth: 360, minHeight: 500)
     }
 
     #Preview("Upgrades list - filtered to nothing") {
@@ -298,13 +297,15 @@ struct UpgradesPackagesView: View {
             brewCommandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
         )
-        UpgradesPackagesView(viewModel: viewModel)
-            .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
-            .task {
-                await viewModel.load()
-                viewModel.searchQuery = "no-such-package"
-            }
-            .frame(minWidth: 360, minHeight: 500)
+        SearchFocusPreviewHost { focus in
+            UpgradesPackagesView(viewModel: viewModel, focus: focus)
+        }
+        .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
+        .task {
+            await viewModel.load()
+            viewModel.searchQuery = "no-such-package"
+        }
+        .frame(minWidth: 360, minHeight: 500)
     }
 
     #Preview("Upgrades list - empty") {
@@ -315,11 +316,13 @@ struct UpgradesPackagesView: View {
             brewCommandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
         )
-        UpgradesPackagesView(viewModel: viewModel)
-            .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
-            .task {
-                await viewModel.load()
-            }
-            .frame(minWidth: 360, minHeight: 500)
+        SearchFocusPreviewHost { focus in
+            UpgradesPackagesView(viewModel: viewModel, focus: focus)
+        }
+        .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
+        .task {
+            await viewModel.load()
+        }
+        .frame(minWidth: 360, minHeight: 500)
     }
 #endif

@@ -21,7 +21,7 @@ final class BrewUISearchField {
         app.searchFields.firstMatch
     }
 
-    /// Opens the search field via ⌘F (`SearchCommands`) and waits for it to take focus.
+    /// Clicks the field, so it proves nothing about ⌘F. ``SearchFocusUITests`` covers that.
     @discardableResult
     func activate(
         timeout: TimeInterval = BrewUITestTimeout.default,
@@ -38,6 +38,44 @@ final class BrewUISearchField {
             line: line,
         )
         element.click()
+        return self
+    }
+
+    @discardableResult
+    func pressFindShortcut() -> Self {
+        app.typeKey("f", modifierFlags: .command)
+        return self
+    }
+
+    /// At the app, not the element: `element.typeText` would focus the field first.
+    @discardableResult
+    func typeAtCursor(_ text: String) -> Self {
+        app.typeText(text)
+        return self
+    }
+
+    @discardableResult
+    func selectAllAtCursor() -> Self {
+        app.typeKey("a", modifierFlags: .command)
+        return self
+    }
+
+    @discardableResult
+    func assertValue(
+        _ expected: String,
+        timeout: TimeInterval = BrewUITestTimeout.default,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        let matches = NSPredicate(format: "value == %@", expected)
+        let expectation = XCTNSPredicateExpectation(predicate: matches, object: element)
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [expectation], timeout: timeout),
+            .completed,
+            "Keystrokes did not reach the search field: wanted \(expected), got \(value)",
+            file: file,
+            line: line,
+        )
         return self
     }
 

@@ -76,15 +76,6 @@ final class DiscoverViewModel {
         isSearching ? results : trending
     }
 
-    /// Bound to `.searchable(isPresented:)`; lives here so ``shouldFocusList`` can factor it in.
-    var isSearchFieldPresented: Bool = false
-
-    /// Never claims focus while the search field is open — clearing the query back to empty must not
-    /// kick the cursor out of it.
-    var shouldFocusList: Bool {
-        trending.isLoaded && !isSearching && !isSearchFieldPresented
-    }
-
     /// Search results have no analytics, so install-count metadata is suppressed in that mode.
     var showsInstallMetrics: Bool {
         !isSearching
