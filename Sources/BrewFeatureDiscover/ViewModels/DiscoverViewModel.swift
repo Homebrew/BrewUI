@@ -76,13 +76,6 @@ final class DiscoverViewModel {
         isSearching ? results : trending
     }
 
-    var isSearchFieldFocused: Bool = false
-
-    /// Clearing the query back to empty must not kick the cursor out of the search field.
-    var shouldFocusList: Bool {
-        trending.isLoaded && !isSearching && !isSearchFieldFocused
-    }
-
     /// Search results have no analytics, so install-count metadata is suppressed in that mode.
     var showsInstallMetrics: Bool {
         !isSearching

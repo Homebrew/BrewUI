@@ -104,15 +104,6 @@ final class InstalledViewModel {
         return false
     }
 
-    var isSearchFieldFocused: Bool = false
-
-    /// Drives the list view's `@FocusState`. The list claims keyboard focus once the inventory has
-    /// loaded, but never while the search field is active — auto-focusing the list must not kick the
-    /// cursor out of an in-progress search.
-    var shouldFocusList: Bool {
-        state.isLoaded && !isSearchFieldFocused
-    }
-
     var packageCountSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
