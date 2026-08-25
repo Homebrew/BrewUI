@@ -29,12 +29,21 @@ public struct CrashReportStore: Sendable {
         )
     }
 
+    /// The signal path appends to one file per launch and the exception path can be handed an
+    /// unbounded backtrace, so a single report is clamped on the way to disk — and again on the way
+    /// back, because an oversized file written before this limit existed would otherwise still reach
+    /// the sheet, where laying out one string of that size wedges the launch it belongs to.
+    /// The dialog renders a report as one `Text`, which lays out in full: 128 KB of it costs six
+    /// seconds of launch. A capped call stack fits in a fraction of this.
+    public static let maximumReportBytes = 16 * 1024
+
     @discardableResult
     public func save(text: String, date: Date) throws -> CrashReport {
         try ensureDirectoryExists()
         let url = reportFileURL(for: date)
-        try Data(text.utf8).write(to: url, options: .atomic)
-        return CrashReport(id: url.lastPathComponent, capturedAt: date, text: text)
+        let clamped = Self.clamped(text)
+        try Data(clamped.utf8).write(to: url, options: .atomic)
+        return CrashReport(id: url.lastPathComponent, capturedAt: date, text: clamped)
     }
 
     /// All persisted reports, oldest first; unreadable files are skipped so a
@@ -71,7 +80,7 @@ public struct CrashReportStore: Sendable {
         }
 
         let url = directoryURL.appendingPathComponent(name)
-        guard let text = try? String(contentsOf: url, encoding: .utf8) else {
+        guard let text = readClampedText(at: url) else {
             return nil
         }
 
@@ -81,6 +90,42 @@ public struct CrashReportStore: Sendable {
             text: text,
         )
     }
+
+    /// Reads the leading bytes rather than the file, so an oversized report costs a page, not its size.
+    private func readClampedText(at url: URL) -> String? {
+        guard let handle = try? FileHandle(forReadingFrom: url) else {
+            return nil
+        }
+        defer { try? handle.close() }
+
+        guard let data = try? handle.read(upToCount: Self.maximumReportBytes) else {
+            return nil
+        }
+        guard let text = Self.decoded(data) else {
+            return nil
+        }
+        let isTruncated = (try? handle.read(upToCount: 1))??.isEmpty == false
+        return isTruncated ? text + Self.truncationMarker : text
+    }
+
+    /// Cutting at a byte count can split a character, so give back the bytes that make a whole one.
+    private static func decoded(_ data: Data) -> String? {
+        for droppedBytes in 0 ... 3 {
+            if let text = String(data: data.dropLast(droppedBytes), encoding: .utf8) {
+                return text
+            }
+        }
+        return nil
+    }
+
+    private static func clamped(_ text: String) -> String {
+        guard text.utf8.count > maximumReportBytes else {
+            return text
+        }
+        return String(text.prefix(maximumReportBytes)) + truncationMarker
+    }
+
+    private static let truncationMarker = "\n\n… report truncated …\n"
 
     private static func defaultDirectoryURL() -> URL {
         let fileManager = FileManager.default

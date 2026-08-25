@@ -28,7 +28,6 @@ public struct SearchFocusArbiter: Equatable, Sendable {
 
     public mutating func requestSearchFocus() {
         guard isSearchFieldPresented else {
-            // Leave `target` alone: whoever holds the keyboard keeps it until the field can take over.
             isSearchFieldPresented = true
             isSearchFocusPending = true
             return
@@ -54,6 +53,13 @@ public struct SearchFocusArbiter: Equatable, Sendable {
         }
     }
 
+    public mutating func emptySearchFieldDidLoseFocus() {
+        guard !isSearchFocusPending else {
+            return
+        }
+        searchFieldDidDismiss()
+    }
+
     public mutating func contentDidLoad() {
         guard target == nil, !isSearchFocusPending else {
             return
@@ -62,7 +68,7 @@ public struct SearchFocusArbiter: Equatable, Sendable {
     }
 
     public mutating func focusDidChange(to target: SearchFocusTarget?) {
-        guard !isSearchFocusPending || target != nil else {
+        guard let target else {
             return
         }
         self.target = target

@@ -80,4 +80,41 @@ struct CrashReportStoreTests {
 
         #expect(store.pendingReports().isEmpty)
     }
+
+    @Test func `an oversized report is clamped on the way to disk`() throws {
+        let store = makeTemporaryStore()
+
+        let saved = try store.save(
+            text: String(repeating: "x", count: CrashReportStore.maximumReportBytes * 3),
+            date: Date(timeIntervalSince1970: 1000),
+        )
+
+        #expect(saved.text.contains("report truncated"))
+        #expect(saved.text.utf8.count < CrashReportStore.maximumReportBytes * 2)
+        #expect(store.pendingReports() == [saved])
+    }
+
+    /// Reports written before the limit existed still have to reach the sheet in one piece.
+    @Test func `an oversized file already on disk is clamped on the way back`() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CrashReportStoreTests-\(UUID().uuidString)", isDirectory: true)
+        let store = CrashReportStore(directoryURL: directory)
+        try store.ensureDirectoryExists()
+        let oversized = String(repeating: "y", count: CrashReportStore.maximumReportBytes * 3)
+        try Data(oversized.utf8).write(to: directory.appendingPathComponent("crash-1000.log"))
+
+        let report = try #require(store.pendingReports().first)
+
+        #expect(report.text.contains("report truncated"))
+        #expect(report.text.utf8.count < CrashReportStore.maximumReportBytes * 2)
+    }
+
+    @Test func `a report within the limit round-trips untouched`() throws {
+        let store = makeTemporaryStore()
+        let text = String(repeating: "z", count: CrashReportStore.maximumReportBytes)
+
+        try store.save(text: text, date: Date(timeIntervalSince1970: 1000))
+
+        #expect(store.pendingReports().map(\.text) == [text])
+    }
 }

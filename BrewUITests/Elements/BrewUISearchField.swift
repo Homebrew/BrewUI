@@ -47,6 +47,13 @@ final class BrewUISearchField {
         return self
     }
 
+    /// At the app, so it reaches whoever holds the keyboard — including nobody.
+    @discardableResult
+    func pressEscape() -> Self {
+        app.typeKey(XCUIKeyboardKey.escape, modifierFlags: [])
+        return self
+    }
+
     /// At the app, not the element: `element.typeText` would focus the field first.
     @discardableResult
     func typeAtCursor(_ text: String) -> Self {

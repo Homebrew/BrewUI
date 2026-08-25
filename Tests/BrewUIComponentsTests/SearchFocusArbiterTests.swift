@@ -142,6 +142,17 @@ struct SearchFocusArbiterTests {
         #expect(arbiter.target == .searchField)
     }
 
+    /// SwiftUI resigns the search field on its way out of the toolbar, after `searchFieldDidDismiss`
+    /// has already handed the list back the keyboard. Honouring that nil left the keyboard nowhere.
+    @Test func `losing focus does not clear the target`() {
+        var arbiter = SearchFocusArbiter(target: .searchField, isSearchFieldPresented: true)
+
+        arbiter.searchFieldDidDismiss()
+        arbiter.focusDidChange(to: nil)
+
+        #expect(arbiter.target == .list)
+    }
+
     @Test func `losing focus while a claim is pending does not cancel the claim`() {
         var arbiter = SearchFocusArbiter(target: .list)
 
@@ -181,6 +192,26 @@ struct SearchFocusArbiterTests {
 
         #expect(!arbiter.isSearchFocusPending)
         #expect(arbiter.target == .list)
+    }
+
+    @Test func `an empty search field collapses once the keyboard leaves it`() {
+        var arbiter = SearchFocusArbiter(target: .searchField, isSearchFieldPresented: true)
+
+        arbiter.focusDidChange(to: .list)
+        arbiter.emptySearchFieldDidLoseFocus()
+
+        #expect(!arbiter.isSearchFieldPresented)
+        #expect(arbiter.target == .list)
+    }
+
+    @Test func `a pending claim keeps the field it just presented`() {
+        var arbiter = SearchFocusArbiter(target: .list)
+
+        arbiter.requestSearchFocus()
+        arbiter.emptySearchFieldDidLoseFocus()
+
+        #expect(arbiter.isSearchFieldPresented)
+        #expect(arbiter.isSearchFocusPending)
     }
 
     @Test func `dismissing while the list holds the keyboard leaves it there`() {
