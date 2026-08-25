@@ -92,6 +92,9 @@ struct InstalledUpgradesContainer: View {
             }
             .onChange(of: focus) { _, focus in
                 searchFocus.focusDidChange(to: focus)
+                if focus != .searchField, activeSearchQuery.wrappedValue.isEmpty {
+                    searchFocus.emptySearchFieldDidLoseFocus()
+                }
             }
             .onChange(of: searchFocus.isSearchFieldPresented) { _, presented in
                 guard presented else {

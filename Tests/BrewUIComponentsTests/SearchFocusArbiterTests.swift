@@ -194,6 +194,26 @@ struct SearchFocusArbiterTests {
         #expect(arbiter.target == .list)
     }
 
+    @Test func `an empty search field collapses once the keyboard leaves it`() {
+        var arbiter = SearchFocusArbiter(target: .searchField, isSearchFieldPresented: true)
+
+        arbiter.focusDidChange(to: .list)
+        arbiter.emptySearchFieldDidLoseFocus()
+
+        #expect(!arbiter.isSearchFieldPresented)
+        #expect(arbiter.target == .list)
+    }
+
+    @Test func `a pending claim keeps the field it just presented`() {
+        var arbiter = SearchFocusArbiter(target: .list)
+
+        arbiter.requestSearchFocus()
+        arbiter.emptySearchFieldDidLoseFocus()
+
+        #expect(arbiter.isSearchFieldPresented)
+        #expect(arbiter.isSearchFocusPending)
+    }
+
     @Test func `dismissing while the list holds the keyboard leaves it there`() {
         var arbiter = SearchFocusArbiter(target: .list, isSearchFieldPresented: true)
 

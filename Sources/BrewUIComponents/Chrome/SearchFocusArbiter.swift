@@ -53,6 +53,13 @@ public struct SearchFocusArbiter: Equatable, Sendable {
         }
     }
 
+    public mutating func emptySearchFieldDidLoseFocus() {
+        guard !isSearchFocusPending else {
+            return
+        }
+        searchFieldDidDismiss()
+    }
+
     public mutating func contentDidLoad() {
         guard target == nil, !isSearchFocusPending else {
             return

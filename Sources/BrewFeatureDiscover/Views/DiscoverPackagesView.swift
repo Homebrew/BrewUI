@@ -44,6 +44,9 @@ struct DiscoverPackagesView: View {
         }
         .onChange(of: focus) { _, focus in
             searchFocus.focusDidChange(to: focus)
+            if focus != .searchField, viewModel.query.isEmpty {
+                searchFocus.emptySearchFieldDidLoseFocus()
+            }
         }
         .onChange(of: searchFocus.isSearchFieldPresented) { _, presented in
             guard presented else {
