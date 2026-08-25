@@ -50,4 +50,27 @@ struct CrashReportFormatterTests {
 
         #expect(!text.contains("Reason:"))
     }
+
+    @Test func `a runaway call stack is elided from the middle`() {
+        let callStack = (0 ..< 500_000).map { "\($0) frame" }
+
+        let text = CrashReportFormatter.makeReportText(
+            kind: "Uncaught exception NSInternalInconsistencyException",
+            detail: nil,
+            callStack: callStack,
+            environment: sampleEnvironment,
+            date: Date(timeIntervalSince1970: 0),
+        )
+
+        #expect(text.contains("0 frame"))
+        #expect(text.contains("499999 frame"))
+        #expect(text.contains("more frames elided"))
+        #expect(text.utf8.count < 16 * 1024)
+    }
+
+    @Test func `a call stack within the limit is kept whole`() {
+        let callStack = (0 ..< CrashReportFormatter.maximumCallStackFrames).map { "\($0) frame" }
+
+        #expect(CrashReportFormatter.clampedCallStack(callStack) == callStack)
+    }
 }

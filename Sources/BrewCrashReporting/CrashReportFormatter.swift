@@ -43,9 +43,26 @@ enum CrashReportFormatter {
         }
 
         lines += "\n\nCall stack:\n"
-        lines += callStack.joined(separator: "\n")
+        lines += clampedCallStack(callStack).joined(separator: "\n")
         return lines
     }
+
+    /// A runaway recursion throws with a call stack hundreds of thousands of frames deep, and every
+    /// frame of it lands in the report. Keeping both ends preserves what the elision costs: the
+    /// repeating cycle at the top, and how the process got there at the bottom.
+    static func clampedCallStack(_ callStack: [String]) -> [String] {
+        guard callStack.count > maximumCallStackFrames else {
+            return callStack
+        }
+
+        let leading = callStack.prefix(maximumCallStackFrames - trailingCallStackFrames)
+        let trailing = callStack.suffix(trailingCallStackFrames)
+        let elided = callStack.count - leading.count - trailing.count
+        return leading + ["… \(elided) more frames elided …"] + trailing
+    }
+
+    static let maximumCallStackFrames = 128
+    private static let trailingCallStackFrames = 32
 
     private static func environmentLines(
         environment: CrashReportEnvironment,
