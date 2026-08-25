@@ -142,6 +142,17 @@ struct SearchFocusArbiterTests {
         #expect(arbiter.target == .searchField)
     }
 
+    /// SwiftUI resigns the search field on its way out of the toolbar, after `searchFieldDidDismiss`
+    /// has already handed the list back the keyboard. Honouring that nil left the keyboard nowhere.
+    @Test func `losing focus does not clear the target`() {
+        var arbiter = SearchFocusArbiter(target: .searchField, isSearchFieldPresented: true)
+
+        arbiter.searchFieldDidDismiss()
+        arbiter.focusDidChange(to: nil)
+
+        #expect(arbiter.target == .list)
+    }
+
     @Test func `losing focus while a claim is pending does not cancel the claim`() {
         var arbiter = SearchFocusArbiter(target: .list)
 

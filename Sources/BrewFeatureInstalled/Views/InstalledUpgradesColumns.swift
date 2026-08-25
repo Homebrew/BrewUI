@@ -87,8 +87,8 @@ struct InstalledUpgradesContainer: View {
             )
             .searchFocused($focus, equals: .searchField)
             .focusedSceneValue(\.focusSearchField, focusSearchField)
-            .onChange(of: searchFocus.target) { _, target in
-                focus = target
+            .onChange(of: searchFocus.target) { _, _ in
+                moveFocusToTarget()
             }
             .onChange(of: focus) { _, focus in
                 searchFocus.focusDidChange(to: focus)
@@ -115,6 +115,18 @@ struct InstalledUpgradesContainer: View {
                     searchFocus.searchFieldDidPresent()
                 }
             }
+    }
+
+    /// Hopping off this update is load-bearing. `.searchable` reports its dismissal from inside
+    /// AppKit's layout pass, so writing the arbiter's new target straight back into `.searchFocused`
+    /// re-enters that pass, which dismisses again — Escape used to wedge the app until the stack ran out.
+    private func moveFocusToTarget() {
+        Task { @MainActor in
+            guard focus != searchFocus.target else {
+                return
+            }
+            focus = searchFocus.target
+        }
     }
 
     private var focusSearchField: FocusSearchFieldAction {
