@@ -96,6 +96,14 @@ struct InstalledUpgradesContainer: View {
                     searchFocus.emptySearchFieldDidLoseFocus()
                 }
             }
+            .onClickOutsideSearchField {
+                guard focus == .searchField else {
+                    return
+                }
+                searchFocus.clickLandedOutsideSearchField(
+                    searchFieldIsEmpty: activeSearchQuery.wrappedValue.isEmpty,
+                )
+            }
             .onChange(of: searchFocus.isSearchFieldPresented) { _, presented in
                 guard presented else {
                     return

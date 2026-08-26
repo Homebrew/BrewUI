@@ -60,6 +60,19 @@ public struct SearchFocusArbiter: Equatable, Sendable {
         searchFieldDidDismiss()
     }
 
+    /// A field with a query in it keeps its place in the toolbar; collapsing it would hide why the
+    /// list is still filtered. Either way the keyboard goes back to the list the user clicked into.
+    public mutating func clickLandedOutsideSearchField(searchFieldIsEmpty: Bool) {
+        guard !isSearchFocusPending else {
+            return
+        }
+        if searchFieldIsEmpty {
+            searchFieldDidDismiss()
+        } else {
+            target = .list
+        }
+    }
+
     public mutating func contentDidLoad() {
         guard target == nil, !isSearchFocusPending else {
             return
