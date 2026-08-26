@@ -73,6 +73,15 @@ public struct SearchFocusArbiter: Equatable, Sendable {
         }
     }
 
+    /// Switching tab rebuilds the list, and a rebuilt list holds no focus. The keyboard only goes back
+    /// to it when the search field is not the one using it.
+    public mutating func activeListDidChange() {
+        guard !isSearchFocusPending, target != .searchField else {
+            return
+        }
+        target = .list
+    }
+
     public mutating func contentDidLoad() {
         guard target == nil, !isSearchFocusPending else {
             return
