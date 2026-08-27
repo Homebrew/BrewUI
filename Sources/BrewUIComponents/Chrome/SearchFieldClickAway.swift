@@ -54,8 +54,6 @@ enum SearchFieldClickAway {
         isInsideSearchField(clickedView(for: event))
     }
 
-    /// The field editor and the toolbar item's own chrome both sit under the `NSSearchField`, so the
-    /// ancestor walk covers a click on the text, the magnifier and the cancel button alike.
     static func isInsideSearchField(_ view: NSView?) -> Bool {
         var node = view
         while let current = node {
@@ -67,8 +65,6 @@ enum SearchFieldClickAway {
         return false
     }
 
-    /// Hit-tested from the theme frame rather than the content view: the search field lives in the
-    /// window's title bar, which is not part of the content view's tree.
     private static func clickedView(for event: NSEvent) -> NSView? {
         guard let window = event.window else {
             return nil
