@@ -53,4 +53,21 @@ final class SearchDismissUITests: BrewUITestCase {
 
         installed.assertHasPackage("wget")
     }
+
+    /// The click that used to change nothing: focus only moves for some of them, so this asserts on
+    /// where the keystrokes land rather than on the field's own focus.
+    @MainActor
+    func testClickingOutsideTheSearchFieldDefocusesIt() {
+        let installed = launch(.installedBasic)
+
+        installed.searchField
+            .activate()
+            .typeAtCursor("wget")
+            .assertValue("wget")
+
+        installed.list.row("wget").tap()
+        installed.searchField.typeAtCursor("zzz")
+
+        installed.searchField.assertValue("wget")
+    }
 }

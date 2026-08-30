@@ -48,6 +48,12 @@ struct DiscoverPackagesView: View {
                 searchFocus.emptySearchFieldDidLoseFocus()
             }
         }
+        .onClickOutsideSearchField {
+            guard focus == .searchField else {
+                return
+            }
+            searchFocus.clickLandedOutsideSearchField(searchFieldIsEmpty: viewModel.query.isEmpty)
+        }
         .onChange(of: searchFocus.isSearchFieldPresented) { _, presented in
             guard presented else {
                 return

@@ -60,6 +60,28 @@ public struct SearchFocusArbiter: Equatable, Sendable {
         searchFieldDidDismiss()
     }
 
+    /// A field with a query in it keeps its place in the toolbar; collapsing it would hide why the
+    /// list is still filtered. Either way the keyboard goes back to the list the user clicked into.
+    public mutating func clickLandedOutsideSearchField(searchFieldIsEmpty: Bool) {
+        guard !isSearchFocusPending else {
+            return
+        }
+        if searchFieldIsEmpty {
+            searchFieldDidDismiss()
+        } else {
+            target = .list
+        }
+    }
+
+    /// Switching tab rebuilds the list, and a rebuilt list holds no focus. The keyboard only goes back
+    /// to it when the search field is not the one using it.
+    public mutating func activeListDidChange() {
+        guard !isSearchFocusPending, target != .searchField else {
+            return
+        }
+        target = .list
+    }
+
     public mutating func contentDidLoad() {
         guard target == nil, !isSearchFocusPending else {
             return

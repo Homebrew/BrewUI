@@ -221,4 +221,63 @@ struct SearchFocusArbiterTests {
 
         #expect(arbiter.target == .list)
     }
+
+    // MARK: - Clicking away from the field
+
+    @Test func `a click outside an empty field collapses it and hands the list the keyboard`() {
+        var arbiter = SearchFocusArbiter(target: .searchField, isSearchFieldPresented: true)
+
+        arbiter.clickLandedOutsideSearchField(searchFieldIsEmpty: true)
+
+        #expect(!arbiter.isSearchFieldPresented)
+        #expect(arbiter.target == .list)
+    }
+
+    @Test func `a click outside a field with a query leaves the field in the toolbar`() {
+        var arbiter = SearchFocusArbiter(target: .searchField, isSearchFieldPresented: true)
+
+        arbiter.clickLandedOutsideSearchField(searchFieldIsEmpty: false)
+
+        #expect(arbiter.isSearchFieldPresented)
+        #expect(arbiter.target == .list)
+    }
+
+    @Test func `a click outside does not cancel a pending claim`() {
+        var arbiter = SearchFocusArbiter(target: .list)
+
+        arbiter.requestSearchFocus()
+        arbiter.clickLandedOutsideSearchField(searchFieldIsEmpty: true)
+
+        #expect(arbiter.isSearchFieldPresented)
+        #expect(arbiter.isSearchFocusPending)
+    }
+
+    // MARK: - Switching tab
+
+    @Test func `switching tab hands the rebuilt list the keyboard`() {
+        var arbiter = SearchFocusArbiter()
+
+        arbiter.activeListDidChange()
+
+        #expect(arbiter.target == .list)
+    }
+
+    @Test func `switching tab does not take the keyboard from the search field`() {
+        var arbiter = SearchFocusArbiter(target: .searchField, isSearchFieldPresented: true)
+
+        arbiter.activeListDidChange()
+
+        #expect(arbiter.target == .searchField)
+        #expect(arbiter.isSearchFieldPresented)
+    }
+
+    @Test func `switching tab does not cancel a pending claim`() {
+        var arbiter = SearchFocusArbiter(target: .list)
+
+        arbiter.requestSearchFocus()
+        arbiter.activeListDidChange()
+
+        #expect(arbiter.isSearchFocusPending)
+        #expect(arbiter.target == .list)
+    }
 }
