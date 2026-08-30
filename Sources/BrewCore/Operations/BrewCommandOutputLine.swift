@@ -21,6 +21,9 @@ public struct BrewCommandOutputLine: Identifiable, Equatable, Sendable {
     /// `false` while the line may still be revised.
     public let isComplete: Bool
 
+    /// Rows back from the end of the buffer this line belongs. Always 0 on the pipe path.
+    public let rowOffset: Int
+
     public enum Stream: Equatable, Sendable {
         case stdout
         case stderr
@@ -32,12 +35,14 @@ public struct BrewCommandOutputLine: Identifiable, Equatable, Sendable {
         timestamp: Date = Date(),
         id: UUID = UUID(),
         isComplete: Bool = true,
+        rowOffset: Int = 0,
     ) {
         self.id = id
         self.stream = stream
         self.text = text
         self.timestamp = timestamp
         self.isComplete = isComplete
+        self.rowOffset = rowOffset
         spans = ANSIParser.parse(text)
     }
 
@@ -48,12 +53,14 @@ public struct BrewCommandOutputLine: Identifiable, Equatable, Sendable {
         isComplete: Bool,
         timestamp: Date = Date(),
         id: UUID = UUID(),
+        rowOffset: Int = 0,
     ) {
         self.id = id
         self.stream = stream
         text = line.text
         self.timestamp = timestamp
         self.isComplete = isComplete
+        self.rowOffset = rowOffset
         spans = line.spans
     }
 
@@ -68,6 +75,7 @@ public struct BrewCommandOutputLine: Identifiable, Equatable, Sendable {
         text = other.text
         timestamp = other.timestamp
         isComplete = other.isComplete
+        rowOffset = other.rowOffset
         spans = other.spans
     }
 }
