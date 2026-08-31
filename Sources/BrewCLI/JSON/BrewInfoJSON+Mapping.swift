@@ -32,7 +32,7 @@ private extension BrewInfoFormula {
                 kind: .formula,
                 description: BrewInfoJSON.trimmedOrEmpty(desc),
                 homepage: BrewInfoJSON.trimmedOrEmpty(homepage),
-                latestVersion: BrewInfoJSON.trimmedOrEmpty(versions.stable),
+                latestVersion: HomebrewPkgVersion.string(version: versions.stable, revision: revision) ?? "",
                 dependencies: HomebrewPackageID.formulaDependencies(from: dependencies),
             ),
             installedVersions: installedVersions,

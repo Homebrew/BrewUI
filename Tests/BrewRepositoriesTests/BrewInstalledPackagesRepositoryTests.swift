@@ -54,6 +54,33 @@ struct BrewInstalledPackagesRepositoryTests {
         #expect(zed.installedVersions == ["1.2.4"])
     }
 
+    @Test @MainActor func `load reports a revision bump as a distinct upgrade target`() async throws {
+        let json = """
+        {
+          "formulae": [
+            {
+              "name": "ffmpeg",
+              "versions": { "stable": "9.0.1" },
+              "revision": 1,
+              "installed": [{ "version": "9.0.1" }],
+              "outdated": true
+            }
+          ],
+          "casks": []
+        }
+        """
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(standardOutput: json),
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
+
+        let ffmpeg = try #require(package(named: "ffmpeg", in: packages))
+        #expect(ffmpeg.outdated)
+        #expect(ffmpeg.latestVersion == "9.0.1_1")
+        #expect(ffmpeg.latestVersion != ffmpeg.installedVersions.first)
+    }
+
     @Test @MainActor func `load handles mixed payload version fallback rules`() async throws {
         let json = """
         {

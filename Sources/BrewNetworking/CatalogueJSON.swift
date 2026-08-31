@@ -34,6 +34,8 @@ public struct FormulaCatalogueItemJSON: Codable, Sendable {
     public let desc: String
     public let homepage: String
     public let versions: Versions
+    /// Optional so a catalogue payload without the field still decodes; absent means revision 0.
+    public let revision: Int?
     public let dependencies: [String]
 
     public struct Versions: Codable, Sendable {
@@ -81,7 +83,7 @@ public extension FormulaCatalogueItemJSON {
     }
 
     var stableVersion: String {
-        versions.stable
+        HomebrewPkgVersion.string(version: versions.stable, revision: revision) ?? versions.stable
     }
 
     var dependencyReferences: [HomebrewPackageID] {
