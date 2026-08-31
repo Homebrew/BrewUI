@@ -15,39 +15,17 @@
     {
       "appearances" : [
         {
-          "appearance" : "luminosity",
-          "value" : "dark"
-        }
-      ],
-      "color" : {
-        "color-space" : "srgb",
-        "components" : {
-          "alpha" : "1.000",
-          "blue" : "0.110",
-          "green" : "0.592",
-          "red" : "0.910"
-        }
-      },
-      "idiom" : "universal"
-    },
-    {
-      "appearances" : [
-        {
           "appearance" : "contrast",
           "value" : "high"
-        },
-        {
-          "appearance" : "luminosity",
-          "value" : "dark"
         }
       ],
       "color" : {
         "color-space" : "srgb",
         "components" : {
           "alpha" : "1.000",
-          "blue" : "0.110",
-          "green" : "0.592",
-          "red" : "0.910"
+          "blue" : "0.063",
+          "green" : "0.388",
+          "red" : "0.604"
         }
       },
       "idiom" : "universal"

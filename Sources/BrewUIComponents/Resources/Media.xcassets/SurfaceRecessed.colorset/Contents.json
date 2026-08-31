@@ -29,6 +29,28 @@
         }
       },
       "idiom" : "universal"
+    },
+    {
+      "appearances" : [
+        {
+          "appearance" : "contrast",
+          "value" : "high"
+        },
+        {
+          "appearance" : "luminosity",
+          "value" : "dark"
+        }
+      ],
+      "color" : {
+        "color-space" : "srgb",
+        "components" : {
+          "alpha" : "1.000",
+          "blue" : "0.102",
+          "green" : "0.102",
+          "red" : "0.102"
+        }
+      },
+      "idiom" : "universal"
     }
   ],
   "info" : {
