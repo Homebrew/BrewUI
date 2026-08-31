@@ -16,7 +16,7 @@ struct UpgradesPackagesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header
+            UpgradesHeaderView(viewModel: viewModel)
 
             if viewModel.totalOutdatedCount > 0 {
                 scopePicker
@@ -45,63 +45,6 @@ struct UpgradesPackagesView: View {
         .task {
             await viewModel.load()
         }
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Available upgrades")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.outdatedSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-            .accessibilityHeading(.h1)
-
-            if viewModel.state.isLoaded {
-                CommandBlockView(
-                    command: viewModel.bulkUpgradeDisplayCommand,
-                    summaryText: viewModel.bulkUpgradeSummary,
-                )
-
-                upgradeAction
-            }
-        }
-        .padding(BrewSpacing.lg)
-    }
-
-    private var upgradeAction: some View {
-        Group {
-            if viewModel.outdatedCount > 0 {
-                Button {
-                    viewModel.upgradeAll()
-                } label: {
-                    Text("Upgrade All (\(viewModel.outdatedCount))")
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.regular)
-                .keyboardShortcut("u", modifiers: [.command, .shift])
-                .disabled(viewModel.isUpgradingAny)
-                .accessibilityLabel("Upgrade all \(viewModel.outdatedCount) packages")
-            } else {
-                nothingToUpgradeIndicator
-            }
-        }
-        .frame(height: BrewLayout.headerActionHeight)
-    }
-
-    private var nothingToUpgradeIndicator: some View {
-        HStack {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(Color.brewStatusSuccess)
-                .accessibilityHidden(true)
-            Text(viewModel.emptyUpgradeActionTitle)
-                .foregroundStyle(Color.brewTextSecondary)
-        }
-        .font(.brewBody)
     }
 
     /// Kind filter shown whenever there is outdated inventory to narrow. Filters client-side; never refetches.
@@ -185,15 +128,14 @@ struct UpgradesPackagesView: View {
         }
     }
 
+    /// No action of its own: re-checking now lives in the header, where it is reachable whether or not
+    /// this state is on screen.
     private var allCaughtUpState: some View {
         centeredEmptyState(
             title: "✅ You're all caught up",
             subtitle: allCaughtUpSubtitle,
-            actionTitle: "Refresh",
             accessibilityLabel: "All packages are up to date",
-        ) {
-            Task { await viewModel.refresh() }
-        }
+        )
     }
 
     /// Shown when the active filters (scope and/or search) hide every outdated package but upgrades
@@ -212,9 +154,9 @@ struct UpgradesPackagesView: View {
     private func centeredEmptyState(
         title: LocalizedStringKey,
         subtitle: String,
-        actionTitle: LocalizedStringKey,
+        actionTitle: LocalizedStringKey? = nil,
         accessibilityLabel: String,
-        action: @escaping () -> Void,
+        action: (() -> Void)? = nil,
     ) -> some View {
         VStack(spacing: BrewSpacing.md) {
             Spacer(minLength: 0)
@@ -225,9 +167,11 @@ struct UpgradesPackagesView: View {
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .multilineTextAlignment(.center)
-            Button(action: action) { Text(actionTitle) }
-                .controlSize(.regular)
-                .padding(.top, BrewSpacing.sm)
+            if let actionTitle, let action {
+                Button(action: action) { Text(actionTitle) }
+                    .controlSize(.regular)
+                    .padding(.top, BrewSpacing.sm)
+            }
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

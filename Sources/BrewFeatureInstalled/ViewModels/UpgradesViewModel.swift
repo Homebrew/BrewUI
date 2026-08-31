@@ -40,6 +40,10 @@ final class UpgradesViewModel {
 
     private var runningIDs: Set<BrewOperationID> = []
 
+    /// True while an explicit ``refresh()`` is in flight. The repository keeps its `.loaded` state
+    /// during a revalidation, so the header's Refresh button needs its own progress signal.
+    private(set) var isRefreshing = false
+
     var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
@@ -180,6 +184,8 @@ final class UpgradesViewModel {
     }
 
     func refresh() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
         await repository.load(forceRefresh: true)
     }
 
