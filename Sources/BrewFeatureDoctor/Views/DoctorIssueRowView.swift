@@ -13,8 +13,7 @@ struct DoctorIssueRowView: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: BrewSpacing.sm) {
-            Image(systemName: DoctorSeverityStyle.icon(item.severity))
-                .foregroundStyle(DoctorSeverityStyle.foreground(item.severity))
+            DoctorSeverityStyle.glyphImage(item.severity)
                 .imageScale(.medium)
             VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
                 Text(item.title)
@@ -24,7 +23,7 @@ struct DoctorIssueRowView: View {
                 if item.hasRunnableFix {
                     Label("Fix available", systemImage: "wrench.and.screwdriver")
                         .font(.brewCaption)
-                        .foregroundStyle(Color.brewBrandPrimary)
+                        .foregroundStyle(Color.brewTextBrand)
                 }
             }
             Spacer(minLength: 0)

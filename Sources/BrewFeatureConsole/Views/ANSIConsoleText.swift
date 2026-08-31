@@ -53,6 +53,8 @@ enum ANSIConsoleText {
     }
 
     /// Bright variants reuse their base hue, since the display palette doesn't distinguish them.
+    /// Magenta and cyan are tokens rather than SwiftUI's `.purple`/`.cyan`, which drop under 2:1 on
+    /// the app surface the console draws on.
     static func color(for ansiColor: ANSIColor) -> Color {
         switch ansiColor {
         case .black, .brightBlack:
@@ -66,9 +68,9 @@ enum ANSIConsoleText {
         case .blue, .brightBlue:
             .brewStatusInfo
         case .magenta, .brightMagenta:
-            .purple
+            .brewTextMagenta
         case .cyan, .brightCyan:
-            .cyan
+            .brewTextCyan
         case .white, .brightWhite:
             .brewTextPrimary
         }

@@ -96,7 +96,7 @@ struct MainSidebarView: View {
             HStack(spacing: BrewSpacing.sm) {
                 Text("\(emoji) \(title)")
                     .font(.brewBody)
-                    .foregroundStyle(isSelected ? Color.brewBrandPrimary : Color.brewTextPrimary)
+                    .foregroundStyle(isSelected ? Color.brewTextBrand : Color.brewTextPrimary)
                 Spacer(minLength: 0)
                 trailingAccessory()
             }
