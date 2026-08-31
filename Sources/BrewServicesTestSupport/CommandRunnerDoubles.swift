@@ -15,6 +15,20 @@ public struct MissingBrewExecutableLocator: BrewExecutableLocating {
     }
 }
 
+/// Fixed answer for ``HomebrewEnvironmentReading``, so a test can pin which package-data source
+/// brew is configured to use without running `brew config`.
+public struct StubHomebrewEnvironment: HomebrewEnvironmentReading {
+    private let installFromAPIDisabled: Bool
+
+    public init(installFromAPIDisabled: Bool) {
+        self.installFromAPIDisabled = installFromAPIDisabled
+    }
+
+    public func isInstallFromAPIDisabled() async -> Bool {
+        installFromAPIDisabled
+    }
+}
+
 /// Per-invocation result for ``MockBrewCommandRunner``.
 public enum MockBrewCommandRunnerBehavior: Sendable {
     case output(CommandOutput)

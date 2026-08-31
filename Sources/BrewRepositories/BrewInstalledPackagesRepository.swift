@@ -40,18 +40,31 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     @ObservationIgnored private let locator: any BrewExecutableLocating
     @ObservationIgnored private let cache: InstalledInventoryCache
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
+    @ObservationIgnored private let environment: any HomebrewEnvironmentReading
+    @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
+
+    /// When the last `brew update` was attempted, so the tap refresh below runs on an interval
+    /// rather than in front of every fetch (each mutating operation triggers one).
+    @ObservationIgnored private var lastTapUpdateAttempt: Date?
+
+    /// Matches Homebrew's own `HOMEBREW_AUTO_UPDATE_SECS` default for the no-API path (5 minutes).
+    private static let tapRefreshInterval: TimeInterval = 300
 
     public init(
         commandRunner: BrewCommandRunning,
         locator: any BrewExecutableLocating,
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
+        environment: any HomebrewEnvironmentReading,
+        now: @escaping @Sendable () -> Date = Date.init,
     ) {
         self.commandRunner = commandRunner
         self.locator = locator
         self.cache = cache
         self.commandCenter = commandCenter
+        self.environment = environment
+        self.now = now
         completionObserverTask = Task { @MainActor [weak self] in
             await self?.observeOperationCompletions()
         }
@@ -69,6 +82,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             locator: executionContext.locator,
             cache: cache,
             commandCenter: commandCenter,
+            environment: BrewConfigEnvironmentReader(executionContext: executionContext),
         )
     }
 
@@ -172,12 +186,49 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
 
     private func fetchInstalledPackages() async throws -> [InstalledBrewPackage] {
         let brew = try locator.findBrewExecutable()
+        await updateTapsIfNeeded(executable: brew)
         let output = try await runInstalledInfoJSON(executable: brew)
         let payload = try decodeInfoJSON(from: output)
         let packages = payload.installedPackages()
         let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: packages)
         await cache.replace(snapshot)
         return packages
+    }
+
+    /// Brings locally cloned taps up to date before reading versions out of them, the way `brew
+    /// upgrade` and `brew outdated` do.
+    ///
+    /// `brew info` is not one of the commands brew auto-updates in front of. Normally that costs
+    /// nothing, because brew re-fetches the JSON API files on its own TTL whenever a command reads
+    /// them. Under `HOMEBREW_NO_INSTALL_FROM_API` there is no such refresh: formula and cask data
+    /// come from tap git clones, so the outdated check answers from whatever the taps held the last
+    /// time the user ran `brew update` in a terminal — indefinitely, with no upgrades ever appearing.
+    ///
+    /// Runs on Homebrew's own cadence for this mode, and the attempt is timestamped whether or not
+    /// it succeeded so a persistently failing update cannot stall every fetch behind it.
+    private func updateTapsIfNeeded(executable: URL) async {
+        guard await environment.isInstallFromAPIDisabled() else {
+            return
+        }
+        if let lastTapUpdateAttempt, now().timeIntervalSince(lastTapUpdateAttempt) < Self.tapRefreshInterval {
+            return
+        }
+        lastTapUpdateAttempt = now()
+        do {
+            let output = try await commandRunner.run(
+                executableURL: executable,
+                arguments: ["update", "--auto-update", "--quiet"],
+            )
+            guard output.terminationStatus == 0 else {
+                throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
+            }
+        } catch {
+            // Not fatal on its own: the taps still hold their previous contents, and the `brew info`
+            // fetch below decides whether the check as a whole produced an answer.
+            installedRepositoryLogger.error(
+                "Tap refresh before the outdated check failed: \(error.localizedDescription, privacy: .public)",
+            )
+        }
     }
 
     private func runInstalledInfoJSON(executable: URL) async throws -> String {
