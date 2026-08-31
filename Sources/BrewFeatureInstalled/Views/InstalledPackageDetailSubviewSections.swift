@@ -96,7 +96,7 @@ struct InstalledPackageDetailMetadataSection: View {
                 valueColor: metadata.isOutdated ? .brewStatusWarning : .brewTextPrimary,
                 valueFontWeight: .heavy,
             )
-            detailRow(label: "Latest stable", value: metadata.latestVersionValue)
+            detailRow(label: "Latest version", value: metadata.latestVersionValue)
             if let dateValue = metadata.installDateValue {
                 detailRow(label: "Installed on", value: dateValue)
             }
