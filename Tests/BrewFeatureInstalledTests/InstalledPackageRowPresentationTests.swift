@@ -53,7 +53,6 @@ struct InstalledPackageRowPresentationTests {
         let expected = PackageKindChrome(
             badgeLabel: "FORMULA",
             accent: .brandPrimary,
-            iconBackground: .brandTint,
         )
         #expect(InstalledPackageKind.formula.chrome == expected)
     }
@@ -62,7 +61,6 @@ struct InstalledPackageRowPresentationTests {
         let expected = PackageKindChrome(
             badgeLabel: "CASK",
             accent: .statusInfo,
-            iconBackground: .statusInfoSubtle,
         )
         #expect(InstalledPackageKind.cask.chrome == expected)
     }

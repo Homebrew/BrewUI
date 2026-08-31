@@ -78,10 +78,10 @@ private struct DiscoverPackageDetailHeroSection: View {
 
     var body: some View {
         let chrome = viewModel.packageKindChrome
-        HStack(alignment: .top, spacing: BrewSpacing.md) {
+        HStack(alignment: .center, spacing: BrewSpacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: BrewRadius.lg)
-                    .fill(iconBackgroundColor(chrome.iconBackground))
+                    .strokeBorder(accentColor(chrome.accent), lineWidth: 1)
                     .frame(width: 44, height: 44)
                 Image(systemName: "cube.box.fill")
                     .font(.title2)
@@ -125,15 +125,8 @@ private struct DiscoverPackageDetailHeroSection: View {
 
     private func accentColor(_ token: PackageKindAccentToken) -> Color {
         switch token {
-        case .brandPrimary: Color.brewBrandPrimary
+        case .brandPrimary: Color.brewTextBrand
         case .statusInfo: Color.brewStatusInfo
-        }
-    }
-
-    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
-        switch token {
-        case .brandTint: Color.brewBrandTint
-        case .statusInfoSubtle: Color.brewStatusInfoSubtle
         }
     }
 }

@@ -13,10 +13,10 @@ struct InstalledPackageDetailHeroSection: View {
 
     var body: some View {
         let chrome = viewModel.packageKind.chrome
-        HStack(alignment: .top, spacing: BrewSpacing.md) {
+        HStack(alignment: .center, spacing: BrewSpacing.md) {
             ZStack {
                 RoundedRectangle(cornerRadius: BrewRadius.lg)
-                    .fill(iconBackgroundColor(chrome.iconBackground))
+                    .strokeBorder(accentColor(chrome.accent), lineWidth: 1)
                     .frame(width: 44, height: 44)
                 Image(systemName: "cube.box.fill")
                     .font(.title2)
@@ -30,16 +30,11 @@ struct InstalledPackageDetailHeroSection: View {
                         .font(.brewTitle1)
                         .foregroundStyle(Color.brewTextPrimary)
 
-                    Image(
-                        systemName: viewModel.showsUpgradeAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill",
-                    )
-                    .font(.brewTitle3)
-                    .foregroundStyle(
-                        viewModel.showsUpgradeAvailable ? Color.brewStatusWarning : Color.brewStatusSuccess,
-                    )
-                    .accessibilityLabel(
-                        viewModel.showsUpgradeAvailable ? "Update available" : "Installed",
-                    )
+                    statusIcon
+                        .font(.brewTitle3)
+                        .accessibilityLabel(
+                            viewModel.showsUpgradeAvailable ? "Update available" : "Installed",
+                        )
 
                     Text(chrome.badgeLabel)
                         .font(.brewCaption2)
@@ -65,6 +60,17 @@ struct InstalledPackageDetailHeroSection: View {
         }
     }
 
+    @ViewBuilder
+    private var statusIcon: some View {
+        if viewModel.showsUpgradeAvailable {
+            Image(systemName: "exclamationmark.circle.fill")
+                .brewWarningGlyphStyle()
+        } else {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Color.brewStatusSuccess)
+        }
+    }
+
     private var heroSubtitle: String? {
         let trimmed = viewModel.package.description.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
@@ -72,15 +78,8 @@ struct InstalledPackageDetailHeroSection: View {
 
     private func accentColor(_ token: PackageKindAccentToken) -> Color {
         switch token {
-        case .brandPrimary: Color.brewBrandPrimary
+        case .brandPrimary: Color.brewTextBrand
         case .statusInfo: Color.brewStatusInfo
-        }
-    }
-
-    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
-        switch token {
-        case .brandTint: Color.brewBrandTint
-        case .statusInfoSubtle: Color.brewStatusInfoSubtle
         }
     }
 }
@@ -189,7 +188,7 @@ struct InstalledPackageDetailMetadataSection: View {
         HStack(alignment: .center, spacing: BrewSpacing.sm) {
             Image(systemName: "info.circle.fill")
                 .font(.brewSubheadline)
-                .foregroundStyle(Color.brewBrandPrimary)
+                .foregroundStyle(Color.brewTextBrand)
             Text(text)
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextPrimary)
@@ -230,10 +229,10 @@ struct InstalledPackageDetailDependentsSection: View {
             if let badgeTitle = viewModel.uninstallItem.usedByBlockingBadgeTitle {
                 Text(badgeTitle)
                     .font(.brewCaption2.weight(.semibold))
-                    .foregroundStyle(Color.brewStatusWarning)
+                    .foregroundStyle(Color.brewTextOnBrand)
                     .padding(.horizontal, BrewSpacing.xs)
                     .padding(.vertical, BrewSpacing.xxs)
-                    .background(Color.brewStatusWarningSubtle)
+                    .background(Color.brewStatusWarningBold)
                     .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm))
             }
         }
@@ -247,8 +246,8 @@ struct UninstallBlockedCallout: View {
     var body: some View {
         HStack(alignment: .top, spacing: BrewSpacing.sm) {
             Image(systemName: "exclamationmark.triangle.fill")
+                .brewWarningGlyphStyle()
                 .font(.brewSubheadline)
-                .foregroundStyle(Color.brewStatusWarning)
             Text("\(Text(lead).fontWeight(.semibold)) \(bodyText)")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextPrimary)
@@ -321,7 +320,7 @@ enum PackageRelationshipDotStyle {
         case .neutral:
             Color.brewTextTertiary
         case .warning:
-            Color.brewStatusWarning
+            Color.brewStatusWarningBold
         }
     }
 }
