@@ -96,7 +96,7 @@ struct UpgradesViewModelTests {
         let none = Self.makeViewModel(packages: [
             .fixture(name: "wget", kind: .formula, outdated: false),
         ])
-        #expect(none.outdatedSubtitle == "All packages are up to date")
+        #expect(none.outdatedSubtitle == "Everything is up to date")
 
         let one = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: true),

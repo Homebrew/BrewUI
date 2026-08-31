@@ -111,10 +111,7 @@ final class UpgradesViewModel {
     private var inventorySubtitle: String {
         switch totalOutdatedCount {
         case 0:
-            String(
-                localized: "All packages are up to date",
-                comment: "Upgrades tab subtitle when nothing is outdated",
-            )
+            UpgradesUpToDateCopy.headline
         case 1:
             String(
                 localized: "1 package can be upgraded",
@@ -371,10 +368,17 @@ extension UpgradesViewModel {
                 comment: "Upgrades header stand-in when filters hide every available upgrade",
             )
         }
-        return String(
-            localized: "Nothing to upgrade",
-            comment: "Upgrades header stand-in when no package is outdated",
-        )
+        return UpgradesUpToDateCopy.headline
+    }
+
+    /// Empty-state headline and VoiceOver label for a fully up-to-date inventory.
+    var upToDateTitle: String {
+        UpgradesUpToDateCopy.headline
+    }
+
+    /// Supporting line under ``upToDateTitle``, scoped to the installed count the claim covers.
+    var upToDateDetail: String {
+        UpgradesUpToDateCopy.installedDetail(count: totalInstalledCount)
     }
 
     /// What "Upgrade All" upgrades, given the active filters:

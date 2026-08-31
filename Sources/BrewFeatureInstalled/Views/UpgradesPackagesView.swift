@@ -132,9 +132,9 @@ struct UpgradesPackagesView: View {
     /// this state is on screen.
     private var allCaughtUpState: some View {
         centeredEmptyState(
-            title: "✅ You're all caught up",
-            subtitle: allCaughtUpSubtitle,
-            accessibilityLabel: "All packages are up to date",
+            title: viewModel.upToDateTitle,
+            subtitle: viewModel.upToDateDetail,
+            accessibilityLabel: viewModel.upToDateTitle,
         )
     }
 
@@ -142,7 +142,10 @@ struct UpgradesPackagesView: View {
     /// still exist in the inventory — distinct from the "all caught up" state.
     private var noSearchMatchesState: some View {
         centeredEmptyState(
-            title: "No matching upgrades",
+            title: String(
+                localized: "No matching upgrades",
+                comment: "Upgrades filter-empty state title",
+            ),
             subtitle: noSearchMatchesSubtitle,
             actionTitle: "Show all upgrades",
             accessibilityLabel: noSearchMatchesSubtitle,
@@ -152,7 +155,7 @@ struct UpgradesPackagesView: View {
     }
 
     private func centeredEmptyState(
-        title: LocalizedStringKey,
+        title: String,
         subtitle: String,
         actionTitle: LocalizedStringKey? = nil,
         accessibilityLabel: String,
@@ -178,27 +181,6 @@ struct UpgradesPackagesView: View {
         .padding(BrewSpacing.xl)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
-    }
-
-    private var allCaughtUpSubtitle: String {
-        let total = viewModel.totalInstalledCount
-        switch total {
-        case 0:
-            return String(
-                localized: "No installed packages to check.",
-                comment: "Upgrades empty state when nothing is installed",
-            )
-        case 1:
-            return String(
-                localized: "Your installed package is at its latest version.",
-                comment: "Upgrades empty state for a single installed package",
-            )
-        default:
-            return String(
-                localized: "All \(total) packages are at their latest versions.",
-                comment: "Upgrades empty state with total installed count",
-            )
-        }
     }
 
     private var noSearchMatchesSubtitle: String {
