@@ -85,10 +85,13 @@ struct UpgradesHeaderView: View {
         .axid(.upgradesRefreshButton)
     }
 
+    /// A green tick is a claim that nothing needs upgrading. When the check itself failed the app has
+    /// no such claim to make, so the same slot warns instead.
     private var nothingToUpgradeIndicator: some View {
-        HStack {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(Color.brewStatusSuccess)
+        let didCheckFail = viewModel.showsUpgradeCheckFailure
+        return HStack {
+            Image(systemName: didCheckFail ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                .foregroundStyle(didCheckFail ? Color.brewStatusWarning : Color.brewStatusSuccess)
                 .accessibilityHidden(true)
             Text(viewModel.emptyUpgradeActionTitle)
                 .foregroundStyle(Color.brewTextSecondary)

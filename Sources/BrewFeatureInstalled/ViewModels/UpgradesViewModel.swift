@@ -86,6 +86,19 @@ final class UpgradesViewModel {
         repository.outdatedCount
     }
 
+    /// Non-nil when the last check for upgrades did not complete and cached inventory is standing in
+    /// for a real answer. Everything downstream — subtitle, empty state, VoiceOver — reads this rather
+    /// than reporting the cached zero as "nothing to upgrade".
+    var upgradeCheckFailureMessage: String? {
+        repository.refreshFailure.map(Self.userMessage(for:))
+    }
+
+    /// True when the tab has no upgrades to show *and* cannot vouch for that: it is standing on a
+    /// cached inventory whose last refresh failed.
+    var showsUpgradeCheckFailure: Bool {
+        totalOutdatedCount == 0 && state.isLoaded && upgradeCheckFailureMessage != nil
+    }
+
     /// Initial fetch with no rows yet — show blocking spinner.
     private var shouldShowInitialLoadingIndicator: Bool {
         if case .loading = state {
@@ -102,11 +115,26 @@ final class UpgradesViewModel {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Upgrades tab subtitle while fetching")
         }
-        if isFiltering {
-            return filteredSubtitle
+        if showsUpgradeCheckFailure {
+            return Self.upgradeCheckFailedTitle
         }
-        return inventorySubtitle
+        let subtitle = isFiltering ? filteredSubtitle : inventorySubtitle
+        guard upgradeCheckFailureMessage != nil else {
+            return subtitle
+        }
+        // Cached upgrades are still worth listing, but the count came from the last check that
+        // succeeded, so it must not read as a current answer.
+        return String(
+            localized: "\(subtitle) — last check failed",
+            comment: "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
+        )
     }
+
+    /// Headline used wherever the tab has to say the check itself did not complete.
+    static let upgradeCheckFailedTitle = String(
+        localized: "Couldn't check for upgrades",
+        comment: "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
+    )
 
     private var inventorySubtitle: String {
         switch totalOutdatedCount {
@@ -362,6 +390,9 @@ extension UpgradesViewModel {
     }
 
     var emptyUpgradeActionTitle: String {
+        if showsUpgradeCheckFailure {
+            return Self.upgradeCheckFailedTitle
+        }
         if isFilteringOutEveryUpgrade {
             return String(
                 localized: "Nothing to upgrade here",
@@ -379,6 +410,18 @@ extension UpgradesViewModel {
     /// Supporting line under ``upToDateTitle``, scoped to the installed count the claim covers.
     var upToDateDetail: String {
         UpgradesUpToDateCopy.installedDetail(count: totalInstalledCount)
+    }
+
+    /// Supporting line under ``upgradeCheckFailedTitle``: what brew actually said, then the point of
+    /// the whole state — an empty list here means "unknown", not "up to date".
+    var upgradeCheckFailureDetail: String {
+        guard let message = upgradeCheckFailureMessage else {
+            return ""
+        }
+        return String(
+            localized: "\(message)\n\nUntil this succeeds the app can't tell whether anything needs upgrading.",
+            comment: "Upgrades empty state under a failed check: brew's error, then why the list is empty",
+        )
     }
 
     /// What "Upgrade All" upgrades, given the active filters:

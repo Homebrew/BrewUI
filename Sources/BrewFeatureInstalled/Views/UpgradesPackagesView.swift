@@ -30,6 +30,8 @@ struct UpgradesPackagesView: View {
                     if content.packages.isEmpty {
                         if viewModel.totalOutdatedCount > 0 {
                             noSearchMatchesState
+                        } else if viewModel.showsUpgradeCheckFailure {
+                            upgradeCheckFailedState
                         } else {
                             allCaughtUpState
                         }
@@ -138,6 +140,20 @@ struct UpgradesPackagesView: View {
         )
     }
 
+    /// An empty list after a failed check means "unknown", not "up to date" — this state says so
+    /// rather than letting the cached zero pass for an answer.
+    private var upgradeCheckFailedState: some View {
+        centeredEmptyState(
+            title: UpgradesViewModel.upgradeCheckFailedTitle,
+            subtitle: viewModel.upgradeCheckFailureDetail,
+            actionTitle: "Try Again",
+            accessibilityLabel: UpgradesViewModel.upgradeCheckFailedTitle,
+        ) {
+            Task { await viewModel.refresh() }
+        }
+        .axid(.errorState)
+    }
+
     /// Shown when the active filters (scope and/or search) hide every outdated package but upgrades
     /// still exist in the inventory — distinct from the "all caught up" state.
     private var noSearchMatchesState: some View {
@@ -230,6 +246,28 @@ struct UpgradesPackagesView: View {
         .task {
             await viewModel.load()
             viewModel.searchQuery = "no-such-package"
+        }
+        .frame(minWidth: 360, minHeight: 500)
+    }
+
+    #Preview("Upgrades list - check failed") {
+        let viewModel = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(
+                packages: [PreviewSupport.currentCask],
+                refreshFailure: BrewCommandError.failed(
+                    exitCode: 1,
+                    stderr: "fatal: not a git repository (or any of the parent directories): .git",
+                ),
+            ),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            commandFactory: PreviewSupport.mutatingCommandFactory,
+        )
+        SearchFocusPreviewHost { focus in
+            UpgradesPackagesView(viewModel: viewModel, focus: focus)
+        }
+        .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
+        .task {
+            await viewModel.load()
         }
         .frame(minWidth: 360, minHeight: 500)
     }

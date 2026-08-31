@@ -327,6 +327,83 @@ struct BrewInstalledPackagesRepositoryTests {
         }
     }
 
+    @Test @MainActor func `a failed refresh is recorded even though the cached list stays on screen`() async {
+        let cache = InstalledInventoryCache()
+        await cache.replace(
+            InstalledInventorySnapshot(fetchedAt: .now, packages: [.fixture(name: "git", kind: .formula)]),
+        )
+        let runner = MockBrewCommandRunner(
+            behaviors: [
+                ["info", "--installed", "--json=v2"]: .throw(BrewCommandError.failed(exitCode: 1, stderr: "boom")),
+            ],
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner, cache: cache)
+
+        await repo.load()
+        #expect(repo.refreshFailure == nil)
+
+        await repo.load(forceRefresh: true)
+
+        #expect(repo.state.isLoaded)
+        guard let failure = repo.refreshFailure,
+              case let BrewCommandError.failed(_, stderr) = failure
+        else {
+            Issue.record("expected the refresh failure to be recorded")
+            return
+        }
+        #expect(stderr == "boom")
+    }
+
+    @Test @MainActor func `an initial failure is recorded alongside the failed state`() async {
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.responsesInstalledInfoFailure(
+                standardError: "boom",
+                terminationStatus: 1,
+            ),
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
+
+        await repo.load(forceRefresh: true)
+
+        #expect(repo.refreshFailure != nil)
+    }
+
+    @Test @MainActor func `a successful fetch clears a recorded failure`() async {
+        let runner = FlakyInfoRunner(
+            firstError: BrewCommandError.failed(exitCode: 1, stderr: "boom"),
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
+
+        await repo.load(forceRefresh: true)
+        #expect(repo.refreshFailure != nil)
+
+        await repo.load(forceRefresh: true)
+        #expect(repo.refreshFailure == nil)
+        #expect(repo.state.isLoaded)
+    }
+
+    @Test @MainActor func `repainting a fresh cache does not clear a recorded failure`() async {
+        // Only a completed fetch can vouch for the inventory. Painting the cache again answers
+        // nothing, so it must not silently turn "couldn't check" back into "nothing to upgrade".
+        let cache = InstalledInventoryCache()
+        await cache.replace(
+            InstalledInventorySnapshot(fetchedAt: .now, packages: [.fixture(name: "git", kind: .formula)]),
+        )
+        let runner = MockBrewCommandRunner(
+            behaviors: [
+                ["info", "--installed", "--json=v2"]: .throw(BrewCommandError.failed(exitCode: 1, stderr: "boom")),
+            ],
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner, cache: cache)
+
+        await repo.load(forceRefresh: true)
+        #expect(repo.refreshFailure != nil)
+
+        await repo.load() // cache is fresh, so this paints without fetching
+
+        #expect(repo.refreshFailure != nil)
+    }
+
     @Test @MainActor func `command center running to idle triggers a reconcile fetch`() async {
         let commandCenter = ControllableAllPhasesCommandCenter()
         let runner = CountingInfoRunner()
@@ -423,6 +500,28 @@ private func expectCallCount(atLeast target: Int, runner: CountingInfoRunner) as
         await Task.yield()
     }
     #expect(await runner.callCount >= target)
+}
+
+/// Throws once, then succeeds — for asserting that recovery clears recorded failure state.
+private actor FlakyInfoRunner: BrewCommandRunning {
+    private let firstError: any Error
+    private var didThrow = false
+
+    init(firstError: any Error) {
+        self.firstError = firstError
+    }
+
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        guard didThrow else {
+            didThrow = true
+            throw firstError
+        }
+        return CommandOutput(
+            standardOutput: #"{ "formulae": [], "casks": [] }"#,
+            standardError: "",
+            terminationStatus: 0,
+        )
+    }
 }
 
 /// Counts `brew info` invocations so reconcile tests can assert a fresh fetch happened.

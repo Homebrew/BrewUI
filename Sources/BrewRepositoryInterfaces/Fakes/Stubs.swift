@@ -12,10 +12,12 @@ import Observation
 @MainActor
 public final class StubInstalledPackagesRepository: InstalledPackagesRepository {
     public private(set) var state: LoadState<[InstalledBrewPackage], any Error>
+    public private(set) var refreshFailure: (any Error)?
     private var lookup: [HomebrewPackageID: InstalledBrewPackage]
 
-    public init(packages: [InstalledBrewPackage]) {
+    public init(packages: [InstalledBrewPackage], refreshFailure: (any Error)? = nil) {
         state = .loaded(packages)
+        self.refreshFailure = refreshFailure
         lookup = Dictionary(packages.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
 

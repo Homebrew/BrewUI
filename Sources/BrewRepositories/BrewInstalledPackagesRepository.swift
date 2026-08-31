@@ -27,6 +27,11 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     /// layers (view models) map it to user-facing copy. `failed` only when there is no data to show.
     public private(set) var state: LoadState<[InstalledBrewPackage], any Error> = .loading
 
+    /// Set when a fetch fails while ``state`` keeps cached inventory on screen, cleared on the next
+    /// success. Without it a caller reading only `state` reports a stale "nothing is outdated" as
+    /// fact, when in truth the outdated check never completed.
+    public private(set) var refreshFailure: (any Error)?
+
     /// O(1) membership/info lookups, kept in lock-step with ``state``. Tracked by observation so
     /// row views re-render when an install/uninstall changes a package's presence.
     private var lookup: [HomebrewPackageID: InstalledBrewPackage] = [:]
@@ -138,11 +143,17 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     private func fetchAndStore() async {
         do {
             let packages = try await fetchInstalledPackages()
+            // Only a completed fetch clears the flag — repainting a cached snapshot answers nothing
+            // about whether the outdated check now works.
+            refreshFailure = nil
             apply(packages)
         } catch is CancellationError {
             return
         } catch {
             // Keep showing cached data if we have any; only surface an error with nothing to show.
+            // Either way the failure is recorded, so surfaces can say the check did not complete
+            // rather than presenting stale inventory as an answer.
+            refreshFailure = error
             if case .loaded = state {
                 installedRepositoryLogger.error(
                     "Installed inventory revalidation failed: \(error.localizedDescription, privacy: .public)",

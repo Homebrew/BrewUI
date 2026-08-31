@@ -19,6 +19,10 @@ final class UnimplementedInstalledPackagesRepository: InstalledPackagesRepositor
         unimplemented()
     }
 
+    var refreshFailure: (any Error)? {
+        unimplemented()
+    }
+
     func load(forceRefresh _: Bool) async {
         unimplemented()
     }
