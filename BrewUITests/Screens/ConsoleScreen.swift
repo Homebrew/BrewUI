@@ -69,7 +69,8 @@ struct ConsoleScreen: Screen {
     }
 
     /// A line reaching the body is proof the run streamed through the real pipe drain rather than
-    /// arriving as one blob at exit.
+    /// arriving as one blob at exit. The body is one text view, so its accessibility *value* is the
+    /// whole transcript — a substring match on it says the line arrived.
     @discardableResult
     func assertOutputContains(
         _ substring: String,
@@ -78,8 +79,8 @@ struct ConsoleScreen: Screen {
         line: UInt = #line,
     ) -> Self {
         expand(file: file, line: line)
-        // macOS exposes a `List` row's `Text` through the accessibility *value*, with no label at all,
-        // so matching on label alone silently never matches.
+        // macOS exposes text through the accessibility *value*, with no label at all, so matching on
+        // label alone silently never matches.
         let predicate = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)
         let match = output.element.descendants(matching: .any).matching(predicate).firstMatch
         XCTAssertTrue(
