@@ -87,15 +87,17 @@ public struct CommandBlockView: View {
         commands.count > 1 ? "Copy all" : "Copy"
     }
 
+    /// Deliberately not on ``Color/brewTerminal``: light-on-dark text under the system selection
+    /// highlight measures 1.01:1, and SwiftUI offers no hook to restyle that highlight.
     @ViewBuilder
     private var commandsBlock: some View {
         if commands.count <= 1, let command = commands.first {
             Text(command)
                 .font(.brewCode)
-                .foregroundStyle(Color.brewCodeDefault)
+                .foregroundStyle(Color.brewTextPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(BrewSpacing.md)
-                .background(Color.brewTerminal)
+                .background(Color.brewSurface)
                 .textSelection(.enabled)
         } else {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
@@ -103,24 +105,24 @@ public struct CommandBlockView: View {
                     HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
                         Text("\(index + 1).")
                             .font(.brewCode)
-                            .foregroundStyle(Color.brewTextTertiary)
+                            .foregroundStyle(Color.brewTextSecondary)
                         Text(command)
                             .font(.brewCode)
-                            .foregroundStyle(Color.brewCodeDefault)
+                            .foregroundStyle(Color.brewTextPrimary)
                             .textSelection(.enabled)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
             .padding(BrewSpacing.md)
-            .background(Color.brewTerminal)
+            .background(Color.brewSurface)
         }
     }
 
     private func footer(_ text: String) -> some View {
         Text(text)
             .font(.brewCaption)
-            .foregroundStyle(Color.brewTextTertiary)
+            .foregroundStyle(Color.brewTextSecondary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, BrewSpacing.md)
             .padding(.vertical, BrewSpacing.sm)
