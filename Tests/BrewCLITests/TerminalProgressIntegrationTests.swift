@@ -47,9 +47,60 @@ struct TerminalProgressIntegrationTests {
 
         #expect(rows.count == 1 && rows[0].isComplete)
     }
+
+    /// Homebrew's download block: three rows, the last newline-less, rewound each tick with `ESC[2F`.
+    private static let downloadBlockScript = """
+    for tick in $(seq 1 25); do
+      printf 'Cask alpha  Downloading %s MB\\033[K\\n' $tick
+      printf 'Cask beta   Downloading %s MB\\033[K\\n' $tick
+      printf 'Cask gamma  Downloading %s MB\\033[K' $tick
+      printf '\\033[2F'
+    done
+    printf 'Cask alpha  Downloaded\\033[K\\n'
+    printf 'Cask beta   Downloaded\\033[K\\n'
+    printf 'Cask gamma  Downloaded\\033[K\\n'
+    """
+
+    @Test func `a redrawn download block settles into one row per cask`() async throws {
+        let rows = try await runIntoJob(script: Self.downloadBlockScript).map(\.text)
+
+        #expect(rows == [
+            "Cask alpha  Downloaded",
+            "Cask beta   Downloaded",
+            "Cask gamma  Downloaded",
+        ])
+    }
+
+    @Test func `a redrawn download block never splices two casks onto one row`() async throws {
+        let rows = try await runIntoJob(script: Self.downloadBlockScript).map(\.text)
+
+        #expect(rows.allSatisfy { $0.components(separatedBy: "Cask").count <= 2 })
+    }
+
+    @Test func `the transcript records settled rows, not every frame`() async throws {
+        let transcript = try await runReturningTranscript(script: Self.downloadBlockScript)
+
+        #expect(transcript == """
+        Cask alpha  Downloaded
+        Cask beta   Downloaded
+        Cask gamma  Downloaded
+
+        """)
+    }
 }
 
 private extension TerminalProgressIntegrationTests {
+    /// The assembled `standardOutput`, as opposed to what the console is streamed.
+    func runReturningTranscript(script: String) async throws -> String {
+        let service = BrewCommandService()
+        let output = try await service.run(
+            executableURL: URL(fileURLWithPath: "/bin/zsh"),
+            arguments: ["-c", script],
+            options: BrewRunOptions(output: .pseudoTerminal),
+        )
+        return output.standardOutput
+    }
+
     /// Replays the streamed lines into a ``CommandJob`` as the console does, returning the rows a user
     /// would see.
     func runIntoJob(script: String) async throws -> [BrewCommandOutputLine] {

@@ -138,9 +138,9 @@ private extension BrewCommandService {
         await withCheckedContinuation { (continuation: CheckedContinuation<String, Never>) in
             // `read` parks on `poll`; run it on a GCD worker rather than the cooperative pool.
             DispatchQueue.global(qos: .utility).async {
-                var transcript = ""
+                var rows = TerminalTranscript()
                 var undecoded = Data()
-                var assembler = TerminalLineAssembler()
+                var assembler = TerminalLineAssembler(windowDepth: Int(PseudoTerminal.defaultRows))
                 var readFailure: Int32?
 
                 loop: while true {
@@ -148,9 +148,7 @@ private extension BrewCommandService {
                     case let .data(chunk):
                         undecoded.append(chunk)
                         for event in assembler.consume(UTF8StreamDecoder.takeDecodablePrefix(&undecoded)) {
-                            if case let .committed(line) = event {
-                                transcript += line.text + "\n"
-                            }
+                            rows.apply(event)
                             emit(event, sink: sink)
                         }
                     case .timedOut:
@@ -167,9 +165,10 @@ private extension BrewCommandService {
 
                 // Output that ended without a trailing newline is settled by the stream ending.
                 if let trailing = assembler.flush() {
-                    transcript += trailing.text
+                    rows.settle(trailing.text)
                     sink?(BrewCommandOutputLine(stream: .stdout, line: trailing, isComplete: true))
                 }
+                var transcript = rows.text
                 // The exit status may still say success, so truncation has to say so itself.
                 if let readFailure {
                     let notice = truncationNotice(errno: readFailure)
@@ -193,8 +192,57 @@ private extension BrewCommandService {
         switch event {
         case let .committed(line):
             sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: true))
-        case let .revised(line):
-            sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: false))
+        case let .revised(line, rowOffset):
+            sink(BrewCommandOutputLine(stream: .stdout, line: line, isComplete: rowOffset > 0, rowOffset: rowOffset))
+        }
+    }
+}
+
+/// Mirrors what the sink is told, so the transcript holds settled rows rather than every frame.
+struct TerminalTranscript {
+    /// `endsWithNewline` is how the row ended, not whether it can still change: output that stopped
+    /// without a trailing newline must not gain one.
+    private struct Row {
+        var text: String
+        var isComplete: Bool
+        var endsWithNewline: Bool
+    }
+
+    private var rows: [Row] = []
+
+    var text: String {
+        rows.map { $0.text + ($0.endsWithNewline ? "\n" : "") }.joined()
+    }
+
+    mutating func apply(_ event: TerminalLineEvent) {
+        switch event {
+        case let .committed(line):
+            put(line.text, isComplete: true, endsWithNewline: true, rowOffset: 0)
+        case let .revised(line, rowOffset):
+            put(line.text, isComplete: rowOffset > 0, endsWithNewline: false, rowOffset: rowOffset)
+        }
+    }
+
+    /// Settles the trailing row; the stream ending is not itself a newline.
+    mutating func settle(_ text: String) {
+        put(text, isComplete: true, endsWithNewline: false, rowOffset: 0)
+    }
+
+    private mutating func put(_ text: String, isComplete: Bool, endsWithNewline: Bool, rowOffset: Int) {
+        guard rowOffset == 0 else {
+            // A row further back has already ended; only its content can change.
+            let index = rows.count - 1 - rowOffset
+            guard rows.indices.contains(index) else {
+                return
+            }
+            rows[index].text = text
+            return
+        }
+        let row = Row(text: text, isComplete: isComplete, endsWithNewline: endsWithNewline)
+        if let last = rows.last, !last.isComplete {
+            rows[rows.count - 1] = row
+        } else {
+            rows.append(row)
         }
     }
 }

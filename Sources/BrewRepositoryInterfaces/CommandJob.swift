@@ -81,9 +81,18 @@ public final class CommandJob: Identifiable {
         }
     }
 
-    /// Appends, or replaces the trailing row when it was still being drawn. Revisions keep the row's
-    /// identity, so a redrawing progress bar animates rather than accumulating hundreds of rows.
+    /// Appends, or replaces a row the terminal redrew, keeping its identity so the list animates rather
+    /// than rebuilding. ``BrewCommandOutputLine/rowOffset`` counts back from the end, staying valid after
+    /// `maxOutputLines` trims the front; an out-of-range offset has scrolled out of reach and is dropped.
     public func appendOutput(_ line: BrewCommandOutputLine) {
+        guard line.rowOffset == 0 else {
+            let index = output.count - 1 - line.rowOffset
+            guard output.indices.contains(index) else {
+                return
+            }
+            output[index] = line.adoptingIdentity(of: output[index])
+            return
+        }
         if let last = output.last, !last.isComplete {
             output[output.count - 1] = line.adoptingIdentity(of: last)
         } else {
