@@ -96,6 +96,7 @@ struct InstalledListRowView: View {
                 .font(.body)
                 .foregroundStyle(statusIconColor(viewModel: viewModel))
                 .accessibilityHidden(true)
+                .help(statusIconHelp(viewModel: viewModel))
 
             Text(viewModel.kind.chrome.badgeLabel)
                 .font(.brewCaption2)
@@ -121,6 +122,10 @@ struct InstalledListRowView: View {
 
     private func statusIconColor(viewModel: InstalledListRowViewModel) -> Color {
         viewModel.showsUpgradeAvailable ? .brewStatusWarning : .brewStatusSuccess
+    }
+
+    private func statusIconHelp(viewModel: InstalledListRowViewModel) -> String {
+        viewModel.showsUpgradeAvailable ? "An upgrade is available" : "Up to date"
     }
 
     @ViewBuilder
