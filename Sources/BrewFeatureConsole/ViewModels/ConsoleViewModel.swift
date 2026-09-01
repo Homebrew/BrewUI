@@ -63,7 +63,6 @@ final class ConsoleViewModel {
         return repository.orderedIDs.last.flatMap { repository.jobs[$0] }
     }
 
-    /// The expanded body's content: the selected job's output, or the empty state when nothing has run.
     var bodyContent: ConsoleBodyContent {
         guard let job = selectedJob else {
             return .noActivity

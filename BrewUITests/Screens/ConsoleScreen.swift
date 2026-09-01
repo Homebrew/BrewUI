@@ -69,8 +69,7 @@ struct ConsoleScreen: Screen {
     }
 
     /// A line reaching the body is proof the run streamed through the real pipe drain rather than
-    /// arriving as one blob at exit. The body is one text view, so its accessibility *value* is the
-    /// whole transcript — a substring match on it says the line arrived.
+    /// arriving as one blob at exit.
     @discardableResult
     func assertOutputContains(
         _ substring: String,

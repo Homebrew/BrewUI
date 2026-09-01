@@ -15,8 +15,6 @@ struct ConsoleTextSelectionTests {
         #expect(ConsoleTextSelection.clamped(selection, toLength: 40) == selection)
     }
 
-    /// Trimming the front of the buffer shortens the document under the user; the surviving part of the
-    /// selection is kept rather than the whole thing being thrown away.
     @Test func `a selection running past the end is clamped to it`() {
         let selection = [NSRange(location: 4, length: 100)]
 
@@ -34,8 +32,7 @@ struct ConsoleTextSelectionTests {
         ])
     }
 
-    /// `NSTextView` rejects an empty set of ranges, so a selection that no longer overlaps the document
-    /// has to come back as a caret.
+    /// `NSTextView` rejects an empty set of ranges.
     @Test func `a selection entirely past the end collapses to a caret`() {
         let selection = [NSRange(location: 80, length: 20)]
 

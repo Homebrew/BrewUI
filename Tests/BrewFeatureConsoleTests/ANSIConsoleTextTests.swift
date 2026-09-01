@@ -68,8 +68,7 @@ struct ANSIConsoleTextTests {
         #expect(attributed.string == "==> Fetching\nWarning: something\n")
     }
 
-    /// The transcript's edit offsets address the text this renderer produces, so the two have to agree on
-    /// how long a line is. Nothing checks that at compile time — this does.
+    /// The transcript's offsets address this text, and nothing checks that agreement at compile time.
     @Test func `rendered length matches what the transcript measures`() {
         let lines = [
             BrewCommandOutputLine(stream: .stdout, text: "\u{1B}[34m==>\u{1B}[0m Fetching gh"),
@@ -103,7 +102,6 @@ struct ANSIConsoleTextTests {
         let bold: Bool
     }
 
-    /// Flattens the attributed string into the runs a reader would perceive: text, colour, weight.
     private func runs(of attributed: NSAttributedString) -> [Run] {
         var runs: [Run] = []
         attributed.enumerateAttributes(in: NSRange(location: 0, length: attributed.length)) { attributes, range, _ in

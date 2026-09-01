@@ -131,7 +131,6 @@ struct ConsoleViewModelTests {
         #expect(harness.viewModel.bodyContent == .output(jobID: job.id, lines: [line]))
     }
 
-    /// The body renders one job's document at a time, so switching tabs has to change what it is handed.
     @Test func `bodyContent follows the selected job`() async throws {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()

@@ -10,25 +10,16 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// The console output as one selectable text document.
-///
-/// A row per line gave every line its own selection scope: dragging across lines selected nothing, ⌘A
-/// had no document to select, the gaps between rows weren't text at all, and the pointer alternated
-/// between an arrow and an I-beam depending on which of those it was over. An `NSTextView` is a single
-/// document, so selection, ⌘A and ⌘C behave the way they do in Terminal and the I-beam covers the whole
-/// output area.
-///
-/// New output is applied as the minimal edit (see ``ConsoleTranscript``) so a selection made while a
-/// command is running survives it, and the view only re-pins to the bottom when it was already there —
-/// scrolling up to read during a long install isn't fought.
+/// The console output as one selectable text document, so selection, ⌘A and ⌘C behave the way they do
+/// in Terminal. New output is applied as ``ConsoleTranscript``'s minimal edit, which is what lets a
+/// selection made mid-run survive it.
 struct ConsoleTextView: NSViewRepresentable {
     let lines: [BrewCommandOutputLine]
 
-    /// Which job is on screen. Switching tabs is a new document rather than an edit of this one.
+    /// Switching tabs is a new document rather than an edit of this one.
     let jobID: CommandJobID
 
-    /// Read as a stored dependency, not off `context.environment`, so a light/dark flip is guaranteed to
-    /// re-invoke ``updateNSView(_:context:)`` and repaint the transcript in the new appearance.
+    /// Stored rather than read off `context.environment`, so a flip is guaranteed to re-invoke the update.
     @Environment(\.colorScheme) private var colorScheme
 
     func makeCoordinator() -> Coordinator {
@@ -48,7 +39,7 @@ struct ConsoleTextView: NSViewRepresentable {
         let textView = ConsoleOutputTextView(frame: .zero, textContainer: container)
         textView.isEditable = false
         textView.isSelectable = true
-        // Copying a console selection should put plain text on the pasteboard, not RTF.
+        // Plain text on the pasteboard, not RTF.
         textView.isRichText = false
         textView.drawsBackground = false
         textView.isVerticallyResizable = true
@@ -77,9 +68,8 @@ struct ConsoleTextView: NSViewRepresentable {
             return
         }
         let coordinator = context.coordinator
+        // A different job, or a restyle of every line, is a re-render rather than an edit.
         if coordinator.jobID != jobID || coordinator.colorScheme != colorScheme {
-            // A different job is a different document, and a light/dark flip restyles every line: both
-            // are a re-render of everything, so the transcript starts over with the empty storage.
             coordinator.jobID = jobID
             coordinator.colorScheme = colorScheme
             coordinator.transcript = ConsoleTranscript()
@@ -101,7 +91,6 @@ struct ConsoleTextView: NSViewRepresentable {
         textView.pinToBottomIfFollowing()
     }
 
-    /// Holds what the text view currently shows, so the next update can be expressed as a diff against it.
     final class Coordinator {
         var transcript = ConsoleTranscript()
         var jobID: CommandJobID?
@@ -109,12 +98,8 @@ struct ConsoleTextView: NSViewRepresentable {
     }
 }
 
-/// Text view that follows the end of the document while the user is parked at the bottom of it.
-///
-/// Following is given up when the user scrolls away and taken back when they scroll to the end again —
-/// reading back through a long install isn't interrupted by the next line arriving. The pin runs on
-/// layout as well as after each edit because SwiftUI hands over the first batch of output before the
-/// scroll view has any size at all, and a scroll issued then goes nowhere.
+/// Follows the end of the document while the user is parked at the bottom of it, giving that up when
+/// they scroll away so reading back through a long install isn't interrupted.
 final class ConsoleOutputTextView: NSTextView {
     /// How close to the end counts as "at the bottom".
     private static let bottomSlack: CGFloat = 4
@@ -142,13 +127,14 @@ final class ConsoleOutputTextView: NSTextView {
         )
     }
 
+    /// Pinning on layout too: SwiftUI hands over the first batch of output before the scroll view has
+    /// any size, and a scroll issued then goes nowhere.
     override func layout() {
         super.layout()
         pinToBottomIfFollowing()
     }
 
-    /// Growing the document doesn't move the clip view, so this only ever fires for a scroll — which is
-    /// exactly the gesture that decides whether the user still wants to be at the end.
+    /// Growing the document doesn't move the clip view, so this only ever fires for a real scroll.
     @objc private func clipViewDidScroll() {
         followsOutput = isScrolledToBottom
     }
@@ -168,12 +154,10 @@ final class ConsoleOutputTextView: NSTextView {
     }
 }
 
-/// Re-applying the selection after a streaming edit, because replacing characters underneath the text
-/// view can leave ranges pointing past the end of the document.
+/// Re-applying the selection after a streaming edit, which can leave ranges past the end of the document.
 enum ConsoleTextSelection {
-    /// Ranges are clamped rather than dropped, so a selection made above the edit survives it intact.
-    /// `NSTextView` rejects an empty set of ranges — with nothing left selected it wants a caret — so the
-    /// result always holds at least one range.
+    /// Clamped rather than dropped, so a selection above the edit survives. `NSTextView` rejects an empty
+    /// set of ranges, so the result always holds at least one.
     static func clamped(_ ranges: [NSRange], toLength length: Int) -> [NSRange] {
         let clamped = ranges.map { range -> NSRange in
             let location = min(range.location, length)

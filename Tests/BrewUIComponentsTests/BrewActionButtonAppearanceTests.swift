@@ -35,7 +35,6 @@ struct BrewActionButtonAppearanceTests {
         #expect((appearance.title, appearance.systemImage) == ("Cleared", "checkmark"))
     }
 
-    /// Save opens a panel, which is its own confirmation — a button with nothing to say never changes.
     @Test func `a button without a confirmation title never changes`() {
         let appearance = BrewActionButtonAppearance(
             title: "Save",

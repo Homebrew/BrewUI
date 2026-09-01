@@ -7,10 +7,8 @@ import SwiftUI
 
 /// Compact icon + title action button for chrome — the console toolbar, the command block header.
 ///
-/// One type so those places agree on icon-to-title spacing, hover and pressed highlighting, and how a
-/// finished action is acknowledged. Actions that leave no visible trace (copying to the pasteboard,
-/// clearing a list) pass a `confirmationTitle`: the button swaps to a tick and that title for a few
-/// seconds, which is the only feedback the user gets that the press did anything.
+/// An action that leaves no visible trace (copying to the pasteboard, clearing a list) passes a
+/// `confirmationTitle`: the button swaps to a tick and that title for a few seconds.
 public struct BrewActionButton: View {
     private let title: String
     private let systemImage: String
@@ -22,7 +20,6 @@ public struct BrewActionButton: View {
     @State private var isConfirming = false
     @State private var confirmationTask: Task<Void, Never>?
 
-    /// How long a confirmation stays up before the button returns to its own title.
     private static let confirmationDuration: Duration = .seconds(5)
 
     public init(
@@ -56,8 +53,7 @@ public struct BrewActionButton: View {
         .buttonStyle(BrewActionButtonStyle(isHovered: isHovered))
         .onHover { isHovered = $0 }
         .help(help ?? title)
-        // The label changes while confirming; the identity a screen reader (or a UI test) matches on
-        // must not.
+        // The label changes while confirming; what a screen reader or a UI test matches on must not.
         .accessibilityLabel(title)
     }
 
@@ -81,8 +77,6 @@ struct BrewActionButtonAppearance: Equatable {
     let title: String
     let systemImage: String
 
-    /// A button with a confirmation title swaps to a tick and that title while its confirmation window
-    /// is open; anything else always shows its own title and icon.
     init(title: String, systemImage: String, confirmationTitle: String?, isConfirming: Bool) {
         if isConfirming, let confirmationTitle {
             self.title = confirmationTitle
@@ -94,8 +88,7 @@ struct BrewActionButtonAppearance: Equatable {
     }
 }
 
-/// Borderless until pointed at: hovering fills the button so it reads as hit-testable, and pressing it
-/// takes the app's selection tint so the press itself is unmistakable.
+/// Borderless until pointed at: hover fills the button, and a press takes the app's selection tint.
 private struct BrewActionButtonStyle: ButtonStyle {
     let isHovered: Bool
 

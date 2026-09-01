@@ -6,8 +6,7 @@
 import BrewUIComponents
 import SwiftUI
 
-/// Output area of the expanded console — the selected job's transcript in a selectable text view that
-/// follows new output while the user is at the bottom of it.
+/// Output area of the expanded console.
 struct ConsoleBody: View {
     let viewModel: ConsoleViewModel
 

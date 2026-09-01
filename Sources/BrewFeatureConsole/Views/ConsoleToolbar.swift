@@ -66,8 +66,7 @@ struct ConsoleToolbar: View {
     @ViewBuilder
     private var actionButtons: some View {
         if let job = viewModel.selectedJob {
-            // Saving ends in a save panel, which is its own confirmation; copying and clearing leave
-            // nothing on screen, so they say so.
+            // Saving ends in a save panel, which is its own confirmation.
             BrewActionButton("Save", systemImage: "square.and.arrow.down", help: "Save output to file") {
                 ConsoleOutputExport.save(job)
             }

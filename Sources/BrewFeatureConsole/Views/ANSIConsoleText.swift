@@ -10,19 +10,15 @@ import SwiftUI
 
 /// Renders output lines into the attributed text the console's text view displays.
 ///
-/// Spans without an explicit foreground fall back to their stream's colour, so an uncoloured line looks
-/// exactly as it did before ANSI support; bold spans get a bold monospaced font. Colours are named on
-/// the SwiftUI token palette and bridged with `NSColor(_:)`, which keeps the asset's light/dark
-/// variants — the design system stays the single source of truth even though the drawing is AppKit's.
+/// Colours are named on the SwiftUI token palette and bridged with `NSColor(_:)`, which keeps the
+/// asset's light/dark variants — the design system stays the source even though the drawing is AppKit's.
 enum ANSIConsoleText {
     static let font = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
     static let boldFont = NSFont.monospacedSystemFont(ofSize: NSFont.systemFontSize, weight: .bold)
 
-    /// Matches the 1pt row insets the list used to put above and below every line.
     private static let lineSpacing = BrewSpacing.xxs
 
-    /// One line, newline-terminated to match ``ConsoleTranscript/text(of:)`` — the transcript's offsets
-    /// address this text, so the two have to agree character for character.
+    /// Newline-terminated to match ``ConsoleTranscript/text(of:)``, whose offsets address this text.
     static func attributed(for line: BrewCommandOutputLine) -> NSAttributedString {
         let result = NSMutableAttributedString()
         let fallback = defaultColor(for: line.stream)
@@ -47,7 +43,6 @@ enum ANSIConsoleText {
         return result
     }
 
-    /// The colour an uncoloured span of this stream takes: `stderr` reads as an error, `stdout` as body text.
     static func defaultColor(for stream: BrewCommandOutputLine.Stream) -> Color {
         switch stream {
         case .stdout:
@@ -57,9 +52,7 @@ enum ANSIConsoleText {
         }
     }
 
-    /// Maps a terminal-palette colour onto a SwiftUI colour. Semantic system colours are used so the
-    /// output adapts to light/dark and stays legible on the console surface; bright variants reuse the
-    /// same hue since the display palette doesn't distinguish them.
+    /// Bright variants reuse their base hue, since the display palette doesn't distinguish them.
     static func color(for ansiColor: ANSIColor) -> Color {
         switch ansiColor {
         case .black, .brightBlack:

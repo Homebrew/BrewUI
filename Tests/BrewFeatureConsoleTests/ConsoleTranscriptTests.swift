@@ -40,8 +40,7 @@ struct ConsoleTranscriptTests {
         ))
     }
 
-    /// A progress row is rewritten in place many times a second; only that row may be replaced, or the
-    /// selection the user is dragging over the lines above it is thrown away on every tick.
+    /// A progress row is rewritten many times a second; replacing more would throw away the selection.
     @Test func `a revised last line replaces only itself`() {
         var transcript = ConsoleTranscript()
         let settled = line("==> Fetching")
@@ -60,8 +59,7 @@ struct ConsoleTranscriptTests {
         ))
     }
 
-    /// `CommandJob` trims the front of the buffer past `maxOutputLines`, which shifts every line — no
-    /// shared prefix is left, so the whole document is replaced.
+    /// `CommandJob` trims the front past `maxOutputLines`, which leaves no shared prefix.
     @Test func `trimming the front of the buffer replaces the whole document`() {
         var transcript = ConsoleTranscript()
         _ = transcript.update(to: [line("first"), line("second")])
@@ -89,8 +87,7 @@ struct ConsoleTranscriptTests {
         ))
     }
 
-    /// Stream decides the line's colour, so a line that moved streams has to be re-rendered even though
-    /// its text is unchanged.
+    /// Stream decides the line's colour, so it matters even when the text is unchanged.
     @Test func `lines differing only in stream are re-rendered`() {
         var transcript = ConsoleTranscript()
         _ = transcript.update(to: [BrewCommandOutputLine(stream: .stdout, text: "Warning")])
@@ -100,9 +97,7 @@ struct ConsoleTranscriptTests {
         #expect(edit?.lines.first?.stream == .stderr)
     }
 
-    /// The offsets only mean anything if applying them to the rendered document reproduces it. Replays a
-    /// streaming run — append, revise in place, append on stderr, trim the front — against a string that
-    /// indexes exactly the way `NSTextStorage` does.
+    /// Replays a streaming run against a string that indexes the way `NSTextStorage` does.
     @Test func `applying each edit in turn reproduces the document`() {
         var transcript = ConsoleTranscript()
         let rendered = NSMutableString()
@@ -142,8 +137,7 @@ struct ConsoleTranscriptTests {
         BrewCommandOutputLine(stream: .stdout, text: text, isComplete: isComplete)
     }
 
-    /// Edits are asserted on position and visible content; line identity and timestamps are the
-    /// buffer's business, not the document's.
+    /// Asserts on position and visible content; identity and timestamps aren't the document's business.
     private struct EditSummary: Equatable {
         let location: Int
         let length: Int
