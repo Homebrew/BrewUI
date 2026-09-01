@@ -30,12 +30,6 @@ struct InstalledPackageDetailHeroSection: View {
                         .font(.brewTitle1)
                         .foregroundStyle(Color.brewTextPrimary)
 
-                    statusIcon
-                        .font(.brewTitle3)
-                        .accessibilityLabel(
-                            viewModel.showsUpgradeAvailable ? "Update available" : "Installed",
-                        )
-
                     Text(chrome.badgeLabel)
                         .font(.brewCaption2)
                         .foregroundStyle(accentColor(chrome.accent))
@@ -49,6 +43,8 @@ struct InstalledPackageDetailHeroSection: View {
                             Capsule()
                                 .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
                         }
+
+                    statusBadge
                 }
 
                 if let subtitle = heroSubtitle {
@@ -61,13 +57,14 @@ struct InstalledPackageDetailHeroSection: View {
     }
 
     @ViewBuilder
-    private var statusIcon: some View {
+    private var statusBadge: some View {
         if viewModel.showsUpgradeAvailable {
-            Image(systemName: "exclamationmark.circle.fill")
-                .brewWarningGlyphStyle()
+            InstalledOutdatedBadge()
         } else {
             Image(systemName: "checkmark.circle.fill")
+                .font(.brewTitle3)
                 .foregroundStyle(Color.brewStatusSuccess)
+                .accessibilityLabel("Installed")
         }
     }
 

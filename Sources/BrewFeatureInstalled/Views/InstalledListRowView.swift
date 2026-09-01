@@ -93,10 +93,6 @@ struct InstalledListRowView: View {
                     .accessibilityHidden(true)
             }
 
-            statusIcon(viewModel: viewModel)
-                .font(.body)
-                .accessibilityHidden(true)
-
             Text(viewModel.kind.chrome.badgeLabel)
                 .font(.brewCaption2)
                 .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
@@ -111,17 +107,20 @@ struct InstalledListRowView: View {
                         .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
                 }
 
+            statusBadge(viewModel: viewModel)
+                .accessibilityHidden(true)
+
             Spacer(minLength: 0)
         }
     }
 
     @ViewBuilder
-    private func statusIcon(viewModel: InstalledListRowViewModel) -> some View {
+    private func statusBadge(viewModel: InstalledListRowViewModel) -> some View {
         if viewModel.showsUpgradeAvailable {
-            Image(systemName: "exclamationmark.circle.fill")
-                .brewWarningGlyphStyle()
+            InstalledOutdatedBadge()
         } else {
             Image(systemName: "checkmark.circle.fill")
+                .font(.body)
                 .foregroundStyle(Color.brewStatusSuccess)
         }
     }
