@@ -61,7 +61,7 @@ struct SerialBrewCommandCenterOutputTests {
         defer { collect.cancel() }
 
         try await center.capture(command("go"), id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil { await collector.events.count == 4 }
 
         let lines = await collector.events.filter { $0.0 == id }.map(\.1)
         #expect(lines.map(\.text) == ["one", "two", "warn", "three"])
@@ -85,7 +85,7 @@ struct SerialBrewCommandCenterOutputTests {
 
         try await center.capture(command("a"), id: idA)
         try await center.capture(command("b"), id: idB)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil { await collector.events.count == 3 }
 
         let events = await collector.events
         #expect(events.filter { $0.0 == idA }.map(\.1.text) == ["a1", "a2"])
@@ -115,7 +115,11 @@ struct SerialBrewCommandCenterOutputTests {
         }
 
         try await center.capture(command("go"), id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil {
+            let countA = await collectorA.events.count
+            let countB = await collectorB.events.count
+            return countA == 2 && countB == 2
+        }
 
         let textsA = await collectorA.events.map(\.1.text)
         let textsB = await collectorB.events.map(\.1.text)
@@ -134,10 +138,19 @@ struct SerialBrewCommandCenterOutputTests {
             }
         }
         collect.cancel()
-        try await Task.sleep(for: .milliseconds(20))
+        await collect.value
+
+        let witnessStream = await center.allOutputChanges()
+        let witness = AllOutputCollector()
+        let observe = Task {
+            for await pair in witnessStream {
+                await witness.append(id: pair.0, line: pair.1)
+            }
+        }
+        defer { observe.cancel() }
 
         try await center.capture(command("go"), id: id)
-        try await Task.sleep(for: .milliseconds(80))
+        try await waitUntil { await witness.events.count == 1 }
 
         let events = await collector.events
         #expect(events.isEmpty)
