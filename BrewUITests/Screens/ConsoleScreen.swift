@@ -78,8 +78,8 @@ struct ConsoleScreen: Screen {
         line: UInt = #line,
     ) -> Self {
         expand(file: file, line: line)
-        // macOS exposes a `List` row's `Text` through the accessibility *value*, with no label at all,
-        // so matching on label alone silently never matches.
+        // macOS exposes text through the accessibility *value*, with no label at all, so matching on
+        // label alone silently never matches.
         let predicate = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)
         let match = output.element.descendants(matching: .any).matching(predicate).firstMatch
         XCTAssertTrue(

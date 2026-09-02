@@ -110,6 +110,43 @@ struct ConsoleViewModelTests {
         #expect(harness.viewModel.selectedID == runningJobID)
     }
 
+    // MARK: - bodyContent
+
+    @Test func `bodyContent is the empty state until something has run`() async {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+
+        #expect(harness.viewModel.bodyContent == .noActivity)
+    }
+
+    @Test func `bodyContent carries the selected job's identity and output`() async throws {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let id = BrewOperationID(kind: .formula, name: "gh")
+        await harness.emit(id: id, phase: .running(.installFormula))
+        let line = BrewCommandOutputLine(stream: .stdout, text: "==> Fetching gh")
+        await harness.emit(id: id, output: line)
+        let job = try #require(harness.job(for: id))
+
+        #expect(harness.viewModel.bodyContent == .output(jobID: job.id, lines: [line]))
+    }
+
+    @Test func `bodyContent follows the selected job`() async throws {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let first = BrewOperationID(kind: .formula, name: "gh")
+        let second = BrewOperationID(kind: .formula, name: "ripgrep")
+        await harness.emit(id: first, phase: .running(.installFormula))
+        let line = BrewCommandOutputLine(stream: .stdout, text: "==> Fetching gh")
+        await harness.emit(id: first, output: line)
+        await harness.emit(id: second, phase: .running(.installFormula))
+        let firstJob = try #require(harness.job(for: first))
+
+        harness.viewModel.select(id: firstJob.id)
+
+        #expect(harness.viewModel.bodyContent == .output(jobID: firstJob.id, lines: [line]))
+    }
+
     // MARK: - shouldAutoExpandConsole
 
     @Test func `shouldAutoExpandConsole is false with no jobs`() async {

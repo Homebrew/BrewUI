@@ -3,21 +3,16 @@
 //  Brew
 //
 
-import BrewAccessibilityID
-import BrewCore
-import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Output area of the expanded console — virtualizing `List` over the selected job's output buffer
-/// with auto-pin-to-bottom when new lines arrive. User scroll-lock-on-scroll-up is deferred to polish.
+/// Output area of the expanded console.
 struct ConsoleBody: View {
     let viewModel: ConsoleViewModel
 
     var body: some View {
-        if let job = viewModel.selectedJob {
-            outputList(for: job)
-        } else {
+        switch viewModel.bodyContent {
+        case .noActivity:
             ContentUnavailableView(
                 "No activity",
                 systemImage: "terminal",
@@ -25,40 +20,9 @@ struct ConsoleBody: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.brewSurfaceElevated)
-        }
-    }
-
-    private func outputList(for job: CommandJob) -> some View {
-        ScrollViewReader { proxy in
-            List(job.output) { line in
-                Text(ANSIConsoleText.attributed(
-                    for: line,
-                    defaultColor: line.stream == .stderr ? Color.brewStatusError : Color.brewTextPrimary,
-                ))
-                .font(.system(.body, design: .monospaced))
-                .textSelection(.enabled)
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 1, leading: BrewSpacing.lg, bottom: 1, trailing: BrewSpacing.lg))
-                .id(line.id)
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .background(Color.brewSurfaceElevated)
-            .axid(.consoleOutput)
-            .onAppear {
-                if let last = job.output.last {
-                    proxy.scrollTo(last.id, anchor: .bottom)
-                }
-            }
-            .onChange(of: job.output.count) {
-                guard let last = job.output.last else {
-                    return
-                }
-                withAnimation(.linear(duration: 0.1)) {
-                    proxy.scrollTo(last.id, anchor: .bottom)
-                }
-            }
+        case let .output(jobID, lines):
+            ConsoleTextView(lines: lines, jobID: jobID)
+                .background(Color.brewSurfaceElevated)
         }
     }
 }

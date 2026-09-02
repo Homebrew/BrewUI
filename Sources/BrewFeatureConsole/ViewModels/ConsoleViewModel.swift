@@ -63,6 +63,13 @@ final class ConsoleViewModel {
         return repository.orderedIDs.last.flatMap { repository.jobs[$0] }
     }
 
+    var bodyContent: ConsoleBodyContent {
+        guard let job = selectedJob else {
+            return .noActivity
+        }
+        return .output(jobID: job.id, lines: job.output)
+    }
+
     var statusPresentation: ConsoleStatusPresentation {
         if let active = activeJob {
             return ConsoleStatusPresentation(

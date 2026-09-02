@@ -66,49 +66,27 @@ struct ConsoleToolbar: View {
     @ViewBuilder
     private var actionButtons: some View {
         if let job = viewModel.selectedJob {
-            toolbarAction(
-                systemImage: "square.and.arrow.down",
-                label: "Save",
-                help: "Save output to file",
-            ) {
+            // Saving ends in a save panel, which is its own confirmation.
+            BrewActionButton("Save", systemImage: "square.and.arrow.down", help: "Save output to file") {
                 ConsoleOutputExport.save(job)
             }
-            toolbarAction(
+            BrewActionButton(
+                "Copy",
                 systemImage: "doc.on.doc",
-                label: "Copy",
+                confirmationTitle: "Copied",
                 help: "Copy output to clipboard",
             ) {
                 ConsoleOutputExport.copy(job)
             }
         }
-        toolbarAction(
+        BrewActionButton(
+            "Clear",
             systemImage: "trash",
-            label: "Clear",
+            confirmationTitle: "Cleared",
             help: "Clear completed jobs",
         ) {
             viewModel.clearCompleted()
         }
-    }
-
-    private func toolbarAction(
-        systemImage: String,
-        label: String,
-        help: String,
-        action: @escaping () -> Void,
-    ) -> some View {
-        Button(action: action) {
-            HStack(spacing: 3) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 11, weight: .medium))
-                Text(label)
-                    .font(.caption)
-            }
-            .foregroundStyle(Color.brewTextSecondary)
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.vertical, BrewSpacing.xxs)
-        }
-        .buttonStyle(.borderless)
-        .help(help)
     }
 }
 

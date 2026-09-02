@@ -31,8 +31,6 @@ public struct CommandBlockView: View {
         _isExpanded = State(initialValue: !collapsible)
     }
 
-    @State private var copied = false
-    @State private var copyTask: Task<Void, Never>?
     @State private var isExpanded: Bool
 
     public var body: some View {
@@ -71,21 +69,10 @@ public struct CommandBlockView: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer()
-            Button(copied ? "Copied" : copyTitle, systemImage: copied ? "checkmark" : "doc.on.doc") {
+            BrewActionButton(copyTitle, systemImage: "doc.on.doc", confirmationTitle: "Copied") {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
-                copied = true
-                copyTask?.cancel()
-                copyTask = Task { @MainActor in
-                    try? await Task.sleep(for: .seconds(5))
-                    if !Task.isCancelled {
-                        copied = false
-                    }
-                }
             }
-            .font(.brewCaption)
-            .foregroundStyle(Color.brewTextSecondary)
-            .buttonStyle(.plain)
         }
         .padding(.horizontal, BrewSpacing.md)
         .padding(.vertical, BrewSpacing.sm)
