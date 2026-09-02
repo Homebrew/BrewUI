@@ -50,7 +50,7 @@ struct InstalledListRowView: View {
     }
 
     private func rowContent(viewModel: InstalledListRowViewModel) -> some View {
-        HStack(alignment: .top, spacing: BrewSpacing.md) {
+        HStack(alignment: .center, spacing: BrewSpacing.md) {
             iconBadge(viewModel: viewModel)
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 titleRow(viewModel: viewModel)
@@ -71,8 +71,9 @@ struct InstalledListRowView: View {
     private func iconBadge(viewModel: InstalledListRowViewModel) -> some View {
         ZStack {
             Circle()
-                .fill(iconBackgroundColor(viewModel.kind.chrome.iconBackground))
+                .strokeBorder(accentColor(viewModel.kind.chrome.accent), lineWidth: 1)
                 .frame(width: 36, height: 36)
+                .brewHiddenWhenRedacted()
             Image(systemName: "cube.box.fill")
                 .font(.body)
                 .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
@@ -92,11 +93,6 @@ struct InstalledListRowView: View {
                     .accessibilityHidden(true)
             }
 
-            Image(systemName: statusIconName(viewModel: viewModel))
-                .font(.body)
-                .foregroundStyle(statusIconColor(viewModel: viewModel))
-                .accessibilityHidden(true)
-
             Text(viewModel.kind.chrome.badgeLabel)
                 .font(.brewCaption2)
                 .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
@@ -111,16 +107,22 @@ struct InstalledListRowView: View {
                         .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
                 }
 
+            statusBadge(viewModel: viewModel)
+                .accessibilityHidden(true)
+
             Spacer(minLength: 0)
         }
     }
 
-    private func statusIconName(viewModel: InstalledListRowViewModel) -> String {
-        viewModel.showsUpgradeAvailable ? "exclamationmark.circle.fill" : "checkmark.circle.fill"
-    }
-
-    private func statusIconColor(viewModel: InstalledListRowViewModel) -> Color {
-        viewModel.showsUpgradeAvailable ? .brewStatusWarning : .brewStatusSuccess
+    @ViewBuilder
+    private func statusBadge(viewModel: InstalledListRowViewModel) -> some View {
+        if viewModel.showsUpgradeAvailable {
+            InstalledOutdatedBadge()
+        } else {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.body)
+                .foregroundStyle(Color.brewStatusSuccess)
+        }
     }
 
     @ViewBuilder
@@ -137,7 +139,7 @@ struct InstalledListRowView: View {
                 Text("→")
                     .foregroundStyle(Color.brewTextTertiary)
                 Text(latest)
-                    .foregroundStyle(Color.brewBrandPrimary)
+                    .foregroundStyle(Color.brewTextBrand)
             }
             .font(.brewCaption)
             .fixedSize(horizontal: false, vertical: true)
@@ -147,18 +149,9 @@ struct InstalledListRowView: View {
     private func accentColor(_ token: PackageKindAccentToken) -> Color {
         switch token {
         case .brandPrimary:
-            Color.brewBrandPrimary
+            Color.brewTextBrand
         case .statusInfo:
             Color.brewStatusInfo
-        }
-    }
-
-    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
-        switch token {
-        case .brandTint:
-            Color.brewBrandTint
-        case .statusInfoSubtle:
-            Color.brewStatusInfoSubtle
         }
     }
 }

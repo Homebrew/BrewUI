@@ -40,6 +40,21 @@ public extension Color {
     /// Text placed on amber brand surfaces — always dark.
     static let brewTextOnBrand = Color("TextOnBrand", bundle: .module)
 
+    /// Knockout on ``brewStatusWarningBold`` where the yellow should stay light. White, going black
+    /// in high contrast; use ``brewTextOnBrand`` where it should be black in every appearance.
+    static let brewTextOnWarning = Color("TextOnWarning", bundle: .module)
+
+    /// Amber foreground for text and small marks on app surfaces.
+    /// ``brewBrandPrimary`` is the fill colour and is not legible as a foreground.
+    static let brewTextBrand = Color("TextBrand", bundle: .module)
+
+    /// ANSI magenta. No semantic role; exists because console output renders on an app surface,
+    /// where SwiftUI's `.purple` drops under 2:1.
+    static let brewTextMagenta = Color("TextMagenta", bundle: .module)
+
+    /// ANSI cyan. See ``brewTextMagenta``.
+    static let brewTextCyan = Color("TextCyan", bundle: .module)
+
     /// Default terminal/code text — always light on dark terminal bg.
     static let brewCodeDefault = Color("CodeDefault", bundle: .module)
 
@@ -75,6 +90,10 @@ public extension Color {
     static let brewStatusSuccessSubtle = Color("StatusSuccessSubtle", bundle: .module)
     static let brewStatusWarning = Color("StatusWarning", bundle: .module)
     static let brewStatusWarningSubtle = Color("StatusWarningSubtle", bundle: .module)
+
+    /// Warning yellow for icons, dots and fills — the signal colour, vivid in every appearance.
+    /// Not a text colour at 1.95:1 on white; ``brewStatusWarning`` is.
+    static let brewStatusWarningBold = Color("StatusWarningBold", bundle: .module)
     static let brewStatusError = Color("StatusError", bundle: .module)
     static let brewStatusErrorSubtle = Color("StatusErrorSubtle", bundle: .module)
     static let brewStatusInfo = Color("StatusInfo", bundle: .module)

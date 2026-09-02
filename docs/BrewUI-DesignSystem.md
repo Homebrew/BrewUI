@@ -24,7 +24,8 @@ These are the raw named colours extracted from the brew.sh visual identity. They
 ```text
 Amber 500    #FBB040   // Primary brand — beer amber, Homebrew logo
 Amber 400    #FCC96B   // Lighter amber for highlights / hover
-Amber 600    #E8971C   // Deeper amber for pressed states
+Amber 600    #E8971C   // Deeper amber for pressed states; amber foreground in dark mode
+Amber 700    #98620F   // Darkest amber — amber foreground on light surfaces (AA)
 Amber 100    #FEF3DC   // Very pale amber — light mode tinted surface
 
 Hops Dark    #1A1A1A   // Near-black background (brew.sh page bg)
@@ -32,22 +33,23 @@ Hops 900     #222222   // Slightly lifted dark surface
 Hops 800     #2D2D2D   // Card / sidebar dark surface
 Hops 700     #3A3A3A   // Elevated surface / popover dark
 Hops 600     #4A4A4A   // Border / divider dark
-Hops 400     #6B6B6B   // Secondary text / placeholder dark
-Hops 200     #B0B0B0   // Tertiary text dark
+Hops 300     #A8A8A8   // Tertiary text / placeholder dark (AA on every dark surface)
+Hops 150     #C7C7C7   // Secondary text dark
 Hops 100     #D4D4D4   // Quaternary text dark
 
 Cellar White  #F5F5F0  // Warm off-white (light mode base — avoids stark pure white)
 Cellar 50     #FAFAF7  // Lightest surface (elevated card in light)
 Cellar 100    #EFEFEA  // Standard surface light
 Cellar 200    #E2E2DC  // Grouped / recessed surface light
-Cellar 400    #9C9C96  // Secondary text light
-Cellar 600    #5C5C58  // Tertiary text light
+Cellar 500    #65655F  // Tertiary text light (AA on every light surface)
+Cellar 700    #4A4A46  // Secondary text light
 Cellar 900    #1A1A18  // Primary text light (warm near-black)
 
-Green OK      #3CB371   // Success / installed
-Red Error     #D9534F   // Error / destructive
-Yellow Warn   #F0AD4E   // Warning / outdated
-Blue Info     #5B9BD5   // Informational / link
+Green OK      #297C4E   // Success / installed (light) — #52C98A in dark
+Red Error     #CD312C   // Error / destructive (light) — #EE918E in dark
+Amber Warn    #9B600D   // Warning text (light) — #F5C26B in dark
+Yellow Warn   #F0AD4E   // Warning icons, dots and fills (light) — #F5C26B in dark
+Blue Info     #2D71AE   // Informational / link (light) — #7AB3E0 in dark
 ```
 
 ---
@@ -88,6 +90,8 @@ The brew.sh site uses a clean sans-serif for prose and a monospaced font for all
 
 All component and layout work should reference these tokens only. Values are given for both **light** and **dark** modes.
 
+> **Two palettes.** Each token below may also carry a **high-contrast** value, used automatically when the user turns on *System Settings → Accessibility → Display → Increase contrast*. The standard palette is the Homebrew palette as designed and several of its pairings sit below 4.5:1; the high-contrast palette is the one that meets WCAG AA throughout. Where the table gives one value, both palettes share it. Tokens are held to this by `BrewColorTokenContrastTests`, which asserts AA in the high-contrast appearances and asserts that high contrast never renders a pairing *worse* than standard.
+
 ### 4.1 Backgrounds
 
 | Token | Light | Dark | Usage |
@@ -96,22 +100,26 @@ All component and layout work should reference these tokens only. Values are giv
 | `color.background.surface` | `Cellar 50 #FAFAF7` | `Hops 900 #222222` | Cards, panels, list backgrounds |
 | `color.background.surfaceElevated` | `#FFFFFF` | `Hops 800 #2D2D2D` | Popovers, sheets, floating panels |
 | `color.background.surfaceRecessed` | `Cellar 200 #E2E2DC` | `Hops Dark #1A1A1A` | Grouped table background, sidebar |
-| `color.background.terminal` | `#1E1E1E` | `#141414` | Command console / log output (always near-black) |
+| `color.background.terminal` | `#1E1E1E` | `#141414` | Command console / log output (always near-black). **Not** used by `CommandBlockView` — see §5 |
 
 ### 4.2 Text
 
 | Token | Light | Dark | Usage |
 |---|---|---|---|
 | `color.text.primary` | `Cellar 900 #1A1A18` | `#F0F0ED` | Main content text |
-| `color.text.secondary` | `Cellar 600 #5C5C58` | `Hops 200 #B0B0B0` | Supporting text, subtitles |
-| `color.text.tertiary` | `Cellar 400 #9C9C96` | `Hops 400 #6B6B6B` | Placeholders, disabled labels |
-| `color.text.link` | `Blue Info #5B9BD5` | `#7AB3E0` | Hyperlinks, tappable secondary actions |
+| `color.text.secondary` | `Cellar 600 #5C5C58` → HC `#4A4A46` | `Hops 200 #B0B0B0` → HC `#C7C7C7` | Supporting text, subtitles |
+| `color.text.tertiary` | `Cellar 400 #9C9C96` → HC `#64645E` | `Hops 400 #6B6B6B` → HC `#A9A9A9` | Placeholders, disabled labels |
+| `color.text.link` | `Blue Info #5B9BD5` → HC `#2D71AF` | `#7AB3E0` | Hyperlinks, tappable secondary actions |
+| `color.text.brand` | `Amber 600 #E8971C` → HC `Amber 700 #9A6310` | `Amber 600 #E8971C` | Amber text and small foreground marks drawn **on** app surfaces |
 | `color.text.onBrand` | `#1A1A1A` | `#1A1A1A` | Text placed on amber brand surfaces (always dark) |
+| `color.text.onWarning` | `#FFFFFF` → HC `#1A1A1A` | `#222222` | Knockout on `color.status.warningBold` where the yellow should stay light — the upgrades count badge |
 | `color.text.codeDefault` | `#D4D4D4` | `#D4D4D4` | Default terminal/code text (always light on dark terminal bg) |
 | `color.text.codeCommand` | `Amber 400 #FCC96B` | `Amber 400 #FCC96B` | brew command verbs in console |
 | `color.text.codeArgument` | `#A8D8A8` | `#A8D8A8` | Formula/cask names in console |
 | `color.text.codeOutput` | `#C8C8C8` | `#C8C8C8` | Standard stdout in console |
 | `color.text.codeError` | `#FF7B72` | `#FF7B72` | stderr / error output in console |
+| `color.text.magenta` | `#CB30E0` → HC `#BA1FCF` | `#DB34F2` → HC `#E25AF4` | ANSI magenta in console output — no semantic role |
+| `color.text.cyan` | `#00C0E8` → HC `#007A93` | `#3CD3FE` | ANSI cyan in console output — no semantic role |
 
 ### 4.3 Brand / accent
 
@@ -124,17 +132,20 @@ All component and layout work should reference these tokens only. Values are giv
 | `color.brand.primaryPressed` | `Amber 600 #E8971C` | `Amber 600 #E8971C` | Pressed/active state on custom brand elements |
 | `color.brand.tint` | `Amber 100 #FEF3DC` | `rgba(251,176,64, 0.12)` | Sidebar selected item background, package row highlight |
 
+> **Fill vs foreground:** `color.brand.primary` and its hover/pressed states are **filled surfaces** — the pairing that has to hold for them is `color.text.onBrand` knocked out of the fill. Amber drawn *on* an app surface (a badge label, a version string, the selected sidebar item) uses `color.text.brand` instead, which is darkened in light mode; the brand amber only reaches 2.4:1 on white.
+
 ### 4.4 Semantic status
 
 | Token | Light | Dark | Usage |
 |---|---|---|---|
-| `color.status.success` | `Green OK #3CB371` | `#52C98A` | Installed badge, success alert |
+| `color.status.success` | `Green OK #3CB371` → HC `#2A7D4F` | `#52C98A` | Installed badge, success alert |
 | `color.status.successSubtle` | `#EBF7F1` | `rgba(60,179,113,0.15)` | Success row tint |
-| `color.status.warning` | `Yellow Warn #F0AD4E` | `#F5C26B` | Outdated package badge, warning alert |
+| `color.status.warning` | `Yellow Warn #F0AD4E` → HC `#9D610D` | `#F5C26B` | Warning **text** |
+| `color.status.warningBold` | `Yellow Warn #F0AD4E` | `#F5C26B` | Warning **icons, dots and filled badges** — always pair with `color.text.onBrand`, either as knocked-out label text or as the inner mark of a two-layer symbol (`Image.brewWarningGlyphStyle()`) |
 | `color.status.warningSubtle` | `#FEF8EC` | `rgba(240,173,78,0.15)` | Warning row tint |
-| `color.status.error` | `Red Error #D9534F` | `#E87370` | Failed install, error alert |
+| `color.status.error` | `Red Error #D9534F` → HC `#CB302C` | `#E87370` → HC `#ED908E` | Failed install, error alert |
 | `color.status.errorSubtle` | `#FDECEB` | `rgba(217,83,79,0.15)` | Error row tint |
-| `color.status.info` | `Blue Info #5B9BD5` | `#7AB3E0` | Info alerts, update notifications |
+| `color.status.info` | `Blue Info #5B9BD5` → HC `#2D71AF` | `#7AB3E0` | Info alerts, update notifications |
 | `color.status.infoSubtle` | `#EBF3FB` | `rgba(91,155,213,0.15)` | Info row tint |
 
 ### 4.5 Borders & separators
@@ -177,7 +188,7 @@ BrewUI uses a fully custom primary button style — this is one of the component
 | `button.secondary.background` | `Cellar 100 #EFEFEA` | `Hops 700 #3A3A3A` | Standard bordered style |
 | `button.secondary.backgroundHover` | `Cellar 200 #E2E2DC` | `Hops 600 #4A4A4A` | |
 | `button.secondary.foreground` | `Cellar 900 #1A1A18` | `#F0F0ED` | |
-| `button.destructive.background` | `Red Error #D9534F` | `#E87370` | Explicit red — never amber |
+| `button.destructive.background` | `Red Error #CD312C` | `#EE918E` | Explicit red — never amber |
 | `button.destructive.foreground` | `#FFFFFF` | `#FFFFFF` | |
 | `button.cornerRadius` | `6pt` | `6pt` | |
 
@@ -191,7 +202,7 @@ Text fields use the system focus ring (system accent) rather than an amber overr
 | `textField.backgroundFocused` | `#FFFFFF` | `Hops 700 #3A3A3A` | |
 | `textField.border` | `rgba(0,0,0,0.12)` | `rgba(255,255,255,0.12)` | Unfocused border only |
 | `textField.borderFocused` | **system accent** | **system accent** | Let macOS render the focus ring — do not override |
-| `textField.placeholder` | `Cellar 400 #9C9C96` | `Hops 400 #6B6B6B` | |
+| `textField.placeholder` | `Cellar 500 #65655F` | `Hops 300 #A8A8A8` | |
 | `textField.cornerRadius` | `6pt` | `6pt` | |
 
 ### 5.3 List rows
@@ -215,7 +226,7 @@ The sidebar active item indicator is a custom drawn element — amber applies he
 | `sidebar.background` | `Cellar 200 #E2E2DC` | `Hops Dark #1A1A1A` | |
 | `sidebar.itemDefault` | `Cellar 900 #1A1A18` | `#D4D4D4` | |
 | `sidebar.itemSelected.background` | `Amber 100 #FEF3DC` | `rgba(251,176,64,0.18)` | **Custom amber** — fully custom component |
-| `sidebar.itemSelected.foreground` | `Amber 600 #E8971C` | `Amber 400 #FCC96B` | **Custom amber** |
+| `sidebar.itemSelected.foreground` | `Amber 700 #98620F` | `Amber 600 #E8971C` | **Custom amber** (`color.text.brand`) |
 | `sidebar.itemSelected.indicator` | `Amber 500 #FBB040` | `Amber 500 #FBB040` | Leading edge pill/bar indicator |
 
 ### 5.5 Progress & install state
@@ -233,9 +244,9 @@ Progress indicators during install/upgrade operations are a core BrewUI-branded 
 | Token | Light | Dark |
 |---|---|---|
 | `badge.installed.background` | `color.status.successSubtle` | `color.status.successSubtle` |
-| `badge.installed.foreground` | `Green OK #3CB371` | `#52C98A` |
+| `badge.installed.foreground` | `Green OK #297C4E` | `#52C98A` |
 | `badge.outdated.background` | `color.status.warningSubtle` | `color.status.warningSubtle` |
-| `badge.outdated.foreground` | `#B07D2A` | `Yellow Warn #F0AD4E` |
+| `badge.outdated.foreground` | `Amber Warn #9B600D` | `#F5C26B` |
 | `badge.cornerRadius` | `4pt` | `4pt` |
 | `badge.fontSize` | `fontSize.caption (11pt)` | `fontSize.caption (11pt)` |
 
@@ -252,7 +263,7 @@ The console is intentionally always dark — this is the "terminal roots" princi
 | `console.textCommand` | `Amber 400 #FCC96B` | brew command and verb |
 | `console.textArgument` | `#A8D8A8` | Formula / cask name argument |
 | `console.textSuccess` | `#52C98A` | Success confirmation lines |
-| `console.textWarning` | `Yellow Warn #F0AD4E` | Warning lines |
+| `console.textWarning` | `Amber Warn #9B600D` light / `#F5C26B` dark | Warning lines |
 | `console.textError` | `#FF7B72` | Error / stderr lines |
 | `console.textDimmed` | `#6B6B6B` | Verbose / debug lines |
 | `console.cursorColor` | `Amber 500 #FBB040` | **Custom amber** — animated cursor / progress indicator |

@@ -28,10 +28,23 @@ enum DoctorSeverityStyle {
         }
     }
 
+    /// Colour for severity text.
     static func foreground(_ severity: DoctorSeverity) -> Color {
         switch severity {
         case .caution: .brewStatusWarning
         case .danger, .unsupported: .brewStatusError
+        }
+    }
+
+    /// Severity glyph. Caution keeps the vivid warning yellow rather than the darker text amber.
+    @ViewBuilder
+    static func glyphImage(_ severity: DoctorSeverity) -> some View {
+        let image = Image(systemName: icon(severity))
+        switch severity {
+        case .caution:
+            image.brewWarningGlyphStyle()
+        case .danger, .unsupported:
+            image.foregroundStyle(Color.brewStatusError)
         }
     }
 

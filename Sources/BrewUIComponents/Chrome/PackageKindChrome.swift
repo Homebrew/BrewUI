@@ -12,25 +12,19 @@ public enum PackageKindAccentToken: Equatable {
     case statusInfo
 }
 
-public enum PackageKindIconBackgroundToken: Equatable {
-    case brandTint
-    case statusInfoSubtle
-}
-
-/// Testable chrome for an installed list row (badge + token roles); views map tokens to `Color`.
+/// Testable chrome for an installed list row (badge + token role); views map tokens to `Color`.
+///
+/// The accent drives the badge label and the icon chip, which is an outline — no background role.
 public struct PackageKindChrome: Equatable {
     public var badgeLabel: String
     public var accent: PackageKindAccentToken
-    public var iconBackground: PackageKindIconBackgroundToken
 
     public init(
         badgeLabel: String,
         accent: PackageKindAccentToken,
-        iconBackground: PackageKindIconBackgroundToken,
     ) {
         self.badgeLabel = badgeLabel
         self.accent = accent
-        self.iconBackground = iconBackground
     }
 }
 
@@ -41,13 +35,11 @@ public extension HomebrewPackageKind {
             PackageKindChrome(
                 badgeLabel: "FORMULA",
                 accent: .brandPrimary,
-                iconBackground: .brandTint,
             )
         case .cask:
             PackageKindChrome(
                 badgeLabel: "CASK",
                 accent: .statusInfo,
-                iconBackground: .statusInfoSubtle,
             )
         }
     }

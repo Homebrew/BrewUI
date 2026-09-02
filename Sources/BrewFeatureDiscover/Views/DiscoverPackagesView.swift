@@ -129,7 +129,7 @@ struct DiscoverPackagesView: View {
                 if viewModel.showsSubtitleTrendIcon {
                     Image(systemName: "chart.line.uptrend.xyaxis")
                         .font(.brewSubheadline)
-                        .foregroundStyle(Color.brewBrandPrimary)
+                        .foregroundStyle(Color.brewTextBrand)
                 }
                 Text(viewModel.subtitleText)
                     .font(.brewSubheadline)

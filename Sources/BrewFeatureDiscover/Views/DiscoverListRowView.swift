@@ -45,7 +45,7 @@ struct DiscoverListRowView: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: BrewSpacing.md) {
+        HStack(alignment: .center, spacing: BrewSpacing.md) {
             iconBadge
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 titleRow
@@ -72,8 +72,9 @@ struct DiscoverListRowView: View {
     private var iconBadge: some View {
         ZStack {
             Circle()
-                .fill(iconBackgroundColor(viewModel.packageKindChrome.iconBackground))
+                .strokeBorder(accentColor(viewModel.packageKindChrome.accent), lineWidth: 1)
                 .frame(width: 36, height: 36)
+                .brewHiddenWhenRedacted()
             Image(systemName: "shippingbox.fill")
                 .font(.body)
                 .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
@@ -139,18 +140,9 @@ struct DiscoverListRowView: View {
     private func accentColor(_ token: PackageKindAccentToken) -> Color {
         switch token {
         case .brandPrimary:
-            Color.brewBrandPrimary
+            Color.brewTextBrand
         case .statusInfo:
             Color.brewStatusInfo
-        }
-    }
-
-    private func iconBackgroundColor(_ token: PackageKindIconBackgroundToken) -> Color {
-        switch token {
-        case .brandTint:
-            Color.brewBrandTint
-        case .statusInfoSubtle:
-            Color.brewStatusInfoSubtle
         }
     }
 }

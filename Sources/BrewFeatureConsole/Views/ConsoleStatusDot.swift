@@ -20,7 +20,7 @@ struct ConsoleStatusDot: View {
     private var fill: Color {
         switch state {
         case .running:
-            .brewBrandPrimary
+            .brewTextBrand
         case .succeeded:
             .brewStatusSuccess
         case .failed:
