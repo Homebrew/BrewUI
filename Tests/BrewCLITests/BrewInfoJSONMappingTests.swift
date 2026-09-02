@@ -34,8 +34,7 @@ struct BrewInfoJSONMappingTests {
     }
 
     @Test func `formula upgrade target keeps the packaging revision suffix`() throws {
-        // A revision bump leaves versions.stable alone, so without the revision the upgrade target
-        // reads back as the installed keg ("9.0.1 → 9.0.1").
+        // A revision bump leaves versions.stable alone, so the bare version reads as no upgrade.
         let json = """
         {
           "formulae": [
@@ -68,7 +67,6 @@ struct BrewInfoJSONMappingTests {
         let ffmpeg = try #require(packages.first { $0.name == "ffmpeg" })
         #expect(ffmpeg.latestVersion == "9.0.1_1")
         #expect(ffmpeg.installedVersions == ["9.0.1"])
-        // Zero and absent revisions must not gain a suffix.
         #expect(packages.first { $0.name == "wget" }?.latestVersion == "1.25.0")
         #expect(packages.first { $0.name == "aria2" }?.latestVersion == "1.37.0")
     }
@@ -90,7 +88,7 @@ struct BrewInfoJSONMappingTests {
 
         #expect(packages.first { $0.name == "alpha" }?.latestVersion == "2.0.0")
         #expect(packages.first { $0.name == "beta" }?.latestVersion == "3.0.0")
-        // No stable version to hang a revision off: still empty, not "_4".
+        // No stable version to hang the revision off.
         #expect(packages.first { $0.name == "gamma" }?.latestVersion == "")
     }
 

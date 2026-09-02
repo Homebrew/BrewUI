@@ -6,11 +6,8 @@
 import BrewCore
 import Foundation
 
-/// Answers ``HomebrewEnvironmentReading`` from `brew config`, which reports the `HOMEBREW_*`
-/// variables brew actually resolved (printing `HOMEBREW_NO_INSTALL_FROM_API: set` only when it is).
-///
-/// The answer is probed once and kept: changing it means editing a shell profile, which does not
-/// take effect for an already-running app anyway.
+/// Asks `brew config`, which prints `HOMEBREW_NO_INSTALL_FROM_API: set` only when it is set.
+/// Probed once: changing it means editing a shell profile, which needs a relaunch anyway.
 public actor BrewConfigEnvironmentReader: HomebrewEnvironmentReading {
     private static let noInstallFromAPIKey = "HOMEBREW_NO_INSTALL_FROM_API"
 
@@ -36,9 +33,7 @@ public actor BrewConfigEnvironmentReader: HomebrewEnvironmentReading {
         return result
     }
 
-    /// Falls back to `false` — the API path — when brew cannot be found or run at all. That is the
-    /// configuration the vast majority of installs are in, and the caller's own `brew` invocation
-    /// will surface the real problem.
+    /// Falls back to the API path; the caller's own brew invocation surfaces the real problem.
     private func probe() async -> Bool {
         guard let brew = try? locator.findBrewExecutable(),
               let output = try? await commandRunner.run(executableURL: brew, arguments: ["config"]),

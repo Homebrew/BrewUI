@@ -383,8 +383,7 @@ struct BrewInstalledPackagesRepositoryTests {
     }
 
     @Test @MainActor func `repainting a fresh cache does not clear a recorded failure`() async {
-        // Only a completed fetch can vouch for the inventory. Painting the cache again answers
-        // nothing, so it must not silently turn "couldn't check" back into "nothing to upgrade".
+        // Painting the cache answers nothing, so it must not clear the recorded failure.
         let cache = InstalledInventoryCache()
         await cache.replace(
             InstalledInventorySnapshot(fetchedAt: .now, packages: [.fixture(name: "git", kind: .formula)]),

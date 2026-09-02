@@ -33,7 +33,6 @@ struct BrewInfoFormula: Decodable {
     var dependencies: [String]
     var rubySourcePath: String?
     var versions: BrewInfoFormulaVersions
-    /// Homebrew packaging revision; part of the keg version as `_<revision>` once non-zero.
     var revision: Int
     var installed: [BrewInfoFormulaInstalled]
     var linkedKeg: String?

@@ -130,8 +130,6 @@ struct UpgradesPackagesView: View {
         }
     }
 
-    /// No action of its own: re-checking now lives in the header, where it is reachable whether or not
-    /// this state is on screen.
     private var allCaughtUpState: some View {
         centeredEmptyState(
             title: viewModel.upToDateTitle,
@@ -140,8 +138,7 @@ struct UpgradesPackagesView: View {
         )
     }
 
-    /// An empty list after a failed check means "unknown", not "up to date" — this state says so
-    /// rather than letting the cached zero pass for an answer.
+    /// An empty list after a failed check means "unknown", not "up to date".
     private var upgradeCheckFailedState: some View {
         centeredEmptyState(
             title: UpgradesViewModel.upgradeCheckFailedTitle,

@@ -32,8 +32,6 @@ struct UpgradesViewModelRefreshTests {
     }
 
     @Test @MainActor func `refresh is available whether or not upgrades exist`() async {
-        // The header's Refresh affordance is not conditional on the outdated count, so both an empty
-        // and a populated inventory must be refreshable.
         for packages in [[], [InstalledBrewPackage.fixture(name: "git", kind: .formula, outdated: true)]] {
             let repository = GatedInstalledPackagesRepository(packages: packages)
             repository.resumeLoad()
@@ -47,7 +45,6 @@ struct UpgradesViewModelRefreshTests {
     }
 
     @Test @MainActor func `load leaves the refresh indicator alone`() async {
-        // The initial `.task` load paints its own skeleton; only an explicit refresh drives the button.
         let repository = GatedInstalledPackagesRepository(packages: [])
         repository.resumeLoad()
         let viewModel = Self.makeViewModel(repository: repository)

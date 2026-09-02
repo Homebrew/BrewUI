@@ -8,8 +8,7 @@ import BrewCore
 import BrewUIComponents
 import SwiftUI
 
-/// Top of the Upgrades tab: title, inventory subtitle, the `brew upgrade` command that "Upgrade All"
-/// would run, and the header action row.
+/// Top of the Upgrades tab: title, subtitle, the bulk `brew upgrade` command, and the action row.
 struct UpgradesHeaderView: View {
     let viewModel: UpgradesViewModel
 
@@ -39,8 +38,6 @@ struct UpgradesHeaderView: View {
         .padding(BrewSpacing.lg)
     }
 
-    /// Upgrade All is conditional on there being something to upgrade; Refresh is not — re-checking is
-    /// exactly what a user wants when the list looks wrong or empty.
     private var actionRow: some View {
         HStack(spacing: BrewSpacing.sm) {
             if viewModel.outdatedCount > 0 {
@@ -85,8 +82,7 @@ struct UpgradesHeaderView: View {
         .axid(.upgradesRefreshButton)
     }
 
-    /// A green tick is a claim that nothing needs upgrading. When the check itself failed the app has
-    /// no such claim to make, so the same slot warns instead.
+    /// A green tick claims nothing needs upgrading; a failed check has no such claim to make.
     private var nothingToUpgradeIndicator: some View {
         let didCheckFail = viewModel.showsUpgradeCheckFailure
         return HStack {

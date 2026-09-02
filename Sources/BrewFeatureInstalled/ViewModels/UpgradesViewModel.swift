@@ -40,8 +40,7 @@ final class UpgradesViewModel {
 
     private var runningIDs: Set<BrewOperationID> = []
 
-    /// True while an explicit ``refresh()`` is in flight. The repository keeps its `.loaded` state
-    /// during a revalidation, so the header's Refresh button needs its own progress signal.
+    /// The repository stays `.loaded` through a revalidation, so Refresh needs its own signal.
     private(set) var isRefreshing = false
 
     var state: LoadState<InstalledPackagesContent, String> {
@@ -86,15 +85,11 @@ final class UpgradesViewModel {
         repository.outdatedCount
     }
 
-    /// Non-nil when the last check for upgrades did not complete and cached inventory is standing in
-    /// for a real answer. Everything downstream — subtitle, empty state, VoiceOver — reads this rather
-    /// than reporting the cached zero as "nothing to upgrade".
     var upgradeCheckFailureMessage: String? {
         repository.refreshFailure.map(Self.userMessage(for:))
     }
 
-    /// True when the tab has no upgrades to show *and* cannot vouch for that: it is standing on a
-    /// cached inventory whose last refresh failed.
+    /// No upgrades to show, and a failed check means the app cannot vouch for that.
     var showsUpgradeCheckFailure: Bool {
         totalOutdatedCount == 0 && state.isLoaded && upgradeCheckFailureMessage != nil
     }
@@ -122,15 +117,13 @@ final class UpgradesViewModel {
         guard upgradeCheckFailureMessage != nil else {
             return subtitle
         }
-        // Cached upgrades are still worth listing, but the count came from the last check that
-        // succeeded, so it must not read as a current answer.
+        // The count came from the last check that succeeded, so it must not read as current.
         return String(
             localized: "\(subtitle) — last check failed",
             comment: "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
         )
     }
 
-    /// Headline used wherever the tab has to say the check itself did not complete.
     static let upgradeCheckFailedTitle = String(
         localized: "Couldn't check for upgrades",
         comment: "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
@@ -402,18 +395,14 @@ extension UpgradesViewModel {
         return UpgradesUpToDateCopy.headline
     }
 
-    /// Empty-state headline and VoiceOver label for a fully up-to-date inventory.
     var upToDateTitle: String {
         UpgradesUpToDateCopy.headline
     }
 
-    /// Supporting line under ``upToDateTitle``, scoped to the installed count the claim covers.
     var upToDateDetail: String {
         UpgradesUpToDateCopy.installedDetail(count: totalInstalledCount)
     }
 
-    /// Supporting line under ``upgradeCheckFailedTitle``: what brew actually said, then the point of
-    /// the whole state — an empty list here means "unknown", not "up to date".
     var upgradeCheckFailureDetail: String {
         guard let message = upgradeCheckFailureMessage else {
             return ""

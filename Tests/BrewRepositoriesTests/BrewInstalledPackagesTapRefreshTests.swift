@@ -11,9 +11,7 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-/// `brew info` is not auto-updated by brew, so under `HOMEBREW_NO_INSTALL_FROM_API` — where package
-/// data comes from tap clones rather than the JSON API — the app has to refresh the taps itself the
-/// way `brew upgrade` does, or the outdated check answers from whatever the taps last held.
+/// With the API off, package data comes from tap clones that only `brew update` refreshes.
 struct BrewInstalledPackagesTapRefreshTests {
     private static let emptyInfoJSON = #"{ "formulae": [], "casks": [] }"#
 
@@ -42,7 +40,7 @@ struct BrewInstalledPackagesTapRefreshTests {
 
         await repo.load(forceRefresh: true)
 
-        // brew refreshes the API files on its own TTL, so an update here would be pure cost.
+        // brew refreshes the API files on its own TTL, so an update here is pure cost.
         #expect(await runner.invocations == [["info", "--installed", "--json=v2"]])
     }
 
@@ -56,13 +54,12 @@ struct BrewInstalledPackagesTapRefreshTests {
         )
 
         await repo.load(forceRefresh: true)
-        // Every mutating operation reconciles with a forced fetch, so back-to-back fetches are normal.
         clock.now = Date(timeIntervalSince1970: 120)
         await repo.load(forceRefresh: true)
 
         #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 1)
 
-        // Past Homebrew's own 5-minute auto-update interval for this mode.
+        // Past Homebrew's 5-minute interval for this mode.
         clock.now = Date(timeIntervalSince1970: 400)
         await repo.load(forceRefresh: true)
 
@@ -70,8 +67,7 @@ struct BrewInstalledPackagesTapRefreshTests {
     }
 
     @Test @MainActor func `a failed tap update still lets the outdated check answer`() async {
-        // The taps keep their previous contents, so a stale answer beats no answer; the info fetch
-        // is what decides whether the check produced a result at all.
+        // The taps keep their previous contents, so a stale answer beats no answer.
         let runner = RecordingCommandRunner(
             infoJSON: Self.emptyInfoJSON,
             updateBehavior: .failure(exitCode: 1, stderr: "fatal: not a git repository"),
@@ -104,7 +100,7 @@ struct BrewInstalledPackagesTapRefreshTests {
         clock.now = Date(timeIntervalSince1970: 60)
         await repo.load(forceRefresh: true)
 
-        // The attempt is timestamped whether or not it worked, so the interval still applies.
+        // The attempt is timestamped even when it fails, so the interval still applies.
         #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 1)
     }
 
@@ -128,9 +124,7 @@ struct BrewInstalledPackagesTapRefreshTests {
 
 // MARK: - Doubles
 
-/// Mutable time source shared with the repository, so interval behaviour is asserted without waiting.
-/// ``dateProvider`` asserts main-actor isolation rather than escaping it: the repository is
-/// `@MainActor` and only reads the clock from its own isolation.
+/// Mutable time source, so interval behaviour is asserted without waiting.
 @MainActor
 private final class MutableClock {
     var now: Date
@@ -140,15 +134,13 @@ private final class MutableClock {
     }
 
     nonisolated var dateProvider: @Sendable () -> Date {
-        // The repository is @MainActor and calls this only from its own isolation; the closure's
-        // synchronous @Sendable type can't say so.
+        // The repository is @MainActor; the synchronous @Sendable closure type can't say so.
         // swiftlint:disable:next assume_isolated
         { MainActor.assumeIsolated { self.now } }
     }
 }
 
-/// Records the `brew` argument lists it was asked to run, answering `info` with a fixed payload and
-/// `update` however the test asks.
+/// Records the `brew` argument lists it was asked to run.
 private actor RecordingCommandRunner: BrewCommandRunning {
     enum UpdateBehavior {
         case success

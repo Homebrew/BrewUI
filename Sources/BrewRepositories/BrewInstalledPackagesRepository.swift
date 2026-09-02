@@ -27,9 +27,6 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     /// layers (view models) map it to user-facing copy. `failed` only when there is no data to show.
     public private(set) var state: LoadState<[InstalledBrewPackage], any Error> = .loading
 
-    /// Set when a fetch fails while ``state`` keeps cached inventory on screen, cleared on the next
-    /// success. Without it a caller reading only `state` reports a stale "nothing is outdated" as
-    /// fact, when in truth the outdated check never completed.
     public private(set) var refreshFailure: (any Error)?
 
     /// O(1) membership/info lookups, kept in lock-step with ``state``. Tracked by observation so
@@ -44,11 +41,10 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
 
-    /// When the last `brew update` was attempted, so the tap refresh below runs on an interval
-    /// rather than in front of every fetch (each mutating operation triggers one).
+    /// Every mutating operation forces a fetch, so the tap refresh runs on an interval instead.
     @ObservationIgnored private var lastTapUpdateAttempt: Date?
 
-    /// Matches Homebrew's own `HOMEBREW_AUTO_UPDATE_SECS` default for the no-API path (5 minutes).
+    /// Homebrew's own `HOMEBREW_AUTO_UPDATE_SECS` default for the no-API path.
     private static let tapRefreshInterval: TimeInterval = 300
 
     public init(
@@ -157,16 +153,13 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     private func fetchAndStore() async {
         do {
             let packages = try await fetchInstalledPackages()
-            // Only a completed fetch clears the flag — repainting a cached snapshot answers nothing
-            // about whether the outdated check now works.
+            // Only a completed fetch clears this; repainting a cached snapshot answers nothing.
             refreshFailure = nil
             apply(packages)
         } catch is CancellationError {
             return
         } catch {
             // Keep showing cached data if we have any; only surface an error with nothing to show.
-            // Either way the failure is recorded, so surfaces can say the check did not complete
-            // rather than presenting stale inventory as an answer.
             refreshFailure = error
             if case .loaded = state {
                 installedRepositoryLogger.error(
@@ -195,17 +188,8 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         return packages
     }
 
-    /// Brings locally cloned taps up to date before reading versions out of them, the way `brew
-    /// upgrade` and `brew outdated` do.
-    ///
-    /// `brew info` is not one of the commands brew auto-updates in front of. Normally that costs
-    /// nothing, because brew re-fetches the JSON API files on its own TTL whenever a command reads
-    /// them. Under `HOMEBREW_NO_INSTALL_FROM_API` there is no such refresh: formula and cask data
-    /// come from tap git clones, so the outdated check answers from whatever the taps held the last
-    /// time the user ran `brew update` in a terminal — indefinitely, with no upgrades ever appearing.
-    ///
-    /// Runs on Homebrew's own cadence for this mode, and the attempt is timestamped whether or not
-    /// it succeeded so a persistently failing update cannot stall every fetch behind it.
+    /// `brew info` is not auto-updated by brew, and with the API off its data comes from tap clones —
+    /// so without this the outdated check answers from the user's last manual `brew update`, forever.
     private func updateTapsIfNeeded(executable: URL) async {
         guard await environment.isInstallFromAPIDisabled() else {
             return
@@ -223,8 +207,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
                 throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
             }
         } catch {
-            // Not fatal on its own: the taps still hold their previous contents, and the `brew info`
-            // fetch below decides whether the check as a whole produced an answer.
+            // Not fatal: the info fetch below decides whether the check produced an answer.
             installedRepositoryLogger.error(
                 "Tap refresh before the outdated check failed: \(error.localizedDescription, privacy: .public)",
             )

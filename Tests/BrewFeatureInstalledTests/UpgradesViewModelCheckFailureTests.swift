@@ -10,8 +10,7 @@ import BrewRepositoryInterfaces
 import Foundation
 import Testing
 
-/// "Nothing to upgrade" and "I couldn't find out" look identical from a package list alone. These
-/// pin the tab telling them apart.
+/// "Nothing to upgrade" and "I couldn't find out" look identical from a package list alone.
 struct UpgradesViewModelCheckFailureTests {
     private static let brewError = BrewCommandError.failed(exitCode: 1, stderr: "Not a git repository")
 
@@ -39,7 +38,7 @@ struct UpgradesViewModelCheckFailureTests {
     }
 
     @Test @MainActor func `cached upgrades survive a failed check but stop reading as current`() {
-        // There is still a list worth showing; what it must not do is pass the count off as fresh.
+        // The list is still worth showing; the count must not pass for fresh.
         let viewModel = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: true),
             .fixture(name: "slack", kind: .cask, outdated: true),
@@ -60,8 +59,7 @@ struct UpgradesViewModelCheckFailureTests {
     }
 
     @Test @MainActor func `filters hiding every upgrade win over a failed check`() {
-        // There is known outdated inventory, so the honest explanation for the empty list is the
-        // filter, not the failed re-check.
+        // With known outdated inventory, the filter is the honest explanation for the empty list.
         let viewModel = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: true),
         ], refreshFailure: Self.brewError)
