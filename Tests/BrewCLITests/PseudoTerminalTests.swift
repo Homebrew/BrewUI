@@ -127,12 +127,33 @@ private extension PseudoTerminalTests {
             }
         }
         process.waitUntilExit()
+        drainPending(terminal, into: &data)
 
         terminal.closeReplica()
         drainToEndOfInput(terminal, into: &data)
         terminal.closePrimary()
 
         return UTF8StreamDecoder.lossyString(data)
+    }
+
+    /// Darwin discards whatever is still queued on the terminal when the last replica descriptor closes,
+    /// so the child's bytes have to be read before ``PseudoTerminal/closeReplica()``. The child has been
+    /// reaped by this point, so what is queued now is all there will ever be.
+    func drainPending(_ terminal: PseudoTerminal, into data: inout Data) {
+        pending: while true {
+            switch terminal.read(timeout: .zero) {
+            case let .data(chunk):
+                data.append(chunk)
+            case .timedOut:
+                break pending
+            case .endOfInput:
+                Issue.record("end of input arrived while this process still held the replica open")
+                break pending
+            case let .failed(code):
+                Issue.record("reading the terminal failed: \(PseudoTerminal.describe(errno: code))")
+                break pending
+            }
+        }
     }
 
     func drainToEndOfInput(_ terminal: PseudoTerminal, into data: inout Data) {
