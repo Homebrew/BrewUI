@@ -84,14 +84,23 @@ struct UpgradesHeaderView: View {
 
     /// A green tick claims nothing needs upgrading; a failed check has no such claim to make.
     private var nothingToUpgradeIndicator: some View {
-        let didCheckFail = viewModel.showsUpgradeCheckFailure
-        return HStack {
-            Image(systemName: didCheckFail ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
-                .foregroundStyle(didCheckFail ? Color.brewStatusWarning : Color.brewStatusSuccess)
+        HStack {
+            statusGlyph
                 .accessibilityHidden(true)
             Text(viewModel.emptyUpgradeActionTitle)
                 .foregroundStyle(Color.brewTextSecondary)
         }
         .font(.brewBody)
+    }
+
+    @ViewBuilder
+    private var statusGlyph: some View {
+        if viewModel.showsUpgradeCheckFailure {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .brewWarningGlyphStyle()
+        } else {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Color.brewStatusSuccess)
+        }
     }
 }
