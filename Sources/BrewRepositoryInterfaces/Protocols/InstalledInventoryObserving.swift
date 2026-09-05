@@ -12,6 +12,11 @@ import Observation
 @MainActor
 public protocol InstalledInventoryObserving: Observable, Sendable {
     var state: LoadState<[InstalledBrewPackage], any Error> { get }
+
+    /// Last failed refresh; nil once a fetch succeeds. `state` stays `.loaded` through a failed
+    /// revalidation, so without this a surface cannot tell "nothing outdated" from "never found out".
+    var refreshFailure: (any Error)? { get }
+
     func load(forceRefresh: Bool) async
 }
 

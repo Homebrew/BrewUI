@@ -33,6 +33,65 @@ struct BrewInfoJSONMappingTests {
         #expect(packages.map(\.kind) == [.cask, .formula, .formula, .cask])
     }
 
+    @Test func `formula upgrade target keeps the packaging revision suffix`() throws {
+        // A revision bump leaves versions.stable alone, so the bare version reads as no upgrade.
+        let json = """
+        {
+          "formulae": [
+            {
+              "name": "ffmpeg",
+              "versions": { "stable": "9.0.1" },
+              "revision": 1,
+              "installed": [{ "version": "9.0.1" }],
+              "outdated": true
+            },
+            {
+              "name": "wget",
+              "versions": { "stable": "1.25.0" },
+              "revision": 0,
+              "installed": [{ "version": "1.25.0" }]
+            },
+            {
+              "name": "aria2",
+              "versions": { "stable": "1.37.0" },
+              "installed": [{ "version": "1.37.0" }]
+            }
+          ],
+          "casks": []
+        }
+        """
+
+        let payload = try JSONDecoder().decode(BrewInfoJSON.self, from: Data(json.utf8))
+        let packages = payload.installedPackages()
+
+        let ffmpeg = try #require(packages.first { $0.name == "ffmpeg" })
+        #expect(ffmpeg.latestVersion == "9.0.1_1")
+        #expect(ffmpeg.installedVersions == ["9.0.1"])
+        #expect(packages.first { $0.name == "wget" }?.latestVersion == "1.25.0")
+        #expect(packages.first { $0.name == "aria2" }?.latestVersion == "1.37.0")
+    }
+
+    @Test func `unusable revision values fall back to the plain stable version`() throws {
+        let json = """
+        {
+          "formulae": [
+            { "name": "alpha", "versions": { "stable": "2.0.0" }, "revision": "1" },
+            { "name": "beta", "versions": { "stable": "3.0.0" }, "revision": null },
+            { "name": "gamma", "revision": 4 }
+          ],
+          "casks": []
+        }
+        """
+
+        let payload = try JSONDecoder().decode(BrewInfoJSON.self, from: Data(json.utf8))
+        let packages = payload.installedPackages()
+
+        #expect(packages.first { $0.name == "alpha" }?.latestVersion == "2.0.0")
+        #expect(packages.first { $0.name == "beta" }?.latestVersion == "3.0.0")
+        // No stable version to hang the revision off.
+        #expect(packages.first { $0.name == "gamma" }?.latestVersion == "")
+    }
+
     @Test func `installedPackages sorts case-insensitively`() throws {
         let json = """
         {

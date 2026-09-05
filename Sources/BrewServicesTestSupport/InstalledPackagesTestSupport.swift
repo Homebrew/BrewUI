@@ -14,13 +14,15 @@ public enum InstalledPackagesTestSupport {
     /// Stable fake path passed to `commandRunner` when using `BrewExecutableLocator(overrideURL:)`.
     public static let fakeBrewExecutableURL = URL(fileURLWithPath: "/fake/brew")
 
-    /// Wired like production slice tests: default locator is ``fakeBrewExecutableURL``.
+    /// Wired like production slice tests; the default environment is the API path, so no tap refresh runs.
     @MainActor
     public static func repository(
         commandRunner: BrewCommandRunning,
         locator: (any BrewExecutableLocating)? = nil,
         cache: InstalledInventoryCache? = nil,
         commandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
+        environment: any HomebrewEnvironmentReading = StubHomebrewEnvironment(installFromAPIDisabled: false),
+        now: @escaping @Sendable () -> Date = Date.init,
     ) -> BrewInstalledPackagesRepository {
         let resolvedCache = cache ?? InstalledInventoryCache()
         let resolvedLocator = locator ?? BrewExecutableLocator(overrideURL: fakeBrewExecutableURL)
@@ -29,6 +31,8 @@ public enum InstalledPackagesTestSupport {
             locator: resolvedLocator,
             cache: resolvedCache,
             commandCenter: commandCenter,
+            environment: environment,
+            now: now,
         )
     }
 

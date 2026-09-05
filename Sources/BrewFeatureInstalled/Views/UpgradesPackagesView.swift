@@ -16,7 +16,7 @@ struct UpgradesPackagesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header
+            UpgradesHeaderView(viewModel: viewModel)
 
             if viewModel.totalOutdatedCount > 0 {
                 scopePicker
@@ -30,6 +30,8 @@ struct UpgradesPackagesView: View {
                     if content.packages.isEmpty {
                         if viewModel.totalOutdatedCount > 0 {
                             noSearchMatchesState
+                        } else if viewModel.showsUpgradeCheckFailure {
+                            upgradeCheckFailedState
                         } else {
                             allCaughtUpState
                         }
@@ -45,63 +47,6 @@ struct UpgradesPackagesView: View {
         .task {
             await viewModel.load()
         }
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Available upgrades")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.outdatedSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-            .accessibilityHeading(.h1)
-
-            if viewModel.state.isLoaded {
-                CommandBlockView(
-                    command: viewModel.bulkUpgradeDisplayCommand,
-                    summaryText: viewModel.bulkUpgradeSummary,
-                )
-
-                upgradeAction
-            }
-        }
-        .padding(BrewSpacing.lg)
-    }
-
-    private var upgradeAction: some View {
-        Group {
-            if viewModel.outdatedCount > 0 {
-                Button {
-                    viewModel.upgradeAll()
-                } label: {
-                    Text("Upgrade All (\(viewModel.outdatedCount))")
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.regular)
-                .keyboardShortcut("u", modifiers: [.command, .shift])
-                .disabled(viewModel.isUpgradingAny)
-                .accessibilityLabel("Upgrade all \(viewModel.outdatedCount) packages")
-            } else {
-                nothingToUpgradeIndicator
-            }
-        }
-        .frame(height: BrewLayout.headerActionHeight)
-    }
-
-    private var nothingToUpgradeIndicator: some View {
-        HStack {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(Color.brewStatusSuccess)
-                .accessibilityHidden(true)
-            Text(viewModel.emptyUpgradeActionTitle)
-                .foregroundStyle(Color.brewTextSecondary)
-        }
-        .font(.brewBody)
     }
 
     /// Kind filter shown whenever there is outdated inventory to narrow. Filters client-side; never refetches.
@@ -187,37 +132,56 @@ struct UpgradesPackagesView: View {
 
     private var allCaughtUpState: some View {
         centeredEmptyState(
-            title: "✅ You're all caught up",
-            subtitle: allCaughtUpSubtitle,
-            actionTitle: "Refresh",
-            accessibilityLabel: "All packages are up to date",
-        ) {
-            Task { await viewModel.refresh() }
-        }
+            title: viewModel.upToDateTitle,
+            subtitle: viewModel.upToDateDetail,
+            accessibilityLabel: viewModel.upToDateTitle,
+        )
+    }
+
+    /// An empty list after a failed check means "unknown", not "up to date".
+    private var upgradeCheckFailedState: some View {
+        centeredEmptyState(
+            title: UpgradesViewModel.upgradeCheckFailedTitle,
+            subtitle: viewModel.upgradeCheckFailureDetail,
+            actionTitle: "Try Again",
+            accessibilityLabel: UpgradesViewModel.upgradeCheckFailedTitle,
+            icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.brewTitle2)
+                    .brewWarningGlyphStyle()
+            },
+            action: { Task { await viewModel.refresh() } },
+        )
+        .axid(.errorState)
     }
 
     /// Shown when the active filters (scope and/or search) hide every outdated package but upgrades
     /// still exist in the inventory — distinct from the "all caught up" state.
     private var noSearchMatchesState: some View {
         centeredEmptyState(
-            title: "No matching upgrades",
+            title: String(
+                localized: "No matching upgrades",
+                comment: "Upgrades filter-empty state title",
+            ),
             subtitle: noSearchMatchesSubtitle,
             actionTitle: "Show all upgrades",
             accessibilityLabel: noSearchMatchesSubtitle,
-        ) {
-            viewModel.resetFilters()
-        }
+            action: { viewModel.resetFilters() },
+        )
     }
 
     private func centeredEmptyState(
-        title: LocalizedStringKey,
+        title: String,
         subtitle: String,
-        actionTitle: LocalizedStringKey,
+        actionTitle: LocalizedStringKey? = nil,
         accessibilityLabel: String,
-        action: @escaping () -> Void,
+        @ViewBuilder icon: () -> some View = { EmptyView() },
+        action: (() -> Void)? = nil,
     ) -> some View {
         VStack(spacing: BrewSpacing.md) {
             Spacer(minLength: 0)
+            icon()
+                .accessibilityHidden(true)
             Text(title)
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
@@ -225,36 +189,17 @@ struct UpgradesPackagesView: View {
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .multilineTextAlignment(.center)
-            Button(action: action) { Text(actionTitle) }
-                .controlSize(.regular)
-                .padding(.top, BrewSpacing.sm)
+            if let actionTitle, let action {
+                Button(action: action) { Text(actionTitle) }
+                    .controlSize(.regular)
+                    .padding(.top, BrewSpacing.sm)
+            }
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(BrewSpacing.xl)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
-    }
-
-    private var allCaughtUpSubtitle: String {
-        let total = viewModel.totalInstalledCount
-        switch total {
-        case 0:
-            return String(
-                localized: "No installed packages to check.",
-                comment: "Upgrades empty state when nothing is installed",
-            )
-        case 1:
-            return String(
-                localized: "Your installed package is at its latest version.",
-                comment: "Upgrades empty state for a single installed package",
-            )
-        default:
-            return String(
-                localized: "All \(total) packages are at their latest versions.",
-                comment: "Upgrades empty state with total installed count",
-            )
-        }
     }
 
     private var noSearchMatchesSubtitle: String {
@@ -304,6 +249,28 @@ struct UpgradesPackagesView: View {
         .task {
             await viewModel.load()
             viewModel.searchQuery = "no-such-package"
+        }
+        .frame(minWidth: 360, minHeight: 500)
+    }
+
+    #Preview("Upgrades list - check failed") {
+        let viewModel = UpgradesViewModel(
+            repository: StubInstalledPackagesRepository(
+                packages: [PreviewSupport.currentCask],
+                refreshFailure: BrewCommandError.failed(
+                    exitCode: 1,
+                    stderr: "fatal: not a git repository (or any of the parent directories): .git",
+                ),
+            ),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            commandFactory: PreviewSupport.mutatingCommandFactory,
+        )
+        SearchFocusPreviewHost { focus in
+            UpgradesPackagesView(viewModel: viewModel, focus: focus)
+        }
+        .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
+        .task {
+            await viewModel.load()
         }
         .frame(minWidth: 360, minHeight: 500)
     }

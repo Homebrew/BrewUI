@@ -34,6 +34,58 @@ struct CatalogueJSONTests {
         #expect(decoded.items.first?.dependencyReferences == [.formula(name: "bdw-gc"), .formula(name: "libpaper")])
     }
 
+    @Test func `formula stable version carries the packaging revision`() throws {
+        let data = Data(
+            """
+            [
+              {
+                "name": "ffmpeg",
+                "desc": "Play, record, convert, and stream audio and video",
+                "homepage": "https://ffmpeg.org/",
+                "versions": { "stable": "9.0.1" },
+                "revision": 1,
+                "dependencies": []
+              },
+              {
+                "name": "wget",
+                "desc": "Network downloader",
+                "homepage": "https://www.gnu.org/software/wget/",
+                "versions": { "stable": "1.25.0" },
+                "revision": 0,
+                "dependencies": []
+              }
+            ]
+            """.utf8,
+        )
+
+        let decoded = try JSONDecoder().decode(FormulaCatalogueJSON.self, from: data)
+
+        #expect(decoded.decodeFailures.isEmpty)
+        #expect(decoded.items.first(where: { $0.name == "ffmpeg" })?.stableVersion == "9.0.1_1")
+        #expect(decoded.items.first(where: { $0.name == "wget" })?.stableVersion == "1.25.0")
+    }
+
+    @Test func `formula item without a revision field still decodes`() throws {
+        let data = Data(
+            """
+            [
+              {
+                "name": "a2ps",
+                "desc": "Any-to-PostScript filter",
+                "homepage": "https://www.gnu.org/software/a2ps/",
+                "versions": { "stable": "4.15.8" },
+                "dependencies": []
+              }
+            ]
+            """.utf8,
+        )
+
+        let decoded = try JSONDecoder().decode(FormulaCatalogueJSON.self, from: data)
+
+        #expect(decoded.decodeFailures.isEmpty)
+        #expect(decoded.items.first?.stableVersion == "4.15.8")
+    }
+
     @Test func `decodes homebrew wire cask bulk shape`() throws {
         let data = Data(
             """

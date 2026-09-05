@@ -15,6 +15,19 @@ public struct MissingBrewExecutableLocator: BrewExecutableLocating {
     }
 }
 
+/// Fixed ``HomebrewEnvironmentReading`` answer, so tests need no `brew config`.
+public struct StubHomebrewEnvironment: HomebrewEnvironmentReading {
+    private let installFromAPIDisabled: Bool
+
+    public init(installFromAPIDisabled: Bool) {
+        self.installFromAPIDisabled = installFromAPIDisabled
+    }
+
+    public func isInstallFromAPIDisabled() async -> Bool {
+        installFromAPIDisabled
+    }
+}
+
 /// Per-invocation result for ``MockBrewCommandRunner``.
 public enum MockBrewCommandRunnerBehavior: Sendable {
     case output(CommandOutput)

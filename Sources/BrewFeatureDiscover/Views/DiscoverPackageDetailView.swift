@@ -147,7 +147,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
                     valueFontWeight: .heavy,
                 )
             }
-            detailRow(label: "Latest stable", value: viewModel.stableVersionLabel)
+            detailRow(label: "Latest version", value: viewModel.stableVersionLabel)
             if viewModel.showsInstallMetrics {
                 detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
             }

@@ -27,6 +27,8 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     /// layers (view models) map it to user-facing copy. `failed` only when there is no data to show.
     public private(set) var state: LoadState<[InstalledBrewPackage], any Error> = .loading
 
+    public private(set) var refreshFailure: (any Error)?
+
     /// O(1) membership/info lookups, kept in lock-step with ``state``. Tracked by observation so
     /// row views re-render when an install/uninstall changes a package's presence.
     private var lookup: [HomebrewPackageID: InstalledBrewPackage] = [:]
@@ -35,18 +37,30 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     @ObservationIgnored private let locator: any BrewExecutableLocating
     @ObservationIgnored private let cache: InstalledInventoryCache
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
+    @ObservationIgnored private let environment: any HomebrewEnvironmentReading
+    @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
+
+    /// Every mutating operation forces a fetch, so the tap refresh runs on an interval instead.
+    @ObservationIgnored private var lastTapUpdateAttempt: Date?
+
+    /// Homebrew's own `HOMEBREW_AUTO_UPDATE_SECS` default for the no-API path.
+    private static let tapRefreshInterval: TimeInterval = 300
 
     public init(
         commandRunner: BrewCommandRunning,
         locator: any BrewExecutableLocating,
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
+        environment: any HomebrewEnvironmentReading,
+        now: @escaping @Sendable () -> Date = Date.init,
     ) {
         self.commandRunner = commandRunner
         self.locator = locator
         self.cache = cache
         self.commandCenter = commandCenter
+        self.environment = environment
+        self.now = now
         completionObserverTask = Task { @MainActor [weak self] in
             await self?.observeOperationCompletions()
         }
@@ -64,6 +78,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             locator: executionContext.locator,
             cache: cache,
             commandCenter: commandCenter,
+            environment: BrewConfigEnvironmentReader(executionContext: executionContext),
         )
     }
 
@@ -138,11 +153,14 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     private func fetchAndStore() async {
         do {
             let packages = try await fetchInstalledPackages()
+            // Only a completed fetch clears this; repainting a cached snapshot answers nothing.
+            refreshFailure = nil
             apply(packages)
         } catch is CancellationError {
             return
         } catch {
             // Keep showing cached data if we have any; only surface an error with nothing to show.
+            refreshFailure = error
             if case .loaded = state {
                 installedRepositoryLogger.error(
                     "Installed inventory revalidation failed: \(error.localizedDescription, privacy: .public)",
@@ -161,12 +179,39 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
 
     private func fetchInstalledPackages() async throws -> [InstalledBrewPackage] {
         let brew = try locator.findBrewExecutable()
+        await updateTapsIfNeeded(executable: brew)
         let output = try await runInstalledInfoJSON(executable: brew)
         let payload = try decodeInfoJSON(from: output)
         let packages = payload.installedPackages()
         let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: packages)
         await cache.replace(snapshot)
         return packages
+    }
+
+    /// `brew info` is not auto-updated by brew, and with the API off its data comes from tap clones —
+    /// so without this the outdated check answers from the user's last manual `brew update`, forever.
+    private func updateTapsIfNeeded(executable: URL) async {
+        guard await environment.isInstallFromAPIDisabled() else {
+            return
+        }
+        if let lastTapUpdateAttempt, now().timeIntervalSince(lastTapUpdateAttempt) < Self.tapRefreshInterval {
+            return
+        }
+        lastTapUpdateAttempt = now()
+        do {
+            let output = try await commandRunner.run(
+                executableURL: executable,
+                arguments: ["update", "--auto-update", "--quiet"],
+            )
+            guard output.terminationStatus == 0 else {
+                throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
+            }
+        } catch {
+            // Not fatal: the info fetch below decides whether the check produced an answer.
+            installedRepositoryLogger.error(
+                "Tap refresh before the outdated check failed: \(error.localizedDescription, privacy: .public)",
+            )
+        }
     }
 
     private func runInstalledInfoJSON(executable: URL) async throws -> String {

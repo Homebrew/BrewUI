@@ -33,6 +33,7 @@ struct BrewInfoFormula: Decodable {
     var dependencies: [String]
     var rubySourcePath: String?
     var versions: BrewInfoFormulaVersions
+    var revision: Int
     var installed: [BrewInfoFormulaInstalled]
     var linkedKeg: String?
     var pinned: Bool
@@ -52,6 +53,7 @@ struct BrewInfoFormula: Decodable {
         rubySourcePath = try? container.decode(String.self, forKey: .rubySourcePath)
         versions = (try? container.decode(BrewInfoFormulaVersions.self, forKey: .versions))
             ?? BrewInfoFormulaVersions(stable: nil)
+        revision = (try? container.decode(Int.self, forKey: .revision)) ?? 0
         installed = (try? container.decode([BrewInfoFormulaInstalled].self, forKey: .installed))
             ?? []
         linkedKeg = try? container.decode(String.self, forKey: .linkedKeg)
@@ -71,6 +73,7 @@ struct BrewInfoFormula: Decodable {
         case dependencies
         case rubySourcePath = "ruby_source_path"
         case versions
+        case revision
         case installed
         case linkedKeg = "linked_keg"
         case pinned

@@ -243,11 +243,11 @@ struct UpgradesViewModelScopeTests {
             .fixture(name: "git", kind: .formula, outdated: false),
         ])
         #expect(!upToDate.isFilteringOutEveryUpgrade)
-        #expect(upToDate.emptyUpgradeActionTitle == "Nothing to upgrade")
+        #expect(upToDate.emptyUpgradeActionTitle == "Everything is up to date")
 
         upToDate.scope = .casks
         #expect(!upToDate.isFilteringOutEveryUpgrade)
-        #expect(upToDate.emptyUpgradeActionTitle == "Nothing to upgrade")
+        #expect(upToDate.emptyUpgradeActionTitle == "Everything is up to date")
     }
 
     @Test @MainActor func `scope that hides every upgrade reports the filtered title`() {

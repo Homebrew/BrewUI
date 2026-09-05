@@ -40,6 +40,9 @@ final class UpgradesViewModel {
 
     private var runningIDs: Set<BrewOperationID> = []
 
+    /// The repository stays `.loaded` through a revalidation, so Refresh needs its own signal.
+    private(set) var isRefreshing = false
+
     var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
@@ -82,6 +85,15 @@ final class UpgradesViewModel {
         repository.outdatedCount
     }
 
+    var upgradeCheckFailureMessage: String? {
+        repository.refreshFailure.map(Self.userMessage(for:))
+    }
+
+    /// No upgrades to show, and a failed check means the app cannot vouch for that.
+    var showsUpgradeCheckFailure: Bool {
+        totalOutdatedCount == 0 && state.isLoaded && upgradeCheckFailureMessage != nil
+    }
+
     /// Initial fetch with no rows yet — show blocking spinner.
     private var shouldShowInitialLoadingIndicator: Bool {
         if case .loading = state {
@@ -98,19 +110,29 @@ final class UpgradesViewModel {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", comment: "Upgrades tab subtitle while fetching")
         }
-        if isFiltering {
-            return filteredSubtitle
+        if showsUpgradeCheckFailure {
+            return Self.upgradeCheckFailedTitle
         }
-        return inventorySubtitle
+        let subtitle = isFiltering ? filteredSubtitle : inventorySubtitle
+        guard upgradeCheckFailureMessage != nil else {
+            return subtitle
+        }
+        // The count came from the last check that succeeded, so it must not read as current.
+        return String(
+            localized: "\(subtitle) — last check failed",
+            comment: "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
+        )
     }
+
+    static let upgradeCheckFailedTitle = String(
+        localized: "Couldn't check for upgrades",
+        comment: "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
+    )
 
     private var inventorySubtitle: String {
         switch totalOutdatedCount {
         case 0:
-            String(
-                localized: "All packages are up to date",
-                comment: "Upgrades tab subtitle when nothing is outdated",
-            )
+            UpgradesUpToDateCopy.headline
         case 1:
             String(
                 localized: "1 package can be upgraded",
@@ -180,6 +202,8 @@ final class UpgradesViewModel {
     }
 
     func refresh() async {
+        isRefreshing = true
+        defer { isRefreshing = false }
         await repository.load(forceRefresh: true)
     }
 
@@ -359,15 +383,33 @@ extension UpgradesViewModel {
     }
 
     var emptyUpgradeActionTitle: String {
+        if showsUpgradeCheckFailure {
+            return Self.upgradeCheckFailedTitle
+        }
         if isFilteringOutEveryUpgrade {
             return String(
                 localized: "Nothing to upgrade here",
                 comment: "Upgrades header stand-in when filters hide every available upgrade",
             )
         }
+        return UpgradesUpToDateCopy.headline
+    }
+
+    var upToDateTitle: String {
+        UpgradesUpToDateCopy.headline
+    }
+
+    var upToDateDetail: String {
+        UpgradesUpToDateCopy.installedDetail(count: totalInstalledCount)
+    }
+
+    var upgradeCheckFailureDetail: String {
+        guard let message = upgradeCheckFailureMessage else {
+            return ""
+        }
         return String(
-            localized: "Nothing to upgrade",
-            comment: "Upgrades header stand-in when no package is outdated",
+            localized: "\(message)\n\nUntil this succeeds the app can't tell whether anything needs upgrading.",
+            comment: "Upgrades empty state under a failed check: brew's error, then why the list is empty",
         )
     }
 
