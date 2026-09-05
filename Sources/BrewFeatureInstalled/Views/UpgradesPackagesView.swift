@@ -145,9 +145,13 @@ struct UpgradesPackagesView: View {
             subtitle: viewModel.upgradeCheckFailureDetail,
             actionTitle: "Try Again",
             accessibilityLabel: UpgradesViewModel.upgradeCheckFailedTitle,
-        ) {
-            Task { await viewModel.refresh() }
-        }
+            icon: {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.brewTitle2)
+                    .brewWarningGlyphStyle()
+            },
+            action: { Task { await viewModel.refresh() } },
+        )
         .axid(.errorState)
     }
 
@@ -162,9 +166,8 @@ struct UpgradesPackagesView: View {
             subtitle: noSearchMatchesSubtitle,
             actionTitle: "Show all upgrades",
             accessibilityLabel: noSearchMatchesSubtitle,
-        ) {
-            viewModel.resetFilters()
-        }
+            action: { viewModel.resetFilters() },
+        )
     }
 
     private func centeredEmptyState(
@@ -172,10 +175,13 @@ struct UpgradesPackagesView: View {
         subtitle: String,
         actionTitle: LocalizedStringKey? = nil,
         accessibilityLabel: String,
+        @ViewBuilder icon: () -> some View = { EmptyView() },
         action: (() -> Void)? = nil,
     ) -> some View {
         VStack(spacing: BrewSpacing.md) {
             Spacer(minLength: 0)
+            icon()
+                .accessibilityHidden(true)
             Text(title)
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
