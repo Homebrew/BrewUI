@@ -64,19 +64,22 @@ struct UpgradesHeaderView: View {
         .accessibilityLabel("Upgrade all \(viewModel.outdatedCount) packages")
     }
 
+    /// ⌘R is the window-wide refresh (``RefreshCommands``); this button is the upgrades-only one.
     private var refreshButton: some View {
         Button {
             Task { await viewModel.refresh() }
         } label: {
-            if viewModel.isRefreshing {
-                ProgressView()
-                    .controlSize(.small)
-            } else {
-                Label("Refresh", systemImage: "arrow.clockwise")
-            }
+            // The label stays laid out while hidden, so swapping in the spinner cannot resize the button.
+            Label("Refresh", systemImage: "arrow.clockwise")
+                .opacity(viewModel.isRefreshing ? 0 : 1)
+                .overlay {
+                    if viewModel.isRefreshing {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                }
         }
         .controlSize(.regular)
-        .keyboardShortcut("r", modifiers: .command)
         .disabled(viewModel.isRefreshing)
         .accessibilityLabel("Check for upgrades again")
         .axid(.upgradesRefreshButton)
