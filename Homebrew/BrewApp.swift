@@ -211,6 +211,7 @@ struct BrewApp: App {
         .commands {
             SearchCommands()
             SidebarCommands()
+            RefreshCommands()
             ConsoleCommands()
 
             // Replace the default "Homebrew Help" item (which points at a

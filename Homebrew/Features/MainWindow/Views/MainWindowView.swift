@@ -10,6 +10,10 @@ import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+    @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
+    @Environment(\.configRepository) private var configRepository
+
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
@@ -36,9 +40,21 @@ struct MainWindowView: View {
         .navigationSplitViewStyle(.automatic)
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         .focusedSceneValue(\.sidebarSelection, $selectedSidebarItem)
+        .focusedSceneValue(\.refreshAll, RefreshAllAction { refreshAll() })
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
+        }
+    }
+
+    /// ⌘R refetches every cached surface at once, whichever tab is showing, since the sidebar counts and
+    /// the other tabs go stale just as readily as the visible one. Doctor is deliberately left out: it
+    /// shells out to a slow `brew doctor` run and keeps its own explicit "Run Again".
+    private func refreshAll() {
+        Task {
+            await installedPackagesRepository.load(forceRefresh: true)
+            await discoverPackagesRepository.load(forceRefresh: true)
+            await configRepository.load(forceRefresh: true)
         }
     }
 
