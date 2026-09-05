@@ -6,6 +6,7 @@ import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureDoctor
 import BrewFeatureInstalled
+import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
@@ -104,8 +105,6 @@ struct MainWindowView: View {
 }
 
 #if DEBUG
-    import BrewRepositoryInterfaces
-
     #Preview {
         MainWindowView()
             .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
