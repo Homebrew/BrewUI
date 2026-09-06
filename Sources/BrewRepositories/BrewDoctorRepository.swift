@@ -15,33 +15,45 @@ private let doctorRepositoryLogger = Logger(
     category: "BrewDoctorRepository",
 )
 
-/// App-scoped observable that runs `brew doctor` through ``BrewCommandCenter`` and parses its output.
+/// App-scoped observable that runs `brew doctor` through ``BrewCommandCenter``, which is what puts the
+/// run in the bottom console, and parses its output.
 ///
-/// Routing through the center is what makes the run appear in the bottom console (as a job the user can
-/// open to watch live output) alongside install / upgrade / fix ops — same plumbing, no parallel channel.
-/// The report is parsed from the ``CommandOutput`` returned by ``BrewCommandCenter/capture(_:id:)``.
-///
-/// Long-lived so the report survives leaving and returning to the Doctor tab. `load()` is
-/// **stale-while-revalidate**: an existing report stays on screen (`isRefreshing` flips on) while the
-/// re-check runs; only the very first load shows `.loading`. Concurrent `load()` calls coalesce onto one
-/// in-flight `Task`, and re-running the same operation id reuses the existing console job rather
-/// than spawning a new one.
+/// Long-lived, so the report survives leaving and returning to the Doctor tab. Refreshes are
+/// stale-while-revalidate; arrival re-runs only once the report has aged past ``refreshInterval``.
 @Observable
 @MainActor
 public final class BrewDoctorRepository: DoctorRepository {
     public private(set) var state: LoadState<DoctorReport, any Error> = .loading
     public private(set) var isRefreshing = false
 
+    /// How long a report is treated as current on tab arrival.
+    public static let defaultRefreshInterval: TimeInterval = 3600
+
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
+    @ObservationIgnored private let refreshInterval: TimeInterval
+    @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var inFlight: Task<Void, Never>?
 
-    public init(commandCenter: any BrewCommandCenter) {
+    /// When the last run produced a report. Not set by a failed run, so a failure is retried on the next
+    /// arrival rather than sat on for an hour.
+    @ObservationIgnored private var reportedAt: Date?
+
+    public init(
+        commandCenter: any BrewCommandCenter,
+        refreshInterval: TimeInterval = BrewDoctorRepository.defaultRefreshInterval,
+        now: @escaping @Sendable () -> Date = Date.init,
+    ) {
         self.commandCenter = commandCenter
+        self.refreshInterval = refreshInterval
+        self.now = now
     }
 
-    public func load() async {
+    public func load(forceRefresh: Bool) async {
         if let inFlight {
             await inFlight.value
+            return
+        }
+        guard forceRefresh || isStale else {
             return
         }
         let task = Task { @MainActor [weak self] in
@@ -53,6 +65,14 @@ public final class BrewDoctorRepository: DoctorRepository {
         inFlight = task
         await task.value
         inFlight = nil
+    }
+
+    /// `true` when there is no report yet, or the one on screen has aged past ``refreshInterval``.
+    private var isStale: Bool {
+        guard case .loaded = state, let reportedAt else {
+            return true
+        }
+        return now().timeIntervalSince(reportedAt) >= refreshInterval
     }
 
     /// Stable id for the doctor pill in the bottom console — using the same id on every load reuses the
@@ -87,6 +107,7 @@ public final class BrewDoctorRepository: DoctorRepository {
             return
         }
         state = .loaded(DoctorOutputParser.parse(Self.combinedOutput(of: output)))
+        reportedAt = now()
     }
 
     /// Combines stdout + stderr (stdout first) into the single text ``DoctorOutputParser`` expects, stripping

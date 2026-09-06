@@ -179,11 +179,14 @@ final class DoctorViewModel {
         NSPasteboard.general.setString(output, forType: .string)
     }
 
-    /// Runs `brew doctor` via the repository. Called on tab arrival and from "Run Again"; keeps any prior
-    /// report visible while it refreshes. On a fresh load (no prior selection or a stale one), auto-
-    /// selects the first issue so the detail pane has something to show.
-    func load() async {
-        await doctorRepository.load()
+    /// Runs `brew doctor` via the repository, keeping any prior report visible while it refreshes. On a
+    /// fresh load (no prior selection or a stale one), auto-selects the first issue so the detail pane has
+    /// something to show.
+    ///
+    /// Tab arrival passes `false` and gets the repository's cached report back when it is still current;
+    /// "Run Again", ⌘R, retry-after-failure and the re-check after a fix all force a run.
+    func load(forceRefresh: Bool) async {
+        await doctorRepository.load(forceRefresh: forceRefresh)
         synchronizeSelectionWithLoadedReport()
     }
 
@@ -250,7 +253,7 @@ final class DoctorViewModel {
                 return
             }
             runningFixTokens.remove(token)
-            await load()
+            await load(forceRefresh: true)
         }
     }
 }

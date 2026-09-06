@@ -40,7 +40,7 @@ struct BrewDoctorRepositoryTests {
             stdout: "Your system is ready to brew.\n",
             exitCode: 0,
         ))
-        await repository.load()
+        await repository.load(forceRefresh: true)
         #expect(repository.state.value?.isHealthy == true)
         #expect(repository.isRefreshing == false)
     }
@@ -52,7 +52,7 @@ struct BrewDoctorRepositoryTests {
           openssl@3
         """
         let repository = Self.makeRepository(runner: Self.fixedRunner(stderr: stderr, exitCode: 1))
-        await repository.load()
+        await repository.load(forceRefresh: true)
 
         let issue = repository.state.value?.issues.first
         #expect(repository.state.value?.issues.count == 1)
@@ -74,7 +74,7 @@ struct BrewDoctorRepositoryTests {
           openssl@3
         """
         let repository = Self.makeRepository(runner: Self.fixedRunner(stderr: stderr, exitCode: 1))
-        await repository.load()
+        await repository.load(forceRefresh: true)
 
         let issue = repository.state.value?.issues.first
         #expect(repository.state.value?.issues.count == 1)
@@ -92,7 +92,7 @@ struct BrewDoctorRepositoryTests {
             runner: MockBrewCommandRunner(responses: [:]),
             locator: MissingBrewExecutableLocator(),
         )
-        await repository.load()
+        await repository.load(forceRefresh: true)
 
         if case .failed = repository.state {
             // expected
@@ -112,13 +112,89 @@ struct BrewDoctorRepositoryTests {
         ])
         let repository = Self.makeRepository(runner: runner)
 
-        await repository.load()
+        await repository.load(forceRefresh: true)
         #expect(repository.state.value?.issues.count == 1)
 
-        await repository.load()
+        await repository.load(forceRefresh: true)
         // Still showing the first report, not blanked to .failed.
         #expect(repository.state.value?.issues.count == 1)
         #expect(repository.isRefreshing == false)
+    }
+
+    // MARK: - Freshness
+
+    /// Same wiring as ``makeRepository(runner:locator:)``, with an injected clock so a report's age can be
+    /// moved without waiting an hour for it.
+    private static func makeAgeableRepository(
+        runner: any BrewCommandRunning,
+        clock: MutableClock,
+        refreshInterval: TimeInterval = 3600,
+    ) -> BrewDoctorRepository {
+        let context = BrewCommandExecutionContext(
+            commandRunner: runner,
+            locator: BrewExecutableLocator(overrideURL: brewURL),
+        )
+        return BrewDoctorRepository(
+            commandCenter: SerialBrewCommandCenter(executionContext: context),
+            refreshInterval: refreshInterval,
+            now: clock.dateProvider,
+        )
+    }
+
+    @Test func `arriving with a current report does not re-run brew doctor`() async {
+        let clock = MutableClock()
+        let runner = CountingCommandRunner(
+            output: CommandOutput(standardOutput: "", standardError: "Warning: A\n", terminationStatus: 1),
+        )
+        let repository = Self.makeAgeableRepository(runner: runner, clock: clock)
+
+        await repository.load(forceRefresh: false)
+        clock.advance(by: 60)
+        await repository.load(forceRefresh: false)
+
+        #expect(await runner.runCount == 1)
+    }
+
+    @Test func `a report older than the refresh interval is re-run on arrival`() async {
+        let clock = MutableClock()
+        let runner = CountingCommandRunner(
+            output: CommandOutput(standardOutput: "", standardError: "Warning: A\n", terminationStatus: 1),
+        )
+        let repository = Self.makeAgeableRepository(runner: runner, clock: clock)
+
+        await repository.load(forceRefresh: false)
+        clock.advance(by: 3600)
+        await repository.load(forceRefresh: false)
+
+        #expect(await runner.runCount == 2)
+    }
+
+    @Test func `forceRefresh re-runs a report that is still current`() async {
+        let clock = MutableClock()
+        let runner = CountingCommandRunner(
+            output: CommandOutput(standardOutput: "", standardError: "Warning: A\n", terminationStatus: 1),
+        )
+        let repository = Self.makeAgeableRepository(runner: runner, clock: clock)
+
+        await repository.load(forceRefresh: false)
+        await repository.load(forceRefresh: true)
+
+        #expect(await runner.runCount == 2)
+    }
+
+    /// A failure leaves nothing to go stale, so the next arrival must retry rather than sit on it.
+    @Test func `a failed run is retried on the next arrival`() async {
+        let clock = MutableClock()
+        let runner = SequencedCommandRunner([
+            .failure(BrewCommandError.launchFailed(underlying: "spawn failed")),
+            .output(CommandOutput(standardOutput: "", standardError: "Warning: A\n", terminationStatus: 1)),
+        ])
+        let repository = Self.makeAgeableRepository(runner: runner, clock: clock)
+
+        await repository.load(forceRefresh: false)
+        await repository.load(forceRefresh: false)
+
+        #expect(repository.state.value?.issues.count == 1)
     }
 
     @Test func `doctor read submit appears as a maintenance op kind .doctorRead`() async {
@@ -130,7 +206,7 @@ struct BrewDoctorRepositoryTests {
         let center = RecordingSerialBrewCommandCenter(executionContext: context)
         let repository = BrewDoctorRepository(commandCenter: center)
 
-        await repository.load()
+        await repository.load(forceRefresh: true)
 
         let entries = await center.recordedSubmitEntries
         #expect(entries.count == 1)
@@ -161,5 +237,36 @@ private actor SequencedCommandRunner: BrewCommandRunning {
         case let .failure(error):
             throw error
         }
+    }
+}
+
+/// Counts how many times brew was actually spawned, which is what the freshness rule is about.
+private actor CountingCommandRunner: BrewCommandRunning {
+    private(set) var runCount = 0
+    private let output: CommandOutput
+
+    init(output: CommandOutput) {
+        self.output = output
+    }
+
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        runCount += 1
+        return output
+    }
+}
+
+/// Hand-wound clock so a report's age can be moved forward without sleeping.
+@MainActor
+private final class MutableClock {
+    private(set) var now = Date(timeIntervalSince1970: 1_000_000)
+
+    func advance(by interval: TimeInterval) {
+        now = now.addingTimeInterval(interval)
+    }
+
+    nonisolated var dateProvider: @Sendable () -> Date {
+        // The repository is @MainActor; the synchronous @Sendable closure type can't say so.
+        // swiftlint:disable:next assume_isolated
+        { MainActor.assumeIsolated { self.now } }
     }
 }

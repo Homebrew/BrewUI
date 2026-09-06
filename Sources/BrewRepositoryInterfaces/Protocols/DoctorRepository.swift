@@ -11,7 +11,7 @@ import Observation
 ///
 /// This is the diagnostics *read* path — it does not mutate Homebrew. Implementations may still route
 /// `brew doctor` through the command center so output appears in the app console. It is long-lived so
-/// the parsed report survives navigating away from and back to the Doctor tab; `load()` refreshes in the
+/// the parsed report survives navigating away from and back to the Doctor tab; a refresh happens in the
 /// background, keeping the prior report on screen while it runs (stale-while-revalidate).
 /// Refines `Observable` so SwiftUI tracks ``state`` / ``isRefreshing`` reads through the existential.
 @MainActor
@@ -24,6 +24,10 @@ public protocol DoctorRepository: Observable, Sendable {
     /// without blanking the content.
     var isRefreshing: Bool { get }
 
-    /// Runs `brew doctor` and updates ``state``. Coalesces concurrent calls; keeps stale data visible while running.
-    func load() async
+    /// Runs `brew doctor` and updates ``state``. Coalesces concurrent calls; keeps stale data visible while
+    /// running.
+    ///
+    /// Age-first by default: a report younger than the implementation's refresh interval is returned
+    /// as-is, because `brew doctor` is slow. `forceRefresh: true` is the user asking.
+    func load(forceRefresh: Bool) async
 }

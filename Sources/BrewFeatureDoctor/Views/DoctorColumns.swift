@@ -72,9 +72,9 @@ struct DoctorColumns: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Run the check on arrival; the repository keeps a prior report on screen and refreshes in the background.
+        // Arrival asks for a current report rather than a fresh run; ⌘R and "Run Again" force one.
         .task {
-            await viewModel.load()
+            await viewModel.load(forceRefresh: false)
         }
     }
 }

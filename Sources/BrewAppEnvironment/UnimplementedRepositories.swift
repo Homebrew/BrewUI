@@ -79,7 +79,7 @@ final class UnimplementedDoctorRepository: DoctorRepository {
         unimplemented()
     }
 
-    func load() async {
+    func load(forceRefresh _: Bool) async {
         unimplemented()
     }
 }

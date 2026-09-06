@@ -49,7 +49,7 @@ struct DoctorView: View {
                     .controlSize(.small)
                 }
                 Button("Run Again") {
-                    Task { await viewModel.load() }
+                    Task { await viewModel.load(forceRefresh: true) }
                 }
                 .controlSize(.small)
                 .disabled(viewModel.isRefreshing)
@@ -64,7 +64,7 @@ struct DoctorView: View {
     private var content: some View {
         AsyncContentView(
             state: viewModel.state,
-            onRetry: { Task { await viewModel.load() } },
+            onRetry: { Task { await viewModel.load(forceRefresh: true) } },
             loaded: { report in
                 if report.isHealthy {
                     healthyState
