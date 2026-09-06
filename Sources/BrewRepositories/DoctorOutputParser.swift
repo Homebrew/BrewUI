@@ -26,6 +26,21 @@ public enum DoctorOutputParser {
             rawOutput: output,
         )
     }
+
+    /// Builds one issue from a title and body the caller has already separated, with severity supplied
+    /// rather than sniffed out of a tier callout.
+    ///
+    /// The `brew doctor --json` path's way in: the JSON supplies the severity and the warning's text, so
+    /// only the body's shape — prose, paths, commands, links — is left for this state machine to work out.
+    static func issue(title: String, body: String, severity: DoctorSeverity) -> DoctorIssue? {
+        var parser = WarningBlockParser(block: WarningBlock(
+            kind: .warning,
+            title: title,
+            bodyLines: body.isEmpty ? [] : body.components(separatedBy: "\n"),
+            severityOverride: severity,
+        ))
+        return parser.parse()
+    }
 }
 
 /// Parser-internal mirror of ``DoctorBlock.Content``'s cases. Used by ``BlockBuilder`` to track what kind
@@ -51,6 +66,9 @@ private struct WarningBlock {
     var kind: IssueKind
     var title: String
     var bodyLines: [String]
+    /// Set by the JSON path, where brew states the support tier outright instead of writing a callout into
+    /// the body.
+    var severityOverride: DoctorSeverity?
 }
 
 private func warningBlocks(in output: String) -> [WarningBlock] {
@@ -62,13 +80,13 @@ private func warningBlocks(in output: String) -> [WarningBlock] {
                 blocks.append(current)
             }
             let title = String(line.dropFirst("Warning:".count)).trimmingCharacters(in: .whitespaces)
-            current = WarningBlock(kind: .warning, title: title, bodyLines: [])
+            current = WarningBlock(kind: .warning, title: title, bodyLines: [], severityOverride: nil)
         } else if line.hasPrefix("Error:") {
             if let current {
                 blocks.append(current)
             }
             let title = String(line.dropFirst("Error:".count)).trimmingCharacters(in: .whitespaces)
-            current = WarningBlock(kind: .error, title: title, bodyLines: [])
+            current = WarningBlock(kind: .error, title: title, bodyLines: [], severityOverride: nil)
         } else if current != nil {
             current?.bodyLines.append(line)
         }
@@ -127,7 +145,7 @@ private struct WarningBlockParser {
         let rawBody = block.bodyLines.joined(separator: "\n")
         return DoctorIssue(
             title: block.title,
-            severity: parseSeverity(body: rawBody, kind: block.kind),
+            severity: block.severityOverride ?? parseSeverity(body: rawBody, kind: block.kind),
             blocks: committed,
             rawBody: rawBody,
         )
