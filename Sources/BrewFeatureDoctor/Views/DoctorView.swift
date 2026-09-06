@@ -38,21 +38,30 @@ struct DoctorView: View {
                     LastUpdatedLabel(lead: "Last checked", date: lastCheckedAt)
                 }
             }
-            // The header's own text wins the width it needs; the buttons beside it truncate first. Without
-            // this the timestamp wraps across two lines at the app's minimum window width.
-            .layoutPriority(1)
-            Spacer(minLength: 0)
-            if viewModel.showsHeaderControls {
+            .frame(maxWidth: .infinity, alignment: .leading)
+            headerControls
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BrewSpacing.lg)
+        .accessibilityElement(children: .contain)
+        .accessibilityHeading(.h1)
+    }
+
+    @ViewBuilder
+    private var headerControls: some View {
+        if viewModel.showsHeaderControls {
+            HStack(spacing: BrewSpacing.sm) {
                 if viewModel.isRefreshing {
                     ProgressView()
                         .controlSize(.small)
                         .accessibilityLabel("Re-checking")
                 }
                 if viewModel.rawDoctorOutput != nil {
-                    Button("Copy brew doctor output") {
+                    Button("Copy output") {
                         viewModel.copyDoctorOutput()
                     }
                     .controlSize(.small)
+                    .accessibilityLabel("Copy brew doctor output")
                 }
                 Button("Run Again") {
                     Task { await viewModel.load(forceRefresh: true) }
@@ -60,11 +69,8 @@ struct DoctorView: View {
                 .controlSize(.small)
                 .disabled(viewModel.isRefreshing)
             }
+            .fixedSize(horizontal: true, vertical: false)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BrewSpacing.lg)
-        .accessibilityElement(children: .contain)
-        .accessibilityHeading(.h1)
     }
 
     private var content: some View {
