@@ -27,14 +27,21 @@ struct DoctorScreen: Screen {
     ) -> Self {
         // See `ConsoleScreen.assertOutputContains`: this text renders through a `Text` whose content
         // macOS exposes via the accessibility *value*, not the *label*.
+        //
+        // `.staticText` rather than `.any`: an `.any` walk of this screen times out instead of returning.
         let predicate = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)
-        let match = root.element.descendants(matching: .any).matching(predicate).firstMatch
-        XCTAssertTrue(
-            match.waitForExistence(timeout: timeout),
-            "Expected Doctor to report an issue containing “\(substring)” within \(timeout)s",
-            file: file,
-            line: line,
-        )
+        let match = root.element.descendants(matching: .staticText).matching(predicate).firstMatch
+        guard match.waitForExistence(timeout: timeout) else {
+            XCTFail(
+                """
+                Expected Doctor to report an issue containing “\(substring)” within \(timeout)s.
+                \(BrewUITestDiagnostics.report(for: app))
+                """,
+                file: file,
+                line: line,
+            )
+            return self
+        }
         return self
     }
 
