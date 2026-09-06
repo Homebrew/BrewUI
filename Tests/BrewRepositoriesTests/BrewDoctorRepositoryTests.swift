@@ -22,7 +22,7 @@ struct BrewDoctorRepositoryTests {
     ) -> BrewDoctorRepository {
         let context = BrewCommandExecutionContext(commandRunner: runner, locator: locator)
         let center = SerialBrewCommandCenter(executionContext: context)
-        return BrewDoctorRepository(commandCenter: center)
+        return BrewDoctorRepository(commandCenter: center, executionContext: context)
     }
 
     private static func fixedRunner(
@@ -121,6 +121,110 @@ struct BrewDoctorRepositoryTests {
         #expect(repository.isRefreshing == false)
     }
 
+    // MARK: - Structured output
+
+    private static let structuredJSON = """
+    {"tier": 1, "findings": [
+      {"text": "You have unlinked kegs in your Cellar.", "tier": 3, "affects": [], "links": [],
+       "remediation": {"commands": ["brew link openssl@3"], "text": "To fix, run:\\n  brew link openssl@3\\n"}}
+    ]}
+    """
+
+    private static let transcript = """
+    Warning: You have unlinked kegs in your Cellar.
+    Run `brew link` on these:
+      openssl@3
+    """
+
+    /// One refresh, two runs: `--json` for the findings and plain `brew doctor` for the transcript.
+    private static func bothRunsRunner(
+        json: String = structuredJSON,
+        text: String = transcript,
+        jsonExitCode: Int32 = 1,
+    ) -> MockBrewCommandRunner {
+        MockBrewCommandRunner(responses: [
+            ["doctor"]: CommandOutput(standardOutput: "", standardError: text, terminationStatus: 1),
+            ["doctor", "--json"]: CommandOutput(
+                standardOutput: json,
+                standardError: "",
+                terminationStatus: jsonExitCode,
+            ),
+        ])
+    }
+
+    @Test func `findings come from the JSON, not from parsing the transcript`() async {
+        let repository = Self.makeRepository(runner: Self.bothRunsRunner())
+        await repository.load(forceRefresh: true)
+
+        // The transcript has no tier callout, so a text-parsed issue would be `.caution`.
+        #expect(repository.state.value?.issues.first?.severity == .danger)
+        #expect(repository.state.value?.issues.first?.blocks.contains { $0.isRunnable } == true)
+    }
+
+    @Test func `the raw output stays the CLI transcript rather than the JSON`() async {
+        let repository = Self.makeRepository(runner: Self.bothRunsRunner())
+        await repository.load(forceRefresh: true)
+
+        let rawOutput = repository.state.value?.rawOutput ?? ""
+        #expect(rawOutput.contains("Warning: You have unlinked kegs in your Cellar."))
+        #expect(!rawOutput.contains("\"findings\""))
+    }
+
+    /// `brew doctor --json` exits non-zero exactly when it has findings, which must not read as a failure.
+    @Test func `a non-zero exit from the JSON run is not a failure`() async {
+        let repository = Self.makeRepository(runner: Self.bothRunsRunner(jsonExitCode: 1))
+        await repository.load(forceRefresh: true)
+
+        #expect(repository.state.value?.issues.count == 1)
+    }
+
+    @Test func `a brew too old for --json degrades to parsing the transcript`() async {
+        let repository = Self.makeRepository(
+            runner: Self.bothRunsRunner(json: "Error: invalid option: --json"),
+        )
+        await repository.load(forceRefresh: true)
+
+        // Parsed from the text, so severity falls back to the untiered default rather than the JSON's.
+        #expect(repository.state.value?.issues.count == 1)
+        #expect(repository.state.value?.issues.first?.severity == .caution)
+    }
+
+    @Test func `a brew known not to support --json is not asked again`() async {
+        let runner = ArgumentRecordingRunner(
+            responses: [
+                ["doctor"]: CommandOutput(standardOutput: "", standardError: Self.transcript, terminationStatus: 1),
+                ["doctor", "--json"]: CommandOutput(
+                    standardOutput: "Error: invalid option: --json",
+                    standardError: "",
+                    terminationStatus: 1,
+                ),
+            ],
+        )
+        let repository = Self.makeRepository(runner: runner)
+
+        await repository.load(forceRefresh: true)
+        await repository.load(forceRefresh: true)
+
+        #expect(await runner.invocations.count(where: { $0 == ["doctor", "--json"] }) == 1)
+        #expect(await runner.invocations.count(where: { $0 == ["doctor"] }) == 2)
+    }
+
+    /// Losing the transcript costs the raw view, not the report — the findings run is the report.
+    @Test func `a failed transcript run still yields a report when the JSON run succeeded`() async {
+        let repository = Self.makeRepository(runner: MockBrewCommandRunner(behaviors: [
+            ["doctor"]: .throw(BrewCommandError.launchFailed(underlying: "spawn failed")),
+            ["doctor", "--json"]: .output(CommandOutput(
+                standardOutput: Self.structuredJSON,
+                standardError: "",
+                terminationStatus: 1,
+            )),
+        ]))
+        await repository.load(forceRefresh: true)
+
+        #expect(repository.state.value?.issues.count == 1)
+        #expect(repository.state.value?.rawOutput.isEmpty == true)
+    }
+
     // MARK: - Freshness
 
     /// Same wiring as ``makeRepository(runner:locator:)``, with an injected clock so a report's age can be
@@ -136,6 +240,8 @@ struct BrewDoctorRepositoryTests {
         )
         return BrewDoctorRepository(
             commandCenter: SerialBrewCommandCenter(executionContext: context),
+            commandRunner: runner,
+            locator: context.locator,
             refreshInterval: refreshInterval,
             now: clock.dateProvider,
         )
@@ -204,7 +310,7 @@ struct BrewDoctorRepositoryTests {
             locator: BrewExecutableLocator(overrideURL: Self.brewURL),
         )
         let center = RecordingSerialBrewCommandCenter(executionContext: context)
-        let repository = BrewDoctorRepository(commandCenter: center)
+        let repository = BrewDoctorRepository(commandCenter: center, executionContext: context)
 
         await repository.load(forceRefresh: true)
 
@@ -227,7 +333,12 @@ private actor SequencedCommandRunner: BrewCommandRunning {
         self.steps = steps
     }
 
-    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+    /// Only the transcript run draws from the sequence; letting the `--json` run consume a step would
+    /// shift every later answer onto the wrong run.
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        guard arguments == ["doctor"] else {
+            throw BrewCommandError.failed(exitCode: 99, stderr: "unmocked: \(arguments.joined(separator: " "))")
+        }
         guard !steps.isEmpty else {
             return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
         }
@@ -240,7 +351,8 @@ private actor SequencedCommandRunner: BrewCommandRunning {
     }
 }
 
-/// Counts how many times brew was actually spawned, which is what the freshness rule is about.
+/// Counts `brew doctor` runs, which is what the freshness rule is about. The `--json` run a refresh also
+/// spawns is answered but not counted, so the count stays one per refresh.
 private actor CountingCommandRunner: BrewCommandRunning {
     private(set) var runCount = 0
     private let output: CommandOutput
@@ -249,7 +361,14 @@ private actor CountingCommandRunner: BrewCommandRunning {
         self.output = output
     }
 
-    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        guard arguments == ["doctor"] else {
+            return CommandOutput(
+                standardOutput: #"{"tier": 1, "findings": [{"text": "A.", "tier": 1}]}"#,
+                standardError: "",
+                terminationStatus: 1,
+            )
+        }
         runCount += 1
         return output
     }
@@ -268,5 +387,24 @@ private final class MutableClock {
         // The repository is @MainActor; the synchronous @Sendable closure type can't say so.
         // swiftlint:disable:next assume_isolated
         { MainActor.assumeIsolated { self.now } }
+    }
+}
+
+/// Records every argument list it is asked to run, so a test can assert on which brew invocations a
+/// refresh actually made.
+private actor ArgumentRecordingRunner: BrewCommandRunning {
+    private(set) var invocations: [[String]] = []
+    private let responses: [[String]: CommandOutput]
+
+    init(responses: [[String]: CommandOutput]) {
+        self.responses = responses
+    }
+
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        invocations.append(arguments)
+        guard let output = responses[arguments] else {
+            throw BrewCommandError.failed(exitCode: 99, stderr: "unmocked: \(arguments.joined(separator: " "))")
+        }
+        return output
     }
 }
