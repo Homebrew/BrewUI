@@ -8,7 +8,7 @@ import SwiftUI
 /// Which register a ``NoteCallout`` speaks in. Both are informational; the difference is what the
 /// surrounding screen already uses.
 public enum NoteCalloutTone: Sendable {
-    /// Homebrew's own amber. The default, used where the note is the only tinted thing on screen.
+    /// Homebrew's own amber.
     case brand
     /// The neutral information blue, for screens whose content is already amber or red — a brand-tinted
     /// note there would read as one more warning.
@@ -29,8 +29,6 @@ public enum NoteCalloutTone: Sendable {
     }
 }
 
-/// Tinted "note" block: an info glyph beside a short piece of explanatory text. Wraps rather than
-/// truncates, however narrow the column gets.
 public struct NoteCallout: View {
     private let text: String
     private let tone: NoteCalloutTone

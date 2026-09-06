@@ -125,8 +125,8 @@ struct DoctorJSONParserTests {
 
     // MARK: - Runnable commands
 
-    /// The plan's central safety rule: a command line that only appears in the free text is copy-only,
-    /// however runnable it looks. brew leaves destructive steps out of `commands` on purpose.
+    /// A command line that only appears in the free text is copy-only, however runnable it looks: brew
+    /// leaves destructive steps out of `commands` on purpose.
     @Test func `a command only in the remediation text is never runnable`() throws {
         let issues = try Self.parse("""
         {
@@ -195,7 +195,7 @@ struct DoctorJSONParserTests {
     }
 
     /// brew's un-indented list style (`check_deprecated_disabled`) leaves the intro with no block of its
-    /// own. It is still a line brew wrote, so it has to survive into the body.
+    /// own, but it is still a line brew wrote.
     @Test func `a colon intro whose list is un-indented is kept, not dropped`() throws {
         let issues = try Self.parse("""
         {

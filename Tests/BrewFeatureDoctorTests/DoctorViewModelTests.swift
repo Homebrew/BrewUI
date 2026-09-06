@@ -501,8 +501,7 @@ private final class LoadingDoctorRepository: DoctorRepository {
     func load(forceRefresh _: Bool) async {}
 }
 
-/// Test-scoped doctor repository that lets the test swap in a new report between load calls. Loading is a
-/// no-op, so selection sync runs against whatever state the test has staged.
+/// Test-scoped doctor repository whose report the test can swap between load calls.
 @Observable
 @MainActor
 private final class MutableDoctorRepository: DoctorRepository {

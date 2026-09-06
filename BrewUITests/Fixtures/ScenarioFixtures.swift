@@ -155,7 +155,6 @@ enum ScenarioFixtures {
         )
         // `brew doctor` exits non-zero when it finds anything, so the fixture reproduces that.
         set.brewFiles["doctor.exitcode"] = text("1")
-        // The same two warnings again: `--json` drives the issues list, the text above the raw view.
         set.brewFiles["doctor_--json.stdout"] = json([
             "tier": 1,
             "findings": [

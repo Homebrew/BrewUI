@@ -61,7 +61,7 @@ public struct DoctorIssue: Equatable, Sendable {
         self.rawBody = rawBody
     }
 
-    /// The whole finding as `brew doctor` printed it: the prefixed summary line, then the body.
+    /// The finding as `brew doctor` printed it.
     public var rawText: String {
         let summary = "\(titlePrefix) \(title)"
         return rawBody.isEmpty ? summary : "\(summary)\n\(rawBody)"

@@ -6,8 +6,7 @@
 @testable import BrewFeatureDoctor
 import Testing
 
-/// The reassurance is quoted from `brew doctor`, so drift away from brew's wording is a defect, not a
-/// style choice. Compared against the CLI string with its hard line breaks unwrapped.
+/// Drift away from brew's own wording is a defect, not a style choice.
 struct DoctorCopyTests {
     private static let brewPreamble = """
     Please note that these warnings are just used to help the Homebrew maintainers

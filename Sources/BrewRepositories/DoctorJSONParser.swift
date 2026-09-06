@@ -7,13 +7,9 @@ import BrewCore
 import Foundation
 
 /// Maps `brew doctor --json` onto the domain model.
-///
-/// Structure brew states outright — the findings, their support tiers, the commands it considers safe to
-/// offer — comes from the JSON rather than being inferred. Only the *shape* of each finding's free text is
-/// left, and that goes to ``DoctorOutputParser/issue(title:body:severity:)``.
 public enum DoctorJSONParser {
-    /// Throws when `data` is not this command's JSON — which is how the repository detects a brew too old
-    /// to know the switch, since that brew writes an error instead.
+    /// Throws when `data` is not this command's JSON, which is how the repository detects a brew too old
+    /// to know the switch.
     public static func parse(_ data: Data) throws -> [DoctorIssue] {
         let payload = try JSONDecoder().decode(DoctorJSON.self, from: data)
         return payload.findings.compactMap(issue(from:))
@@ -40,8 +36,7 @@ public enum DoctorJSONParser {
         return issue
     }
 
-    /// What the CLI prints for this finding, rebuilt from the fields brew serialised it from — a mirror of
-    /// `Finding#to_s` and `Remediation#to_s` in `Homebrew/diagnostic/finding.rb`.
+    /// Mirrors brew's own `Finding#to_s` and `Remediation#to_s` in `Homebrew/diagnostic/finding.rb`.
     private static func printedForm(of finding: DoctorJSONFinding) -> String {
         let text = finding.text.trimmingCharacters(in: .whitespacesAndNewlines)
         let remediation = printedRemediation(finding.remediation)
@@ -94,8 +89,6 @@ public enum DoctorJSONParser {
         }
     }
 
-    /// `affects` and `links` are appended only where the body does not already say the same thing, so a
-    /// finding whose text already lists its casks isn't shown them twice.
     private static func metadataBlocks(
         for finding: DoctorJSONFinding,
         startingAt nextID: Int,
@@ -125,9 +118,8 @@ public enum DoctorJSONParser {
         return blocks
     }
 
-    /// Support tier onto the app's severity, matching what the text path derives from brew's tier
-    /// callouts. An unrecognised tier reads as the mildest rather than alarming the user over a value the
-    /// app doesn't know.
+    /// An unrecognised tier reads as the mildest rather than alarming the user over a value the app
+    /// doesn't know.
     private static func severity(for tier: DoctorJSONTier) -> DoctorSeverity {
         switch tier {
         case .unsupported:

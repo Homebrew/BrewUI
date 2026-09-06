@@ -5,11 +5,8 @@
 
 import Foundation
 
-/// Wire shape of `brew doctor --json`.
-///
-/// The switch is marked `hidden:` in `Homebrew/cmd/doctor.rb`, so the schema is not a contract: every
-/// field is optional and an unknown one is ignored, so a renamed key costs a finding's detail rather than
-/// the whole report.
+/// Wire shape of `brew doctor --json`. The switch is `hidden:` in `Homebrew/cmd/doctor.rb`, so the schema
+/// is not a contract: every field is optional and unknown ones are ignored.
 struct DoctorJSON: Decodable {
     var tier: DoctorJSONTier
     var findings: [DoctorJSONFinding]
@@ -26,11 +23,10 @@ struct DoctorJSON: Decodable {
 }
 
 struct DoctorJSONFinding: Decodable {
-    /// The warning as brew would print it — one summary line, sometimes followed by its subjects.
+    /// The warning as brew would print it.
     var text: String
     /// Support tier of the configuration this finding indicates, *not* a ranking of how bad it is.
     var tier: DoctorJSONTier
-    /// Packages the finding is about; frequently empty.
     var affects: [String]
     var links: [String]
     var remediation: DoctorJSONRemediation?

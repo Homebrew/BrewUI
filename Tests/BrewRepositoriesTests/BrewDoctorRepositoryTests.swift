@@ -227,8 +227,7 @@ struct BrewDoctorRepositoryTests {
 
     // MARK: - Freshness
 
-    /// Same wiring as ``makeRepository(runner:locator:)``, with an injected clock so a report's age can be
-    /// moved without waiting an hour for it.
+    /// Same wiring as ``makeRepository(runner:locator:)``, with an injected clock.
     private static func makeAgeableRepository(
         runner: any BrewCommandRunning,
         clock: MutableClock,
@@ -351,8 +350,7 @@ private actor SequencedCommandRunner: BrewCommandRunning {
     }
 }
 
-/// Counts `brew doctor` runs, which is what the freshness rule is about. The `--json` run a refresh also
-/// spawns is answered but not counted, so the count stays one per refresh.
+/// Counts plain `brew doctor` runs only, so a refresh counts once despite also spawning `--json`.
 private actor CountingCommandRunner: BrewCommandRunning {
     private(set) var runCount = 0
     private let output: CommandOutput
@@ -390,8 +388,6 @@ private final class MutableClock {
     }
 }
 
-/// Records every argument list it is asked to run, so a test can assert on which brew invocations a
-/// refresh actually made.
 private actor ArgumentRecordingRunner: BrewCommandRunning {
     private(set) var invocations: [[String]] = []
     private let responses: [[String]: CommandOutput]

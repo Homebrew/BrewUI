@@ -50,8 +50,7 @@ struct MainWindowView: View {
     }
 
     /// ⌘R refetches every cached surface at once, whichever tab is showing, since the sidebar counts and
-    /// the other tabs go stale just as readily as the visible one. Doctor is included now that arriving on
-    /// its tab no longer re-runs the check, and runs alongside the rest because it is the slow one.
+    /// the other tabs go stale just as readily as the visible one.
     private func refreshAll() {
         Task {
             async let doctor: Void = doctorRepository.load(forceRefresh: true)

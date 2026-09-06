@@ -72,7 +72,6 @@ struct DoctorColumns: View {
             )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        // Arrival asks for a current report rather than a fresh run; ⌘R and "Run Again" force one.
         .task {
             await viewModel.load(forceRefresh: false)
         }

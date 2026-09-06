@@ -18,7 +18,6 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let title: String
     let severity: DoctorSeverity
     let blocks: [DoctorBlock]
-    /// The finding as brew printed it, `Warning:` line included — what the detail pane's raw view shows.
     let rawText: String
 
     init(issue: DoctorIssue) {

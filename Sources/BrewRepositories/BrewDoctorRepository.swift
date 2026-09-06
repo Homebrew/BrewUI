@@ -27,7 +27,6 @@ public final class BrewDoctorRepository: DoctorRepository {
     public private(set) var state: LoadState<DoctorReport, any Error> = .loading
     public private(set) var isRefreshing = false
 
-    /// How long a report is treated as current on tab arrival.
     public static let defaultRefreshInterval: TimeInterval = 3600
 
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
@@ -37,12 +36,10 @@ public final class BrewDoctorRepository: DoctorRepository {
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var inFlight: Task<Void, Never>?
 
-    /// When the last run produced a report. Not set by a failed run, so a failure is retried on the next
-    /// arrival rather than sat on for an hour.
+    /// Not set by a failed run, so a failure is retried on the next arrival rather than sat on for an hour.
     public private(set) var reportedAt: Date?
 
-    /// Cleared once a brew has been seen to reject `--json`, so the extra process isn't spawned again.
-    /// A run that failed to start says nothing about the switch and leaves this alone.
+    /// A run that failed to start says nothing about the switch, so it leaves this alone.
     @ObservationIgnored private var supportsStructuredOutput = true
 
     public init(
@@ -59,8 +56,6 @@ public final class BrewDoctorRepository: DoctorRepository {
         self.now = now
     }
 
-    /// Takes the execution context rather than building its own runner, so every brew invocation goes
-    /// through the one the composition root chose.
     public convenience init(
         commandCenter: any BrewCommandCenter,
         executionContext: BrewCommandExecutionContext,
@@ -91,7 +86,6 @@ public final class BrewDoctorRepository: DoctorRepository {
         inFlight = nil
     }
 
-    /// `true` when there is no report yet, or the one on screen has aged past ``refreshInterval``.
     private var isStale: Bool {
         guard case .loaded = state, let reportedAt else {
             return true
@@ -145,10 +139,7 @@ public final class BrewDoctorRepository: DoctorRepository {
         }
     }
 
-    /// The human-readable run, routed through the center so it lands in the console.
-    ///
-    /// `.doctorRead` output is shown in the console in colour, so it carries ANSI codes; `combinedOutput`
-    /// strips them. A non-zero exit (warnings found) is not a failure.
+    /// Routed through the center so the run lands in the console.
     private func captureTranscript() async -> Result<CommandOutput, any Error> {
         do {
             return try await .success(commandCenter.capture(BrewCommands.doctorRead(), id: Self.operationID))
@@ -157,9 +148,6 @@ public final class BrewDoctorRepository: DoctorRepository {
         }
     }
 
-    /// The structured run. `nil` means "no findings could be read this time" — an older brew, or a run
-    /// that failed to start — and the caller falls back to parsing the transcript.
-    ///
     /// Deliberately not routed through the command center, whose work runs serially: this would queue
     /// behind the transcript run instead of alongside it.
     private func fetchStructuredIssues() async -> [DoctorIssue]? {

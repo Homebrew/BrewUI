@@ -27,11 +27,8 @@ public enum DoctorOutputParser {
         )
     }
 
-    /// Builds one issue from a title and body the caller has already separated, with severity supplied
-    /// rather than sniffed out of a tier callout.
-    ///
-    /// The `brew doctor --json` path's way in: the JSON supplies the severity and the warning's text, so
-    /// only the body's shape — prose, paths, commands, links — is left for this state machine to work out.
+    /// Entry point for the `--json` path, which supplies the severity instead of it being sniffed out of
+    /// a tier callout.
     static func issue(title: String, body: String, severity: DoctorSeverity) -> DoctorIssue? {
         var parser = WarningBlockParser(block: WarningBlock(
             kind: .warning,
@@ -61,8 +58,6 @@ private enum IssueKind {
     case warning
     case error
 
-    /// The prefix brew printed on the summary line, kept so the raw view can show the finding as the CLI
-    /// wrote it.
     var titlePrefix: String {
         switch self {
         case .warning: "Warning:"
@@ -75,8 +70,7 @@ private struct WarningBlock {
     var kind: IssueKind
     var title: String
     var bodyLines: [String]
-    /// Set by the JSON path, where brew states the support tier outright instead of writing a callout into
-    /// the body.
+    /// Set by the JSON path, where brew states the tier outright instead of writing a callout into the body.
     var severityOverride: DoctorSeverity?
 }
 

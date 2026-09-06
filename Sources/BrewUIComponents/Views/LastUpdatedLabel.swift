@@ -6,8 +6,6 @@
 import Foundation
 import SwiftUI
 
-/// How long ago something happened, in the app's own words.
-///
 /// Spelled out rather than left to `RelativeDateTimeFormatter`, which follows the system locale and would
 /// put a translated phrase after an English lead-in.
 public enum RelativeTimeText {
@@ -30,8 +28,6 @@ public enum RelativeTimeText {
     }
 }
 
-/// Quiet "when was this last refreshed" line for a list or detail header. Re-renders every minute so the
-/// phrase ages while the screen sits open.
 public struct LastUpdatedLabel: View {
     private let lead: String
     private let date: Date
