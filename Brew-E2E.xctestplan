@@ -1,7 +1,7 @@
 {
   "configurations" : [
     {
-      "id" : "3A23003A-5B61-4E4A-888C-8A49F40BC97A",
+      "id" : "B4B0F6E2-1C1E-4C36-9E4B-3D2A0C7F51A4",
       "name" : "Configuration 1",
       "options" : {
 
@@ -9,14 +9,17 @@
     }
   ],
   "defaultOptions" : {
+    "defaultTestExecutionTimeAllowance" : 600,
+    "maximumTestExecutionTimeAllowance" : 900,
+    "maximumTestRepetitions" : 3,
     "screenshotDestination" : "testRunnerAndAttachments",
-    "testExecutionOrdering" : "random",
+    "testRepetitionMode" : "retryOnFailure",
     "testTimeoutsEnabled" : true,
-    "uiTestingScreenshotsLifetime" : "deleteOnSuccess"
+    "uiTestingScreenshotsLifetime" : "keepAlways"
   },
   "testTargets" : [
     {
-      "skippedTests" : [
+      "selectedTests" : [
         "InstallUninstallE2ETests",
         "ReadOnlyE2ETests"
       ],

@@ -6,8 +6,7 @@
 import BrewAccessibilityID
 import XCTest
 
-/// A list whose rows are addressed by package token. It is handed the ``AXID`` case that builds a row
-/// identifier, so `row("wget")` and the view spell it the same way.
+/// A list whose rows are addressed by package token, through the ``AXID`` case the view spells.
 @MainActor
 final class BrewUIList: BrewUIElement {
     private let rowID: @Sendable (String) -> AXID
@@ -26,8 +25,7 @@ final class BrewUIList: BrewUIElement {
         BrewUICell(app, rowID(token))
     }
 
-    /// Counted by identifier prefix, since SwiftUI's scaffolding makes a child count not a row count.
-    /// `List` virtualizes, so this is *rendered* rows and only meaningful for short fixture lists.
+    /// Rendered rows only, since `List` virtualizes: meaningful for fixtures, not a real inventory.
     var count: Int {
         let prefix = rowID("").rawValue
         let predicate = NSPredicate(format: "identifier BEGINSWITH %@", prefix)

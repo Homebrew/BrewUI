@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+# annotate-flaky-tests — name the tests that only passed on a retry.
+#
+# Retry-on-failure turns a flaky test into a green run, which is the point but also the risk: nothing
+# on the summary distinguishes "passed" from "passed on the third go". This reads the result bundle
+# and reports every test that took more than one run to pass.
+#
+# On GitHub Actions the lines are ::warning:: workflow commands, so they surface as annotations on
+# the run; anywhere else they are plain text. A flake is never an error here — the exit status is 0
+# whatever it finds, so the caller's own result is what decides the run.
+#
+# Usage: scripts/annotate-flaky-tests <path-to-.xcresult>
+
+set -euo pipefail
+
+BUNDLE="${1:-}"
+if [[ -z "${BUNDLE}" ]]; then
+  echo "usage: scripts/annotate-flaky-tests <path-to-.xcresult>" >&2
+  exit 2
+fi
+
+# A run that died before writing a bundle has nothing to say about retries, and saying so loudly
+# would bury the real failure.
+if [[ ! -d "${BUNDLE}" ]]; then
+  exit 0
+fi
+
+tests_report() {
+  xcrun xcresulttool get test-results tests --compact --path "${BUNDLE}"
+}
+
+# `testRuns` is the report's own list of this test's runs. It counts one entry per configuration as
+# well as per repetition, which is only unambiguous because Brew-E2E has a single configuration.
+run_count() {
+  xcrun xcresulttool get test-results test-details --compact --path "${BUNDLE}" --test-id "$1" \
+    | jq '.testRuns | length'
+}
+
+flaky_found=false
+
+while IFS= read -r test_id; do
+  [[ -n "${test_id}" ]] || continue
+
+  runs="$(run_count "${test_id}" 2>/dev/null || echo 1)"
+  [[ "${runs}" -ge 2 ]] || continue
+
+  flaky_found=true
+  message="${test_id} passed only after ${runs} runs. A live canary that needs a retry is either a \
+real intermittent break or a network blip, and the result bundle is the only way to tell which."
+  if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+    echo "::warning title=Flaky live canary::${message}"
+  else
+    echo "warning: ${message}"
+  fi
+done < <(tests_report | jq -r '
+  [.testNodes[]? | recurse(.children[]?)]
+  | .[]
+  | select(.nodeType == "Test Case" and .result == "Passed")
+  | .nodeIdentifier // empty
+')
+
+# Tells the workflow to keep the result bundle for a run that passed: the screenshots explaining the
+# attempt that failed are in it, and the job would otherwise discard them as a success.
+if [[ "${flaky_found}" == true && -n "${GITHUB_OUTPUT:-}" ]]; then
+  echo "flaky=true" >> "${GITHUB_OUTPUT}"
+fi

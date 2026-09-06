@@ -1,0 +1,62 @@
+name: Live E2E Canaries
+
+# Real Homebrew and real network: this installs and uninstalls `hello` on the
+# runner, which is safe because the runner is ephemeral.
+# See BrewUITests/E2E/README.md.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+    inputs:
+      test_filter:
+        description: "Optional xcodebuild -only-testing filter for the live suite"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  # A dispatched run has no pull request to key on; fall back to the ref so manual
+  # runs on the same branch still supersede each other.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Live end-to-end canaries
+    # GitHub's macOS runners ship with Homebrew installed and have egress to
+    # formulae.brew.sh and ghcr.io, which is what this suite requires.
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The job uploads artifacts on failure; a persisted token in .git/config could ride along.
+          persist-credentials: false
+
+      - name: Run live end-to-end canaries (Brew-E2E test plan)
+        id: e2e
+        # Through env rather than interpolated into the script body, so the input cannot inject shell.
+        env:
+          TEST_FILTER: ${{ inputs.test_filter }}
+        run: |
+          set -o pipefail
+          if [[ -n "${TEST_FILTER}" ]]; then
+            scripts/test-e2e -only-testing:"${TEST_FILTER}" | tee xcodebuild-e2e.log
+          else
+            scripts/test-e2e | tee xcodebuild-e2e.log
+          fi
+
+      # Also on a green run that needed a retry: the result bundle holds the screenshot of the
+      # attempt that failed, which is the only account of what the flake looked like.
+      - name: Upload logs on failure
+        if: failure() || cancelled() || steps.e2e.outputs.flaky == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: e2e-logs
+          path: |
+            xcodebuild-e2e.log
+            E2ETestResults.xcresult
+          retention-days: 7

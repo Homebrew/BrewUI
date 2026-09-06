@@ -5,12 +5,10 @@
 
 import XCTest
 
-/// Base class for the suite. `continueAfterFailure = false` matters more here than in a unit suite:
-/// once an element is missing every later step in a chain fails too, burying the one that explains it.
+/// Base class for the suite. `continueAfterFailure = false`, or one missing element buries itself in
+/// the later failures it causes.
 class BrewUITestCase: XCTestCase {
-    /// XCTest calls `setUp`/the test body/`tearDown` serially on the main thread, but none of those
-    /// override points are themselves `@MainActor` — the annotation below records that this is
-    /// manually synchronised by that ordering rather than by the type system.
+    /// Synchronised by XCTest running setUp, the test and tearDown serially on the main thread.
     // swiftlint:disable:next nonisolated_unsafe
     private nonisolated(unsafe) var launchedApp: XCUIApplication?
 
@@ -18,19 +16,48 @@ class BrewUITestCase: XCTestCase {
         continueAfterFailure = false
     }
 
-    /// `launch()` is documented to replace a running instance of the same bundle, but that proved
-    /// unreliable once a prior launch went through ``BrewApp/reopen()``: the next test finds the old
-    /// process wedged in the background and fails outright. Ending on a clean process list avoids it.
+    /// `launch()` is documented to replace a running instance, but one that went through
+    /// ``BrewApp/reopen()`` wedges in the background and fails the next test's launch outright.
     override func tearDown() {
         let app = launchedApp
         launchedApp = nil
-        // XCTest always calls tearDown() on the main thread in practice, it just doesn't say so in
-        // the override point's signature — asserted here rather than provable at compile time.
+        // Always the main thread in practice; the override point just doesn't say so.
         // swiftlint:disable:next assume_isolated
         MainActor.assumeIsolated {
             app?.terminate()
         }
         super.tearDown()
+    }
+
+    /// A missing element and a dialog covering the app read identically in text, so failures get a
+    /// picture. `keepAlways` keeps the one belonging to a failed attempt of a test that passed on retry.
+    override func record(_ issue: XCTIssue) {
+        if let screenshot = mainScreenPNG() {
+            // PNG data rather than the `XCUIScreenshot`, which cannot cross out of the main actor.
+            let attachment = XCTAttachment(data: screenshot, uniformTypeIdentifier: "public.png")
+            attachment.name = "Failure: \(name)"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+        }
+        super.record(issue)
+    }
+
+    /// Off the main thread the failure goes unillustrated rather than risking a crash inside `record`.
+    private func mainScreenPNG() -> Data? {
+        guard Thread.isMainThread else {
+            return nil
+        }
+        // swiftlint:disable:next assume_isolated
+        return MainActor.assumeIsolated {
+            XCUIScreen.main.screenshot().pngRepresentation
+        }
+    }
+
+    /// For an app the case launched itself — the live suite — so `tearDown` terminates that one too.
+    @discardableResult
+    func track(_ app: XCUIApplication) -> XCUIApplication {
+        launchedApp = app
+        return app
     }
 
     /// Launches against `scenario` and returns the Installed tab, waited for.

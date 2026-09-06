@@ -6,16 +6,14 @@
 import BrewAccessibilityID
 import XCTest
 
-/// A control that can be activated. `tap()` is iOS-only, so the wrapper keeps that name while macOS
-/// clicks underneath, and the platform verb appears in one place.
+/// A control that can be activated. `tap()` keeps the iOS name; macOS clicks underneath.
 @MainActor
 final class BrewUIButton: BrewUIElement {
     init(_ app: XCUIApplication, _ id: AXID, in container: XCUIElement? = nil) {
         super.init(app, id, type: .any, in: container)
     }
 
-    /// Waits for hittability first: a button can exist while off-screen or covered mid-transition,
-    /// and clicking one then either misses or throws.
+    /// Waits for hittability: a button can exist while off-screen or covered, and clicking one throws.
     @discardableResult
     func tap(
         timeout: TimeInterval = BrewUITestTimeout.default,

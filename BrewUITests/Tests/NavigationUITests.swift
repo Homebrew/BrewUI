@@ -5,8 +5,7 @@
 
 import XCTest
 
-/// Every sidebar destination reaches a screen that renders. A root that never appears is usually a
-/// crash or a composition-root mistake, and is clearer here than inside a feature test.
+/// Every sidebar destination renders. A root that never appears is a crash or a composition mistake.
 final class NavigationUITests: BrewUITestCase {
     @MainActor
     func testVisitsEverySidebarDestination() {

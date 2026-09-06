@@ -5,8 +5,7 @@
 
 import XCTest
 
-/// Harness smoke test: a `-uiTesting` launch reaches the stubbed wiring and `AXID` resolves against
-/// the running app. When it fails alongside half the suite, read it first — everything assumes it.
+/// Harness smoke test. When it fails alongside half the suite, read it first: everything assumes it.
 final class LaunchSmokeUITests: BrewUITestCase {
     @MainActor
     func testLaunchesIntoTheStubbedComposition() {

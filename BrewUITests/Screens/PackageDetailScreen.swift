@@ -6,8 +6,8 @@
 import BrewAccessibilityID
 import XCTest
 
-/// The right-hand detail column. One type covers the Installed and Discover detail views: they share
-/// `AXID.packageDetail` and expose disjoint actions, so the action a test calls decides which is up.
+/// The right-hand detail column, shared by the Installed and Discover detail views, whose actions are
+/// disjoint enough that the one a test calls decides which is up.
 @MainActor
 struct PackageDetailScreen: Screen {
     let app: XCUIApplication
@@ -28,18 +28,14 @@ struct PackageDetailScreen: Screen {
         BrewUIButton(app, .upgradeButton)
     }
 
-    /// Returns to Discover: the package only reaches Installed once `brew install` exits and the
-    /// inventory reconciles.
+    /// Returns to Discover; the package reaches Installed only once the inventory reconciles.
     func install(file: StaticString = #filePath, line: UInt = #line) -> DiscoverScreen {
         installButton.tap(file: file, line: line)
         return DiscoverScreen(app: app)
     }
 
-    /// Confirms the destructive dialog, then returns to Installed; the row goes once `brew uninstall`
-    /// exits and the repository reconciles.
-    ///
-    /// The scroll is load-bearing: the default test window height clips the Uninstall button below the
-    /// fold, where it exists but is never hittable.
+    /// Confirms the destructive dialog, then returns to Installed. The scroll is load-bearing: at the
+    /// default window height the Uninstall button sits below the fold, where it never becomes hittable.
     func uninstall(file: StaticString = #filePath, line: UInt = #line) -> InstalledScreen {
         root.element.scroll(byDeltaX: 0, deltaY: -400)
         uninstallButton.tap(file: file, line: line)
@@ -52,11 +48,8 @@ struct PackageDetailScreen: Screen {
         return InstalledScreen(app: app)
     }
 
-    /// SwiftUI does not forward an identifier onto a `confirmationDialog`, so its buttons go by title,
-    /// and whether AppKit reports it as a sheet or a dialog has moved between releases — hence both.
-    ///
-    /// Scoping to the container matters: the detail pane behind it also has an "Uninstall" button, and
-    /// an app-wide query by title could pick that one and silently re-open the dialog.
+    /// SwiftUI forwards no identifier onto a `confirmationDialog`, and whether AppKit reports it as a
+    /// sheet or a dialog has moved between releases. Scoped, or the pane's own button could match.
     private func confirmDestructiveDialog(
         named title: String,
         file: StaticString,

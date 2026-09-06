@@ -5,9 +5,8 @@
 
 import Foundation
 
-/// One package, described once and rendered into all three wire formats that mention it —
-/// `brew info --json=v2`, the catalogue, and analytics — so a scenario cannot claim `wget` is at one
-/// version in the inventory and another in the catalogue.
+/// One package rendered into every wire format that mentions it, so a scenario cannot claim `wget` is
+/// at one version in the inventory and another in the catalogue.
 struct FixturePackage {
     enum Kind {
         case formula
@@ -51,7 +50,6 @@ struct FixturePackage {
         return installedVersion != latestVersion
     }
 
-    /// A `formulae` element of `brew info --json=v2`.
     var infoFormulaJSON: [String: Any] {
         var installed: [[String: Any]] = []
         if let installedVersion {
@@ -83,7 +81,6 @@ struct FixturePackage {
         return json
     }
 
-    /// A `casks` element of `brew info --json=v2`.
     var infoCaskJSON: [String: Any] {
         [
             "token": token,
@@ -99,7 +96,6 @@ struct FixturePackage {
         ]
     }
 
-    /// An element of the `formula.json` catalogue.
     var catalogueFormulaJSON: [String: Any] {
         [
             "name": token,
@@ -110,7 +106,6 @@ struct FixturePackage {
         ]
     }
 
-    /// An element of the `cask.json` catalogue.
     var catalogueCaskJSON: [String: Any] {
         [
             "token": token,

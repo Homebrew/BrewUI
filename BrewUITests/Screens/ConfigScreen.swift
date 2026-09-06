@@ -15,8 +15,7 @@ struct ConfigScreen: Screen {
         BrewUIElement(app, .configScreen)
     }
 
-    /// Matched on rendered text because the cards are data-driven, with no per-row identity to address.
-    /// Command timeout, not render timeout: the cards exist only once `brew config` has been parsed.
+    /// Matched on rendered text — the cards carry no per-row identity — and only exist once parsed.
     @discardableResult
     func assertShowsEntry(
         _ key: String,

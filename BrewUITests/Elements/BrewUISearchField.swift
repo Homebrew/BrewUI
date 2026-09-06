@@ -5,10 +5,8 @@
 
 import XCTest
 
-/// The toolbar search field, the one element not addressed by ``AXID``: `.searchable` injects it into
-/// the toolbar and SwiftUI offers no hook to identify it, so `AXID.installedSearchField` and
-/// `.discoverSearchField` stay unattached until the field is a custom view. Element-type matching is
-/// confined to this type so the rest of the suite stays identifier-only.
+/// The one element not addressed by ``AXID``: `.searchable` injects it into the toolbar, where
+/// SwiftUI offers no hook to identify it.
 @MainActor
 final class BrewUISearchField {
     private let app: XCUIApplication

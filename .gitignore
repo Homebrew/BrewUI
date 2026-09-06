@@ -51,3 +51,7 @@ Configurations/Signing.local.xcconfig
 *.pem
 *.p12
 *.mobileprovision
+
+# Merge-conflict leftovers
+*.orig
+*.rej

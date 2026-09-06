@@ -5,8 +5,8 @@
 
 import XCTest
 
-/// Uninstalling from the detail pane removes the row — not because the test asked, but because
-/// `brew uninstall` exits 0, the centre publishes running→idle, and the repository refetches.
+/// The row goes because `brew uninstall` exits 0, the centre publishes running→idle and the repository
+/// refetches — not because the test asked for it.
 final class UninstallUITests: BrewUITestCase {
     @MainActor
     func testUninstallRemovesPackage() {
