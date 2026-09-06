@@ -14,6 +14,7 @@ struct MainWindowView: View {
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
+    @Environment(\.doctorRepository) private var doctorRepository
 
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
@@ -49,13 +50,14 @@ struct MainWindowView: View {
     }
 
     /// ⌘R refetches every cached surface at once, whichever tab is showing, since the sidebar counts and
-    /// the other tabs go stale just as readily as the visible one. Doctor is deliberately left out: it
-    /// shells out to a slow `brew doctor` run and keeps its own explicit "Run Again".
+    /// the other tabs go stale just as readily as the visible one.
     private func refreshAll() {
         Task {
+            async let doctor: Void = doctorRepository.load(forceRefresh: true)
             await installedPackagesRepository.load(forceRefresh: true)
             await discoverPackagesRepository.load(forceRefresh: true)
             await configRepository.load(forceRefresh: true)
+            await doctor
         }
     }
 

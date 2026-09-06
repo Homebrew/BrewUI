@@ -20,9 +20,13 @@ struct ConsoleBody: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.brewSurfaceElevated)
-        case let .output(jobID, lines):
-            ConsoleTextView(lines: lines, jobID: jobID)
-                .background(Color.brewSurfaceElevated)
+        case let .output(jobID, lines, standardErrorIsNormalOutput):
+            ConsoleTextView(
+                lines: lines,
+                jobID: jobID,
+                standardErrorIsNormalOutput: standardErrorIsNormalOutput,
+            )
+            .background(Color.brewSurfaceElevated)
         }
     }
 }

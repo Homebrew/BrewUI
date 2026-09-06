@@ -116,6 +116,7 @@ private extension TerminalProgressIntegrationTests {
         return await MainActor.run {
             let job = CommandJob(
                 operationID: BrewOperationID(kind: .formula, name: "go"),
+                kind: .upgradeFormula,
                 command: "brew upgrade go",
                 startedAt: Date(),
                 phase: .running(.upgradeFormula),

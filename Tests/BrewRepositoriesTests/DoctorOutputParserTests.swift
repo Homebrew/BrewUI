@@ -411,6 +411,18 @@ struct DoctorOutputParserTests {
         #expect(issue.rawBody == body)
     }
 
+    @Test func `raw text reproduces the whole block, summary line included`() throws {
+        let output = "Warning: Something.\nLine one.\n  brew upgrade git"
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.rawText == output)
+    }
+
+    @Test func `an Error block's raw text keeps the Error prefix`() throws {
+        let output = "Error: Something fatal.\nLine one."
+        let issue = try #require(DoctorOutputParser.parse(output).issues.first)
+        #expect(issue.rawText == output)
+    }
+
     // MARK: - Multiple warnings
 
     @Test func `multiple warnings parse in order`() {

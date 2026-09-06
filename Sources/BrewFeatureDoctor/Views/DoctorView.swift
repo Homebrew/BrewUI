@@ -34,26 +34,12 @@ struct DoctorView: View {
                 Text(viewModel.subtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
+                if let lastCheckedAt = viewModel.lastCheckedAt {
+                    LastUpdatedLabel(lead: "Last checked", date: lastCheckedAt)
+                }
             }
-            Spacer(minLength: 0)
-            if viewModel.showsHeaderControls {
-                if viewModel.isRefreshing {
-                    ProgressView()
-                        .controlSize(.small)
-                        .accessibilityLabel("Re-checking")
-                }
-                if viewModel.rawDoctorOutput != nil {
-                    Button("Copy brew doctor output") {
-                        viewModel.copyDoctorOutput()
-                    }
-                    .controlSize(.small)
-                }
-                Button("Run Again") {
-                    Task { await viewModel.load() }
-                }
-                .controlSize(.small)
-                .disabled(viewModel.isRefreshing)
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            headerControls
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BrewSpacing.lg)
@@ -61,10 +47,36 @@ struct DoctorView: View {
         .accessibilityHeading(.h1)
     }
 
+    @ViewBuilder
+    private var headerControls: some View {
+        if viewModel.showsHeaderControls {
+            HStack(spacing: BrewSpacing.sm) {
+                if viewModel.isRefreshing {
+                    ProgressView()
+                        .controlSize(.small)
+                        .accessibilityLabel("Re-checking")
+                }
+                if viewModel.rawDoctorOutput != nil {
+                    Button("Copy output") {
+                        viewModel.copyDoctorOutput()
+                    }
+                    .controlSize(.small)
+                    .accessibilityLabel("Copy brew doctor output")
+                }
+                Button("Run Again") {
+                    Task { await viewModel.load(forceRefresh: true) }
+                }
+                .controlSize(.small)
+                .disabled(viewModel.isRefreshing)
+            }
+            .fixedSize(horizontal: true, vertical: false)
+        }
+    }
+
     private var content: some View {
         AsyncContentView(
             state: viewModel.state,
-            onRetry: { Task { await viewModel.load() } },
+            onRetry: { Task { await viewModel.load(forceRefresh: true) } },
             loaded: { report in
                 if report.isHealthy {
                     healthyState
@@ -93,6 +105,7 @@ struct DoctorView: View {
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
+            DoctorReassuranceNote()
             List {
                 ForEach(groups) { group in
                     Section {
@@ -117,10 +130,6 @@ struct DoctorView: View {
                         }
                     } header: {
                         DoctorSeveritySectionHeader(severity: group.severity)
-                    } footer: {
-                        if group.id == groups.last?.id {
-                            DoctorInfoFooter()
-                        }
                     }
                 }
             }
@@ -152,15 +161,11 @@ private struct DoctorSeveritySectionHeader: View {
     }
 }
 
-private struct DoctorInfoFooter: View {
+private struct DoctorReassuranceNote: View {
     var body: some View {
-        Text(
-            "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
-        )
-        .font(.brewCallout)
-        .foregroundStyle(Color.brewTextSecondary)
-        .padding(.vertical, BrewSpacing.sm)
-        .padding(.trailing, BrewSpacing.md)
+        NoteCallout(DoctorCopy.warningPreamble, tone: .info)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.sm)
     }
 }
 

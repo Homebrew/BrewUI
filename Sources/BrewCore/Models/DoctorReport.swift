@@ -34,6 +34,8 @@ public struct DoctorReport: Equatable, Sendable {
 public struct DoctorIssue: Equatable, Sendable {
     /// `Warning:` summary line, with the prefix stripped.
     public var title: String
+    /// The prefix stripped from ``title`` — `Warning:`, or `Error:` for brew's rarer `ofail` findings.
+    public var titlePrefix: String
     /// Severity derived from a support-tier callout (`This is a Tier N configuration:` /
     /// `Unsupported configuration:`). Unflagged warnings default to ``DoctorSeverity/caution``.
     public var severity: DoctorSeverity
@@ -47,14 +49,22 @@ public struct DoctorIssue: Equatable, Sendable {
 
     public init(
         title: String,
+        titlePrefix: String = "Warning:",
         severity: DoctorSeverity,
         blocks: [DoctorBlock],
         rawBody: String,
     ) {
         self.title = title
+        self.titlePrefix = titlePrefix
         self.severity = severity
         self.blocks = blocks
         self.rawBody = rawBody
+    }
+
+    /// The finding as `brew doctor` printed it.
+    public var rawText: String {
+        let summary = "\(titlePrefix) \(title)"
+        return rawBody.isEmpty ? summary : "\(summary)\n\(rawBody)"
     }
 }
 

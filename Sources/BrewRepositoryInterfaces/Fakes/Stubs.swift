@@ -119,22 +119,24 @@ struct StubDependentsRepository: InstalledDependentsRepository {
 }
 
 /// Observable doctor repository preloaded with a fixed ``DoctorReport`` (or error) — for previews/tests.
-/// `load()` is a no-op so the preset state stays put.
+/// `load(forceRefresh:)` is a no-op so the preset state stays put.
 @Observable
 @MainActor
 public final class StubDoctorRepository: DoctorRepository {
     public private(set) var state: LoadState<DoctorReport, any Error>
     public private(set) var isRefreshing = false
+    public private(set) var reportedAt: Date?
 
-    public init(report: DoctorReport) {
+    public init(report: DoctorReport, reportedAt: Date? = nil) {
         state = .loaded(report)
+        self.reportedAt = reportedAt
     }
 
     public init(error: any Error) {
         state = .failed(error)
     }
 
-    public func load() async {}
+    public func load(forceRefresh _: Bool) async {}
 }
 
 /// No-op command center for previews/tests: immediate, with no phase bookkeeping. Uses only BrewCore.

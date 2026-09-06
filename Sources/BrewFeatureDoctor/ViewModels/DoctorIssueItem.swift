@@ -18,14 +18,14 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let title: String
     let severity: DoctorSeverity
     let blocks: [DoctorBlock]
-    let rawBody: String
+    let rawText: String
 
     init(issue: DoctorIssue) {
         id = Self.contentID(for: issue)
         title = issue.title
         severity = issue.severity
         blocks = issue.blocks
-        rawBody = issue.rawBody
+        rawText = issue.rawText
     }
 
     /// Stable FNV-1a 64-bit hash of `title` + `rawBody`, truncated to platform `Int`. Exposed so the

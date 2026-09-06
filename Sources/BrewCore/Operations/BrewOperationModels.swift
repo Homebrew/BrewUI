@@ -20,6 +20,12 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case uninstallCask
     case doctorFix
     case doctorRead
+
+    /// `true` when the command's ordinary output arrives on stderr, as `brew doctor`'s does — the
+    /// console would otherwise paint the whole run in the error role.
+    public var writesNormalOutputToStandardError: Bool {
+        self == .doctorRead
+    }
 }
 
 /// Stable identity for in-flight mutating work.

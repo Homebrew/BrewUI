@@ -40,6 +40,22 @@ struct ANSIConsoleTextTests {
         #expect(runs == [Run(text: "Warning: something\n", color: NSColor(.brewStatusError), bold: false)])
     }
 
+    @Test func `a run whose normal output is stderr does not paint it in the error role`() {
+        let line = BrewCommandOutputLine(stream: .stderr, text: "Checking your system")
+
+        let runs = runs(of: ANSIConsoleText.attributed(for: line, standardErrorIsNormalOutput: true))
+
+        #expect(runs == [Run(text: "Checking your system\n", color: NSColor(.brewTextPrimary), bold: false)])
+    }
+
+    @Test func `brew's own ANSI colours still win on a normal-output-on-stderr run`() {
+        let line = BrewCommandOutputLine(stream: .stderr, text: "\u{1B}[31mError: broken")
+
+        let runs = runs(of: ANSIConsoleText.attributed(for: line, standardErrorIsNormalOutput: true))
+
+        #expect(runs.first == Run(text: "Error: broken", color: NSColor(.brewStatusError), bold: false))
+    }
+
     @Test func `bold span carries a bold monospaced font`() {
         let line = BrewCommandOutputLine(stream: .stdout, text: "\u{1B}[1;32mSUCCESS")
 

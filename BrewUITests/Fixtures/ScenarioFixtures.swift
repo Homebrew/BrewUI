@@ -154,6 +154,36 @@ enum ScenarioFixtures {
         )
         // `brew doctor` exits non-zero when it finds anything, so the fixture reproduces that.
         set.brewFiles["doctor.exitcode"] = text("1")
+        set.brewFiles["doctor_--json.stdout"] = json([
+            "tier": 1,
+            "findings": [
+                [
+                    "text": "Some installed formulae are deprecated or disabled.",
+                    "tier": 1,
+                    "affects": ["openssl@1.1"],
+                    "links": [],
+                    "remediation": [
+                        "commands": [],
+                        "text": "You should find replacements for the following formulae:\n  openssl@1.1\n",
+                    ],
+                ],
+                [
+                    "text": "You have unlinked kegs in your Cellar.",
+                    "tier": 1,
+                    "affects": ["openssl@3"],
+                    "links": [],
+                    "remediation": [
+                        "commands": ["brew link openssl@3"],
+                        "text": """
+                        Leaving kegs unlinked can lead to build-trouble and cause formulae that depend on
+                        those kegs to fail to run properly once built.
+                          openssl@3
+                        """,
+                    ],
+                ],
+            ],
+        ])
+        set.brewFiles["doctor_--json.exitcode"] = text("1")
         return set
     }
 
@@ -227,6 +257,7 @@ enum ScenarioFixtures {
             "\(installedInfoKey).stdout": infoJSON(for: installed),
             "config.stdout": configOutput,
             "doctor.stdout": text("Your system is ready to brew.\n"),
+            "doctor_--json.stdout": json(["tier": 1, "findings": []]),
         ]
     }
 

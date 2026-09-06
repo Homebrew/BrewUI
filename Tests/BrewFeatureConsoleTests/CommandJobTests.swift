@@ -146,6 +146,7 @@ struct CommandJobTests {
     @Test func `updatePhase from idle to idle does not back-fill an exit code`() {
         let job = CommandJob(
             operationID: BrewOperationID(kind: .formula, name: "gh"),
+            kind: .installFormula,
             command: "brew install gh",
             startedAt: Date(),
             phase: .idle,
@@ -176,6 +177,7 @@ struct CommandJobTests {
     @Test func `appendOutput evicts oldest lines once the cap is exceeded`() {
         let job = CommandJob(
             operationID: BrewOperationID(kind: .formula, name: "gh"),
+            kind: .installFormula,
             command: "brew install gh",
             startedAt: Date(),
             phase: .running(.installFormula),

@@ -182,20 +182,8 @@ struct InstalledPackageDetailMetadataSection: View {
     }
 
     private func caveatsCallout(text: String) -> some View {
-        HStack(alignment: .center, spacing: BrewSpacing.sm) {
-            Image(systemName: "info.circle.fill")
-                .font(.brewSubheadline)
-                .foregroundStyle(Color.brewTextBrand)
-            Text(text)
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewTextPrimary)
-                .textSelection(.enabled)
-        }
-        .padding(BrewSpacing.sm)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.brewBrandTint)
-        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
-        .padding(.top, BrewSpacing.lg)
+        NoteCallout(text)
+            .padding(.top, BrewSpacing.lg)
     }
 }
 

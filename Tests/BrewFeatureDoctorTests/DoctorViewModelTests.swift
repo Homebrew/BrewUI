@@ -93,7 +93,7 @@ struct DoctorViewModelTests {
     @Test func `projects loaded issues and selects the first`() async {
         let report = Self.issuesReport()
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: report))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         let items = Self.displayedItems(report)
 
         #expect(viewModel.presentation == .issues)
@@ -226,7 +226,7 @@ struct DoctorViewModelTests {
         let repository = MutableDoctorRepository(report: DoctorReport(issues: []))
         let viewModel = Self.viewModel(repository: repository)
 
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
 
         #expect(viewModel.selectedIssueID == nil)
     }
@@ -240,14 +240,14 @@ struct DoctorViewModelTests {
         let repository = MutableDoctorRepository(report: initial)
         let viewModel = Self.viewModel(repository: repository)
 
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         let thirdID = Self.displayedItems(initial)[2].id
         viewModel.setSelection(thirdID)
         #expect(viewModel.selectedIssueID == thirdID)
 
         let survivor = Self.minimal(.caution, "only-survivor")
         repository.replace(report: DoctorReport(issues: [survivor]))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
 
         #expect(viewModel.selectedIssueID == DoctorIssueItem.contentID(for: survivor))
     }
@@ -260,11 +260,11 @@ struct DoctorViewModelTests {
         let repository = MutableDoctorRepository(report: report)
         let viewModel = Self.viewModel(repository: repository)
 
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         let secondID = Self.displayedItems(report)[1].id
         viewModel.setSelection(secondID)
 
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
 
         #expect(viewModel.selectedIssueID == secondID)
     }
@@ -276,13 +276,13 @@ struct DoctorViewModelTests {
         let repository = MutableDoctorRepository(report: DoctorReport(issues: [first, middle, last]))
         let viewModel = Self.viewModel(repository: repository)
 
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         let middleID = DoctorIssueItem.contentID(for: middle)
         viewModel.setSelection(middleID)
 
         // Resolve the first issue; "middle" shifts to index 0 but the selection should follow it.
         repository.replace(report: DoctorReport(issues: [middle, last]))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
 
         #expect(viewModel.selectedIssueID == middleID)
         #expect(viewModel.selectedIssue?.title == "middle")
@@ -301,7 +301,7 @@ struct DoctorViewModelTests {
         let viewModel = Self.viewModel(
             repository: StubDoctorRepository(report: DoctorReport(issues: [caution, danger, unsupported])),
         )
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
 
         #expect(viewModel.orderedIssueIDs == [
             DoctorIssueItem.contentID(for: unsupported),
@@ -312,7 +312,7 @@ struct DoctorViewModelTests {
 
     @Test func `selectNext steps through issues in grouped order and stops at the last`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         let ordered = viewModel.orderedIssueIDs
         #expect(ordered.count == 3)
 
@@ -328,7 +328,7 @@ struct DoctorViewModelTests {
 
     @Test func `selectPrevious steps backward through issues and stops at the first`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         let ordered = viewModel.orderedIssueIDs
 
         viewModel.setSelection(ordered[2])
@@ -343,7 +343,7 @@ struct DoctorViewModelTests {
 
     @Test func `selectNext from no selection selects the first issue`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         viewModel.setSelection(nil)
 
         viewModel.selectNext()
@@ -353,7 +353,7 @@ struct DoctorViewModelTests {
 
     @Test func `selectPrevious from no selection selects the last issue`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.threeSeverityReport()))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         viewModel.setSelection(nil)
 
         viewModel.selectPrevious()
@@ -363,7 +363,7 @@ struct DoctorViewModelTests {
 
     @Test func `selectNext is a no-op on a healthy report`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
         #expect(viewModel.selectedIssueID == nil)
 
         viewModel.selectNext()
@@ -444,7 +444,7 @@ struct DoctorViewModelTests {
     @Test func `shouldFocusList is true once a report with issues has loaded`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: Self.issuesReport()))
 
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
 
         #expect(viewModel.shouldFocusList)
     }
@@ -452,7 +452,7 @@ struct DoctorViewModelTests {
     @Test func `shouldFocusList is true on a healthy report`() async {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
 
-        await viewModel.load()
+        await viewModel.load(forceRefresh: true)
 
         #expect(viewModel.shouldFocusList)
     }
@@ -464,6 +464,30 @@ struct DoctorViewModelTests {
 
         #expect(!viewModel.shouldFocusList)
     }
+
+    // MARK: - lastCheckedAt
+
+    @Test func `lastCheckedAt dates the report the repository holds`() {
+        let checkedAt = Date(timeIntervalSince1970: 1_800_000_000)
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(report: Self.issuesReport(), reportedAt: checkedAt),
+        )
+
+        #expect(viewModel.lastCheckedAt == checkedAt)
+    }
+
+    @Test func `lastCheckedAt is nil while the first check runs`() {
+        #expect(Self.viewModel(repository: LoadingDoctorRepository()).lastCheckedAt == nil)
+    }
+
+    /// A failed check dates nothing: the header would otherwise stamp a time on a report that is not there.
+    @Test func `lastCheckedAt is nil when the check failed`() {
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
+        )
+
+        #expect(viewModel.lastCheckedAt == nil)
+    }
 }
 
 /// Test-scoped doctor repository pinned in the `.loading` state. Used to exercise the loading branches of
@@ -473,23 +497,24 @@ struct DoctorViewModelTests {
 private final class LoadingDoctorRepository: DoctorRepository {
     let state: LoadState<DoctorReport, any Error> = .loading
     let isRefreshing = false
-    func load() async {}
+    let reportedAt: Date? = nil
+    func load(forceRefresh _: Bool) async {}
 }
 
-/// Test-scoped doctor repository that lets the test swap in a new report between `load()` calls.
-/// `load()` is a no-op (the report is supplied directly) so the view model's selection-sync logic
-/// runs against whatever state the test has staged.
+/// Test-scoped doctor repository whose report the test can swap between load calls.
 @Observable
 @MainActor
 private final class MutableDoctorRepository: DoctorRepository {
     private(set) var state: LoadState<DoctorReport, any Error>
     private(set) var isRefreshing = false
+    private(set) var reportedAt: Date?
 
-    init(report: DoctorReport) {
+    init(report: DoctorReport, reportedAt: Date? = nil) {
         state = .loaded(report)
+        self.reportedAt = reportedAt
     }
 
-    func load() async {}
+    func load(forceRefresh _: Bool) async {}
 
     func replace(report: DoctorReport) {
         state = .loaded(report)

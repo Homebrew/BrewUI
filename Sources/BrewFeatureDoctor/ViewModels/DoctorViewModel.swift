@@ -115,6 +115,13 @@ final class DoctorViewModel {
         }
     }
 
+    var lastCheckedAt: Date? {
+        guard case .loaded = state else {
+            return nil
+        }
+        return doctorRepository.reportedAt
+    }
+
     /// Linear scan over `report.issues` keyed by the content id. `brew doctor` reports a handful of
     /// issues at most and this only runs when the detail pane re-renders.
     var selectedIssue: DoctorIssueItem? {
@@ -179,11 +186,8 @@ final class DoctorViewModel {
         NSPasteboard.general.setString(output, forType: .string)
     }
 
-    /// Runs `brew doctor` via the repository. Called on tab arrival and from "Run Again"; keeps any prior
-    /// report visible while it refreshes. On a fresh load (no prior selection or a stale one), auto-
-    /// selects the first issue so the detail pane has something to show.
-    func load() async {
-        await doctorRepository.load()
+    func load(forceRefresh: Bool) async {
+        await doctorRepository.load(forceRefresh: forceRefresh)
         synchronizeSelectionWithLoadedReport()
     }
 
@@ -250,7 +254,7 @@ final class DoctorViewModel {
                 return
             }
             runningFixTokens.remove(token)
-            await load()
+            await load(forceRefresh: true)
         }
     }
 }

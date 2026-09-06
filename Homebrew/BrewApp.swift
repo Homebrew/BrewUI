@@ -76,7 +76,7 @@ struct BrewApp: App {
             cache: discoverAnalytics,
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
         )
-        doctorRepository = BrewDoctorRepository(commandCenter: center)
+        doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
         NSWindow.allowsAutomaticWindowTabbing = false
     }

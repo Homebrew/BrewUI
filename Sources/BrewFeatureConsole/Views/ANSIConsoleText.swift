@@ -19,9 +19,15 @@ enum ANSIConsoleText {
     private static let lineSpacing = BrewSpacing.xxs
 
     /// Newline-terminated to match ``ConsoleTranscript/text(of:)``, whose offsets address this text.
-    static func attributed(for line: BrewCommandOutputLine) -> NSAttributedString {
+    static func attributed(
+        for line: BrewCommandOutputLine,
+        standardErrorIsNormalOutput: Bool = false,
+    ) -> NSAttributedString {
         let result = NSMutableAttributedString()
-        let fallback = defaultColor(for: line.stream)
+        let fallback = defaultColor(
+            for: line.stream,
+            standardErrorIsNormalOutput: standardErrorIsNormalOutput,
+        )
         for span in line.spans {
             result.append(NSAttributedString(
                 string: span.text,
@@ -35,20 +41,26 @@ enum ANSIConsoleText {
         return result
     }
 
-    static func attributed(for lines: [BrewCommandOutputLine]) -> NSAttributedString {
+    static func attributed(
+        for lines: [BrewCommandOutputLine],
+        standardErrorIsNormalOutput: Bool = false,
+    ) -> NSAttributedString {
         let result = NSMutableAttributedString()
         for line in lines {
-            result.append(attributed(for: line))
+            result.append(attributed(for: line, standardErrorIsNormalOutput: standardErrorIsNormalOutput))
         }
         return result
     }
 
-    static func defaultColor(for stream: BrewCommandOutputLine.Stream) -> Color {
+    static func defaultColor(
+        for stream: BrewCommandOutputLine.Stream,
+        standardErrorIsNormalOutput: Bool = false,
+    ) -> Color {
         switch stream {
         case .stdout:
             .brewTextPrimary
         case .stderr:
-            .brewStatusError
+            standardErrorIsNormalOutput ? .brewTextPrimary : .brewStatusError
         }
     }
 

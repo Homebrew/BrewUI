@@ -75,11 +75,15 @@ final class UnimplementedDoctorRepository: DoctorRepository {
         unimplemented()
     }
 
+    var reportedAt: Date? {
+        unimplemented()
+    }
+
     var isRefreshing: Bool {
         unimplemented()
     }
 
-    func load() async {
+    func load(forceRefresh _: Bool) async {
         unimplemented()
     }
 }

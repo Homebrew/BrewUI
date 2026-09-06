@@ -26,6 +26,18 @@ public enum DoctorOutputParser {
             rawOutput: output,
         )
     }
+
+    /// Entry point for the `--json` path, which supplies the severity instead of it being sniffed out of
+    /// a tier callout.
+    static func issue(title: String, body: String, severity: DoctorSeverity) -> DoctorIssue? {
+        var parser = WarningBlockParser(block: WarningBlock(
+            kind: .warning,
+            title: title,
+            bodyLines: body.isEmpty ? [] : body.components(separatedBy: "\n"),
+            severityOverride: severity,
+        ))
+        return parser.parse()
+    }
 }
 
 /// Parser-internal mirror of ``DoctorBlock.Content``'s cases. Used by ``BlockBuilder`` to track what kind
@@ -45,12 +57,21 @@ private enum DoctorBlockType {
 private enum IssueKind {
     case warning
     case error
+
+    var titlePrefix: String {
+        switch self {
+        case .warning: "Warning:"
+        case .error: "Error:"
+        }
+    }
 }
 
 private struct WarningBlock {
     var kind: IssueKind
     var title: String
     var bodyLines: [String]
+    /// Set by the JSON path, where brew states the tier outright instead of writing a callout into the body.
+    var severityOverride: DoctorSeverity?
 }
 
 private func warningBlocks(in output: String) -> [WarningBlock] {
@@ -62,13 +83,13 @@ private func warningBlocks(in output: String) -> [WarningBlock] {
                 blocks.append(current)
             }
             let title = String(line.dropFirst("Warning:".count)).trimmingCharacters(in: .whitespaces)
-            current = WarningBlock(kind: .warning, title: title, bodyLines: [])
+            current = WarningBlock(kind: .warning, title: title, bodyLines: [], severityOverride: nil)
         } else if line.hasPrefix("Error:") {
             if let current {
                 blocks.append(current)
             }
             let title = String(line.dropFirst("Error:".count)).trimmingCharacters(in: .whitespaces)
-            current = WarningBlock(kind: .error, title: title, bodyLines: [])
+            current = WarningBlock(kind: .error, title: title, bodyLines: [], severityOverride: nil)
         } else if current != nil {
             current?.bodyLines.append(line)
         }
@@ -127,7 +148,8 @@ private struct WarningBlockParser {
         let rawBody = block.bodyLines.joined(separator: "\n")
         return DoctorIssue(
             title: block.title,
-            severity: parseSeverity(body: rawBody, kind: block.kind),
+            titlePrefix: block.kind.titlePrefix,
+            severity: block.severityOverride ?? parseSeverity(body: rawBody, kind: block.kind),
             blocks: committed,
             rawBody: rawBody,
         )
@@ -249,8 +271,9 @@ private struct WarningBlockParser {
     }
 
     private mutating func appendProseLine(_ trimmed: String) {
-        // Any orphan pendingCaption was a colon intro whose block never materialized — drop it; the
-        // raw body still carries it for the verbatim fallback.
+        // An orphan pendingCaption is a colon intro whose block never materialized. brew wrote the line,
+        // so it leads the prose that follows rather than being dropped.
+        let orphanedCaption = pendingCaption
         if pendingCaption != nil {
             pendingCaption = nil
             specialUnindentedActive = false
@@ -262,6 +285,9 @@ private struct WarningBlockParser {
                 caption: nil,
                 precededByBlankLine: consumePendingBlankLine(),
             )
+        }
+        if let orphanedCaption {
+            current?.proseLines.append(orphanedCaption)
         }
         current?.proseLines.append(trimmed)
     }
