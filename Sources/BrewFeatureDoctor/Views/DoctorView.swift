@@ -34,7 +34,13 @@ struct DoctorView: View {
                 Text(viewModel.subtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
+                if let lastCheckedAt = viewModel.lastCheckedAt {
+                    LastUpdatedLabel(lead: "Last checked", date: lastCheckedAt)
+                }
             }
+            // The header's own text wins the width it needs; the buttons beside it truncate first. Without
+            // this the timestamp wraps across two lines at the app's minimum window width.
+            .layoutPriority(1)
             Spacer(minLength: 0)
             if viewModel.showsHeaderControls {
                 if viewModel.isRefreshing {

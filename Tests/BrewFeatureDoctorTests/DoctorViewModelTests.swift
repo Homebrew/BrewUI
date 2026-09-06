@@ -464,6 +464,30 @@ struct DoctorViewModelTests {
 
         #expect(!viewModel.shouldFocusList)
     }
+
+    // MARK: - lastCheckedAt
+
+    @Test func `lastCheckedAt dates the report the repository holds`() {
+        let checkedAt = Date(timeIntervalSince1970: 1_800_000_000)
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(report: Self.issuesReport(), reportedAt: checkedAt),
+        )
+
+        #expect(viewModel.lastCheckedAt == checkedAt)
+    }
+
+    @Test func `lastCheckedAt is nil while the first check runs`() {
+        #expect(Self.viewModel(repository: LoadingDoctorRepository()).lastCheckedAt == nil)
+    }
+
+    /// A failed check dates nothing: the header would otherwise stamp a time on a report that is not there.
+    @Test func `lastCheckedAt is nil when the check failed`() {
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
+        )
+
+        #expect(viewModel.lastCheckedAt == nil)
+    }
 }
 
 /// Test-scoped doctor repository pinned in the `.loading` state. Used to exercise the loading branches of
@@ -473,6 +497,7 @@ struct DoctorViewModelTests {
 private final class LoadingDoctorRepository: DoctorRepository {
     let state: LoadState<DoctorReport, any Error> = .loading
     let isRefreshing = false
+    let reportedAt: Date? = nil
     func load(forceRefresh _: Bool) async {}
 }
 
@@ -483,9 +508,11 @@ private final class LoadingDoctorRepository: DoctorRepository {
 private final class MutableDoctorRepository: DoctorRepository {
     private(set) var state: LoadState<DoctorReport, any Error>
     private(set) var isRefreshing = false
+    private(set) var reportedAt: Date?
 
-    init(report: DoctorReport) {
+    init(report: DoctorReport, reportedAt: Date? = nil) {
         state = .loaded(report)
+        self.reportedAt = reportedAt
     }
 
     func load(forceRefresh _: Bool) async {}

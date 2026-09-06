@@ -125,9 +125,11 @@ struct StubDependentsRepository: InstalledDependentsRepository {
 public final class StubDoctorRepository: DoctorRepository {
     public private(set) var state: LoadState<DoctorReport, any Error>
     public private(set) var isRefreshing = false
+    public private(set) var reportedAt: Date?
 
-    public init(report: DoctorReport) {
+    public init(report: DoctorReport, reportedAt: Date? = nil) {
         state = .loaded(report)
+        self.reportedAt = reportedAt
     }
 
     public init(error: any Error) {

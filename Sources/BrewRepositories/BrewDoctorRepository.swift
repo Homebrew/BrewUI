@@ -39,7 +39,7 @@ public final class BrewDoctorRepository: DoctorRepository {
 
     /// When the last run produced a report. Not set by a failed run, so a failure is retried on the next
     /// arrival rather than sat on for an hour.
-    @ObservationIgnored private var reportedAt: Date?
+    public private(set) var reportedAt: Date?
 
     /// Cleared once a brew has been seen to reject `--json`, so the extra process isn't spawned again.
     /// A run that failed to start says nothing about the switch and leaves this alone.

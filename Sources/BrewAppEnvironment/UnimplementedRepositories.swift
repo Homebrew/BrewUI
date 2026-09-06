@@ -75,6 +75,10 @@ final class UnimplementedDoctorRepository: DoctorRepository {
         unimplemented()
     }
 
+    var reportedAt: Date? {
+        unimplemented()
+    }
+
     var isRefreshing: Bool {
         unimplemented()
     }

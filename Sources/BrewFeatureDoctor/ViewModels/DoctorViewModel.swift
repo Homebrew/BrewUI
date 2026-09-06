@@ -115,6 +115,15 @@ final class DoctorViewModel {
         }
     }
 
+    /// When the report on screen was produced, for the header's "Last checked …" line. `nil` while the
+    /// first check runs, or after it failed.
+    var lastCheckedAt: Date? {
+        guard case .loaded = state else {
+            return nil
+        }
+        return doctorRepository.reportedAt
+    }
+
     /// Linear scan over `report.issues` keyed by the content id. `brew doctor` reports a handful of
     /// issues at most and this only runs when the detail pane re-renders.
     var selectedIssue: DoctorIssueItem? {

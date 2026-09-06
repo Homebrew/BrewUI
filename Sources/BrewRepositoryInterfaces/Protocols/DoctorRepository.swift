@@ -20,6 +20,10 @@ public protocol DoctorRepository: Observable, Sendable {
     /// prior `.loaded` report stays put across refreshes.
     var state: LoadState<DoctorReport, any Error> { get }
 
+    /// When the report in ``state`` was produced. A failed run leaves it alone, so it dates the report on
+    /// screen rather than the last attempt.
+    var reportedAt: Date? { get }
+
     /// `true` while a re-check runs and a prior report is already on screen — drives a subtle "checking" hint
     /// without blanking the content.
     var isRefreshing: Bool { get }
