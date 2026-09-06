@@ -60,6 +60,7 @@ struct DiscoverPackageDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
+            .brewPaneContentWidth()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
@@ -308,6 +309,7 @@ struct DiscoverPackageDetailPlaceholder: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(BrewSpacing.xl)
+        .brewPaneContentWidth()
     }
 }
 

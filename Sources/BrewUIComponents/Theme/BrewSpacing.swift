@@ -41,12 +41,12 @@ public enum BrewLayout {
     /// Installed list column (middle pane of `NavigationSplitView`).
     public static let installedListColumnMinWidth: CGFloat = 300
     public static let installedListColumnIdealWidth: CGFloat = 400
-    public static let installedListColumnMaxWidth: CGFloat = 800
 
     /// Third column (package detail).
     public static let installedDetailColumnIdealWidth: CGFloat = 400
-    public static let installedDetailColumnMaxWidth: CGFloat = 1200
     public static let installedThreePaneMinWindowWidth: CGFloat = 960
+
+    public static let paneContentMaxWidth: CGFloat = 800
 
     /// Call-to-action row in a pane header. Clears a `.regular` bordered button, so pinning the row to it
     /// leaves the button's own metrics alone while giving anything that stands in for it the same height.

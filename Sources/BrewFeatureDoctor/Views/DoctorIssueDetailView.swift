@@ -35,6 +35,7 @@ struct DoctorIssueDetailView: View {
                 }
             }
             .padding(BrewSpacing.xl)
+            .brewPaneContentWidth()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -231,6 +232,7 @@ struct DoctorDetailPlaceholder: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(BrewSpacing.xl)
+        .brewPaneContentWidth()
     }
 }
 
