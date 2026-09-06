@@ -176,6 +176,29 @@ struct DoctorJSONParserTests {
         #expect(issue.rawBody.contains("rar"))
     }
 
+    /// brew's un-indented list style (`check_deprecated_disabled`) leaves the intro with no block of its
+    /// own. It is still a line brew wrote, so it has to survive into the body.
+    @Test func `a colon intro whose list is un-indented is kept, not dropped`() throws {
+        let issues = try Self.parse("""
+        {
+          "tier": 1,
+          "findings": [
+            { "text": "Some installed casks are deprecated or disabled.", "tier": 1,
+              "affects": ["rar"], "links": [],
+              "remediation": { "commands": [],
+                "text": "You should find replacements for the following casks:\\nrar\\n" } }
+          ]
+        }
+        """)
+
+        let issue = try #require(issues.first)
+        let prose = issue.blocks.flatMap { block -> [String] in
+            guard case let .prose(lines) = block.content else { return [] }
+            return lines
+        }
+        #expect(prose == ["You should find replacements for the following casks:", "rar"])
+    }
+
     @Test func `affects the body never mentions are surfaced`() throws {
         let issues = try Self.parse("""
         {"tier": 1, "findings": [

@@ -267,8 +267,9 @@ private struct WarningBlockParser {
     }
 
     private mutating func appendProseLine(_ trimmed: String) {
-        // Any orphan pendingCaption was a colon intro whose block never materialized — drop it; the
-        // raw body still carries it for the verbatim fallback.
+        // An orphan pendingCaption is a colon intro whose block never materialized. brew wrote the line,
+        // so it leads the prose that follows rather than being dropped.
+        let orphanedCaption = pendingCaption
         if pendingCaption != nil {
             pendingCaption = nil
             specialUnindentedActive = false
@@ -280,6 +281,9 @@ private struct WarningBlockParser {
                 caption: nil,
                 precededByBlankLine: consumePendingBlankLine(),
             )
+        }
+        if let orphanedCaption {
+            current?.proseLines.append(orphanedCaption)
         }
         current?.proseLines.append(trimmed)
     }
