@@ -93,6 +93,7 @@ struct DoctorView: View {
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
         VStack(alignment: .leading, spacing: 0) {
+            DoctorReassuranceNote()
             List {
                 ForEach(groups) { group in
                     Section {
@@ -117,10 +118,6 @@ struct DoctorView: View {
                         }
                     } header: {
                         DoctorSeveritySectionHeader(severity: group.severity)
-                    } footer: {
-                        if group.id == groups.last?.id {
-                            DoctorInfoFooter()
-                        }
                     }
                 }
             }
@@ -152,15 +149,11 @@ private struct DoctorSeveritySectionHeader: View {
     }
 }
 
-private struct DoctorInfoFooter: View {
+private struct DoctorReassuranceNote: View {
     var body: some View {
-        Text(
-            "These warnings help Homebrew maintainers debug. Please don't worry or file an issue.",
-        )
-        .font(.brewCallout)
-        .foregroundStyle(Color.brewTextSecondary)
-        .padding(.vertical, BrewSpacing.sm)
-        .padding(.trailing, BrewSpacing.md)
+        NoteCallout(DoctorCopy.warningPreamble, tone: .info)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.sm)
     }
 }
 
