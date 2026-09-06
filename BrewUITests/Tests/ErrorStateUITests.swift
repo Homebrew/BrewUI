@@ -5,8 +5,8 @@
 
 import XCTest
 
-/// The failure paths, and the reason this suite mocks process boundaries rather than repositories:
-/// every error here is real app code reacting to real bad input, not a stubbed error value.
+/// Why this suite mocks process boundaries rather than repositories: every error here is real app code
+/// reacting to real bad input, not a stubbed error value.
 final class ErrorStateUITests: BrewUITestCase {
     @MainActor
     func testCatalogueServerErrorShowsDiscoverError() {

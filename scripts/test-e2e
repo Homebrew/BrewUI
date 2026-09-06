@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+#
+# test-e2e — run the live end-to-end canaries (Brew-E2E test plan).
+#
+# THIS MUTATES REAL HOMEBREW STATE. It installs and uninstalls the formula
+# `hello` on this machine, hits formulae.brew.sh and ghcr.io for real, and runs
+# the app with production wiring (no -uiTesting). Nothing may depend on `hello`
+# being present or absent — see BrewUITests/E2E/README.md.
+#
+# CI runs this on every pull request as its own job. Run it by hand before
+# cutting a release. It is not the deterministic suite; that is scripts/test-ui
+# (Brew-UI test plan), which never touches real brew.
+#
+# Same window/focus caveats as scripts/test-ui — see BrewUITests/TROUBLESHOOTING.md
+# before running it on a machine you're actively using.
+#
+# Pass extra xcodebuild args through, e.g. to scope to one test:
+#   scripts/test-e2e -only-testing:BrewUITests/ReadOnlyE2ETests
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+if [[ ! -x /opt/homebrew/bin/brew && ! -x /usr/local/bin/brew ]]; then
+  echo "error: the live suite needs Homebrew installed on this machine." >&2
+  exit 1
+fi
+
+echo "==> Resolving package dependencies"
+xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
+
+echo "==> BrewUITests live canaries (Brew-E2E test plan)"
+rm -rf E2ETestResults.xcresult
+# On exit rather than after the run: the plan retries a failing test, so a green result can still
+# have a flake behind it, and a red one is exactly when you want to know a retry was involved.
+trap 'scripts/annotate-flaky-tests E2ETestResults.xcresult || true' EXIT
+# No -derivedDataPath override, for the reason documented in scripts/test-ui.
+#
+# Signing stays ALLOWED: identity "-" ad-hoc signs, needing no identity, team or profile, so this
+# works on a bare CI runner too. CODE_SIGNING_ALLOWED=NO instead leaves the runner carrying Apple's
+# XCTRunner.app signature over contents the build has replaced, which macOS rejects as "damaged"
+# (BrewUITests/TROUBLESHOOTING.md #8).
+xcodebuild test \
+  -project Homebrew.xcodeproj \
+  -scheme Brew-UI \
+  -testPlan Brew-E2E \
+  -destination "platform=macOS" \
+  -resultBundlePath E2ETestResults.xcresult \
+  -skipPackagePluginValidation \
+  -skipMacroValidation \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY=- \
+  CODE_SIGNING_REQUIRED=NO \
+  "$@"
+
+echo "==> Live end-to-end canaries passed."

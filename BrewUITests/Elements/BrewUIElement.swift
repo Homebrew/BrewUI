@@ -6,11 +6,8 @@
 import BrewAccessibilityID
 import XCTest
 
-/// The only layer in the suite that touches `XCUIElement`, addressing elements only by ``AXID``.
-///
-/// Two rules are enforced here rather than remembered at every call site: every operation self-waits,
-/// because a bare `exists` read races the app's next render and is the largest source of XCUITest
-/// flake; and failures carry the caller's `file`/`line`, so a red test points at the test body.
+/// The only layer that touches `XCUIElement`, addressing elements by ``AXID`` alone. Every operation
+/// self-waits, because a bare `exists` read races the app's next render.
 @MainActor
 class BrewUIElement {
     let app: XCUIApplication
@@ -66,8 +63,7 @@ class BrewUIElement {
         waitToExist(timeout: timeout, file: file, line: line)
     }
 
-    /// Waits for disappearance rather than reading a snapshot: `!exists` straight after an action
-    /// passes for the wrong reason and starts failing once the app gets marginally faster.
+    /// Waits for disappearance: `!exists` straight after an action passes for the wrong reason.
     @discardableResult
     func assertDoesNotExist(
         timeout: TimeInterval = BrewUITestTimeout.disappearance,
@@ -87,7 +83,7 @@ class BrewUIElement {
     }
 }
 
-/// Named so a call site says why a wait is longer than the rest, and so CI can be widened in one place.
+/// Named so a call site says why a wait is longer than the rest, and so CI widens in one place.
 enum BrewUITestTimeout {
     /// Rendering off already-loaded state.
     static let `default`: TimeInterval = 10

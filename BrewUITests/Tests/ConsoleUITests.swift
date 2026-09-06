@@ -5,9 +5,7 @@
 
 import XCTest
 
-/// The bottom console: whatever Homebrew printed, the user can see. Asserting on individual lines is
-/// what proves the output streamed, since one blob at exit would leave the buffer correct but the
-/// per-line drain untested.
+/// Asserting on individual lines is what proves the output streamed rather than arriving at exit.
 final class ConsoleUITests: BrewUITestCase {
     @MainActor
     func testStreamsOutputAndReportsSuccess() {
@@ -38,7 +36,7 @@ final class ConsoleUITests: BrewUITestCase {
             .assertFailed(exitCode: 1)
     }
 
-    /// A failed install must not read as success anywhere; the fake's world never changed.
+    /// A failed install must not read as success anywhere.
     @MainActor
     func testFailedInstallDoesNotAddThePackage() {
         let installed = launch(.installFailure)

@@ -6,8 +6,7 @@
 import BrewAccessibilityID
 import XCTest
 
-/// The Doctor tab. `brew doctor` exits non-zero when it finds warnings and the repository treats that
-/// as data, so a scenario with issues is still a successful run.
+/// The Doctor tab, where a non-zero exit means warnings were found rather than that the run failed.
 @MainActor
 struct DoctorScreen: Screen {
     let app: XCUIApplication
@@ -16,8 +15,7 @@ struct DoctorScreen: Screen {
         BrewUIElement(app, .doctorScreen)
     }
 
-    /// Command timeout for the same reason as ``assertIsHealthy(timeout:file:line:)``: the report only
-    /// exists once `brew doctor` has run.
+    /// Command timeout: the report exists only once `brew doctor` has run.
     @discardableResult
     func assertShowsIssue(
         containing substring: String,
@@ -25,8 +23,7 @@ struct DoctorScreen: Screen {
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
-        // See `ConsoleScreen.assertOutputContains`: this text renders through a `Text` whose content
-        // macOS exposes via the accessibility *value*, not the *label*.
+        // macOS exposes this `Text` through the accessibility *value*, not the *label*.
         let predicate = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)
         let match = root.element.descendants(matching: .any).matching(predicate).firstMatch
         XCTAssertTrue(
@@ -38,8 +35,7 @@ struct DoctorScreen: Screen {
         return self
     }
 
-    /// Command timeout, not render timeout: `DoctorReport.placeholder` is not healthy, so this text
-    /// does not exist until the `brew doctor` subprocess finishes.
+    /// `DoctorReport.placeholder` is not healthy, so this text exists only once `brew doctor` has run.
     @discardableResult
     func assertIsHealthy(
         timeout: TimeInterval = BrewUITestTimeout.command,

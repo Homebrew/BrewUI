@@ -100,6 +100,10 @@ The pre-commit hook formats and lints **staged** Swift files (SwiftFormat/SwiftL
 
 If a test failure surfaces a real regression that's out of scope for the current turn, surface it to the user rather than silently skipping it — never paper over a red test with `.disabled` or `--filter` exclusions without flagging.
 
+### Live end-to-end canaries (`scripts/test-e2e`) — never run unasked
+
+`scripts/test-e2e` (test plan `Brew-E2E`, sources in `BrewUITests/E2E/`) runs the app against **real Homebrew and the real network**, and **installs and uninstalls the formula `hello` on the machine it runs on**. CI runs it on an ephemeral runner for every pull request, and it is run by hand before a release. Do not run it to "check the UI tests" — that's `scripts/test-ui`, which is deterministic and touches nothing. See `BrewUITests/E2E/README.md`.
+
 ### Dead-code analysis (Periphery)
 
 `.github/workflows/pr_build_test.yml` runs [Periphery](https://github.com/peripheryapp/periphery) (pinned in `Mintfile`) after the Xcode build, reusing that build's index store (`--index-store-path DerivedData/Index.noindex/DataStore --skip-build`) so it adds no second build. It scans the **Xcode project** (config in `.periphery.yml`) so the `Homebrew/` app counts as a consumer of the SwiftPM modules — this reports unused code across the whole program, including dead `public` API, which a package-only scan cannot.

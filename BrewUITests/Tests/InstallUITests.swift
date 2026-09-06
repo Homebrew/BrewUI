@@ -5,8 +5,8 @@
 
 import XCTest
 
-/// The widest path in the app: the catalogue arrives over the HTTP seam, the install runs over the
-/// shell seam, and the two meet when the inventory reconciles off the completion stream.
+/// The widest path in the app: catalogue over the HTTP seam, install over the shell seam, and the two
+/// meeting when the inventory reconciles.
 final class InstallUITests: BrewUITestCase {
     @MainActor
     func testInstallingFromDiscoverAddsThePackageToInstalled() {
