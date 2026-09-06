@@ -37,6 +37,24 @@ struct DoctorJSONParserTests {
         #expect(issues[1].title == "Your Command Line Tools are too outdated.")
     }
 
+    /// Every JSON finding is one brew would have printed through `opoo`, which prefixes `Warning:`.
+    @Test func `raw text reads the way brew would have printed the finding`() throws {
+        let issues = try Self.parse("""
+        {"tier": 1, "findings": [
+          { "text": "Some installed casks are deprecated or disabled.", "tier": 1,
+            "affects": [], "links": [],
+            "remediation": { "commands": [],
+              "text": "You should find replacements for the following casks:\\nrar\\n" } }
+        ]}
+        """)
+
+        #expect(try #require(issues.first).rawText == """
+        Warning: Some installed casks are deprecated or disabled.
+        You should find replacements for the following casks:
+        rar
+        """)
+    }
+
     @Test func `an empty findings array is a healthy system`() throws {
         #expect(try Self.parse(#"{"tier": 1, "findings": []}"#).isEmpty)
     }

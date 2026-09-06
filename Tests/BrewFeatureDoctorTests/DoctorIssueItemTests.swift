@@ -73,7 +73,7 @@ struct DoctorIssueItemTests {
         #expect(item.title == "Stale downloads")
         #expect(item.severity == .danger)
         #expect(item.blocks == blocks)
-        #expect(item.rawBody == "raw")
+        #expect(item.rawText == "Warning: Stale downloads\nraw")
         #expect(item.id == DoctorIssueItem.contentID(for: source))
     }
 

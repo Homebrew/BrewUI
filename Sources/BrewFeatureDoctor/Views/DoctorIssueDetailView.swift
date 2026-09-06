@@ -29,10 +29,8 @@ struct DoctorIssueDetailView: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                if !item.rawBody.isEmpty {
-                    Divider()
-                    rawOutputSection
-                }
+                Divider()
+                rawOutputSection
             }
             .padding(BrewSpacing.xl)
         }
@@ -177,7 +175,7 @@ struct DoctorIssueDetailView: View {
     // MARK: - Raw output
 
     private var rawOutputSection: some View {
-        CommandBlockView(command: item.rawBody, title: "Raw output", collapsible: true)
+        CommandBlockView(command: item.rawText, title: "Raw output", collapsible: true)
     }
 }
 

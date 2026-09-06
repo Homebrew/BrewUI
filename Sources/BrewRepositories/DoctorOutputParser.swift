@@ -60,6 +60,15 @@ private enum DoctorBlockType {
 private enum IssueKind {
     case warning
     case error
+
+    /// The prefix brew printed on the summary line, kept so the raw view can show the finding as the CLI
+    /// wrote it.
+    var titlePrefix: String {
+        switch self {
+        case .warning: "Warning:"
+        case .error: "Error:"
+        }
+    }
 }
 
 private struct WarningBlock {
@@ -145,6 +154,7 @@ private struct WarningBlockParser {
         let rawBody = block.bodyLines.joined(separator: "\n")
         return DoctorIssue(
             title: block.title,
+            titlePrefix: block.kind.titlePrefix,
             severity: block.severityOverride ?? parseSeverity(body: rawBody, kind: block.kind),
             blocks: committed,
             rawBody: rawBody,
