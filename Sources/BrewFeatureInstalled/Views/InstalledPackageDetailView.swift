@@ -90,6 +90,7 @@ struct InstalledPackageDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.xl)
+            .brewPaneContentWidth()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
@@ -280,6 +281,7 @@ struct InstalledPackageDetailPlaceholder: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(BrewSpacing.xl)
+        .brewPaneContentWidth()
     }
 }
 

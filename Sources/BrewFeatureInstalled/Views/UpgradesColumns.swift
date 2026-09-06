@@ -15,7 +15,7 @@ struct UpgradesColumns: View {
                 .frame(
                     minWidth: BrewLayout.installedListColumnMinWidth,
                     idealWidth: BrewLayout.installedListColumnIdealWidth,
-                    maxWidth: BrewLayout.installedListColumnMaxWidth,
+                    maxWidth: .infinity,
                     maxHeight: .infinity,
                     alignment: .topLeading,
                 )
@@ -37,7 +37,7 @@ struct UpgradesColumns: View {
             .frame(
                 minWidth: BrewLayout.inspectorWidth,
                 idealWidth: BrewLayout.installedDetailColumnIdealWidth,
-                maxWidth: BrewLayout.installedDetailColumnMaxWidth,
+                maxWidth: .infinity,
                 maxHeight: .infinity,
                 alignment: .topLeading,
             )

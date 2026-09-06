@@ -44,6 +44,7 @@ struct ConfigView: View {
         }
         .padding(.horizontal, BrewSpacing.lg)
         .padding(.vertical, BrewSpacing.md)
+        .brewPaneContentWidth()
     }
 
     @ViewBuilder
@@ -69,7 +70,7 @@ struct ConfigView: View {
                 }
             }
             .padding(BrewSpacing.lg)
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .brewPaneContentWidth()
         }
     }
 
