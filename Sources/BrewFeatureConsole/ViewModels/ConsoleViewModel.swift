@@ -67,7 +67,11 @@ final class ConsoleViewModel {
         guard let job = selectedJob else {
             return .noActivity
         }
-        return .output(jobID: job.id, lines: job.output)
+        return .output(
+            jobID: job.id,
+            lines: job.output,
+            standardErrorIsNormalOutput: job.kind.writesNormalOutputToStandardError,
+        )
     }
 
     var statusPresentation: ConsoleStatusPresentation {

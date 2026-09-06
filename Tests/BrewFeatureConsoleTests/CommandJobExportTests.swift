@@ -84,6 +84,7 @@ struct CommandJobExportTests {
     @Test func `suggestedExportFilename replaces unsafe path characters`() {
         let job = CommandJob(
             operationID: BrewOperationID(kind: .formula, name: "weird"),
+            kind: .installFormula,
             command: "brew weird /path:colon thing",
             startedAt: Date(),
             phase: .idle,

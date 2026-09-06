@@ -34,6 +34,7 @@ public struct CommandJobID: Hashable, Sendable {
 public final class CommandJob: Identifiable {
     public let id: CommandJobID
     public let operationID: BrewOperationID
+    public let kind: BrewOperationKind
     public let command: String
     public let startedAt: Date
 
@@ -45,6 +46,7 @@ public final class CommandJob: Identifiable {
 
     public init(
         operationID: BrewOperationID,
+        kind: BrewOperationKind,
         command: String,
         startedAt: Date,
         phase: BrewOperationPhase,
@@ -52,6 +54,7 @@ public final class CommandJob: Identifiable {
     ) {
         id = CommandJobID()
         self.operationID = operationID
+        self.kind = kind
         self.command = command
         self.startedAt = startedAt
         self.phase = phase
@@ -133,6 +136,7 @@ public extension CommandJob {
         }
         return CommandJob(
             operationID: id,
+            kind: kind,
             command: command,
             startedAt: now,
             phase: phase,

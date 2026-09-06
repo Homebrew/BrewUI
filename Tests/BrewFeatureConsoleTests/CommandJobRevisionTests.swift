@@ -145,6 +145,7 @@ struct CommandJobRevisionTests {
 private func makeJob(maxOutputLines: Int = 50000) -> CommandJob {
     CommandJob(
         operationID: BrewOperationID(kind: .formula, name: "go"),
+        kind: .upgradeFormula,
         command: "brew upgrade go",
         startedAt: Date(),
         phase: .running(.upgradeFormula),

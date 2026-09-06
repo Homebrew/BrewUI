@@ -19,6 +19,8 @@ struct ConsoleTextView: NSViewRepresentable {
     /// Switching tabs is a new document rather than an edit of this one.
     let jobID: CommandJobID
 
+    let standardErrorIsNormalOutput: Bool
+
     /// Stored rather than read off `context.environment`, so a flip is guaranteed to re-invoke the update.
     @Environment(\.colorScheme) private var colorScheme
 
@@ -82,7 +84,10 @@ struct ConsoleTextView: NSViewRepresentable {
         let selection = textView.selectedRanges.map(\.rangeValue)
         storage.replaceCharacters(
             in: NSRange(location: edit.location, length: edit.length),
-            with: ANSIConsoleText.attributed(for: edit.lines),
+            with: ANSIConsoleText.attributed(
+                for: edit.lines,
+                standardErrorIsNormalOutput: standardErrorIsNormalOutput,
+            ),
         )
         textView.selectedRanges = ConsoleTextSelection
             .clamped(selection, toLength: storage.length)

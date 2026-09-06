@@ -128,7 +128,10 @@ struct ConsoleViewModelTests {
         await harness.emit(id: id, output: line)
         let job = try #require(harness.job(for: id))
 
-        #expect(harness.viewModel.bodyContent == .output(jobID: job.id, lines: [line]))
+        #expect(
+            harness.viewModel.bodyContent
+                == .output(jobID: job.id, lines: [line], standardErrorIsNormalOutput: false),
+        )
     }
 
     @Test func `bodyContent follows the selected job`() async throws {
@@ -144,7 +147,25 @@ struct ConsoleViewModelTests {
 
         harness.viewModel.select(id: firstJob.id)
 
-        #expect(harness.viewModel.bodyContent == .output(jobID: firstJob.id, lines: [line]))
+        #expect(
+            harness.viewModel.bodyContent
+                == .output(jobID: firstJob.id, lines: [line], standardErrorIsNormalOutput: false),
+        )
+    }
+
+    @Test func `bodyContent marks a brew doctor run's stderr as its normal output`() async throws {
+        let harness = ConsoleJobsHarness()
+        await harness.awaitReady()
+        let id = BrewOperationID(maintenanceToken: "doctor", displayCommand: "brew doctor")
+        await harness.emit(id: id, phase: .running(.doctorRead))
+        let line = BrewCommandOutputLine(stream: .stderr, text: "Please note that these warnings")
+        await harness.emit(id: id, output: line)
+        let job = try #require(harness.job(for: id))
+
+        #expect(
+            harness.viewModel.bodyContent
+                == .output(jobID: job.id, lines: [line], standardErrorIsNormalOutput: true),
+        )
     }
 
     // MARK: - shouldAutoExpandConsole

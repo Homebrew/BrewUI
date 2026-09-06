@@ -10,5 +10,5 @@ import BrewRepositoryInterfaces
 /// view treats a different job as a different document.
 enum ConsoleBodyContent: Equatable {
     case noActivity
-    case output(jobID: CommandJobID, lines: [BrewCommandOutputLine])
+    case output(jobID: CommandJobID, lines: [BrewCommandOutputLine], standardErrorIsNormalOutput: Bool)
 }
