@@ -3,6 +3,7 @@
 //  BrewTests
 //
 
+import BrewAppStorage
 @testable import BrewCrashReporting
 import Foundation
 import Testing
@@ -116,5 +117,26 @@ struct CrashReportStoreTests {
         try store.save(text: text, date: Date(timeIntervalSince1970: 1000))
 
         #expect(store.pendingReports().map(\.text) == [text])
+    }
+}
+
+struct CrashReportStoreLocationTests {
+    @Test func `reports default into the namespaced application support directory`() {
+        let expected = BrewAppStorageLocations.applicationSupportDirectoryURL
+            .appendingPathComponent("CrashReports", isDirectory: true)
+
+        #expect(CrashReportStore.defaultDirectoryURL == expected)
+    }
+
+    @Test func `reports are not stored in the purgeable caches directory`() {
+        let path = CrashReportStore.defaultDirectoryURL.path
+
+        #expect(!path.contains(BrewAppStorageLocations.cachesDirectoryURL.path))
+    }
+
+    @Test func `reports no longer default into the legacy directory`() {
+        let path = CrashReportStore.defaultDirectoryURL.path
+
+        #expect(!path.contains(BrewAppStorageLocations.legacyApplicationSupportDirectoryURL.path))
     }
 }

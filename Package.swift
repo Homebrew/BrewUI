@@ -71,6 +71,7 @@ let package = Package(
         ),
         .target(
             name: "BrewCrashReporting",
+            dependencies: ["BrewAppStorage"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -244,7 +245,7 @@ let package = Package(
         ),
         .testTarget(
             name: "BrewCrashReportingTests",
-            dependencies: ["BrewCrashReporting"],
+            dependencies: ["BrewCrashReporting", "BrewAppStorage"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),

@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAppStorage
 import Foundation
 
 /// Persists and enumerates crash reports on disk as individual
@@ -13,8 +14,16 @@ import Foundation
 public struct CrashReportStore: Sendable {
     private let directoryURL: URL
 
+    /// The folder reports live in, under the app's Application Support directory.
+    public static let directoryName = "CrashReports"
+
+    /// A pending report cannot be regenerated, so unlike the API caches these bytes stay in
+    /// Application Support, where the system will not purge them out from under an unlaunched app.
+    public static let defaultDirectoryURL = BrewAppStorageLocations.applicationSupportDirectoryURL
+        .appendingPathComponent(directoryName, isDirectory: true)
+
     public init(directoryURL: URL? = nil) {
-        self.directoryURL = directoryURL ?? Self.defaultDirectoryURL()
+        self.directoryURL = directoryURL ?? Self.defaultDirectoryURL
     }
 
     public func reportFileURL(for date: Date) -> URL {
@@ -126,13 +135,4 @@ public struct CrashReportStore: Sendable {
     }
 
     private static let truncationMarker = "\n\n… report truncated …\n"
-
-    private static func defaultDirectoryURL() -> URL {
-        let fileManager = FileManager.default
-        let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? fileManager.temporaryDirectory
-        return base
-            .appendingPathComponent("Brew", isDirectory: true)
-            .appendingPathComponent("CrashReports", isDirectory: true)
-    }
 }

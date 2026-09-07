@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAppStorage
 import Foundation
 
 /// Builds a pre-filled "new issue" URL on the app's GitHub repository from a
@@ -45,12 +46,18 @@ enum CrashReportIssue {
         """
     }
 
+    /// The tilde form of ``CrashReportStore/defaultDirectoryURL``, which is what a person needs in
+    /// order to find the file in Finder.
+    private static let reportDirectoryDisplayPath =
+        "~/Library/Application Support/\(BrewAppStorageLocations.bundleIdentifier)/" +
+        CrashReportStore.directoryName
+
     private static func truncatedLog(_ text: String) -> String {
         guard text.count > maxBodyLength else {
             return text
         }
         let prefix = text.prefix(maxBodyLength)
         return prefix + "\n… (truncated — please attach the full crash log from " +
-            "~/Library/Application Support/Brew/CrashReports)"
+            "\(reportDirectoryDisplayPath))"
     }
 }
