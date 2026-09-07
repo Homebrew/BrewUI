@@ -20,6 +20,14 @@ public actor CatalogueCache: CatalogueCaching {
     private var hasPrepared = false
     private var prepareTask: Task<(FormulaCatalogueJSON?, CaskCatalogueJSON?), Never>?
 
+    /// An ETag-validated copy of a network response, so a purge costs one refetch.
+    static func defaultCacheDirectoryURL() -> URL {
+        let fileManager = FileManager.default
+        let base = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first
+            ?? fileManager.temporaryDirectory
+        return base.appendingPathComponent("sh.brew.app", isDirectory: true)
+    }
+
     /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for
     /// `FileManager.default` / `UserDefaults.standard` itself so it doesn't have to store
     /// non-Sendable singletons. Tests pass a unique tmp directory + unique key prefix to isolate.
@@ -121,14 +129,6 @@ public actor CatalogueCache: CatalogueCaching {
 }
 
 private extension CatalogueCache {
-    static func defaultCacheDirectoryURL() -> URL {
-        let fileManager = FileManager.default
-        if let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            return appSupportURL.appendingPathComponent("Brew", isDirectory: true)
-        }
-        return fileManager.temporaryDirectory.appendingPathComponent("Brew", isDirectory: true)
-    }
-
     static func formulaCacheURL(in directoryURL: URL) -> URL {
         directoryURL.appendingPathComponent("formula-cache.json")
     }

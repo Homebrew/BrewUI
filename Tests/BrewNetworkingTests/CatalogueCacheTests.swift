@@ -155,3 +155,16 @@ private struct TestFixture {
         )
     }
 }
+
+struct CatalogueCacheLocationTests {
+    @Test func `catalogue cache defaults into the namespaced caches directory`() throws {
+        let expected = try #require(FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("sh.brew.app", isDirectory: true)
+
+        #expect(CatalogueCache.defaultCacheDirectoryURL() == expected)
+    }
+
+    @Test func `catalogue cache does not default into application support`() {
+        #expect(!CatalogueCache.defaultCacheDirectoryURL().path.contains("Application Support"))
+    }
+}
