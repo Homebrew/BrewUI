@@ -29,8 +29,7 @@ public actor DiscoverAnalyticsCache: DiscoverAnalyticsCaching {
     private var hasPrepared = false
     private var prepareTask: Task<[CacheKey: Data], Never>?
 
-    /// Same rationale as ``CatalogueCache/defaultCacheDirectoryURL``: an ETag-validated copy of a
-    /// network response, replaceable by a refetch.
+    /// An ETag-validated copy of a network response, so a purge costs one refetch.
     static let defaultCacheDirectoryURL = BrewAppStorageLocations.cachesDirectoryURL
 
     /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for

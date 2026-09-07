@@ -53,8 +53,7 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
-        // Dependency-free by design: the lowest layer of the app, naming the on-disk directories
-        // that every persistent store resolves against.
+        // Dependency-free by design: the bottom of the graph, so any store can resolve against it.
         .target(
             name: "BrewAppStorage",
             swiftSettings: [

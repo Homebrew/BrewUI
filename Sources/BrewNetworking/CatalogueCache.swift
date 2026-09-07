@@ -21,8 +21,7 @@ public actor CatalogueCache: CatalogueCaching {
     private var hasPrepared = false
     private var prepareTask: Task<(FormulaCatalogueJSON?, CaskCatalogueJSON?), Never>?
 
-    /// Catalogue bytes are an ETag-validated copy of a network response, so they belong in
-    /// `Caches`: a purge costs one refetch, and they stay out of the user's backups.
+    /// An ETag-validated copy of a network response, so a purge costs one refetch.
     static let defaultCacheDirectoryURL = BrewAppStorageLocations.cachesDirectoryURL
 
     /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for

@@ -83,9 +83,8 @@ struct BrewApp: App {
         NSWindow.allowsAutomaticWindowTabbing = false
     }
 
-    /// Moves crash reports written before the app namespaced its storage by bundle identifier, then
-    /// drops the directory they shared with the caches. Skipped under `-uiTesting`, which must never
-    /// delete a directory belonging to the real install on the machine running the tests.
+    /// Skipped under `-uiTesting`: this deletes a real directory in the user's Library, which a
+    /// test run must never touch.
     private static func migrateLegacyStorage(uiTesting: BrewUITestingLaunchConfiguration?) {
         guard uiTesting == nil else {
             return

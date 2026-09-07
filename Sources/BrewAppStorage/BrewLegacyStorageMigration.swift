@@ -5,15 +5,10 @@
 
 import Foundation
 
-/// One-time move off `~/Library/Application Support/Brew`, the directory every store shared before
-/// the app namespaced its storage by bundle identifier.
+/// One-time move off `~/Library/Application Support/Brew`.
 public enum BrewLegacyStorageMigration {
-    /// Rescues the named subdirectories, then deletes the legacy directory and everything still in
-    /// it — the caches that lived there are regenerable and have moved to `Caches` anyway.
-    ///
-    /// Nothing is deleted until every rescue has succeeded, so a failure leaves the legacy directory
-    /// where it is and the next launch tries again. Returns whether the legacy directory is gone,
-    /// which is the only thing a caller could act on; there is no user-facing failure here.
+    /// Rescues the named subdirectories, then deletes the legacy directory and everything left in
+    /// it. Nothing is deleted until every rescue succeeds, so a failure retries on the next launch.
     @discardableResult
     public static func run(
         preserving subdirectoryNames: [String],
@@ -41,8 +36,8 @@ public enum BrewLegacyStorageMigration {
         }
     }
 
-    /// Moves files one at a time rather than moving the folder, because the destination may already
-    /// hold files written since the app moved: a name present on both sides keeps the newer copy.
+    /// File-at-a-time rather than moving the folder: the destination may already hold newer files,
+    /// which win.
     private static func rescue(
         subdirectoryNamed name: String,
         from legacyDirectoryURL: URL,

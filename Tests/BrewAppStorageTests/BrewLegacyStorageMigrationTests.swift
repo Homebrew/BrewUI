@@ -7,8 +7,7 @@
 import Foundation
 import Testing
 
-/// A pair of throwaway directories standing in for the legacy and namespaced Application Support
-/// folders, so no test ever reads or deletes anything in the real `~/Library`.
+/// Throwaway directories, so no test reads or deletes anything in the real `~/Library`.
 private struct MigrationFixture {
     let legacyURL: URL
     let destinationURL: URL

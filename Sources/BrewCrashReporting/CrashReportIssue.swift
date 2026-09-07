@@ -46,8 +46,7 @@ enum CrashReportIssue {
         """
     }
 
-    /// The tilde form of ``CrashReportStore/defaultDirectoryURL``, which is what a person needs in
-    /// order to find the file in Finder.
+    /// Tilde form, because the resolved URL spells out the user's home directory.
     private static let reportDirectoryDisplayPath =
         "~/Library/Application Support/\(BrewAppStorageLocations.bundleIdentifier)/" +
         CrashReportStore.directoryName

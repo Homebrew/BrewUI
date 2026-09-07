@@ -5,34 +5,25 @@
 
 import Foundation
 
-/// The per-user directories the app owns on disk.
-///
-/// The app is unsandboxed, so it writes into the shared `~/Library` rather than a container:
-/// every directory is namespaced by bundle identifier so nothing collides with the `brew`
-/// CLI's own `Homebrew` folders, or with anything else called `Brew`.
-///
-/// Which of the two roots a store belongs in is decided by whether its contents can be
-/// rebuilt: ``cachesDirectoryURL`` is purgeable by the system and excluded from backups,
-/// ``applicationSupportDirectoryURL`` is neither.
+/// The per-user directories the app owns on disk. Unsandboxed, so there is no container to
+/// namespace writes and `~/Library` is shared ground. A store belongs in Caches only if losing
+/// it costs nothing but a refetch.
 public enum BrewAppStorageLocations {
-    /// Matches `PRODUCT_BUNDLE_IDENTIFIER`. Spelled out rather than read from `Bundle.main` so
-    /// unit tests and the crash-signal path resolve the same directories the app does.
+    /// Not read from `Bundle.main`: tests and the crash-signal path must resolve the app's own
+    /// directories. Pinned to `PRODUCT_BUNDLE_IDENTIFIER` by a test.
     public static let bundleIdentifier = "sh.brew.app"
 
-    /// The single directory every store shared before the move to bundle-identifier namespacing.
     public static let legacyDirectoryName = "Brew"
 
-    /// Regenerable content — anything a refetch or a recompute can replace.
     public static var cachesDirectoryURL: URL {
         namespaced(.cachesDirectory)
     }
 
-    /// App-owned data that a purge would destroy for good.
     public static var applicationSupportDirectoryURL: URL {
         namespaced(.applicationSupportDirectory)
     }
 
-    /// `~/Library/Application Support/Brew` — read only to migrate off it.
+    /// Read only to migrate off it; nothing should write here.
     public static var legacyApplicationSupportDirectoryURL: URL {
         base(.applicationSupportDirectory).appendingPathComponent(legacyDirectoryName, isDirectory: true)
     }
@@ -41,8 +32,7 @@ public enum BrewAppStorageLocations {
         base(directory).appendingPathComponent(bundleIdentifier, isDirectory: true)
     }
 
-    /// Falls back to the temporary directory so a store still has somewhere to write when the
-    /// search path cannot be resolved.
+    /// Falls back to the temporary directory so a store always has somewhere to write.
     private static func base(_ directory: FileManager.SearchPathDirectory) -> URL {
         let fileManager = FileManager.default
         return fileManager.urls(for: directory, in: .userDomainMask).first ?? fileManager.temporaryDirectory
