@@ -6,6 +6,7 @@
 //
 
 import BrewAppEnvironment
+import BrewAppStorage
 import BrewCLI
 import BrewCore
 import BrewCrashReporting
@@ -47,6 +48,7 @@ struct BrewApp: App {
         // nil in every production launch, so both process-boundary seams below fall through to the
         // live wiring untouched.
         let uiTesting = BrewUITestingLaunchConfiguration.current()
+        Self.migrateLegacyStorage(uiTesting: uiTesting)
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
         let fixtures = Self.installFixtures(uiTesting: uiTesting)
         let catalogue = Self.makeCatalogueCache(fixtures: fixtures)
@@ -79,6 +81,16 @@ struct BrewApp: App {
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
         NSWindow.allowsAutomaticWindowTabbing = false
+    }
+
+    /// Moves crash reports written before the app namespaced its storage by bundle identifier, then
+    /// drops the directory they shared with the caches. Skipped under `-uiTesting`, which must never
+    /// delete a directory belonging to the real install on the machine running the tests.
+    private static func migrateLegacyStorage(uiTesting: BrewUITestingLaunchConfiguration?) {
+        guard uiTesting == nil else {
+            return
+        }
+        BrewLegacyStorageMigration.run(preserving: [CrashReportStore.directoryName])
     }
 
     /// Cleared at launch, so a previous run's ETag or refresh timestamp cannot decide this run's fetches.

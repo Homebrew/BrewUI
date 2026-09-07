@@ -26,6 +26,7 @@
 		EEAA110F00000000000000BF /* BrewAccessibilityID in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100F00000000000000CF /* BrewAccessibilityID */; };
 		EEAA111000000000000000C0 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101000000000000000D0 /* BrewUITestContract */; };
 		EEAA111100000000000000C1 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101100000000000000D1 /* BrewUITestContract */; };
+		EEAA111200000000000000C2 /* BrewAppStorage in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101200000000000000D2 /* BrewAppStorage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EEAA111200000000000000C2 /* BrewAppStorage in Frameworks */,
 				EEAA110100000000000000B1 /* BrewCore in Frameworks */,
 				EEAA110200000000000000B2 /* BrewUIComponents in Frameworks */,
 				EEAA110300000000000000B3 /* BrewCLI in Frameworks */,
@@ -173,6 +175,7 @@
 			);
 			name = Homebrew;
 			packageProductDependencies = (
+				EEAA101200000000000000D2 /* BrewAppStorage */,
 				EEAA100100000000000000C1 /* BrewCore */,
 				EEAA100200000000000000C2 /* BrewUIComponents */,
 				EEAA100300000000000000C3 /* BrewCLI */,
@@ -690,6 +693,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA00012F70000000000001 /* XCLocalSwiftPackageReference "Tools/BrewUILint" */;
 			productName = "plugin:BrewUILintPlugin";
+		};
+		EEAA101200000000000000D2 /* BrewAppStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewAppStorage;
 		};
 		EEAA100100000000000000C1 /* BrewCore */ = {
 			isa = XCSwiftPackageProductDependency;
