@@ -3,6 +3,7 @@
 //  BrewNetworking
 //
 
+import BrewAppStorage
 import BrewCore
 import Foundation
 
@@ -28,6 +29,10 @@ public actor DiscoverAnalyticsCache: DiscoverAnalyticsCaching {
     private var hasPrepared = false
     private var prepareTask: Task<[CacheKey: Data], Never>?
 
+    /// Same rationale as ``CatalogueCache/defaultCacheDirectoryURL``: an ETag-validated copy of a
+    /// network response, replaceable by a refetch.
+    static let defaultCacheDirectoryURL = BrewAppStorageLocations.cachesDirectoryURL
+
     /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for
     /// `FileManager.default` / `UserDefaults.standard` itself so it doesn't have to store
     /// non-Sendable singletons. Tests pass a unique tmp directory + unique key prefix to isolate.
@@ -35,7 +40,7 @@ public actor DiscoverAnalyticsCache: DiscoverAnalyticsCaching {
         cacheDirectoryURL: URL? = nil,
         defaultsKeyPrefix: String = "DiscoverAnalyticsCache",
     ) {
-        self.cacheDirectoryURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL()
+        self.cacheDirectoryURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL
         self.defaultsKeyPrefix = defaultsKeyPrefix
     }
 
@@ -120,14 +125,6 @@ public actor DiscoverAnalyticsCache: DiscoverAnalyticsCaching {
 }
 
 private extension DiscoverAnalyticsCache {
-    static func defaultCacheDirectoryURL() -> URL {
-        let fileManager = FileManager.default
-        if let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            return appSupportURL.appendingPathComponent("Brew", isDirectory: true)
-        }
-        return fileManager.temporaryDirectory.appendingPathComponent("Brew", isDirectory: true)
-    }
-
     static func cacheURL(in directoryURL: URL, kind: AnalyticsKind, window: BrewAnalyticsWindow) -> URL {
         directoryURL.appendingPathComponent("\(kind.rawValue)-analytics-\(window.rawValue).json")
     }

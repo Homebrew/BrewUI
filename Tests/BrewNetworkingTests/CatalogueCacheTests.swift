@@ -3,6 +3,7 @@
 //  BrewTests
 //
 
+import BrewAppStorage
 import BrewCoreTestSupport
 @testable import BrewNetworking
 import Foundation
@@ -153,5 +154,17 @@ private struct TestFixture {
             ]
             """.utf8,
         )
+    }
+}
+
+struct CatalogueCacheLocationTests {
+    @Test func `catalogue cache defaults to the app's caches directory`() {
+        #expect(CatalogueCache.defaultCacheDirectoryURL == BrewAppStorageLocations.cachesDirectoryURL)
+    }
+
+    @Test func `catalogue cache no longer defaults into application support`() {
+        let path = CatalogueCache.defaultCacheDirectoryURL.path
+
+        #expect(!path.contains("Application Support"))
     }
 }

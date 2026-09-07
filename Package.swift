@@ -100,7 +100,7 @@ let package = Package(
         ),
         .target(
             name: "BrewNetworking",
-            dependencies: ["BrewCore"],
+            dependencies: ["BrewAppStorage", "BrewCore"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -268,7 +268,7 @@ let package = Package(
         ),
         .testTarget(
             name: "BrewNetworkingTests",
-            dependencies: ["BrewNetworking", "BrewCoreTestSupport"],
+            dependencies: ["BrewNetworking", "BrewAppStorage", "BrewCoreTestSupport"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),

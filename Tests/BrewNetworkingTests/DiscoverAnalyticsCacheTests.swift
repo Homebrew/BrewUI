@@ -3,6 +3,7 @@
 //  BrewTests
 //
 
+import BrewAppStorage
 import BrewCore
 import BrewCoreTestSupport
 @testable import BrewNetworking
@@ -154,5 +155,17 @@ private struct TestFixture {
     func cleanup() {
         try? FileManager.default.removeItem(at: cacheDirectoryURL)
         UserDefaults.standard.removePersistedKeys(withPrefix: defaultsKeyPrefix)
+    }
+}
+
+struct DiscoverAnalyticsCacheLocationTests {
+    @Test func `analytics cache defaults to the app's caches directory`() {
+        #expect(DiscoverAnalyticsCache.defaultCacheDirectoryURL == BrewAppStorageLocations.cachesDirectoryURL)
+    }
+
+    @Test func `analytics cache no longer defaults into application support`() {
+        let path = DiscoverAnalyticsCache.defaultCacheDirectoryURL.path
+
+        #expect(!path.contains("Application Support"))
     }
 }

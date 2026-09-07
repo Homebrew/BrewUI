@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewAppStorage
 import Foundation
 
 public actor CatalogueCache: CatalogueCaching {
@@ -20,6 +21,10 @@ public actor CatalogueCache: CatalogueCaching {
     private var hasPrepared = false
     private var prepareTask: Task<(FormulaCatalogueJSON?, CaskCatalogueJSON?), Never>?
 
+    /// Catalogue bytes are an ETag-validated copy of a network response, so they belong in
+    /// `Caches`: a purge costs one refetch, and they stay out of the user's backups.
+    static let defaultCacheDirectoryURL = BrewAppStorageLocations.cachesDirectoryURL
+
     /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for
     /// `FileManager.default` / `UserDefaults.standard` itself so it doesn't have to store
     /// non-Sendable singletons. Tests pass a unique tmp directory + unique key prefix to isolate.
@@ -27,7 +32,7 @@ public actor CatalogueCache: CatalogueCaching {
         cacheDirectoryURL: URL? = nil,
         defaultsKeyPrefix: String = "CatalogueCache",
     ) {
-        self.cacheDirectoryURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL()
+        self.cacheDirectoryURL = cacheDirectoryURL ?? Self.defaultCacheDirectoryURL
         self.defaultsKeyPrefix = defaultsKeyPrefix
     }
 
@@ -121,14 +126,6 @@ public actor CatalogueCache: CatalogueCaching {
 }
 
 private extension CatalogueCache {
-    static func defaultCacheDirectoryURL() -> URL {
-        let fileManager = FileManager.default
-        if let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
-            return appSupportURL.appendingPathComponent("Brew", isDirectory: true)
-        }
-        return fileManager.temporaryDirectory.appendingPathComponent("Brew", isDirectory: true)
-    }
-
     static func formulaCacheURL(in directoryURL: URL) -> URL {
         directoryURL.appendingPathComponent("formula-cache.json")
     }
