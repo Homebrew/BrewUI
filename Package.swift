@@ -23,6 +23,7 @@ let package = Package(
         .library(name: "BrewServicesTestSupport", targets: ["BrewServicesTestSupport"]),
         .library(name: "BrewFeatureConsole", targets: ["BrewFeatureConsole"]),
         .library(name: "BrewFeatureInstalled", targets: ["BrewFeatureInstalled"]),
+        .library(name: "BrewFeatureSelfUpdate", targets: ["BrewFeatureSelfUpdate"]),
         .library(name: "BrewFeatureDiscover", targets: ["BrewFeatureDiscover"]),
         .library(name: "BrewFeatureDoctor", targets: ["BrewFeatureDoctor"]),
         .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
@@ -170,6 +171,21 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        // Its own module because the banner is on three lists across two other features, so neither can own
+        // it. Deliberately does not depend on them.
+        .target(
+            name: "BrewFeatureSelfUpdate",
+            dependencies: [
+                "BrewAccessibilityID",
+                "BrewCore",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -341,6 +357,18 @@ let package = Package(
                 "BrewNetworking",
                 "BrewCoreTestSupport",
                 "BrewServicesTestSupport",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewFeatureSelfUpdateTests",
+            dependencies: [
+                "BrewFeatureSelfUpdate",
+                "BrewCore",
+                "BrewRepositoryInterfaces",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
