@@ -9,6 +9,7 @@ let package = Package(
     products: [
         .library(name: "BrewAccessibilityID", targets: ["BrewAccessibilityID"]),
         .library(name: "BrewUITestContract", targets: ["BrewUITestContract"]),
+        .library(name: "BrewAppStorage", targets: ["BrewAppStorage"]),
         .library(name: "BrewCore", targets: ["BrewCore"]),
         .library(name: "BrewCrashReporting", targets: ["BrewCrashReporting"]),
         .library(name: "BrewUIComponents", targets: ["BrewUIComponents"]),
@@ -47,6 +48,15 @@ let package = Package(
         // environment key names and the fixture payload — so both sides spell them once.
         .target(
             name: "BrewUITestContract",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        // Dependency-free by design: the lowest layer of the app, naming the on-disk directories
+        // that every persistent store resolves against.
+        .target(
+            name: "BrewAppStorage",
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -219,6 +229,14 @@ let package = Package(
         .testTarget(
             name: "BrewAccessibilityIDTests",
             dependencies: ["BrewAccessibilityID"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewAppStorageTests",
+            dependencies: ["BrewAppStorage"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
