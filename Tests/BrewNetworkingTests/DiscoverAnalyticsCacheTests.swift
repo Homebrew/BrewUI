@@ -156,3 +156,16 @@ private struct TestFixture {
         UserDefaults.standard.removePersistedKeys(withPrefix: defaultsKeyPrefix)
     }
 }
+
+struct DiscoverAnalyticsCacheLocationTests {
+    @Test func `analytics cache defaults into the namespaced caches directory`() throws {
+        let expected = try #require(FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first)
+            .appendingPathComponent("sh.brew.app", isDirectory: true)
+
+        #expect(DiscoverAnalyticsCache.defaultCacheDirectoryURL() == expected)
+    }
+
+    @Test func `analytics cache does not default into application support`() {
+        #expect(!DiscoverAnalyticsCache.defaultCacheDirectoryURL().path.contains("Application Support"))
+    }
+}

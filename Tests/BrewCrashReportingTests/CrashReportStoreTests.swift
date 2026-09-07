@@ -118,3 +118,19 @@ struct CrashReportStoreTests {
         #expect(store.pendingReports().map(\.text) == [text])
     }
 }
+
+struct CrashReportStoreLocationTests {
+    @Test func `reports default into the namespaced application support directory`() throws {
+        let expected = try #require(
+            FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
+        )
+        .appendingPathComponent("sh.brew.app", isDirectory: true)
+        .appendingPathComponent("CrashReports", isDirectory: true)
+
+        #expect(CrashReportStore.defaultDirectoryURL() == expected)
+    }
+
+    @Test func `reports are not stored in the purgeable caches directory`() {
+        #expect(!CrashReportStore.defaultDirectoryURL().path.contains("/Caches/"))
+    }
+}
