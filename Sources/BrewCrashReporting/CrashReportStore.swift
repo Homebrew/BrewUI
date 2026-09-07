@@ -127,7 +127,7 @@ public struct CrashReportStore: Sendable {
 
     private static let truncationMarker = "\n\n… report truncated …\n"
 
-    /// Not `Caches`: a pending report cannot be regenerated, so it must not be purgeable.
+    /// Application Support, not Caches: a pending report cannot be regenerated.
     static func defaultDirectoryURL() -> URL {
         let fileManager = FileManager.default
         let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first

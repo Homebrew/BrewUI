@@ -28,7 +28,7 @@ public actor DiscoverAnalyticsCache: DiscoverAnalyticsCaching {
     private var hasPrepared = false
     private var prepareTask: Task<[CacheKey: Data], Never>?
 
-    /// An ETag-validated copy of a network response, so a purge costs one refetch.
+    /// Caches, not Application Support: losing this costs a refetch.
     static func defaultCacheDirectoryURL() -> URL {
         let fileManager = FileManager.default
         let base = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first
@@ -36,9 +36,6 @@ public actor DiscoverAnalyticsCache: DiscoverAnalyticsCaching {
         return base.appendingPathComponent("sh.brew.app", isDirectory: true)
     }
 
-    /// `cacheDirectoryURL` and `defaultsKeyPrefix` are the only test seams; the actor reaches for
-    /// `FileManager.default` / `UserDefaults.standard` itself so it doesn't have to store
-    /// non-Sendable singletons. Tests pass a unique tmp directory + unique key prefix to isolate.
     public init(
         cacheDirectoryURL: URL? = nil,
         defaultsKeyPrefix: String = "DiscoverAnalyticsCache",
