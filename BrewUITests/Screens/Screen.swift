@@ -66,4 +66,50 @@ extension Screen {
         BrewUIButton(app, .errorRetryButton, in: root.element).tap(file: file, line: line)
         return self
     }
+
+    // MARK: Self-update banner
+
+    /// On every package list, so it is here rather than on one screen.
+    var selfUpdateBanner: BrewUIElement {
+        BrewUIElement(app, .selfUpdateBanner)
+    }
+
+    var selfUpdateUpgradeButton: BrewUIButton {
+        BrewUIButton(app, .selfUpdateUpgradeButton)
+    }
+
+    var selfUpdateLaterButton: BrewUIButton {
+        BrewUIButton(app, .selfUpdateLaterButton)
+    }
+
+    @discardableResult
+    func assertShowsSelfUpdateBanner(
+        timeout: TimeInterval = BrewUITestTimeout.default,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        selfUpdateBanner.waitToExist(timeout: timeout, file: file, line: line)
+        return self
+    }
+
+    @discardableResult
+    func assertHidesSelfUpdateBanner(
+        timeout: TimeInterval = BrewUITestTimeout.disappearance,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        selfUpdateBanner.assertDoesNotExist(timeout: timeout, file: file, line: line)
+        return self
+    }
+
+    /// Returns nothing: the app terminates, so the caller has to pick the relaunched process back up.
+    func startSelfUpdate(file: StaticString = #filePath, line: UInt = #line) {
+        selfUpdateUpgradeButton.tap(file: file, line: line)
+    }
+
+    @discardableResult
+    func deferSelfUpdate(file: StaticString = #filePath, line: UInt = #line) -> Self {
+        selfUpdateLaterButton.tap(file: file, line: line)
+        return self
+    }
 }
