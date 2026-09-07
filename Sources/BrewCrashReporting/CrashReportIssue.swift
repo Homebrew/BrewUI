@@ -51,6 +51,6 @@ enum CrashReportIssue {
         }
         let prefix = text.prefix(maxBodyLength)
         return prefix + "\n… (truncated — please attach the full crash log from " +
-            "~/Library/Application Support/Brew/CrashReports)"
+            "~/Library/Application Support/sh.brew.app/CrashReports)"
     }
 }

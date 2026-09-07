@@ -127,12 +127,13 @@ public struct CrashReportStore: Sendable {
 
     private static let truncationMarker = "\n\n… report truncated …\n"
 
-    private static func defaultDirectoryURL() -> URL {
+    /// Not `Caches`: a pending report cannot be regenerated, so it must not be purgeable.
+    static func defaultDirectoryURL() -> URL {
         let fileManager = FileManager.default
         let base = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fileManager.temporaryDirectory
         return base
-            .appendingPathComponent("Brew", isDirectory: true)
+            .appendingPathComponent("sh.brew.app", isDirectory: true)
             .appendingPathComponent("CrashReports", isDirectory: true)
     }
 }

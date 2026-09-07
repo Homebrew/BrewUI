@@ -45,4 +45,12 @@ struct CrashReportIssueTests {
         let body = try? #require(queryItems(of: url)["body"])
         #expect(body?.contains("truncated") == true)
     }
+
+    @Test func `the attach note points at the directory reports are written to`() {
+        let longText = String(repeating: "x", count: CrashReportIssue.maxBodyLength + 500)
+        let url = CrashReportIssue.url(for: makeReport(text: longText))
+
+        let body = try? #require(queryItems(of: url)["body"])
+        #expect(body?.contains("~/Library/Application Support/sh.brew.app/CrashReports") == true)
+    }
 }
