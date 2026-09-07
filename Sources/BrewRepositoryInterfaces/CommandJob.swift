@@ -133,6 +133,8 @@ public extension CommandJob {
             displayCommand
         case let .bulkUpgrade(selection):
             selection.displayCommand
+        case .selfUpgrade:
+            SelfUpdateIdentity.displayCommand
         }
         return CommandJob(
             operationID: id,
@@ -165,10 +167,9 @@ public extension CommandJob {
         case .uninstallCask:
             verb = "uninstall"
             isCask = true
-        case .doctorFix, .doctorRead, .upgradeAll:
-            // Unreachable: doctor kinds use `.maintenance` ids, and `.upgradeAll` uses `.bulkUpgrade` —
-            // both materialize their display command in the outer switch rather than via package-name
-            // synthesis. Fall back defensively.
+        case .doctorFix, .doctorRead, .upgradeAll, .upgradeApp:
+            // Unreachable: these all materialize their display command in the outer switch rather than via
+            // package-name synthesis. Fall back defensively.
             return "brew"
         }
         if isCask {

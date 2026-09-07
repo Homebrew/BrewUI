@@ -22,7 +22,8 @@ public struct PackageOperationSubject: Hashable, Sendable {
             packageID == self.packageID
         case let .bulkUpgrade(selection):
             selection.covers(packageID: packageID, isOutdated: isOutdated)
-        case .maintenance:
+        case .maintenance, .selfUpgrade:
+            // Neither is package-scoped; the app's own cask is not part of the inventory any surface observes.
             false
         }
     }

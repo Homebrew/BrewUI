@@ -39,6 +39,13 @@ struct BrewCommandsTests {
         #expect(command.operationKind == .upgradeAll)
     }
 
+    @Test func `selfUpgrade upgrades the app's own cask under upgradeApp`() {
+        let command = BrewCommands.selfUpgrade()
+        #expect(command.arguments == ["upgrade", "--cask", "homebrew-app"])
+        #expect(command.arguments == ["upgrade", "--cask", SelfUpdateIdentity.caskToken])
+        #expect(command.operationKind == .upgradeApp)
+    }
+
     @Test func `doctorFix passes the argv through under doctorFix`() {
         let command = BrewCommands.doctorFix(arguments: ["link", "openssl@3"])
         #expect(command.arguments == ["link", "openssl@3"])

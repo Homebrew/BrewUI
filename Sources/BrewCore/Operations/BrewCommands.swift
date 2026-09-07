@@ -35,6 +35,14 @@ public enum BrewCommands {
         BrewCommand(operationKind: .upgradeAll, arguments: selection.arguments)
     }
 
+    /// The quit → replace → relaunch handoff that makes this safe to run lives above this layer.
+    public static func selfUpgrade() -> BrewCommand {
+        BrewCommand(
+            operationKind: .upgradeApp,
+            arguments: ["upgrade", "--cask", SelfUpdateIdentity.caskToken],
+        )
+    }
+
     /// A `brew doctor` fix, e.g. `["link", "openssl@3"]` or `["cleanup"]` — the argv is the fix itself.
     public static func doctorFix(arguments: [String]) -> BrewCommand {
         BrewCommand(operationKind: .doctorFix, arguments: arguments)

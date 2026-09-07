@@ -18,6 +18,9 @@ public protocol BrewMutatingCommandFactory: Sendable {
     /// outdated, a single kind (`--formula`/`--cask`), or an explicit list of names.
     func bulkUpgradeCommand(selection: BrewUpgradeSelection) -> BrewCommand
 
+    /// `brew upgrade --cask homebrew-app`.
+    func selfUpgradeCommand() -> BrewCommand
+
     /// Builds a maintenance command running the given `brew` argument vector (e.g. a `brew doctor` fix
     /// like `["link", "openssl@3"]` or `["cleanup"]`).
     func doctorFixCommand(arguments: [String]) -> BrewCommand

@@ -16,6 +16,8 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case upgradeFormula
     case upgradeCask
     case upgradeAll
+    /// Distinct from ``upgradeCask`` so surfaces can treat the app updating itself differently.
+    case upgradeApp
     case uninstallFormula
     case uninstallCask
     case doctorFix
@@ -42,6 +44,8 @@ public enum BrewOperationID: Hashable, Identifiable, Sendable {
     case package(HomebrewPackageID)
     case maintenance(token: String, displayCommand: String)
     case bulkUpgrade(BrewUpgradeSelection)
+    /// Singleton: the app's own upgrade isn't package-scoped and takes no selection, so a fixed case is enough.
+    case selfUpgrade
 
     public var id: Self {
         self
