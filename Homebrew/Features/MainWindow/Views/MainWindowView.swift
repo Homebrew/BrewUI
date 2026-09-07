@@ -1,4 +1,5 @@
 import AppKit
+import BrewAccessibilityID
 import BrewAppEnvironment
 import BrewCore
 import BrewFeatureConfig
@@ -6,11 +7,16 @@ import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureDoctor
 import BrewFeatureInstalled
+import BrewFeatureSelfUpdate
+
+// Used by the preview below.
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
+    let selfUpdateCoordinator: SelfUpdateCoordinator?
+
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
@@ -47,6 +53,29 @@ struct MainWindowView: View {
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
         }
+        .alert("Homebrew is up to date", isPresented: launchOutcomeBinding(for: .succeeded)) {
+            Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
+        } message: {
+            Text("The Homebrew app has been upgraded to the latest version.")
+        }
+        .alert("Homebrew wasn’t upgraded", isPresented: launchOutcomeBinding(for: .failed)) {
+            Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
+        } message: {
+            Text("The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages.")
+        }
+        .axid(.selfUpdateOutcomeAlert)
+    }
+
+    /// A failure gets its own alert rather than silence: the app looks identical at launch either way.
+    private func launchOutcomeBinding(for outcome: SelfUpdateOutcome) -> Binding<Bool> {
+        Binding(
+            get: { selfUpdateCoordinator?.lastLaunchOutcome == outcome },
+            set: { presented in
+                if !presented {
+                    selfUpdateCoordinator?.acknowledgeUpdateCompletion()
+                }
+            },
+        )
     }
 
     /// ⌘R refetches every cached surface at once, whichever tab is showing, since the sidebar counts and
@@ -108,7 +137,7 @@ struct MainWindowView: View {
 
 #if DEBUG
     #Preview {
-        MainWindowView()
+        MainWindowView(selfUpdateCoordinator: nil)
             .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
             .environment(\.installedPackagesRepository, PreviewSupport.makeInstalledPackagesRepository())
             .environment(\.discoverPackagesRepository, PreviewSupport.makeDiscoverPackagesRepository())
