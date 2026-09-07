@@ -200,6 +200,7 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
+                "BrewFeatureSelfUpdate",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -214,6 +215,7 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
+                "BrewFeatureSelfUpdate",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
