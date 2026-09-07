@@ -37,6 +37,7 @@ struct MainWindowView: View {
                 expandedHeight: consoleHeight,
                 minExpandedHeight: BrewLayout.consoleMinExpandedHeight,
                 maxExpandedHeight: BrewLayout.consoleMaxExpandedHeight,
+                minTopHeight: BrewLayout.mainPaneMinHeight,
                 animation: .brewFast,
             ) {
                 featureColumn

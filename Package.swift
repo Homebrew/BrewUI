@@ -381,6 +381,8 @@ let package = Package(
             name: "BrewFeatureInstalledTests",
             dependencies: [
                 "BrewFeatureInstalled",
+                // For the chrome-budget test: the self-update banner sits above this feature's lists.
+                "BrewFeatureSelfUpdate",
                 "BrewCLI",
                 "BrewCore",
                 "BrewUIComponents",

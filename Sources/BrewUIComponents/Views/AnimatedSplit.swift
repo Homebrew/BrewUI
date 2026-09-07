@@ -18,6 +18,8 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     let expandedHeight: CGFloat
     let minExpandedHeight: CGFloat
     let maxExpandedHeight: CGFloat
+    /// Space the top pane keeps when the two cannot both be satisfied. The bottom pane yields to it.
+    let minTopHeight: CGFloat
     let animation: NSAnimationContextSpec?
     @ViewBuilder let top: () -> Top
     @ViewBuilder let bottom: () -> Bottom
@@ -28,6 +30,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
         expandedHeight: CGFloat,
         minExpandedHeight: CGFloat,
         maxExpandedHeight: CGFloat,
+        minTopHeight: CGFloat = 0,
         animation: NSAnimationContextSpec?,
         @ViewBuilder top: @escaping () -> Top,
         @ViewBuilder bottom: @escaping () -> Bottom,
@@ -37,6 +40,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
         self.expandedHeight = expandedHeight
         self.minExpandedHeight = minExpandedHeight
         self.maxExpandedHeight = maxExpandedHeight
+        self.minTopHeight = minTopHeight
         self.animation = animation
         self.top = top
         self.bottom = bottom
@@ -65,6 +69,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
             collapsedHeight: collapsedHeight,
             minExpandedHeight: minExpandedHeight,
             maxExpandedHeight: maxExpandedHeight,
+            minTopHeight: minTopHeight,
         )
         context.coordinator.topHost = topHost
         context.coordinator.bottomHost = bottomHost
@@ -83,6 +88,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
         nsView.collapsedHeight = collapsedHeight
         nsView.minExpandedHeight = minExpandedHeight
         nsView.maxExpandedHeight = maxExpandedHeight
+        nsView.minTopHeight = minTopHeight
 
         let collapsedChanged = context.coordinator.previousCollapsed != collapsed
         context.coordinator.previousCollapsed = collapsed
@@ -116,6 +122,7 @@ public final class AnimatedSplitView: NSView {
     var collapsedHeight: CGFloat
     var minExpandedHeight: CGFloat
     var maxExpandedHeight: CGFloat
+    var minTopHeight: CGFloat
     private(set) var collapsed: Bool
     private var bottomHeight: CGFloat
     private var dragStartHeight: CGFloat?
@@ -129,6 +136,7 @@ public final class AnimatedSplitView: NSView {
         collapsedHeight: CGFloat,
         minExpandedHeight: CGFloat,
         maxExpandedHeight: CGFloat,
+        minTopHeight: CGFloat,
     ) {
         topHost = top
         bottomHost = bottom
@@ -141,6 +149,7 @@ public final class AnimatedSplitView: NSView {
         self.collapsedHeight = collapsedHeight
         self.minExpandedHeight = minExpandedHeight
         self.maxExpandedHeight = maxExpandedHeight
+        self.minTopHeight = minTopHeight
         super.init(frame: .zero)
         wantsLayer = true
         addSubview(topHost)
@@ -185,7 +194,9 @@ public final class AnimatedSplitView: NSView {
         let width = bounds.width
         let handleH = collapsed ? 0 : Self.handleThickness
         let dividerH = Self.dividerThickness
-        let bottomH = max(0, min(bottom, total))
+        // Recomputed on every layout rather than stored, so shrinking the window squeezes the bottom
+        // pane and growing it back restores the height that was asked for.
+        let bottomH = fit(bottom)
         let topH = max(0, total - bottomH - handleH - dividerH)
 
         // NSView coordinates are bottom-up by default: y=0 is the bottom edge. Stacking from the
@@ -219,6 +230,20 @@ public final class AnimatedSplitView: NSView {
         )
     }
 
+    private func fit(_ value: CGFloat) -> CGFloat {
+        fittedSplitBottomHeight(
+            value,
+            total: bounds.height,
+            collapsed: collapsed,
+            limits: SplitHeightLimits(
+                collapsedHeight: collapsedHeight,
+                minExpanded: minExpandedHeight,
+                minTop: minTopHeight,
+                chrome: (collapsed ? 0 : Self.handleThickness) + Self.dividerThickness,
+            ),
+        )
+    }
+
     @objc private func handlePan(_ recognizer: NSPanGestureRecognizer) {
         switch recognizer.state {
         case .began:
@@ -229,7 +254,7 @@ public final class AnimatedSplitView: NSView {
             }
             // Non-flipped NSView: positive translation.y == cursor moved up == bottom pane grows.
             let proposed = start + recognizer.translation(in: self).y
-            bottomHeight = clamp(proposed, collapsed: false)
+            bottomHeight = fit(clamp(proposed, collapsed: false))
             applyLayout(forBottomHeight: bottomHeight, animated: false)
         case .ended, .cancelled, .failed:
             dragStartHeight = nil
@@ -287,4 +312,34 @@ func clampedSplitBottomHeight(
         return collapsedHeight
     }
     return max(min(value, maxExpanded), minExpanded)
+}
+
+/// The fixed heights a split has to respect, as one value so the fitting maths stays readable.
+struct SplitHeightLimits {
+    let collapsedHeight: CGFloat
+    let minExpanded: CGFloat
+    /// What the top pane keeps when the two panes cannot both be satisfied.
+    let minTop: CGFloat
+    /// The handle and divider between them, which come out of the same budget.
+    let chrome: CGFloat
+}
+
+/// Fits an already-clamped bottom height into the space actually available.
+///
+/// The bottom pane is the accessory, so it is the one that gives way: it shrinks towards `minExpanded`
+/// to keep `minTop` for the pane above, and only eats into that once it has nothing left to give.
+/// Without this the bottom pane always got the height it asked for and the top absorbed the entire
+/// shortfall, so a short window left the top pane a sliver.
+func fittedSplitBottomHeight(
+    _ value: CGFloat,
+    total: CGFloat,
+    collapsed: Bool,
+    limits: SplitHeightLimits,
+) -> CGFloat {
+    let available = max(0, total - limits.chrome)
+    guard !collapsed else {
+        return min(limits.collapsedHeight, available)
+    }
+    let yieldingToTop = min(value, max(0, available - limits.minTop))
+    return min(max(yieldingToTop, limits.minExpanded), available)
 }
