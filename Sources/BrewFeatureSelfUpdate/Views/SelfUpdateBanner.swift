@@ -26,8 +26,7 @@ public struct SelfUpdateBanner: View {
     }
 }
 
-/// The banner shown above the package lists when the app itself is outdated. The whole flow runs from here:
-/// there is no detail pane to open, so Upgrade and Later sit on the banner.
+/// There is no detail pane to open, so Upgrade and Later sit on the banner itself.
 struct SelfUpdateBannerContent: View {
     let coordinator: SelfUpdateCoordinator
 

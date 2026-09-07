@@ -314,18 +314,14 @@ func clampedSplitBottomHeight(
     return max(min(value, maxExpanded), minExpanded)
 }
 
-/// The fixed heights a split has to respect, as one value so the fitting maths stays readable.
 struct SplitHeightLimits {
     let collapsedHeight: CGFloat
     let minExpanded: CGFloat
-    /// What the top pane keeps when the two panes cannot both be satisfied.
     let minTop: CGFloat
     /// The handle and divider between them, which come out of the same budget.
     let chrome: CGFloat
 }
 
-/// Fits an already-clamped bottom height into the space actually available.
-///
 /// The bottom pane is the accessory, so it is the one that gives way: it shrinks towards `minExpanded`
 /// to keep `minTop` for the pane above, and only eats into that once it has nothing left to give.
 /// Without this the bottom pane always got the height it asked for and the top absorbed the entire

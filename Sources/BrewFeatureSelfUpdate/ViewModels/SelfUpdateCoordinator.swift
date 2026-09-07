@@ -8,7 +8,6 @@ import BrewRepositoryInterfaces
 import Foundation
 import Observation
 
-/// Composes detection, preferences and the handoff so the banner binds to one object.
 @Observable
 @MainActor
 public final class SelfUpdateCoordinator {
@@ -24,7 +23,7 @@ public final class SelfUpdateCoordinator {
 
     public private(set) var phase: Phase = .idle
 
-    /// How the attempt that preceded this launch ended. `nil` on an ordinary launch.
+    /// `nil` on an ordinary launch.
     public private(set) var lastLaunchOutcome: SelfUpdateOutcome?
 
     public var didJustCompleteUpdate: Bool {
@@ -70,7 +69,6 @@ public final class SelfUpdateCoordinator {
         return message
     }
 
-    /// Dismissal is scoped to the available version, so a newer release re-shows the banner.
     public var isBannerVisible: Bool {
         status.isUpdateAvailable && preferences.dismissedVersion != status.latestVersion
     }

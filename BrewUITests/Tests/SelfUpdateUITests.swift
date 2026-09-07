@@ -84,7 +84,6 @@ final class SelfUpdateUITests: BrewUITestCase {
     private static let successAlertTitle = "Homebrew is up to date"
     private static let failureAlertTitle = "Homebrew wasn’t upgraded"
 
-    /// Presses Upgrade on the banner and returns the process the helper brought back.
     private func upgradeAndWaitForRelaunch(_ scenario: BrewUITestScenario) throws -> XCUIApplication {
         let app = launchUnverified(scenario)
         // Waited for explicitly because this test needs the `XCUIApplication` itself, to watch it terminate.

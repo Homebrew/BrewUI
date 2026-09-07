@@ -55,7 +55,6 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
-        // Shared with the update helper, a separate process — deliberately dependency-free.
         .target(
             name: "BrewSelfUpdateContract",
             swiftSettings: [
@@ -63,8 +62,6 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
-        // The update helper's behaviour, in the package so it can be unit-tested: the helper is an Xcode
-        // command-line target with no test host of its own. Nothing in the app links this.
         .target(
             name: "BrewSelfUpdateHelperCore",
             swiftSettings: [
@@ -177,8 +174,6 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
-        // Its own module because the banner is on three lists across two other features, so neither can own
-        // it. Deliberately does not depend on them.
         .target(
             name: "BrewFeatureSelfUpdate",
             dependencies: [
@@ -381,7 +376,6 @@ let package = Package(
             name: "BrewFeatureInstalledTests",
             dependencies: [
                 "BrewFeatureInstalled",
-                // For the chrome-budget test: the self-update banner sits above this feature's lists.
                 "BrewFeatureSelfUpdate",
                 "BrewCLI",
                 "BrewCore",

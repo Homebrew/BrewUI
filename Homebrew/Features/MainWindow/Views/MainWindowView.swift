@@ -9,7 +9,6 @@ import BrewFeatureDoctor
 import BrewFeatureInstalled
 import BrewFeatureSelfUpdate
 
-// Used by the preview below.
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI

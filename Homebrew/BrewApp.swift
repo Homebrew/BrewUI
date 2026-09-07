@@ -104,7 +104,6 @@ struct BrewApp: App {
         #else
             let statusProvider: any SelfUpdateStatusProviding = realStatusProvider
         #endif
-        // A closure, not a value: the DEBUG menu can flip this mid-session.
         let simulationRequestedAtLaunch = uiTesting?.usesFakeSelfUpdate == true
         let simulated = SelfUpdateHandoffDefaults.simulatedUpgradeDuration
         #if DEBUG

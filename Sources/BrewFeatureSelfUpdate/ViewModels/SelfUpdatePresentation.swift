@@ -34,7 +34,6 @@ struct SelfUpdatePresentation {
         return "\(runningVersionDisplay) → \(latest)"
     }
 
-    /// Names the target version when known, e.g. "Upgrade to v1.5.0".
     var upgradeActionTitle: String {
         guard let latest = latestVersionDisplay else {
             return "Upgrade Homebrew"

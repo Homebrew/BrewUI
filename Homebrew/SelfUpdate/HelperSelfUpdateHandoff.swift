@@ -10,7 +10,6 @@ import BrewRepositoryInterfaces
 import BrewSelfUpdateContract
 import Foundation
 
-/// Launches `Contents/Helpers/HomebrewUpdateHelper` and quits, leaving it to update and relaunch the app.
 struct HelperSelfUpdateHandoff: SelfUpdateHandoff {
     /// Resolved here rather than in the helper: the app already knows which `brew` it has been talking to,
     /// and a failure to find one should stop the handoff instead of quitting into a helper that cannot work.
@@ -22,8 +21,6 @@ struct HelperSelfUpdateHandoff: SelfUpdateHandoff {
     /// Carried across the relaunch so a UI-test run comes back still pointed at its fixtures.
     let relaunchArguments: [String]
     let relaunchEnvironment: [String: String]
-    /// Empty in production; under `-uiTesting` this points the fake `brew` at the fixture tree, which the
-    /// helper outlives this process and so cannot inherit.
     let upgradeEnvironment: [String: String]
     let logFileURL: URL
 

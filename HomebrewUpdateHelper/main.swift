@@ -30,7 +30,6 @@ do {
     exit(EXIT_FAILURE)
 }
 
-/// Only reachable once the spec is decoded: the log's location is one of the things it carries.
 let log = SelfUpdateLog(fileURL: URL(fileURLWithPath: spec.logFilePath))
 await UpdateHelper(spec: spec, log: log).run()
 

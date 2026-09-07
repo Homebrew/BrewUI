@@ -5,15 +5,12 @@
 
 import Foundation
 
-/// Runs `brew upgrade --cask homebrew-app` on behalf of the app, which by this point has quit.
-///
 /// Deliberately `Foundation.Process` rather than the app's `BrewCommandService`: that path exists to stream a
 /// pseudo-terminal into the console UI, and there is no UI here. Nobody is watching, so the transcript goes to
 /// a file and only the exit status is reported back.
 public struct SelfUpdateUpgradeRunner: Sendable {
     public struct Outcome: Sendable, Equatable {
         public let succeeded: Bool
-        /// One line for the log. Not user-facing: by the time anyone sees anything, the app has relaunched.
         public let detail: String
 
         public init(succeeded: Bool, detail: String) {
@@ -22,7 +19,6 @@ public struct SelfUpdateUpgradeRunner: Sendable {
         }
     }
 
-    /// Where each line of brew's output goes. The tests read it directly instead of a file on disk.
     private let transcriptSink: @Sendable (String) -> Void
 
     public init(transcriptSink: @escaping @Sendable (String) -> Void = { _ in }) {
@@ -129,7 +125,6 @@ public struct SelfUpdateUpgradeRunner: Sendable {
                     buffer = Data(buffer.dropFirst(offset + 1))
                 }
             }
-            // Output that ended without a trailing newline is still a line.
             if !buffer.isEmpty {
                 sink(Self.text(of: buffer))
             }

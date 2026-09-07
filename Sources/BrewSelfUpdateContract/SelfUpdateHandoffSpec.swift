@@ -5,28 +5,22 @@
 
 import Foundation
 
-/// Everything the update helper needs, as JSON.
-///
-/// It travels as a file path rather than argv: a UI-test relaunch environment carries the whole fixture tree
+/// The spec travels as a file path rather than argv: a UI-test relaunch environment carries the whole fixture tree
 /// and would put argv over `ARG_MAX`.
 public struct SelfUpdateHandoffSpec: Codable, Sendable, Equatable {
     public let parentProcessIdentifier: Int32
     public let appBundlePath: String
-    /// Empty in production; under `-uiTesting` these carry the test's launch flags and fixture payload.
     public let relaunchArguments: [String]
     public let relaunchEnvironment: [String: String]
     /// Resolved by the app, which already knows where `brew` is — and under `-uiTesting` knows it is the
     /// fake one. The helper does no probing of its own: guessing a prefix here would upgrade from the wrong
     /// Homebrew, and the app can refuse the handoff instead of quitting into a helper that cannot work.
     public let brewExecutablePath: String
-    /// `["upgrade", "--cask", "homebrew-app"]`, built by `BrewCommands.selfUpgrade()` so the argv the helper
-    /// runs is the same value the detail pane displays.
+    /// Built by `BrewCommands.selfUpgrade()`, so the argv the helper runs is what the app displays.
     public let upgradeArguments: [String]
     /// Empty in production. Under `-uiTesting` this points the fake `brew` at the fixture tree, which the
     /// helper cannot inherit: it is spawned by the app, but outlives it.
     public let upgradeEnvironment: [String: String]
-    /// The upgrade's transcript. The app is not running while it happens, so without a file a failure has
-    /// nowhere to be reported from.
     public let logFilePath: String
     /// Named explicitly: the helper's own `UserDefaults.standard` is a different domain.
     public let defaultsSuiteName: String
@@ -94,8 +88,7 @@ public enum SelfUpdateHandoffDefaults {
 
     public static let specPathArgument = "--spec"
 
-    /// Alongside Homebrew's own logs, and readable without a running app — which is the point, since the
-    /// upgrade happens while the app is gone.
+    /// Alongside Homebrew's own logs, and readable without a running app.
     public static func productionLogFileURL(
         homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
     ) -> URL {

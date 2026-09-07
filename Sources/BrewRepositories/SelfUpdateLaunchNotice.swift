@@ -6,8 +6,8 @@
 import BrewCore
 import Foundation
 
-/// The one-time "just came back from a self-update" signal. The writer is a different process, so the helper
-/// opens the app's suite by name and is handed ``storageKey`` rather than deriving it.
+/// The writer is a different process, so the helper opens the app's suite by name and is handed
+/// ``storageKey`` rather than deriving it.
 public struct SelfUpdateLaunchNotice {
     private let defaults: UserDefaults
     private let defaultsKeyPrefix: String
@@ -31,7 +31,6 @@ public struct SelfUpdateLaunchNotice {
         return SelfUpdateOutcome(rawValue: raw) ?? .succeeded
     }
 
-    /// Called by the update helper.
     public func mark(_ outcome: SelfUpdateOutcome) {
         defaults.set(outcome.rawValue, forKey: storageKey)
     }

@@ -5,10 +5,9 @@
 
 import Foundation
 
-/// Appends the helper's transcript to a file.
-///
 /// The app is not running while the upgrade happens, so stderr goes nowhere anyone will look: a file is the
 /// only place a failed self-update can explain itself afterwards.
+///
 /// Written from the caller *and* from the upgrade's drain queue, so every access to the handle goes through
 /// the lock; nothing else is mutable.
 // swiftlint:disable:next unchecked_sendable

@@ -8,8 +8,6 @@ import BrewRepositoryInterfaces
 import Foundation
 import Observation
 
-/// Derives ``SelfUpdateStatus`` from the app's own cask in the shared installed inventory.
-///
 /// Reading `inventory.state` in the getter routes SwiftUI observation through the existential.
 @Observable
 @MainActor

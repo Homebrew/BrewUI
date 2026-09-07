@@ -5,8 +5,6 @@
 
 import Foundation
 
-/// Whether the running build is behind the version Homebrew can install.
-///
 /// ``isUpdateAvailable`` is the cask's `outdated` flag verbatim, not a comparison of the version strings —
 /// there is no semantic-version comparator here.
 public struct SelfUpdateStatus: Hashable, Sendable {

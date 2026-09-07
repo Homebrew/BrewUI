@@ -8,10 +8,8 @@ import BrewSelfUpdateContract
 import BrewSelfUpdateHelperCore
 import Foundation
 
-/// Updates the app on its behalf, since an app cannot replace its own bundle while running.
-///
-/// The ordering is the point: wait for exit, then update, then relaunch. A wait that times out relaunches
-/// *without* updating.
+/// An app cannot replace its own bundle while running, so the helper does it: wait for exit, then update,
+/// then relaunch. A wait that times out relaunches *without* updating.
 struct UpdateHelper {
     let spec: SelfUpdateHandoffSpec
     let log: SelfUpdateLog
