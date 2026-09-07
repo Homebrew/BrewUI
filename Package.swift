@@ -9,6 +9,8 @@ let package = Package(
     products: [
         .library(name: "BrewAccessibilityID", targets: ["BrewAccessibilityID"]),
         .library(name: "BrewUITestContract", targets: ["BrewUITestContract"]),
+        .library(name: "BrewSelfUpdateContract", targets: ["BrewSelfUpdateContract"]),
+        .library(name: "BrewSelfUpdateHelperCore", targets: ["BrewSelfUpdateHelperCore"]),
         .library(name: "BrewCore", targets: ["BrewCore"]),
         .library(name: "BrewCrashReporting", targets: ["BrewCrashReporting"]),
         .library(name: "BrewUIComponents", targets: ["BrewUIComponents"]),
@@ -47,6 +49,23 @@ let package = Package(
         // environment key names and the fixture payload — so both sides spell them once.
         .target(
             name: "BrewUITestContract",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        // Shared with the update helper, a separate process — deliberately dependency-free.
+        .target(
+            name: "BrewSelfUpdateContract",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        // The update helper's behaviour, in the package so it can be unit-tested: the helper is an Xcode
+        // command-line target with no test host of its own. Nothing in the app links this.
+        .target(
+            name: "BrewSelfUpdateHelperCore",
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -219,6 +238,22 @@ let package = Package(
         .testTarget(
             name: "BrewAccessibilityIDTests",
             dependencies: ["BrewAccessibilityID"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewSelfUpdateContractTests",
+            dependencies: ["BrewSelfUpdateContract"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewSelfUpdateHelperCoreTests",
+            dependencies: ["BrewSelfUpdateHelperCore"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
