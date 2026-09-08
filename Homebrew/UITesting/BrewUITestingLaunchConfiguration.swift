@@ -15,7 +15,6 @@ nonisolated struct BrewUITestingLaunchConfiguration {
     let scenario: String?
     let payload: String?
     let fixturesRootURL: URL?
-    let usesFakeSelfUpdate: Bool
 
     /// `nil` until the fixture tree is installed.
     var httpFixturesURL: URL? {
@@ -37,7 +36,6 @@ nonisolated struct BrewUITestingLaunchConfiguration {
             payload: environment[BrewUITestingEnvironmentKey.payload],
             fixturesRootURL: environment[BrewUITestingEnvironmentKey.fixturesRoot]
                 .map { URL(fileURLWithPath: $0) },
-            usesFakeSelfUpdate: environment[BrewUITestingEnvironmentKey.fakeSelfUpdate] == "1",
         )
     }
 }

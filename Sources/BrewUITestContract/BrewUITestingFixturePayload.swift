@@ -13,8 +13,6 @@ public enum BrewUITestingEnvironmentKey {
     public static let payload = "BREW_UITEST_FIXTURE_PAYLOAD"
     /// Written by the app once the tree is installed, not by the test runner.
     public static let fixturesRoot = "BREW_UITEST_FIXTURES"
-    /// `"1"` routes the update through the real helper with a simulated upgrade step.
-    public static let fakeSelfUpdate = "BREW_UITEST_FAKE_SELF_UPDATE"
 }
 
 /// The fixture tree, in transit: relative paths to bytes, JSON then deflated then base64'd.

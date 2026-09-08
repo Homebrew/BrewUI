@@ -9,6 +9,7 @@ import XCTest
 
 /// The self-update handshake end to end: the app really terminates, the real helper waits for it, really runs
 /// `brew upgrade --cask homebrew-app` against the fake `brew`, and the app it brings back is a new process.
+/// Nothing here is simulated — the upgrade a test exercises is the one a release performs.
 @MainActor
 final class SelfUpdateUITests: BrewUITestCase {
     func testBannerOffersAnUpgradeWhenTheAppsOwnCaskIsOutdated() {
@@ -57,8 +58,10 @@ final class SelfUpdateUITests: BrewUITestCase {
             .assertHasPackage("ripgrep")
     }
 
+    /// The whole handshake in one pass: the app quits, the helper runs `brew upgrade --cask homebrew-app`
+    /// against the fake `brew`, and the app it brings back reports the outcome once.
     func testUpgradingQuitsRelaunchesAndAcknowledgesOnTheNextLaunch() throws {
-        let relaunched = try upgradeAndWaitForRelaunch(.selfUpdateAvailable)
+        let relaunched = try upgradeAndWaitForRelaunch(.selfUpdateRunsBrew)
         defer { relaunched.terminate() }
 
         XCTAssertTrue(
@@ -79,18 +82,6 @@ final class SelfUpdateUITests: BrewUITestCase {
             ),
             .completed,
             "Acknowledging the outcome did not dismiss the alert",
-        )
-    }
-
-    /// The simulated path steps over the subprocess entirely, so this is the only test that proves the
-    /// helper runs `brew upgrade --cask homebrew-app` at all.
-    func testTheHelperReallyRunsBrewAndTheAppComesBackReportingSuccess() throws {
-        let relaunched = try upgradeAndWaitForRelaunch(.selfUpdateRunsBrew)
-        defer { relaunched.terminate() }
-
-        XCTAssertTrue(
-            relaunched.staticTexts[Self.successAlertTitle].waitForExistence(timeout: BrewUITestTimeout.launch),
-            "The relaunched app did not report the upgrade as successful",
         )
     }
 

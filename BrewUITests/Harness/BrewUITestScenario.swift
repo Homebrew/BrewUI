@@ -26,16 +26,12 @@ enum BrewUITestScenario: String, CaseIterable {
     case installFailure
     /// No `brew` executable can be resolved at all.
     case brewNotFound
-    /// The app's own cask is installed and outdated, so real detection reports the update.
+    /// The app's own cask is installed and outdated, so real detection reports the update. Answers no
+    /// `brew upgrade`: the banner tests never press it.
     case selfUpdateAvailable
-    /// As above, but the helper really runs `brew upgrade --cask homebrew-app` against the fake `brew`.
+    /// As above, plus the upgrade the helper really runs — `brew upgrade --cask homebrew-app` against the
+    /// fake `brew`, from a process that outlives the app.
     case selfUpdateRunsBrew
     /// The same, with an upgrade that exits non-zero: the app comes back saying so rather than silently.
     case selfUpdateBrewFails
-
-    /// The helper sleeps instead of upgrading. Only ``selfUpdateAvailable`` does — the other two exist to
-    /// cover the real subprocess, which a simulation would step over.
-    var usesFakeSelfUpdate: Bool {
-        self == .selfUpdateAvailable
-    }
 }

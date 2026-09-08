@@ -27,9 +27,6 @@ enum BrewApp {
         app.launchArguments += [BrewUITestingEnvironmentKey.launchArgument, "YES"]
         app.launchEnvironment[BrewUITestingEnvironmentKey.scenario] = scenario.rawValue
         app.launchEnvironment[BrewUITestingEnvironmentKey.payload] = encoded
-        if scenario.usesFakeSelfUpdate {
-            app.launchEnvironment[BrewUITestingEnvironmentKey.fakeSelfUpdate] = "1"
-        }
         app.launch()
         activate(app)
         return app
