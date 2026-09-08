@@ -201,10 +201,6 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
         BrewCommands.bulkUpgrade(selection)
     }
 
-    public func selfUpgradeCommand() -> BrewCommand {
-        BrewCommands.selfUpgrade()
-    }
-
     public func doctorFixCommand(arguments: [String]) -> BrewCommand {
         BrewCommands.doctorFix(arguments: arguments)
     }

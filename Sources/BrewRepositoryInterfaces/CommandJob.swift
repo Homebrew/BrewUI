@@ -133,8 +133,6 @@ public extension CommandJob {
             displayCommand
         case let .bulkUpgrade(selection):
             selection.displayCommand
-        case .selfUpgrade:
-            SelfUpdateIdentity.displayCommand
         }
         return CommandJob(
             operationID: id,

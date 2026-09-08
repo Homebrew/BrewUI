@@ -44,8 +44,6 @@ public enum BrewOperationID: Hashable, Identifiable, Sendable {
     case package(HomebrewPackageID)
     case maintenance(token: String, displayCommand: String)
     case bulkUpgrade(BrewUpgradeSelection)
-    /// Singleton: the app's own upgrade isn't package-scoped and takes no selection, so a fixed case is enough.
-    case selfUpgrade
 
     public var id: Self {
         self
