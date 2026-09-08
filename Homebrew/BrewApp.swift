@@ -278,7 +278,7 @@ struct BrewApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainWindowView(selfUpdateCoordinator: selfUpdateCoordinator)
+            MainWindowView()
                 .environment(\.brewCommandCenter, commandCenter)
                 .environment(\.mutatingCommandFactory, commandFactory)
                 .environment(\.installedPackagesRepository, installedPackagesRepository)

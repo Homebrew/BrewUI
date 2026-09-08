@@ -13,8 +13,7 @@ import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
-    let selfUpdateCoordinator: SelfUpdateCoordinator?
-
+    @Environment(\.selfUpdateCoordinator) private var selfUpdateCoordinator
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
@@ -140,7 +139,7 @@ struct MainWindowView: View {
 
 #if DEBUG
     #Preview {
-        MainWindowView(selfUpdateCoordinator: nil)
+        MainWindowView()
             .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
             .environment(\.installedPackagesRepository, PreviewSupport.makeInstalledPackagesRepository())
             .environment(\.discoverPackagesRepository, PreviewSupport.makeDiscoverPackagesRepository())
