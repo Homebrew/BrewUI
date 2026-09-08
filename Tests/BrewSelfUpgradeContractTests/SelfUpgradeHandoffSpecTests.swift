@@ -17,6 +17,7 @@ struct SelfUpgradeHandoffSpecTests {
             relaunchEnvironment: ["BREW_UITEST_SCENARIO": "selfUpgradeAvailable"],
             brewExecutablePath: "/opt/homebrew/bin/brew",
             upgradeArguments: ["upgrade", "--cask", "homebrew-app"],
+            usesLoginShell: true,
             upgradeEnvironment: ["BREW_UITEST_FIXTURES": "/tmp/fixtures"],
             logFilePath: "/tmp/self-upgrade.log",
             defaultsSuiteName: "sh.brew.app",
@@ -48,6 +49,7 @@ struct SelfUpgradeHandoffSpecTests {
         #expect(decoded.brewExecutablePath == "/opt/homebrew/bin/brew")
         #expect(decoded.upgradeArguments == ["upgrade", "--cask", "homebrew-app"])
         #expect(decoded.upgradeEnvironment["BREW_UITEST_FIXTURES"] == "/tmp/fixtures")
+        #expect(decoded.usesLoginShell)
         #expect(decoded.logFilePath == "/tmp/self-upgrade.log")
     }
 

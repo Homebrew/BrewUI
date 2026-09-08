@@ -18,6 +18,10 @@ public struct SelfUpgradeHandoffSpec: Codable, Sendable, Equatable {
     public let brewExecutablePath: String
     /// Built by `BrewCommands.selfUpgrade()`, so the argv the helper runs is what the app displays.
     public let upgradeArguments: [String]
+    /// The app's own choice between `BrewCommandExecutionContext.live()` and `.uiTesting(brewURL:)`: the
+    /// helper inherits the app's stripped environment, so without the login shell the one command that
+    /// replaces the app sees none of the `HOMEBREW_*` the user's profile exports.
+    public let usesLoginShell: Bool
     /// Empty in production. Under `-uiTesting` this points the fake `brew` at the fixture tree, which the
     /// helper cannot inherit: it is spawned by the app, but outlives it.
     public let upgradeEnvironment: [String: String]
@@ -38,6 +42,7 @@ public struct SelfUpgradeHandoffSpec: Codable, Sendable, Equatable {
         relaunchEnvironment: [String: String],
         brewExecutablePath: String,
         upgradeArguments: [String],
+        usesLoginShell: Bool,
         upgradeEnvironment: [String: String],
         logFilePath: String,
         defaultsSuiteName: String,
@@ -53,6 +58,7 @@ public struct SelfUpgradeHandoffSpec: Codable, Sendable, Equatable {
         self.relaunchEnvironment = relaunchEnvironment
         self.brewExecutablePath = brewExecutablePath
         self.upgradeArguments = upgradeArguments
+        self.usesLoginShell = usesLoginShell
         self.upgradeEnvironment = upgradeEnvironment
         self.logFilePath = logFilePath
         self.defaultsSuiteName = defaultsSuiteName

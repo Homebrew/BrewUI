@@ -3,11 +3,12 @@
 //  BrewSelfUpgradeHelperCore
 //
 
+import BrewCLI
+import BrewCore
 import Foundation
 
-/// Deliberately `Foundation.Process` rather than the app's `BrewCommandService`: that path exists to stream a
-/// pseudo-terminal into the console UI, and there is no UI here. Nobody is watching, so the transcript goes to
-/// a file and only the exit status is reported back.
+/// Runs the upgrade through the same ``BrewCommandRunning`` the app runs every other brew command through.
+/// Nobody is watching this one, so the transcript goes to a file and only the exit status is reported back.
 public struct SelfUpgradeRunner: Sendable {
     public struct Outcome: Sendable, Equatable {
         public let succeeded: Bool
@@ -19,10 +20,29 @@ public struct SelfUpgradeRunner: Sendable {
         }
     }
 
+    private let commandRunner: any BrewCommandRunning
     private let transcriptSink: @Sendable (String) -> Void
+    private let sleep: @Sendable (TimeInterval) async throws -> Void
 
-    public init(transcriptSink: @escaping @Sendable (String) -> Void = { _ in }) {
+    public init(
+        commandRunner: any BrewCommandRunning,
+        transcriptSink: @escaping @Sendable (String) -> Void = { _ in },
+        sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) },
+    ) {
+        self.commandRunner = commandRunner
         self.transcriptSink = transcriptSink
+        self.sleep = sleep
+    }
+
+    /// See ``SelfUpgradeHandoffSpec/usesLoginShell``.
+    public init(
+        usesLoginShell: Bool,
+        transcriptSink: @escaping @Sendable (String) -> Void = { _ in },
+    ) {
+        self.init(
+            commandRunner: usesLoginShell ? LoginShellBrewCommandRunner() : BrewCommandService(),
+            transcriptSink: transcriptSink,
+        )
     }
 
     public func run(
@@ -34,143 +54,84 @@ public struct SelfUpgradeRunner: Sendable {
         guard FileManager.default.isExecutableFile(atPath: executablePath) else {
             return Outcome(succeeded: false, detail: "no executable brew at \(executablePath)")
         }
-        // `Process` and `Pipe` are not `Sendable`, so both are created and used entirely inside the worker.
-        return await withCheckedContinuation { (continuation: CheckedContinuation<Outcome, Never>) in
-            DispatchQueue.global(qos: .userInitiated).async {
-                continuation.resume(
-                    returning: runBlocking(
-                        executablePath: executablePath,
-                        arguments: arguments,
-                        environment: environment,
-                        timeout: timeout,
-                    ),
-                )
-            }
-        }
+        return await race(
+            upgrade: { await upgrade(executablePath: executablePath, arguments: arguments, environment: environment) },
+            timeout: timeout,
+        )
     }
 
-    /// Synchronous on purpose: an upgrade is one long blocking wait on a helper process that does nothing
-    /// else, and the alternative is threading a non-`Sendable` `Process` across concurrency boundaries.
-    private func runBlocking(
+    // MARK: Upgrade
+
+    private func upgrade(
         executablePath: String,
         arguments: [String],
         environment: [String: String],
-        timeout: TimeInterval,
-    ) -> Outcome {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executablePath)
-        process.arguments = arguments
-        process.environment = Self.environment(adding: environment)
-
-        // One pipe for both streams: the transcript is read by a person, and interleaved is how it ran.
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-        process.standardInput = FileHandle.nullDevice
-
-        // Installed before `run()`, so a process that exits immediately cannot be missed.
-        let exited = DispatchSemaphore(value: 0)
-        process.terminationHandler = { _ in exited.signal() }
-
+    ) async -> Outcome? {
+        let sink = transcriptSink
+        let options = BrewRunOptions(
+            lineObserver: { line in sink(line.text) },
+            output: .pipes(forceColor: false),
+            environment: Self.pinnedEnvironment(adding: environment),
+        )
         do {
-            try process.run()
+            let output = try await commandRunner.run(
+                executableURL: URL(fileURLWithPath: executablePath),
+                arguments: arguments,
+                options: options,
+            )
+            guard output.terminationStatus == 0 else {
+                return Outcome(succeeded: false, detail: "brew exited \(output.terminationStatus)")
+            }
+            return Outcome(succeeded: true, detail: "brew \(arguments.joined(separator: " ")) succeeded")
+        } catch is CancellationError {
+            // The timeout won the race and owns the outcome.
+            return nil
         } catch {
             return Outcome(succeeded: false, detail: "could not launch \(executablePath): \(error)")
         }
-
-        // Started before the wait: reading only after termination deadlocks once the output overruns a
-        // pipe buffer, and `brew upgrade --cask` easily does.
-        let drained = drainInBackground(pipe)
-
-        var timedOut = false
-        if exited.wait(timeout: .now() + timeout) == .timedOut {
-            timedOut = true
-            terminate(process)
-            // It will go now; without this the transcript could be read before the last write.
-            exited.wait()
-        }
-
-        // The write end closes when the last descendant holding it exits, which is what ends the drain.
-        drained.wait()
-
-        if timedOut {
-            return Outcome(succeeded: false, detail: "brew did not finish within \(Int(timeout))s")
-        }
-        let status = Self.exitCode(of: process)
-        guard status == 0 else {
-            return Outcome(succeeded: false, detail: "brew exited \(status)")
-        }
-        return Outcome(succeeded: true, detail: "brew \(arguments.joined(separator: " ")) succeeded")
     }
 
-    // MARK: Output
+    // MARK: Timeout
 
-    /// Emits `\n`-terminated lines as they arrive, so the transcript survives a helper killed mid-run.
-    private func drainInBackground(_ pipe: Pipe) -> DispatchSemaphore {
-        let finished = DispatchSemaphore(value: 0)
-        // Read on this queue only, and never after `finished` is signalled.
-        let handle = pipe.fileHandleForReading
-        let sink = transcriptSink
-        DispatchQueue.global(qos: .utility).async {
-            var buffer = Data()
-            while true {
-                let chunk = handle.availableData
-                if chunk.isEmpty {
+    /// Cancellation, not a signal to `brew`: the runner tears down the whole process group, and a
+    /// descendant left holding the output open would keep the drain — and so the helper — running forever.
+    /// The loser is awaited so brew is gone before the helper relaunches the app.
+    private func race(
+        upgrade: @escaping @Sendable () async -> Outcome?,
+        timeout: TimeInterval,
+    ) async -> Outcome {
+        let timedOut = Outcome(succeeded: false, detail: "brew did not finish within \(Int(timeout))s")
+        let sleep = sleep
+        return await withTaskGroup(of: Outcome?.self) { group in
+            group.addTask { await upgrade() }
+            group.addTask {
+                guard await (try? sleep(timeout)) != nil else {
+                    return nil
+                }
+                return timedOut
+            }
+
+            var outcome: Outcome?
+            while let next = await group.next() {
+                if let next {
+                    outcome = next
                     break
                 }
-                buffer.append(chunk)
-                while let newline = buffer.firstIndex(of: 0x0A) {
-                    let offset = buffer.distance(from: buffer.startIndex, to: newline)
-                    sink(Self.text(of: buffer.prefix(offset)))
-                    buffer = Data(buffer.dropFirst(offset + 1))
-                }
             }
-            if !buffer.isEmpty {
-                sink(Self.text(of: buffer))
-            }
-            finished.signal()
+            group.cancelAll()
+            await group.waitForAll()
+            return outcome ?? timedOut
         }
-        return finished
-    }
-
-    /// Latin-1 as the fallback because it cannot fail on arbitrary bytes: a line brew wrote in some other
-    /// encoding is still worth having in the log, mangled, rather than dropped.
-    private static func text(of data: Data) -> String {
-        String(bytes: data, encoding: .utf8) ?? String(bytes: data, encoding: .isoLatin1) ?? ""
-    }
-
-    // MARK: Termination
-
-    /// A hung upgrade must not strand the user without an app: brew is stopped and the relaunch happens
-    /// anyway, with the old version. Only brew itself is signalled — `Process` gives the child no session of
-    /// its own, so signalling the group would signal this helper too.
-    private func terminate(_ process: Process) {
-        process.terminate()
-        // SIGTERM is what a Ruby script traps; SIGKILL is for one that has stopped listening.
-        if process.isRunning, kill(process.processIdentifier, SIGKILL) != 0 {
-            log("could not kill brew (pid \(process.processIdentifier))")
-        }
-    }
-
-    /// A signalled child becomes `128 + signal`, the shell convention, keeping "non-zero means failure".
-    private static func exitCode(of process: Process) -> Int32 {
-        process.terminationReason == .uncaughtSignal
-            ? 128 + process.terminationStatus
-            : process.terminationStatus
-    }
-
-    private func log(_ message: String) {
-        transcriptSink(message)
     }
 
     // MARK: Environment
 
-    /// Inherited, plus whatever the app pinned. Colour is stripped because the transcript is a file, and
-    /// `HOMEBREW_NO_ENV_HINTS` keeps the hints out of it — neither changes what the upgrade does.
-    static func environment(adding overrides: [String: String]) -> [String: String] {
-        var environment = ProcessInfo.processInfo.environment
-        environment["HOMEBREW_NO_COLOR"] = "1"
-        environment["HOMEBREW_NO_ENV_HINTS"] = "1"
+    /// Colour is stripped because the transcript is a file; neither key changes what the upgrade does.
+    static func pinnedEnvironment(adding overrides: [String: String]) -> [String: String] {
+        var environment = [
+            "HOMEBREW_NO_COLOR": "1",
+            "HOMEBREW_NO_ENV_HINTS": "1",
+        ]
         for (key, value) in overrides {
             environment[key] = value
         }

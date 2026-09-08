@@ -3,6 +3,8 @@
 //  BrewSelfUpgradeHelperCoreTests
 //
 
+import BrewCLI
+import BrewCore
 @testable import BrewSelfUpgradeHelperCore
 import Foundation
 import Testing
@@ -104,9 +106,97 @@ struct SelfUpgradeRunnerTests {
         #expect(Date().timeIntervalSince(started) < 20, "the runner waited for the process instead of killing it")
     }
 
+    /// Real brew is a shell script that forks ruby, which forks `curl` and `git`, and every one of them
+    /// inherits the output descriptor. Signal only `brew` and the drain never sees end-of-input, so the
+    /// helper hangs on the timeout that was supposed to rescue it — no outcome recorded, no app brought back.
+    @Test func `a timeout kills the descendants brew left behind`() async throws {
+        let ready = ReadyFile()
+        defer { ready.remove() }
+        let descendant = Descendant()
+        let brew = try FakeExecutable(
+            script: """
+            sleep \(descendant.seconds) &
+            touch "${READY}"
+            wait
+            """,
+        )
+        defer { brew.remove() }
+
+        let outcome = await SelfUpgradeRunner(
+            commandRunner: BrewCommandService(),
+            sleep: ready.reached,
+        ).run(
+            executablePath: brew.path,
+            arguments: [],
+            environment: ["READY": ready.path],
+            timeout: 0.5,
+        )
+
+        #expect(!outcome.succeeded)
+        #expect(outcome.detail.contains("did not finish"))
+        #expect(!descendant.isAlive)
+    }
+
+    /// Homebrew traps `SIGTERM`, and `brew upgrade --cask` is replacing an app bundle when it does. Killing
+    /// it outright can leave half a bundle in `/Applications` and nothing for the relaunch to open.
+    @Test func `a timeout asks brew to stop before killing it`() async throws {
+        let ready = ReadyFile()
+        let caught = ReadyFile()
+        defer {
+            ready.remove()
+            caught.remove()
+        }
+        let brew = try FakeExecutable(
+            script: """
+            trap 'touch "${CAUGHT}"; exit 0' TERM
+            sleep 30 &
+            touch "${READY}"
+            wait
+            """,
+        )
+        defer { brew.remove() }
+
+        _ = await SelfUpgradeRunner(commandRunner: BrewCommandService(), sleep: ready.reached).run(
+            executablePath: brew.path,
+            arguments: [],
+            environment: ["READY": ready.path, "CAUGHT": caught.path],
+            timeout: 0.5,
+        )
+
+        #expect(caught.exists)
+    }
+
+    /// What brew managed to say before it wedged is the only account of why.
+    @Test func `output from before a timeout is kept`() async throws {
+        let ready = ReadyFile()
+        defer { ready.remove() }
+        let brew = try FakeExecutable(
+            script: """
+            echo "==> Downloading"
+            touch "${READY}"
+            sleep 30
+            """,
+        )
+        defer { brew.remove() }
+
+        let transcript = TranscriptRecorder()
+        _ = await SelfUpgradeRunner(
+            commandRunner: BrewCommandService(),
+            transcriptSink: { transcript.append($0) },
+            sleep: ready.reached,
+        ).run(
+            executablePath: brew.path,
+            arguments: [],
+            environment: ["READY": ready.path],
+            timeout: 0.5,
+        )
+
+        #expect(transcript.lines == ["==> Downloading"])
+    }
+
     // MARK: Transcript
 
-    @Test func `both streams reach the transcript, in the order they were written`() async throws {
+    @Test func `both streams reach the transcript`() async throws {
         let brew = try FakeExecutable(
             script: """
             echo "==> Downloading"
@@ -117,7 +207,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        let outcome = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
+        let outcome = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -125,7 +215,7 @@ struct SelfUpgradeRunnerTests {
         )
 
         #expect(outcome.succeeded)
-        #expect(transcript.lines == ["==> Downloading", "Warning: something", "==> Upgrading"])
+        #expect(transcript.lines.sorted() == ["==> Downloading", "==> Upgrading", "Warning: something"])
     }
 
     /// Homebrew's progress output is the last thing written before a hang, so a line without its newline
@@ -135,7 +225,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        _ = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
+        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -152,7 +242,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        let outcome = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
+        let outcome = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -170,7 +260,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        _ = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
+        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: ["upgrade", "--cask", "homebrew-app"],
             environment: [:],
@@ -187,7 +277,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        _ = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
+        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: ["BREW_UITEST_SCENARIO": "selfUpgradeAvailable"],
@@ -197,16 +287,24 @@ struct SelfUpgradeRunnerTests {
         #expect(transcript.lines == ["selfUpgradeAvailable"])
     }
 
-    @Test func `the inherited environment survives alongside the pinned one`() {
-        let environment = SelfUpgradeRunner.environment(adding: ["PINNED": "yes"])
+    @Test func `the inherited environment survives alongside the pinned one`() async throws {
+        let brew = try FakeExecutable(script: #"echo "${PATH}""#)
+        defer { brew.remove() }
 
-        #expect(environment["PINNED"] == "yes")
-        #expect(environment["PATH"] == ProcessInfo.processInfo.environment["PATH"])
+        let transcript = TranscriptRecorder()
+        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
+            executablePath: brew.path,
+            arguments: [],
+            environment: ["PINNED": "yes"],
+            timeout: 30,
+        )
+
+        #expect(transcript.lines == [ProcessInfo.processInfo.environment["PATH"]])
     }
 
     /// The transcript is a file, so escape codes in it are noise rather than colour.
     @Test func `colour is switched off for the transcript`() {
-        let environment = SelfUpgradeRunner.environment(adding: [:])
+        let environment = SelfUpgradeRunner.pinnedEnvironment(adding: [:])
 
         #expect(environment["HOMEBREW_NO_COLOR"] == "1")
         #expect(environment["HOMEBREW_NO_ENV_HINTS"] == "1")
@@ -214,15 +312,35 @@ struct SelfUpgradeRunnerTests {
 
     /// A caller that pins one of them means it, even though nothing does today.
     @Test func `a pinned value wins over the defaults`() {
-        let environment = SelfUpgradeRunner.environment(adding: ["HOMEBREW_NO_COLOR": "0"])
+        let environment = SelfUpgradeRunner.pinnedEnvironment(adding: ["HOMEBREW_NO_COLOR": "0"])
 
         #expect(environment["HOMEBREW_NO_COLOR"] == "0")
+    }
+
+    // MARK: Spawning route
+
+    @Test func `brew, its argv and the pinned environment are handed to the command runner`() async throws {
+        let brew = try FakeExecutable(script: "exit 0")
+        defer { brew.remove() }
+
+        let recorder = InvocationRecorder()
+        _ = await SelfUpgradeRunner(commandRunner: recorder).run(
+            executablePath: brew.path,
+            arguments: ["upgrade", "--cask", "homebrew-app"],
+            environment: [:],
+            timeout: 30,
+        )
+
+        let invocation = try #require(await recorder.first)
+        #expect(invocation.executableURL.path == brew.path)
+        #expect(invocation.arguments == ["upgrade", "--cask", "homebrew-app"])
+        #expect(invocation.options.environment["HOMEBREW_NO_COLOR"] == "1")
     }
 }
 
 // MARK: - Support
 
-/// A shell script standing in for `brew`. Real enough to exercise `Process`, pipes and exit handling.
+/// A shell script standing in for `brew`. Real enough to exercise spawning, pipes and exit handling.
 private struct FakeExecutable {
     let url: URL
 
@@ -241,8 +359,49 @@ private struct FakeExecutable {
         try? FileManager.default.removeItem(at: url)
     }
 
-    static func runner() -> SelfUpgradeRunner {
-        SelfUpgradeRunner()
+    /// Invoked directly, for the reason `BrewCommandExecutionContext.uiTesting(brewURL:)` does the same:
+    /// the login shell would source the developer's dotfiles.
+    static func runner(transcriptSink: @escaping @Sendable (String) -> Void = { _ in }) -> SelfUpgradeRunner {
+        SelfUpgradeRunner(usesLoginShell: false, transcriptSink: transcriptSink)
+    }
+}
+
+/// Stands in for the clock, so the timeout fires once the fake `brew` has started rather than after a
+/// wall-clock guess a loaded machine loses.
+private struct ReadyFile {
+    let path = URL(fileURLWithPath: NSTemporaryDirectory())
+        .appendingPathComponent("self-upgrade-ready-\(UUID().uuidString)").path
+
+    var exists: Bool {
+        FileManager.default.fileExists(atPath: path)
+    }
+
+    var reached: @Sendable (TimeInterval) async throws -> Void {
+        { _ in
+            while !FileManager.default.fileExists(atPath: path) {
+                try await Task.sleep(for: .milliseconds(20))
+            }
+        }
+    }
+
+    func remove() {
+        try? FileManager.default.removeItem(atPath: path)
+    }
+}
+
+/// A `sleep` long enough to be unique to this test, so `pgrep` can tell whether it outlived the run.
+private struct Descendant {
+    let seconds = Int.random(in: 20000 ..< 30000)
+
+    var isAlive: Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/pgrep")
+        process.arguments = ["-f", "sleep \(seconds)"]
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+        try? process.run()
+        process.waitUntilExit()
+        return process.terminationStatus == 0
     }
 }
 
@@ -263,5 +422,24 @@ private final class TranscriptRecorder: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         storage.append(line)
+    }
+}
+
+private struct RecordedInvocation {
+    let executableURL: URL
+    let arguments: [String]
+    let options: BrewRunOptions
+}
+
+private actor InvocationRecorder: BrewCommandRunning {
+    private(set) var invocations: [RecordedInvocation] = []
+
+    var first: RecordedInvocation? {
+        invocations.first
+    }
+
+    func run(executableURL: URL, arguments: [String], options: BrewRunOptions) async throws -> CommandOutput {
+        invocations.append(RecordedInvocation(executableURL: executableURL, arguments: arguments, options: options))
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }
 }

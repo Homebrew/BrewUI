@@ -64,6 +64,7 @@ let package = Package(
         ),
         .target(
             name: "BrewSelfUpgradeHelperCore",
+            dependencies: ["BrewCore", "BrewCLI"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -264,7 +265,7 @@ let package = Package(
         ),
         .testTarget(
             name: "BrewSelfUpgradeHelperCoreTests",
-            dependencies: ["BrewSelfUpgradeHelperCore"],
+            dependencies: ["BrewSelfUpgradeHelperCore", "BrewCore"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),

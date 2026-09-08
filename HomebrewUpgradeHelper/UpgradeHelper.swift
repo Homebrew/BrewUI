@@ -45,7 +45,10 @@ struct UpgradeHelper {
 
     private func performUpgrade() async -> Bool {
         log.write("running \(spec.brewExecutablePath) \(spec.upgradeArguments.joined(separator: " "))")
-        let runner = SelfUpgradeRunner(transcriptSink: { line in log.write(line) })
+        let runner = SelfUpgradeRunner(
+            usesLoginShell: spec.usesLoginShell,
+            transcriptSink: { line in log.write(line) },
+        )
         let outcome = await runner.run(
             executablePath: spec.brewExecutablePath,
             arguments: spec.upgradeArguments,
