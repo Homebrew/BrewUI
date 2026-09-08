@@ -64,3 +64,33 @@ struct SelfUpdatePresentationTests {
         #expect(presentation(latest: "1.5.0").eyebrow.uppercased() == "UPGRADE HOMEBREW APP")
     }
 }
+
+/// One alert carries both outcomes, so the copy has to differ by outcome rather than by which modifier
+/// happens to be attached.
+struct SelfUpdateOutcomePresentationTests {
+    private func copy(_ outcome: SelfUpdateOutcome) -> SelfUpdateOutcomePresentation {
+        SelfUpdateOutcomePresentation(outcome: outcome)
+    }
+
+    @Test func `a successful upgrade is reported as done`() {
+        #expect(copy(.succeeded).title == "The Homebrew app is up to date")
+        #expect(copy(.succeeded).message.contains("upgraded to the latest version"))
+    }
+
+    /// A failed upgrade relaunches an app that looks exactly like an ordinary start, so the copy has to
+    /// say the version did not move.
+    @Test func `a failed upgrade says the app is still on the previous version`() {
+        #expect(copy(.failed).title == "The Homebrew app wasn’t upgraded")
+        #expect(copy(.failed).message.contains("still the previous version"))
+    }
+
+    @Test func `the two outcomes never read the same`() {
+        #expect(copy(.succeeded).title != copy(.failed).title)
+        #expect(copy(.succeeded).message != copy(.failed).message)
+    }
+
+    /// The banner is where a retry lives, so the failure alert points at it rather than dead-ending.
+    @Test func `the failure copy points back at the banner`() {
+        #expect(copy(.failed).message.contains("banner"))
+    }
+}

@@ -51,15 +51,16 @@ struct MainWindowView: View {
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
         }
-        .alert("The Homebrew app is up to date", isPresented: launchOutcomeBinding(for: .succeeded)) {
+        // One alert for both outcomes, not two: SwiftUI presents only the first `.alert` attached to a
+        // view, so a second one for the failure case would never appear.
+        .alert(
+            Text(outcomeCopy.title),
+            isPresented: launchOutcomeBinding,
+            presenting: launchOutcome,
+        ) { _ in
             acknowledgeButton
-        } message: {
-            Text("The Homebrew app has been upgraded to the latest version.")
-        }
-        .alert("The Homebrew app wasn’t upgraded", isPresented: launchOutcomeBinding(for: .failed)) {
-            acknowledgeButton
-        } message: {
-            Text("The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages.")
+        } message: { outcome in
+            Text(SelfUpdateOutcomePresentation(outcome: outcome).message)
         }
     }
 
@@ -68,10 +69,20 @@ struct MainWindowView: View {
             .axid(.selfUpdateOutcomeAcknowledgeButton)
     }
 
-    /// A failure gets its own alert rather than silence: the app looks identical at launch either way.
-    private func launchOutcomeBinding(for outcome: SelfUpdateOutcome) -> Binding<Bool> {
+    private var launchOutcome: SelfUpdateOutcome? {
+        selfUpdateCoordinator?.lastLaunchOutcome
+    }
+
+    /// The title is read outside the `presenting:` closure, so it needs a value once the outcome has been
+    /// acknowledged and the alert is on its way out; that copy is never shown.
+    private var outcomeCopy: SelfUpdateOutcomePresentation {
+        SelfUpdateOutcomePresentation(outcome: launchOutcome ?? .succeeded)
+    }
+
+    /// A failure is reported rather than passed over in silence: the app looks identical at launch either way.
+    private var launchOutcomeBinding: Binding<Bool> {
         Binding(
-            get: { selfUpdateCoordinator?.lastLaunchOutcome == outcome },
+            get: { selfUpdateCoordinator?.lastLaunchOutcome != nil },
             set: { presented in
                 if !presented {
                     selfUpdateCoordinator?.acknowledgeUpdateCompletion()

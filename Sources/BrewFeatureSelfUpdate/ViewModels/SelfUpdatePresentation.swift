@@ -6,6 +6,52 @@
 import BrewCore
 import Foundation
 
+/// Copy for the alert the app shows on the launch after an upgrade attempt.
+///
+/// Both outcomes read from one value because SwiftUI presents only the first `.alert` attached to a view:
+/// two of them left the failure alert permanently unreachable, so the app relaunched at the old version
+/// saying nothing.
+public struct SelfUpdateOutcomePresentation {
+    public let outcome: SelfUpdateOutcome
+
+    public init(outcome: SelfUpdateOutcome) {
+        self.outcome = outcome
+    }
+
+    public var title: String {
+        switch outcome {
+        case .succeeded:
+            String(
+                localized: "The Homebrew app is up to date",
+                comment: "Alert title on the launch after a successful self-update",
+            )
+        case .failed:
+            String(
+                localized: "The Homebrew app wasn’t upgraded",
+                comment: "Alert title on the launch after a self-update that failed",
+            )
+        }
+    }
+
+    public var message: String {
+        switch outcome {
+        case .succeeded:
+            String(
+                localized: "The Homebrew app has been upgraded to the latest version.",
+                comment: "Alert body on the launch after a successful self-update",
+            )
+        case .failed:
+            String(
+                localized: """
+                The upgrade didn’t finish, so this is still the previous version. You can try again from \
+                the banner above your packages.
+                """,
+                comment: "Alert body on the launch after a self-update that failed",
+            )
+        }
+    }
+}
+
 /// Copy for the self-update banner. The verb is "Upgrade" throughout, as it is for packages.
 struct SelfUpdatePresentation {
     let status: SelfUpdateStatus
