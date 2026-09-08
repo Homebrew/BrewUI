@@ -69,12 +69,26 @@ public final class SelfUpdateCoordinator {
         return message
     }
 
+    /// Set when "Later" is pressed on an update brew reports as outdated without a version string. There
+    /// is no version to key a stored dismissal to, so that one lasts the session rather than persisting.
+    private var didDismissUnversionedUpdate = false
+
     public var isBannerVisible: Bool {
-        status.isUpdateAvailable && preferences.dismissedVersion != status.latestVersion
+        guard status.isUpdateAvailable else {
+            return false
+        }
+        guard let latestVersion = status.latestVersion else {
+            return !didDismissUnversionedUpdate
+        }
+        return preferences.dismissedVersion != latestVersion
     }
 
     public func dismiss() {
-        preferences.dismissedVersion = status.latestVersion
+        guard let latestVersion = status.latestVersion else {
+            didDismissUnversionedUpdate = true
+            return
+        }
+        preferences.dismissedVersion = latestVersion
     }
 
     /// Does not return in production — the app quits. A failure to *start* lands in ``phase``.

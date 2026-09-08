@@ -61,6 +61,48 @@ struct SelfUpdateCoordinatorTests {
         #expect(coordinator.isBannerVisible)
     }
 
+    // MARK: An update with no version string
+
+    /// `brew` can report the app's cask as outdated without a version to go with it. The banner has copy
+    /// for that, so it has to be reachable rather than reading as an already-dismissed update.
+    @Test func `banner is visible for an update brew reports without a version`() {
+        let coordinator = makeCoordinator(status: status(available: true, latest: nil))
+        #expect(coordinator.isBannerVisible)
+    }
+
+    @Test func `a version-less update is not hidden by a dismissal of some earlier version`() {
+        let preferences = StubSelfUpdatePreferences(dismissedVersion: "1.5.0")
+        let coordinator = makeCoordinator(status: status(available: true, latest: nil), preferences: preferences)
+        #expect(coordinator.isBannerVisible)
+    }
+
+    @Test func `dismissing a version-less update hides the banner without storing a version`() {
+        let preferences = StubSelfUpdatePreferences()
+        let coordinator = makeCoordinator(status: status(available: true, latest: nil), preferences: preferences)
+
+        coordinator.dismiss()
+
+        #expect(coordinator.isBannerVisible == false)
+        #expect(preferences.dismissedVersion == nil)
+    }
+
+    /// The session-only dismissal must not leak into a later release that does carry a version.
+    @Test func `dismissing a version-less update leaves a versioned one still stored as undismissed`() {
+        let preferences = StubSelfUpdatePreferences()
+        let statusProvider = StubSelfUpdateStatusProvider(selfUpdateStatus: status(available: true, latest: nil))
+        let coordinator = SelfUpdateCoordinator(
+            statusProvider: statusProvider,
+            preferences: preferences,
+            handoff: RecordingSelfUpdateHandoff(),
+        )
+        coordinator.dismiss()
+        #expect(coordinator.isBannerVisible == false)
+
+        statusProvider.selfUpdateStatus = status(available: true, latest: "1.6.0")
+
+        #expect(coordinator.isBannerVisible)
+    }
+
     // MARK: beginUpdate
 
     @Test func `beginUpdate invokes the handoff and returns to idle when it does not terminate`() async {
