@@ -138,10 +138,10 @@ final class SelfUpdateUITests: BrewUITestCase {
 
     // MARK: Relaunch
 
-    /// `/DerivedData/` narrows this to the build under test: a developer machine can have a real install
-    /// carrying the same identifier.
     private static let appBundleIdentifier = "sh.brew.app"
 
+    /// `/DerivedData/` narrows this to the build under test: a developer machine can have a real install
+    /// carrying the same identifier.
     private static func runningAppUnderTest() -> NSRunningApplication? {
         NSWorkspace.shared.runningApplications
             .filter { $0.bundleIdentifier == appBundleIdentifier }
