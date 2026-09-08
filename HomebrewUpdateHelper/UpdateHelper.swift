@@ -9,7 +9,7 @@ import BrewSelfUpdateHelperCore
 import Foundation
 
 /// An app cannot replace its own bundle while running, so the helper does it: wait for exit, then update,
-/// then relaunch. A wait that times out relaunches *without* updating.
+/// then relaunch. ``SelfUpdateHelperRun`` owns that order; this supplies the real effects.
 struct UpdateHelper {
     let spec: SelfUpdateHandoffSpec
     let log: SelfUpdateLog
@@ -18,27 +18,27 @@ struct UpdateHelper {
         log.begin()
         defer { log.end() }
 
-        let outcome = await waitForAppToExit() ? await performUpdate() : false
-        record(succeeded: outcome)
-        relaunchApp()
+        await SelfUpdateHelperRun(
+            waitForExitTimeout: spec.waitForExitTimeout,
+            effects: SelfUpdateHelperRun.Effects(
+                isAppRunning: { isAppRunning() },
+                upgrade: { await performUpdate() },
+                recordOutcome: { record(succeeded: $0) },
+                relaunchApp: { relaunchApp() },
+            ),
+            log: { log.write($0) },
+        ).run()
     }
 
     // MARK: Wait
 
     /// Polls because the helper is not the app's child, so it cannot wait on it.
-    private func waitForAppToExit() async -> Bool {
-        let deadline = Date().addingTimeInterval(spec.waitForExitTimeout)
-        while Date() < deadline {
-            if kill(spec.parentProcessIdentifier, 0) != 0 {
-                // ESRCH: no such process. Anything else (EPERM) means it is alive and not ours to signal.
-                if errno == ESRCH {
-                    return true
-                }
-            }
-            try? await Task.sleep(for: .milliseconds(100))
+    private func isAppRunning() -> Bool {
+        guard kill(spec.parentProcessIdentifier, 0) != 0 else {
+            return true
         }
-        log.write("timed out after \(spec.waitForExitTimeout)s waiting for pid \(spec.parentProcessIdentifier) to exit")
-        return false
+        // ESRCH: no such process. Anything else (EPERM) means it is alive and not ours to signal.
+        return errno != ESRCH
     }
 
     // MARK: Update
