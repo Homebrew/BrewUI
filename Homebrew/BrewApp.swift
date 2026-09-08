@@ -93,6 +93,7 @@ struct BrewApp: App {
         let selfUpgradeContext = SelfUpgradeLaunchContext(
             installedPackagesRepository: installedPackagesRepository,
             executionContext: executionContext,
+            commandCenter: center,
             selfUpgradeKeyPrefix: selfUpgradeKeyPrefix,
             uiTesting: uiTesting,
             fixtures: fixtures,
@@ -311,6 +312,7 @@ struct BrewApp: App {
 private struct SelfUpgradeLaunchContext {
     let installedPackagesRepository: BrewInstalledPackagesRepository
     let executionContext: BrewCommandExecutionContext
+    let commandCenter: any BrewCommandCenter
     let selfUpgradeKeyPrefix: String
     let uiTesting: BrewUITestingLaunchConfiguration?
     let fixtures: BrewUITestingFixtureInstaller.Installation?
@@ -350,11 +352,13 @@ extension BrewApp {
         }
     #endif
 
-    /// The same locator every other brew invocation goes through, so under `-uiTesting` the helper
-    /// upgrades through the fake `brew` rather than the machine's real one.
+    /// The same locator and the same login-shell decision every other brew invocation goes through, so
+    /// under `-uiTesting` the helper upgrades through the fake `brew` rather than the machine's real one.
     private static func makeHelperHandoff(_ context: SelfUpgradeLaunchContext) -> HelperSelfUpgradeHandoff {
         HelperSelfUpgradeHandoff(
             brewExecutableURL: { try context.executionContext.brewExecutableURL() },
+            commandCenter: context.commandCenter,
+            usesLoginShell: context.uiTesting == nil,
             defaultsKeyPrefix: context.selfUpgradeKeyPrefix,
             relaunchArguments: relaunchArguments(uiTesting: context.uiTesting),
             relaunchEnvironment: relaunchEnvironment(uiTesting: context.uiTesting),

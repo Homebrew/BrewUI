@@ -28,6 +28,11 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     public var writesNormalOutputToStandardError: Bool {
         self == .doctorRead
     }
+
+    /// `true` when interrupting the command would leave Homebrew half-changed.
+    public var isMutating: Bool {
+        self != .doctorRead
+    }
 }
 
 /// Stable identity for in-flight mutating work.

@@ -14,6 +14,10 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
     /// Resolved here rather than in the helper: the app already knows which `brew` it has been talking to,
     /// and a failure to find one should stop the handoff instead of quitting into a helper that cannot work.
     let brewExecutableURL: @MainActor () throws -> URL
+    /// Asked before quitting: terminating would kill the `brew` an install is streaming through.
+    /// `brew doctor` is exempt — it changes nothing, and it runs long enough to block every upgrade.
+    let commandCenter: any BrewCommandCenter
+    let usesLoginShell: Bool
     let defaultsKeyPrefix: String
     /// Carried across the relaunch so a UI-test run comes back still pointed at its fixtures.
     let relaunchArguments: [String]
@@ -22,6 +26,15 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
     let logFileURL: URL
 
     func performUpgrade() async throws {
+        let mutating = await commandCenter.runningPhases().values.contains { phase in
+            guard case let .running(kind) = phase else {
+                return false
+            }
+            return kind.isMutating
+        }
+        guard !mutating else {
+            throw SelfUpgradeBlockedByRunningOperation()
+        }
         let helperURL = Bundle.main.bundleURL
             .appendingPathComponent("Contents/Helpers/HomebrewUpgradeHelper")
         guard FileManager.default.isExecutableFile(atPath: helperURL.path) else {
@@ -53,6 +66,7 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
             relaunchEnvironment: relaunchEnvironment,
             brewExecutablePath: brewExecutableURL.path,
             upgradeArguments: BrewCommands.selfUpgrade().arguments,
+            usesLoginShell: usesLoginShell,
             upgradeEnvironment: upgradeEnvironment,
             logFilePath: logFileURL.path,
             defaultsSuiteName: Bundle.main.bundleIdentifier ?? SelfUpgradeIdentity.bundleIdentifier,
@@ -66,6 +80,15 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
             .appendingPathComponent("self-upgrade-handoff-\(UUID().uuidString).json")
         try spec.encoded().write(to: specURL, options: .atomic)
         return specURL
+    }
+}
+
+private struct SelfUpgradeBlockedByRunningOperation: LocalizedError {
+    var errorDescription: String? {
+        String(
+            localized: "Wait for the running Homebrew command to finish, then upgrade the Homebrew app.",
+            comment: "Shown when the self-upgrade is attempted while another brew command is still running",
+        )
     }
 }
 

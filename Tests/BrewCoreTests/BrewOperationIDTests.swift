@@ -40,4 +40,18 @@ struct BrewOperationIDTests {
         let maintenance = BrewOperationID(maintenanceToken: "cleanup", displayCommand: "brew cleanup")
         #expect(package != maintenance)
     }
+
+    /// `brew doctor` is the one kind the center schedules that changes nothing, and it runs long enough
+    /// that treating it as mutating would block the self-upgrade for as long as the Doctor tab is loading.
+    @Test func `every kind but the doctor read is mutating`() {
+        let kinds: [BrewOperationKind] = [
+            .installFormula, .installCask,
+            .upgradeFormula, .upgradeCask, .upgradeAll, .upgradeApp,
+            .uninstallFormula, .uninstallCask,
+            .doctorFix,
+        ]
+
+        #expect(kinds.filter { !$0.isMutating }.isEmpty)
+        #expect(!BrewOperationKind.doctorRead.isMutating)
+    }
 }
