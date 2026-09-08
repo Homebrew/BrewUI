@@ -61,8 +61,25 @@ final class SelfUpdateUITests: BrewUITestCase {
         let relaunched = try upgradeAndWaitForRelaunch(.selfUpdateAvailable)
         defer { relaunched.terminate() }
 
-        BrewUIElement(relaunched, .selfUpdateOutcomeAlert)
-            .waitToExist(timeout: BrewUITestTimeout.launch)
+        XCTAssertTrue(
+            relaunched.staticTexts[Self.successAlertTitle].waitForExistence(timeout: BrewUITestTimeout.launch),
+            "The relaunched app did not report the upgrade",
+        )
+
+        BrewUIButton(relaunched, .selfUpdateOutcomeAcknowledgeButton).tap()
+
+        let dismissed = NSPredicate(format: "exists == false")
+        XCTAssertEqual(
+            XCTWaiter().wait(
+                for: [XCTNSPredicateExpectation(
+                    predicate: dismissed,
+                    object: relaunched.staticTexts[Self.successAlertTitle],
+                )],
+                timeout: BrewUITestTimeout.disappearance,
+            ),
+            .completed,
+            "Acknowledging the outcome did not dismiss the alert",
+        )
     }
 
     /// The simulated path steps over the subprocess entirely, so this is the only test that proves the

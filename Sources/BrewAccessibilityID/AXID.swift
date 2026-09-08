@@ -30,7 +30,7 @@ public enum AXID: Hashable, Sendable {
     case selfUpdateBanner
     case selfUpdateUpgradeButton
     case selfUpdateLaterButton
-    case selfUpdateOutcomeAlert
+    case selfUpdateOutcomeAcknowledgeButton
 
     // Discover
     case discoverScreen
@@ -79,7 +79,7 @@ public enum AXID: Hashable, Sendable {
         case .selfUpdateBanner: "selfupdate.banner"
         case .selfUpdateUpgradeButton: "selfupdate.upgrade"
         case .selfUpdateLaterButton: "selfupdate.later"
-        case .selfUpdateOutcomeAlert: "selfupdate.outcome.alert"
+        case .selfUpdateOutcomeAcknowledgeButton: "selfupdate.outcome.acknowledge"
         case .discoverScreen: "discover.screen"
         case .discoverSearchField: "discover.search"
         case .discoverList: "discover.list"

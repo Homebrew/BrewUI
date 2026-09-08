@@ -53,16 +53,20 @@ struct MainWindowView: View {
             selectedSidebarItem = .installed
         }
         .alert("The Homebrew app is up to date", isPresented: launchOutcomeBinding(for: .succeeded)) {
-            Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
+            acknowledgeButton
         } message: {
             Text("The Homebrew app has been upgraded to the latest version.")
         }
         .alert("The Homebrew app wasn’t upgraded", isPresented: launchOutcomeBinding(for: .failed)) {
-            Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
+            acknowledgeButton
         } message: {
             Text("The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages.")
         }
-        .axid(.selfUpdateOutcomeAlert)
+    }
+
+    private var acknowledgeButton: some View {
+        Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
+            .axid(.selfUpdateOutcomeAcknowledgeButton)
     }
 
     /// A failure gets its own alert rather than silence: the app looks identical at launch either way.
