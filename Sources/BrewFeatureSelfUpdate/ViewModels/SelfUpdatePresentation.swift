@@ -11,11 +11,14 @@ struct SelfUpdatePresentation {
     let status: SelfUpdateStatus
 
     var eyebrow: String {
-        "Upgrade Homebrew app"
+        String(localized: "Upgrade Homebrew app", comment: "Self-update banner eyebrow")
     }
 
     var bannerTitle: String {
-        "A new version of Homebrew is available"
+        String(
+            localized: "A new version of the Homebrew app is available",
+            comment: "Self-update banner title",
+        )
     }
 
     var runningVersionDisplay: String {
@@ -36,8 +39,14 @@ struct SelfUpdatePresentation {
 
     var upgradeActionTitle: String {
         guard let latest = latestVersionDisplay else {
-            return "Upgrade Homebrew"
+            return String(
+                localized: "Upgrade the Homebrew app",
+                comment: "Self-update banner button when brew reports no version for the update",
+            )
         }
-        return "Upgrade to \(latest)"
+        return String(
+            localized: "Upgrade to \(latest)",
+            comment: "Self-update banner button, e.g. \"Upgrade to v1.5.0\"",
+        )
     }
 }

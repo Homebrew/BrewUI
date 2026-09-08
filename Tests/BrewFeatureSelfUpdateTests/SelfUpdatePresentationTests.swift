@@ -43,7 +43,14 @@ struct SelfUpdatePresentationTests {
     }
 
     @Test func `upgrade action falls back to a generic label without a latest version`() {
-        #expect(presentation(latest: nil).upgradeActionTitle == "Upgrade Homebrew")
+        #expect(presentation(latest: nil).upgradeActionTitle == "Upgrade the Homebrew app")
+    }
+
+    /// The app updates itself here, not `brew`, and the two are separate things in this app.
+    @Test func `the banner title names the app rather than Homebrew itself`() {
+        let title = presentation(latest: "1.5.0").bannerTitle
+        #expect(title == "A new version of the Homebrew app is available")
+        #expect(title.contains("Homebrew app"))
     }
 
     @Test func `the app uses the same upgrade verb as packages`() {

@@ -95,8 +95,8 @@ final class SelfUpdateUITests: BrewUITestCase {
 
     // MARK: Handoff
 
-    private static let successAlertTitle = "Homebrew is up to date"
-    private static let failureAlertTitle = "Homebrew wasn’t upgraded"
+    private static let successAlertTitle = "The Homebrew app is up to date"
+    private static let failureAlertTitle = "The Homebrew app wasn’t upgraded"
 
     private func upgradeAndWaitForRelaunch(_ scenario: BrewUITestScenario) throws -> XCUIApplication {
         let app = launchUnverified(scenario)

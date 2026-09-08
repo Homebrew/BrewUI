@@ -52,12 +52,12 @@ struct MainWindowView: View {
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
         }
-        .alert("Homebrew is up to date", isPresented: launchOutcomeBinding(for: .succeeded)) {
+        .alert("The Homebrew app is up to date", isPresented: launchOutcomeBinding(for: .succeeded)) {
             Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
         } message: {
             Text("The Homebrew app has been upgraded to the latest version.")
         }
-        .alert("Homebrew wasn’t upgraded", isPresented: launchOutcomeBinding(for: .failed)) {
+        .alert("The Homebrew app wasn’t upgraded", isPresented: launchOutcomeBinding(for: .failed)) {
             Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
         } message: {
             Text("The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages.")
