@@ -76,7 +76,7 @@ public enum BrewLayout {
     /// Floor for the pane *above* the console. The console is the accessory, so it gives way to this
     /// rather than the other way round.
     ///
-    /// Sized for Upgrades, which has by far the tallest chrome and none of it scrolls: the self-update
+    /// Sized for Upgrades, which has by far the tallest chrome and none of it scrolls: the self-upgrade
     /// banner (~122) + the header's title, bulk-command block and action row (~227) + the scope picker
     /// and its divider (~47) come to ~396 before a single row. The remainder is about two rows. Set
     /// below the chrome, the list is handed negative space and clips under the console instead.

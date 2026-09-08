@@ -36,10 +36,10 @@ enum ScenarioFixtures {
             malformedInstalledInfoFixtures()
         case .installFailure:
             installFailureFixtures()
-        case .selfUpdateAvailable:
-            selfUpdateAvailableFixtures()
-        case .selfUpdateRunsBrew, .selfUpdateBrewFails:
-            selfUpdateRunsBrewFixtures(upgradeSucceeds: scenario == .selfUpdateRunsBrew)
+        case .selfUpgradeAvailable:
+            selfUpgradeAvailableFixtures()
+        case .selfUpgradeRunsBrew, .selfUpgradeBrewFails:
+            selfUpgradeRunsBrewFixtures(upgradeSucceeds: scenario == .selfUpgradeRunsBrew)
         }
     }
 
@@ -135,7 +135,7 @@ enum ScenarioFixtures {
     }
 
     /// An ordinary outdated package alongside the app's own, so the banner is distinguishable from the list.
-    private static func selfUpdateAvailableFixtures() -> FixtureSet {
+    private static func selfUpgradeAvailableFixtures() -> FixtureSet {
         let installed = [wget, ripgrep, homebrewApp]
         var set = FixtureSet()
         set.brewFiles = baseBrewFiles(installed: installed)
@@ -146,8 +146,8 @@ enum ScenarioFixtures {
 
     /// Answers the upgrade the *helper* runs, not the app: by then the app has quit, so this is the fake
     /// `brew` being executed from a different process against the same fixture tree.
-    private static func selfUpdateRunsBrewFixtures(upgradeSucceeds: Bool) -> FixtureSet {
-        var set = selfUpdateAvailableFixtures()
+    private static func selfUpgradeRunsBrewFixtures(upgradeSucceeds: Bool) -> FixtureSet {
+        var set = selfUpgradeAvailableFixtures()
         let key = "upgrade_--cask_\(homebrewApp.token)"
         guard upgradeSucceeds else {
             set.brewFiles["\(key).stderr"] = text("Error: Download failed on Cask 'homebrew-app'")

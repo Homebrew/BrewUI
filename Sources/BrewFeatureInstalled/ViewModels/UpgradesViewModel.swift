@@ -337,7 +337,7 @@ final class UpgradesViewModel {
 // MARK: - Upgrade action
 
 extension UpgradesViewModel {
-    /// User-facing command rendered by the Updates header's `CommandBlockView`. Derived from the same
+    /// User-facing command rendered by the Upgrades header's `CommandBlockView`. Derived from the same
     /// ``BrewUpgradeSelection`` that ``upgradeAll()`` submits, so the shown command always matches what runs.
     var bulkUpgradeDisplayCommand: String {
         upgradeSelection.displayCommand
@@ -435,7 +435,7 @@ extension UpgradesViewModel {
     /// them. Naming the rows instead is the only way to run the batch without it.
     private func wouldSweepInTheAppsOwnCask(_ selection: BrewUpgradeSelection) -> Bool {
         repository.isTheAppsOwnCaskOutdated
-            && selection.covers(packageID: SelfUpdateIdentity.packageID, isOutdated: true)
+            && selection.covers(packageID: SelfUpgradeIdentity.packageID, isOutdated: true)
     }
 
     /// Submits one batch `brew upgrade` for ``upgradeSelection`` under ``BrewOperationID/bulkUpgrade(_:)``

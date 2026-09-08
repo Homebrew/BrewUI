@@ -26,11 +26,11 @@
 		EEAA110F00000000000000BF /* BrewAccessibilityID in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100F00000000000000CF /* BrewAccessibilityID */; };
 		EEAA111000000000000000C0 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101000000000000000D0 /* BrewUITestContract */; };
 		EEAA111100000000000000C1 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101100000000000000D1 /* BrewUITestContract */; };
-		EEBB110100000000000000E1 /* BrewSelfUpdateContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100100000000000000F1 /* BrewSelfUpdateContract */; };
-		EEBB110200000000000000E2 /* BrewSelfUpdateContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100200000000000000F2 /* BrewSelfUpdateContract */; };
-		EEBB110300000000000000E3 /* HomebrewUpdateHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBB120100000000000000A1 /* HomebrewUpdateHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		EEBB110400000000000000E4 /* BrewSelfUpdateHelperCore in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100300000000000000F3 /* BrewSelfUpdateHelperCore */; };
-		EEBB110500000000000000E5 /* BrewFeatureSelfUpdate in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100400000000000000F4 /* BrewFeatureSelfUpdate */; };
+		EEBB110100000000000000E1 /* BrewSelfUpgradeContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100100000000000000F1 /* BrewSelfUpgradeContract */; };
+		EEBB110200000000000000E2 /* BrewSelfUpgradeContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100200000000000000F2 /* BrewSelfUpgradeContract */; };
+		EEBB110300000000000000E3 /* HomebrewUpgradeHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBB120100000000000000A1 /* HomebrewUpgradeHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		EEBB110400000000000000E4 /* BrewSelfUpgradeHelperCore in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100300000000000000F3 /* BrewSelfUpgradeHelperCore */; };
+		EEBB110500000000000000E5 /* BrewFeatureSelfUpgrade in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100400000000000000F4 /* BrewFeatureSelfUpgrade */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +39,7 @@
 			containerPortal = EEC39EB72F5AB4B900269514 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = EEBB140100000000000000C1;
-			remoteInfo = HomebrewUpdateHelper;
+			remoteInfo = HomebrewUpgradeHelper;
 		};
 		EEC39ECD2F5AB4B900269514 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -64,7 +64,7 @@
 			dstPath = Contents/Helpers;
 			dstSubfolderSpec = 1;
 			files = (
-				EEBB110300000000000000E3 /* HomebrewUpdateHelper in Copy Helpers */,
+				EEBB110300000000000000E3 /* HomebrewUpgradeHelper in Copy Helpers */,
 			);
 			name = "Copy Helpers";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -78,16 +78,16 @@
 		EE00AA000000000000000005 /* App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = App.xcconfig; sourceTree = "<group>"; };
 		EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-Unit.xctestplan"; sourceTree = "<group>"; };
 		EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-UI.xctestplan"; sourceTree = "<group>"; };
-		EEBB120100000000000000A1 /* HomebrewUpdateHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HomebrewUpdateHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEBB120100000000000000A1 /* HomebrewUpgradeHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HomebrewUpgradeHelper; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39EBF2F5AB4B900269514 /* Homebrew.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Homebrew.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ECC2F5AB4B900269514 /* BrewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		EEBB150100000000000000D1 /* HomebrewUpdateHelper */ = {
+		EEBB150100000000000000D1 /* HomebrewUpgradeHelper */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = HomebrewUpdateHelper;
+			path = HomebrewUpgradeHelper;
 			sourceTree = "<group>";
 		};
 		EEC39EC12F5AB4B900269514 /* Homebrew */ = {
@@ -112,8 +112,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EEBB110200000000000000E2 /* BrewSelfUpdateContract in Frameworks */,
-				EEBB110400000000000000E4 /* BrewSelfUpdateHelperCore in Frameworks */,
+				EEBB110200000000000000E2 /* BrewSelfUpgradeContract in Frameworks */,
+				EEBB110400000000000000E4 /* BrewSelfUpgradeHelperCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,8 +136,8 @@
 				EEAA110D00000000000000BD /* BrewCrashReporting in Frameworks */,
 				EEAA110E00000000000000BE /* BrewAccessibilityID in Frameworks */,
 				EEAA111000000000000000C0 /* BrewUITestContract in Frameworks */,
-				EEBB110100000000000000E1 /* BrewSelfUpdateContract in Frameworks */,
-				EEBB110500000000000000E5 /* BrewFeatureSelfUpdate in Frameworks */,
+				EEBB110100000000000000E1 /* BrewSelfUpgradeContract in Frameworks */,
+				EEBB110500000000000000E5 /* BrewFeatureSelfUpgrade in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,7 +177,7 @@
 				EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */,
 				EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */,
 				EEC39EC12F5AB4B900269514 /* Homebrew */,
-				EEBB150100000000000000D1 /* HomebrewUpdateHelper */,
+				EEBB150100000000000000D1 /* HomebrewUpgradeHelper */,
 				EEC39ECF2F5AB4B900269514 /* BrewTests */,
 				EEC39ED92F5AB4B900269514 /* BrewUITests */,
 				EEC39EC02F5AB4B900269514 /* Products */,
@@ -189,7 +189,7 @@
 			isa = PBXGroup;
 			children = (
 				EEC39EBF2F5AB4B900269514 /* Homebrew.app */,
-				EEBB120100000000000000A1 /* HomebrewUpdateHelper */,
+				EEBB120100000000000000A1 /* HomebrewUpgradeHelper */,
 				EEC39ECC2F5AB4B900269514 /* BrewTests.xctest */,
 				EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */,
 			);
@@ -199,9 +199,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EEBB140100000000000000C1 /* HomebrewUpdateHelper */ = {
+		EEBB140100000000000000C1 /* HomebrewUpgradeHelper */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EEBB190100000000000000B1 /* Build configuration list for PBXNativeTarget "HomebrewUpdateHelper" */;
+			buildConfigurationList = EEBB190100000000000000B1 /* Build configuration list for PBXNativeTarget "HomebrewUpgradeHelper" */;
 			buildPhases = (
 				EEBB1A0100000000000000C1 /* Sources */,
 				EEBB160100000000000000E1 /* Frameworks */,
@@ -211,15 +211,15 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				EEBB150100000000000000D1 /* HomebrewUpdateHelper */,
+				EEBB150100000000000000D1 /* HomebrewUpgradeHelper */,
 			);
-			name = HomebrewUpdateHelper;
+			name = HomebrewUpgradeHelper;
 			packageProductDependencies = (
-				EEBB100200000000000000F2 /* BrewSelfUpdateContract */,
-				EEBB100300000000000000F3 /* BrewSelfUpdateHelperCore */,
+				EEBB100200000000000000F2 /* BrewSelfUpgradeContract */,
+				EEBB100300000000000000F3 /* BrewSelfUpgradeHelperCore */,
 			);
-			productName = HomebrewUpdateHelper;
-			productReference = EEBB120100000000000000A1 /* HomebrewUpdateHelper */;
+			productName = HomebrewUpgradeHelper;
+			productReference = EEBB120100000000000000A1 /* HomebrewUpgradeHelper */;
 			productType = "com.apple.product-type.tool";
 		};
 		EEC39EBE2F5AB4B900269514 /* Homebrew */ = {
@@ -258,8 +258,8 @@
 				EEAA100D00000000000000CD /* BrewCrashReporting */,
 				EEAA100E00000000000000CE /* BrewAccessibilityID */,
 				EEAA101000000000000000D0 /* BrewUITestContract */,
-				EEBB100100000000000000F1 /* BrewSelfUpdateContract */,
-				EEBB100400000000000000F4 /* BrewFeatureSelfUpdate */,
+				EEBB100100000000000000F1 /* BrewSelfUpgradeContract */,
+				EEBB100400000000000000F4 /* BrewFeatureSelfUpgrade */,
 			);
 			productName = Brew;
 			productReference = EEC39EBF2F5AB4B900269514 /* Homebrew.app */;
@@ -358,7 +358,7 @@
 			projectRoot = "";
 			targets = (
 				EEC39EBE2F5AB4B900269514 /* Homebrew */,
-				EEBB140100000000000000C1 /* HomebrewUpdateHelper */,
+				EEBB140100000000000000C1 /* HomebrewUpgradeHelper */,
 				EEC39ECB2F5AB4B900269514 /* BrewTests */,
 				EEC39ED52F5AB4B900269514 /* BrewUITests */,
 			);
@@ -451,7 +451,7 @@
 		};
 		EEBB180100000000000000A1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = EEBB140100000000000000C1 /* HomebrewUpdateHelper */;
+			target = EEBB140100000000000000C1 /* HomebrewUpgradeHelper */;
 			targetProxy = EEBB130100000000000000B1 /* PBXContainerItemProxy */;
 		};
 		EEC39ECE2F5AB4B900269514 /* PBXTargetDependency */ = {
@@ -474,7 +474,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				ENABLE_HARDENED_RUNTIME = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.updatehelper;
+				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.upgradehelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -492,7 +492,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				ENABLE_HARDENED_RUNTIME = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.updatehelper;
+				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.upgradehelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -760,7 +760,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EEBB190100000000000000B1 /* Build configuration list for PBXNativeTarget "HomebrewUpdateHelper" */ = {
+		EEBB190100000000000000B1 /* Build configuration list for PBXNativeTarget "HomebrewUpgradeHelper" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EEBB1B0100000000000000D1 /* Debug */,
@@ -909,25 +909,25 @@
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewUITestContract;
 		};
-		EEBB100100000000000000F1 /* BrewSelfUpdateContract */ = {
+		EEBB100100000000000000F1 /* BrewSelfUpgradeContract */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
-			productName = BrewSelfUpdateContract;
+			productName = BrewSelfUpgradeContract;
 		};
-		EEBB100200000000000000F2 /* BrewSelfUpdateContract */ = {
+		EEBB100200000000000000F2 /* BrewSelfUpgradeContract */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
-			productName = BrewSelfUpdateContract;
+			productName = BrewSelfUpgradeContract;
 		};
-		EEBB100300000000000000F3 /* BrewSelfUpdateHelperCore */ = {
+		EEBB100300000000000000F3 /* BrewSelfUpgradeHelperCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
-			productName = BrewSelfUpdateHelperCore;
+			productName = BrewSelfUpgradeHelperCore;
 		};
-		EEBB100400000000000000F4 /* BrewFeatureSelfUpdate */ = {
+		EEBB100400000000000000F4 /* BrewFeatureSelfUpgrade */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
-			productName = BrewFeatureSelfUpdate;
+			productName = BrewFeatureSelfUpgrade;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,6 +1,6 @@
 import BrewAccessibilityID
 import BrewCore
-import BrewFeatureSelfUpdate
+import BrewFeatureSelfUpgrade
 import BrewUIComponents
 import SwiftUI
 
@@ -13,7 +13,7 @@ struct DiscoverPackagesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SelfUpdateBanner()
+            SelfUpgradeBanner()
 
             header
             scopePicker

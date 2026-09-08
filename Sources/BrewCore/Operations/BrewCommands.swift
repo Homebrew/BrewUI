@@ -39,7 +39,7 @@ public enum BrewCommands {
     public static func selfUpgrade() -> BrewCommand {
         BrewCommand(
             operationKind: .upgradeApp,
-            arguments: ["upgrade", "--cask", SelfUpdateIdentity.caskToken],
+            arguments: ["upgrade", "--cask", SelfUpgradeIdentity.caskToken],
         )
     }
 

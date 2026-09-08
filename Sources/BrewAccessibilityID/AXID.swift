@@ -26,11 +26,11 @@ public enum AXID: Hashable, Sendable {
     case upgradesRow(token: String)
     case upgradesRefreshButton
 
-    // Self-update
-    case selfUpdateBanner
-    case selfUpdateUpgradeButton
-    case selfUpdateLaterButton
-    case selfUpdateOutcomeAcknowledgeButton
+    // Self-upgrade
+    case selfUpgradeBanner
+    case selfUpgradeUpgradeButton
+    case selfUpgradeLaterButton
+    case selfUpgradeOutcomeAcknowledgeButton
 
     // Discover
     case discoverScreen
@@ -76,10 +76,10 @@ public enum AXID: Hashable, Sendable {
         case .upgradesList: "upgrades.list"
         case let .upgradesRow(token): "upgrades.row.\(token)"
         case .upgradesRefreshButton: "upgrades.refresh"
-        case .selfUpdateBanner: "selfupdate.banner"
-        case .selfUpdateUpgradeButton: "selfupdate.upgrade"
-        case .selfUpdateLaterButton: "selfupdate.later"
-        case .selfUpdateOutcomeAcknowledgeButton: "selfupdate.outcome.acknowledge"
+        case .selfUpgradeBanner: "selfupgrade.banner"
+        case .selfUpgradeUpgradeButton: "selfupgrade.upgrade"
+        case .selfUpgradeLaterButton: "selfupgrade.later"
+        case .selfUpgradeOutcomeAcknowledgeButton: "selfupgrade.outcome.acknowledge"
         case .discoverScreen: "discover.screen"
         case .discoverSearchField: "discover.search"
         case .discoverList: "discover.list"

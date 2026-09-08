@@ -8,7 +8,7 @@ import SwiftUI
 
 #if DEBUG
     struct DebugMenuCommands: Commands {
-        @Bindable var selfUpdateControl: SelfUpdateDebugControl
+        @Bindable var selfUpgradeControl: SelfUpgradeDebugControl
 
         var body: some Commands {
             CommandMenu("Debug") {
@@ -34,9 +34,9 @@ import SwiftUI
 
                 Divider()
 
-                // Shows the banner only: pressing Upgrade on a simulated update reports that nothing was
+                // Shows the banner only: pressing Upgrade on a simulated upgrade reports that nothing was
                 // upgraded rather than running one against the copy installed in /Applications.
-                Toggle("Show the Self-Update Banner", isOn: $selfUpdateControl.simulateUpdateAvailable)
+                Toggle("Show the Self-Upgrade Banner", isOn: $selfUpgradeControl.simulateUpgradeAvailable)
             }
         }
     }

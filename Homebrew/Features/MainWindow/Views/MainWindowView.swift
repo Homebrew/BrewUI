@@ -7,13 +7,13 @@ import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureDoctor
 import BrewFeatureInstalled
-import BrewFeatureSelfUpdate
+import BrewFeatureSelfUpgrade
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
-    @Environment(\.selfUpdateCoordinator) private var selfUpdateCoordinator
+    @Environment(\.selfUpgradeCoordinator) private var selfUpgradeCoordinator
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
@@ -60,32 +60,32 @@ struct MainWindowView: View {
         ) { _ in
             acknowledgeButton
         } message: { outcome in
-            Text(SelfUpdateOutcomePresentation(outcome: outcome).message)
+            Text(SelfUpgradeOutcomePresentation(outcome: outcome).message)
         }
     }
 
     private var acknowledgeButton: some View {
-        Button("OK") { selfUpdateCoordinator?.acknowledgeUpdateCompletion() }
-            .axid(.selfUpdateOutcomeAcknowledgeButton)
+        Button("OK") { selfUpgradeCoordinator?.acknowledgeUpgradeCompletion() }
+            .axid(.selfUpgradeOutcomeAcknowledgeButton)
     }
 
-    private var launchOutcome: SelfUpdateOutcome? {
-        selfUpdateCoordinator?.lastLaunchOutcome
+    private var launchOutcome: SelfUpgradeOutcome? {
+        selfUpgradeCoordinator?.lastLaunchOutcome
     }
 
     /// The title is read outside the `presenting:` closure, so it needs a value once the outcome has been
     /// acknowledged and the alert is on its way out; that copy is never shown.
-    private var outcomeCopy: SelfUpdateOutcomePresentation {
-        SelfUpdateOutcomePresentation(outcome: launchOutcome ?? .succeeded)
+    private var outcomeCopy: SelfUpgradeOutcomePresentation {
+        SelfUpgradeOutcomePresentation(outcome: launchOutcome ?? .succeeded)
     }
 
     /// A failure is reported rather than passed over in silence: the app looks identical at launch either way.
     private var launchOutcomeBinding: Binding<Bool> {
         Binding(
-            get: { selfUpdateCoordinator?.lastLaunchOutcome != nil },
+            get: { selfUpgradeCoordinator?.lastLaunchOutcome != nil },
             set: { presented in
                 if !presented {
-                    selfUpdateCoordinator?.acknowledgeUpdateCompletion()
+                    selfUpgradeCoordinator?.acknowledgeUpgradeCompletion()
                 }
             },
         )

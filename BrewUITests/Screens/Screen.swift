@@ -67,49 +67,49 @@ extension Screen {
         return self
     }
 
-    // MARK: Self-update banner
+    // MARK: Self-upgrade banner
 
     /// On every package list, so it is here rather than on one screen.
-    var selfUpdateBanner: BrewUIElement {
-        BrewUIElement(app, .selfUpdateBanner)
+    var selfUpgradeBanner: BrewUIElement {
+        BrewUIElement(app, .selfUpgradeBanner)
     }
 
-    var selfUpdateUpgradeButton: BrewUIButton {
-        BrewUIButton(app, .selfUpdateUpgradeButton)
+    var selfUpgradeUpgradeButton: BrewUIButton {
+        BrewUIButton(app, .selfUpgradeUpgradeButton)
     }
 
-    var selfUpdateLaterButton: BrewUIButton {
-        BrewUIButton(app, .selfUpdateLaterButton)
+    var selfUpgradeLaterButton: BrewUIButton {
+        BrewUIButton(app, .selfUpgradeLaterButton)
     }
 
     @discardableResult
-    func assertShowsSelfUpdateBanner(
+    func assertShowsSelfUpgradeBanner(
         timeout: TimeInterval = BrewUITestTimeout.default,
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
-        selfUpdateBanner.waitToExist(timeout: timeout, file: file, line: line)
+        selfUpgradeBanner.waitToExist(timeout: timeout, file: file, line: line)
         return self
     }
 
     @discardableResult
-    func assertHidesSelfUpdateBanner(
+    func assertHidesSelfUpgradeBanner(
         timeout: TimeInterval = BrewUITestTimeout.disappearance,
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
-        selfUpdateBanner.assertDoesNotExist(timeout: timeout, file: file, line: line)
+        selfUpgradeBanner.assertDoesNotExist(timeout: timeout, file: file, line: line)
         return self
     }
 
     /// Returns nothing: the app terminates, so the caller has to pick the relaunched process back up.
-    func startSelfUpdate(file: StaticString = #filePath, line: UInt = #line) {
-        selfUpdateUpgradeButton.tap(file: file, line: line)
+    func startSelfUpgrade(file: StaticString = #filePath, line: UInt = #line) {
+        selfUpgradeUpgradeButton.tap(file: file, line: line)
     }
 
     @discardableResult
-    func deferSelfUpdate(file: StaticString = #filePath, line: UInt = #line) -> Self {
-        selfUpdateLaterButton.tap(file: file, line: line)
+    func deferSelfUpgrade(file: StaticString = #filePath, line: UInt = #line) -> Self {
+        selfUpgradeLaterButton.tap(file: file, line: line)
         return self
     }
 }

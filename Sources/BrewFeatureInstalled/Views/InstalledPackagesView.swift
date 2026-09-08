@@ -5,7 +5,7 @@
 
 import BrewAccessibilityID
 import BrewCore
-import BrewFeatureSelfUpdate
+import BrewFeatureSelfUpgrade
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
@@ -17,7 +17,7 @@ struct InstalledPackagesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SelfUpdateBanner()
+            SelfUpgradeBanner()
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 Text("Your packages")

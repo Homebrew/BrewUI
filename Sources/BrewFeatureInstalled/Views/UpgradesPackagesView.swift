@@ -5,7 +5,7 @@
 
 import BrewAccessibilityID
 import BrewCore
-import BrewFeatureSelfUpdate
+import BrewFeatureSelfUpgrade
 import BrewUIComponents
 import SwiftUI
 
@@ -17,7 +17,7 @@ struct UpgradesPackagesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SelfUpdateBanner()
+            SelfUpgradeBanner()
 
             UpgradesHeaderView(viewModel: viewModel)
 

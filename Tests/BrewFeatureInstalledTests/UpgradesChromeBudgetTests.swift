@@ -6,7 +6,7 @@
 import AppKit
 import BrewCore
 @testable import BrewFeatureInstalled
-@testable import BrewFeatureSelfUpdate
+@testable import BrewFeatureSelfUpgrade
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
@@ -41,21 +41,21 @@ struct UpgradesChromeBudgetTests {
     }
 
     private var bannerHeight: CGFloat {
-        let coordinator = SelfUpdateCoordinator(
-            statusProvider: StubSelfUpdateStatusProvider(
-                selfUpdateStatus: SelfUpdateStatus(
+        let coordinator = SelfUpgradeCoordinator(
+            statusProvider: StubSelfUpgradeStatusProvider(
+                selfUpgradeStatus: SelfUpgradeStatus(
                     runningVersion: "0.2.3",
                     latestVersion: "99.0.0",
                     homepageURL: nil,
-                    isUpdateAvailable: true,
+                    isUpgradeAvailable: true,
                 ),
             ),
-            preferences: StubSelfUpdatePreferences(),
-            handoff: RecordingSelfUpdateHandoff(),
+            preferences: StubSelfUpgradePreferences(),
+            handoff: RecordingSelfUpgradeHandoff(),
         )
-        // The padding `SelfUpdateBanner` applies around the content, which is part of what the list loses.
+        // The padding `SelfUpgradeBanner` applies around the content, which is part of what the list loses.
         return height(
-            SelfUpdateBannerContent(coordinator: coordinator)
+            SelfUpgradeBannerContent(coordinator: coordinator)
                 .padding(.horizontal, BrewSpacing.lg)
                 .padding(.top, BrewSpacing.lg),
         )
@@ -77,7 +77,7 @@ struct UpgradesChromeBudgetTests {
 
     /// The banner is the part that grew when Upgrade and Later moved onto it, so it gets its own bound —
     /// a third one would put the list below two rows at the minimum window size.
-    @Test func `the self-update banner stays within two lines of chrome`() {
+    @Test func `the self-upgrade banner stays within two lines of chrome`() {
         #expect(bannerHeight <= 130)
     }
 }

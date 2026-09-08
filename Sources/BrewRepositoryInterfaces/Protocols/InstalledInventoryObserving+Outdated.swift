@@ -7,8 +7,8 @@ import BrewCore
 
 @MainActor
 public extension InstalledInventoryObserving {
-    /// The loaded inventory minus the app's own cask, which the self-update banner owns. Every list, count
-    /// and batch reads this; `state` stays unfiltered so the self-update detector can still find it there.
+    /// The loaded inventory minus the app's own cask, which the self-upgrade banner owns. Every list, count
+    /// and batch reads this; `state` stays unfiltered so the self-upgrade detector can still find it there.
     /// Reads `state` through the `Observable` existential so SwiftUI re-renders
     /// callers when the inventory reconciles after a mutating operation.
     var userManagedPackages: [InstalledBrewPackage] {
