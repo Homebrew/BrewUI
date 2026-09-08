@@ -8,7 +8,6 @@ import BrewFeatureDiscover
 import BrewFeatureDoctor
 import BrewFeatureInstalled
 import BrewFeatureSelfUpdate
-
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
