@@ -73,12 +73,24 @@ struct SelfUpdateHandoffSpecTests {
         #expect(SelfUpdateHandoffDefaults.simulatedUpgradeDuration < SelfUpdateHandoffDefaults.waitForExitTimeout)
     }
 
-    /// Alongside Homebrew's own logs, so someone whose app came back at the old version knows where to look.
-    @Test func `the production log sits under the user's Homebrew logs`() {
+    /// Namespaced like every other root the app writes to, and somewhere a user whose app came back at
+    /// the old version can be told to look.
+    @Test func `the production log sits under the app's own logs directory`() {
         let url = SelfUpdateHandoffDefaults.productionLogFileURL(
             homeDirectory: URL(fileURLWithPath: "/Users/example"),
         )
 
-        #expect(url.path == "/Users/example/Library/Logs/Homebrew/self-update.log")
+        #expect(url.path == "/Users/example/Library/Logs/sh.brew.app/self-update.log")
+    }
+
+    /// `Logs/Homebrew` is the `brew` CLI's own directory; writing there would put the app's transcript
+    /// among logs it does not own.
+    @Test func `the production log is not written into Homebrew's own log directory`() {
+        let url = SelfUpdateHandoffDefaults.productionLogFileURL(
+            homeDirectory: URL(fileURLWithPath: "/Users/example"),
+        )
+
+        #expect(!url.path.contains("Logs/Homebrew"))
+        #expect(url.deletingLastPathComponent().lastPathComponent == "sh.brew.app")
     }
 }

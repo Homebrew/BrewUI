@@ -88,12 +88,12 @@ public enum SelfUpdateHandoffDefaults {
 
     public static let specPathArgument = "--spec"
 
-    /// Alongside Homebrew's own logs, and readable without a running app.
+    /// Readable without a running app, which is the point — the upgrade happens while the app is gone.
     public static func productionLogFileURL(
         homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
     ) -> URL {
         homeDirectory
-            .appendingPathComponent("Library/Logs/Homebrew", isDirectory: true)
+            .appendingPathComponent("Library/Logs/sh.brew.app", isDirectory: true)
             .appendingPathComponent("self-update.log")
     }
 }

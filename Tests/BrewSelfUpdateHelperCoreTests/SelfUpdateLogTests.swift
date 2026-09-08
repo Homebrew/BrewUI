@@ -35,7 +35,7 @@ struct SelfUpdateLogTests {
         #expect(lines[1].hasSuffix("second"))
     }
 
-    /// `~/Library/Logs/Homebrew` may not exist on a machine that has never run one.
+    /// `~/Library/Logs/sh.brew.app` does not exist until the first self-update writes to it.
     @Test func `a missing directory is created`() {
         let fileURL = makeFileURL()
         defer { try? FileManager.default.removeItem(at: fileURL.deletingLastPathComponent()) }
