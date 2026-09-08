@@ -30,6 +30,20 @@ final class SelfUpdateUITests: BrewUITestCase {
             .assertShowsSelfUpdateBanner()
     }
 
+    /// The banner owns the app's own cask. Left in the list it would offer an in-process
+    /// `brew upgrade --cask homebrew-app`, which is the one thing the handoff exists to avoid.
+    func testTheAppsOwnCaskIsNotAnOrdinaryRow() {
+        let installed = launch(.selfUpdateAvailable)
+            .assertShowsSelfUpdateBanner()
+            .assertHasPackage("ripgrep")
+            .assertDoesNotHavePackage("homebrew-app")
+
+        installed.sidebar
+            .goToUpgrades()
+            .assertHasPackage("ripgrep")
+            .assertDoesNotHavePackage("homebrew-app")
+    }
+
     /// Dismissal is the app's, not the list's, so it has to hold as the tabs change.
     func testLaterDismissesTheBannerEverywhere() {
         let installed = launch(.selfUpdateAvailable)

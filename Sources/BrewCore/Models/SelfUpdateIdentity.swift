@@ -16,4 +16,14 @@ public enum SelfUpdateIdentity {
     public static let homepageURL = URL(string: "https://github.com/Homebrew/BrewUI")!
 
     public static let displayCommand = "brew upgrade --cask \(caskToken)"
+
+    public static let packageID = HomebrewPackageID.cask(token: caskToken)
+}
+
+public extension InstalledBrewPackage {
+    /// Upgraded through the self-update handoff rather than by `brew` in-process, so every list, count and
+    /// batch leaves it out — replacing the bundle under a running app is what the handoff exists to avoid.
+    var isTheAppsOwnCask: Bool {
+        kind == .cask && name == SelfUpdateIdentity.caskToken
+    }
 }
