@@ -90,48 +90,19 @@ struct BrewApp: App {
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
 
-        let realStatusProvider = BrewSelfUpdateStatusProvider(
-            inventory: installedPackagesRepository,
-            versionReader: BundleAppVersionReader(),
+        let selfUpdateContext = SelfUpdateLaunchContext(
+            installedPackagesRepository: installedPackagesRepository,
+            executionContext: executionContext,
+            selfUpdateKeyPrefix: selfUpdateKeyPrefix,
+            uiTesting: uiTesting,
+            fixtures: fixtures,
+            launchOutcome: launchOutcome,
         )
-        // A dev build never has its own cask outdated, so DEBUG wraps the provider with the simulator.
         #if DEBUG
-            let statusProvider: any SelfUpdateStatusProviding = DebugSelfUpdateStatusProvider(
-                base: realStatusProvider,
-                control: selfUpdateDebugControl,
-            )
+            selfUpdateCoordinator = Self.makeSelfUpdateCoordinator(selfUpdateContext, debugControl: selfUpdateDebugControl)
         #else
-            let statusProvider: any SelfUpdateStatusProviding = realStatusProvider
+            selfUpdateCoordinator = Self.makeSelfUpdateCoordinator(selfUpdateContext)
         #endif
-        let simulationRequestedAtLaunch = uiTesting?.usesFakeSelfUpdate == true
-        let simulated = SelfUpdateHandoffDefaults.simulatedUpgradeDuration
-        #if DEBUG
-            let debugControl = selfUpdateDebugControl
-            let simulatedUpgradeDuration: @MainActor () -> TimeInterval? = {
-                simulationRequestedAtLaunch || debugControl.simulateUpdateHandoff ? simulated : nil
-            }
-        #else
-            let simulatedUpgradeDuration: @MainActor () -> TimeInterval? = {
-                simulationRequestedAtLaunch ? simulated : nil
-            }
-        #endif
-        let coordinator = SelfUpdateCoordinator(
-            statusProvider: statusProvider,
-            preferences: UserDefaultsSelfUpdatePreferences(defaultsKeyPrefix: selfUpdateKeyPrefix),
-            handoff: HelperSelfUpdateHandoff(
-                // The same locator every other brew invocation goes through, so under `-uiTesting` the
-                // helper upgrades through the fake `brew` rather than the machine's real one.
-                brewExecutableURL: { try executionContext.brewExecutableURL() },
-                simulatedUpgradeDuration: simulatedUpgradeDuration,
-                defaultsKeyPrefix: selfUpdateKeyPrefix,
-                relaunchArguments: Self.relaunchArguments(uiTesting: uiTesting),
-                relaunchEnvironment: Self.relaunchEnvironment(uiTesting: uiTesting),
-                upgradeEnvironment: Self.upgradeEnvironment(fixtures: fixtures, uiTesting: uiTesting),
-                logFileURL: Self.selfUpdateLogFileURL(fixtures: fixtures),
-            ),
-        )
-        coordinator.registerLaunchOutcome(launchOutcome)
-        selfUpdateCoordinator = coordinator
 
         NSWindow.allowsAutomaticWindowTabbing = false
     }
@@ -223,9 +194,6 @@ struct BrewApp: App {
         var environment: [String: String] = [:]
         environment[BrewUITestingEnvironmentKey.scenario] = uiTesting.scenario
         environment[BrewUITestingEnvironmentKey.payload] = uiTesting.payload
-        if uiTesting.usesFakeSelfUpdate {
-            environment[BrewUITestingEnvironmentKey.fakeSelfUpdate] = "1"
-        }
         return environment
     }
 
@@ -334,5 +302,78 @@ struct BrewApp: App {
                 DebugMenuCommands(selfUpdateControl: selfUpdateDebugControl)
             }
         #endif
+    }
+}
+
+/// Bundled rather than passed field-by-field: `BrewApp.init` builds one of these before the `#if DEBUG`
+/// split, and the two `makeSelfUpdateCoordinator` overloads would otherwise carry six or seven parameters
+/// apiece.
+private struct SelfUpdateLaunchContext {
+    let installedPackagesRepository: BrewInstalledPackagesRepository
+    let executionContext: BrewCommandExecutionContext
+    let selfUpdateKeyPrefix: String
+    let uiTesting: BrewUITestingLaunchConfiguration?
+    let fixtures: BrewUITestingFixtureInstaller.Installation?
+    let launchOutcome: SelfUpdateOutcome?
+}
+
+extension BrewApp {
+    #if DEBUG
+        /// A dev build never has its own cask outdated, so DEBUG wraps the status provider with the
+        /// simulator, and wraps the handoff so the simulated banner cannot reach it — see
+        /// ``DebugSelfUpdateHandoff``.
+        private static func makeSelfUpdateCoordinator(
+            _ context: SelfUpdateLaunchContext,
+            debugControl: SelfUpdateDebugControl,
+        ) -> SelfUpdateCoordinator {
+            let statusProvider = DebugSelfUpdateStatusProvider(
+                base: BrewSelfUpdateStatusProvider(
+                    inventory: context.installedPackagesRepository,
+                    versionReader: BundleAppVersionReader(),
+                ),
+                control: debugControl,
+            )
+            let handoff = DebugSelfUpdateHandoff(
+                base: makeHelperHandoff(context),
+                isSimulatingUpdate: { debugControl.simulateUpdateAvailable },
+            )
+            return makeCoordinator(statusProvider: statusProvider, handoff: handoff, context)
+        }
+    #else
+        private static func makeSelfUpdateCoordinator(_ context: SelfUpdateLaunchContext) -> SelfUpdateCoordinator {
+            let statusProvider = BrewSelfUpdateStatusProvider(
+                inventory: context.installedPackagesRepository,
+                versionReader: BundleAppVersionReader(),
+            )
+            let handoff = makeHelperHandoff(context)
+            return makeCoordinator(statusProvider: statusProvider, handoff: handoff, context)
+        }
+    #endif
+
+    /// The same locator every other brew invocation goes through, so under `-uiTesting` the helper
+    /// upgrades through the fake `brew` rather than the machine's real one.
+    private static func makeHelperHandoff(_ context: SelfUpdateLaunchContext) -> HelperSelfUpdateHandoff {
+        HelperSelfUpdateHandoff(
+            brewExecutableURL: { try context.executionContext.brewExecutableURL() },
+            defaultsKeyPrefix: context.selfUpdateKeyPrefix,
+            relaunchArguments: relaunchArguments(uiTesting: context.uiTesting),
+            relaunchEnvironment: relaunchEnvironment(uiTesting: context.uiTesting),
+            upgradeEnvironment: upgradeEnvironment(fixtures: context.fixtures, uiTesting: context.uiTesting),
+            logFileURL: selfUpdateLogFileURL(fixtures: context.fixtures),
+        )
+    }
+
+    private static func makeCoordinator(
+        statusProvider: any SelfUpdateStatusProviding,
+        handoff: any SelfUpdateHandoff,
+        _ context: SelfUpdateLaunchContext,
+    ) -> SelfUpdateCoordinator {
+        let coordinator = SelfUpdateCoordinator(
+            statusProvider: statusProvider,
+            preferences: UserDefaultsSelfUpdatePreferences(defaultsKeyPrefix: context.selfUpdateKeyPrefix),
+            handoff: handoff,
+        )
+        coordinator.registerLaunchOutcome(context.launchOutcome)
+        return coordinator
     }
 }

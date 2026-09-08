@@ -14,9 +14,6 @@ struct HelperSelfUpdateHandoff: SelfUpdateHandoff {
     /// Resolved here rather than in the helper: the app already knows which `brew` it has been talking to,
     /// and a failure to find one should stop the handoff instead of quitting into a helper that cannot work.
     let brewExecutableURL: @MainActor () throws -> URL
-    /// A closure, not a value, because the DEBUG menu can flip the simulation on mid-session. `nil` runs
-    /// the real `brew upgrade --cask`.
-    let simulatedUpgradeDuration: @MainActor () -> TimeInterval?
     let defaultsKeyPrefix: String
     /// Carried across the relaunch so a UI-test run comes back still pointed at its fixtures.
     let relaunchArguments: [String]
@@ -64,7 +61,6 @@ struct HelperSelfUpdateHandoff: SelfUpdateHandoff {
             failureValue: SelfUpdateOutcome.failed.rawValue,
             waitForExitTimeout: SelfUpdateHandoffDefaults.waitForExitTimeout,
             upgradeTimeout: SelfUpdateHandoffDefaults.upgradeTimeout,
-            simulatedUpgradeDuration: simulatedUpgradeDuration(),
         )
         let specURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("self-update-handoff-\(UUID().uuidString).json")

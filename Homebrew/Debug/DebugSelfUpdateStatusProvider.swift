@@ -29,7 +29,7 @@ import Observation
             }
             return SelfUpdateStatus(
                 runningVersion: real.runningVersion,
-                latestVersion: control.simulatedLatestVersion,
+                latestVersion: SelfUpdateDebugControl.simulatedLatestVersion,
                 homepageURL: SelfUpdateIdentity.homepageURL,
                 isUpdateAvailable: true,
             )

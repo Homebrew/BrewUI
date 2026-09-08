@@ -44,13 +44,6 @@ struct UpdateHelper {
     // MARK: Update
 
     private func performUpdate() async -> Bool {
-        if let simulatedDuration = spec.simulatedUpgradeDuration {
-            log.write("simulating an update for \(simulatedDuration)s")
-            let clamped = min(simulatedDuration, spec.upgradeTimeout)
-            try? await Task.sleep(for: .seconds(clamped))
-            return true
-        }
-
         log.write("running \(spec.brewExecutablePath) \(spec.upgradeArguments.joined(separator: " "))")
         let runner = SelfUpdateUpgradeRunner(transcriptSink: { line in log.write(line) })
         let outcome = await runner.run(

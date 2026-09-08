@@ -34,11 +34,9 @@ import SwiftUI
 
                 Divider()
 
-                Toggle("Simulate Homebrew Update Available", isOn: $selfUpdateControl.simulateUpdateAvailable)
-                Toggle("Simulate a Newer Version (test “Later” re-show)", isOn: $selfUpdateControl.simulateNewerVersion)
-                // The quit, the helper and the relaunch are all real; only `brew upgrade --cask` is skipped,
-                // which a dev build has no business running against the installed app.
-                Toggle("Skip the Real Upgrade (still quits and relaunches)", isOn: $selfUpdateControl.simulateUpdateHandoff)
+                // Shows the banner only: pressing Upgrade on a simulated update reports that nothing was
+                // upgraded rather than running one against the copy installed in /Applications.
+                Toggle("Show the Self-Update Banner", isOn: $selfUpdateControl.simulateUpdateAvailable)
             }
         }
     }

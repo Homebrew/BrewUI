@@ -9,7 +9,7 @@ import Testing
 
 /// A field the helper cannot read means the app quits and nothing brings it back.
 struct SelfUpdateHandoffSpecTests {
-    private func makeSpec(simulatedUpgradeDuration: TimeInterval? = 2) -> SelfUpdateHandoffSpec {
+    private func makeSpec() -> SelfUpdateHandoffSpec {
         SelfUpdateHandoffSpec(
             parentProcessIdentifier: 4321,
             appBundlePath: "/Applications/Homebrew.app",
@@ -25,22 +25,12 @@ struct SelfUpdateHandoffSpecTests {
             failureValue: "failed",
             waitForExitTimeout: 30,
             upgradeTimeout: 600,
-            simulatedUpgradeDuration: simulatedUpgradeDuration,
         )
     }
 
     @Test func `a spec survives the round trip intact`() throws {
         let spec = makeSpec()
         #expect(try SelfUpdateHandoffSpec.decoded(from: spec.encoded()) == spec)
-    }
-
-    /// `nil` selects the real upgrade, so it must not quietly become a zero-second simulation.
-    @Test func `a nil simulated duration round trips as nil`() throws {
-        let spec = makeSpec(simulatedUpgradeDuration: nil)
-        let decoded = try SelfUpdateHandoffSpec.decoded(from: spec.encoded())
-
-        #expect(decoded.simulatedUpgradeDuration == nil)
-        #expect(decoded == spec)
     }
 
     @Test func `the relaunch environment survives, since a UI-test relaunch depends on it`() throws {
@@ -70,7 +60,6 @@ struct SelfUpdateHandoffSpecTests {
     /// A wedged app must not hold the helper past the point where someone has relaunched by hand.
     @Test func `the default timeouts are ordered`() {
         #expect(SelfUpdateHandoffDefaults.waitForExitTimeout < SelfUpdateHandoffDefaults.upgradeTimeout)
-        #expect(SelfUpdateHandoffDefaults.simulatedUpgradeDuration < SelfUpdateHandoffDefaults.waitForExitTimeout)
     }
 
     /// Namespaced like every other root the app writes to, and somewhere a user whose app came back at

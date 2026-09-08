@@ -7,21 +7,15 @@ import Foundation
 import Observation
 
 #if DEBUG
-    /// Switches for exercising the self-update UI, which a dev build never triggers on its own.
+    /// Puts the self-update banner on screen in a dev build, which is never the installed cask and so never
+    /// has an update of its own. Showing the banner is all it does: ``DebugSelfUpdateHandoff`` refuses the
+    /// upgrade the banner offers.
     @Observable
     @MainActor
     final class SelfUpdateDebugControl {
         var simulateUpdateAvailable = false
 
-        /// Bumps the simulated version, for checking the banner reappears after "Later".
-        var simulateNewerVersion = false
-
-        /// On by default: with it off, pressing Upgrade in a dev build runs a real
-        /// `brew upgrade --cask homebrew-app` against whatever is installed in `/Applications`.
-        var simulateUpdateHandoff = true
-
-        var simulatedLatestVersion: String {
-            simulateNewerVersion ? "100.0.0" : "99.0.0"
-        }
+        /// A version no release will reach, so the banner reads as the debug one it is.
+        static let simulatedLatestVersion = "99.0.0"
     }
 #endif

@@ -30,8 +30,6 @@ public struct SelfUpdateHandoffSpec: Codable, Sendable, Equatable {
     public let failureValue: String
     public let waitForExitTimeout: TimeInterval
     public let upgradeTimeout: TimeInterval
-    /// When set, the helper sleeps for this long instead of updating. `nil` performs the real upgrade.
-    public let simulatedUpgradeDuration: TimeInterval?
 
     public init(
         parentProcessIdentifier: Int32,
@@ -48,7 +46,6 @@ public struct SelfUpdateHandoffSpec: Codable, Sendable, Equatable {
         failureValue: String,
         waitForExitTimeout: TimeInterval,
         upgradeTimeout: TimeInterval,
-        simulatedUpgradeDuration: TimeInterval?,
     ) {
         self.parentProcessIdentifier = parentProcessIdentifier
         self.appBundlePath = appBundlePath
@@ -64,7 +61,6 @@ public struct SelfUpdateHandoffSpec: Codable, Sendable, Equatable {
         self.failureValue = failureValue
         self.waitForExitTimeout = waitForExitTimeout
         self.upgradeTimeout = upgradeTimeout
-        self.simulatedUpgradeDuration = simulatedUpgradeDuration
     }
 
     public func encoded() throws -> Data {
@@ -82,9 +78,6 @@ public enum SelfUpdateHandoffDefaults {
 
     /// A cask download on a slow connection is the long pole here.
     public static let upgradeTimeout: TimeInterval = 600
-
-    /// Long enough to see the app quit and come back, short enough for a UI test to wait on.
-    public static let simulatedUpgradeDuration: TimeInterval = 2
 
     public static let specPathArgument = "--spec"
 
