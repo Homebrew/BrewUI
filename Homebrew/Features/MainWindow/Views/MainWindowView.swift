@@ -51,6 +51,10 @@ struct MainWindowView: View {
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
         }
+        // Composed here, not inside a feature: the shell already imports every feature to build the split
+        // view, so it is the one place allowed to know that both the lists and the banner exist. The lists
+        // place what is in the slot; none of them can name it.
+        .environment(\.packageListBanner, PackageListBanner { SelfUpgradeBanner() })
         // One alert for both outcomes, not two: SwiftUI presents only the first `.alert` attached to a
         // view, so a second one for the failure case would never appear.
         .alert(

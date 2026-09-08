@@ -195,7 +195,6 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
-                "BrewFeatureSelfUpgrade",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -210,7 +209,6 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
-                "BrewFeatureSelfUpgrade",
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -347,6 +345,7 @@ let package = Package(
             name: "BrewFeatureDiscoverTests",
             dependencies: [
                 "BrewFeatureDiscover",
+                "BrewAppEnvironment",
                 "BrewCLI",
                 "BrewCore",
                 "BrewRepositoryInterfaces",
@@ -377,6 +376,7 @@ let package = Package(
             dependencies: [
                 "BrewFeatureInstalled",
                 "BrewFeatureSelfUpgrade",
+                "BrewAppEnvironment",
                 "BrewCLI",
                 "BrewCore",
                 "BrewUIComponents",

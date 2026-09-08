@@ -10,8 +10,8 @@ import BrewUIComponents
 import SwiftUI
 
 /// Pins ``SelfUpgradeBannerContent`` above a package list, outside the filtered dataset, so it survives the
-/// All/Formulae/Casks scopes and search. Placed by the Installed, Upgrades and Discover lists; it reads the
-/// coordinator itself so each of those is a single line and none of them plumbs it through.
+/// All/Formulae/Casks scopes and search. The app shell puts it in the lists' `\.packageListBanner` slot —
+/// they render it without naming it — and it reads the coordinator itself, so nothing plumbs one through.
 public struct SelfUpgradeBanner: View {
     @Environment(\.selfUpgradeCoordinator) private var coordinator
 

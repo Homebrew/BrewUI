@@ -16,6 +16,10 @@ import Testing
 /// ``BrewLayout/mainPaneMinHeight`` is sized for. These measure the real views rather than trusting an
 /// arithmetic budget: set the floor below the chrome and the list is handed negative space, which is
 /// how it ended up clipped under the console.
+///
+/// The banner is the app shell's, dropped into this list's `\.packageListBanner` slot, but its height
+/// comes off this list all the same — so the budget is measured against both here. This test target is
+/// the one place the two are composed; the feature itself cannot name the banner.
 @MainActor
 struct UpgradesChromeBudgetTests {
     /// Private inside `UpgradesPackagesView`, so this one stays a measured constant.

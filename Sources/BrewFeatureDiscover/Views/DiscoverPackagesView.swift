@@ -1,6 +1,6 @@
 import BrewAccessibilityID
+import BrewAppEnvironment
 import BrewCore
-import BrewFeatureSelfUpgrade
 import BrewUIComponents
 import SwiftUI
 
@@ -11,9 +11,11 @@ struct DiscoverPackagesView: View {
     @State private var searchFocus = SearchFocusArbiter()
     @FocusState private var focus: SearchFocusTarget?
 
+    @Environment(\.packageListBanner) private var packageListBanner
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SelfUpgradeBanner()
+            packageListBanner()
 
             header
             scopePicker
