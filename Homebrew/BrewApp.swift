@@ -10,7 +10,6 @@ import BrewCLI
 import BrewCore
 import BrewCrashReporting
 import BrewFeatureConsole
-import BrewFeatureInstalled
 import BrewFeatureSelfUpdate
 import BrewNetworking
 import BrewRepositories
