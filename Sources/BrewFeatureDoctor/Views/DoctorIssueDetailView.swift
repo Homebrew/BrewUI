@@ -201,7 +201,7 @@ private struct DoctorSeverityBadge: View {
             .padding(.vertical, BrewSpacing.xxs)
             .background(DoctorSeverityStyle.background(severity), in: Capsule())
             .accessibilityLabel(LocalizedStringResource(
-                doctor: "Severity: \(String(localized: DoctorSeverityStyle.displayName(severity)))",
+                doctor: "Severity: \(DoctorSeverityStyle.displayName(severity))",
             ))
     }
 }
