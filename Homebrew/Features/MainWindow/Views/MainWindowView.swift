@@ -93,17 +93,14 @@ struct MainWindowView: View {
     /// `brew doctor` is a full diagnostic run rather than a refetch, so it only happens from Doctor.
     private func refreshAll() {
         Task {
-            async let doctor: Void = refreshDoctorReportIfSelected()
+            guard !selectedSidebarItem.refreshesDoctorReport else {
+                await doctorRepository.load(forceRefresh: true)
+                return
+            }
             await installedPackagesRepository.load(forceRefresh: true)
             await discoverPackagesRepository.load(forceRefresh: true)
             await configRepository.load(forceRefresh: true)
-            await doctor
         }
-    }
-
-    private func refreshDoctorReportIfSelected() async {
-        guard selectedSidebarItem.refreshesDoctorReport else { return }
-        await doctorRepository.load(forceRefresh: true)
     }
 
     /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be
