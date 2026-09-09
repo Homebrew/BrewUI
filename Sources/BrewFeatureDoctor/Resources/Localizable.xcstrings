@@ -1,416 +1,200 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "Copy brew doctor output": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copy brew doctor output"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copiar saída do brew doctor"
-          }
-        }
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Copy brew doctor output" : {
+      "comment" : "VoiceOver label for the header's copy button; describes the action fully since VoiceOver users don't see the adjacent brew doctor context that the shorter visible title relies on.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy brew doctor output" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Copiar saída do brew doctor" } }
       }
     },
-    "Copy output": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copy output"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copiar saída"
-          }
-        }
+    "Copy output" : {
+      "comment" : "Visible title of the header button that copies the raw brew doctor output to the clipboard.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy output" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Copiar saída" } }
       }
     },
-    "Danger": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Danger"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Perigo"
-          }
-        }
+    "Danger" : {
+      "comment" : "Display name for the .danger case of DoctorSeverity, shown as a severity badge/label on issue rows and details.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Danger" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Perigo" } }
       }
     },
-    "Doctor": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doctor"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doctor"
-          }
-        }
+    "Doctor" : {
+      "comment" : "Both the Doctor tab/pane title and the name of the brew doctor CLI command; identical in Portuguese because it names the command itself, not a description of it.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Doctor" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Doctor" } }
       }
     },
-    "Doctor issues": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Doctor issues"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Problemas do Doctor"
-          }
-        }
+    "Doctor issues" : {
+      "comment" : "VoiceOver label for the issues list in the Doctor pane.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Doctor issues" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Problemas do Doctor" } }
       }
     },
-    "Fix available": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fix available"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Correção disponível"
-          }
-        }
+    "Fix available" : {
+      "comment" : "Hint label shown on an issue row when brew doctor supplied a runnable fix for that issue.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Fix available" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Correção disponível" } }
       }
     },
-    "Last checked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last checked"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verificado"
-          }
-        }
+    "Last checked" : {
+      "comment" : "Lead phrase before the relative timestamp of the most recent brew doctor run, passed to LastUpdatedLabel.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last checked" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Verificado" } }
       }
     },
-    "Needs admin · runs in Terminal": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Needs admin · runs in Terminal"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Requer administrador · executa no Terminal"
-          }
-        }
+    "Needs admin · runs in Terminal" : {
+      "comment" : "Label on a fix's command block warning that it needs administrator privileges and opens Terminal to run; the middle dot (·, U+00B7) is a visual separator between the two clauses, not a translatable word.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Needs admin · runs in Terminal" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Requer administrador · executa no Terminal" } }
       }
     },
-    "No problems found": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No problems found"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nenhum problema encontrado"
-          }
-        }
+    "No problems found" : {
+      "comment" : "Header subtitle shown at rest when the most recent brew doctor run reported no issues.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No problems found" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nenhum problema encontrado" } }
       }
     },
-    "No selection": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No selection"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nada selecionado"
-          }
-        }
+    "No selection" : {
+      "comment" : "Placeholder title shown in the detail pane before any issue is selected in the list.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "No selection" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Nada selecionado" } }
       }
     },
-    "Raw output": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Raw output"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saída bruta"
-          }
-        }
+    "Raw output" : {
+      "comment" : "Title of the collapsible block that shows the verbatim brew doctor console output for the selected issue.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Raw output" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Saída bruta" } }
       }
     },
-    "Re-checking": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Re-checking"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verificando novamente"
-          }
-        }
+    "Re-checking" : {
+      "comment" : "VoiceOver label on the small spinner shown in the header while a background re-check runs. generatesSymbol is false because Xcode's GenerateStringSymbols build phase strips punctuation from keys, so this and the Re-checking… entry below would otherwise collide on the same generated identifier.",
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Re-checking" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Verificando novamente" } }
       }
     },
-    "Re-checking…": {
-      "extractionState": "manual",
-      "generatesSymbol": false,
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Re-checking…"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verificando novamente…"
-          }
-        }
+    "Re-checking…" : {
+      "comment" : "Header subtitle shown while a background re-check runs on top of a previously loaded report. generatesSymbol is false for the same reason as the Re-checking entry above: stripping punctuation makes the two keys generate an identical identifier.",
+      "extractionState" : "manual",
+      "generatesSymbol" : false,
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Re-checking…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Verificando novamente…" } }
       }
     },
-    "Run Again": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Run Again"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Executar novamente"
-          }
-        }
+    "Run Again" : {
+      "comment" : "Header button title that re-runs brew doctor from scratch.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Run Again" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Executar novamente" } }
       }
     },
-    "Run diagnostics, then choose an issue to see details and fixes.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Run diagnostics, then choose an issue to see details and fixes."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Execute o diagnóstico e escolha um problema para ver detalhes e correções."
-          }
-        }
+    "Run Fix" : {
+      "comment" : "Title and VoiceOver label of the button that applies an issue's suggested automated fix.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Run Fix" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Aplicar correção" } }
       }
     },
-    "Run Fix": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Run Fix"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aplicar correção"
-          }
-        }
+    "Run diagnostics, then choose an issue to see details and fixes." : {
+      "comment" : "Placeholder body text in the detail pane, shown under the No selection title before any issue is chosen.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Run diagnostics, then choose an issue to see details and fixes." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Execute o diagnóstico e escolha um problema para ver detalhes e correções." } }
       }
     },
-    "Running brew doctor…": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Running brew doctor…"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Executando brew doctor…"
-          }
-        }
+    "Running brew doctor…" : {
+      "comment" : "Header subtitle shown while the initial brew doctor run is still in progress.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Running brew doctor…" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Executando brew doctor…" } }
       }
     },
-    "Severity: %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Severity: %@"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Severidade: %@"
-          }
-        }
+    "Severity: %@" : {
+      "comment" : "VoiceOver label prefixing an issue's severity name, e.g. Severity: Warning; %@ is filled with the localized value produced by DoctorSeverityStyle.displayName(_:).",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Severity: %@" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Severidade: %@" } }
       }
     },
-    "The check could not be completed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The check could not be completed"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não foi possível concluir a verificação"
-          }
-        }
+    "The check could not be completed" : {
+      "comment" : "Header subtitle shown when the brew doctor run fails.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The check could not be completed" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Não foi possível concluir a verificação" } }
       }
     },
-    "Unsupported": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unsupported"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sem suporte"
-          }
-        }
+    "Unsupported" : {
+      "comment" : "Display name for the .unsupported case of DoctorSeverity, shown as a severity badge/label on issue rows and details.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Unsupported" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Sem suporte" } }
       }
     },
-    "Warning": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Warning"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aviso"
-          }
-        }
+    "Warning" : {
+      "comment" : "Display name for the .caution case of DoctorSeverity; brew itself calls this severity a warning, so the label reads Warning rather than Caution.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Warning" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Aviso" } }
       }
     },
-    "Warnings found": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Warnings found"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Avisos encontrados"
-          }
-        }
+    "Warnings found" : {
+      "comment" : "Header subtitle shown at rest when the most recent brew doctor run reported outstanding issues.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Warnings found" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Avisos encontrados" } }
       }
     },
-    "Your system is ready to brew": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your system is ready to brew"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seu sistema está pronto pro brew"
-          }
-        }
+    "Your system is ready to brew" : {
+      "comment" : "Headline shown in the healthy empty state, above the brew doctor found no problems. body text.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Your system is ready to brew" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Seu sistema está pronto pro brew" } }
       }
     },
-    "brew doctor found no problems.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "brew doctor found no problems."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O brew doctor não encontrou problemas."
-          }
-        }
+    "brew doctor found no problems." : {
+      "comment" : "Body text in the healthy empty state, directly under Your system is ready to brew; distinct from the untranslated DoctorCopy.warningPreamble, which must match brew's own CLI wording verbatim.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "brew doctor found no problems." } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "O brew doctor não encontrou problemas." } }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
