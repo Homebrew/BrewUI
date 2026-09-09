@@ -3,7 +3,8 @@
 //  BrewFeatureDoctor
 //
 
-/// Doctor copy that must match `brew doctor` word for word.
+/// Doctor copy that must match `brew doctor` word for word. Deliberately not localized: it is a
+/// verbatim echo of the CLI, and translating it would contradict the output shown beside it.
 enum DoctorCopy {
     static let warningPreamble = """
     Please note that these warnings are just used to help the Homebrew maintainers with debugging \

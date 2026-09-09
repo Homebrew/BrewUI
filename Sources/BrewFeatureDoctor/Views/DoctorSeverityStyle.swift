@@ -12,11 +12,11 @@ import SwiftUI
 /// distinct icon so a reader can tell severities apart at a glance; Danger and Unsupported share the
 /// error colour token because they share the same severity register in the BrewUI palette.
 enum DoctorSeverityStyle {
-    static func displayName(_ severity: DoctorSeverity) -> String {
+    static func displayName(_ severity: DoctorSeverity) -> LocalizedStringResource {
         switch severity {
-        case .caution: "Warning"
-        case .danger: "Danger"
-        case .unsupported: "Unsupported"
+        case .caution: LocalizedStringResource(doctor: "Warning")
+        case .danger: LocalizedStringResource(doctor: "Danger")
+        case .unsupported: LocalizedStringResource(doctor: "Unsupported")
         }
     }
 

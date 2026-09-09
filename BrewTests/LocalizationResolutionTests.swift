@@ -3,6 +3,7 @@
 //  BrewTests
 //
 
+import BrewFeatureDoctor
 import BrewUIComponents
 import Foundation
 import Testing
@@ -63,5 +64,21 @@ struct LocalizationResolutionTests {
             )
         }
         #expect(phrases == ["agora mesmo", "há 1 minuto", "há 5 minutos", "há 1 hora", "há 1 dia"])
+    }
+
+    /// A representative Doctor string per surface: the header subtitle and a severity label. The
+    /// completeness test guarantees every other key has a `pt-BR` entry; this one proves the Doctor
+    /// module's bundle wiring reaches it.
+    @Test func `doctor copy resolves in Portuguese`() {
+        let subtitle = LocalizedStringResource(
+            "Running brew doctor…",
+            bundle: .atURL(Bundle.brewFeatureDoctor.bundleURL),
+        )
+        let severity = LocalizedStringResource(
+            "Unsupported",
+            bundle: .atURL(Bundle.brewFeatureDoctor.bundleURL),
+        )
+        #expect([Self.localized(subtitle, in: "pt-BR"), Self.localized(severity, in: "pt-BR")]
+            == ["Executando brew doctor…", "Sem suporte"])
     }
 }

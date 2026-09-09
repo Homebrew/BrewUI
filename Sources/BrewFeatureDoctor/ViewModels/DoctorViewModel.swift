@@ -102,16 +102,24 @@ final class DoctorViewModel {
 
     /// Header subtitle copy. Mirrors ``presentation``; while a re-check runs on top of a prior report it
     /// switches to "Re-checking…" so the user knows the visible content is being refreshed.
-    var subtitle: String {
+    var subtitle: LocalizedStringResource {
         switch presentation {
         case .loading:
-            "Running brew doctor…"
+            LocalizedStringResource(doctor: "Running brew doctor…")
         case .healthy:
-            isRefreshing ? "Re-checking…" : "No problems found"
+            if isRefreshing {
+                LocalizedStringResource(doctor: "Re-checking…")
+            } else {
+                LocalizedStringResource(doctor: "No problems found")
+            }
         case .issues:
-            isRefreshing ? "Re-checking…" : "Warnings found"
+            if isRefreshing {
+                LocalizedStringResource(doctor: "Re-checking…")
+            } else {
+                LocalizedStringResource(doctor: "Warnings found")
+            }
         case .failed:
-            "The check could not be completed"
+            LocalizedStringResource(doctor: "The check could not be completed")
         }
     }
 

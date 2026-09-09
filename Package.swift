@@ -196,6 +196,9 @@ let package = Package(
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
             ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
+            ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
