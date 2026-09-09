@@ -192,7 +192,7 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Your system is ready to brew" } },
-        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Seu sistema está pronto pro brew" } }
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Seu sistema está pronto para o brew" } }
       }
     }
   },
