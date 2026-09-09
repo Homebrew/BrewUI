@@ -8,8 +8,7 @@ import BrewUITestContract
 import XCTest
 
 /// Launches the app under test against a scenario. The fixture tree travels in the launch environment
-/// because both seams are stubbed inside the app process, and a `URLProtocol` registered out here
-/// would never see the app's traffic.
+/// because both seams are stubbed inside the app process.
 @MainActor
 enum BrewApp {
     /// The payload compresses well, so approaching this means a fixture grew by an order of magnitude.

@@ -1,4 +1,5 @@
 import AppKit
+import BrewAccessibilityID
 import BrewAppEnvironment
 import BrewCore
 import BrewFeatureConfig
@@ -6,11 +7,13 @@ import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureDoctor
 import BrewFeatureInstalled
+import BrewFeatureSelfUpgrade
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
+    @Environment(\.selfUpgradeCoordinator) private var selfUpgradeCoordinator
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
@@ -31,6 +34,7 @@ struct MainWindowView: View {
                 expandedHeight: consoleHeight,
                 minExpandedHeight: BrewLayout.consoleMinExpandedHeight,
                 maxExpandedHeight: BrewLayout.consoleMaxExpandedHeight,
+                minTopHeight: BrewLayout.mainPaneMinHeight,
                 animation: .brewFast,
             ) {
                 featureColumn
@@ -47,6 +51,41 @@ struct MainWindowView: View {
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
         }
+        .environment(\.packageListBanner, PackageListBanner { SelfUpgradeBanner() })
+        .alert(
+            Text(outcomeCopy.title),
+            isPresented: launchOutcomeBinding,
+            presenting: launchOutcome,
+        ) { _ in
+            acknowledgeButton
+        } message: { outcome in
+            Text(SelfUpgradeOutcomePresentation(outcome: outcome).message)
+        }
+    }
+
+    private var acknowledgeButton: some View {
+        Button("OK") { selfUpgradeCoordinator?.acknowledgeUpgradeCompletion() }
+            .axid(.selfUpgradeOutcomeAcknowledgeButton)
+    }
+
+    private var launchOutcome: SelfUpgradeOutcome? {
+        selfUpgradeCoordinator?.lastLaunchOutcome
+    }
+
+    /// Read outside `presenting:`, so it still needs a value while the alert dismisses; that copy is unseen.
+    private var outcomeCopy: SelfUpgradeOutcomePresentation {
+        SelfUpgradeOutcomePresentation(outcome: launchOutcome ?? .succeeded)
+    }
+
+    private var launchOutcomeBinding: Binding<Bool> {
+        Binding(
+            get: { selfUpgradeCoordinator?.lastLaunchOutcome != nil },
+            set: { presented in
+                if !presented {
+                    selfUpgradeCoordinator?.acknowledgeUpgradeCompletion()
+                }
+            },
+        )
     }
 
     /// ⌘R refetches every cached surface at once, whichever tab is showing, since the sidebar counts and

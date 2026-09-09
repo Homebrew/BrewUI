@@ -38,6 +38,30 @@ struct BrewCommandServiceTests {
         #expect(output.standardError.count == 250_000)
     }
 
+    @Test func `pinned environment variables reach the child alongside the inherited ones`() async throws {
+        let service = BrewCommandService()
+
+        let output = try await service.run(
+            executableURL: URL(fileURLWithPath: "/bin/bash"),
+            arguments: ["-c", "printf '%s|%s' \"${PINNED}\" \"${HOME}\""],
+            options: BrewRunOptions(environment: ["PINNED": "yes"]),
+        )
+
+        #expect(output.standardOutput == "yes|\(ProcessInfo.processInfo.environment["HOME"] ?? "")")
+    }
+
+    @Test func `a pinned variable wins over the colour the output channel forces`() async throws {
+        let service = BrewCommandService()
+
+        let output = try await service.run(
+            executableURL: URL(fileURLWithPath: "/bin/bash"),
+            arguments: ["-c", "printf '%s' \"${HOMEBREW_COLOR}\""],
+            options: BrewRunOptions(output: .pipes(forceColor: true), environment: ["HOMEBREW_COLOR": "0"]),
+        )
+
+        #expect(output.standardOutput == "0")
+    }
+
     @Test func `run throws CancellationError when caller task is cancelled`() async throws {
         let service = BrewCommandService()
         let executable = URL(fileURLWithPath: "/bin/zsh")

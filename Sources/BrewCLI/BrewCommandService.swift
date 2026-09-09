@@ -369,12 +369,22 @@ private extension BrewCommandService {
     /// the BSD-convention tools brew shells out to). The terminal path needs `TERM` instead: a GUI process
     /// launched from Finder inherits none, and without it tools treat the terminal as capability-less.
     static func environment(for options: BrewRunOptions) -> Environment {
-        switch options.output {
+        var pinned: [String: String] = switch options.output {
         case .pseudoTerminal:
-            .inherit.updating(["TERM": "xterm-256color"])
+            ["TERM": "xterm-256color"]
         case let .pipes(forceColor):
-            forceColor ? .inherit.updating(["HOMEBREW_COLOR": "1", "CLICOLOR_FORCE": "1"]) : .inherit
+            forceColor ? ["HOMEBREW_COLOR": "1", "CLICOLOR_FORCE": "1"] : [:]
         }
+        pinned.merge(options.environment) { _, override in override }
+        guard !pinned.isEmpty else {
+            return .inherit
+        }
+        // `Key(rawValue:)` is the only public way in from a runtime string, and never fails.
+        return .inherit.updating(
+            Dictionary(uniqueKeysWithValues: pinned.compactMap { key, value in
+                Environment.Key(rawValue: key).map { ($0, String?.some(value)) }
+            }),
+        )
     }
 
     /// A signalled child becomes `128 + signal`, the shell convention, keeping "non-zero means failure".

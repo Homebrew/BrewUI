@@ -36,6 +36,10 @@ enum ScenarioFixtures {
             malformedInstalledInfoFixtures()
         case .installFailure:
             installFailureFixtures()
+        case .selfUpgradeAvailable:
+            selfUpgradeAvailableFixtures()
+        case .selfUpgradeRunsBrew, .selfUpgradeBrewFails:
+            selfUpgradeRunsBrewFixtures(upgradeSucceeds: scenario == .selfUpgradeRunsBrew)
         }
     }
 
@@ -73,6 +77,16 @@ enum ScenarioFixtures {
         summary: "Move and resize windows using keyboard shortcuts or snap areas",
         installedVersion: "0.84",
         latestVersion: "0.90",
+    )
+
+    /// The app's own cask, installed and behind — detection is real here, not the DEBUG override.
+    static let homebrewApp = FixturePackage(
+        token: "homebrew-app",
+        kind: .cask,
+        displayName: "Homebrew",
+        summary: "Homebrew, as an app",
+        installedVersion: "1.4.2",
+        latestVersion: "1.5.0",
     )
 
     /// Catalogue-only packages — present in `formula.json` / `cask.json`, never installed.
@@ -117,6 +131,36 @@ enum ScenarioFixtures {
 
         set.httpFiles = catalogueFiles(packages: installed)
             .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
+        return set
+    }
+
+    /// An ordinary outdated package alongside the app's own, so the banner is distinguishable from the list.
+    private static func selfUpgradeAvailableFixtures() -> FixtureSet {
+        let installed = [wget, ripgrep, homebrewApp]
+        var set = FixtureSet()
+        set.brewFiles = baseBrewFiles(installed: installed)
+        set.httpFiles = catalogueFiles(packages: installed)
+            .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
+        return set
+    }
+
+    /// Answers the upgrade the *helper* runs: by then the app has quit, so this is a different process.
+    private static func selfUpgradeRunsBrewFixtures(upgradeSucceeds: Bool) -> FixtureSet {
+        var set = selfUpgradeAvailableFixtures()
+        let key = "upgrade_--cask_\(homebrewApp.token)"
+        guard upgradeSucceeds else {
+            set.brewFiles["\(key).stderr"] = text("Error: Download failed on Cask 'homebrew-app'")
+            set.brewFiles["\(key).exitcode"] = text("1")
+            return set
+        }
+        set.brewFiles["\(key).stdout"] = text(
+            """
+            ==> Upgrading 1 outdated package:
+            homebrew-app \(homebrewApp.installedVersion ?? "") -> \(homebrewApp.latestVersion)
+            ==> Moving App 'Homebrew.app' to '/Applications/Homebrew.app'
+            🍺  homebrew-app was successfully upgraded!
+            """,
+        )
         return set
     }
 

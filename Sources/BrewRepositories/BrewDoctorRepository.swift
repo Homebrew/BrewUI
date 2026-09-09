@@ -15,12 +15,8 @@ private let doctorRepositoryLogger = Logger(
     category: "BrewDoctorRepository",
 )
 
-/// App-scoped observable that runs `brew doctor` and turns it into a ``DoctorReport``.
-///
-/// Two runs in parallel: `--json` for the findings, and a plain run through ``BrewCommandCenter`` for the
-/// console transcript, since `--json` suppresses the prose. A brew that rejects the switch falls back to
-/// parsing the transcript. Refreshes are stale-while-revalidate; arrival re-runs only once the report has
-/// aged past ``refreshInterval``.
+/// Runs `brew doctor` twice in parallel: `--json` for the findings, and a plain run through
+/// ``BrewCommandCenter`` for the console transcript, since `--json` suppresses the prose.
 @Observable
 @MainActor
 public final class BrewDoctorRepository: DoctorRepository {
@@ -148,8 +144,7 @@ public final class BrewDoctorRepository: DoctorRepository {
         }
     }
 
-    /// Deliberately not routed through the command center, whose work runs serially: this would queue
-    /// behind the transcript run instead of alongside it.
+    /// Not routed through the command center, whose work is serial: this would queue behind the transcript.
     private func fetchStructuredIssues() async -> [DoctorIssue]? {
         guard supportsStructuredOutput else {
             return nil

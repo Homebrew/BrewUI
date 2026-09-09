@@ -75,9 +75,9 @@ final class InstalledViewModel {
             .loading
         case let .failed(error):
             .failed(Self.userMessage(for: error))
-        case let .loaded(packages):
+        case .loaded:
             .loaded(Self.filteredContent(
-                InstalledPackagesContent(packages: packages),
+                InstalledPackagesContent(packages: repository.userManagedPackages),
                 scope: scope,
                 query: searchQuery,
             ))

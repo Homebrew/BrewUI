@@ -10,10 +10,13 @@ import BrewCLI
 import BrewCore
 import BrewCrashReporting
 import BrewFeatureConsole
+import BrewFeatureSelfUpgrade
 import BrewNetworking
 import BrewRepositories
 import BrewRepositoryInterfaces
+import BrewSelfUpgradeContract
 import BrewUIComponents
+import BrewUITestContract
 import SwiftUI
 
 @main
@@ -36,6 +39,10 @@ struct BrewApp: App {
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
     private let crashReportController: CrashReportController
+    private let selfUpgradeCoordinator: SelfUpgradeCoordinator
+    #if DEBUG
+        private let selfUpgradeDebugControl = SelfUpgradeDebugControl()
+    #endif
 
     init() {
         // Install crash capture before any other launch work so startup crashes are recorded.
@@ -49,6 +56,9 @@ struct BrewApp: App {
         let uiTesting = BrewUITestingLaunchConfiguration.current()
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
         let fixtures = Self.installFixtures(uiTesting: uiTesting)
+        let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
+        // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
+        let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
         let catalogue = Self.makeCatalogueCache(fixtures: fixtures)
         let discoverAnalytics = Self.makeDiscoverAnalyticsCache(fixtures: fixtures)
         // One context for every brew invocation: command center, installed inventory and `brew config`.
@@ -78,6 +88,22 @@ struct BrewApp: App {
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
+
+        let selfUpgradeContext = SelfUpgradeLaunchContext(
+            installedPackagesRepository: installedPackagesRepository,
+            executionContext: executionContext,
+            commandCenter: center,
+            selfUpgradeKeyPrefix: selfUpgradeKeyPrefix,
+            uiTesting: uiTesting,
+            fixtures: fixtures,
+            launchOutcome: launchOutcome,
+        )
+        #if DEBUG
+            selfUpgradeCoordinator = Self.makeSelfUpgradeCoordinator(selfUpgradeContext, debugControl: selfUpgradeDebugControl)
+        #else
+            selfUpgradeCoordinator = Self.makeSelfUpgradeCoordinator(selfUpgradeContext)
+        #endif
+
         NSWindow.allowsAutomaticWindowTabbing = false
     }
 
@@ -151,6 +177,48 @@ struct BrewApp: App {
         fixtures == nil ? base : uiTestingDefaultsPrefix + base
     }
 
+    /// Carried forward, or the relaunched process comes up pointed at the real Homebrew mid-test.
+    private static func relaunchArguments(uiTesting: BrewUITestingLaunchConfiguration?) -> [String] {
+        guard uiTesting != nil else {
+            return []
+        }
+        return [BrewUITestingEnvironmentKey.launchArgument, "YES"]
+    }
+
+    /// `fixturesRoot` is omitted: the relaunched app reinstalls the fixture tree into its own temp directory.
+    private static func relaunchEnvironment(uiTesting: BrewUITestingLaunchConfiguration?) -> [String: String] {
+        guard let uiTesting else {
+            return [:]
+        }
+        var environment: [String: String] = [:]
+        environment[BrewUITestingEnvironmentKey.scenario] = uiTesting.scenario
+        environment[BrewUITestingEnvironmentKey.payload] = uiTesting.payload
+        return environment
+    }
+
+    private static func upgradeEnvironment(
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+        uiTesting: BrewUITestingLaunchConfiguration?,
+    ) -> [String: String] {
+        guard let fixtures, let scenario = uiTesting?.scenario else {
+            return [:]
+        }
+        return [
+            BrewUITestingEnvironmentKey.fixturesRoot: fixtures.rootURL.path,
+            BrewUITestingEnvironmentKey.scenario: scenario,
+        ]
+    }
+
+    /// Under `-uiTesting` the transcript stays in the run's container, clear of a real install's log.
+    private static func selfUpgradeLogFileURL(
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> URL {
+        guard let fixtures else {
+            return SelfUpgradeHandoffDefaults.productionLogFileURL()
+        }
+        return fixtures.containerURL.appendingPathComponent("self-upgrade.log")
+    }
+
     private static func clearUITestingDefaults() {
         let defaults = UserDefaults.standard
         for key in defaults.dictionaryRepresentation().keys where key.hasPrefix(uiTestingDefaultsPrefix) {
@@ -182,13 +250,16 @@ struct BrewApp: App {
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
+                .environment(\.selfUpgradeCoordinator, selfUpgradeCoordinator)
                 .task {
                     async let catalogue: Void = catalogueCache.prepare()
                     async let analytics: Void = discoverAnalyticsCache.prepare()
                     _ = await (catalogue, analytics)
                     await discoverPackagesRepository.load()
                 }
-                .task { await installedPackagesRepository.load() }
+                .task {
+                    await installedPackagesRepository.load()
+                }
                 .onChange(of: scenePhase) { oldPhase, newPhase in
                     // Mark the config + brew.env caches stale on return-to-foreground so the next visit
                     // to the Configuration tab triggers a silent revalidation (stale value stays on
@@ -223,8 +294,79 @@ struct BrewApp: App {
         }
         #if DEBUG
         .commands {
-                DebugMenuCommands()
+                DebugMenuCommands(selfUpgradeControl: selfUpgradeDebugControl)
             }
         #endif
+    }
+}
+
+/// Bundled so the two `makeSelfUpgradeCoordinator` overloads don't each carry seven parameters.
+private struct SelfUpgradeLaunchContext {
+    let installedPackagesRepository: BrewInstalledPackagesRepository
+    let executionContext: BrewCommandExecutionContext
+    let commandCenter: any BrewCommandCenter
+    let selfUpgradeKeyPrefix: String
+    let uiTesting: BrewUITestingLaunchConfiguration?
+    let fixtures: BrewUITestingFixtureInstaller.Installation?
+    let launchOutcome: SelfUpgradeOutcome?
+}
+
+extension BrewApp {
+    #if DEBUG
+        /// A dev build is never the installed cask, so DEBUG wraps both detection and the handoff.
+        private static func makeSelfUpgradeCoordinator(
+            _ context: SelfUpgradeLaunchContext,
+            debugControl: SelfUpgradeDebugControl,
+        ) -> SelfUpgradeCoordinator {
+            let statusProvider = DebugSelfUpgradeStatusProvider(
+                base: BrewSelfUpgradeStatusProvider(
+                    inventory: context.installedPackagesRepository,
+                    versionReader: BundleAppVersionReader(),
+                ),
+                control: debugControl,
+            )
+            let handoff = DebugSelfUpgradeHandoff(
+                base: makeHelperHandoff(context),
+                isSimulatingUpgrade: { debugControl.simulateUpgradeAvailable },
+            )
+            return makeCoordinator(statusProvider: statusProvider, handoff: handoff, context)
+        }
+    #else
+        private static func makeSelfUpgradeCoordinator(_ context: SelfUpgradeLaunchContext) -> SelfUpgradeCoordinator {
+            let statusProvider = BrewSelfUpgradeStatusProvider(
+                inventory: context.installedPackagesRepository,
+                versionReader: BundleAppVersionReader(),
+            )
+            let handoff = makeHelperHandoff(context)
+            return makeCoordinator(statusProvider: statusProvider, handoff: handoff, context)
+        }
+    #endif
+
+    /// The same locator and login-shell decision every other brew invocation goes through.
+    private static func makeHelperHandoff(_ context: SelfUpgradeLaunchContext) -> HelperSelfUpgradeHandoff {
+        HelperSelfUpgradeHandoff(
+            brewExecutableURL: { try context.executionContext.brewExecutableURL() },
+            commandCenter: context.commandCenter,
+            usesLoginShell: context.uiTesting == nil,
+            defaultsKeyPrefix: context.selfUpgradeKeyPrefix,
+            relaunchArguments: relaunchArguments(uiTesting: context.uiTesting),
+            relaunchEnvironment: relaunchEnvironment(uiTesting: context.uiTesting),
+            upgradeEnvironment: upgradeEnvironment(fixtures: context.fixtures, uiTesting: context.uiTesting),
+            logFileURL: selfUpgradeLogFileURL(fixtures: context.fixtures),
+        )
+    }
+
+    private static func makeCoordinator(
+        statusProvider: any SelfUpgradeStatusProviding,
+        handoff: any SelfUpgradeHandoff,
+        _ context: SelfUpgradeLaunchContext,
+    ) -> SelfUpgradeCoordinator {
+        let coordinator = SelfUpgradeCoordinator(
+            statusProvider: statusProvider,
+            preferences: UserDefaultsSelfUpgradePreferences(defaultsKeyPrefix: context.selfUpgradeKeyPrefix),
+            handoff: handoff,
+        )
+        coordinator.registerLaunchOutcome(context.launchOutcome)
+        return coordinator
     }
 }

@@ -9,6 +9,8 @@ let package = Package(
     products: [
         .library(name: "BrewAccessibilityID", targets: ["BrewAccessibilityID"]),
         .library(name: "BrewUITestContract", targets: ["BrewUITestContract"]),
+        .library(name: "BrewSelfUpgradeContract", targets: ["BrewSelfUpgradeContract"]),
+        .library(name: "BrewSelfUpgradeHelperCore", targets: ["BrewSelfUpgradeHelperCore"]),
         .library(name: "BrewCore", targets: ["BrewCore"]),
         .library(name: "BrewCrashReporting", targets: ["BrewCrashReporting"]),
         .library(name: "BrewUIComponents", targets: ["BrewUIComponents"]),
@@ -21,6 +23,7 @@ let package = Package(
         .library(name: "BrewServicesTestSupport", targets: ["BrewServicesTestSupport"]),
         .library(name: "BrewFeatureConsole", targets: ["BrewFeatureConsole"]),
         .library(name: "BrewFeatureInstalled", targets: ["BrewFeatureInstalled"]),
+        .library(name: "BrewFeatureSelfUpgrade", targets: ["BrewFeatureSelfUpgrade"]),
         .library(name: "BrewFeatureDiscover", targets: ["BrewFeatureDiscover"]),
         .library(name: "BrewFeatureDoctor", targets: ["BrewFeatureDoctor"]),
         .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
@@ -47,6 +50,21 @@ let package = Package(
         // environment key names and the fixture payload — so both sides spell them once.
         .target(
             name: "BrewUITestContract",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewSelfUpgradeContract",
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
+            name: "BrewSelfUpgradeHelperCore",
+            dependencies: ["BrewCore", "BrewCLI"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -158,6 +176,19 @@ let package = Package(
             ],
         ),
         .target(
+            name: "BrewFeatureSelfUpgrade",
+            dependencies: [
+                "BrewAccessibilityID",
+                "BrewCore",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
             name: "BrewFeatureInstalled",
             dependencies: [
                 "BrewAccessibilityID",
@@ -219,6 +250,22 @@ let package = Package(
         .testTarget(
             name: "BrewAccessibilityIDTests",
             dependencies: ["BrewAccessibilityID"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewSelfUpgradeContractTests",
+            dependencies: ["BrewSelfUpgradeContract"],
+            swiftSettings: [
+                .defaultIsolation(nil),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewSelfUpgradeHelperCoreTests",
+            dependencies: ["BrewSelfUpgradeHelperCore", "BrewCore"],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -299,6 +346,7 @@ let package = Package(
             name: "BrewFeatureDiscoverTests",
             dependencies: [
                 "BrewFeatureDiscover",
+                "BrewAppEnvironment",
                 "BrewCLI",
                 "BrewCore",
                 "BrewRepositoryInterfaces",
@@ -313,9 +361,23 @@ let package = Package(
             ],
         ),
         .testTarget(
+            name: "BrewFeatureSelfUpgradeTests",
+            dependencies: [
+                "BrewFeatureSelfUpgrade",
+                "BrewCore",
+                "BrewRepositoryInterfaces",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
             name: "BrewFeatureInstalledTests",
             dependencies: [
                 "BrewFeatureInstalled",
+                "BrewFeatureSelfUpgrade",
+                "BrewAppEnvironment",
                 "BrewCLI",
                 "BrewCore",
                 "BrewUIComponents",
