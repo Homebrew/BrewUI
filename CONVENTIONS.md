@@ -37,6 +37,55 @@ Follow [Swift API Design Guidelines](https://www.swift.org/documentation/api-des
 
 UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`BrewColors`, `BrewSpacing` / `BrewLayout` / `BrewRadius`, `BrewFonts`). Do not hard-code colours, spacing, or typography in feature views — **add or extend tokens** in Theme when new semantics appear. Cursor agents: see [`.cursor/rules/design-system.mdc`](.cursor/rules/design-system.mdc).
 
+## Localization
+
+Every target with user-facing copy owns `Resources/Localizable.xcstrings`, declared as a
+`.process` resource in `Package.swift`. Source language is English; the key is the English text.
+
+**Adding a string:**
+
+1. Build the value through the module's initialiser: `LocalizedStringResource(doctor: "Run Again")`.
+   Never `String(localized:)` or `LocalizedStringResource(_:)` without a `bundle:` — those default
+   to `Bundle.main`, which is not where a SwiftPM module's catalogue lives, and the failure is
+   silent: you get the English key back, which reads as a missing translation. If a module has no
+   initialiser yet, add one rather than passing the bundle inline at each call.
+2. Add the key to the module's catalogue with an `en` and a `pt-BR` entry, both `"translated"`.
+   Order entries case-insensitively and give every entry a `comment` — a translator working in
+   Xcode's String Catalog editor sees only the string and its comment, never the surrounding view.
+   Match Xcode's own pretty-printer style (space before every colon, a `stringUnit` object collapsed
+   onto one line): Xcode rewrites the file in that style the moment anyone saves it in the editor,
+   so a hand-formatted file just produces a reformat-only diff on the next edit.
+3. Interpolate counts rather than branching on them — `"\(count) minutes ago"` produces a `%lld`
+   key that the catalogue answers with per-language plural variations.
+4. If the new string is an existing one plus trailing punctuation (`"Loading"` /
+   `"Loading…"`), set `"generatesSymbol": false` on both entries. Xcode's `GenerateStringSymbols`
+   phase strips punctuation when deriving an identifier, so the two would otherwise generate the
+   same symbol and fail the `xcodebuild` build outright.
+
+**`LocalizedStringResource` or `String`:** a string a person reads is a `LocalizedStringResource`,
+including accessibility labels. It stays a `LocalizedStringResource` across every boundary — a
+ViewModel returns one, and a component that renders caller-supplied copy accepts one, so it
+resolves against the catalogue of the module that owns it.
+
+**Never localized:** text that echoes `brew` output word for word, copyable command text, SF Symbol
+names, and `AXID` values. Mark each with a comment saying why.
+
+**Tests** resolve against a named locale rather than the machine's — and only `BrewTests` (the
+Xcode target, run by `xcodebuild`) can do that, because `swift test` copies a catalogue into the
+module bundle uncompiled and a lookup under it always returns its key:
+
+```swift
+var resource = viewModel.subtitle
+resource.locale = Locale(identifier: "pt-BR")
+#expect(String(localized: resource) == "Executando brew doctor…")
+```
+
+A suite under `Tests/` (which only ever runs via `swift test`) must stop at asserting catalogue
+keys and bundle bindings — never a resolved translation, which would pass locally under `xcodebuild`
+and fail in CI's `swift test` leg. A `BrewTests` case that reaches into `BrewUIComponents` or
+`BrewFeatureDoctor` needs `@MainActor`: both set `.defaultIsolation(MainActor.self)` in
+`Package.swift`, and `BrewTests` itself carries no default isolation.
+
 ## Implementation notes
 
 **Errors:** Prefer typed `Error` enums with associated values where useful. Separate **user-facing** copy from **technical** detail; log or preserve detail; do not swallow errors silently.
