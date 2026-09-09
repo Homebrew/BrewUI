@@ -15,8 +15,9 @@ extension LocalizedStringResource {
 
 public extension Bundle {
     /// `Bundle.module` is internal to its own module. The Xcode test target needs the same bundle to
-    /// assert that a translation resolves, so it is exposed here — the only reason this is public.
-    static var brewFeatureDoctor: Bundle {
+    /// assert that a translation resolves, which is the only reason this exists — so it ships as SPI
+    /// rather than API. See the equivalent in `BrewUIComponents`.
+    @_spi(BrewUITesting) static var brewFeatureDoctor: Bundle {
         .module
     }
 }

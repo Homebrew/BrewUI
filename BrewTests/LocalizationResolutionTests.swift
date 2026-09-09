@@ -3,8 +3,8 @@
 //  BrewTests
 //
 
-import BrewFeatureDoctor
-import BrewUIComponents
+@_spi(BrewUITesting) import BrewFeatureDoctor
+@_spi(BrewUITesting) import BrewUIComponents
 import Foundation
 import Testing
 
