@@ -168,7 +168,9 @@ private struct DoctorSeveritySectionHeader: View {
 
 private struct DoctorReassuranceNote: View {
     var body: some View {
-        NoteCallout(DoctorCopy.warningPreamble, tone: .info)
+        // `verbatim:`, not a resource: this is `brew doctor`'s own wording, echoed word for word
+        // beside the output it explains. See ``DoctorCopy``.
+        NoteCallout(verbatim: DoctorCopy.warningPreamble, tone: .info)
             .padding(.horizontal, BrewSpacing.lg)
             .padding(.bottom, BrewSpacing.sm)
     }

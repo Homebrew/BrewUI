@@ -182,7 +182,8 @@ struct InstalledPackageDetailMetadataSection: View {
     }
 
     private func caveatsCallout(text: String) -> some View {
-        NoteCallout(text)
+        // `verbatim:`: caveats are the package's own text as Homebrew publishes it, not app copy.
+        NoteCallout(verbatim: text)
             .padding(.top, BrewSpacing.lg)
     }
 }
