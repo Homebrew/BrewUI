@@ -51,6 +51,8 @@ struct DoctorScreen: Screen {
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
+        // Element type unconfirmed: the suite couldn't be run locally to verify this matches.
+        // If it doesn't, try `staticTexts` first, then `descendants(matching: .any)`.
         let healthy = root.element.otherElements[AXID.doctorHealthyState.rawValue]
         guard healthy.waitForExistence(timeout: timeout) else {
             XCTFail(
