@@ -404,34 +404,43 @@ struct DoctorViewModelTests {
 
     @Test func `subtitle while loading describes the running check`() {
         let viewModel = Self.viewModel(repository: LoadingDoctorRepository())
-        #expect(viewModel.subtitle == "Running brew doctor…")
+        #expect(viewModel.subtitle.key == "Running brew doctor…")
     }
 
     @Test func `subtitle on healthy reflects refresh state`() {
         let repository = MutableDoctorRepository(report: DoctorReport(issues: []))
         let viewModel = Self.viewModel(repository: repository)
-
-        #expect(viewModel.subtitle == "No problems found")
+        let resting = viewModel.subtitle.key
 
         repository.setRefreshing(true)
-        #expect(viewModel.subtitle == "Re-checking…")
+        #expect([resting, viewModel.subtitle.key] == ["No problems found", "Re-checking…"])
     }
 
     @Test func `subtitle on issues shows "Warnings found" when not refreshing`() {
         let repository = MutableDoctorRepository(report: Self.issuesReport())
         let viewModel = Self.viewModel(repository: repository)
-
-        #expect(viewModel.subtitle == "Warnings found")
+        let resting = viewModel.subtitle.key
 
         repository.setRefreshing(true)
-        #expect(viewModel.subtitle == "Re-checking…")
+        #expect([resting, viewModel.subtitle.key] == ["Warnings found", "Re-checking…"])
     }
 
     @Test func `subtitle on failure shows a generic could-not-complete message`() {
         let viewModel = Self.viewModel(
             repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
         )
-        #expect(viewModel.subtitle == "The check could not be completed")
+        #expect(viewModel.subtitle.key == "The check could not be completed")
+    }
+
+    /// The whole point of the module initialiser: a subtitle bound to `Bundle.main` would silently
+    /// stay English no matter what the catalogue says.
+    @Test func `subtitle points at the module bundle, not main`() {
+        let viewModel = Self.viewModel(repository: LoadingDoctorRepository())
+        guard case let .atURL(url) = viewModel.subtitle.bundle else {
+            Issue.record("Expected .atURL — .main means the Doctor catalogue is unreachable")
+            return
+        }
+        #expect(url.lastPathComponent == "BrewKit_BrewFeatureDoctor.bundle")
     }
 
     // MARK: - shouldFocusList

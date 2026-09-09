@@ -43,25 +43,21 @@ struct DoctorScreen: Screen {
         return self
     }
 
-    /// `DoctorReport.placeholder` is not healthy, so this text exists only once `brew doctor` has run.
+    /// `DoctorReport.placeholder` is not healthy, so this element exists only once `brew doctor` has
+    /// run. Matched by identifier rather than copy so the assertion holds in every localization.
     @discardableResult
     func assertIsHealthy(
         timeout: TimeInterval = BrewUITestTimeout.command,
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
-        let healthy = root.element.staticTexts["Your system is ready to brew"]
-        guard healthy.waitForExistence(timeout: timeout) else {
-            XCTFail(
-                """
-                Expected Doctor to show the healthy state within \(timeout)s.
-                \(BrewUITestDiagnostics.report(for: app))
-                """,
-                file: file,
-                line: line,
-            )
-            return self
-        }
+        healthyState.waitToExist(timeout: timeout, file: file, line: line)
         return self
+    }
+
+    /// Scoped to this screen's root, and resolved by ``BrewUIElement`` rather than a typed query, so
+    /// it holds whichever element type SwiftUI surfaces the healthy state's container as.
+    private var healthyState: BrewUIElement {
+        BrewUIElement(app, .doctorHealthyState, in: root.element)
     }
 }

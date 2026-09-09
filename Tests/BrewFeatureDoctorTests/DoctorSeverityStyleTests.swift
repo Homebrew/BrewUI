@@ -12,9 +12,9 @@ import Testing
 @MainActor
 struct DoctorSeverityStyleTests {
     @Test func `displayName names each severity`() {
-        #expect(DoctorSeverityStyle.displayName(.caution) == "Warning")
-        #expect(DoctorSeverityStyle.displayName(.danger) == "Danger")
-        #expect(DoctorSeverityStyle.displayName(.unsupported) == "Unsupported")
+        #expect([DoctorSeverity.caution, .danger, .unsupported]
+            .map { DoctorSeverityStyle.displayName($0).key }
+            == ["Warning", "Danger", "Unsupported"])
     }
 
     @Test func `icon is a distinct glyph per severity`() {

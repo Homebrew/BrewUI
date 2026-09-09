@@ -607,3 +607,99 @@
 
 - **The app is unsandboxed, so `~/Library` is shared ground.** There is no container to namespace writes, and a folder named `Brew` collides with anything else of that name and reads as the `brew` CLI's. Every store resolves its own path under `sh.brew.app`.
 - **Which root follows from whether the contents can be rebuilt.** The catalogue and Discover analytics caches hold ETag-validated HTTP responses, so they sit in `Caches`: purgeable, out of Time Machine, one refetch to replace. Crash reports sit in `Application Support` because a pending report cannot be regenerated. Do not merge the two back into one root.
+
+## 2026-09-09 — Localization (String Catalogs, pt-BR first)
+
+- **Mechanism:** one `Resources/Localizable.xcstrings` per target that owns user-facing copy, with
+  `defaultLocalization: "en"` in `Package.swift`. Not a central localization module: Xcode's key
+  extraction is per-target, and a shared catalogue would degrade into a hand-maintained key enum.
+- **Boundary type:** strings crossing a boundary (ViewModel → View, module → module) are
+  `LocalizedStringResource`, not `String`. It carries key *and* bundle and resolves at display time.
+  `LastUpdatedLabel(lead:)` is the reason this matters — the lead phrase belongs to the *calling*
+  module's catalogue.
+- **The bundle trap:** `String(localized:)` and `LocalizedStringResource(_:)` default to
+  `Bundle.main`, which in a SwiftPM module is the app, not where the catalogue was processed.
+  Resolution against the wrong bundle does not throw — it returns the key, so the string silently
+  stays English. Each localized module has an internal `init(<module>:)` that supplies the bundle;
+  every user-facing string in that module goes through it.
+- **The two build systems disagree, and that dictates where a test can live.** `xcrun swift build`
+  / `swift test` copies `Localizable.xcstrings` into the module bundle raw — SwiftPM's native
+  builder runs no Apple resource compiler at all (`Media.xcassets` is copied raw too, same
+  reasoning as the 2026-08-30 contrast audit). So under `swift test` a catalogue lookup always
+  returns its key, and an assertion on *resolved* Portuguese prose can never pass there. `xcodebuild`
+  is the one that actually compiles the catalogue, into `<lang>.lproj/Localizable.strings`. CI runs
+  both, and `Brew-Unit.xctestplan` contains only the `BrewTests` Xcode target — everything under
+  `Tests/` runs exclusively under `swift test`. Hence the split: suites under `Tests/` assert
+  catalogue keys and bundle bindings (e.g. `Tests/BrewUIComponentsTests/LocalizationBundleTests.swift`,
+  `StringCatalogueCompletenessTests`, which reads the `.xcstrings` JSON directly and so is
+  build-system-agnostic); `BrewTests/LocalizationResolutionTests.swift` is the only place a resolved
+  Portuguese string is asserted. A Portuguese assertion added under `Tests/` will pass locally under
+  `xcodebuild` and fail in CI's `swift test` leg.
+- **The app bundle has to advertise its own languages.** Adding `pt-BR` to `knownRegions` in
+  `Package.swift`/the Xcode project only puts `pt-BR.lproj` inside the nested `BrewKit_*.bundle`s.
+  macOS decides which languages an app offers in System Settings → General → Language & Region →
+  Applications by reading the *app bundle's own* top-level `.lproj` folders and
+  `CFBundleLocalizations` — and this app has no in-app language picker by choice, so without this
+  the translation would ship built but unreachable. Fixed with
+  `Homebrew/en.lproj/InfoPlist.strings` and `Homebrew/pt-BR.lproj/InfoPlist.strings`.
+  `INFOPLIST_KEY_CFBundleLocalizations` does **not** work — Xcode's build setting synthesis maps
+  only an allowlist of `INFOPLIST_KEY_*` names into `Info.plist`, and that key isn't on it. Don't
+  retry that route; ship the `.lproj` files.
+- **Two strings differing only in punctuation collide.** Xcode's `GenerateStringSymbols` build
+  phase strips punctuation when deriving an identifier, so `"Re-checking"` (a VoiceOver label) and
+  `"Re-checking…"` (the header subtitle) produced the same generated symbol and broke `xcodebuild`
+  outright — not a warning, a build failure. Fixed with `"generatesSymbol": false` on both entries,
+  safe because nothing references the generated symbols. Any new string that's an existing one plus
+  trailing punctuation needs the same flag.
+- **Catalogue house style, so the two files stop fighting each other:** keys are the English source
+  text; entries are ordered case-insensitively; the JSON follows Xcode's own pretty-printer (a space
+  before every colon, a simple `stringUnit` object collapsed onto one line) because Xcode rewrites
+  the file in that style on save and a hand-formatted diff would just get re-diffed into noise on
+  the next edit made through the editor. Every entry carries a `comment` — a translator working in
+  Xcode's String Catalog editor sees only the string and its comment, never the surrounding view.
+- **81 existing call sites are still bundle-less** — `localized:` appears 81 times across `Sources`
+  in `BrewFeatureInstalled` (46), `BrewFeatureDiscover` (27), `BrewFeatureConfig` (3),
+  `BrewServicesTestSupport` (2), `BrewCore` (2), `BrewRepositories` (1), none passing `bundle:`.
+  Harmless while those targets have no catalogue — the call returns its English key, which is
+  today's behaviour. Fixing them, plus the BrewUILint rule that would enforce the argument, is
+  specified in `.ai/plans/2026-09-10-localization-bundle-followup.md` — a **local working document
+  only**, since `.ai/plans/` is gitignored and nobody else can open it from the repository; treat
+  its existence as this note, not as that file. Deliberately deferred: it touches six targets, and
+  this pull request is scoped to two.
+- **Never localized:** copy that echoes `brew` output verbatim (`DoctorCopy.warningPreamble`),
+  copyable command text (`CONVENTIONS.md` — Command transparency), SF Symbol names, `AXID` values.
+- **No in-app language picker.** macOS already offers per-app language selection; a second source
+  of truth would have to be persisted and defended against the system's.
+- **Plurals** go through catalogue plural variations (`%lld minutes ago`), never a
+  singular/plural ternary in Swift — plural rules are per-language.
+- **Completeness is enforced,** not reviewed: `StringCatalogueCompletenessTests` reads every
+  `.xcstrings` in `Sources/` plus the app target's, and fails when a catalogue translates *some* of
+  its keys into a language but not all of them. Deliberately not "every string must have `pt-BR`":
+  that would put a standing translation obligation on maintainers who never agreed to one, which is
+  project policy and not this repository's to decide. A catalogue nobody has begun translating
+  passes; a half-translated one — the failure that is invisible at runtime — does not.
+- **A component that renders caller-supplied copy takes a `LocalizedStringResource`,** and offers a
+  `verbatim:` initialiser for text that must not be translated (`NoteCallout`, for `brew`'s own
+  preamble and for a package's caveats). Migrated in this branch rather than in PRs 2..n, so later
+  modules plug in without changing public signatures again: `CommandBlockView.title`,
+  `BrewActionButton`'s title/confirmation/help, `NoteCallout`. Still `String` and deliberately
+  deferred: `CommandBlockView.summaryText`, `PackageDetailSectionHeading.title` and
+  `LoadState`'s failure payload — every one of those has a call site fed by a view-model-computed
+  `String`, so they move with their own module's PR.
+- **The module bundle accessors are `@_spi(BrewUITesting) public`,** not `public`. They exist only so
+  the Xcode `BrewTests` target can reach a bundle that is otherwise internal, `.periphery.yml` sets
+  `retain_public: false`, and the staged plan adds one per localized module. `BrewTests` imports them
+  with `@_spi(BrewUITesting) import`; dropping that attribute is a hard compile error, which is the
+  point.
+- **`BrewTests` needs `@MainActor` on any test that reaches into a UI module.**
+  `BrewUIComponents` and `BrewFeatureDoctor` set `.defaultIsolation(MainActor.self)` in
+  `Package.swift`; the Xcode `BrewTests` target sets no default isolation, so a nonisolated test
+  calling into either module is a hard Swift 6 compile error. Annotate the test — never loosen the
+  module's isolation default to work around it.
+- **Status:** `BrewUIComponents` and `BrewFeatureDoctor` are translated. The `Homebrew/` app target
+  has an empty catalogue plus the two `InfoPlist.strings` files, so it already sits inside the
+  completeness guard. Every other target awaits its own pull request.
+- **Known gap:** `LoadState`'s failure payload is still `String`, produced by
+  `OperationFailure.userFacingMessage` in `BrewCore` and consumed by every feature module. Error
+  copy is therefore still English everywhere. Migrating it touches all five feature modules at
+  once and belongs in its own PR.

@@ -13,7 +13,7 @@ public struct RefreshCommands: Commands {
 
     public var body: some Commands {
         CommandGroup(after: .sidebar) {
-            Button("Refresh") { refreshAll?() }
+            Button(LocalizedStringResource(uiComponents: "Refresh")) { refreshAll?() }
                 .keyboardShortcut("r", modifiers: .command)
                 .disabled(refreshAll == nil)
         }

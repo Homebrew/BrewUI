@@ -50,6 +50,11 @@ Guiding patterns:
 - **Command center:** `BrewCommandCenter` (actor protocol; app default `SerialBrewCommandCenter`) — **serializes** mutating `brew` work, tracks **in-flight / failed** **operation** state (`BrewOperationID` + `BrewOperationPhase`) for UI across surfaces, and runs **small `BrewMutatingCommand` types** that call `BrewCommandRunning` + the brew locator. It does **not** own **read/parsing** of `brew list` / `brew info` output — that stays in **repositories**. Feature-scoped executors (e.g. upgrade helpers) should stay **thin** and be invoked **from** commands the center schedules, not as a second parallel pipeline.
 - **Models:** Domain-only value types and relationships shared across layers. Keep UI/presentation helpers, transport decoding models, and infrastructure-state containers out of domain models.
 
+## File organisation
+
+- `Sources/<Target>/Resources/Localizable.xcstrings` — that target's String Catalog. Source
+  language English; `pt-BR` supported. See [`CONVENTIONS.md`](CONVENTIONS.md) — **Localization**.
+
 ## Command execution
 
 Run Homebrew commands **asynchronously** via subprocess; support **cancellation**; **stream or preserve** stdout/stderr for transparency and logs. Always make the **exact command** visible to the user; treat **CLI text output as unstable** (tolerant parsing, fallbacks).

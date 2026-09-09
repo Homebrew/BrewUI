@@ -1,0 +1,4 @@
+/* The app's name is a proper noun and is identical in every language. This file exists so the
+   app bundle declares that it ships this localization — macOS reads the bundle's .lproj folders
+   to decide which languages to offer in System Settings > General > Language & Region. */
+"CFBundleDisplayName" = "Homebrew";
