@@ -25,4 +25,43 @@ struct LocalizationResolutionTests {
                 == ["Retry", "Tentar novamente"],
         )
     }
+
+    /// One representative count per unit. This is where plural variations are actually exercised:
+    /// the count comes from a `%lld` argument, and the catalogue picks `one` or `other` per language.
+    ///
+    /// `@MainActor`: `BrewUIComponents` defaults every declaration to main-actor isolation
+    /// (`Package.swift`'s `.defaultIsolation(MainActor.self)`), so `RelativeTimeText.resource` is
+    /// main-actor-isolated too. `BrewTests` carries no such default, so the call needs an isolated
+    /// caller — unlike `Tests/BrewUIComponentsTests`, whose own target shares that same default.
+    @MainActor
+    @Test func `relative time resolves in English`() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let phrases = [0, 60, 5 * 60, 3600, 24 * 3600].map { secondsAgo in
+            Self.localized(
+                RelativeTimeText.resource(
+                    for: now.addingTimeInterval(-TimeInterval(secondsAgo)),
+                    relativeTo: now,
+                ),
+                in: "en",
+            )
+        }
+        #expect(phrases == ["just now", "1 minute ago", "5 minutes ago", "1 hour ago", "1 day ago"])
+    }
+
+    /// Portuguese takes the singular below two, as English does here — but through catalogue plural
+    /// variations rather than a hand-written ternary, so a language with different rules stays right.
+    @MainActor
+    @Test func `relative time resolves in Portuguese`() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let phrases = [0, 60, 5 * 60, 3600, 24 * 3600].map { secondsAgo in
+            Self.localized(
+                RelativeTimeText.resource(
+                    for: now.addingTimeInterval(-TimeInterval(secondsAgo)),
+                    relativeTo: now,
+                ),
+                in: "pt-BR",
+            )
+        }
+        #expect(phrases == ["agora mesmo", "há 1 minuto", "há 5 minutos", "há 1 hora", "há 1 dia"])
+    }
 }

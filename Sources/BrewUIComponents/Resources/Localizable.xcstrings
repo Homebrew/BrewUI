@@ -1,22 +1,110 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld days ago" : {
+      "comment" : "Relative time, whole days",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : { "stringUnit" : { "state" : "translated", "value" : "%lld day ago" } },
+              "other" : { "stringUnit" : { "state" : "translated", "value" : "%lld days ago" } }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : { "stringUnit" : { "state" : "translated", "value" : "há %lld dia" } },
+              "other" : { "stringUnit" : { "state" : "translated", "value" : "há %lld dias" } }
+            }
+          }
+        }
+      }
+    },
+    "%lld hours ago" : {
+      "comment" : "Relative time, whole hours",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : { "stringUnit" : { "state" : "translated", "value" : "%lld hour ago" } },
+              "other" : { "stringUnit" : { "state" : "translated", "value" : "%lld hours ago" } }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : { "stringUnit" : { "state" : "translated", "value" : "há %lld hora" } },
+              "other" : { "stringUnit" : { "state" : "translated", "value" : "há %lld horas" } }
+            }
+          }
+        }
+      }
+    },
+    "%lld minutes ago" : {
+      "comment" : "Relative time, whole minutes",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : { "stringUnit" : { "state" : "translated", "value" : "%lld minute ago" } },
+              "other" : { "stringUnit" : { "state" : "translated", "value" : "%lld minutes ago" } }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : { "stringUnit" : { "state" : "translated", "value" : "há %lld minuto" } },
+              "other" : { "stringUnit" : { "state" : "translated", "value" : "há %lld minutos" } }
+            }
+          }
+        }
+      }
+    },
+    "Find" : {
+      "comment" : "Edit menu item that focuses the search field (⌘F)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Find" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Buscar" } }
+      }
+    },
+    "just now" : {
+      "comment" : "Relative time, under one minute",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "just now" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "agora mesmo" } }
+      }
+    },
+    "Last checked" : {
+      "comment" : "Preview-only lead phrase; production callers pass their own",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Last checked" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Verificado" } }
+      }
+    },
+    "Refresh" : {
+      "comment" : "View menu item that reloads the current surface (⌘R)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Refresh" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Atualizar" } }
+      }
+    },
     "Retry" : {
       "comment" : "Button that re-runs a failed load",
       "extractionState" : "manual",
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retry"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tentar novamente"
-          }
-        }
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Retry" } },
+        "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Tentar novamente" } }
       }
     }
   },
