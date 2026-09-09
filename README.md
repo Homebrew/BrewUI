@@ -11,7 +11,7 @@ Enable CLI-averse users to safely discover, install, update, and manage Homebrew
 ## 📲 Tech
 
 - **Swift 6.0** with strict concurrency · **SwiftUI** · **Swift Package Manager**
-- **macOS Tahoe 26+** (also supports Sequoia 15, Sonoma 14)
+- **macOS Tahoe 26+**
 - Data from the `brew` CLI and the [Homebrew JSON API](https://formulae.brew.sh/docs/api/)
 
 ## 📦 Installation
