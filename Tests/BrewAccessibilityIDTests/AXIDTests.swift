@@ -10,58 +10,37 @@ import Testing
 /// an expensive, flaky-looking failure; a diff here is a cheap, obvious one — so identifier drift
 /// should break this suite first.
 struct AXIDTests {
+    /// Case and expected rawValue live on one line, rather than in two parallel arrays kept in sync by
+    /// position, so this stays under swiftlint's function_body_length even as the identifier list grows.
     @Test func `static identifiers keep their wire format`() {
-        let identifiers = [
-            AXID.sidebar,
-            .installedScreen,
-            .installedList,
-            .installedSearchField,
-            .upgradesScreen,
-            .upgradesList,
-            .upgradesRefreshButton,
-            .discoverScreen,
-            .discoverSearchField,
-            .discoverList,
-            .configScreen,
-            .doctorScreen,
-            .brewNotFoundState,
-            .packageDetail,
-            .installButton,
-            .uninstallButton,
-            .upgradeButton,
-            .console,
-            .consoleStatus,
-            .consoleToggle,
-            .consoleOutput,
-            .errorState,
-            .errorRetryButton,
-        ].map(\.rawValue)
+        let pairs: [(AXID, String)] = [
+            (.sidebar, "sidebar"),
+            (.installedScreen, "installed.screen"),
+            (.installedList, "installed.list"),
+            (.installedSearchField, "installed.search"),
+            (.upgradesScreen, "upgrades.screen"),
+            (.upgradesList, "upgrades.list"),
+            (.upgradesRefreshButton, "upgrades.refresh"),
+            (.discoverScreen, "discover.screen"),
+            (.discoverSearchField, "discover.search"),
+            (.discoverList, "discover.list"),
+            (.configScreen, "config.screen"),
+            (.doctorScreen, "doctor.screen"),
+            (.doctorHealthyState, "doctor.healthy"),
+            (.brewNotFoundState, "brew.not.found"),
+            (.packageDetail, "package.detail"),
+            (.installButton, "detail.install"),
+            (.uninstallButton, "detail.uninstall"),
+            (.upgradeButton, "detail.upgrade"),
+            (.console, "console"),
+            (.consoleStatus, "console.status"),
+            (.consoleToggle, "console.toggle"),
+            (.consoleOutput, "console.output"),
+            (.errorState, "error.state"),
+            (.errorRetryButton, "error.retry"),
+        ]
 
-        #expect(identifiers == [
-            "sidebar",
-            "installed.screen",
-            "installed.list",
-            "installed.search",
-            "upgrades.screen",
-            "upgrades.list",
-            "upgrades.refresh",
-            "discover.screen",
-            "discover.search",
-            "discover.list",
-            "config.screen",
-            "doctor.screen",
-            "brew.not.found",
-            "package.detail",
-            "detail.install",
-            "detail.uninstall",
-            "detail.upgrade",
-            "console",
-            "console.status",
-            "console.toggle",
-            "console.output",
-            "error.state",
-            "error.retry",
-        ])
+        #expect(pairs.map(\.0.rawValue) == pairs.map(\.1))
     }
 
     @Test func `every sidebar destination maps to a distinct namespaced identifier`() {

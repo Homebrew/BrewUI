@@ -104,6 +104,8 @@ struct DoctorView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(BrewSpacing.xl)
+        .accessibilityElement(children: .contain)
+        .axid(.doctorHealthyState)
     }
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
