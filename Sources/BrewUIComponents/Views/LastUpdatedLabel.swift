@@ -37,6 +37,13 @@ public struct LastUpdatedLabel: View {
     /// `lead` is the phrase the relative time is appended to, e.g. `"Last checked"`. It arrives as a
     /// resource rather than a `String` so it resolves against the calling module's catalogue, not
     /// this one's.
+    ///
+    /// The two halves are joined lead-then-time with a space, which is a limit of this shape rather
+    /// than a general answer: a language that puts the time first, or joins with something other than
+    /// a space, cannot express that here. Resolving the halves separately is what forces it — they
+    /// belong to different catalogues, so neither can hold a format string with the other's slot in
+    /// it. A language that needs a different order wants one catalogue entry that takes the relative
+    /// phrase as an argument, which means moving the lead into the component's own catalogue.
     public init(lead: LocalizedStringResource, date: Date) {
         self.lead = lead
         self.date = date
