@@ -181,7 +181,7 @@ struct DoctorIssueDetailView: View {
     private var rawOutputSection: some View {
         CommandBlockView(
             command: item.rawText,
-            title: String(localized: LocalizedStringResource(doctor: "Raw output")),
+            title: LocalizedStringResource(doctor: "Raw output"),
             collapsible: true,
         )
     }

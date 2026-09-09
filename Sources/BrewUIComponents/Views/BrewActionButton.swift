@@ -10,10 +10,10 @@ import SwiftUI
 /// An action that leaves no visible trace (copying to the pasteboard, clearing a list) passes a
 /// `confirmationTitle`: the button swaps to a tick and that title for a few seconds.
 public struct BrewActionButton: View {
-    private let title: String
+    private let title: LocalizedStringResource
     private let systemImage: String
-    private let confirmationTitle: String?
-    private let help: String?
+    private let confirmationTitle: LocalizedStringResource?
+    private let help: LocalizedStringResource?
     private let action: () -> Void
 
     @State private var isHovered = false
@@ -23,10 +23,10 @@ public struct BrewActionButton: View {
     private static let confirmationDuration: Duration = .seconds(5)
 
     public init(
-        _ title: String,
+        _ title: LocalizedStringResource,
         systemImage: String,
-        confirmationTitle: String? = nil,
-        help: String? = nil,
+        confirmationTitle: LocalizedStringResource? = nil,
+        help: LocalizedStringResource? = nil,
         action: @escaping () -> Void,
     ) {
         self.title = title
@@ -74,10 +74,15 @@ public struct BrewActionButton: View {
 
 /// What a ``BrewActionButton`` shows right now.
 struct BrewActionButtonAppearance: Equatable {
-    let title: String
+    let title: LocalizedStringResource
     let systemImage: String
 
-    init(title: String, systemImage: String, confirmationTitle: String?, isConfirming: Bool) {
+    init(
+        title: LocalizedStringResource,
+        systemImage: String,
+        confirmationTitle: LocalizedStringResource?,
+        isConfirming: Bool,
+    ) {
         if isConfirming, let confirmationTitle {
             self.title = confirmationTitle
             self.systemImage = "checkmark"
