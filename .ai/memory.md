@@ -673,7 +673,24 @@
 - **Plurals** go through catalogue plural variations (`%lld minutes ago`), never a
   singular/plural ternary in Swift — plural rules are per-language.
 - **Completeness is enforced,** not reviewed: `StringCatalogueCompletenessTests` reads every
-  `.xcstrings` in `Sources/` and fails on any string lacking a translated `pt-BR` entry.
+  `.xcstrings` in `Sources/` plus the app target's, and fails when a catalogue translates *some* of
+  its keys into a language but not all of them. Deliberately not "every string must have `pt-BR`":
+  that would put a standing translation obligation on maintainers who never agreed to one, which is
+  project policy and not this repository's to decide. A catalogue nobody has begun translating
+  passes; a half-translated one — the failure that is invisible at runtime — does not.
+- **A component that renders caller-supplied copy takes a `LocalizedStringResource`,** and offers a
+  `verbatim:` initialiser for text that must not be translated (`NoteCallout`, for `brew`'s own
+  preamble and for a package's caveats). Migrated in this branch rather than in PRs 2..n, so later
+  modules plug in without changing public signatures again: `CommandBlockView.title`,
+  `BrewActionButton`'s title/confirmation/help, `NoteCallout`. Still `String` and deliberately
+  deferred: `CommandBlockView.summaryText`, `PackageDetailSectionHeading.title` and
+  `LoadState`'s failure payload — every one of those has a call site fed by a view-model-computed
+  `String`, so they move with their own module's PR.
+- **The module bundle accessors are `@_spi(BrewUITesting) public`,** not `public`. They exist only so
+  the Xcode `BrewTests` target can reach a bundle that is otherwise internal, `.periphery.yml` sets
+  `retain_public: false`, and the staged plan adds one per localized module. `BrewTests` imports them
+  with `@_spi(BrewUITesting) import`; dropping that attribute is a hard compile error, which is the
+  point.
 - **`BrewTests` needs `@MainActor` on any test that reaches into a UI module.**
   `BrewUIComponents` and `BrewFeatureDoctor` set `.defaultIsolation(MainActor.self)` in
   `Package.swift`; the Xcode `BrewTests` target sets no default isolation, so a nonisolated test

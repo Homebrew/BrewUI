@@ -68,7 +68,15 @@ ViewModel returns one, and a component that renders caller-supplied copy accepts
 resolves against the catalogue of the module that owns it.
 
 **Never localized:** text that echoes `brew` output word for word, copyable command text, SF Symbol
-names, and `AXID` values. Mark each with a comment saying why.
+names, and `AXID` values. Mark each with a comment saying why. A component that also has to render
+such text offers a separate `verbatim:` initialiser alongside its resource one (see `NoteCallout`),
+so a call site cannot opt out of localization without saying so.
+
+**`StringCatalogueCompletenessTests` enforces consistency, not language policy:** a catalogue that
+translates any of its keys into a language must translate all of them into it. A catalogue with no
+translations yet passes — which languages the project accepts is the project's decision, not the
+test's. A module bundle exposed for `BrewTests` to resolve against is `@_spi(BrewUITesting) public`,
+not plain `public`: it is a test hatch, not API.
 
 **Tests** resolve against a named locale rather than the machine's — and only `BrewTests` (the
 Xcode target, run by `xcodebuild`) can do that, because `swift test` copies a catalogue into the
