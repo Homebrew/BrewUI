@@ -51,20 +51,13 @@ struct DoctorScreen: Screen {
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
-        // Element type unconfirmed: the suite couldn't be run locally to verify this matches.
-        // If it doesn't, try `staticTexts` first, then `descendants(matching: .any)`.
-        let healthy = root.element.otherElements[AXID.doctorHealthyState.rawValue]
-        guard healthy.waitForExistence(timeout: timeout) else {
-            XCTFail(
-                """
-                Expected Doctor to show the healthy state within \(timeout)s.
-                \(BrewUITestDiagnostics.report(for: app))
-                """,
-                file: file,
-                line: line,
-            )
-            return self
-        }
+        healthyState.waitToExist(timeout: timeout, file: file, line: line)
         return self
+    }
+
+    /// Scoped to this screen's root, and resolved by ``BrewUIElement`` rather than a typed query, so
+    /// it holds whichever element type SwiftUI surfaces the healthy state's container as.
+    private var healthyState: BrewUIElement {
+        BrewUIElement(app, .doctorHealthyState, in: root.element)
     }
 }
