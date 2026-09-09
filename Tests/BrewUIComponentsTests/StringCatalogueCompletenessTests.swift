@@ -6,15 +6,19 @@
 import Foundation
 import Testing
 
-/// Every catalogue in the package must carry a translated `pt-BR` entry for every source string.
-/// A missing translation is invisible at runtime — the key is returned, so the view renders English
-/// inside an otherwise Portuguese screen. This is the only thing that makes it a build failure.
+/// A catalogue that has begun translating into a language must finish: every key it holds needs a
+/// translated entry in every language that any of its keys declares.
+///
+/// This enforces consistency, not language policy. Which languages the project accepts, and whether
+/// a new string must arrive with a translation, is the project's call — a module nobody has started
+/// translating declares no second language and passes untouched. What the rule does catch is the
+/// half-translated module, and that distinction matters because the failure is invisible at runtime:
+/// a missing entry returns the key, so an otherwise Portuguese screen renders one English button and
+/// nothing else notices.
 ///
 /// Reads the catalogue sources from the repository rather than a bundle: `.xcstrings` is compiled
 /// into `.lproj` directories, so the authored JSON never reaches the test bundle.
 struct StringCatalogueCompletenessTests {
-    private static let requiredLanguage = "pt-BR"
-
     private static var packageRoot: URL {
         // .../Tests/BrewUIComponentsTests/ThisFile.swift → package root
         URL(filePath: #filePath)
@@ -68,45 +72,66 @@ struct StringCatalogueCompletenessTests {
     /// catalogue — a bigger blast radius than one known path deserves.
     private static let appTargetCatalogue = "Homebrew/Localizable.xcstrings"
 
+    /// Walking two directories up from the app catalogue reaches the checkout folder, whose name is
+    /// whatever the person cloning chose. Every other catalogue sits at `<module>/Resources/`.
+    private static let appTargetLabel = "Homebrew"
+
+    /// Every catalogue that exists today. The `Sources/` walk still finds any others, so a new
+    /// module's catalogue is checked the day it lands — but a walk that returns nothing, because a
+    /// directory was renamed or the layout restructured, fails here instead of passing a suite that
+    /// silently checked only the deliberately empty app catalogue.
+    private static let requiredCatalogues = [
+        "Sources/BrewFeatureDoctor/Resources/Localizable.xcstrings",
+        "Sources/BrewUIComponents/Resources/Localizable.xcstrings",
+        appTargetCatalogue,
+    ]
+
     private static func catalogueURLs() throws -> [URL] {
         let sources = packageRoot.appending(path: "Sources")
         let enumerator = FileManager.default.enumerator(
             at: sources,
             includingPropertiesForKeys: nil,
         )
-        var found = enumerator?
-            .compactMap { $0 as? URL }
-            .filter { $0.lastPathComponent == "Localizable.xcstrings" } ?? []
+        let walked = (enumerator?.compactMap { $0 as? URL } ?? [])
+            .filter { $0.lastPathComponent == "Localizable.xcstrings" }
 
-        // Named, not discovered — so a moved or deleted app catalogue fails here instead of
-        // quietly dropping out of the checked set.
-        let appCatalogue = packageRoot.appending(path: appTargetCatalogue)
-        guard FileManager.default.fileExists(atPath: appCatalogue.path) else {
-            throw CatalogueNotFound(path: appTargetCatalogue)
+        var found = Set(walked.map(\.standardizedFileURL))
+        for relativePath in requiredCatalogues {
+            let url = packageRoot.appending(path: relativePath).standardizedFileURL
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                throw CatalogueNotFound(path: relativePath)
+            }
+            found.insert(url)
         }
-        found.append(appCatalogue)
 
         return found.sorted { $0.path < $1.path }
+    }
+
+    private static func moduleLabel(for url: URL) -> String {
+        guard url != packageRoot.appending(path: appTargetCatalogue).standardizedFileURL else {
+            return appTargetLabel
+        }
+        return url.deletingLastPathComponent().deletingLastPathComponent().lastPathComponent
     }
 
     private struct CatalogueNotFound: Error, CustomStringConvertible {
         let path: String
         var description: String {
-            "Expected a String Catalog at \(path). If it moved, update appTargetCatalogue."
+            "Expected a String Catalog at \(path). If it moved, update requiredCatalogues."
         }
     }
 
-    @Test func `every catalogue string has a translated pt-BR entry`() throws {
+    @Test func `a catalogue that translates a string into a language translates all of them`() throws {
         var untranslated: [String] = []
 
         for url in try Self.catalogueURLs() {
             let catalogue = try JSONDecoder().decode(Catalogue.self, from: Data(contentsOf: url))
-            let module = url.deletingLastPathComponent().deletingLastPathComponent().lastPathComponent
+            let module = Self.moduleLabel(for: url)
+            let languages = Set(catalogue.strings.values.compactMap(\.localizations).flatMap(\.keys))
 
-            for (key, entry) in catalogue.strings {
-                let localization = entry.localizations?[Self.requiredLanguage]
-                if localization?.isTranslated != true {
-                    untranslated.append("\(module): \(key)")
+            for language in languages {
+                for (key, entry) in catalogue.strings where entry.localizations?[language]?.isTranslated != true {
+                    untranslated.append("\(module) [\(language)]: \(key)")
                 }
             }
         }
