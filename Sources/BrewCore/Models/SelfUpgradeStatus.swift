@@ -5,8 +5,7 @@
 
 import Foundation
 
-/// ``isUpgradeAvailable`` is the cask's `outdated` flag verbatim, not a comparison of the version strings —
-/// there is no semantic-version comparator here.
+/// ``isUpgradeAvailable`` is brew's `outdated` flag verbatim; nothing here compares version strings.
 public struct SelfUpgradeStatus: Hashable, Sendable {
     public let runningVersion: String
     public let latestVersion: String?

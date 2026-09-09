@@ -9,7 +9,6 @@ import Foundation
 import Observation
 
 #if DEBUG
-    /// Overrides detection when ``SelfUpgradeDebugControl`` asks it to, delegating verbatim otherwise.
     /// Reading the control's flags in the getter routes SwiftUI observation through them.
     @Observable
     @MainActor

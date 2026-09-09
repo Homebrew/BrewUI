@@ -480,7 +480,7 @@ struct DoctorViewModelTests {
         #expect(Self.viewModel(repository: LoadingDoctorRepository()).lastCheckedAt == nil)
     }
 
-    /// A failed check dates nothing: the header would otherwise stamp a time on a report that is not there.
+    /// Or the header stamps a time on a report that is not there.
     @Test func `lastCheckedAt is nil when the check failed`() {
         let viewModel = Self.viewModel(
             repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),

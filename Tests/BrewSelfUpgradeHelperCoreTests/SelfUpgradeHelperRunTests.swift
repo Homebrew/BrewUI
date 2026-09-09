@@ -7,8 +7,7 @@
 import Foundation
 import Testing
 
-/// Nobody is watching while this runs, so a wrong order here is only visible afterwards — as an app that
-/// came back at the old version, never came back, or came back twice.
+/// Nobody is watching while this runs, so a wrong order is only visible afterwards.
 struct SelfUpgradeHelperRunTests {
     // MARK: The app exits
 
@@ -63,8 +62,7 @@ struct SelfUpgradeHelperRunTests {
 
     // MARK: The app does not exit
 
-    /// The whole point: a timeout means the app is still on screen, so a relaunch would be a second copy
-    /// of it, and there is no upgrade to acknowledge on a launch that never happens.
+    /// A timeout means the app is still on screen, so a relaunch would be a second copy of it.
     @Test func `an app that outlives the wait is left alone`() async {
         let effects = EffectRecorder(isAppRunning: true, upgradeSucceeds: true)
 

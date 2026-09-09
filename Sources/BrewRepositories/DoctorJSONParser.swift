@@ -6,7 +6,6 @@
 import BrewCore
 import Foundation
 
-/// Maps `brew doctor --json` onto the domain model.
 public enum DoctorJSONParser {
     /// Throws when `data` is not this command's JSON, which is how the repository detects a brew too old
     /// to know the switch.
@@ -16,8 +15,7 @@ public enum DoctorJSONParser {
     }
 
     private static func issue(from finding: DoctorJSONFinding) -> DoctorIssue? {
-        // brew wraps URLs in remediation text with underline codes, so escapes reach us inside JSON
-        // string values.
+        // brew wraps URLs in underline codes, so escapes reach us inside JSON string values.
         let printed = ANSIParser.plainText(printedForm(of: finding))
         let lines = printed.components(separatedBy: "\n")
         guard let title = lines.first?.trimmingCharacters(in: .whitespaces), !title.isEmpty else {
@@ -60,8 +58,8 @@ public enum DoctorJSONParser {
         return "You can solve this by running:\n  " + remediation.commands.joined(separator: "\n  ")
     }
 
-    /// A step is only offered as a Run Fix if brew listed it under `remediation.commands`. The free text
-    /// contains command lines brew deliberately kept out of that array, so those stay copy-only.
+    /// Run Fix only offers `remediation.commands`: brew keeps destructive lines out of that array, and
+    /// the free text is where they land.
     private static func restrictRunnableSteps(
         in blocks: [DoctorBlock],
         to commands: [String],
@@ -118,8 +116,7 @@ public enum DoctorJSONParser {
         return blocks
     }
 
-    /// An unrecognised tier reads as the mildest rather than alarming the user over a value the app
-    /// doesn't know.
+    /// An unrecognised tier reads as the mildest rather than alarming the user over an unknown value.
     private static func severity(for tier: DoctorJSONTier) -> DoctorSeverity {
         switch tier {
         case .unsupported:

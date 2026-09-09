@@ -166,8 +166,7 @@ public extension CommandJob {
             verb = "uninstall"
             isCask = true
         case .doctorFix, .doctorRead, .upgradeAll, .upgradeApp:
-            // Unreachable: these all materialize their display command in the outer switch rather than via
-            // package-name synthesis. Fall back defensively.
+            // Unreachable: these materialize their display command in the outer switch.
             return "brew"
         }
         if isCask {

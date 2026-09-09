@@ -9,8 +9,7 @@ import BrewCore
 import Foundation
 import Testing
 
-/// The upgrade runs while the app is dead, so anything it gets wrong is only visible afterwards — as a user
-/// whose app came back at the old version, or never came back at all.
+/// The upgrade runs while the app is dead, so anything it gets wrong is only visible afterwards.
 struct SelfUpgradeRunnerTests {
     // MARK: Exit status
 
@@ -28,8 +27,7 @@ struct SelfUpgradeRunnerTests {
         #expect(outcome.succeeded)
     }
 
-    /// Homebrew exits non-zero for a download that failed, a checksum mismatch, a cask that has gone away.
-    /// Every one of them has to reach the app as a failure, or it claims to have upgraded and has not.
+    /// Every non-zero exit has to reach the app as a failure, or it claims to have upgraded and has not.
     @Test func `a brew that exits non-zero failed, and the code is reported`() async throws {
         let brew = try FakeExecutable(script: "exit 12")
         defer { brew.remove() }
@@ -61,8 +59,7 @@ struct SelfUpgradeRunnerTests {
 
     // MARK: Missing executable
 
-    /// The app resolves `brew` before it quits, but the path is stale by the time the helper runs it: an
-    /// uninstall between the two would leave nothing there.
+    /// The app resolves `brew` before it quits, so the path can be stale by the time the helper runs it.
     @Test func `a path with no executable fails without launching anything`() async {
         let outcome = await FakeExecutable.runner().run(
             executablePath: "/nonexistent/brew",
@@ -106,9 +103,8 @@ struct SelfUpgradeRunnerTests {
         #expect(Date().timeIntervalSince(started) < 20, "the runner waited for the process instead of killing it")
     }
 
-    /// Real brew is a shell script that forks ruby, which forks `curl` and `git`, and every one of them
-    /// inherits the output descriptor. Signal only `brew` and the drain never sees end-of-input, so the
-    /// helper hangs on the timeout that was supposed to rescue it — no outcome recorded, no app brought back.
+    /// brew's descendants inherit the output descriptor. Signal only `brew` and the drain never sees
+    /// end-of-input, so the helper hangs on the timeout that was supposed to rescue it.
     @Test func `a timeout kills the descendants brew left behind`() async throws {
         let ready = ReadyFile()
         defer { ready.remove() }
@@ -137,8 +133,7 @@ struct SelfUpgradeRunnerTests {
         #expect(!descendant.isAlive)
     }
 
-    /// Homebrew traps `SIGTERM`, and `brew upgrade --cask` is replacing an app bundle when it does. Killing
-    /// it outright can leave half a bundle in `/Applications` and nothing for the relaunch to open.
+    /// Killing brew outright mid-`ditto` can leave half a bundle in `/Applications` and nothing to relaunch.
     @Test func `a timeout asks brew to stop before killing it`() async throws {
         let ready = ReadyFile()
         let caught = ReadyFile()
@@ -218,8 +213,7 @@ struct SelfUpgradeRunnerTests {
         #expect(transcript.lines.sorted() == ["==> Downloading", "==> Upgrading", "Warning: something"])
     }
 
-    /// Homebrew's progress output is the last thing written before a hang, so a line without its newline
-    /// is exactly the line worth having.
+    /// The last thing written before a hang is a line without its newline, which is the one worth having.
     @Test func `output that never ends in a newline is still captured`() async throws {
         let brew = try FakeExecutable(script: #"printf "no trailing newline""#)
         defer { brew.remove() }
@@ -235,8 +229,7 @@ struct SelfUpgradeRunnerTests {
         #expect(transcript.lines == ["no trailing newline"])
     }
 
-    /// Reading only after the process exits deadlocks once the output overruns a pipe buffer, and a real
-    /// `brew upgrade --cask` writes far more than one.
+    /// Reading only after the process exits deadlocks once the output overruns a pipe buffer.
     @Test func `output larger than a pipe buffer does not deadlock`() async throws {
         let brew = try FakeExecutable(script: "for i in $(seq 1 5000); do echo \"line ${i} of padding output\"; done")
         defer { brew.remove() }
@@ -270,8 +263,7 @@ struct SelfUpgradeRunnerTests {
         #expect(transcript.lines == ["upgrade --cask homebrew-app"])
     }
 
-    /// The fake `brew` a UI test runs reads its fixture tree from here, and the helper outlives the app it
-    /// would otherwise have inherited it from.
+    /// The helper outlives the app it would otherwise have inherited the fixture tree from.
     @Test func `pinned environment variables reach brew`() async throws {
         let brew = try FakeExecutable(script: #"echo "${BREW_UITEST_SCENARIO:-unset}""#)
         defer { brew.remove() }
@@ -366,8 +358,7 @@ private struct FakeExecutable {
     }
 }
 
-/// Stands in for the clock, so the timeout fires once the fake `brew` has started rather than after a
-/// wall-clock guess a loaded machine loses.
+/// Fires the timeout once the fake `brew` has started, rather than on a wall-clock guess.
 private struct ReadyFile {
     let path = URL(fileURLWithPath: NSTemporaryDirectory())
         .appendingPathComponent("self-upgrade-ready-\(UUID().uuidString)").path
@@ -405,8 +396,7 @@ private struct Descendant {
     }
 }
 
-/// The sink is called from the drain's own queue and read from the test, so every access to `storage` goes
-/// through the lock; nothing else is mutable.
+/// Written from the drain's queue and read from the test, so every access goes through the lock.
 // swiftlint:disable:next unchecked_sendable
 private final class TranscriptRecorder: @unchecked Sendable {
     private let lock = NSLock()

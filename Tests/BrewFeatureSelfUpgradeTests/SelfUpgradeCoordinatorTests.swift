@@ -63,8 +63,6 @@ struct SelfUpgradeCoordinatorTests {
 
     // MARK: An update with no version string
 
-    /// `brew` can report the app's cask as outdated without a version to go with it. The banner has copy
-    /// for that, so it has to be reachable rather than reading as an already-dismissed update.
     @Test func `banner is visible for an update brew reports without a version`() {
         let coordinator = makeCoordinator(status: status(available: true, latest: nil))
         #expect(coordinator.isBannerVisible)
@@ -86,7 +84,6 @@ struct SelfUpgradeCoordinatorTests {
         #expect(preferences.dismissedVersion == nil)
     }
 
-    /// The session-only dismissal must not leak into a later release that does carry a version.
     @Test func `dismissing a version-less update leaves a versioned one still stored as undismissed`() {
         let preferences = StubSelfUpgradePreferences()
         let statusProvider = StubSelfUpgradeStatusProvider(selfUpgradeStatus: status(available: true, latest: nil))
@@ -211,7 +208,6 @@ struct SelfUpgradeCoordinatorTests {
         #expect(coordinator.didJustFailUpgrade == false)
     }
 
-    /// Bounded so a regression fails the caller's assertion rather than hanging the suite.
     private static func waitUntil(_ condition: () -> Bool) async {
         for _ in 0 ..< 200 where !condition() {
             await Task.yield()

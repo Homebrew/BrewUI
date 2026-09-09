@@ -7,9 +7,8 @@ import Foundation
 import Observation
 
 #if DEBUG
-    /// Puts the self-upgrade banner on screen in a dev build, which is never the installed cask and so never
-    /// has an upgrade of its own. Showing the banner is all it does: ``DebugSelfUpgradeHandoff`` refuses the
-    /// upgrade the banner offers.
+    /// Puts the banner on screen in a dev build, which is never the installed cask. Showing it is all it
+    /// does: ``DebugSelfUpgradeHandoff`` refuses the upgrade it offers.
     @Observable
     @MainActor
     final class SelfUpgradeDebugControl {

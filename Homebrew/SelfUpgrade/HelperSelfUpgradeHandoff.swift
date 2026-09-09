@@ -11,11 +11,9 @@ import BrewSelfUpgradeContract
 import Foundation
 
 struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
-    /// Resolved here rather than in the helper: the app already knows which `brew` it has been talking to,
-    /// and a failure to find one should stop the handoff instead of quitting into a helper that cannot work.
+    /// Resolved here so a missing `brew` stops the handoff instead of quitting into a helper that cannot work.
     let brewExecutableURL: @MainActor () throws -> URL
     /// Asked before quitting: terminating would kill the `brew` an install is streaming through.
-    /// `brew doctor` is exempt — it changes nothing, and it runs long enough to block every upgrade.
     let commandCenter: any BrewCommandCenter
     let usesLoginShell: Bool
     let defaultsKeyPrefix: String

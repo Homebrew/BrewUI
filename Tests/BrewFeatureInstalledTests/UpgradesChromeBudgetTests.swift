@@ -12,14 +12,8 @@ import BrewUIComponents
 import SwiftUI
 import Testing
 
-/// Upgrades has the tallest chrome of any list and none of it scrolls, so it is what
-/// ``BrewLayout/mainPaneMinHeight`` is sized for. These measure the real views rather than trusting an
-/// arithmetic budget: set the floor below the chrome and the list is handed negative space, which is
-/// how it ended up clipped under the console.
-///
-/// The banner is the app shell's, dropped into this list's `\.packageListBanner` slot, but its height
-/// comes off this list all the same — so the budget is measured against both here. This test target is
-/// the one place the two are composed; the feature itself cannot name the banner.
+/// Upgrades is what ``BrewLayout/mainPaneMinHeight`` is sized for. Measured against the real views rather
+/// than an arithmetic budget, and against the shell's banner too, since its height comes off this list.
 @MainActor
 struct UpgradesChromeBudgetTests {
     /// Private inside `UpgradesPackagesView`, so this one stays a measured constant.
@@ -79,8 +73,7 @@ struct UpgradesChromeBudgetTests {
         #expect(BrewLayout.mainPaneMinHeight >= chrome + 2 * row)
     }
 
-    /// The banner is the part that grew when Upgrade and Later moved onto it, so it gets its own bound —
-    /// a third one would put the list below two rows at the minimum window size.
+    /// Bounded separately: the banner is the part that grew when Upgrade and Later moved onto it.
     @Test func `the self-upgrade banner stays within two lines of chrome`() {
         #expect(bannerHeight <= 130)
     }

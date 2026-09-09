@@ -24,8 +24,7 @@ public final class UserDefaultsSelfUpgradePreferences: SelfUpgradePreferences {
         }
     }
 
-    /// The composition root prefixes the keys under `-uiTesting`, so a UI test cannot write into the real
-    /// app's preferences. The default prefix reproduces the original key name.
+    /// Prefixed under `-uiTesting` so a UI test cannot write into the real app's preferences.
     public init(defaults: UserDefaults = .standard, defaultsKeyPrefix: String = "selfUpgrade") {
         self.defaults = defaults
         self.defaultsKeyPrefix = defaultsKeyPrefix

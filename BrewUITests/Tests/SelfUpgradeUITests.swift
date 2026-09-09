@@ -7,9 +7,8 @@ import AppKit
 import BrewAccessibilityID
 import XCTest
 
-/// The self-upgrade handshake end to end: the app really terminates, the real helper waits for it, really runs
-/// `brew upgrade --cask homebrew-app` against the fake `brew`, and the app it brings back is a new process.
-/// Nothing here is simulated — the upgrade a test exercises is the one a release performs.
+/// The self-upgrade handshake end to end, with nothing simulated: the app really terminates, the real
+/// helper runs `brew upgrade --cask homebrew-app` against the fake `brew`, and brings back a new process.
 @MainActor
 final class SelfUpgradeUITests: BrewUITestCase {
     func testBannerOffersAnUpgradeWhenTheAppsOwnCaskIsOutdated() {
@@ -31,8 +30,7 @@ final class SelfUpgradeUITests: BrewUITestCase {
             .assertShowsSelfUpgradeBanner()
     }
 
-    /// The banner owns the app's own cask. Left in the list it would offer an in-process
-    /// `brew upgrade --cask homebrew-app`, which is the one thing the handoff exists to avoid.
+    /// The banner owns the app's own cask; the list would offer an in-process upgrade of it.
     func testTheAppsOwnCaskIsNotAnOrdinaryRow() {
         let installed = launch(.selfUpgradeAvailable)
             .assertShowsSelfUpgradeBanner()
@@ -58,8 +56,7 @@ final class SelfUpgradeUITests: BrewUITestCase {
             .assertHasPackage("ripgrep")
     }
 
-    /// The whole handshake in one pass: the app quits, the helper runs `brew upgrade --cask homebrew-app`
-    /// against the fake `brew`, and the app it brings back reports the outcome once.
+    /// The whole handshake in one pass, ending with the relaunched app reporting the outcome once.
     func testUpgradingQuitsRelaunchesAndAcknowledgesOnTheNextLaunch() throws {
         let relaunched = try upgradeAndWaitForRelaunch(.selfUpgradeRunsBrew)
         defer { relaunched.terminate() }
@@ -85,8 +82,7 @@ final class SelfUpgradeUITests: BrewUITestCase {
         )
     }
 
-    /// A failed upgrade relaunches an app that looks exactly like an ordinary start, so saying nothing
-    /// would leave the user believing they had upgraded.
+    /// Saying nothing would leave the user believing they had upgraded.
     func testAnUpgradeThatExitsNonZeroIsReportedOnTheNextLaunch() throws {
         let relaunched = try upgradeAndWaitForRelaunch(.selfUpgradeBrewFails)
         defer { relaunched.terminate() }
@@ -131,8 +127,7 @@ final class SelfUpgradeUITests: BrewUITestCase {
 
     private static let appBundleIdentifier = "sh.brew.app"
 
-    /// `/DerivedData/` narrows this to the build under test: a developer machine can have a real install
-    /// carrying the same identifier.
+    /// `/DerivedData/` narrows this to the build under test; a real install shares the identifier.
     private static func runningAppUnderTest() -> NSRunningApplication? {
         NSWorkspace.shared.runningApplications
             .filter { $0.bundleIdentifier == appBundleIdentifier }

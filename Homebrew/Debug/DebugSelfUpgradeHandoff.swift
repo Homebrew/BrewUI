@@ -7,11 +7,8 @@ import BrewRepositoryInterfaces
 import Foundation
 
 #if DEBUG
-    /// Refuses the upgrade the debug banner offers, and delegates verbatim when the banner is the real one.
-    ///
-    /// The debug toggle fabricates an upgrade for a build that has none. Handing that to the real handoff
-    /// would quit this build and run `brew upgrade --cask homebrew-app` against whatever copy of the app is
-    /// installed in `/Applications` — a different bundle, upgraded behind the user's back.
+    /// Refuses the upgrade the debug banner fabricates, delegating verbatim when the banner is the real one:
+    /// the real handoff would upgrade whatever copy is installed in `/Applications`, a different bundle.
     struct DebugSelfUpgradeHandoff: SelfUpgradeHandoff {
         let base: any SelfUpgradeHandoff
         /// A closure, not a value: the debug menu can flip the simulation on mid-session.

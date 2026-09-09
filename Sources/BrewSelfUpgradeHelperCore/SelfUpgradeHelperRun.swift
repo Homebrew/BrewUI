@@ -10,8 +10,7 @@ import Foundation
 public struct SelfUpgradeHelperRun: Sendable {
     public enum Result: Equatable, Sendable {
         case relaunched(upgraded: Bool)
-        /// The app outlived the wait, so it was left alone: relaunching would put a second copy of a
-        /// still-running app on screen, and there is no upgrade to acknowledge.
+        /// The app outlived the wait: relaunching would put a second copy of it on screen.
         case abandoned
     }
 

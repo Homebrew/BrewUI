@@ -8,8 +8,7 @@ import BrewSelfUpgradeContract
 import BrewSelfUpgradeHelperCore
 import Foundation
 
-/// An app cannot replace its own bundle while running, so the helper does it: wait for exit, then upgrade,
-/// then relaunch. ``SelfUpgradeHelperRun`` owns that order; this supplies the real effects.
+/// The real effects behind ``SelfUpgradeHelperRun``, which owns the order of work.
 struct UpgradeHelper {
     let spec: SelfUpgradeHandoffSpec
     let log: SelfUpgradeLog
@@ -61,7 +60,6 @@ struct UpgradeHelper {
 
     // MARK: Report
 
-    /// The app's suite by name: `UserDefaults.standard` here is the helper's own domain.
     private func record(succeeded: Bool) {
         guard let defaults = UserDefaults(suiteName: spec.defaultsSuiteName) else {
             log.write("could not open defaults suite \(spec.defaultsSuiteName); the app will not acknowledge this run")

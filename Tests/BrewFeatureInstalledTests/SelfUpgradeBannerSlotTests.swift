@@ -13,10 +13,8 @@ import BrewUIComponents
 import SwiftUI
 import Testing
 
-/// The real banner in the real slot, composed the way `MainWindowView` composes it. ``PackageListBannerSlotTests``
-/// proves the list places whatever is in the slot; this proves the thing the shell puts there appears, and
-/// keeps appearing when the status changes *after* the first render — the debug toggle's path, and the one
-/// an erased view in an environment value could plausibly break.
+/// The real banner in the real slot, composed the way `MainWindowView` composes it — including when the
+/// status changes *after* the first render, which an erased view in an environment value could break.
 @MainActor
 struct SelfUpgradeBannerSlotTests {
     private static let noUpgrade = SelfUpgradeStatus.upToDate(runningVersion: "1.0.0")

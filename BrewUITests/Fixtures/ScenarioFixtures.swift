@@ -144,8 +144,7 @@ enum ScenarioFixtures {
         return set
     }
 
-    /// Answers the upgrade the *helper* runs, not the app: by then the app has quit, so this is the fake
-    /// `brew` being executed from a different process against the same fixture tree.
+    /// Answers the upgrade the *helper* runs: by then the app has quit, so this is a different process.
     private static func selfUpgradeRunsBrewFixtures(upgradeSucceeds: Bool) -> FixtureSet {
         var set = selfUpgradeAvailableFixtures()
         let key = "upgrade_--cask_\(homebrewApp.token)"

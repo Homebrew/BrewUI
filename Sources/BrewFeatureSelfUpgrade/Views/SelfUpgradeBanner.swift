@@ -9,9 +9,8 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Pins ``SelfUpgradeBannerContent`` above a package list, outside the filtered dataset, so it survives the
-/// All/Formulae/Casks scopes and search. The app shell puts it in the lists' `\.packageListBanner` slot —
-/// they render it without naming it — and it reads the coordinator itself, so nothing plumbs one through.
+/// Sits outside the list's filtered dataset, so it survives the All/Formulae/Casks scopes and search.
+/// Reads the coordinator from the environment, so nothing plumbs one through.
 public struct SelfUpgradeBanner: View {
     @Environment(\.selfUpgradeCoordinator) private var coordinator
 
@@ -26,7 +25,6 @@ public struct SelfUpgradeBanner: View {
     }
 }
 
-/// There is no detail pane to open, so Upgrade and Later sit on the banner itself.
 struct SelfUpgradeBannerContent: View {
     let coordinator: SelfUpgradeCoordinator
 
@@ -107,8 +105,7 @@ struct SelfUpgradeBannerContent: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(!coordinator.isUpgradeActionEnabled)
-            // The command is what the helper actually runs, so it belongs somewhere the user can find it;
-            // the banner has no room to spell it out.
+            // The banner has no room to spell out the command the helper runs.
             .help(SelfUpgradeIdentity.displayCommand)
             .accessibilityLabel(presentation.upgradeActionTitle)
             .axid(.selfUpgradeUpgradeButton)

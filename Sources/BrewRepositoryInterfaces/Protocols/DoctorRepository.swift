@@ -27,10 +27,7 @@ public protocol DoctorRepository: Observable, Sendable {
     /// without blanking the content.
     var isRefreshing: Bool { get }
 
-    /// Runs `brew doctor` and updates ``state``. Coalesces concurrent calls; keeps stale data visible while
-    /// running.
-    ///
-    /// A report younger than the implementation's refresh interval is returned as-is; `forceRefresh`
-    /// bypasses that.
+    /// Runs `brew doctor` and updates ``state``. Coalesces concurrent calls and keeps stale data visible;
+    /// a report younger than the refresh interval is returned as-is unless `forceRefresh`.
     func load(forceRefresh: Bool) async
 }

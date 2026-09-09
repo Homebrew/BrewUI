@@ -337,8 +337,7 @@ final class UpgradesViewModel {
 // MARK: - Upgrade action
 
 extension UpgradesViewModel {
-    /// User-facing command rendered by the Upgrades header's `CommandBlockView`. Derived from the same
-    /// ``BrewUpgradeSelection`` that ``upgradeAll()`` submits, so the shown command always matches what runs.
+    /// Derived from the ``BrewUpgradeSelection`` ``upgradeAll()`` submits, so the shown command is what runs.
     var bulkUpgradeDisplayCommand: String {
         upgradeSelection.displayCommand
     }

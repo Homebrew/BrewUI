@@ -6,11 +6,8 @@
 import BrewCore
 import Foundation
 
-/// Copy for the alert the app shows on the launch after an upgrade attempt.
-///
-/// Both outcomes read from one value because SwiftUI presents only the first `.alert` attached to a view:
-/// two of them left the failure alert permanently unreachable, so the app relaunched at the old version
-/// saying nothing.
+/// Copy for the alert the app shows on the launch after an upgrade attempt. One value carries both
+/// outcomes because SwiftUI presents only the first `.alert` attached to a view.
 public struct SelfUpgradeOutcomePresentation {
     public let outcome: SelfUpgradeOutcome
 
@@ -52,7 +49,7 @@ public struct SelfUpgradeOutcomePresentation {
     }
 }
 
-/// Copy for the self-upgrade banner. The verb is "Upgrade" throughout, as it is for packages.
+/// Copy for the self-upgrade banner.
 struct SelfUpgradePresentation {
     let status: SelfUpgradeStatus
 

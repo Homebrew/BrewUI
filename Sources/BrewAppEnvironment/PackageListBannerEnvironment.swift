@@ -6,15 +6,11 @@
 import SwiftUI
 
 /// Chrome the app shell pins above a package list, inside the list column and outside its filtered dataset.
-///
-/// The lists render whatever is here without knowing what it is, which is what keeps one feature from
-/// importing another: the self-upgrade banner is composed in `MainWindowView`, the one place that already
-/// knows every feature exists.
+/// The lists render it without naming it, which is what stops one feature importing another.
 public struct PackageListBanner {
     private let content: @MainActor () -> AnyView
 
-    /// Erased because an environment value cannot carry an opaque type. It is one banner, rebuilt only when
-    /// what it observes changes.
+    /// Erased because an environment value cannot carry an opaque type.
     public init(@ViewBuilder _ content: @escaping @MainActor () -> some View) {
         self.content = { AnyView(content()) }
     }
@@ -26,6 +22,5 @@ public struct PackageListBanner {
 }
 
 public extension EnvironmentValues {
-    /// Injected by `MainWindowView`; the default is empty so previews and unit tests don't have to provide it.
     @Entry var packageListBanner = PackageListBanner { EmptyView() }
 }

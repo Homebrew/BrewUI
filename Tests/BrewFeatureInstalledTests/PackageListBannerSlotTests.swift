@@ -12,9 +12,7 @@ import BrewUIComponents
 import SwiftUI
 import Testing
 
-/// The lists render whatever the shell puts in `\.packageListBanner` and cannot name it — which is what
-/// stops this feature importing another one. Measured rather than asserted structurally: a slot that is
-/// read but never placed still compiles.
+/// Measured rather than asserted structurally: a slot that is read but never placed still compiles.
 @MainActor
 struct PackageListBannerSlotTests {
     private static let probeHeight: CGFloat = 120

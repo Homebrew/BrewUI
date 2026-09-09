@@ -12,14 +12,12 @@ public struct SelfUpgradeHandoffSpec: Codable, Sendable, Equatable {
     public let appBundlePath: String
     public let relaunchArguments: [String]
     public let relaunchEnvironment: [String: String]
-    /// Resolved by the app, which already knows where `brew` is — and under `-uiTesting` knows it is the
-    /// fake one. The helper does no probing of its own: guessing a prefix here would upgrade from the wrong
-    /// Homebrew, and the app can refuse the handoff instead of quitting into a helper that cannot work.
+    /// Resolved by the app, which already knows where `brew` is. The helper does no probing of its own:
+    /// guessing a prefix here would upgrade from the wrong Homebrew.
     public let brewExecutablePath: String
     /// Built by `BrewCommands.selfUpgrade()`, so the argv the helper runs is what the app displays.
     public let upgradeArguments: [String]
-    /// The app's own choice between `BrewCommandExecutionContext.live()` and `.uiTesting(brewURL:)`: the
-    /// helper inherits the app's stripped environment, so without the login shell the one command that
+    /// The helper inherits the app's stripped environment, so without the login shell the one command that
     /// replaces the app sees none of the `HOMEBREW_*` the user's profile exports.
     public let usesLoginShell: Bool
     /// Empty in production. Under `-uiTesting` this points the fake `brew` at the fixture tree, which the

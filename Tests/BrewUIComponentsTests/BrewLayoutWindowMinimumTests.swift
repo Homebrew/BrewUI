@@ -7,8 +7,7 @@
 import Foundation
 import Testing
 
-/// The window minimum and the split's two floors have to agree, or the smallest allowed window cannot
-/// satisfy both panes and something silently gets starved.
+/// The window minimum and the split's two floors have to agree, or the smallest window starves a pane.
 struct BrewLayoutWindowMinimumTests {
     private static let chrome = AnimatedSplitView.handleThickness + AnimatedSplitView.dividerThickness
 
@@ -38,8 +37,7 @@ struct BrewLayoutWindowMinimumTests {
         #expect(available - BrewLayout.consoleMinExpandedHeight >= BrewLayout.mainPaneMinHeight)
     }
 
-    /// The point of sizing the minimum against the console's floor: in a short window it opens small
-    /// rather than the window having to be tall enough for its full height.
+    /// The point of sizing the minimum against the console's floor rather than its default height.
     @Test func `a short window opens the console at its floor, not its default`() {
         #expect(Self.consoleOpensAt(windowHeight: BrewLayout.minWindowHeight)
             < BrewLayout.consoleDefaultExpandedHeight)

@@ -5,11 +5,8 @@
 
 import Foundation
 
-/// The app is not running while the upgrade happens, so stderr goes nowhere anyone will look: a file is the
-/// only place a failed self-upgrade can explain itself afterwards.
-///
-/// Written from the caller *and* from the upgrade's drain queue, so every access to the handle goes through
-/// the lock; nothing else is mutable.
+/// The app is gone while the upgrade runs, so a file is the only place a failure can explain itself.
+/// Written from the caller and from the drain queue, so every access to the handle goes through the lock.
 // swiftlint:disable:next unchecked_sendable
 public final class SelfUpgradeLog: @unchecked Sendable {
     private let fileURL: URL?
@@ -23,8 +20,7 @@ public final class SelfUpgradeLog: @unchecked Sendable {
         self.clock = clock
     }
 
-    /// Truncates, rather than appending forever: one self-upgrade per file, which is what anyone reading it
-    /// after a failure wants to see.
+    /// Truncates: one self-upgrade per file.
     public func begin() {
         guard let fileURL else {
             return

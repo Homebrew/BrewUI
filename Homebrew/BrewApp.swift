@@ -57,8 +57,7 @@ struct BrewApp: App {
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
         let fixtures = Self.installFixtures(uiTesting: uiTesting)
         let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
-        // Consumed *before* the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed
-        // default, which under `-uiTesting` includes the notice the upgrade helper just wrote.
+        // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
         let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
         let catalogue = Self.makeCatalogueCache(fixtures: fixtures)
         let discoverAnalytics = Self.makeDiscoverAnalyticsCache(fixtures: fixtures)
@@ -178,8 +177,7 @@ struct BrewApp: App {
         fixtures == nil ? base : uiTestingDefaultsPrefix + base
     }
 
-    /// A UI-test relaunch has to carry the launch flag forward, or the new process comes up pointed at the
-    /// real Homebrew mid-test.
+    /// Carried forward, or the relaunched process comes up pointed at the real Homebrew mid-test.
     private static func relaunchArguments(uiTesting: BrewUITestingLaunchConfiguration?) -> [String] {
         guard uiTesting != nil else {
             return []
@@ -198,9 +196,6 @@ struct BrewApp: App {
         return environment
     }
 
-    /// The fake `brew` reads the fixture tree out of its environment, and the helper is spawned by this
-    /// process but outlives it — so what `setenv` published here has to travel in the spec. Empty in
-    /// production, where the real `brew` needs nothing pinned.
     private static func upgradeEnvironment(
         fixtures: BrewUITestingFixtureInstaller.Installation?,
         uiTesting: BrewUITestingLaunchConfiguration?,
@@ -214,8 +209,7 @@ struct BrewApp: App {
         ]
     }
 
-    /// Under `-uiTesting` the transcript lands in the run's container, so a test cannot overwrite the log
-    /// of a real install's last self-upgrade.
+    /// Under `-uiTesting` the transcript stays in the run's container, clear of a real install's log.
     private static func selfUpgradeLogFileURL(
         fixtures: BrewUITestingFixtureInstaller.Installation?,
     ) -> URL {
@@ -306,9 +300,7 @@ struct BrewApp: App {
     }
 }
 
-/// Bundled rather than passed field-by-field: `BrewApp.init` builds one of these before the `#if DEBUG`
-/// split, and the two `makeSelfUpgradeCoordinator` overloads would otherwise carry six or seven parameters
-/// apiece.
+/// Bundled so the two `makeSelfUpgradeCoordinator` overloads don't each carry seven parameters.
 private struct SelfUpgradeLaunchContext {
     let installedPackagesRepository: BrewInstalledPackagesRepository
     let executionContext: BrewCommandExecutionContext
@@ -321,9 +313,7 @@ private struct SelfUpgradeLaunchContext {
 
 extension BrewApp {
     #if DEBUG
-        /// A dev build never has its own cask outdated, so DEBUG wraps the status provider with the
-        /// simulator, and wraps the handoff so the simulated banner cannot reach it — see
-        /// ``DebugSelfUpgradeHandoff``.
+        /// A dev build is never the installed cask, so DEBUG wraps both detection and the handoff.
         private static func makeSelfUpgradeCoordinator(
             _ context: SelfUpgradeLaunchContext,
             debugControl: SelfUpgradeDebugControl,
@@ -352,8 +342,7 @@ extension BrewApp {
         }
     #endif
 
-    /// The same locator and the same login-shell decision every other brew invocation goes through, so
-    /// under `-uiTesting` the helper upgrades through the fake `brew` rather than the machine's real one.
+    /// The same locator and login-shell decision every other brew invocation goes through.
     private static func makeHelperHandoff(_ context: SelfUpgradeLaunchContext) -> HelperSelfUpgradeHandoff {
         HelperSelfUpgradeHandoff(
             brewExecutableURL: { try context.executionContext.brewExecutableURL() },

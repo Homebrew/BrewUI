@@ -21,8 +21,7 @@ public enum SelfUpgradeIdentity {
 }
 
 public extension InstalledBrewPackage {
-    /// Upgraded through the self-upgrade handoff rather than by `brew` in-process, so every list, count and
-    /// batch leaves it out — replacing the bundle under a running app is what the handoff exists to avoid.
+    /// Left out of every list, count and batch: an in-process `brew upgrade` would replace the running bundle.
     var isTheAppsOwnCask: Bool {
         kind == .cask && name == SelfUpgradeIdentity.caskToken
     }

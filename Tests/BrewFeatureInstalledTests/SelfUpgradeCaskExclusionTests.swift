@@ -10,8 +10,7 @@ import BrewRepositoryInterfaces
 import Foundation
 import Testing
 
-/// The app's own cask is upgraded by quitting, replacing the bundle and relaunching. Anywhere it reaches
-/// an ordinary `brew upgrade` it would be replaced underneath the running app instead.
+/// Anywhere the app's own cask reaches an ordinary `brew upgrade`, it is replaced under the running app.
 @MainActor
 struct SelfUpgradeCaskExclusionTests {
     // MARK: The inventory accessors
@@ -75,7 +74,6 @@ struct SelfUpgradeCaskExclusionTests {
         #expect(viewModel.totalPackageCount == 2)
     }
 
-    /// Searching is how a user would go looking for it by name after not finding it in the list.
     @Test func `searching for it by name finds nothing`() {
         let viewModel = Self.makeUpgradesViewModel(packages: Self.packagesIncludingTheApp)
 

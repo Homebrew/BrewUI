@@ -170,7 +170,7 @@ struct BrewDoctorRepositoryTests {
         #expect(!rawOutput.contains("\"findings\""))
     }
 
-    /// `brew doctor --json` exits non-zero exactly when it has findings, which must not read as a failure.
+    /// `brew doctor --json` exits non-zero exactly when it has findings.
     @Test func `a non-zero exit from the JSON run is not a failure`() async {
         let repository = Self.makeRepository(runner: Self.bothRunsRunner(jsonExitCode: 1))
         await repository.load(forceRefresh: true)
@@ -209,7 +209,6 @@ struct BrewDoctorRepositoryTests {
         #expect(await runner.invocations.count(where: { $0 == ["doctor"] }) == 2)
     }
 
-    /// Losing the transcript costs the raw view, not the report — the findings run is the report.
     @Test func `a failed transcript run still yields a report when the JSON run succeeded`() async {
         let repository = Self.makeRepository(runner: MockBrewCommandRunner(behaviors: [
             ["doctor"]: .throw(BrewCommandError.launchFailed(underlying: "spawn failed")),
@@ -332,8 +331,7 @@ private actor SequencedCommandRunner: BrewCommandRunning {
         self.steps = steps
     }
 
-    /// Only the transcript run draws from the sequence; letting the `--json` run consume a step would
-    /// shift every later answer onto the wrong run.
+    /// Only the transcript run draws from the sequence, or every later answer lands on the wrong run.
     func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         guard arguments == ["doctor"] else {
             throw BrewCommandError.failed(exitCode: 99, stderr: "unmocked: \(arguments.joined(separator: " "))")

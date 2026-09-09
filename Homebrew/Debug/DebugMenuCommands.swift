@@ -34,8 +34,6 @@ import SwiftUI
 
                 Divider()
 
-                // Shows the banner only: pressing Upgrade on a simulated upgrade reports that nothing was
-                // upgraded rather than running one against the copy installed in /Applications.
                 Toggle("Show the Self-Upgrade Banner", isOn: $selfUpgradeControl.simulateUpgradeAvailable)
             }
         }

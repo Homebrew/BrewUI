@@ -51,12 +51,7 @@ struct MainWindowView: View {
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
         }
-        // Composed here, not inside a feature: the shell already imports every feature to build the split
-        // view, so it is the one place allowed to know that both the lists and the banner exist. The lists
-        // place what is in the slot; none of them can name it.
         .environment(\.packageListBanner, PackageListBanner { SelfUpgradeBanner() })
-        // One alert for both outcomes, not two: SwiftUI presents only the first `.alert` attached to a
-        // view, so a second one for the failure case would never appear.
         .alert(
             Text(outcomeCopy.title),
             isPresented: launchOutcomeBinding,
@@ -77,13 +72,11 @@ struct MainWindowView: View {
         selfUpgradeCoordinator?.lastLaunchOutcome
     }
 
-    /// The title is read outside the `presenting:` closure, so it needs a value once the outcome has been
-    /// acknowledged and the alert is on its way out; that copy is never shown.
+    /// Read outside `presenting:`, so it still needs a value while the alert dismisses; that copy is unseen.
     private var outcomeCopy: SelfUpgradeOutcomePresentation {
         SelfUpgradeOutcomePresentation(outcome: launchOutcome ?? .succeeded)
     }
 
-    /// A failure is reported rather than passed over in silence: the app looks identical at launch either way.
     private var launchOutcomeBinding: Binding<Bool> {
         Binding(
             get: { selfUpgradeCoordinator?.lastLaunchOutcome != nil },

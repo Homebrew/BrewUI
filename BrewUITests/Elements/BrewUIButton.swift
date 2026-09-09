@@ -6,7 +6,7 @@
 import BrewAccessibilityID
 import XCTest
 
-/// A control that can be activated. `tap()` keeps the iOS name; macOS clicks underneath.
+/// `tap()` keeps the iOS name; macOS clicks underneath.
 @MainActor
 final class BrewUIButton: BrewUIElement {
     init(_ app: XCUIApplication, _ id: AXID, in container: XCUIElement? = nil) {

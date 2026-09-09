@@ -5,10 +5,8 @@
 
 import Foundation
 
-/// Performs the self-upgrade by handing off to a short-lived external helper, then quitting.
-///
-/// ``performUpgrade()`` does not return on success — the app is gone. A thrown error means the handoff could
-/// not be started.
+/// Hands off to a short-lived external helper, then quits: ``performUpgrade()`` does not return on success.
+/// A thrown error means the handoff never started.
 @MainActor
 public protocol SelfUpgradeHandoff: Sendable {
     func performUpgrade() async throws

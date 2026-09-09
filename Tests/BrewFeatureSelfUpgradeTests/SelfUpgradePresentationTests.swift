@@ -46,7 +46,6 @@ struct SelfUpgradePresentationTests {
         #expect(presentation(latest: nil).upgradeActionTitle == "Upgrade the Homebrew app")
     }
 
-    /// The app updates itself here, not `brew`, and the two are separate things in this app.
     @Test func `the banner title names the app rather than Homebrew itself`() {
         let title = presentation(latest: "1.5.0").bannerTitle
         #expect(title == "A new version of the Homebrew app is available")
@@ -65,8 +64,7 @@ struct SelfUpgradePresentationTests {
     }
 }
 
-/// One alert carries both outcomes, so the copy has to differ by outcome rather than by which modifier
-/// happens to be attached.
+/// One alert carries both outcomes, so the copy has to differ by outcome.
 struct SelfUpgradeOutcomePresentationTests {
     private func copy(_ outcome: SelfUpgradeOutcome) -> SelfUpgradeOutcomePresentation {
         SelfUpgradeOutcomePresentation(outcome: outcome)
@@ -77,8 +75,6 @@ struct SelfUpgradeOutcomePresentationTests {
         #expect(copy(.succeeded).message.contains("upgraded to the latest version"))
     }
 
-    /// A failed upgrade relaunches an app that looks exactly like an ordinary start, so the copy has to
-    /// say the version did not move.
     @Test func `a failed upgrade says the app is still on the previous version`() {
         #expect(copy(.failed).title == "The Homebrew app wasn’t upgraded")
         #expect(copy(.failed).message.contains("still the previous version"))
@@ -89,7 +85,6 @@ struct SelfUpgradeOutcomePresentationTests {
         #expect(copy(.succeeded).message != copy(.failed).message)
     }
 
-    /// The banner is where a retry lives, so the failure alert points at it rather than dead-ending.
     @Test func `the failure copy points back at the banner`() {
         #expect(copy(.failed).message.contains("banner"))
     }

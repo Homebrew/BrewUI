@@ -30,7 +30,6 @@ public final class SelfUpgradeCoordinator {
         lastLaunchOutcome == .succeeded
     }
 
-    /// Distinct from ``didJustCompleteUpgrade`` because the app looks identical either way at launch.
     public var didJustFailUpgrade: Bool {
         lastLaunchOutcome == .failed
     }
@@ -69,8 +68,8 @@ public final class SelfUpgradeCoordinator {
         return message
     }
 
-    /// Set when "Later" is pressed on an upgrade brew reports as outdated without a version string. There
-    /// is no version to key a stored dismissal to, so that one lasts the session rather than persisting.
+    /// An outdated cask with no version string has nothing to key a stored dismissal to, so this one
+    /// lasts the session instead.
     private var didDismissUnversionedUpgrade = false
 
     public var isBannerVisible: Bool {

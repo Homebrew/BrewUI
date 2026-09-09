@@ -27,8 +27,7 @@ public enum DoctorOutputParser {
         )
     }
 
-    /// Entry point for the `--json` path, which supplies the severity instead of it being sniffed out of
-    /// a tier callout.
+    /// Entry point for the `--json` path, which supplies the severity rather than sniffing a tier callout.
     static func issue(title: String, body: String, severity: DoctorSeverity) -> DoctorIssue? {
         var parser = WarningBlockParser(block: WarningBlock(
             kind: .warning,

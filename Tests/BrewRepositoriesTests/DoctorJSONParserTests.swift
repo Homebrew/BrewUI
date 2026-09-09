@@ -125,8 +125,7 @@ struct DoctorJSONParserTests {
 
     // MARK: - Runnable commands
 
-    /// A command line that only appears in the free text is copy-only, however runnable it looks: brew
-    /// leaves destructive steps out of `commands` on purpose.
+    /// A command line only in the free text stays copy-only, however runnable it looks.
     @Test func `a command only in the remediation text is never runnable`() throws {
         let issues = try Self.parse("""
         {
@@ -194,8 +193,7 @@ struct DoctorJSONParserTests {
         #expect(issue.rawBody.contains("rar"))
     }
 
-    /// brew's un-indented list style (`check_deprecated_disabled`) leaves the intro with no block of its
-    /// own, but it is still a line brew wrote.
+    /// brew's un-indented list style leaves the intro with no block, but it is still a line brew wrote.
     @Test func `a colon intro whose list is un-indented is kept, not dropped`() throws {
         let issues = try Self.parse("""
         {

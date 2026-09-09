@@ -93,9 +93,8 @@ public struct SelfUpgradeRunner: Sendable {
 
     // MARK: Timeout
 
-    /// Cancellation, not a signal to `brew`: the runner tears down the whole process group, and a
-    /// descendant left holding the output open would keep the drain — and so the helper — running forever.
-    /// The loser is awaited so brew is gone before the helper relaunches the app.
+    /// Cancellation, not a signal to `brew`: a descendant left holding the output open would keep the
+    /// drain — and so the helper — running forever. The loser is awaited so brew is gone before the relaunch.
     private func race(
         upgrade: @escaping @Sendable () async -> Outcome?,
         timeout: TimeInterval,

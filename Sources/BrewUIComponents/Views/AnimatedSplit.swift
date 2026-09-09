@@ -194,8 +194,7 @@ public final class AnimatedSplitView: NSView {
         let width = bounds.width
         let handleH = collapsed ? 0 : Self.handleThickness
         let dividerH = Self.dividerThickness
-        // Recomputed on every layout rather than stored, so shrinking the window squeezes the bottom
-        // pane and growing it back restores the height that was asked for.
+        // Recomputed per layout, so growing the window back restores the height that was asked for.
         let bottomH = fit(bottom)
         let topH = max(0, total - bottomH - handleH - dividerH)
 
@@ -324,8 +323,6 @@ struct SplitHeightLimits {
 
 /// The bottom pane is the accessory, so it is the one that gives way: it shrinks towards `minExpanded`
 /// to keep `minTop` for the pane above, and only eats into that once it has nothing left to give.
-/// Without this the bottom pane always got the height it asked for and the top absorbed the entire
-/// shortfall, so a short window left the top pane a sliver.
 func fittedSplitBottomHeight(
     _ value: CGFloat,
     total: CGFloat,
