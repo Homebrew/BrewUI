@@ -68,7 +68,7 @@ struct ErrorStateView: View {
                 .foregroundStyle(Color.brewStatusError)
                 .multilineTextAlignment(.center)
             if let onRetry {
-                Button("Retry", action: onRetry)
+                Button(LocalizedStringResource(uiComponents: "Retry"), action: onRetry)
                     .axid(.errorRetryButton)
             }
         }
