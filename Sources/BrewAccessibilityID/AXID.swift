@@ -21,6 +21,7 @@ public enum AXID: Hashable, Sendable {
     case installedList
     case installedRow(token: String)
     case installedSearchField
+    case installedHideDependenciesCheckbox
     case upgradesScreen
     case upgradesList
     case upgradesRow(token: String)
@@ -72,6 +73,7 @@ public enum AXID: Hashable, Sendable {
         case .installedList: "installed.list"
         case let .installedRow(token): "installed.row.\(token)"
         case .installedSearchField: "installed.search"
+        case .installedHideDependenciesCheckbox: "installed.hideDependencies"
         case .upgradesScreen: "upgrades.screen"
         case .upgradesList: "upgrades.list"
         case let .upgradesRow(token): "upgrades.row.\(token)"
