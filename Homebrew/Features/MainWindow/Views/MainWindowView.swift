@@ -88,15 +88,18 @@ struct MainWindowView: View {
         )
     }
 
-    /// ⌘R refetches every cached surface at once, whichever tab is showing, since the sidebar counts and
-    /// the other tabs go stale just as readily as the visible one.
+    /// ⌘R refetches every cached surface except the Doctor report, whichever tab is showing, since the
+    /// sidebar counts and the other tabs go stale just as readily as the visible one. Re-running
+    /// `brew doctor` is a full diagnostic run rather than a refetch, so it only happens from Doctor.
     private func refreshAll() {
         Task {
-            async let doctor: Void = doctorRepository.load(forceRefresh: true)
+            guard !selectedSidebarItem.refreshesDoctorReport else {
+                await doctorRepository.load(forceRefresh: true)
+                return
+            }
             await installedPackagesRepository.load(forceRefresh: true)
             await discoverPackagesRepository.load(forceRefresh: true)
             await configRepository.load(forceRefresh: true)
-            await doctor
         }
     }
 
