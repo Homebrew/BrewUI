@@ -13,6 +13,27 @@ import Foundation
 import Testing
 
 struct BrewInstalledPackagesRepositoryTests {
+    @Test @MainActor func `load ignores interactive shell output before installed info json`() async {
+        let runner = MockBrewCommandRunner(
+            responses: InstalledPackagesTestSupport.installedInfoJSONResponse(
+                standardOutput: """
+                \u{1B}]1337;SetUserVar=badge={"theme":"dark"}\u{7}
+                {
+                  "formulae": [
+                    { "name": "wget", "versions": { "stable": "1.0.0" }, "installed": [{ "version": "1.0.0" }] }
+                  ],
+                  "casks": []
+                }
+                """,
+            ),
+        )
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
+
+        let packages = await InstalledPackagesTestSupport.loadedPackages(from: repo)
+
+        #expect(packages.map(\.name) == ["wget"])
+    }
+
     @Test @MainActor func `load returns sorted packages for mixed formula and cask json payload`() async throws {
         let json = """
         {
