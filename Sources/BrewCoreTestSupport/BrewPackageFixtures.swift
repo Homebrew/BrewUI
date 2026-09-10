@@ -41,6 +41,7 @@ public extension InstalledBrewPackage {
         outdated: Bool = false,
         tap: String? = nil,
         rubySourcePath: String? = nil,
+        installedOnRequest: Bool = true,
         linkedKeg: String? = nil,
     ) -> InstalledBrewPackage {
         InstalledBrewPackage(
@@ -57,6 +58,7 @@ public extension InstalledBrewPackage {
             outdated: outdated,
             tap: tap,
             rubySourcePath: rubySourcePath,
+            installedOnRequest: installedOnRequest,
             linkedKeg: linkedKeg,
         )
     }
