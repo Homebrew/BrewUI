@@ -224,17 +224,24 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     }
 
     private func decodeInfoJSON(from standardOutput: String) throws -> BrewInfoJSON {
-        let data = Data(standardOutput.utf8)
-        do {
-            return try JSONDecoder().decode(BrewInfoJSON.self, from: data)
-        } catch {
-            throw BrewCommandError.launchFailed(
-                underlying: String(
-                    localized: "Failed to decode Homebrew JSON output.",
-                    comment: "Installed tab JSON decode failure",
-                ),
-            )
+        let decoder = JSONDecoder()
+        if let payload = try? decoder.decode(BrewInfoJSON.self, from: Data(standardOutput.utf8)) {
+            return payload
         }
+
+        for jsonStart in standardOutput.indices where standardOutput[jsonStart] == "{" {
+            let jsonOutput = standardOutput[jsonStart...]
+            if let payload = try? decoder.decode(BrewInfoJSON.self, from: Data(jsonOutput.utf8)) {
+                return payload
+            }
+        }
+
+        throw BrewCommandError.launchFailed(
+            underlying: String(
+                localized: "Failed to decode Homebrew JSON output.",
+                comment: "Installed tab JSON decode failure",
+            ),
+        )
     }
 }
 
