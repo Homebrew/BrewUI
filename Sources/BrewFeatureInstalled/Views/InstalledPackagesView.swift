@@ -35,6 +35,7 @@ struct InstalledPackagesView: View {
             .accessibilityHeading(.h1)
 
             scopePicker
+            hideDependenciesToggle
             Divider()
 
             AsyncContentView(
@@ -63,7 +64,18 @@ struct InstalledPackagesView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
-        .padding(.bottom, BrewSpacing.md)
+        .padding(.bottom, BrewSpacing.sm)
+    }
+
+    /// Direct packages vs. dependencies filter checkbox.
+    private var hideDependenciesToggle: some View {
+        Toggle("Hide dependencies", isOn: $viewModel.hideDependencies)
+            .toggleStyle(.checkbox)
+            .font(.brewSubheadline)
+            .foregroundStyle(Color.brewTextSecondary)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.md)
+            .axid(.installedHideDependenciesCheckbox)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {

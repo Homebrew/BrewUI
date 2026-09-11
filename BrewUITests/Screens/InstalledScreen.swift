@@ -23,6 +23,16 @@ struct InstalledScreen: Screen {
         BrewUISearchField(app)
     }
 
+    var hideDependenciesCheckbox: BrewUIElement {
+        BrewUIElement(app, .installedHideDependenciesCheckbox)
+    }
+
+    @discardableResult
+    func toggleHideDependencies(file: StaticString = #filePath, line: UInt = #line) -> Self {
+        hideDependenciesCheckbox.tap(file: file, line: line)
+        return self
+    }
+
     @discardableResult
     func assertHasPackage(
         _ token: String,

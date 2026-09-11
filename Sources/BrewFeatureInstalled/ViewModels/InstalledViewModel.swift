@@ -38,6 +38,12 @@ struct InstalledPackagesContent: Equatable {
             InstalledPackagesContent(packages: caskPackages)
         }
     }
+
+    /// Filters packages to only direct packages (installed on request) when `hideDependencies` is true.
+    func filtered(hidingDependencies: Bool) -> InstalledPackagesContent {
+        guard hidingDependencies else { return self }
+        return InstalledPackagesContent(packages: packages.filter(\.installedOnRequest))
+    }
 }
 
 @Observable
@@ -60,14 +66,24 @@ final class InstalledViewModel {
             guard oldValue != scope else {
                 return
             }
-            updateSelectionForScopeChange()
+            updateSelectionForFilterChange()
+        }
+    }
+
+    /// Filter to hide packages installed solely as dependencies.
+    var hideDependencies: Bool = false {
+        didSet {
+            guard oldValue != hideDependencies else {
+                return
+            }
+            updateSelectionForFilterChange()
         }
     }
 
     private var selectedPackageID: InstalledBrewPackage.ID?
 
-    /// Projects the shared repository's inventory through the active scope and search query. The
-    /// repository is the single source of truth; this view model owns only screen-local filter and
+    /// Projects the shared repository's inventory through the active scope, dependency filter, and search query.
+    /// The repository is the single source of truth; this view model owns only screen-local filter and
     /// selection state.
     var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
@@ -79,6 +95,7 @@ final class InstalledViewModel {
             .loaded(Self.filteredContent(
                 InstalledPackagesContent(packages: repository.userManagedPackages),
                 scope: scope,
+                hideDependencies: hideDependencies,
                 query: searchQuery,
             ))
         }
@@ -126,9 +143,11 @@ final class InstalledViewModel {
     init(
         repository: any InstalledInventoryObserving,
         initialSelection: InstalledBrewPackage.ID? = nil,
+        hideDependencies: Bool = false,
     ) {
         self.repository = repository
         selectedPackageID = initialSelection
+        self.hideDependencies = hideDependencies
     }
 
     func load() async {
@@ -225,10 +244,10 @@ final class InstalledViewModel {
         }
     }
 
-    /// Re-homes the search preview when a scope change hides the previewed row. Committed selections
-    /// are left untouched: `activeSelectedPackageID` already falls back to the first visible row while a
-    /// selection is scoped out, and restores it if the user widens the scope again.
-    private func updateSelectionForScopeChange() {
+    /// Re-homes the search preview when a filter change (scope or hide dependencies) hides the previewed row.
+    /// Committed selections are left untouched: `activeSelectedPackageID` already falls back to the first visible
+    /// row while a selection is filtered out, and restores it if the user widens the filter again.
+    private func updateSelectionForFilterChange() {
         guard isSearchActive, !didCommitSelectionDuringSearch else {
             return
         }
@@ -242,9 +261,12 @@ final class InstalledViewModel {
     private static func filteredContent(
         _ content: InstalledPackagesContent,
         scope: InstalledPackageScope,
+        hideDependencies: Bool,
         query: String,
     ) -> InstalledPackagesContent {
-        let scoped = content.filtered(by: scope)
+        let scoped = content
+            .filtered(by: scope)
+            .filtered(hidingDependencies: hideDependencies)
         let normalizedQuery = normalizedSearchQuery(query)
         guard !normalizedQuery.isEmpty else {
             return scoped
