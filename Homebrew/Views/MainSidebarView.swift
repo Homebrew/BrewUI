@@ -88,7 +88,7 @@ struct MainSidebarView: View {
             .foregroundStyle(
                 isSelected
                     ? Color.brewTextBrand
-                    : Color.brewTextPrimary
+                    : Color.brewTextPrimary,
             )
             .padding(.horizontal, BrewSpacing.md)
             .padding(.vertical, BrewSpacing.sm)
