@@ -95,7 +95,7 @@ struct MainSidebarView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
                 RoundedRectangle(cornerRadius: BrewRadius.md)
-                    .fill(isSelected ? Color.brewBrandTint : Color.clear)
+                    .fill(isSelected ? Color.brewBrandTint : Color.clear,)
             }
             .contentShape(Rectangle())
         }
