@@ -15,7 +15,7 @@ struct MainSidebarView: View {
         VStack(alignment: .leading, spacing: 0) {
             sidebarRow(
                 title: "Installed",
-                emoji: "📦",
+                systemImage: "shippingbox",
                 item: .installed,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -23,7 +23,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Upgrades",
-                emoji: "⬆️",
+                systemImage: "arrow.up.circle",
                 item: .upgrades,
                 trailingAccessory: { UpgradesSidebarBadge() },
             )
@@ -32,7 +32,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Discover",
-                emoji: "🔍",
+                systemImage: "magnifyingglass",
                 item: .discover,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -40,7 +40,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Doctor",
-                emoji: "🩺",
+                systemImage: "stethoscope",
                 item: .doctor,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -48,7 +48,7 @@ struct MainSidebarView: View {
 
             sidebarRow(
                 title: "Configuration",
-                emoji: "⚙️",
+                systemImage: "gearshape",
                 item: .configuration,
             )
             .padding(.horizontal, BrewSpacing.sm)
@@ -58,8 +58,6 @@ struct MainSidebarView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color.brewSurface)
-        // `.contain` makes the sidebar itself an addressable container element without flattening
-        // the rows inside it, so UI tests can scope a query to the sidebar.
         .accessibilityElement(children: .contain)
         .axid(.sidebar)
     }
@@ -67,7 +65,7 @@ struct MainSidebarView: View {
     @ViewBuilder
     private func sidebarRow(
         title: String,
-        emoji: String,
+        systemImage: String,
         item: SidebarItem,
         @ViewBuilder trailingAccessory: () -> some View = { EmptyView() },
     ) -> some View {
@@ -76,12 +74,22 @@ struct MainSidebarView: View {
             selection = item
         } label: {
             HStack(spacing: BrewSpacing.sm) {
-                Text("\(emoji) \(title)")
+                Image(systemName: systemImage)
                     .font(.brewBody)
-                    .foregroundStyle(isSelected ? Color.brewTextBrand : Color.brewTextPrimary)
+                    .frame(width: 20, alignment: .center)
+
+                Text(title)
+                    .font(.brewBody)
+
                 Spacer(minLength: 0)
+
                 trailingAccessory()
             }
+            .foregroundStyle(
+                isSelected
+                    ? Color.brewTextBrand
+                    : Color.brewTextPrimary
+            )
             .padding(.horizontal, BrewSpacing.md)
             .padding(.vertical, BrewSpacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
