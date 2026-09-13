@@ -35,9 +35,6 @@ public enum BrewLayout {
     /// Default sidebar width.
     public static let sidebarWidth: CGFloat = 220
 
-    /// Fixed width for sidebar row symbols so titles align regardless of glyph width.
-    public static let sidebarIconWidth: CGFloat = 20
-
     /// Detail inspector panel width.
     public static let inspectorWidth: CGFloat = 280
 

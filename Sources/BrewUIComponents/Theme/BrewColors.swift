@@ -40,10 +40,6 @@ public extension Color {
     /// Text placed on amber brand surfaces — always dark.
     static let brewTextOnBrand = Color("TextOnBrand", bundle: .module)
 
-    /// Knockout on ``brewStatusWarningBold`` where the yellow should stay light. White, going black
-    /// in high contrast; use ``brewTextOnBrand`` where it should be black in every appearance.
-    static let brewTextOnWarning = Color("TextOnWarning", bundle: .module)
-
     /// Amber foreground for text and small marks on app surfaces.
     /// ``brewBrandPrimary`` is the fill colour and is not legible as a foreground.
     static let brewTextBrand = Color("TextBrand", bundle: .module)

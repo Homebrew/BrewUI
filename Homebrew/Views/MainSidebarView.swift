@@ -4,101 +4,37 @@
 //
 
 import BrewAccessibilityID
-import BrewFeatureInstalled
+import BrewAppEnvironment
+import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
 struct MainSidebarView: View {
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Binding var selection: SidebarItem
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            sidebarRow(
-                title: "Installed",
-                systemImage: "cube.box.fill",
-                item: .installed,
-            )
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.top, BrewSpacing.sm)
-
-            sidebarRow(
-                title: "Upgrades",
-                systemImage: "arrow.up.circle",
-                item: .upgrades,
-                trailingAccessory: { UpgradesSidebarBadge() },
-            )
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.top, BrewSpacing.xs)
-
-            sidebarRow(
-                title: "Discover",
-                systemImage: "magnifyingglass",
-                item: .discover,
-            )
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.top, BrewSpacing.xs)
-
-            sidebarRow(
-                title: "Doctor",
-                systemImage: "stethoscope",
-                item: .doctor,
-            )
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.top, BrewSpacing.xs)
-
-            sidebarRow(
-                title: "Configuration",
-                systemImage: "gearshape",
-                item: .configuration,
-            )
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.top, BrewSpacing.xs)
-
-            Spacer(minLength: 0)
+        List(selection: $selection) {
+            ForEach(SidebarItem.allCases) { item in
+                Label(item.title, systemImage: item.systemImage)
+                    .badge(badgeCount(for: item))
+                    .tag(item)
+                    .axid(.sidebarItem(item.axDestination))
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.brewSurface)
+        .listStyle(.sidebar)
         // `.contain` makes the sidebar itself an addressable container element without flattening
         // the rows inside it, so UI tests can scope a query to the sidebar.
         .accessibilityElement(children: .contain)
         .axid(.sidebar)
     }
 
-    @ViewBuilder
-    private func sidebarRow(
-        title: String,
-        systemImage: String,
-        item: SidebarItem,
-        @ViewBuilder trailingAccessory: () -> some View = { EmptyView() },
-    ) -> some View {
-        let isSelected = selection == item
-        Button {
-            selection = item
-        } label: {
-            HStack(spacing: BrewSpacing.sm) {
-                Image(systemName: systemImage)
-                    .imageScale(.medium)
-                    .foregroundStyle(isSelected ? Color.brewTextBrand : Color.brewTextSecondary)
-                    .frame(width: BrewLayout.sidebarIconWidth)
-                Text(title)
-                    .font(.brewBody)
-                    .foregroundStyle(isSelected ? Color.brewTextBrand : Color.brewTextPrimary)
-                Spacer(minLength: 0)
-                trailingAccessory()
-            }
-            .padding(.horizontal, BrewSpacing.md)
-            .padding(.vertical, BrewSpacing.sm)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background {
-                RoundedRectangle(cornerRadius: BrewRadius.md)
-                    .fill(isSelected ? Color.brewBrandTint : Color.clear)
-            }
-            .contentShape(Rectangle())
+    /// `.badge(0)` renders nothing, so rows without a count need no special case.
+    private func badgeCount(for item: SidebarItem) -> Int {
+        switch item {
+        case .upgrades: installedPackagesRepository.outdatedCount
+        case .installed, .discover, .doctor, .configuration: 0
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
-        .axid(.sidebarItem(item.axDestination))
     }
 }
 

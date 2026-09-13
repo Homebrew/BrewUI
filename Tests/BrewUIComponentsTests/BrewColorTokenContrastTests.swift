@@ -141,20 +141,6 @@ struct BrewColorTokenContrastTests {
         }
     }
 
-    /// The knockout is white in standard light (1.95:1, as the badge has always looked), so AA holds
-    /// in high contrast and in standard dark, where it is already near-black.
-    @Test func `the upgrades count is legible on its capsule wherever the palette promises it`() throws {
-        for appearance in BrewColorAsset.Appearance.highContrast + [.dark] {
-            let knockout = try BrewColorAsset.color("TextOnWarning", appearance)
-            let fill = try BrewColorAsset.color("StatusWarningBold", appearance)
-
-            #expect(
-                knockout.contrastRatio(against: fill) >= TokenContrastRequirement.minimumRatio,
-                "TextOnWarning on StatusWarningBold (\(appearance.rawValue)) is \(knockout.contrastRatio(against: fill)):1",
-            )
-        }
-    }
-
     /// Pulling tertiary up to AA squeezes it toward secondary; 1.3x is about the smallest gap that
     /// still reads as a level of emphasis at 11pt.
     @Test func `the neutral text ramp stays ordered and distinguishable`() throws {

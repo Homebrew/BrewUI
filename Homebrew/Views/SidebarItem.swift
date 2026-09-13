@@ -30,6 +30,16 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
         }
     }
 
+    var systemImage: String {
+        switch self {
+        case .installed: "cube.box.fill"
+        case .upgrades: "arrow.up.circle"
+        case .discover: "magnifyingglass"
+        case .doctor: "stethoscope"
+        case .configuration: "gearshape"
+        }
+    }
+
     var refreshesDoctorReport: Bool {
         switch self {
         case .doctor: true
