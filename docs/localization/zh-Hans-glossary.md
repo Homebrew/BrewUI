@@ -1,4 +1,4 @@
-# English–Simplified Chinese glossary / 完整中英词表
+# English–Simplified Chinese Glossary / 完整中英词表
 
 154 entries, extracted from the local `feature/chinese-caskflow` catalog, including the approved corrections to “Check for upgrades again” and “Choose a package from Discover to see details.” This is the full catalog snapshot, including entries that may not currently appear on screen, not a claim that all possible runtime messages are localized.
 
@@ -164,5 +164,4 @@
 | Your installed package is up to date. | 已安装的软件包为最新版本。 |
 | All %lld installed packages are up to date. | 全部 %lld 个已安装的软件包均为最新版本。 |
 | Installs this package on your Mac | 在此 Mac 上安装此软件包 |
-
 

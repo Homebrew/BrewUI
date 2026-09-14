@@ -28,7 +28,9 @@ struct DoctorCopyTests {
         #expect(DoctorCopy.localized("You should download the Command Line Tools for Xcode 26.6.") == "You should download the Command Line Tools for Xcode 26.6.")
         #expect(DoctorCopy.localized("Untap them with:") == "Untap them with:")
         #expect(DoctorCopy.localized("For more information, see:") == "For more information, see:")
-        #expect(DoctorCopy.localized("Please report this issue to the user/tap (not Homebrew/* repositories), or even better, submit a PR to fix it:") == "Please report this issue to the user/tap (not Homebrew/* repositories), or even better, submit a PR to fix it:")
+        let reportMessage = "Please report this issue to the user/tap (not Homebrew/* repositories), " +
+            "or even better, submit a PR to fix it:"
+        #expect(DoctorCopy.localized(reportMessage) == reportMessage)
         #expect(DoctorCopy.localized("A future brew warning") == "A future brew warning")
     }
 }

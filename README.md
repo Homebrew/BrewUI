@@ -8,9 +8,6 @@ Homebrew's official macOS GUI: making package management approachable for users 
 
 Enable CLI-averse users to safely discover, install, update, and manage Homebrew packages through a native SwiftUI interface that never hides what Homebrew is doing.
 
-Cask icons are provided by the open-source [CaskFlow](https://github.com/alielsokary/CaskFlow)
-pipeline, using jsDelivr with a GitHub Raw fallback and the existing package symbol when unavailable.
-
 ## 📲 Tech
 
 - **Swift 6.0** with strict concurrency · **SwiftUI** · **Swift Package Manager**

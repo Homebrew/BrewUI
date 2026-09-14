@@ -107,13 +107,17 @@ final class DoctorViewModel {
         case .loading:
             String(localized: "Running brew doctor…", comment: "Doctor subtitle while running")
         case .healthy:
-            isRefreshing
-                ? String(localized: "Re-checking…", comment: "Doctor subtitle while refreshing")
-                : String(localized: "No problems found", comment: "Doctor subtitle for a healthy report")
+            if isRefreshing {
+                String(localized: "Re-checking…", comment: "Doctor subtitle while refreshing")
+            } else {
+                String(localized: "No problems found", comment: "Doctor subtitle for a healthy report")
+            }
         case .issues:
-            isRefreshing
-                ? String(localized: "Re-checking…", comment: "Doctor subtitle while refreshing")
-                : String(localized: "Warnings found", comment: "Doctor subtitle when warnings are present")
+            if isRefreshing {
+                String(localized: "Re-checking…", comment: "Doctor subtitle while refreshing")
+            } else {
+                String(localized: "Warnings found", comment: "Doctor subtitle when warnings are present")
+            }
         case .failed:
             String(localized: "The check could not be completed", comment: "Doctor subtitle after a failed check")
         }

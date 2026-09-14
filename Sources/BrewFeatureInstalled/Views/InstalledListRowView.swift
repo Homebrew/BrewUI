@@ -74,16 +74,9 @@ struct InstalledListRowView: View {
                 .strokeBorder(accentColor(viewModel.kind.chrome.accent), lineWidth: 1)
                 .frame(width: 36, height: 36)
                 .brewHiddenWhenRedacted()
-            Group {
-                if viewModel.kind == .cask {
-                    CaskFlowIconView(packageID: package.id, fallbackSystemName: "cube.box.fill")
-                        .frame(width: 22, height: 22)
-                } else {
-                    Image(systemName: "cube.box.fill")
-                        .font(.body)
-                }
-            }
-            .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
+            Image(systemName: "cube.box.fill")
+                .font(.body)
+                .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
         }
         .accessibilityHidden(true)
     }

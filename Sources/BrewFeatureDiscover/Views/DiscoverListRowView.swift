@@ -75,16 +75,9 @@ struct DiscoverListRowView: View {
                 .strokeBorder(accentColor(viewModel.packageKindChrome.accent), lineWidth: 1)
                 .frame(width: 36, height: 36)
                 .brewHiddenWhenRedacted()
-            Group {
-                if viewModel.packageKind == .cask {
-                    CaskFlowIconView(packageID: discoveryPackage.id, fallbackSystemName: "shippingbox.fill")
-                        .frame(width: 22, height: 22)
-                } else {
-                    Image(systemName: "shippingbox.fill")
-                        .font(.body)
-                }
-            }
-            .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
+            Image(systemName: "shippingbox.fill")
+                .font(.body)
+                .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
         }
         .accessibilityHidden(true)
     }

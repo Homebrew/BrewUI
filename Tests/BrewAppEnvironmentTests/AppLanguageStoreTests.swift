@@ -3,18 +3,18 @@ import Foundation
 import Testing
 
 struct AppLanguageStoreTests {
-    private func makeDefaults() -> UserDefaults {
-        UserDefaults(suiteName: "BrewUI.AppLanguageTests.\(UUID().uuidString)")!
+    private func makeDefaults() throws -> UserDefaults {
+        try #require(UserDefaults(suiteName: "BrewUI.AppLanguageTests.\(UUID().uuidString)"))
     }
 
-    @Test func `language defaults to system`() {
-        let defaults = makeDefaults()
+    @Test func `language defaults to system`() throws {
+        let defaults = try makeDefaults()
 
         #expect(AppLanguageStore(defaults: defaults).language == .system)
     }
 
-    @Test func `language round trips through user defaults`() {
-        let defaults = makeDefaults()
+    @Test func `language round trips through user defaults`() throws {
+        let defaults = try makeDefaults()
         let store = AppLanguageStore(defaults: defaults)
 
         store.language = .simplifiedChinese
@@ -22,9 +22,9 @@ struct AppLanguageStoreTests {
         #expect(AppLanguageStore(defaults: defaults).language == .simplifiedChinese)
     }
 
-    @Test func `launch override follows the selected language`() {
+    @Test func `launch override follows the selected language`() throws {
         let suite = "BrewUI.AppLanguageTests.\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suite)!
+        let defaults = try #require(UserDefaults(suiteName: suite))
         let store = AppLanguageStore(defaults: defaults)
 
         store.language = .english

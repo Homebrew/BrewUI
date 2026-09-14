@@ -1,4 +1,4 @@
-# Simplified Chinese terminology / 简体中文术语规范
+# Simplified Chinese Terminology / 简体中文术语规范
 
 This document defines terminology for maintaining BrewUI's optional Simplified Chinese localization. The term list is a maintenance guide, not a list of new UI strings. See [zh-Hans-glossary.md](zh-Hans-glossary.md) for the complete catalog snapshot.
 
@@ -42,8 +42,7 @@ This document defines terminology for maintaining BrewUI's optional Simplified C
 | Command Line Tools | 命令行工具 | Apple Command Line Tools；Xcode 名称及版本号保持原样。 |
 | Report | 报告 | 例如“复制报告”“保存报告”。 |
 | Console | 控制台 | App 内命令输出区域；与外部终端区别。 |
-| Icon | 图标 | 文档术语，用于描述 CaskFlow 应用图标；不是新增界面文案。 |
-| Homebrew / BrewUI / CaskFlow / Xcode | 保留原名 | 项目与产品名称不翻译。 |
+| Homebrew / BrewUI / Xcode | 保留原名 | 项目与产品名称不翻译。 |
 
 ## Actions and status text / 操作与状态用词
 
@@ -66,10 +65,8 @@ This document defines terminology for maintaining BrewUI's optional Simplified C
 1. Consult this table before translating new strings. Reuse the established term for the same concept. 新增文案先查本表，同一概念使用相同译法。
 2. Distinguish dependencies from dependents. “依赖”是当前软件包需要的包；“依赖者”是需要当前软件包的包。
 3. Update `Homebrew/Resources/Localizable.xcstrings` and the complete glossary together. If terminology changes, update this document and every affected translation in the same change.
-4. Preserve format placeholders such as `%@` and `%lld`, including their number, type, and intended meaning. Keep command syntax, paths, URLs, package tokens, and version numbers unchanged.
+4. Preserve format placeholders such as `%@` and `%lld`, including their number, type and intended meaning. Keep command syntax, paths, URLs, package tokens and version numbers unchanged.
 5. Keep untranslated diagnostics verbatim when no supported mapping exists. Do not change raw output to make localization appear complete.
 6. Check the string catalog and review the affected UI after changes. Do not mark unperformed manual checks as complete.
 
 词表之外的新增术语应在同一次改动中补充英文、中文、含义和必要的使用例子。不得将通用软件包名称、路径或命令语法当作界面标签翻译。
-
-

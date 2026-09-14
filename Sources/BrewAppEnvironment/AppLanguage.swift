@@ -7,11 +7,13 @@ import Foundation
 
 /// The language choices exposed by BrewUI's Configuration page.
 public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
-    case system = "system"
+    case system
     case english = "en"
     case simplifiedChinese = "zh-Hans"
 
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
 }
 
 /// Persists the user's language choice and applies it to the next app launch.
