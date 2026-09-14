@@ -6,6 +6,7 @@
 import BrewAccessibilityID
 import BrewFeatureInstalled
 import BrewUIComponents
+import Foundation
 import SwiftUI
 
 struct MainSidebarView: View {
@@ -14,7 +15,7 @@ struct MainSidebarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             sidebarRow(
-                title: "Installed",
+                title: String(localized: "Installed"),
                 emoji: "📦",
                 item: .installed,
             )
@@ -22,7 +23,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.sm)
 
             sidebarRow(
-                title: "Upgrades",
+                title: String(localized: "Upgrades"),
                 emoji: "⬆️",
                 item: .upgrades,
                 trailingAccessory: { UpgradesSidebarBadge() },
@@ -31,7 +32,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
-                title: "Discover",
+                title: String(localized: "Discover"),
                 emoji: "🔍",
                 item: .discover,
             )
@@ -39,7 +40,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
-                title: "Doctor",
+                title: String(localized: "Doctor"),
                 emoji: "🩺",
                 item: .doctor,
             )
@@ -47,7 +48,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
-                title: "Configuration",
+                title: String(localized: "Configuration"),
                 emoji: "⚙️",
                 item: .configuration,
             )

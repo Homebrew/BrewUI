@@ -69,7 +69,12 @@ public struct CommandBlockView: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer()
-            BrewActionButton(copyTitle, systemImage: "doc.on.doc", confirmationTitle: "Copied") {
+            BrewActionButton(
+                copyTitle,
+                systemImage: "doc.on.doc",
+                confirmationTitle: String(localized: "Copied", comment: "Copy command confirmation"),
+                help: copyHelp,
+            ) {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
             }
@@ -80,11 +85,21 @@ public struct CommandBlockView: View {
     }
 
     private var headerTitle: String {
-        commands.count > 1 ? "Terminal commands" : "Terminal command"
+        commands.count > 1
+            ? String(localized: "Terminal commands", comment: "Command block multiple-command heading")
+            : String(localized: "Terminal command", comment: "Command block single-command heading")
     }
 
     private var copyTitle: String {
-        commands.count > 1 ? "Copy all" : "Copy"
+        commands.count > 1
+            ? String(localized: "Copy all", comment: "Copy all commands action")
+            : String(localized: "Copy", comment: "Copy command action")
+    }
+
+    private var copyHelp: String {
+        commands.count > 1
+            ? String(localized: "Copy all", comment: "Copy all commands help")
+            : String(localized: "Copy", comment: "Copy command help")
     }
 
     /// Deliberately not on ``Color/brewTerminal``: light-on-dark text under the system selection

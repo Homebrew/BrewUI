@@ -78,7 +78,7 @@ struct DoctorIssueDetailView: View {
     // MARK: - Prose
 
     private func proseView(lines: [String]) -> some View {
-        Text(lines.joined(separator: "\n"))
+        Text(lines.map(DoctorCopy.localized).joined(separator: "\n"))
             .font(.brewBody)
             .foregroundStyle(Color.brewTextSecondary)
             .textSelection(.enabled)
@@ -89,7 +89,7 @@ struct DoctorIssueDetailView: View {
     @ViewBuilder
     private func captionText(_ caption: String?) -> some View {
         if let caption {
-            Text(caption)
+            Text(DoctorCopy.localized(caption))
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextSecondary)
                 .textSelection(.enabled)
@@ -176,7 +176,11 @@ struct DoctorIssueDetailView: View {
     // MARK: - Raw output
 
     private var rawOutputSection: some View {
-        CommandBlockView(command: item.rawText, title: "Raw output", collapsible: true)
+        CommandBlockView(
+            command: item.rawText,
+            title: String(localized: "Raw output", comment: "Doctor raw output section title"),
+            collapsible: true,
+        )
     }
 }
 

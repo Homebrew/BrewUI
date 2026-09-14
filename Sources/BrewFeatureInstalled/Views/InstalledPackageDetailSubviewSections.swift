@@ -89,22 +89,34 @@ struct InstalledPackageDetailMetadataSection: View {
     var body: some View {
         let metadata = viewModel.metadataItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "Details")
+            PackageDetailSectionHeading(title: String(localized: "Details", comment: "Installed package details heading"))
             detailRow(
-                label: "Installed",
+                label: String(localized: "Installed", comment: "Installed package installed version label"),
                 value: metadata.installedVersionsValue,
                 valueColor: metadata.isOutdated ? .brewStatusWarning : .brewTextPrimary,
                 valueFontWeight: .heavy,
             )
-            detailRow(label: "Latest version", value: metadata.latestVersionValue)
+            detailRow(
+                label: String(localized: "Latest version", comment: "Installed package latest version label"),
+                value: metadata.latestVersionValue,
+            )
             if let dateValue = metadata.installDateValue {
-                detailRow(label: "Installed on", value: dateValue)
+                detailRow(
+                    label: String(localized: "Installed on", comment: "Installed package install date label"),
+                    value: dateValue,
+                )
             }
             if let reason = metadata.installReasonValue {
-                detailRow(label: "Install reason", value: reason)
+                detailRow(
+                    label: String(localized: "Install reason", comment: "Installed package install reason label"),
+                    value: reason,
+                )
             }
             if let license = metadata.licenseValue {
-                detailRow(label: "License", value: license)
+                detailRow(
+                    label: String(localized: "License", comment: "Installed package license label"),
+                    value: license,
+                )
             }
             if let tap = metadata.tapDisplayValue {
                 sourceRow(tap: tap, url: metadata.sourceURL)
@@ -113,10 +125,16 @@ struct InstalledPackageDetailMetadataSection: View {
                 homepageRow(url: homepageURL, title: metadata.homepageDisplayTitle ?? homepageURL.absoluteString)
             }
             if metadata.isPinned {
-                detailRow(label: "Pinned", value: "Yes")
+                detailRow(
+                    label: String(localized: "Pinned", comment: "Installed package pinned label"),
+                    value: String(localized: "Yes", comment: "Affirmative package metadata value"),
+                )
             }
             if metadata.isKegOnly {
-                detailRow(label: "Keg-only", value: "Yes")
+                detailRow(
+                    label: String(localized: "Keg-only", comment: "Installed package keg-only label"),
+                    value: String(localized: "Yes", comment: "Affirmative package metadata value"),
+                )
             }
             if let caveats = metadata.caveatsText {
                 caveatsCallout(text: caveats)
@@ -210,7 +228,7 @@ struct InstalledPackageDetailDependentsSection: View {
 
     private var dependentsHeading: some View {
         HStack(spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "Dependents")
+            PackageDetailSectionHeading(title: String(localized: "Dependents", comment: "Installed package dependents heading"))
             if let badgeTitle = viewModel.uninstallItem.usedByBlockingBadgeTitle {
                 Text(badgeTitle)
                     .font(.brewCaption2.weight(.semibold))

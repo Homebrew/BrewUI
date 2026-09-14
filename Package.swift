@@ -422,5 +422,13 @@ let package = Package(
                 .swiftLanguageMode(.v6),
             ],
         ),
+        .testTarget(
+            name: "BrewAppEnvironmentTests",
+            dependencies: ["BrewAppEnvironment"],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
     ],
 )

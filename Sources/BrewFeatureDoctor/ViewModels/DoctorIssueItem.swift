@@ -22,7 +22,7 @@ struct DoctorIssueItem: Identifiable, Equatable {
 
     init(issue: DoctorIssue) {
         id = Self.contentID(for: issue)
-        title = issue.title
+        title = DoctorCopy.localized(issue.title)
         severity = issue.severity
         blocks = issue.blocks
         rawText = issue.rawText
@@ -62,7 +62,9 @@ struct DoctorIssueItem: Identifiable, Equatable {
 
     /// Label for voiceover mode — combines title with Fix available
     var accessibilityLabel: String {
-        hasRunnableFix ? "\(title), Fix available" : title
+        hasRunnableFix
+            ? "\(title), \(String(localized: "Fix available", comment: "VoiceOver hint for a doctor fix"))"
+            : title
     }
 }
 

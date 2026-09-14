@@ -64,7 +64,7 @@ struct MainWindowView: View {
     }
 
     private var acknowledgeButton: some View {
-        Button("OK") { selfUpgradeCoordinator?.acknowledgeUpgradeCompletion() }
+        Button(String(localized: "OK")) { selfUpgradeCoordinator?.acknowledgeUpgradeCompletion() }
             .axid(.selfUpgradeOutcomeAcknowledgeButton)
     }
 
@@ -126,24 +126,33 @@ struct MainWindowView: View {
                 mode: selectedSidebarItem == .upgrades ? .upgrades : .installed,
                 deepLinkSelection: $pendingInstalledSelection,
             )
-            .navigationTitle(selectedSidebarItem == .upgrades ? "Upgrades" : "Installed")
+            .navigationTitle(
+                selectedSidebarItem == .upgrades
+                    ? String(localized: "Upgrades")
+                    : String(localized: "Installed"),
+            )
             .navigationSubtitle(
                 selectedSidebarItem == .upgrades
-                    ? "Review and upgrade outdated packages"
-                    : "Browse or search your installed packages",
+                    ? String(localized: "Review and upgrade outdated packages")
+                    : String(localized: "Browse or search your installed packages"),
             )
         case .discover:
             DiscoverColumnsRoot()
-                .navigationTitle("Discover")
-                .navigationSubtitle("Browse and search \(Self.approximateCatalogueSize) packages")
+                .navigationTitle(String(localized: "Discover"))
+                .navigationSubtitle(
+                    String(
+                        format: String(localized: "Browse and search %@ packages"),
+                        Self.approximateCatalogueSize,
+                    ),
+                )
         case .doctor:
             DoctorColumnsRoot()
-                .navigationTitle("Doctor")
-                .navigationSubtitle("Check your Homebrew installation for problems")
+                .navigationTitle(String(localized: "Doctor"))
+                .navigationSubtitle(String(localized: "Check your Homebrew installation for problems"))
         case .configuration:
             ConfigColumnsRoot()
-                .navigationTitle("Configuration")
-                .navigationSubtitle("Homebrew environment & diagnostics")
+                .navigationTitle(String(localized: "Configuration"))
+                .navigationSubtitle(String(localized: "Homebrew environment & diagnostics"))
         }
     }
 }

@@ -13,18 +13,24 @@ public enum RelativeTimeText {
         let seconds = now.timeIntervalSince(date)
         guard seconds >= 60 else {
             // Also covers a future date: a clock that moved backwards should read as "now", not a countdown.
-            return "just now"
+            return String(localized: "just now", comment: "Relative timestamp under one minute")
         }
         let minutes = Int(seconds / 60)
         if minutes < 60 {
-            return "\(minutes) \(minutes == 1 ? "minute" : "minutes") ago"
+            return minutes == 1
+                ? String(localized: "1 minute ago", comment: "Relative timestamp one minute ago")
+                : String(localized: "\(minutes) minutes ago", comment: "Relative timestamp in minutes")
         }
         let hours = minutes / 60
         if hours < 24 {
-            return "\(hours) \(hours == 1 ? "hour" : "hours") ago"
+            return hours == 1
+                ? String(localized: "1 hour ago", comment: "Relative timestamp one hour ago")
+                : String(localized: "\(hours) hours ago", comment: "Relative timestamp in hours")
         }
         let days = hours / 24
-        return "\(days) \(days == 1 ? "day" : "days") ago"
+        return days == 1
+            ? String(localized: "1 day ago", comment: "Relative timestamp one day ago")
+            : String(localized: "\(days) days ago", comment: "Relative timestamp in days")
     }
 }
 

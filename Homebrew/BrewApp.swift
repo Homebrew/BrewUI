@@ -45,6 +45,8 @@ struct BrewApp: App {
     #endif
 
     init() {
+        AppLanguageStore().applyLaunchOverride()
+
         // Install crash capture before any other launch work so startup crashes are recorded.
         let crashReportStore = CrashReportStore()
         CrashReportInstaller.install(store: crashReportStore, environment: .current())

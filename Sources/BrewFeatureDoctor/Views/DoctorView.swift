@@ -35,7 +35,10 @@ struct DoctorView: View {
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
                 if let lastCheckedAt = viewModel.lastCheckedAt {
-                    LastUpdatedLabel(lead: "Last checked", date: lastCheckedAt)
+                    LastUpdatedLabel(
+                        lead: String(localized: "Last checked", comment: "Doctor timestamp lead-in"),
+                        date: lastCheckedAt,
+                    )
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
