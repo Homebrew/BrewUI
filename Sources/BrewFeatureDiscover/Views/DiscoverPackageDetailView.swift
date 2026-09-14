@@ -84,9 +84,16 @@ private struct DiscoverPackageDetailHeroSection: View {
                 RoundedRectangle(cornerRadius: BrewRadius.lg)
                     .strokeBorder(accentColor(chrome.accent), lineWidth: 1)
                     .frame(width: 44, height: 44)
-                Image(systemName: "cube.box.fill")
-                    .font(.title2)
-                    .foregroundStyle(accentColor(chrome.accent))
+                Group {
+                    if viewModel.packageKind == .cask {
+                        CaskFlowIconView(packageID: viewModel.discoveryPackage.id, fallbackSystemName: "cube.box.fill")
+                            .frame(width: 28, height: 28)
+                    } else {
+                        Image(systemName: "cube.box.fill")
+                            .font(.title2)
+                    }
+                }
+                .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
 
