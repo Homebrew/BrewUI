@@ -664,6 +664,14 @@
 
 - Sidebar rows render `Image(systemName:)` glyphs, not emoji (issue #165). macOS convention; symbols tint with selection state and align via `BrewLayout.sidebarIconWidth`.
 
+## 2026-09-14 — Actionable issue forms and crash-report compatibility
+
+- Bug and feature forms in `.github/ISSUE_TEMPLATE/` adapt Homebrew/brew's workflow to the macOS app. Questions and general opinions go to Homebrew Discussions; reports request concrete behaviour and relevant app diagnostics.
+- Keep blank issues enabled while released apps use `CrashReportIssue`'s `issues/new?title=…&body=…` URL. Disabling that route needs a coordinated move to the bug form's field parameters, including a plan for reports from older app releases.
+- Keep the PR template short. Request validation appropriate to Swift and UI changes, with actual results and any checks not run.
+- `check-issues.yml` and `check-prs.yml` adapt Homebrew/brew's template enforcement and use the shared `Homebrew/.github` checker. They read templates from `main` through the API without checking out code, close stripped templates and reopen only submissions closed by this automation. The checker requires at least 75% of template headings/checkboxes, regardless of tick state, plus an AI mention for PRs. Legacy app-generated crash reports remain accepted.
+- Template warning comments mark unresolved failures and are removed once the template is complete, after any required reopen succeeds. Clear them for already-open submissions too: the stale workflow shares `github-actions[bot]`, so a historical warning cannot identify which workflow performed a later closure.
+
 ## 2026-09-14 — Language takes effect on the next launch
 
 - **A running process cannot retarget SwiftUI/AppKit menus honestly.** Live switching and rewriting File / Edit / Window titles were tried; they flicker and leave standard menus fighting the framework. Persist the next-launch language, offer reopen / defer / undo, and start a new process with app-domain `AppleLanguages`. Never write the global macOS language. File / Edit / Window still come out translated — macOS does that for the process language; those strings are not in our catalog.

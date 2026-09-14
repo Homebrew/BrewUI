@@ -1,0 +1,47 @@
+name: Feature request
+description: Propose a concrete improvement to the Homebrew macOS app, with a use case and expected behaviour.
+type: Feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This tracker is for actionable bugs and feature requests for **BrewUI, the Homebrew macOS app**.
+        A feature request needs a concrete problem and a proposed change. General opinions, usage questions and disagreement without a proposed change belong in [Homebrew Discussions](https://github.com/orgs/Homebrew/discussions).
+        For example, explain which task a layout prevents you completing and how a proposed change would help, rather than only saying you dislike the layout.
+        Requests may be closed or left for a contributor to implement if they are outside the project's scope or current priorities.
+        Keep the template headings and checkboxes. Issues with a stripped template may be closed automatically and reopened when you edit the same issue to restore it.
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have searched the [issues](https://github.com/Homebrew/BrewUI/issues?q=is%3Aissue) and [pull requests](https://github.com/Homebrew/BrewUI/pulls?q=is%3Apr) for duplicates.
+          required: true
+        - label: I am proposing a specific improvement to BrewUI with a use case and a clear outcome.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and use case
+      description: What task is difficult or impossible today? Describe a real example, the current app behaviour and who would benefit. Include the app version if this concerns an existing feature.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: Describe what the user would do and what the app should do in response. Identify the screen or workflow and how we could tell the request is complete. Include a mock-up if useful; Swift code is not required.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What existing app workflows, Homebrew commands or workarounds have you tried, and why are they insufficient? If you know of none, say so and explain the gap.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: macOS and Homebrew context
+      description: If relevant, describe keyboard or VoiceOver needs, macOS integration, the Homebrew command this would expose or behaviour that depends on a particular macOS version.
