@@ -78,6 +78,12 @@ Use the [Homebrew JSON API](https://formulae.brew.sh/docs/api/) where it helps. 
 
 ## Resources
 
+Application UI translations live in `Homebrew/Localizable.xcstrings`, packaged by the app target.
+Feature packages and shared UI deliberately use the app's default localization table (`Bundle.main`).
+English is the source and fallback language; Simplified Chinese follows the macOS app language preference.
+Homebrew data and raw command output remain verbatim; known diagnostic prose is translated at the
+feature presentation boundary. See `CONVENTIONS.md` for authoring and verification.
+
 - [`CONVENTIONS.md`](CONVENTIONS.md)
 - [Homebrew JSON API](https://formulae.brew.sh/docs/api/)
 - [Swift Concurrency](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/)

@@ -105,13 +105,21 @@ final class DoctorViewModel {
     var subtitle: String {
         switch presentation {
         case .loading:
-            "Running brew doctor…"
+            String(localized: "Running brew doctor…")
         case .healthy:
-            isRefreshing ? "Re-checking…" : "No problems found"
+            if isRefreshing {
+                String(localized: "Re-checking…")
+            } else {
+                String(localized: "No problems found")
+            }
         case .issues:
-            isRefreshing ? "Re-checking…" : "Warnings found"
+            if isRefreshing {
+                String(localized: "Re-checking…")
+            } else {
+                String(localized: "Warnings found")
+            }
         case .failed:
-            "The check could not be completed"
+            String(localized: "The check could not be completed")
         }
     }
 
@@ -128,7 +136,7 @@ final class DoctorViewModel {
         guard let id = selectedIssueID, case let .loaded(report) = state else {
             return nil
         }
-        return report.issues.lazy.map(DoctorIssueItem.init(issue:)).first { $0.id == id }
+        return report.issues.lazy.map { DoctorIssueItem(issue: $0) }.first { $0.id == id }
     }
 
     func setSelection(_ id: Int?) {

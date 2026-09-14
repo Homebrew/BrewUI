@@ -8,6 +8,14 @@ import BrewRepositoryInterfaces
 import Foundation
 
 extension CommandJob {
+    /// The tab names the task; command tooltips and exported logs retain executable syntax.
+    var tabTitle: String {
+        if kind == .doctorRead {
+            return String(localized: "brew doctor", comment: "Console tab for the diagnostic task, not a shell command")
+        }
+        return command
+    }
+
     /// Status-dot state for this job: running until terminal, then success/failure by exit code.
     /// Single source of truth for the dot — both the status bar and the toolbar pill bind to it.
     var dotState: ConsoleStatusPresentation.DotState {

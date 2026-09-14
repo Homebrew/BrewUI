@@ -1,0 +1,3020 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "brew doctor": {
+      "extractionState": "manual",
+      "comment": "Console diagnostic task label only; executable commands remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brew 诊断"
+          }
+        }
+      }
+    },
+    "Please note that these warnings are just used to help the Homebrew maintainers with debugging if you file an issue. If everything you use Homebrew for is working fine: please don't worry or file an issue; just ignore this. Thanks!": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些警告用于帮助 Homebrew 维护者排查你提交的问题。如果你使用 Homebrew 时一切正常，可以忽略这些提示，无需担心或提交问题。谢谢！"
+          }
+        }
+      }
+    },
+    "Some installed formulae are deprecated or disabled.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的命令行工具已弃用或被禁用。"
+          }
+        }
+      }
+    },
+    "Some installed formulae are deprecated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的命令行工具已弃用。"
+          }
+        }
+      }
+    },
+    "Some installed casks are deprecated or disabled.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的应用程序已弃用或被禁用。"
+          }
+        }
+      }
+    },
+    "You should find replacements for the following formulae:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请为以下命令行工具寻找替代项："
+          }
+        }
+      }
+    },
+    "You should find replacements for the following casks:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请为以下应用程序寻找替代项："
+          }
+        }
+      }
+    },
+    "You have unlinked kegs in your Cellar.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cellar 中有尚未链接的软件包。"
+          }
+        }
+      }
+    },
+    "Leaving kegs unlinked can lead to build-trouble and cause formulae that depend on those kegs to fail to run properly once built.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未链接的软件包可能导致构建问题，并使依赖它们的命令行工具在构建后无法正常运行。"
+          }
+        }
+      }
+    },
+    "Run `brew link` on these:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对以下软件包运行 `brew link`："
+          }
+        }
+      }
+    },
+    "You can solve this by running:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以运行以下命令解决此问题："
+          }
+        }
+      }
+    },
+    "To fix, run:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请运行以下命令修复："
+          }
+        }
+      }
+    },
+    "To fix this, run:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请运行以下命令修复："
+          }
+        }
+      }
+    },
+    "Affects:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受影响的项目："
+          }
+        }
+      }
+    },
+    "More information:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多信息："
+          }
+        }
+      }
+    },
+    "Your Command Line Tools are too outdated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令行工具版本过旧。"
+          }
+        }
+      }
+    },
+    "Your Command Line Tools are outdated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令行工具已过时。"
+          }
+        }
+      }
+    },
+    "Your Xcode is outdated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 已过时。"
+          }
+        }
+      }
+    },
+    "Update them from Software Update in System Settings.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在系统设置的“软件更新”中更新。"
+          }
+        }
+      }
+    },
+    "Update them from Software Update in System Preferences.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在系统偏好设置的“软件更新”中更新。"
+          }
+        }
+      }
+    },
+    "If that doesn't show you any updates, run:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如果没有显示可用更新，请运行："
+          }
+        }
+      }
+    },
+    "Alternatively, manually download them from:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也可以从以下地址手动下载："
+          }
+        }
+      }
+    },
+    "The following directories are not writable by your user:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前用户没有以下目录的写入权限："
+          }
+        }
+      }
+    },
+    "The following directories do not exist:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下目录不存在："
+          }
+        }
+      }
+    },
+    "You should create these directories and change their ownership to your user.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请创建这些目录，并将其所有者改为当前用户。"
+          }
+        }
+      }
+    },
+    "You should change the ownership of these directories to your user, and make sure that you have write permission.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请将这些目录的所有者改为当前用户，并确保你拥有写入权限。"
+          }
+        }
+      }
+    },
+    "And make sure that your user has write permission.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "并确保当前用户拥有写入权限。"
+          }
+        }
+      }
+    },
+    "The following tools exist at both paths:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下工具同时存在于这两个路径中："
+          }
+        }
+      }
+    },
+    "Broken symlinks were found:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现失效的符号链接："
+          }
+        }
+      }
+    },
+    "Broken symlinks were found. Remove them with `brew cleanup`:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现失效的符号链接。请使用 `brew cleanup` 清理："
+          }
+        }
+      }
+    },
+    "Remove them with `brew cleanup`": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请使用 `brew cleanup` 清理"
+          }
+        }
+      }
+    },
+    "Remove them with `brew cleanup`:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请使用 `brew cleanup` 清理："
+          }
+        }
+      }
+    },
+    "Uncommitted git changes.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存在尚未提交的 Git 更改。"
+          }
+        }
+      }
+    },
+    "Your homebrew git repo has uncommitted changes.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 的 Git 仓库存在尚未提交的更改。"
+          }
+        }
+      }
+    },
+    "Uncommitted files:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未提交的文件："
+          }
+        }
+      }
+    },
+    "Homebrew's bin was not found in your PATH.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PATH 中未找到 Homebrew 的 bin 目录。"
+          }
+        }
+      }
+    },
+    "Homebrew's \"bin\" was not found in your PATH.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PATH 中未找到 Homebrew 的 bin 目录。"
+          }
+        }
+      }
+    },
+    "Homebrew's origin is not set.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 尚未设置 origin 远程仓库。"
+          }
+        }
+      }
+    },
+    "Consider setting your PATH for example like so:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以参考以下示例设置 PATH："
+          }
+        }
+      }
+    },
+    "Another `brew` shadows this Homebrew installation in your PATH:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PATH 中的另一个 `brew` 优先于当前 Homebrew 安装："
+          }
+        }
+      }
+    },
+    "This may be a helper, wrapper or another Homebrew installation.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它可能是辅助程序、包装脚本或另一个 Homebrew 安装。"
+          }
+        }
+      }
+    },
+    "This means that system-provided programs will be used instead of those provided by Homebrew.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这意味着系统提供的程序会优先于 Homebrew 提供的程序运行。"
+          }
+        }
+      }
+    },
+    "Your Cellar is symlinked.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cellar 是一个符号链接。"
+          }
+        }
+      }
+    },
+    "Symlinked Cellars can cause problems.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过符号链接访问 Cellar 可能引发问题。"
+          }
+        }
+      }
+    },
+    "Some installed formulae or casks are missing dependencies.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的命令行工具或应用程序缺少依赖项。"
+          }
+        }
+      }
+    },
+    "Run `brew missing` for more details.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 `brew missing` 查看详情。"
+          }
+        }
+      }
+    },
+    "Some of Homebrew's bottles (binary packages) cannot be used with this prefix.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此安装路径无法使用部分 Homebrew 预编译软件包。"
+          }
+        }
+      }
+    },
+    "The detected git configuration values are:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检测到的 Git 配置值如下："
+          }
+        }
+      }
+    },
+    "Update guidance:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新指引："
+          }
+        }
+      }
+    },
+    "This is a Tier 2 configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这是二级支持配置："
+          }
+        }
+      }
+    },
+    "This is a Tier 3 configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这是三级支持配置："
+          }
+        }
+      }
+    },
+    "This is an unsupported configuration.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此配置不受支持。"
+          }
+        }
+      }
+    },
+    "This is an Unsupported configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此配置不受支持："
+          }
+        }
+      }
+    },
+    "Unsupported configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不受支持的配置："
+          }
+        }
+      }
+    },
+    "To set it, run the following command:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请运行以下命令进行设置："
+          }
+        }
+      }
+    },
+    "%@ installs in 30 days": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近 30 天安装 %@ 次"
+          }
+        }
+      }
+    },
+    "Upgrade available to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可升级至 %@"
+          }
+        }
+      }
+    },
+    "Installed and up to date": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装且为最新版本"
+          }
+        }
+      }
+    },
+    "Homebrew Documentation": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 文档"
+          }
+        }
+      }
+    },
+    "Report an Issue…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告问题…"
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "Find": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查找"
+          }
+        }
+      }
+    },
+    "Debug": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调试"
+          }
+        }
+      }
+    },
+    "Clear UserDefaults": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除用户偏好设置"
+          }
+        }
+      }
+    },
+    "Force Crash": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "触发崩溃"
+          }
+        }
+      }
+    },
+    "Fatal Error (signal)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "致命错误（信号）"
+          }
+        }
+      }
+    },
+    "Uncaught Exception": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未捕获的异常"
+          }
+        }
+      }
+    },
+    "Show the Self-Upgrade Banner": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示应用升级提示条"
+          }
+        }
+      }
+    },
+    "Installed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装"
+          }
+        }
+      }
+    },
+    "Upgrades": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级"
+          }
+        }
+      }
+    },
+    "Discover": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现"
+          }
+        }
+      }
+    },
+    "Doctor": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brew 诊断"
+          }
+        }
+      }
+    },
+    "Configuration": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置"
+          }
+        }
+      }
+    },
+    "Your packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装的软件包"
+          }
+        }
+      }
+    },
+    "Available upgrades": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可用升级"
+          }
+        }
+      }
+    },
+    "All": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "Formulae": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令行工具"
+          }
+        }
+      }
+    },
+    "Casks": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用程序"
+          }
+        }
+      }
+    },
+    "FORMULA": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令行工具"
+          }
+        }
+      }
+    },
+    "CASK": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用程序"
+          }
+        }
+      }
+    },
+    "Scope": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "范围"
+          }
+        }
+      }
+    },
+    "Search Installed Packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索已安装的软件包"
+          }
+        }
+      }
+    },
+    "Search Upgrades": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索可升级的软件包"
+          }
+        }
+      }
+    },
+    "Search Homebrew's Packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索 Homebrew 软件包"
+          }
+        }
+      }
+    },
+    "Review and upgrade outdated packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看并升级有新版本的软件包"
+          }
+        }
+      }
+    },
+    "Browse or search your installed packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览或搜索已安装的软件包"
+          }
+        }
+      }
+    },
+    "Browse and search %@ packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览和搜索 %@ 个软件包"
+          }
+        }
+      }
+    },
+    "Check your Homebrew installation for problems": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查 Homebrew 安装是否存在问题"
+          }
+        }
+      }
+    },
+    "Homebrew environment & diagnostics": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 环境与诊断"
+          }
+        }
+      }
+    },
+    "Loading packages…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载软件包…"
+          }
+        }
+      }
+    },
+    "1 package": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个软件包"
+          }
+        }
+      }
+    },
+    "%lld packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个软件包"
+          }
+        }
+      }
+    },
+    "Installed packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装的软件包"
+          }
+        }
+      }
+    },
+    "Outdated packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可升级的软件包"
+          }
+        }
+      }
+    },
+    "Discover packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现软件包"
+          }
+        }
+      }
+    },
+    "Details": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "详情"
+          }
+        }
+      }
+    },
+    "Latest version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新版本"
+          }
+        }
+      }
+    },
+    "Installed on": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装时间"
+          }
+        }
+      }
+    },
+    "Install reason": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装原因"
+          }
+        }
+      }
+    },
+    "License": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "许可证"
+          }
+        }
+      }
+    },
+    "Pinned": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已锁定版本"
+          }
+        }
+      }
+    },
+    "Keg-only": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅安装到独立目录"
+          }
+        }
+      }
+    },
+    "Yes": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是"
+          }
+        }
+      }
+    },
+    "Source": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来源"
+          }
+        }
+      }
+    },
+    "Homepage": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主页"
+          }
+        }
+      }
+    },
+    "Dependencies": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依赖项"
+          }
+        }
+      }
+    },
+    "Dependents": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依赖此软件包的程序"
+          }
+        }
+      }
+    },
+    "No dependencies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无依赖项。"
+          }
+        }
+      }
+    },
+    "No dependents.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有其他软件包依赖此软件包。"
+          }
+        }
+      }
+    },
+    "None.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无。"
+          }
+        }
+      }
+    },
+    "No selection": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未选择项目"
+          }
+        }
+      }
+    },
+    "Choose a package from the list to see details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从列表中选择软件包以查看详情。"
+          }
+        }
+      }
+    },
+    "Choose a package from Discover to see details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从发现列表中选择软件包以查看详情。"
+          }
+        }
+      }
+    },
+    "%@ (linked)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@（已链接）"
+          }
+        }
+      }
+    },
+    "Poured from bottle — %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从预编译包安装 — %@"
+          }
+        }
+      }
+    },
+    "As dependency": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作为依赖项安装"
+          }
+        }
+      }
+    },
+    "Install": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装"
+          }
+        }
+      }
+    },
+    "Uninstall": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载"
+          }
+        }
+      }
+    },
+    "Upgrade": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
+          }
+        }
+      }
+    },
+    "OK": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
+          }
+        }
+      }
+    },
+    "Later": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稍后"
+          }
+        }
+      }
+    },
+    "Installs this package on your Mac": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 Mac 上安装软件包"
+          }
+        }
+      }
+    },
+    "Uninstalls this package from this Mac": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从此 Mac 卸载软件包"
+          }
+        }
+      }
+    },
+    "Upgrades this package to the latest available version": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将此软件包升级至最新可用版本"
+          }
+        }
+      }
+    },
+    "Upgrade to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级至 %@"
+          }
+        }
+      }
+    },
+    "Uninstall %@?": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载 %@？"
+          }
+        }
+      }
+    },
+    "This will remove %@ from this Mac using Homebrew.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将使用 Homebrew 从此 Mac 移除 %@。"
+          }
+        }
+      }
+    },
+    "Blocked by installed dependents. Activate to see why.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他已安装的软件包依赖此软件包，无法卸载。点击查看原因。"
+          }
+        }
+      }
+    },
+    "blocking uninstall": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "阻止卸载"
+          }
+        }
+      }
+    },
+    "Can't uninstall yet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂时无法卸载。"
+          }
+        }
+      }
+    },
+    "1 package above depends on %@. Uninstall it first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上方 1 个软件包依赖 %@，请先将其卸载。"
+          }
+        }
+      }
+    },
+    "%lld packages above depend on %@. Uninstall them first.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上方 %lld 个软件包依赖 %@，请先将它们卸载。"
+          }
+        }
+      }
+    },
+    "Open installed package %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开已安装的软件包 %@"
+          }
+        }
+      }
+    },
+    "%@, not installed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，未安装"
+          }
+        }
+      }
+    },
+    "OUTDATED": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可升级"
+          }
+        }
+      }
+    },
+    "INSTALLED": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装"
+          }
+        }
+      }
+    },
+    "Upgrade available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有可用升级"
+          }
+        }
+      }
+    },
+    "Upgrading": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在升级"
+          }
+        }
+      }
+    },
+    "Uninstalling": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在卸载"
+          }
+        }
+      }
+    },
+    "Installing": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在安装"
+          }
+        }
+      }
+    },
+    "%lld upgrades available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有 %lld 项可用升级"
+          }
+        }
+      }
+    },
+    "Upgrade All (%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部升级（%lld）"
+          }
+        }
+      }
+    },
+    "Upgrade all %lld packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级全部 %lld 个软件包"
+          }
+        }
+      }
+    },
+    "Check for upgrades again": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新检查可用升级"
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新"
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        }
+      }
+    },
+    "Retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重试"
+          }
+        }
+      }
+    },
+    "Show all upgrades": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示全部可用升级"
+          }
+        }
+      }
+    },
+    "Everything is up to date": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有软件包均为最新版本"
+          }
+        }
+      }
+    },
+    "No installed packages to check.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有已安装的软件包可供检查。"
+          }
+        }
+      }
+    },
+    "Your installed package is up to date.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装的软件包为最新版本。"
+          }
+        }
+      }
+    },
+    "All %lld installed packages are up to date.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部 %lld 个已安装的软件包均为最新版本。"
+          }
+        }
+      }
+    },
+    "%@ — last check failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ — 上次检查失败"
+          }
+        }
+      }
+    },
+    "Couldn't check for upgrades": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法检查可用升级"
+          }
+        }
+      }
+    },
+    "1 package can be upgraded": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个软件包可升级"
+          }
+        }
+      }
+    },
+    "%lld packages can be upgraded": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个软件包可升级"
+          }
+        }
+      }
+    },
+    "Showing %lld of %lld upgrades": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示 %lld 项升级，共 %lld 项"
+          }
+        }
+      }
+    },
+    "No matches in 1 outdated package": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个可升级的软件包中没有匹配项"
+          }
+        }
+      }
+    },
+    "No matches in %lld outdated packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个可升级的软件包中没有匹配项"
+          }
+        }
+      }
+    },
+    "Upgrades every outdated package": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级所有有新版本的软件包"
+          }
+        }
+      }
+    },
+    "Upgrades every outdated formula": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级所有有新版本的命令行工具"
+          }
+        }
+      }
+    },
+    "Upgrades every outdated cask": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级所有有新版本的应用程序"
+          }
+        }
+      }
+    },
+    "Upgrades the 1 package matching your search": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级与搜索条件匹配的 1 个软件包"
+          }
+        }
+      }
+    },
+    "Upgrades the %lld packages matching your search": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级与搜索条件匹配的 %lld 个软件包"
+          }
+        }
+      }
+    },
+    "Nothing to upgrade here": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有可升级的软件包"
+          }
+        }
+      }
+    },
+    "%@\n\nUntil this succeeds the app can't tell whether anything needs upgrading.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@\n\n检查成功后，才能确定是否有软件包需要升级。"
+          }
+        }
+      }
+    },
+    "No matching upgrades": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的可用升级"
+          }
+        }
+      }
+    },
+    "1 outdated package is hidden by the current filters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前筛选条件隐藏了 1 个可升级的软件包。"
+          }
+        }
+      }
+    },
+    "%lld outdated packages are hidden by the current filters.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前筛选条件隐藏了 %lld 个可升级的软件包。"
+          }
+        }
+      }
+    },
+    "Trending": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门"
+          }
+        }
+      }
+    },
+    "No matches": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配项"
+          }
+        }
+      }
+    },
+    "Results": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索结果"
+          }
+        }
+      }
+    },
+    "Searching…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在搜索…"
+          }
+        }
+      }
+    },
+    "Could not search packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法搜索软件包"
+          }
+        }
+      }
+    },
+    "Could not load packages": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法加载软件包"
+          }
+        }
+      }
+    },
+    "Most-installed packages in the last 30 days": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "过去 30 天安装次数最多的软件包"
+          }
+        }
+      }
+    },
+    "Nothing found for “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有找到与“%@”匹配的软件包"
+          }
+        }
+      }
+    },
+    "1 package matches “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个软件包与“%@”匹配"
+          }
+        }
+      }
+    },
+    "%lld packages match “%@”": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个软件包与“%@”匹配"
+          }
+        }
+      }
+    },
+    "Popular Formulae": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门命令行工具"
+          }
+        }
+      }
+    },
+    "Popular Casks": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门应用程序"
+          }
+        }
+      }
+    },
+    "No formulae match": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的命令行工具"
+          }
+        }
+      }
+    },
+    "No casks match": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的应用程序"
+          }
+        }
+      }
+    },
+    "30-day installs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近 30 天安装次数"
+          }
+        }
+      }
+    },
+    "%@ installs (30d)": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近 30 天安装 %@ 次"
+          }
+        }
+      }
+    },
+    "Could not find Homebrew. Install it or ensure brew is in the default location.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 Homebrew。请先安装，或确认 brew 位于默认位置。"
+          }
+        }
+      }
+    },
+    "Homebrew command failed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 命令执行失败。"
+          }
+        }
+      }
+    },
+    "Something went wrong loading packages.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加载软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong while upgrading this package.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级此软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong while uninstalling this package.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "卸载此软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong while installing this package.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装此软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong searching the catalogue.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索软件包目录时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong loading Discover packages.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加载发现列表时发生错误。"
+          }
+        }
+      }
+    },
+    "Failed to decode Homebrew JSON output.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法解析 Homebrew 的 JSON 输出。"
+          }
+        }
+      }
+    },
+    "Homebrew not found": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 Homebrew"
+          }
+        }
+      }
+    },
+    "Couldn't locate the brew executable. Install Homebrew, then refresh.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 brew 可执行文件。请安装 Homebrew 后刷新。"
+          }
+        }
+      }
+    },
+    "Couldn't read the Homebrew configuration.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取 Homebrew 配置。"
+          }
+        }
+      }
+    },
+    "Copy report": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制报告"
+          }
+        }
+      }
+    },
+    "System": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统"
+          }
+        }
+      }
+    },
+    "Build settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建设置"
+          }
+        }
+      }
+    },
+    "Running brew doctor…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在运行 brew 诊断…"
+          }
+        }
+      }
+    },
+    "Re-checking…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在重新检查…"
+          }
+        }
+      }
+    },
+    "Re-checking": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在重新检查"
+          }
+        }
+      }
+    },
+    "No problems found": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未发现问题"
+          }
+        }
+      }
+    },
+    "Warnings found": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现警告"
+          }
+        }
+      }
+    },
+    "The check could not be completed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法完成检查"
+          }
+        }
+      }
+    },
+    "Fix available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可修复"
+          }
+        }
+      }
+    },
+    "%@, Fix available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，可修复"
+          }
+        }
+      }
+    },
+    "Warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告"
+          }
+        }
+      }
+    },
+    "Danger": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "严重问题"
+          }
+        }
+      }
+    },
+    "Unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不受支持"
+          }
+        }
+      }
+    },
+    "Severity: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "严重程度：%@"
+          }
+        }
+      }
+    },
+    "Doctor issues": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "诊断问题"
+          }
+        }
+      }
+    },
+    "Your system is ready to brew": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统已准备就绪"
+          }
+        }
+      }
+    },
+    "brew doctor found no problems.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brew 诊断未发现问题。"
+          }
+        }
+      }
+    },
+    "Copy output": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制输出"
+          }
+        }
+      }
+    },
+    "Copy brew doctor output": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制 brew 诊断输出"
+          }
+        }
+      }
+    },
+    "Run Again": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新运行"
+          }
+        }
+      }
+    },
+    "Run Fix": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "执行修复"
+          }
+        }
+      }
+    },
+    "Needs admin · runs in Terminal": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要管理员权限 · 在终端中运行"
+          }
+        }
+      }
+    },
+    "Raw output": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原始输出"
+          }
+        }
+      }
+    },
+    "Run diagnostics, then choose an issue to see details and fixes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行诊断后，选择问题以查看详情和修复方法。"
+          }
+        }
+      }
+    },
+    "Last checked": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次检查"
+          }
+        }
+      }
+    },
+    "just now": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刚刚"
+          }
+        }
+      }
+    },
+    "1 minute ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 分钟前"
+          }
+        }
+      }
+    },
+    "%lld minutes ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 分钟前"
+          }
+        }
+      }
+    },
+    "1 hour ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 小时前"
+          }
+        }
+      }
+    },
+    "%lld hours ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 小时前"
+          }
+        }
+      }
+    },
+    "1 day ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 天前"
+          }
+        }
+      }
+    },
+    "%lld days ago": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 天前"
+          }
+        }
+      }
+    },
+    "Terminal command": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "终端命令"
+          }
+        }
+      }
+    },
+    "Terminal commands": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "终端命令"
+          }
+        }
+      }
+    },
+    "Copy all": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部复制"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制"
+          }
+        }
+      }
+    },
+    "Copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制"
+          }
+        }
+      }
+    },
+    "Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除"
+          }
+        }
+      }
+    },
+    "Cleared": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已清除"
+          }
+        }
+      }
+    },
+    "Save output to file": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将输出保存到文件"
+          }
+        }
+      }
+    },
+    "Copy output to clipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将输出复制到剪贴板"
+          }
+        }
+      }
+    },
+    "Clear completed jobs": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除已完成的任务"
+          }
+        }
+      }
+    },
+    "Hide console": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏控制台"
+          }
+        }
+      }
+    },
+    "Show console": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示控制台"
+          }
+        }
+      }
+    },
+    "Hide Console": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏控制台"
+          }
+        }
+      }
+    },
+    "Show Console": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示控制台"
+          }
+        }
+      }
+    },
+    "Expand Console Panel Automatically": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动展开控制台"
+          }
+        }
+      }
+    },
+    "Ready": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就绪"
+          }
+        }
+      }
+    },
+    "No activity": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无活动"
+          }
+        }
+      }
+    },
+    "Run a brew command to see output here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 brew 命令后，可在此查看输出。"
+          }
+        }
+      }
+    },
+    "— done": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— 已完成"
+          }
+        }
+      }
+    },
+    "— failed · exit %d": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— 失败 · 退出码 %d"
+          }
+        }
+      }
+    },
+    "done": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成"
+          }
+        }
+      }
+    },
+    "running": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在运行"
+          }
+        }
+      }
+    },
+    "failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败"
+          }
+        }
+      }
+    },
+    "The Homebrew app is up to date": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 应用已是最新版本"
+          }
+        }
+      }
+    },
+    "The Homebrew app wasn’t upgraded": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 应用未完成升级"
+          }
+        }
+      }
+    },
+    "The Homebrew app has been upgraded to the latest version.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 应用已升级至最新版本。"
+          }
+        }
+      }
+    },
+    "The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级未完成，当前仍为旧版本。你可以通过软件包列表上方的提示条重试。"
+          }
+        }
+      }
+    },
+    "Upgrade Homebrew app": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级 Homebrew 应用"
+          }
+        }
+      }
+    },
+    "A new version of the Homebrew app is available": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 应用有新版本可用"
+          }
+        }
+      }
+    },
+    "Upgrade the Homebrew app": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级 Homebrew 应用"
+          }
+        }
+      }
+    },
+    "Upgrade failed: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级失败：%@"
+          }
+        }
+      }
+    },
+    "Wait for the running Homebrew command to finish, then upgrade the Homebrew app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请等待正在运行的 Homebrew 命令结束，再升级 Homebrew 应用。"
+          }
+        }
+      }
+    },
+    "The upgrade helper is missing from this build of the Homebrew app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本的 Homebrew 应用缺少升级辅助程序。"
+          }
+        }
+      }
+    },
+    "The Homebrew app quit unexpectedly": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 应用意外退出"
+          }
+        }
+      }
+    },
+    "A report was saved after the app quit unexpectedly. You can send it to the Homebrew team on GitHub to help fix the problem, or discard it.": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用意外退出后已保存报告。你可以通过 GitHub 将报告发送给 Homebrew 团队以帮助解决问题，也可以丢弃报告。"
+          }
+        }
+      }
+    },
+    "Discard": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "丢弃"
+          }
+        }
+      }
+    },
+    "Report on GitHub…": {
+      "extractionState": "manual",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 GitHub 上报告…"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

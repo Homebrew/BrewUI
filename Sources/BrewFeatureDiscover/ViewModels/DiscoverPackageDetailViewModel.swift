@@ -121,7 +121,7 @@ final class DiscoverPackageDetailViewModel {
               let raw = pkg.linkedKeg ?? pkg.installedVersions.first else { return nil }
         let base = InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
         let showLinked = pkg.installedVersions.count > 1 && pkg.linkedKeg != nil
-        return showLinked ? "\(base) (linked)" : base
+        return showLinked ? String(localized: "\(base) (linked)") : base
     }
 
     var isInstalledVersionOutdated: Bool {
@@ -131,12 +131,12 @@ final class DiscoverPackageDetailViewModel {
     var installDateValue: String? {
         guard let pkg = installedPackage, let date = pkg.installDate else { return nil }
         let formatted = installDateFormatter.string(from: date)
-        return pkg.pouredFromBottle ? "Poured from bottle — \(formatted)" : formatted
+        return pkg.pouredFromBottle ? String(localized: "Poured from bottle — \(formatted)") : formatted
     }
 
     var installReasonValue: String? {
         guard let pkg = installedPackage else { return nil }
-        return pkg.installedOnRequest ? nil : "As dependency"
+        return pkg.installedOnRequest ? nil : String(localized: "As dependency")
     }
 
     var licenseLabel: String? {

@@ -170,7 +170,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
+    private func detailRow(label: LocalizedStringKey, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
@@ -266,7 +266,7 @@ private struct DiscoverPackageInstallSection: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: viewModel.installCommand,
-                    summaryText: "Installs this package on your Mac",
+                    summaryText: String(localized: "Installs this package on your Mac"),
                 )
 
                 Button {

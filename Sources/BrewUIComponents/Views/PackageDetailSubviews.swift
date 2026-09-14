@@ -14,7 +14,7 @@ public struct PackageDetailSectionHeading: View {
     }
 
     public var body: some View {
-        Text(title)
+        Text(LocalizedStringKey(title))
             .font(.brewSubheadline.weight(.semibold))
             .foregroundStyle(Color.brewTextPrimary)
     }

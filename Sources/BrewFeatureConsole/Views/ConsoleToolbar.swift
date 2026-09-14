@@ -103,7 +103,7 @@ private struct JobPill: View {
             Button(action: onSelect) {
                 HStack(spacing: BrewSpacing.xs) {
                     ConsoleStatusDot(state: job.dotState)
-                    Text(job.command)
+                    Text(job.tabTitle)
                         .font(.system(.caption, design: .monospaced))
                         .foregroundStyle(isSelected ? Color.brewTextPrimary : Color.brewTextSecondary)
                         .lineLimit(1)

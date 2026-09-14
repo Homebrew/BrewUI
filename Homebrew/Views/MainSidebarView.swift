@@ -66,7 +66,7 @@ struct MainSidebarView: View {
 
     @ViewBuilder
     private func sidebarRow(
-        title: String,
+        title: LocalizedStringKey,
         emoji: String,
         item: SidebarItem,
         @ViewBuilder trailingAccessory: () -> some View = { EmptyView() },
@@ -76,7 +76,7 @@ struct MainSidebarView: View {
             selection = item
         } label: {
             HStack(spacing: BrewSpacing.sm) {
-                Text("\(emoji) \(title)")
+                Text("\(emoji) \(Text(title))")
                     .font(.brewBody)
                     .foregroundStyle(isSelected ? Color.brewTextBrand : Color.brewTextPrimary)
                 Spacer(minLength: 0)

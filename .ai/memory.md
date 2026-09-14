@@ -3,6 +3,18 @@
 > Long-term knowledge about this project. Append new entries; do not delete history.
 > Format: `## YYYY-MM-DD — Topic`
 
+## 2026-09-14 — Simplified Chinese localization
+
+- The application owns one `Homebrew/Localizable.xcstrings` catalog (`en` source, `zh-Hans` translation). Existing package UI resolves `Bundle.main` deliberately, so there is no new feature dependency or duplicated per-module translation resource. Unsupported languages fall back to the English keys.
+- Language selection follows macOS, including its per-app preference, at launch. No custom preference store or live language-switching layer was introduced. Package names, commands, API descriptions/caveats, doctor output and diagnostic report data remain verbatim.
+- Runtime chrome keys need manual catalog entries; automatic app-target extraction cannot find all package or custom-component strings. Format placeholders retain their types and existing singular/plural branches. Catalog tests check completeness and argument parity; fixture UI tests cover Chinese navigation, counts and errors, while existing UI tests launch explicitly in English.
+- String Catalog symbol generation is disabled for the app: existing keys differing only by case (`Installed` / `INSTALLED`, `Hide Console` / `Hide console`) would produce duplicate generated identifiers. The app uses literal-key APIs, not generated symbols.
+- On this machine, `scripts/test-ui` with signing disabled leaves the XCTest runner's template signature invalid. Ad-hoc signing fixes integrity but the runner is still rejected. A development-signed runner also passes signature verification but is terminated by Gatekeeper before connecting. Direct launch of the development-signed app works, so manual fixture smoke remains possible. No machine-wide security settings are changed.
+- Never launch `-uiTesting` without a fixture payload for an ordinary preview: the intentionally isolated locator then reports Homebrew missing even on a machine where it is installed. Pass a complete `FakeBrew` scenario and identify the window as a test instance.
+- Scope clarified during implementation: the user requested “brew 诊断” as the Chinese page name and Chinese diagnostic explanations, then explicitly excluded configuration field translation. `DoctorText` translates known prose only after parsing, normalizes wrapped paragraphs for lookup, and leaves unknown messages unchanged. Raw output and commands stay intact; configuration keys and values stay original.
+- Verification: app and UI-test targets build; `scripts/test`, SwiftFormat, strict SwiftLint and whole-production-tree BrewUILint pass. Direct fixture-backed native UI smoke confirmed Chinese navigation, counts, details, configuration chrome, error states and diagnostic paragraphs. XCTest UI execution itself remains blocked by Gatekeeper. Test windows were closed after inspection; installed Homebrew was independently confirmed runnable.
+- Console diagnostic tab label is also “brew 诊断” in Chinese (`CommandJob.tabTitle`, selected by `.doctorRead`). `command` remains original for the tooltip, command blocks and log export; translating a task label must never rewrite executable shell syntax.
+
 ---
 
 ## 2026-03-03 — Project Initialised

@@ -34,11 +34,11 @@ extension BrewOperationPhase {
     var shortLabel: String {
         switch self {
         case .idle:
-            "done"
+            String(localized: "done")
         case .running:
-            "running"
+            String(localized: "running")
         case .failed:
-            "failed"
+            String(localized: "failed")
         }
     }
 }

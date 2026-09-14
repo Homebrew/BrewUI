@@ -58,13 +58,13 @@ public struct CommandBlockView: View {
                         isExpanded.toggle()
                     }
                 } label: {
-                    Label(title ?? headerTitle, systemImage: isExpanded ? "chevron.down" : "chevron.right")
+                    Label(LocalizedStringKey(title ?? headerTitle), systemImage: isExpanded ? "chevron.down" : "chevron.right")
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewTextSecondary)
                 }
                 .buttonStyle(.plain)
             } else {
-                Label(title ?? headerTitle, systemImage: "terminal")
+                Label(LocalizedStringKey(title ?? headerTitle), systemImage: "terminal")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextSecondary)
             }
