@@ -12,6 +12,7 @@ import SwiftUI
 
 /// Single scrolling pane presenting `brew config` output, with copy/refresh.
 struct ConfigView: View {
+    @Environment(\.brewLocalization) private var localization
     @State private var viewModel: ConfigViewModel
 
     init(repository: any ConfigRepository) {
@@ -53,7 +54,7 @@ struct ConfigView: View {
             brewNotFoundState
         } else {
             AsyncContentView(
-                state: viewModel.pageState,
+                state: viewModel.pageState(localization: localization),
                 onRetry: { Task { await viewModel.refresh() } },
                 loaded: { snapshot in
                     loadedCards(snapshot: snapshot)
@@ -77,11 +78,8 @@ struct ConfigView: View {
     private var brewNotFoundState: some View {
         emptyState(
             systemImage: "questionmark.folder",
-            title: String(localized: "Homebrew not found", comment: "Configuration tab, brew-not-found title"),
-            message: String(
-                localized: "Couldn't locate the brew executable. Install Homebrew, then refresh.",
-                comment: "Configuration tab, brew-not-found message",
-            ),
+            title: localization.string("Homebrew not found"),
+            message: localization.string("Couldn't locate the brew executable. Install Homebrew, then refresh."),
         )
         .axid(.brewNotFoundState)
     }

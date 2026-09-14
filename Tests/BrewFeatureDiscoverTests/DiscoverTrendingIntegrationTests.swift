@@ -24,8 +24,8 @@ struct DiscoverTrendingIntegrationTests {
 
         await viewModel.load()
 
-        guard case .loaded = viewModel.trending else {
-            Issue.record("expected trending to load; got \(viewModel.trending)")
+        guard case .loaded = viewModel.trending() else {
+            Issue.record("expected trending to load; got \(viewModel.trending())")
             return
         }
         #expect(viewModel.visiblePackages.map(\.name) == ["wget", "bat", "a2ps", "raycast", "iterm2"])
@@ -42,8 +42,8 @@ struct DiscoverTrendingIntegrationTests {
 
         await viewModel.load()
 
-        guard case .failed = viewModel.trending else {
-            Issue.record("expected trending to fail on undecodable analytics; got \(viewModel.trending)")
+        guard case .failed = viewModel.trending() else {
+            Issue.record("expected trending to fail on undecodable analytics; got \(viewModel.trending())")
             return
         }
     }

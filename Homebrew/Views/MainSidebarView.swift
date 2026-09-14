@@ -66,7 +66,7 @@ struct MainSidebarView: View {
 
     @ViewBuilder
     private func sidebarRow(
-        title: String,
+        title: LocalizedStringKey,
         systemImage: String,
         item: SidebarItem,
         @ViewBuilder trailingAccessory: () -> some View = { EmptyView() },

@@ -3,6 +3,7 @@
 //  BrewUITests
 //
 
+import BrewUITestContract
 import XCTest
 
 /// Base class for the suite. `continueAfterFailure = false`, or one missing element buries itself in
@@ -25,6 +26,9 @@ class BrewUITestCase: XCTestCase {
         // swiftlint:disable:next assume_isolated
         MainActor.assumeIsolated {
             app?.terminate()
+            if let domain = app?.launchEnvironment[BrewUITestingEnvironmentKey.languagePreferencesDomain] {
+                UserDefaults(suiteName: domain)?.removePersistentDomain(forName: domain)
+            }
         }
         super.tearDown()
     }

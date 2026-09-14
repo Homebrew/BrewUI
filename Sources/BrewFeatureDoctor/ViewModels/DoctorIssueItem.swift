@@ -4,6 +4,7 @@
 //
 
 import BrewCore
+import BrewUIComponents
 import Foundation
 
 /// Presentation mapping for a single ``DoctorIssue`` in the list/detail surface.
@@ -61,8 +62,8 @@ struct DoctorIssueItem: Identifiable, Equatable {
     }
 
     /// Label for voiceover mode — combines title with Fix available
-    var accessibilityLabel: String {
-        hasRunnableFix ? "\(title), Fix available" : title
+    func accessibilityLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String {
+        hasRunnableFix ? localization.string("\(title), Fix available") : title
     }
 }
 

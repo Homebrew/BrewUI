@@ -2,10 +2,65 @@ import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureDiscover
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Testing
 
 struct DiscoverViewModelTests {
+    @Test @MainActor func `an existing search failure resolves again after language changes`() async throws {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(state: .loaded([])),
+            catalogueRepository: StubCatalogueRepository(searchError: DiscoverOddError()),
+            installedRepository: installedRepo(),
+        )
+        viewModel.query = "git"
+        await viewModel.search()
+        try withLanguageBundle { bundle in
+            let english = AppLocalization(language: "en", bundle: bundle)
+            let chinese = AppLocalization(language: "zh-Hans", bundle: bundle)
+            guard case let .failed(before) = viewModel.results(localization: english),
+                  case let .failed(after) = viewModel.results(localization: chinese)
+            else {
+                Issue.record("Expected the same failed search in both languages")
+                return
+            }
+            #expect((before, after, viewModel.query) == (
+                "Something went wrong searching the catalogue.", "搜索软件包目录时出错。", "git",
+            ))
+        }
+    }
+
+    @Test @MainActor func `raw transport diagnostics are not interpreted as localization keys`() throws {
+        let diagnostic = "Something went wrong searching the catalogue."
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                state: .failed(BrewAPIClientError.transport(underlying: diagnostic)),
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+        )
+        try withLanguageBundle { bundle in
+            guard case let .failed(message) = viewModel.trending(localization: AppLocalization(language: "zh-Hans", bundle: bundle)) else {
+                Issue.record("Expected a transport diagnostic")
+                return
+            }
+            #expect(message == diagnostic)
+        }
+    }
+
+    private func withLanguageBundle(_ body: (Bundle) throws -> Void) throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("DiscoverLocalization-\(UUID().uuidString).bundle")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let key = "Something went wrong searching the catalogue."
+        for (language, value) in [("en", key), ("zh-Hans", "搜索软件包目录时出错。")] {
+            let directory = root.appendingPathComponent("\(language).lproj")
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let data = try PropertyListSerialization.data(fromPropertyList: [key: value], format: .xml, options: 0)
+            try data.write(to: directory.appendingPathComponent("Localizable.strings"))
+        }
+        try body(#require(Bundle(url: root)))
+    }
+
     @Test @MainActor func `load exposes the top packages and selects the most popular`() async throws {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
@@ -38,7 +93,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        guard case .loaded = viewModel.trending else {
+        guard case .loaded = viewModel.trending() else {
             Issue.record("expected loaded trending state")
             return
         }
@@ -62,7 +117,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        guard case let .failed(message) = viewModel.trending else {
+        guard case let .failed(message) = viewModel.trending() else {
             Issue.record("expected failed trending state")
             return
         }
@@ -78,7 +133,7 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        guard case let .failed(message) = viewModel.trending else {
+        guard case let .failed(message) = viewModel.trending() else {
             Issue.record("expected failed trending state")
             return
         }
@@ -261,12 +316,12 @@ struct DiscoverViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        #expect(viewModel.formulaeSectionTitle == "Popular Formulae")
-        #expect(viewModel.casksSectionTitle == "Popular Casks")
+        #expect(viewModel.formulaeSectionTitle() == "Popular Formulae")
+        #expect(viewModel.casksSectionTitle() == "Popular Casks")
 
         viewModel.query = "git"
-        #expect(viewModel.formulaeSectionTitle == "Formulae")
-        #expect(viewModel.casksSectionTitle == "Casks")
+        #expect(viewModel.formulaeSectionTitle() == "Formulae")
+        #expect(viewModel.casksSectionTitle() == "Casks")
     }
 
     @Test @MainActor func `subtitle reflects loading state`() {
@@ -276,8 +331,8 @@ struct DiscoverViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        #expect(viewModel.paneHeading == "Trending")
-        #expect(viewModel.subtitleText == "Loading packages…")
+        #expect(viewModel.paneHeading() == "Trending")
+        #expect(viewModel.subtitleText() == "Loading packages…")
         #expect(!viewModel.isSubtitleError)
     }
 
@@ -292,8 +347,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.paneHeading == "Trending")
-        #expect(viewModel.subtitleText == "Most-installed packages in the last 30 days")
+        #expect(viewModel.paneHeading() == "Trending")
+        #expect(viewModel.subtitleText() == "Most-installed packages in the last 30 days")
         #expect(viewModel.showsSubtitleTrendIcon)
         #expect(!viewModel.isSubtitleError)
     }
@@ -307,8 +362,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.paneHeading == "Trending")
-        #expect(viewModel.subtitleText == "Could not load packages")
+        #expect(viewModel.paneHeading() == "Trending")
+        #expect(viewModel.subtitleText() == "Could not load packages")
         #expect(viewModel.isSubtitleError)
     }
 
@@ -493,8 +548,8 @@ struct DiscoverViewModelTests {
         viewModel.query = "git"
         await viewModel.search()
 
-        #expect(viewModel.paneHeading == "Results")
-        #expect(viewModel.subtitleText == "2 packages match “git”")
+        #expect(viewModel.paneHeading() == "Results")
+        #expect(viewModel.subtitleText() == "2 packages match “git”")
         #expect(!viewModel.showsSubtitleTrendIcon)
     }
 
@@ -512,8 +567,8 @@ struct DiscoverViewModelTests {
         viewModel.query = "git"
         await viewModel.search()
 
-        #expect(viewModel.paneHeading == "Results")
-        #expect(viewModel.subtitleText == "1 package matches “git”")
+        #expect(viewModel.paneHeading() == "Results")
+        #expect(viewModel.subtitleText() == "1 package matches “git”")
     }
 
     @Test @MainActor func `search subtitle reports no matches`() async {
@@ -528,8 +583,8 @@ struct DiscoverViewModelTests {
         viewModel.query = "zzz"
         await viewModel.search()
 
-        #expect(viewModel.paneHeading == "No matches")
-        #expect(viewModel.subtitleText == "Nothing found for “zzz”")
+        #expect(viewModel.paneHeading() == "No matches")
+        #expect(viewModel.subtitleText() == "Nothing found for “zzz”")
     }
 
     @Test @MainActor func `search maps transport errors to underlying message`() async {
@@ -546,12 +601,12 @@ struct DiscoverViewModelTests {
         viewModel.query = "git"
         await viewModel.search()
 
-        guard case let .failed(message) = viewModel.results else {
+        guard case let .failed(message) = viewModel.results() else {
             Issue.record("expected failed results state")
             return
         }
         #expect(message == "offline")
-        #expect(viewModel.subtitleText == "Could not search packages")
+        #expect(viewModel.subtitleText() == "Could not search packages")
         #expect(viewModel.isSubtitleError)
     }
 
@@ -567,7 +622,7 @@ struct DiscoverViewModelTests {
         viewModel.query = "git"
         await viewModel.search()
 
-        guard case let .failed(message) = viewModel.results else {
+        guard case let .failed(message) = viewModel.results() else {
             Issue.record("expected failed results state")
             return
         }

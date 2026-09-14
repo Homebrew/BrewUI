@@ -24,6 +24,7 @@ struct DiscoverListRowRoot: View {
 }
 
 struct DiscoverListRowView: View {
+    @Environment(\.brewLocalization) private var localization
     let discoveryPackage: DiscoveryBrewPackage
     @State private var viewModel: DiscoverListRowViewModel
 
@@ -66,7 +67,7 @@ struct DiscoverListRowView: View {
             viewModel.update(discoveryPackage: new)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(viewModel.rowAccessibilityLabel)
+        .accessibilityLabel(viewModel.rowAccessibilityLabel(localization: localization))
     }
 
     private var iconBadge: some View {
@@ -96,7 +97,7 @@ struct DiscoverListRowView: View {
 
             packageKindBadge
 
-            if viewModel.installedStatusLabel != nil {
+            if viewModel.installedStatusLabel(localization: localization) != nil {
                 DiscoverInstalledBadge()
             }
 
@@ -129,7 +130,7 @@ struct DiscoverListRowView: View {
                 Text("•")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
-                Text("\(viewModel.installs30DayLabel) installs (30d)")
+                Text("\(viewModel.installs30DayLabel(localization: localization)) installs (30d)")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
             }

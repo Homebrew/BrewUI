@@ -12,6 +12,7 @@ import SwiftUI
 /// healthy, the issues list, or an error. A background re-check keeps the prior content on screen and shows
 /// a small "checking" spinner in the header.
 struct DoctorView: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: DoctorViewModel
     @FocusState private var isFocused: Bool
 
@@ -31,7 +32,7 @@ struct DoctorView: View {
                 Text("Doctor")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.subtitle)
+                Text(viewModel.subtitle(localization: localization))
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
                 if let lastCheckedAt = viewModel.lastCheckedAt {
@@ -75,7 +76,7 @@ struct DoctorView: View {
 
     private var content: some View {
         AsyncContentView(
-            state: viewModel.state,
+            state: viewModel.state(localization: localization),
             onRetry: { Task { await viewModel.load(forceRefresh: true) } },
             loaded: { report in
                 if report.isHealthy {
@@ -152,10 +153,11 @@ struct DoctorView: View {
 }
 
 private struct DoctorSeveritySectionHeader: View {
+    @Environment(\.brewLocalization) private var localization
     let severity: DoctorSeverity
 
     var body: some View {
-        Text(DoctorSeverityStyle.displayName(severity))
+        Text(DoctorSeverityStyle.displayName(severity, localization: localization))
             .font(.brewSubheadline.weight(.semibold))
             .foregroundStyle(DoctorSeverityStyle.foreground(severity))
     }

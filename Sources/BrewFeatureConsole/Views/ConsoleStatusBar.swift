@@ -10,11 +10,12 @@ import SwiftUI
 /// Always-visible collapsed strip showing the active (or most recent) brew operation
 /// with status dot, copyable command, phase label, and an expand affordance.
 struct ConsoleStatusBar: View {
+    @Environment(\.brewLocalization) private var localization
     @Binding var expanded: Bool
     let viewModel: ConsoleViewModel
 
     var body: some View {
-        let presentation = viewModel.statusPresentation
+        let presentation = viewModel.statusPresentation(localization: localization)
         HStack(spacing: BrewSpacing.md) {
             // Combined into one element so the whole "<command> — done" / "— failed · exit N"
             // sentence reads as a single string to VoiceOver and to UI tests.
@@ -37,8 +38,8 @@ struct ConsoleStatusBar: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             .buttonStyle(.borderless)
-            .help(expanded ? "Hide console" : "Show console")
-            .accessibilityLabel(expanded ? "Hide console" : "Show console")
+            .help(localization.string(expanded ? "Hide console" : "Show console"))
+            .accessibilityLabel(localization.string(expanded ? "Hide console" : "Show console"))
             .axid(.consoleToggle)
         }
         .padding(.horizontal, BrewSpacing.lg)

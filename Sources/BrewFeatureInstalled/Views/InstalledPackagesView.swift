@@ -12,6 +12,7 @@ import SwiftUI
 
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: InstalledViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
@@ -25,7 +26,7 @@ struct InstalledPackagesView: View {
                 Text("Your packages")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageCountSubtitle)
+                Text(viewModel.packageCountSubtitle(localization: localization))
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
             }
@@ -38,7 +39,7 @@ struct InstalledPackagesView: View {
             Divider()
 
             AsyncContentView(
-                state: viewModel.state,
+                state: viewModel.localizedState(localization: localization),
                 onRetry: { Task { await viewModel.refresh() } },
                 loaded: { content in
                     installedList(content)

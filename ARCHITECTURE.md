@@ -49,6 +49,7 @@ Guiding patterns:
 - **Services:** Infrastructure grouped by integration boundaries.
 - **Command center:** `BrewCommandCenter` (actor protocol; app default `SerialBrewCommandCenter`) — **serializes** mutating `brew` work, tracks **in-flight / failed** **operation** state (`BrewOperationID` + `BrewOperationPhase`) for UI across surfaces, and runs **small `BrewMutatingCommand` types** that call `BrewCommandRunning` + the brew locator. It does **not** own **read/parsing** of `brew list` / `brew info` output — that stays in **repositories**. Feature-scoped executors (e.g. upgrade helpers) should stay **thin** and be invoked **from** commands the center schedules, not as a second parallel pipeline.
 - **Models:** Domain-only value types and relationships shared across layers. Keep UI/presentation helpers, transport decoding models, and infrastructure-state containers out of domain models.
+- **Localization:** Process language is set in `ApplicationEntry` before SwiftUI starts. `LanguagePreferences` holds the current-launch snapshot and the next-launch choice. App-owned copy is `Homebrew/Localizable.xcstrings` via `AppLocalization`; File / Edit / Window follow the process language from the system.
 
 ## Command execution
 
@@ -68,6 +69,7 @@ Use the [Homebrew JSON API](https://formulae.brew.sh/docs/api/) where it helps. 
 - **Homebrew is separate** — detect and degrade if missing; do not bundle Homebrew.
 - **Detection:** try `/opt/homebrew/bin/brew` then `/usr/local/bin/brew`.
 - **Open source** — patterns should stay contributor-friendly.
+- **Language is launch-time.** Changing language starts a new process. Do not rewrite menus or switch copy in the running app. Never write the global macOS language.
 
 ### Platform constraints
 

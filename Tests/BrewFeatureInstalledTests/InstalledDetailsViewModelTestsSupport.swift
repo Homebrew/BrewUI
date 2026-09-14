@@ -275,7 +275,7 @@ func waitForUpgradeAttemptToFinish(on viewModel: InstalledPackageDetailViewModel
 @MainActor
 func waitForUpgradeError(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
-        if viewModel.upgradeErrorMessage != nil { return }
+        if viewModel.upgradeErrorMessage() != nil { return }
         await Task.yield()
     }
     Issue.record("timed out waiting for upgradeErrorMessage")
@@ -304,7 +304,7 @@ func waitForUninstallAttemptToFinish(on viewModel: InstalledPackageDetailViewMod
 @MainActor
 func waitForUninstallError(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
-        if viewModel.uninstallErrorMessage != nil { return }
+        if viewModel.uninstallErrorMessage() != nil { return }
         await Task.yield()
     }
     Issue.record("timed out waiting for uninstallErrorMessage")

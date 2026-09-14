@@ -15,6 +15,7 @@ import SwiftUI
 /// rows). The reading flow matches what brew printed. Raw output stays at the bottom as the
 /// never-wrong fallback.
 struct DoctorIssueDetailView: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: DoctorViewModel
     let item: DoctorIssueItem
 
@@ -134,7 +135,7 @@ struct DoctorIssueDetailView: View {
             .disabled(viewModel.isFixRunning(item))
             .accessibilityLabel("Run Fix")
 
-            if let fixError = viewModel.fixError(item) {
+            if let fixError = viewModel.fixError(item, localization: localization) {
                 Text(fixError)
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewStatusError)
@@ -183,17 +184,18 @@ struct DoctorIssueDetailView: View {
 // MARK: - Subviews
 
 private struct DoctorSeverityBadge: View {
+    @Environment(\.brewLocalization) private var localization
     let severity: DoctorSeverity
 
     var body: some View {
-        Label(DoctorSeverityStyle.displayName(severity),
+        Label(DoctorSeverityStyle.displayName(severity, localization: localization),
               systemImage: DoctorSeverityStyle.icon(severity))
             .font(.brewCaption.weight(.semibold))
             .foregroundStyle(DoctorSeverityStyle.foreground(severity))
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.vertical, BrewSpacing.xxs)
             .background(DoctorSeverityStyle.background(severity), in: Capsule())
-            .accessibilityLabel("Severity: \(DoctorSeverityStyle.displayName(severity))")
+            .accessibilityLabel("Severity: \(DoctorSeverityStyle.displayName(severity, localization: localization))")
     }
 }
 

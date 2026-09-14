@@ -46,7 +46,7 @@ struct InstalledPackageRowPresentationTests {
             ),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(vm.accessibilitySummary == "Git, DVCS, v2.0, Upgrade available to v2.1")
+        #expect(vm.accessibilitySummary() == "Git, DVCS, v2.0, Upgrade available to v2.1")
     }
 
     @Test func `formula chrome matches design tokens`() {

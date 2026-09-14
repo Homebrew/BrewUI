@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewUIComponents
 import SwiftUI
 
 /// View menu commands for the command console. Currently a single `⌘\`` toggle matching Xcode / VS Code / Terminal.
@@ -11,17 +12,21 @@ public struct ConsoleCommands: Commands {
     /// App-wide preference (not per-window), so it lives here directly rather than as a focused value.
     @AppStorage("autoExpandConsole") private var autoExpandConsole = true
 
-    public init() {}
+    private let localization: AppLocalization
+
+    public init(localization: AppLocalization = AppLocalization()) {
+        self.localization = localization
+    }
 
     public var body: some Commands {
         CommandGroup(after: .toolbar) {
-            Button(expanded == true ? "Hide Console" : "Show Console") {
+            Button(localization.string(expanded == true ? "Hide Console" : "Show Console")) {
                 expanded?.toggle()
             }
             .keyboardShortcut("`", modifiers: .command)
             .disabled(expanded == nil)
 
-            Toggle("Expand Console Panel Automatically", isOn: $autoExpandConsole)
+            Toggle(localization.string("Expand Console Panel Automatically"), isOn: $autoExpandConsole)
         }
     }
 }

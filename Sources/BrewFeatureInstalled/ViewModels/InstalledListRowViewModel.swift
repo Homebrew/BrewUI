@@ -4,6 +4,7 @@
 //
 
 import BrewCore
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -63,16 +64,16 @@ final class InstalledListRowViewModel {
         return .installed(installedVersionLabel)
     }
 
-    var accessibilitySummary: String {
+    func accessibilitySummary(localization: AppLocalization = AppLocalization()) -> String {
         var parts = [name]
         if hasDescription {
             parts.append(descriptionText)
         }
         parts.append(installedVersionLabel)
         if showsUpgradeAvailable, let latest = availableVersionLabel {
-            parts.append("Upgrade available to \(latest)")
+            parts.append(localization.string("Upgrade available to \(latest)"))
         } else {
-            parts.append("Installed and up to date")
+            parts.append(localization.string("Installed and up to date"))
         }
         return parts.joined(separator: ", ")
     }
@@ -83,16 +84,16 @@ final class InstalledListRowViewModel {
     }
 
     /// Full VoiceOver summary, including transient mutation state when present.
-    var rowAccessibilityLabel: String {
+    func rowAccessibilityLabel(localization: AppLocalization = AppLocalization()) -> String {
         if showsUpgradeBusy {
-            let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
-            return "\(accessibilitySummary), \(upgrading)"
+            let upgrading = localization.string("Upgrading")
+            return "\(accessibilitySummary(localization: localization)), \(upgrading)"
         }
         if showsUninstallBusy {
-            let uninstalling = String(localized: "Uninstalling", comment: "VoiceOver: package uninstalling")
-            return "\(accessibilitySummary), \(uninstalling)"
+            let uninstalling = localization.string("Uninstalling")
+            return "\(accessibilitySummary(localization: localization)), \(uninstalling)"
         }
-        return accessibilitySummary
+        return accessibilitySummary(localization: localization)
     }
 
     init(package: InstalledBrewPackage, brewCommandCenter: BrewCommandCenter) {

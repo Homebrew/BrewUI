@@ -19,8 +19,8 @@ struct DiscoverListRowViewModelTests {
         #expect(viewModel.descriptionText.isEmpty)
         #expect(!viewModel.hasDescription)
         #expect(viewModel.stableVersionLabel.isEmpty)
-        #expect(viewModel.installs30DayLabel == "12,345")
-        #expect(viewModel.installedStatusLabel == nil)
+        #expect(viewModel.installs30DayLabel() == "12,345")
+        #expect(viewModel.installedStatusLabel() == nil)
         #expect(viewModel.installedVersionLabel == nil)
     }
 
@@ -34,7 +34,7 @@ struct DiscoverListRowViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
 
-        #expect(viewModel.installedStatusLabel == "Installed")
+        #expect(viewModel.installedStatusLabel() == "Installed")
         #expect(viewModel.installedVersionLabel == "v2.45.0")
     }
 
@@ -102,7 +102,7 @@ struct DiscoverListRowViewModelTests {
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.hasDescription)
         #expect(viewModel.stableVersionLabel == "3.5.0")
-        #expect(viewModel.installs30DayLabel == "99")
+        #expect(viewModel.installs30DayLabel() == "99")
         #expect(viewModel.installedVersionLabel == "v3.4.0")
     }
 }

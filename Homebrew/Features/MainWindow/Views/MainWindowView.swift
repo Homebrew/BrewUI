@@ -13,6 +13,7 @@ import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
+    @Environment(\.brewLocalization) private var localization
     @Environment(\.selfUpgradeCoordinator) private var selfUpgradeCoordinator
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
@@ -59,7 +60,7 @@ struct MainWindowView: View {
         ) { _ in
             acknowledgeButton
         } message: { outcome in
-            Text(SelfUpgradeOutcomePresentation(outcome: outcome).message)
+            Text(SelfUpgradeOutcomePresentation(outcome: outcome, localization: localization).message)
         }
     }
 
@@ -74,7 +75,7 @@ struct MainWindowView: View {
 
     /// Read outside `presenting:`, so it still needs a value while the alert dismisses; that copy is unseen.
     private var outcomeCopy: SelfUpgradeOutcomePresentation {
-        SelfUpgradeOutcomePresentation(outcome: launchOutcome ?? .succeeded)
+        SelfUpgradeOutcomePresentation(outcome: launchOutcome ?? .succeeded, localization: localization)
     }
 
     private var launchOutcomeBinding: Binding<Bool> {
@@ -126,24 +127,24 @@ struct MainWindowView: View {
                 mode: selectedSidebarItem == .upgrades ? .upgrades : .installed,
                 deepLinkSelection: $pendingInstalledSelection,
             )
-            .navigationTitle(selectedSidebarItem == .upgrades ? "Upgrades" : "Installed")
-            .navigationSubtitle(
+            .navigationTitle(localization.string(selectedSidebarItem == .upgrades ? "Upgrades" : "Installed"))
+            .navigationSubtitle(localization.string(
                 selectedSidebarItem == .upgrades
                     ? "Review and upgrade outdated packages"
                     : "Browse or search your installed packages",
-            )
+            ))
         case .discover:
             DiscoverColumnsRoot()
-                .navigationTitle("Discover")
-                .navigationSubtitle("Browse and search \(Self.approximateCatalogueSize) packages")
+                .navigationTitle(localization.string("Discover"))
+                .navigationSubtitle(localization.string("Browse and search \(Self.approximateCatalogueSize) packages"))
         case .doctor:
             DoctorColumnsRoot()
-                .navigationTitle("Doctor")
-                .navigationSubtitle("Check your Homebrew installation for problems")
+                .navigationTitle(localization.string("Doctor"))
+                .navigationSubtitle(localization.string("Check your Homebrew installation for problems"))
         case .configuration:
             ConfigColumnsRoot()
-                .navigationTitle("Configuration")
-                .navigationSubtitle("Homebrew environment & diagnostics")
+                .navigationTitle(localization.string("Configuration"))
+                .navigationSubtitle(localization.string("Homebrew environment & diagnostics"))
         }
     }
 }

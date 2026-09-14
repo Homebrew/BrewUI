@@ -75,6 +75,7 @@ struct DiscoverPackageDetailView: View {
 }
 
 private struct DiscoverPackageDetailHeroSection: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: DiscoverPackageDetailViewModel
 
     var body: some View {
@@ -110,7 +111,7 @@ private struct DiscoverPackageDetailHeroSection: View {
                                 .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
                         }
 
-                    if viewModel.installedStatusLabel != nil {
+                    if viewModel.installedStatusLabel(localization: localization) != nil {
                         DiscoverInstalledBadge()
                     }
                 }
@@ -133,6 +134,7 @@ private struct DiscoverPackageDetailHeroSection: View {
 }
 
 private struct DiscoverPackageDetailMetadataSection: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: DiscoverPackageDetailViewModel
 
     private let labelWidth: CGFloat = 110
@@ -140,7 +142,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
-            if let installedVersion = viewModel.installedVersionLabel {
+            if let installedVersion = viewModel.installedVersionLabel(localization: localization) {
                 detailRow(
                     label: "Installed",
                     value: installedVersion,
@@ -150,12 +152,12 @@ private struct DiscoverPackageDetailMetadataSection: View {
             }
             detailRow(label: "Latest version", value: viewModel.stableVersionLabel)
             if viewModel.showsInstallMetrics {
-                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
+                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel(localization: localization))
             }
-            if let dateValue = viewModel.installDateValue {
+            if let dateValue = viewModel.installDateValue(localization: localization) {
                 detailRow(label: "Installed on", value: dateValue)
             }
-            if let reason = viewModel.installReasonValue {
+            if let reason = viewModel.installReasonValue(localization: localization) {
                 detailRow(label: "Install reason", value: reason)
             }
             if let license = viewModel.licenseLabel {
@@ -170,7 +172,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
+    private func detailRow(label: LocalizedStringKey, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
@@ -258,6 +260,7 @@ private struct DiscoverPackageDetailDependenciesSection: View {
 }
 
 private struct DiscoverPackageInstallSection: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: DiscoverPackageDetailViewModel
 
     var body: some View {
@@ -266,7 +269,7 @@ private struct DiscoverPackageInstallSection: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: viewModel.installCommand,
-                    summaryText: "Installs this package on your Mac",
+                    summaryText: localization.string("Installs this package on your Mac"),
                 )
 
                 Button {
@@ -285,7 +288,7 @@ private struct DiscoverPackageInstallSection: View {
                 .accessibilityLabel(Text("Install"))
                 .axid(.installButton)
 
-                if let installErrorMessage = viewModel.installErrorMessage {
+                if let installErrorMessage = viewModel.installErrorMessage(localization: localization) {
                     Text(installErrorMessage)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewStatusError)

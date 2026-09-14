@@ -11,12 +11,10 @@ import SwiftUI
 /// Outlined like the kind pill it sits beside, and neutral rather than warning-coloured: an
 /// available upgrade is routine, and the version line underneath already carries the amber.
 struct InstalledOutdatedBadge: View {
+    @Environment(\.brewLocalization) private var localization
     var body: some View {
         Text(
-            String(
-                localized: "OUTDATED",
-                comment: "Installed outdated status badge label",
-            ),
+            localization.string("OUTDATED"),
         )
         .font(.brewCaption2)
         .foregroundStyle(Color.brewTextSecondary)
@@ -31,10 +29,7 @@ struct InstalledOutdatedBadge: View {
                 .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
         }
         .accessibilityLabel(
-            String(
-                localized: "Upgrade available",
-                comment: "Installed outdated status badge accessibility label",
-            ),
+            localization.string("Upgrade available"),
         )
     }
 }

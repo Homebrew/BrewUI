@@ -26,11 +26,20 @@ nonisolated struct BrewUITestingLaunchConfiguration {
             .appendingPathComponent("http", isDirectory: true)
     }
 
-    static func current(processInfo: ProcessInfo = .processInfo) -> BrewUITestingLaunchConfiguration? {
-        guard processInfo.arguments.contains(BrewUITestingEnvironmentKey.launchArgument) else {
+    static func current(processInfo: ProcessInfo = .processInfo, bundle: Bundle = .main) -> BrewUITestingLaunchConfiguration? {
+        let environment = processInfo.environment
+        var isUITesting = processInfo.arguments.contains(BrewUITestingEnvironmentKey.launchArgument)
+        #if DEBUG
+            // Background CUA launches the app through Launch Services and cannot pass XCTest arguments; only a dedicated fixture copy sets this marker.
+            isUITesting = isUITesting || (
+                bundle.object(forInfoDictionaryKey: "BrewUITesting") as? Bool == true
+                    && environment[BrewUITestingEnvironmentKey.scenario] != nil
+                    && environment[BrewUITestingEnvironmentKey.payload] != nil
+            )
+        #endif
+        guard isUITesting else {
             return nil
         }
-        let environment = processInfo.environment
         return BrewUITestingLaunchConfiguration(
             scenario: environment[BrewUITestingEnvironmentKey.scenario],
             payload: environment[BrewUITestingEnvironmentKey.payload],

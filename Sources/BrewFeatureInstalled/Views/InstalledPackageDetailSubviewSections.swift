@@ -82,12 +82,13 @@ struct InstalledPackageDetailHeroSection: View {
 }
 
 struct InstalledPackageDetailMetadataSection: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: InstalledPackageDetailViewModel
 
     private let labelWidth: CGFloat = 100
 
     var body: some View {
-        let metadata = viewModel.metadataItem
+        let metadata = viewModel.metadataItem(localization: localization)
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Details")
             detailRow(
@@ -113,10 +114,10 @@ struct InstalledPackageDetailMetadataSection: View {
                 homepageRow(url: homepageURL, title: metadata.homepageDisplayTitle ?? homepageURL.absoluteString)
             }
             if metadata.isPinned {
-                detailRow(label: "Pinned", value: "Yes")
+                detailRow(label: "Pinned", value: localization.string("Yes"))
             }
             if metadata.isKegOnly {
-                detailRow(label: "Keg-only", value: "Yes")
+                detailRow(label: "Keg-only", value: localization.string("Yes"))
             }
             if let caveats = metadata.caveatsText {
                 caveatsCallout(text: caveats)
@@ -124,7 +125,7 @@ struct InstalledPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
+    private func detailRow(label: LocalizedStringKey, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)
@@ -188,6 +189,7 @@ struct InstalledPackageDetailMetadataSection: View {
 }
 
 struct InstalledPackageDetailDependentsSection: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: InstalledPackageDetailViewModel
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
 
@@ -211,7 +213,7 @@ struct InstalledPackageDetailDependentsSection: View {
     private var dependentsHeading: some View {
         HStack(spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: "Dependents")
-            if let badgeTitle = viewModel.uninstallItem.usedByBlockingBadgeTitle {
+            if let badgeTitle = viewModel.uninstallItem(localization: localization).usedByBlockingBadgeTitle {
                 Text(badgeTitle)
                     .font(.brewCaption2.weight(.semibold))
                     .foregroundStyle(Color.brewTextOnBrand)

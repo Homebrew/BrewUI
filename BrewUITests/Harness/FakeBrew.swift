@@ -9,7 +9,7 @@ import Foundation
 /// A deterministic stand-in for `brew`, plus the fixture tree it reads. Spawned through the real
 /// `BrewCommandService`, so `Process`, pipes, the drain and exit handling stay under test.
 nonisolated enum FakeBrew {
-    static func payload(for scenario: BrewUITestScenario) -> BrewUITestingFixturePayload {
+    static func payload(for scenario: BrewUITestScenario, commandDelays: [String: Int] = [:]) -> BrewUITestingFixturePayload {
         let fixtures = ScenarioFixtures.fixtures(for: scenario)
         var files: [String: Data] = [:]
 
@@ -25,6 +25,9 @@ nonisolated enum FakeBrew {
             return BrewUITestingFixturePayload(files: files, executable: nil)
         }
 
+        for (command, seconds) in commandDelays {
+            files["\(scenario.rawValue)/brew/\(command).delay"] = Data(String(max(0, seconds)).utf8)
+        }
         files[executableName] = Data(dispatcher.utf8)
         return BrewUITestingFixturePayload(files: files, executable: executableName)
     }
@@ -70,6 +73,10 @@ nonisolated enum FakeBrew {
     fi
     if [[ -f "${base}.stderr" ]]; then
         cat "${base}.stderr" >&2
+    fi
+
+    if [[ -f "${base}.delay" ]]; then
+        sleep "$(cat "${base}.delay")"
     fi
 
     status=0

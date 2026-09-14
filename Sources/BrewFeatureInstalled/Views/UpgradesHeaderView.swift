@@ -10,6 +10,7 @@ import SwiftUI
 
 /// Top of the Upgrades tab: title, subtitle, the bulk `brew upgrade` command, and the action row.
 struct UpgradesHeaderView: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: UpgradesViewModel
 
     var body: some View {
@@ -18,7 +19,7 @@ struct UpgradesHeaderView: View {
                 Text("Available upgrades")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.outdatedSubtitle)
+                Text(viewModel.outdatedSubtitle(localization: localization))
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
             }
@@ -29,7 +30,7 @@ struct UpgradesHeaderView: View {
             if viewModel.state.isLoaded {
                 CommandBlockView(
                     command: viewModel.bulkUpgradeDisplayCommand,
-                    summaryText: viewModel.bulkUpgradeSummary,
+                    summaryText: viewModel.bulkUpgradeSummary(localization: localization),
                 )
 
                 actionRow
@@ -90,7 +91,7 @@ struct UpgradesHeaderView: View {
         HStack {
             statusGlyph
                 .accessibilityHidden(true)
-            Text(viewModel.emptyUpgradeActionTitle)
+            Text(viewModel.emptyUpgradeActionTitle(localization: localization))
                 .foregroundStyle(Color.brewTextSecondary)
         }
         .font(.brewBody)

@@ -9,11 +9,15 @@ import SwiftUI
 public struct SearchCommands: Commands {
     @FocusedValue(\.focusSearchField) private var focusSearchField
 
-    public init() {}
+    private let localization: AppLocalization
+
+    public init(localization: AppLocalization = AppLocalization()) {
+        self.localization = localization
+    }
 
     public var body: some Commands {
         CommandGroup(after: .textEditing) {
-            Button("Find") { focusSearchField?() }
+            Button(localization.string("Find")) { focusSearchField?() }
                 .keyboardShortcut("f") // ⌘F
                 .disabled(focusSearchField == nil)
         }

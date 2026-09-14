@@ -10,10 +10,12 @@ import SwiftUI
 /// An action that leaves no visible trace (copying to the pasteboard, clearing a list) passes a
 /// `confirmationTitle`: the button swaps to a tick and that title for a few seconds.
 public struct BrewActionButton: View {
-    private let title: String
+    @Environment(\.brewLocalization) private var localization
+
+    private let title: String.LocalizationValue
     private let systemImage: String
-    private let confirmationTitle: String?
-    private let help: String?
+    private let confirmationTitle: String.LocalizationValue?
+    private let help: String.LocalizationValue?
     private let action: () -> Void
 
     @State private var isHovered = false
@@ -23,10 +25,10 @@ public struct BrewActionButton: View {
     private static let confirmationDuration: Duration = .seconds(5)
 
     public init(
-        _ title: String,
+        _ title: String.LocalizationValue,
         systemImage: String,
-        confirmationTitle: String? = nil,
-        help: String? = nil,
+        confirmationTitle: String.LocalizationValue? = nil,
+        help: String.LocalizationValue? = nil,
         action: @escaping () -> Void,
     ) {
         self.title = title
@@ -38,9 +40,9 @@ public struct BrewActionButton: View {
 
     public var body: some View {
         let appearance = BrewActionButtonAppearance(
-            title: title,
+            title: localization.string(title),
             systemImage: systemImage,
-            confirmationTitle: confirmationTitle,
+            confirmationTitle: confirmationTitle.map { localization.string($0) },
             isConfirming: isConfirming,
         )
         Button {
@@ -52,9 +54,9 @@ public struct BrewActionButton: View {
         }
         .buttonStyle(BrewActionButtonStyle(isHovered: isHovered))
         .onHover { isHovered = $0 }
-        .help(help ?? title)
+        .help(localization.string(help ?? title))
         // The label changes while confirming; what a screen reader or a UI test matches on must not.
-        .accessibilityLabel(title)
+        .accessibilityLabel(localization.string(title))
     }
 
     private func confirm() {

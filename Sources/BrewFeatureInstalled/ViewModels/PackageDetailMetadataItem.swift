@@ -4,20 +4,16 @@
 //
 
 import BrewCore
+import BrewUIComponents
 import Foundation
 
 /// Presentation mapping for Installed detail metadata content.
 struct PackageDetailMetadataItem {
+    private let localization: AppLocalization
     private let package: InstalledBrewPackage
 
-    private static let installDateFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateStyle = .medium
-        f.timeStyle = .none
-        return f
-    }()
-
-    init(package: InstalledBrewPackage) {
+    init(package: InstalledBrewPackage, localization: AppLocalization = AppLocalization()) {
+        self.localization = localization
         self.package = package
     }
 
@@ -35,19 +31,19 @@ struct PackageDetailMetadataItem {
         guard package.installedVersions.count > 1, package.linkedKeg != nil else {
             return joined
         }
-        return "\(joined) (linked)"
+        return localization.string("\(joined) (linked)")
     }
 
     /// Nil when there is no install date to show.
     var installDateValue: String? {
         guard let date = package.installDate else { return nil }
-        let formatted = Self.installDateFormatter.string(from: date)
-        return package.pouredFromBottle ? "Poured from bottle — \(formatted)" : formatted
+        let formatted = date.formatted(Date.FormatStyle(date: .abbreviated, time: .omitted).locale(localization.locale))
+        return package.pouredFromBottle ? localization.string("Poured from bottle — \(formatted)") : formatted
     }
 
     /// Nil when the package was installed on request (the default); non-nil for dependency installs.
     var installReasonValue: String? {
-        package.installedOnRequest ? nil : "As dependency"
+        package.installedOnRequest ? nil : localization.string("As dependency")
     }
 
     var licenseValue: String? {

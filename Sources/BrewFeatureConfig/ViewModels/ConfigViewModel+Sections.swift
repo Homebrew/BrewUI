@@ -4,6 +4,7 @@
 //
 
 import BrewCore
+import BrewUIComponents
 import Foundation
 
 /// Read-only presentation surface of the Configuration tab — the four-card layout, the Copy report
@@ -47,10 +48,11 @@ extension ConfigViewModel {
     }
 
     private func sectionReport(for section: ConfigSectionItem) -> String {
+        let title = AppLocalization(language: "en").string(section.title)
         let body = section.rows
             .map { "\($0.label): \($0.value)" }
             .joined(separator: "\n")
-        return body.isEmpty ? "\(section.title)\n(none)" : "\(section.title)\n\(body)"
+        return body.isEmpty ? "\(title)\n(none)" : "\(title)\n\(body)"
     }
 
     /// `brew` could not be located — the view shows a dedicated empty state rather than the error chrome.
@@ -82,7 +84,7 @@ extension ConfigViewModel {
     private func appendIfNonEmpty(
         _ result: inout [ConfigSectionItem],
         id: String,
-        title: String,
+        title: String.LocalizationValue,
         group: ConfigGroup,
         in entries: [BrewConfigEntry],
     ) {

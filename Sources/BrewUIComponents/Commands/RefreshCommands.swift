@@ -9,11 +9,15 @@ import SwiftUI
 public struct RefreshCommands: Commands {
     @FocusedValue(\.refreshAll) private var refreshAll
 
-    public init() {}
+    private let localization: AppLocalization
+
+    public init(localization: AppLocalization = AppLocalization()) {
+        self.localization = localization
+    }
 
     public var body: some Commands {
         CommandGroup(after: .sidebar) {
-            Button("Refresh") { refreshAll?() }
+            Button(localization.string("Refresh")) { refreshAll?() }
                 .keyboardShortcut("r", modifiers: .command)
                 .disabled(refreshAll == nil)
         }

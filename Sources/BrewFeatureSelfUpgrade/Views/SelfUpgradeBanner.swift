@@ -26,10 +26,11 @@ public struct SelfUpgradeBanner: View {
 }
 
 struct SelfUpgradeBannerContent: View {
+    @Environment(\.brewLocalization) private var localization
     let coordinator: SelfUpgradeCoordinator
 
     private var presentation: SelfUpgradePresentation {
-        SelfUpgradePresentation(status: coordinator.status)
+        SelfUpgradePresentation(status: coordinator.status, localization: localization)
     }
 
     var body: some View {
@@ -39,7 +40,7 @@ struct SelfUpgradeBannerContent: View {
                 summary
                 actions
                     .padding(.top, BrewSpacing.sm)
-                if let failureMessage = coordinator.failureMessage {
+                if let failureMessage = coordinator.failureMessage(localization: localization) {
                     Text(failureMessage)
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewStatusError)

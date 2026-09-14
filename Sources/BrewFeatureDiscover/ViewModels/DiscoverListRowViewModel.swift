@@ -61,8 +61,8 @@ final class DiscoverListRowViewModel: Identifiable {
         discoveryPackage.thirtyDayInstallCount
     }
 
-    var installs30DayLabel: String {
-        thirtyDayInstallCount.formatted()
+    func installs30DayLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String {
+        thirtyDayInstallCount.formatted(.number.locale(localization.locale))
     }
 
     var stableVersionLabel: String {
@@ -82,11 +82,11 @@ final class DiscoverListRowViewModel: Identifiable {
         return InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
     }
 
-    var installedStatusLabel: String? {
+    func installedStatusLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String? {
         guard installedRepository.isInstalled(id) else {
             return nil
         }
-        return String(localized: "Installed", comment: "Discover list row installed status")
+        return localization.string("Installed")
     }
 
     /// True while an install for this package is in flight (and bridging until the installed badge appears).
@@ -98,21 +98,21 @@ final class DiscoverListRowViewModel: Identifiable {
         )
     }
 
-    var rowAccessibilityLabel: String {
-        var summary = accessibilityLabel
+    func rowAccessibilityLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String {
+        var summary = accessibilityLabel(localization: localization)
         if showsInstallBusy {
-            let installing = String(localized: "Installing", comment: "VoiceOver: package installing")
+            let installing = localization.string("Installing")
             summary += ", \(installing)"
         }
         return summary
     }
 
-    private var accessibilityLabel: String {
+    private func accessibilityLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String {
         var parts = [name, packageKindChrome.badgeLabel]
         if showsInstallMetrics {
-            parts.append("\(installs30DayLabel) installs in 30 days")
+            parts.append(localization.string("\(installs30DayLabel(localization: localization)) installs in 30 days"))
         }
-        if let installedStatusLabel {
+        if let installedStatusLabel = installedStatusLabel(localization: localization) {
             parts.append(installedStatusLabel)
         }
         return parts.joined(separator: ", ")

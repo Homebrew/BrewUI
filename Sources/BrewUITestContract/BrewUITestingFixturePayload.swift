@@ -10,6 +10,7 @@ public enum BrewUITestingEnvironmentKey {
     /// Its presence is what puts the app in test mode.
     public static let launchArgument = "-uiTesting"
     public static let scenario = "BREW_UITEST_SCENARIO"
+    public static let languagePreferencesDomain = "BREW_UITEST_LANGUAGE_DOMAIN"
     public static let payload = "BREW_UITEST_FIXTURE_PAYLOAD"
     /// Written by the app once the tree is installed, not by the test runner.
     public static let fixturesRoot = "BREW_UITEST_FIXTURES"

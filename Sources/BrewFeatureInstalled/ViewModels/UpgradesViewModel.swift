@@ -5,6 +5,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -42,6 +43,13 @@ final class UpgradesViewModel {
 
     /// The repository stays `.loaded` through a revalidation, so Refresh needs its own signal.
     private(set) var isRefreshing = false
+
+    func localizedState(localization: AppLocalization) -> LoadState<InstalledPackagesContent, String> {
+        if case let .failed(error) = repository.state {
+            return .failed(Self.userMessage(for: error, localization: localization))
+        }
+        return state
+    }
 
     var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
@@ -86,7 +94,7 @@ final class UpgradesViewModel {
     }
 
     var upgradeCheckFailureMessage: String? {
-        repository.refreshFailure.map(Self.userMessage(for:))
+        repository.refreshFailure.map { Self.userMessage(for: $0) }
     }
 
     /// No upgrades to show, and a failed check means the app cannot vouch for that.
@@ -106,67 +114,48 @@ final class UpgradesViewModel {
     /// inventory when no search is active, and "Showing N of M" / "No matches
     /// in M outdated packages" once a query narrows the list. The window-chrome
     /// subtitle is a static tab description owned by `MainWindowView`.
-    var outdatedSubtitle: String {
+    func outdatedSubtitle(localization: AppLocalization = AppLocalization()) -> String {
         if shouldShowInitialLoadingIndicator {
-            return String(localized: "Loading packages…", comment: "Upgrades tab subtitle while fetching")
+            return localization.string("Loading packages…")
         }
         if showsUpgradeCheckFailure {
-            return Self.upgradeCheckFailedTitle
+            return Self.upgradeCheckFailedTitle(localization: localization)
         }
-        let subtitle = isFiltering ? filteredSubtitle : inventorySubtitle
+        let subtitle = isFiltering ? filteredSubtitle(localization: localization) : inventorySubtitle(localization: localization)
         guard upgradeCheckFailureMessage != nil else {
             return subtitle
         }
         // The count came from the last check that succeeded, so it must not read as current.
-        return String(
-            localized: "\(subtitle) — last check failed",
-            comment: "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
-        )
+        return localization.string("\(subtitle) — last check failed")
     }
 
-    static let upgradeCheckFailedTitle = String(
-        localized: "Couldn't check for upgrades",
-        comment: "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
-    )
+    static func upgradeCheckFailedTitle(localization: AppLocalization = AppLocalization()) -> String {
+        localization.string("Couldn't check for upgrades")
+    }
 
-    private var inventorySubtitle: String {
+    private func inventorySubtitle(localization: AppLocalization = AppLocalization()) -> String {
         switch totalOutdatedCount {
         case 0:
-            UpgradesUpToDateCopy.headline
+            UpgradesUpToDateCopy.headline(localization: localization)
         case 1:
-            String(
-                localized: "1 package can be upgraded",
-                comment: "Upgrades tab subtitle for a single outdated package",
-            )
+            localization.string("1 package can be upgraded")
         default:
-            String(
-                localized: "\(totalOutdatedCount) packages can be upgraded",
-                comment: "Upgrades tab subtitle when multiple packages are outdated",
-            )
+            localization.string("\(totalOutdatedCount) packages can be upgraded")
         }
     }
 
     /// Subtitle while a scope and/or search filter is narrowing the list: "Showing N of M upgrades", or
     /// "No matches in M outdated packages" when the filters hide every available upgrade.
-    private var filteredSubtitle: String {
+    private func filteredSubtitle(localization: AppLocalization = AppLocalization()) -> String {
         let total = totalOutdatedCount
         let visible = outdatedCount
         if visible > 0 {
-            return String(
-                localized: "Showing \(visible) of \(total) upgrades",
-                comment: "Upgrades tab subtitle while filtering with at least one match",
-            )
+            return localization.string("Showing \(visible) of \(total) upgrades")
         }
         if total == 1 {
-            return String(
-                localized: "No matches in 1 outdated package",
-                comment: "Upgrades tab subtitle when filters hide the single available upgrade",
-            )
+            return localization.string("No matches in 1 outdated package")
         }
-        return String(
-            localized: "No matches in \(total) outdated packages",
-            comment: "Upgrades tab subtitle when filters hide every available upgrade",
-        )
+        return localization.string("No matches in \(total) outdated packages")
     }
 
     var selectedPackage: InstalledBrewPackage? {
@@ -313,23 +302,20 @@ final class UpgradesViewModel {
     }
 
     /// Maps a repository failure into user-facing copy. Mirrors `InstalledViewModel.userMessage(for:)`.
-    private static func userMessage(for error: any Error) -> String {
+    private static func userMessage(for error: any Error, localization: AppLocalization = AppLocalization()) -> String {
         switch error {
         case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Upgrades tab error when brew binary missing",
-            )
+            return localization.string("Could not find Homebrew. Install it or ensure brew is in the default location.")
         case let BrewCommandError.failed(_, stderr):
             let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 return trimmed
             }
-            return String(localized: "Homebrew command failed.", comment: "Upgrades tab error generic brew failure")
+            return localization.string("Homebrew command failed.")
         case let BrewCommandError.launchFailed(underlying):
             return underlying
         default:
-            return String(localized: "Something went wrong loading packages.", comment: "Upgrades tab generic error")
+            return localization.string("Something went wrong loading packages.")
         }
     }
 }
@@ -342,74 +328,53 @@ extension UpgradesViewModel {
         upgradeSelection.displayCommand
     }
 
-    var bulkUpgradeSummary: String {
+    func bulkUpgradeSummary(localization: AppLocalization = AppLocalization()) -> String {
         switch upgradeSelection {
         case .all:
-            String(
-                localized: "Upgrades every outdated package",
-                comment: "Upgrades header command summary for an unfiltered batch",
-            )
+            localization.string("Upgrades every outdated package")
         case .formulae:
-            String(
-                localized: "Upgrades every outdated formula",
-                comment: "Upgrades header command summary scoped to formulae",
-            )
+            localization.string("Upgrades every outdated formula")
         case .casks:
-            String(
-                localized: "Upgrades every outdated cask",
-                comment: "Upgrades header command summary scoped to casks",
-            )
+            localization.string("Upgrades every outdated cask")
         case let .explicit(names):
-            Self.searchedUpgradeSummary(count: names.count)
+            Self.searchedUpgradeSummary(count: names.count, localization: localization)
         }
     }
 
-    private static func searchedUpgradeSummary(count: Int) -> String {
+    private static func searchedUpgradeSummary(count: Int, localization: AppLocalization) -> String {
         if count == 1 {
-            return String(
-                localized: "Upgrades the 1 package matching your search",
-                comment: "Upgrades header command summary for a single searched package",
-            )
+            return localization.string("Upgrades the 1 package matching your search")
         }
-        return String(
-            localized: "Upgrades the \(count) packages matching your search",
-            comment: "Upgrades header command summary for multiple searched packages",
-        )
+        return localization.string("Upgrades the \(count) packages matching your search")
     }
 
     var isFilteringOutEveryUpgrade: Bool {
         outdatedCount == 0 && totalOutdatedCount > 0
     }
 
-    var emptyUpgradeActionTitle: String {
+    func emptyUpgradeActionTitle(localization: AppLocalization = AppLocalization()) -> String {
         if showsUpgradeCheckFailure {
-            return Self.upgradeCheckFailedTitle
+            return Self.upgradeCheckFailedTitle(localization: localization)
         }
         if isFilteringOutEveryUpgrade {
-            return String(
-                localized: "Nothing to upgrade here",
-                comment: "Upgrades header stand-in when filters hide every available upgrade",
-            )
+            return localization.string("Nothing to upgrade here")
         }
-        return UpgradesUpToDateCopy.headline
+        return UpgradesUpToDateCopy.headline(localization: localization)
     }
 
-    var upToDateTitle: String {
-        UpgradesUpToDateCopy.headline
+    func upToDateTitle(localization: AppLocalization = AppLocalization()) -> String {
+        UpgradesUpToDateCopy.headline(localization: localization)
     }
 
-    var upToDateDetail: String {
-        UpgradesUpToDateCopy.installedDetail(count: totalInstalledCount)
+    func upToDateDetail(localization: AppLocalization = AppLocalization()) -> String {
+        UpgradesUpToDateCopy.installedDetail(count: totalInstalledCount, localization: localization)
     }
 
-    var upgradeCheckFailureDetail: String {
-        guard let message = upgradeCheckFailureMessage else {
+    func upgradeCheckFailureDetail(localization: AppLocalization = AppLocalization()) -> String {
+        guard let message = repository.refreshFailure.map({ Self.userMessage(for: $0, localization: localization) }) else {
             return ""
         }
-        return String(
-            localized: "\(message)\n\nUntil this succeeds the app can't tell whether anything needs upgrading.",
-            comment: "Upgrades empty state under a failed check: brew's error, then why the list is empty",
-        )
+        return localization.string("\(message)\n\nUntil this succeeds the app can't tell whether anything needs upgrading.")
     }
 
     /// What "Upgrade All" upgrades, given the active filters:

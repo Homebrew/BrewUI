@@ -24,6 +24,7 @@ struct InstalledListRowRoot: View {
 }
 
 struct InstalledListRowView: View {
+    @Environment(\.brewLocalization) private var localization
     let package: InstalledBrewPackage
     @State private var viewModel: InstalledListRowViewModel
 
@@ -65,7 +66,7 @@ struct InstalledListRowView: View {
         }
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(viewModel.rowAccessibilityLabel)
+        .accessibilityLabel(viewModel.rowAccessibilityLabel(localization: localization))
     }
 
     private func iconBadge(viewModel: InstalledListRowViewModel) -> some View {

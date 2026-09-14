@@ -24,7 +24,7 @@ struct InstalledDetailMutationParityTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.uninstallSelectedPackage()
             await waitForUninstallError(on: viewModel)
-            #expect(viewModel.uninstallErrorMessage == "spawn failed")
+            #expect(viewModel.uninstallErrorMessage() == "spawn failed")
         }
     }
 
@@ -39,7 +39,7 @@ struct InstalledDetailMutationParityTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.uninstallSelectedPackage()
             await waitForUninstallError(on: viewModel)
-            #expect(viewModel.uninstallErrorMessage == "Homebrew command failed.")
+            #expect(viewModel.uninstallErrorMessage() == "Homebrew command failed.")
         }
     }
 

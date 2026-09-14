@@ -9,9 +9,11 @@ import Foundation
 
 /// Presentation mapping for upgrade actions shown in Installed package detail.
 struct UpgradePackageItem {
+    private let localization: AppLocalization
     private let package: InstalledBrewPackage
 
-    init(package: InstalledBrewPackage) {
+    init(package: InstalledBrewPackage, localization: AppLocalization = AppLocalization()) {
+        self.localization = localization
         self.package = package
     }
 
@@ -37,9 +39,6 @@ struct UpgradePackageItem {
         guard let label = InstalledBrewVersionFormatting.upgradeDisplayLabel(from: package.latestVersion) else {
             return nil
         }
-        return String(
-            localized: "Upgrade to \(label)",
-            comment: "Installed detail upgrade button; interpolated label shows target tap version.",
-        )
+        return localization.string("Upgrade to \(label)")
     }
 }

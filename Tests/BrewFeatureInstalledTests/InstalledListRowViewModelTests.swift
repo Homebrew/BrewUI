@@ -71,7 +71,7 @@ struct InstalledListRowViewModelTests {
         await viewModel.observeRowUpdates()
         #expect(viewModel.showsUpgradeBusy)
         #expect(viewModel.showsOperationBusy)
-        #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
+        #expect(viewModel.rowAccessibilityLabel().contains("Upgrading"))
     }
 
     @Test func `covering bulk upgrade shows busy on the row`() async {
@@ -84,7 +84,7 @@ struct InstalledListRowViewModelTests {
 
         #expect(viewModel.showsUpgradeBusy)
         #expect(viewModel.showsOperationBusy)
-        #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
+        #expect(viewModel.rowAccessibilityLabel().contains("Upgrading"))
     }
 
     @Test func `bulk formula upgrade does not show busy on an outdated cask row`() async {
@@ -108,7 +108,7 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
         #expect(viewModel.showsUninstallBusy)
         #expect(viewModel.showsOperationBusy)
-        #expect(viewModel.rowAccessibilityLabel.contains("Uninstalling"))
+        #expect(viewModel.rowAccessibilityLabel().contains("Uninstalling"))
     }
 
     @Test func `update package clears upgrade busy latch and operation busy`() async {
@@ -126,7 +126,7 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
         #expect(!viewModel.showsUninstallBusy)
         #expect(!viewModel.showsOperationBusy)
-        #expect(!viewModel.rowAccessibilityLabel.contains("Upgrading"))
+        #expect(!viewModel.rowAccessibilityLabel().contains("Upgrading"))
     }
 
     @Test func `update package clears uninstall busy latch and operation busy`() async {
@@ -143,7 +143,7 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
         #expect(!viewModel.showsUninstallBusy)
         #expect(!viewModel.showsOperationBusy)
-        #expect(!viewModel.rowAccessibilityLabel.contains("Uninstalling"))
+        #expect(!viewModel.rowAccessibilityLabel().contains("Uninstalling"))
     }
 
     @Test func `update package flips row version presentation when outdated changes`() {
