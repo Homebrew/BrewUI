@@ -17,6 +17,9 @@ import Foundation
 /// `-i` flag additionally sources interactive rc files (`.zshrc`, `.bashrc`) so users who put
 /// their brew setup in those files also get parity; the tradeoff is that interactive rc files may
 /// print banners or expect a TTY, which we accept as the cost of exact-Terminal parity.
+///
+/// The exec script is written for POSIX shells.
+/// Fish has its own fallback. Other shells fall back to /bin/zsh
 public struct LoginShellBrewCommandRunner: BrewCommandRunning {
     private let underlying: any BrewCommandRunning
     private let shellResolver: LoginShellResolver
@@ -38,7 +41,7 @@ public struct LoginShellBrewCommandRunner: BrewCommandRunning {
         options: BrewRunOptions,
     ) async throws -> CommandOutput {
         var options = options
-        let shell = shellResolver.resolve()
+        let shell = Self.supportedShell(for: shellResolver.resolve())
         let marker = makeMarker()
         let shellCommand = Self.shellCommand(for: shell, marker: marker, output: options.output)
         let shellArguments = Self.shellArguments(executableURL: executableURL, arguments: arguments)
@@ -77,6 +80,15 @@ public struct LoginShellBrewCommandRunner: BrewCommandRunning {
         }
         let exec = shell.lastPathComponent == "fish" ? "exec $argv" : "exec \"$0\" \"$@\""
         return announce + exec
+    }
+
+    /// Shells whose `-c` script the runner can generate: POSIX `sh`-family shells plus fish.
+    static let supportedShellNames: Set<String> = ["sh", "bash", "zsh", "ksh", "dash", "fish"]
+
+    /// Returns `shell` when ``shellCommand(for:marker:output:)`` can target it, otherwise the
+    /// default POSIX-compatible fallback.
+    static func supportedShell(for shell: URL) -> URL {
+        supportedShellNames.contains(shell.lastPathComponent) ? shell : LoginShellResolver.defaultFallback
     }
 
     static func shellArguments(executableURL: URL, arguments: [String]) -> [String] {

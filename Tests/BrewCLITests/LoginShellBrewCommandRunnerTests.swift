@@ -121,6 +121,42 @@ struct LoginShellBrewCommandRunnerTests {
         #expect(invocation.arguments[6] == "--foo=it's")
     }
 
+    /// The exec script is POSIX (or fish); any other login shell is swapped for the default fallback.
+    @Test func `run falls back to default shell when login shell is not POSIX compatible`() async throws {
+        let recorder = InvocationRecorder()
+        let wrapped = LoginShellBrewCommandRunner(
+            underlying: recorder,
+            shellResolver: LoginShellResolver(
+                lookup: { URL(fileURLWithPath: "/opt/homebrew/bin/nu") },
+            ),
+            makeMarker: { "MARK" },
+        )
+
+        _ = try await wrapped.run(
+            executableURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew"),
+            arguments: ["config"],
+        )
+
+        let invocation = try #require(await recorder.first)
+        #expect(invocation.executableURL.path == LoginShellResolver.defaultFallback.path)
+        #expect(invocation.arguments == [
+            "-l", "-i", "-c",
+            "printf '%s\\n' 'MARK' 1>&2; printf '%s\\n' 'MARK'; exec \"$0\" \"$@\"",
+            "/opt/homebrew/bin/brew", "config",
+        ])
+    }
+
+    @Test func `supportedShell keeps POSIX shells and fish, replaces everything else`() {
+        for name in ["sh", "bash", "zsh", "fish"] {
+            let shell = URL(fileURLWithPath: "/opt/homebrew/bin/\(name)")
+            #expect(LoginShellBrewCommandRunner.supportedShell(for: shell) == shell)
+        }
+        for name in ["nu", "xonsh", "pwsh"] {
+            let shell = URL(fileURLWithPath: "/opt/homebrew/bin/\(name)")
+            #expect(LoginShellBrewCommandRunner.supportedShell(for: shell) == LoginShellResolver.defaultFallback)
+        }
+    }
+
     @Test func `run falls back to default shell when Directory Services lookup yields nil`() async throws {
         let recorder = InvocationRecorder()
         let wrapped = LoginShellBrewCommandRunner(
