@@ -74,8 +74,12 @@ final class LocalizationUITests: BrewUITestCase {
 
     @MainActor
     private func selectLanguage(_ language: String, in app: XCUIApplication) {
-        app.menuBars.menuBarItems.element(boundBy: 1).click()
-        let menu = app.menuItems.matching(NSPredicate(format: "label IN %@", ["Language", "语言", "語言"])).firstMatch
+        // SwiftUI `Menu` inside Commands does not publish AXID onto the NSMenuItem.
+        // Match the visible Homebrew → Language titles from the current launch language.
+        let appMenu = app.menuBars.menuBarItems["Homebrew"]
+        XCTAssertTrue(appMenu.waitForExistence(timeout: BrewUITestTimeout.default))
+        appMenu.click()
+        let menu = app.menuItems["Language"]
         XCTAssertTrue(menu.waitForExistence(timeout: BrewUITestTimeout.default))
         menu.hover()
         let name = Locale(identifier: language).localizedString(forIdentifier: language) ?? language
