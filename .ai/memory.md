@@ -660,6 +660,10 @@
 - **The handoff refuses while a *mutating* brew command is in flight.** `NSApplication.terminate` would kill the subprocess the command center is streaming and the helper would start a second brew against the same Homebrew; `HelperSelfUpgradeHandoff` asks `commandCenter.runningPhases()` first and throws, which surfaces on the banner. `BrewOperationKind.isMutating` is the filter — `doctorRead` is the one scheduled kind that changes nothing, and it runs long enough that counting it would block every upgrade attempted while the Doctor tab is loading.
 - **The runner takes an injected `sleep`, like `SelfUpgradeHelperRun`.** Wall-clock timeouts of 0.5–3s pass alone and fail under the parallel suite, because the fake `brew` has not spawned before the deadline — which made the tests that matter most (a descendant surviving the timeout) pass vacuously. Tests drive the timeout off a readiness file the fake `brew` touches.
 
+## 2026-09-13 — Sidebar icons use SF Symbols
+
+- Sidebar rows render `Image(systemName:)` glyphs, not emoji (issue #165). macOS convention; symbols tint with selection state and align via `BrewLayout.sidebarIconWidth`.
+
 ## 2026-09-14 — Language takes effect on the next launch
 
 - **A running process cannot retarget SwiftUI/AppKit menus honestly.** Live switching and rewriting File / Edit / Window titles were tried; they flicker and leave standard menus fighting the framework. Persist the next-launch language, offer reopen / defer / undo, and start a new process with app-domain `AppleLanguages`. Never write the global macOS language. File / Edit / Window still come out translated — macOS does that for the process language; those strings are not in our catalog.

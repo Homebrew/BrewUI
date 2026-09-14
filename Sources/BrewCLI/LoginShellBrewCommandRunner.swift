@@ -20,13 +20,16 @@ import Foundation
 public struct LoginShellBrewCommandRunner: BrewCommandRunning {
     private let underlying: any BrewCommandRunning
     private let shellResolver: LoginShellResolver
+    private let makeMarker: @Sendable () -> String
 
     public init(
         underlying: any BrewCommandRunning = BrewCommandService(),
         shellResolver: LoginShellResolver = LoginShellResolver(),
+        makeMarker: @escaping @Sendable () -> String = { UUID().uuidString },
     ) {
         self.underlying = underlying
         self.shellResolver = shellResolver
+        self.makeMarker = makeMarker
     }
 
     public func run(
@@ -34,26 +37,85 @@ public struct LoginShellBrewCommandRunner: BrewCommandRunning {
         arguments: [String],
         options: BrewRunOptions,
     ) async throws -> CommandOutput {
+        var options = options
         let shell = shellResolver.resolve()
-        let shellCommand = Self.shellCommand(for: shell)
+        let marker = makeMarker()
+        let shellCommand = Self.shellCommand(for: shell, marker: marker, output: options.output)
         let shellArguments = Self.shellArguments(executableURL: executableURL, arguments: arguments)
+
+        if let lineObserver = options.lineObserver {
+            let gate = LoginShellStartupGate(marker: marker)
+            options.lineObserver = { line in
+                if let admitted = gate.admit(line) {
+                    lineObserver(admitted)
+                }
+            }
+        }
+
         // Forward `options` so the wrapped subprocess still streams + colours — the default protocol
         // implementation would drop it, silently disabling colour on the production login-shell path.
-        return try await underlying.run(
+        let output = try await underlying.run(
             executableURL: shell,
             arguments: ["-l", "-i", "-c", shellCommand] + shellArguments,
             options: options,
         )
+        return CommandOutput(
+            standardOutput: Self.removingStartupNoise(from: output.standardOutput, upTo: marker),
+            standardError: Self.removingStartupNoise(from: output.standardError, upTo: marker),
+            terminationStatus: output.terminationStatus,
+        )
     }
 
-    static func shellCommand(for shell: URL) -> String {
-        if shell.lastPathComponent == "fish" {
-            return "exec $argv"
+    /// Printed to the streams the child will actually use, right after `-l -i` startup and before
+    /// `exec`, so ``removingStartupNoise(from:upTo:)`` has an exact line to cut rc-file noise at.
+    static func shellCommand(for shell: URL, marker: String, output: BrewRunOptions.OutputChannel) -> String {
+        let announce = switch output {
+        case .pipes:
+            "printf '%s\\n' '\(marker)' 1>&2; printf '%s\\n' '\(marker)'; "
+        case .pseudoTerminal:
+            "printf '%s\\n' '\(marker)'; "
         }
-        return "exec \"$0\" \"$@\""
+        let exec = shell.lastPathComponent == "fish" ? "exec $argv" : "exec \"$0\" \"$@\""
+        return announce + exec
     }
 
     static func shellArguments(executableURL: URL, arguments: [String]) -> [String] {
         [executableURL.path] + arguments
+    }
+
+    static func removingStartupNoise(from text: String, upTo marker: String) -> String {
+        guard let markerRange = text.range(of: marker) else {
+            return text
+        }
+        let remainder = text[markerRange.upperBound...]
+        guard let newline = remainder.firstIndex(of: "\n") else {
+            return String(remainder)
+        }
+        return String(remainder[remainder.index(after: newline)...])
+    }
+}
+
+/// Drops every live console line up to and including the login-shell startup marker, so streamed
+/// output skips the same rc-file noise ``LoginShellBrewCommandRunner`` strips from the buffered result.
+// swiftlint:disable:next unchecked_sendable
+private final class LoginShellStartupGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private let marker: String
+    private var admitting = false
+
+    init(marker: String) {
+        self.marker = marker
+    }
+
+    func admit(_ line: BrewCommandOutputLine) -> BrewCommandOutputLine? {
+        lock.lock()
+        defer { lock.unlock() }
+        if admitting {
+            return line
+        }
+        if line.text == marker {
+            admitting = true
+        }
+        return nil
     }
 }
