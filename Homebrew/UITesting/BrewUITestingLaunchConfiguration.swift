@@ -30,7 +30,7 @@ nonisolated struct BrewUITestingLaunchConfiguration {
         let environment = processInfo.environment
         var isUITesting = processInfo.arguments.contains(BrewUITestingEnvironmentKey.launchArgument)
         #if DEBUG
-            // CUA 在后台通过 Launch Services 启动 app，无法传 XCTest 参数；只有专用 fixture 副本显式设置此标记。
+            // Background CUA launches the app through Launch Services and cannot pass XCTest arguments; only a dedicated fixture copy sets this marker.
             isUITesting = isUITesting || (
                 bundle.object(forInfoDictionaryKey: "BrewUITesting") as? Bool == true
                     && environment[BrewUITestingEnvironmentKey.scenario] != nil

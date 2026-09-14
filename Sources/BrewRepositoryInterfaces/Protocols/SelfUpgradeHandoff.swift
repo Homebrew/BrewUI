@@ -12,7 +12,7 @@ public protocol SelfUpgradeHandoff: Sendable {
     func performUpgrade() async throws
 }
 
-/// 交接边界的可恢复失败；具体文案由展示层决定。
+/// Recoverable failure at the handoff boundary; presentation copy is decided by the UI layer.
 public enum SelfUpgradeHandoffError: Error, Sendable {
     case operationRunning
     case helperUnavailable

@@ -11,21 +11,107 @@ struct LocalizationPreferencesTests {
         try body(defaults, domain)
     }
 
-    private func preferences(_ defaults: UserDefaults, _: String) -> LanguagePreferences {
-        LanguagePreferences(defaults: defaults, localizations: ["Base", "zh-Hans", "en", "en"])
+    private func preferences(
+        _ defaults: UserDefaults,
+        _: String,
+        preferredLanguages: [String] = ["en"],
+        systemPreferredLanguages: [String] = ["en"],
+    ) -> LanguagePreferences {
+        LanguagePreferences(
+            defaults: defaults,
+            localizations: ["Base", "zh-Hans", "en", "en"],
+            preferredLanguages: preferredLanguages,
+            systemPreferredLanguages: systemPreferredLanguages,
+        )
+    }
+
+    @Test func `launch migrates legacy selection only within the injected domain`() throws {
+        try withDefaults { defaults, domain in
+            defaults.set("zh-Hans", forKey: "appLanguage")
+            let languages = LanguagePreferences.prepareForLaunch(defaults: defaults, domain: domain, localizations: ["en", "zh-Hans"])
+            #expect(languages == ["zh-Hans"] && defaults.stringArray(forKey: "AppleLanguages") == ["zh-Hans"])
+        }
+    }
+
+    @Test func `launch respects an existing native app language over legacy selection`() throws {
+        try withDefaults { defaults, domain in
+            defaults.set("zh-Hans", forKey: "appLanguage")
+            defaults.set(["en"], forKey: "AppleLanguages")
+            _ = LanguagePreferences.prepareForLaunch(defaults: defaults, domain: domain, localizations: ["en", "zh-Hans"])
+            #expect(defaults.string(forKey: "appLanguage") == "en")
+        }
+    }
+
+    @Test func `removing native override after migration does not resurrect legacy language`() throws {
+        try withDefaults { defaults, domain in
+            defaults.set("zh-Hans", forKey: "appLanguage")
+            _ = LanguagePreferences.prepareForLaunch(defaults: defaults, domain: domain, localizations: ["en", "zh-Hans"])
+            defaults.removeObject(forKey: "AppleLanguages")
+            let languages = LanguagePreferences.prepareForLaunch(defaults: defaults, domain: domain, localizations: ["en", "zh-Hans"])
+            #expect(languages == nil && defaults.string(forKey: "appLanguage") == nil)
+        }
+    }
+
+    @Test func `global inherited languages are not copied into app override`() throws {
+        try withDefaults { defaults, domain in
+            defaults.register(defaults: ["AppleLanguages": ["zh-Hans"]])
+            let languages = LanguagePreferences.prepareForLaunch(defaults: defaults, domain: domain, localizations: ["en", "zh-Hans"])
+            #expect(languages == nil && defaults.persistentDomain(forName: domain)?["AppleLanguages"] == nil)
+        }
     }
 
     @Test func `inherited language still means follow system`() throws {
         try withDefaults { defaults, domain in
             defaults.register(defaults: ["AppleLanguages": ["zh-Hans"]])
-            #expect(preferences(defaults, domain).selectedLanguage == nil)
+            let model = preferences(defaults, domain)
+            #expect(model.selectedLanguage == nil && model.activeSelection == nil && !model.hasPendingChange)
         }
     }
 
-    @Test func `selection survives A new preferences instance`() throws {
+    @Test func `selection survives a new preferences instance as pending state`() throws {
         try withDefaults { defaults, domain in
-            preferences(defaults, domain).select("zh-Hans")
-            #expect(preferences(defaults, domain).selectedLanguage == "zh-Hans")
+            let first = preferences(defaults, domain)
+            first.select("zh-Hans")
+            let second = preferences(defaults, domain)
+            #expect(
+                second.selectedLanguage == "zh-Hans"
+                    && second.activeSelection == "en"
+                    && second.activeLanguage == "en"
+                    && second.hasPendingChange,
+            )
+        }
+    }
+
+    @Test func `legacy app language remains the initial pending selection`() throws {
+        try withDefaults { defaults, domain in
+            defaults.set("zh-Hans", forKey: "appLanguage")
+            let model = preferences(defaults, domain)
+            #expect(
+                model.selectedLanguage == "zh-Hans"
+                    && model.activeSelection == "en"
+                    && model.activeLanguage == "en"
+                    && model.localization.locale.identifier == "en"
+                    && model.hasPendingChange,
+            )
+        }
+    }
+
+    @Test func `undo restores the selection captured at startup`() throws {
+        try withDefaults { defaults, domain in
+            defaults.set("zh-Hans", forKey: "appLanguage")
+            let model = preferences(defaults, domain, preferredLanguages: ["zh-Hans"])
+            model.select("en")
+            model.select(model.activeSelection)
+            #expect(model.selectedLanguage == "zh-Hans" && !model.hasPendingChange)
+        }
+    }
+
+    @Test func `undo during migration restores the actual launch language`() throws {
+        try withDefaults { defaults, domain in
+            defaults.set("zh-Hans", forKey: "appLanguage")
+            let model = preferences(defaults, domain, preferredLanguages: ["en"])
+            model.select(model.activeSelection)
+            #expect(!model.hasPendingChange && model.selectedLanguage == "en")
         }
     }
 
@@ -36,7 +122,11 @@ struct LocalizationPreferencesTests {
             model.select("zh-Hans")
             model.select(nil)
             let saved = defaults.persistentDomain(forName: domain) ?? [:]
-            #expect(saved["appLanguage"] == nil && saved["unrelated"] as? String == "keep")
+            #expect(
+                saved["appLanguage"] == nil
+                    && saved["AppleLanguages"] == nil
+                    && saved["unrelated"] as? String == "keep",
+            )
         }
     }
 
@@ -44,25 +134,91 @@ struct LocalizationPreferencesTests {
         try withDefaults { defaults, domain in
             let model = preferences(defaults, domain)
             model.select("../../untrusted")
-            #expect(model.selectedLanguage == nil && defaults.persistentDomain(forName: domain)?["appLanguage"] == nil)
+            #expect(
+                model.selectedLanguage == nil
+                    && model.activeLanguage == "en"
+                    && !model.hasPendingChange
+                    && defaults.persistentDomain(forName: domain)?["appLanguage"] == nil
+                    && defaults.persistentDomain(forName: domain)?["AppleLanguages"] == nil,
+            )
         }
     }
 
-    @Test func `selection immediately changes the active locale`() throws {
+    @Test func `selection waits for the next launch to change the active locale`() throws {
+        try withDefaults { defaults, domain in
+            let model = preferences(defaults, domain)
+            let initialLocalization = model.localization
+            model.select("zh-Hans")
+            #expect(
+                model.selectedLanguage == "zh-Hans"
+                    && model.activeLanguage == "en"
+                    && model.localization.locale.identifier == "en"
+                    && initialLocalization.locale.identifier == "en"
+                    && model.hasPendingChange,
+            )
+        }
+    }
+
+    @Test func `reverting to follow system clears a pending change`() throws {
         try withDefaults { defaults, domain in
             let model = preferences(defaults, domain)
             model.select("zh-Hans")
-            #expect(model.localization.locale.identifier == "zh-Hans")
             model.select(nil)
-            #expect(model.selectedLanguage == nil)
+            #expect(
+                model.selectedLanguage == nil
+                    && model.activeSelection == nil
+                    && model.activeLanguage == "en"
+                    && model.localization.locale.identifier == "en"
+                    && !model.hasPendingChange,
+            )
         }
     }
 
-    @Test func `selection does not write apple languages`() throws {
+    @Test func `follow system resolves against the injected system preferences`() throws {
         try withDefaults { defaults, domain in
-            defaults.set(["ja"], forKey: "AppleLanguages")
-            preferences(defaults, domain).select("zh-Hans")
-            #expect(defaults.stringArray(forKey: "AppleLanguages") == ["ja"])
+            let model = preferences(
+                defaults,
+                domain,
+                preferredLanguages: ["en"],
+                systemPreferredLanguages: ["zh-Hans"],
+            )
+            #expect(
+                model.selectedLanguage == nil
+                    && model.activeLanguage == "en"
+                    && model.localization.locale.identifier == "en"
+                    && model.hasPendingChange,
+            )
+            model.select("en")
+            #expect(!model.hasPendingChange)
+        }
+    }
+
+    @Test func `selection synchronizes the isolated apple languages override`() throws {
+        try withDefaults { defaults, domain in
+            let model = preferences(defaults, domain)
+            model.select("zh-Hans")
+            let saved = defaults.persistentDomain(forName: domain) ?? [:]
+            #expect(
+                saved["appLanguage"] as? String == "zh-Hans"
+                    && saved["AppleLanguages"] as? [String] == ["zh-Hans"],
+            )
+        }
+    }
+
+    @Test func `new resource locale uses the same pending launch argument contract`() throws {
+        try withDefaults { defaults, _ in
+            let model = LanguagePreferences(defaults: defaults, localizations: ["en", "ja"], preferredLanguages: ["en"])
+            model.select("ja")
+            #expect(model.pendingLaunchArguments == ["-AppleLanguages", "(ja)"] && model.activeLanguage == "en")
+        }
+    }
+
+    @Test func `follow system launch argument resolves a supported script language`() throws {
+        try withDefaults { defaults, _ in
+            let model = LanguagePreferences(
+                defaults: defaults, localizations: ["en", "zh-Hant"], preferredLanguages: ["en"], systemPreferredLanguages: ["zh-HK"],
+            )
+            #expect(model.pendingLaunchArguments == ["-AppleLanguages", "(zh-Hant)"])
         }
     }
 
@@ -90,25 +246,34 @@ struct LocalizationResourceTests {
         try body(bundle)
     }
 
-    @Test func `existing preferences resolve new language in the same process`() throws {
+    private func preferences(bundle: Bundle, preferredLanguages: [String]) -> LanguagePreferences {
+        LanguagePreferences(
+            defaults: nil,
+            localizations: ["en", "zh-Hans", "zh-Hant"],
+            bundle: bundle,
+            preferredLanguages: preferredLanguages,
+            systemPreferredLanguages: ["en"],
+        )
+    }
+
+    @Test func `selection keeps the current resources until a new instance starts`() throws {
         try withBundle { bundle in
-            let model = LanguagePreferences(defaults: nil, bundle: bundle, preferredLanguages: ["en"])
+            let model = preferences(bundle: bundle, preferredLanguages: ["en"])
+            let message = AppMessage.localized("Installed")
             let initial = model.localization.string("Installed")
             model.select("zh-Hans")
-            let translated = model.localization.string("Installed")
-            model.select("en")
-            #expect([initial, translated, model.localization.string("Installed")] == ["Installed", "已安装", "Installed"])
+            let deferred = message.string(localization: model.localization)
+            let relaunched = preferences(bundle: bundle, preferredLanguages: ["zh-Hans"])
+            let translated = message.string(localization: relaunched.localization)
+            #expect([initial, deferred, translated] == ["Installed", "Installed", "已安装"])
         }
     }
 
-    @Test func `three languages share one preference and message instance`() throws {
+    @Test func `three languages share one message across launch instances`() throws {
         try withBundle { bundle in
-            let model = LanguagePreferences(defaults: nil, bundle: bundle, preferredLanguages: ["en"])
             let message = AppMessage.localized("Installed")
-            var labels: [String] = []
-            for language in ["zh-Hans", "zh-Hant", "en"] {
-                model.select(language)
-                labels.append(message.string(localization: model.localization))
+            let labels = ["zh-Hans", "zh-Hant", "en"].map { language in
+                message.string(localization: preferences(bundle: bundle, preferredLanguages: [language]).localization)
             }
             #expect(labels == ["已安装", "已安裝", "Installed"])
         }
@@ -117,9 +282,12 @@ struct LocalizationResourceTests {
     @Test func `traditional chinese system preferences resolve the script resource`() {
         for language in ["zh-TW", "zh-HK", "zh-Hant"] {
             let model = LanguagePreferences(
-                defaults: nil, localizations: ["en", "zh-Hans", "zh-Hant"], preferredLanguages: [language],
+                defaults: nil,
+                localizations: ["en", "zh-Hans", "zh-Hant"],
+                preferredLanguages: [language],
+                systemPreferredLanguages: ["en"],
             )
-            #expect(model.localization.locale.identifier == "zh-Hant")
+            #expect(model.activeLanguage == "zh-Hant")
         }
     }
 
@@ -148,7 +316,12 @@ struct LocalizationResourceTests {
     }
 
     @Test func `unsupported system language uses english`() {
-        let model = LanguagePreferences(defaults: nil, localizations: ["en", "zh-Hans"], preferredLanguages: ["fr"])
-        #expect(model.localization.locale.identifier == "en")
+        let model = LanguagePreferences(
+            defaults: nil,
+            localizations: ["en", "zh-Hans"],
+            preferredLanguages: ["fr"],
+            systemPreferredLanguages: ["fr"],
+        )
+        #expect(model.activeLanguage == "en" && model.localization.locale.identifier == "en")
     }
 }

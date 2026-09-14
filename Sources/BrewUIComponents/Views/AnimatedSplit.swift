@@ -115,7 +115,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     }
 }
 
-/// 独立 hosting root 不会自动继承外层环境；固定包装类型保留子树身份。
+/// A separate hosting root does not inherit the outer environment; a fixed wrapper type keeps subtree identity.
 private struct SplitLocalizedContent<Content: View>: View {
     let content: Content
     let localization: AppLocalization

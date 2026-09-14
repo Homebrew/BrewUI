@@ -6,7 +6,7 @@
 import Foundation
 import SwiftUI
 
-/// 时间桶独立于语言；文案解析由展示层传入，避免缓存已翻译的字符串。
+/// Time buckets are language-agnostic; the presentation layer supplies copy resolution so translated strings are not cached.
 public enum RelativeTimeText {
     public static func string(
         for date: Date,

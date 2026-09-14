@@ -239,6 +239,72 @@ struct SerialBrewCommandCenterTests {
     }
 }
 
+struct SerialBrewCommandCenterRelaunchTests {
+    @Test func `idle center accepts one relaunch lock`() async {
+        let center = makeSucceedingCenter()
+
+        #expect(await center.beginRelaunch())
+        #expect(await center.beginRelaunch() == false)
+    }
+
+    @Test func `relaunch lock rejects new work without invoking the runner`() async throws {
+        let counter = InvocationCounter()
+        let center = makeCenter(runner: ClosureRunner { _ in
+            await counter.increment()
+            return successOutput
+        })
+        let id = BrewOperationID(kind: .formula, name: "blocked")
+
+        #expect(await center.beginRelaunch())
+        do {
+            try await center.perform(noopCommand, id: id)
+            Issue.record("expected a relaunch lock to reject new work")
+        } catch is CancellationError {
+            // The guard must run before any child process task is created.
+        } catch {
+            Issue.record("expected CancellationError, got \(error)")
+        }
+
+        #expect(await counter.value == 0)
+    }
+
+    @Test func `canceling relaunch lock allows work again`() async throws {
+        let counter = InvocationCounter()
+        let center = makeCenter(runner: ClosureRunner { _ in
+            await counter.increment()
+            return successOutput
+        })
+        let id = BrewOperationID(kind: .formula, name: "unblocked")
+
+        #expect(await center.beginRelaunch())
+        await center.cancelRelaunch()
+        try await center.perform(noopCommand, id: id)
+
+        #expect(await counter.value == 1)
+    }
+
+    @Test func `running doctor read prevents relaunch lock and continues`() async throws {
+        let counter = InvocationCounter()
+        let gate = TestGate()
+        let center = makeCenter(runner: ClosureRunner { _ in
+            await counter.increment()
+            await gate.wait()
+            return successOutput
+        })
+        let id = BrewOperationID(kind: .formula, name: "running")
+        let doctorRead = BrewCommand(operationKind: .doctorRead, arguments: ["doctor"])
+        let task = Task { try await center.capture(doctorRead, id: id) }
+        defer { task.cancel() }
+
+        try await waitUntil { await counter.value == 1 }
+        #expect(await center.beginRelaunch() == false)
+        await gate.open()
+        try await task.value
+
+        #expect(await counter.value == 1)
+    }
+}
+
 struct SerialBrewAllPhaseStreamTests {
     @Test func `allPhaseChanges emits transitions across multiple ids without per id subscriber`() async throws {
         let center = makeSucceedingCenter()

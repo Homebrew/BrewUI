@@ -3,6 +3,7 @@
 //  Brew
 //
 
+import BrewUIComponents
 import Foundation
 import SwiftUI
 
@@ -10,20 +11,22 @@ import SwiftUI
     struct DebugMenuCommands: Commands {
         @Bindable var selfUpgradeControl: SelfUpgradeDebugControl
 
+        let localization: AppLocalization
+
         var body: some Commands {
-            CommandMenu("Debug") {
-                Button("Clear UserDefaults") {
+            CommandMenu(localization.string("Debug")) {
+                Button(localization.string("Clear UserDefaults")) {
                     UserDefaultsDebug.clearAll()
                 }
 
                 Divider()
 
                 // Exercises the crash-reporting flow: the report appears on next launch.
-                Menu("Force Crash") {
-                    Button("Fatal Error (signal)") {
+                Menu(localization.string("Force Crash")) {
+                    Button(localization.string("Fatal Error (signal)")) {
                         fatalError("Debug menu: forced fatalError")
                     }
-                    Button("Uncaught Exception") {
+                    Button(localization.string("Uncaught Exception")) {
                         NSException(
                             name: .genericException,
                             reason: "Debug menu: forced NSException",
@@ -34,7 +37,7 @@ import SwiftUI
 
                 Divider()
 
-                Toggle("Show the Self-Upgrade Banner", isOn: $selfUpgradeControl.simulateUpgradeAvailable)
+                Toggle(localization.string("Show the Self-Upgrade Banner"), isOn: $selfUpgradeControl.simulateUpgradeAvailable)
             }
         }
     }

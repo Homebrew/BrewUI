@@ -20,7 +20,6 @@ import BrewUIComponents
 import BrewUITestContract
 import SwiftUI
 
-@main
 struct BrewApp: App {
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
     private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!
@@ -29,9 +28,7 @@ struct BrewApp: App {
 
     @State private var languagePreferences: LanguagePreferences
 
-    private let nativeMenuRefresh = NativeMenuRefresh()
-    private let standardAppCommandState = StandardAppCommandState()
-    private let standardEditingState = StandardEditingValidationState()
+    private let languageChange: LanguageChange
     private static let mainWindowID = "main"
 
     private let commandCenter: SerialBrewCommandCenter
@@ -51,76 +48,6 @@ struct BrewApp: App {
     #if DEBUG
         private let selfUpgradeDebugControl = SelfUpgradeDebugControl()
     #endif
-
-    init() {
-        // Install crash capture before any other launch work so startup crashes are recorded.
-        let crashReportStore = CrashReportStore()
-        CrashReportInstaller.install(store: crashReportStore, environment: .current())
-        crashReportController = CrashReportController(store: crashReportStore)
-
-        let inventoryCache = InstalledInventoryCache()
-        // nil in every production launch, so both process-boundary seams below fall through to the
-        // live wiring untouched.
-        let uiTesting = BrewUITestingLaunchConfiguration.current()
-        let languageDefaults = uiTesting == nil ? UserDefaults.standard : ProcessInfo.processInfo.environment[
-            BrewUITestingEnvironmentKey.languagePreferencesDomain,
-        ].flatMap(UserDefaults.init(suiteName:))
-        _languagePreferences = State(initialValue: LanguagePreferences(
-            defaults: languageDefaults,
-            preferredLanguages: uiTesting == nil ? Locale.preferredLanguages : ["en"],
-        ))
-        // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
-        let fixtures = Self.installFixtures(uiTesting: uiTesting)
-        let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
-        // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
-        let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
-        let catalogue = Self.makeCatalogueCache(fixtures: fixtures)
-        let discoverAnalytics = Self.makeDiscoverAnalyticsCache(fixtures: fixtures)
-        // One context for every brew invocation: command center, installed inventory and `brew config`.
-        let executionContext = Self.executionContext(uiTesting: uiTesting, fixtures: fixtures)
-        let center = SerialBrewCommandCenter(executionContext: executionContext)
-        let apiClient = Self.makeAPIClient(uiTesting: uiTesting)
-        let catalogueRepo = BrewCatalogueRepository(apiClient: apiClient, cache: catalogue)
-
-        installedInventoryCache = inventoryCache
-        catalogueCache = catalogue
-        discoverAnalyticsCache = discoverAnalytics
-        commandCenter = center
-        commandFactory = LiveBrewMutatingCommandFactory()
-        installedPackagesRepository = BrewInstalledPackagesRepository(
-            executionContext: executionContext,
-            cache: inventoryCache,
-            commandCenter: center,
-        )
-        commandJobsRepository = BrewCommandJobsRepository(commandCenter: center)
-        installedDependentsRepository = BrewInstalledDependentsRepository(cache: inventoryCache)
-        catalogueRepository = catalogueRepo
-        discoverPackagesRepository = BrewDiscoverPackagesRepository(
-            apiClient: apiClient,
-            catalogueRepository: catalogueRepo,
-            cache: discoverAnalytics,
-            defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
-        )
-        doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
-        configRepository = BrewConfigRepository(executionContext: executionContext)
-
-        let selfUpgradeContext = SelfUpgradeLaunchContext(
-            installedPackagesRepository: installedPackagesRepository,
-            executionContext: executionContext,
-            commandCenter: center,
-            selfUpgradeKeyPrefix: selfUpgradeKeyPrefix,
-            uiTesting: uiTesting,
-            fixtures: fixtures,
-            launchOutcome: launchOutcome,
-        )
-        #if DEBUG
-            selfUpgradeCoordinator = Self.makeSelfUpgradeCoordinator(selfUpgradeContext, debugControl: selfUpgradeDebugControl)
-        #else
-            selfUpgradeCoordinator = Self.makeSelfUpgradeCoordinator(selfUpgradeContext)
-        #endif
-
-        NSWindow.allowsAutomaticWindowTabbing = false
-    }
 
     /// Cleared at launch, so a previous run's ETag or refresh timestamp cannot decide this run's fetches.
     private static let uiTestingDefaultsPrefix = "UITesting."
@@ -256,12 +183,6 @@ struct BrewApp: App {
         return .uiTesting(brewURL: fixtures?.fakeBrewURL)
     }
 
-    private func refreshNativeMenus() {
-        standardAppCommandState.refresh()
-        standardEditingState.refresh()
-        nativeMenuRefresh.request(localization: languagePreferences.localization)
-    }
-
     var body: some Scene {
         WindowGroup(id: Self.mainWindowID) {
             MainWindowView()
@@ -301,36 +222,14 @@ struct BrewApp: App {
                 .environment(\.locale, languagePreferences.localization.locale)
                 .environment(\.layoutDirection, languagePreferences.localization.layoutDirection)
                 .environment(\.brewLocalization, languagePreferences.localization)
-                .task(id: languagePreferences.localization.locale.identifier) {
-                    // 等 SwiftUI 完成本轮 Commands 更新，只改现有原生菜单的标题。
-                    await Task.yield()
-                    refreshNativeMenus()
-                }
-                .onReceive(NotificationCenter.default.publisher(for: NSWindow.didUpdateNotification)) { _ in
-                    // 焦点或选择变化后更新快捷键可用性，不要求先打开菜单。
-                    standardEditingState.refresh()
-                }
-                .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
-                    refreshNativeMenus()
-                }
-                .onReceive(NotificationCenter.default.publisher(for: NSMenu.didBeginTrackingNotification)) { _ in
-                    refreshNativeMenus()
-                }
-                .onReceive(NotificationCenter.default.publisher(for: NSMenu.didChangeItemNotification)) { _ in
-                    refreshNativeMenus()
-                }
-                .onReceive(NotificationCenter.default.publisher(for: NSMenu.didAddItemNotification)) { _ in
-                    refreshNativeMenus()
-                }
+                .task { languageChange.offerInitialChangeOnce() }
         }
         .defaultSize(
             width: BrewLayout.defaultWindowWidth,
             height: BrewLayout.defaultWindowHeight,
         )
         .commands {
-            StandardEditingCommands(localization: languagePreferences.localization, state: standardEditingState)
-            StandardAppCommands(localization: languagePreferences.localization, mainWindowID: Self.mainWindowID, state: standardAppCommandState)
-            LanguageCommands(preferences: languagePreferences)
+            LanguageCommands(preferences: languagePreferences, onSelect: languageChange.select, onReopen: languageChange.requestRelaunch)
             SearchCommands(localization: languagePreferences.localization)
             SidebarCommands(localization: languagePreferences.localization)
             RefreshCommands(localization: languagePreferences.localization)
@@ -345,7 +244,7 @@ struct BrewApp: App {
         }
         #if DEBUG
         .commands {
-                DebugMenuCommands(selfUpgradeControl: selfUpgradeDebugControl)
+                DebugMenuCommands(selfUpgradeControl: selfUpgradeDebugControl, localization: languagePreferences.localization)
             }
         #endif
     }
@@ -363,6 +262,90 @@ private struct SelfUpgradeLaunchContext {
 }
 
 extension BrewApp {
+    init() {
+        // Install crash capture before any other launch work so startup crashes are recorded.
+        let crashReportStore = CrashReportStore()
+        CrashReportInstaller.install(store: crashReportStore, environment: .current())
+        crashReportController = CrashReportController(store: crashReportStore)
+
+        let inventoryCache = InstalledInventoryCache()
+        // nil in every production launch, so both process-boundary seams below fall through to the
+        // live wiring untouched.
+        let uiTesting = BrewUITestingLaunchConfiguration.current()
+        let preferences = Self.makeLanguagePreferences(uiTesting: uiTesting)
+        _languagePreferences = State(initialValue: preferences)
+        // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
+        let fixtures = Self.installFixtures(uiTesting: uiTesting)
+        let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
+        // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
+        let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
+        let catalogue = Self.makeCatalogueCache(fixtures: fixtures)
+        let discoverAnalytics = Self.makeDiscoverAnalyticsCache(fixtures: fixtures)
+        // One context for every brew invocation: command center, installed inventory and `brew config`.
+        let executionContext = Self.executionContext(uiTesting: uiTesting, fixtures: fixtures)
+        let center = SerialBrewCommandCenter(executionContext: executionContext)
+        let apiClient = Self.makeAPIClient(uiTesting: uiTesting)
+        let catalogueRepo = BrewCatalogueRepository(apiClient: apiClient, cache: catalogue)
+
+        installedInventoryCache = inventoryCache
+        catalogueCache = catalogue
+        discoverAnalyticsCache = discoverAnalytics
+        commandCenter = center
+        languageChange = Self.makeLanguageChange(preferences: preferences, center: center, uiTesting: uiTesting)
+        commandFactory = LiveBrewMutatingCommandFactory()
+        installedPackagesRepository = BrewInstalledPackagesRepository(executionContext: executionContext, cache: inventoryCache, commandCenter: center)
+        commandJobsRepository = BrewCommandJobsRepository(commandCenter: center)
+        installedDependentsRepository = BrewInstalledDependentsRepository(cache: inventoryCache)
+        catalogueRepository = catalogueRepo
+        discoverPackagesRepository = BrewDiscoverPackagesRepository(
+            apiClient: apiClient,
+            catalogueRepository: catalogueRepo,
+            cache: discoverAnalytics,
+            defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
+        )
+        doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
+        configRepository = BrewConfigRepository(executionContext: executionContext)
+
+        let selfUpgradeContext = SelfUpgradeLaunchContext(
+            installedPackagesRepository: installedPackagesRepository,
+            executionContext: executionContext,
+            commandCenter: center,
+            selfUpgradeKeyPrefix: selfUpgradeKeyPrefix,
+            uiTesting: uiTesting,
+            fixtures: fixtures,
+            launchOutcome: launchOutcome,
+        )
+        #if DEBUG
+            selfUpgradeCoordinator = Self.makeSelfUpgradeCoordinator(selfUpgradeContext, debugControl: selfUpgradeDebugControl)
+        #else
+            selfUpgradeCoordinator = Self.makeSelfUpgradeCoordinator(selfUpgradeContext)
+        #endif
+
+        NSWindow.allowsAutomaticWindowTabbing = false
+    }
+
+    private static func makeLanguagePreferences(uiTesting: BrewUITestingLaunchConfiguration?) -> LanguagePreferences {
+        let languageDefaults = uiTesting == nil ? UserDefaults.standard : ProcessInfo.processInfo.environment[
+            BrewUITestingEnvironmentKey.languagePreferencesDomain,
+        ].flatMap(ApplicationEntry.languageDefaults(for:))
+        return LanguagePreferences(
+            defaults: languageDefaults,
+            preferredLanguages: Bundle.main.preferredLocalizations,
+            systemPreferredLanguages: uiTesting == nil ? nil : ["en"],
+        )
+    }
+
+    private static func makeLanguageChange(
+        preferences: LanguagePreferences, center: SerialBrewCommandCenter, uiTesting: BrewUITestingLaunchConfiguration?,
+    ) -> LanguageChange {
+        LanguageChange(preferences: preferences, commandCenter: center) {
+            try await ApplicationEntry.relaunch(
+                arguments: Self.relaunchArguments(uiTesting: uiTesting) + preferences.pendingLaunchArguments,
+                environment: Self.relaunchEnvironment(uiTesting: uiTesting),
+            )
+        }
+    }
+
     #if DEBUG
         /// A dev build is never the installed cask, so DEBUG wraps both detection and the handoff.
         private static func makeSelfUpgradeCoordinator(
@@ -419,29 +402,5 @@ extension BrewApp {
         )
         coordinator.registerLaunchOutcome(context.launchOutcome)
         return coordinator
-    }
-}
-
-/// 合并 SwiftUI 重新生成菜单时的一批通知；自身标题写入不再递归调度。
-@MainActor
-private final class NativeMenuRefresh {
-    private var isScheduled = false
-    private var isApplying = false
-    private var localization = AppLocalization()
-
-    func request(localization: AppLocalization) {
-        self.localization = localization
-        guard !isApplying, !isScheduled else { return }
-        isScheduled = true
-        // 菜单打开时处于 event-tracking run loop；普通 Task 可能等到菜单关闭才执行。
-        RunLoop.main.perform(inModes: [.common]) { [weak self] in
-            MainActor.assumeIsolated {
-                guard let self else { return }
-                self.isApplying = true
-                NativeMenuLocalization.applyStandard(to: NSApp, localization: self.localization)
-                self.isApplying = false
-                self.isScheduled = false
-            }
-        }
     }
 }

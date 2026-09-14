@@ -8,7 +8,7 @@ public struct AppLocalization {
     public init(language: String? = nil, bundle: Bundle = .main) {
         let language = language ?? bundle.preferredLocalizations.first ?? "en"
         locale = Locale(identifier: language)
-        // 显式选择资源目录；仅传 locale 不足以改变 Foundation 的 Bundle 查找语言。
+        // Pick the resource directory explicitly; passing a locale alone does not change Foundation's bundle language lookup.
         let path = bundle.path(forResource: language, ofType: "lproj")
             ?? bundle.path(forResource: "en", ofType: "lproj")
         self.bundle = path.flatMap(Bundle.init(path:)) ?? bundle

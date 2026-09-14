@@ -73,6 +73,8 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Documentation:** Use [DocC](https://www.swift.org/documentation/docc/) / Xcode doc comments for non-obvious `public` / `internal` API. Inline `//` explains **why**, not **what**.
 
+**Localization:** App-owned strings go in `Homebrew/Localizable.xcstrings` and resolve through `AppLocalization` for the current launch. Do not rewrite File / Edit / Window titles. `zh-Hant` uses Taiwan software terms (套件 / 解除安裝 / 重新整理 / 升級 / 拷貝), translated from the English meaning. Configuration is 配置 in both Chinese variants — it is a brew config report, not Settings. Leave brew output, paths, and package names untranslated. Adding a locale is catalog entries plus an Xcode known region, not a business-logic branch.
+
 **Accessibility:** Meaningful labels (and hints where needed) on interactive controls; keyboard shortcuts where it matters. **UI test IDs:** the `AXID` enum in [`Sources/BrewAccessibilityID/`](Sources/BrewAccessibilityID/), linked by both the app and `BrewUITests`. Attach it with `.axid(_:)`; never write a raw identifier string in a view or a test. Identity is orthogonal to labels — keep `accessibilityLabel` for VoiceOver.
 
 **Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub only **boundaries**: `BrewCommandRunning` (subprocess) and, when needed, `BrewExecutableLocating` (e.g. `MissingBrewExecutableLocator` for “brew not found”). Prefer **slice tests** that use the real `BrewInstalledPackagesRepository` (and thus real parsing) with those fakes; shared helpers live under [`BrewTests/TestSupport/`](BrewTests/TestSupport/). Pure presentation tests may use `InstalledViewModel`’s `init(testing…)` without a repository. Cover errors and async paths, not only happy paths. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for layer flow.
@@ -90,17 +92,3 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 ## Updating this file
 
 Add patterns when they stabilize in code. Cross-cutting decisions go in `.ai/memory.md`.
-
-## Localization
-
-- Keep all app-owned translations in `Homebrew/Localizable.xcstrings`; views and Commands consume the
-  same `AppLocalization` snapshot from `LanguagePreferences`. Adding a locale requires resources and
-  Xcode region registration, not language-specific business branches.
-- `zh-Hant` uses Taiwan software terminology and Apple's native menu vocabulary (for example 檔案,
-  視窗, 拷貝, 貼上, 復原). Translate from the English meaning, not by converting Simplified Chinese
-  characters. Use 套件 / 解除安裝 / 重新整理 / 升級 consistently; retain Homebrew product/category names.
-- Preserve interpolation types, plural branches, commands, paths and raw diagnostics. Review dependency
-  direction and destructive-action copy explicitly. `LocalizationCatalogTests` checks the shipping
-  catalog's coverage and formatting arguments, while background UI checks verify actual rendering.
-- Native vocabulary references: [Apple's Taiwan menu guide](https://support.apple.com/zh-tw/guide/mac-help/mchlp1446/mac)
-  and [Finder view terminology](https://support.apple.com/zh-tw/guide/mac-help/-mchldaafb302/mac).
