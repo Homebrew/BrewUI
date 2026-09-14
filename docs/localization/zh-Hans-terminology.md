@@ -49,8 +49,11 @@ This document defines terminology for maintaining BrewUI's optional Simplified C
 | English | 统一中文 | 使用规则 |
 | --- | --- | --- |
 | Upgrade / Upgrades | 更新 | 所有界面用词统一为“更新”；brew upgrade 命令不改写。 |
+| Upgrading | 升级中 | 表示软件包正在升级；完成后的操作名称仍使用“更新”。 |
 | Install | 安装 | 安装操作。 |
+| Installing | 安装中 | 表示软件包正在安装。 |
 | Uninstall | 卸载 | 卸载操作。 |
+| Uninstalling | 卸载中 | 表示软件包正在卸载。 |
 | Refresh | 刷新 | 重新读取或刷新数据。 |
 | Search | 搜索 | 搜索框及搜索状态；Find 对应“查找”。 |
 | Copy | 复制 | 复制操作。 |

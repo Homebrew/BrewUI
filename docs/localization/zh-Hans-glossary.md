@@ -25,6 +25,8 @@
 | Could not search packages | 无法搜索软件包 |
 | Something went wrong loading packages. | 加载软件包时出错。 |
 | No matches | 无匹配项 |
+| No formulae match | 没找到匹配的 Formula |
+| No casks match | 没找到匹配的 Cask |
 | Results | 搜索结果 |
 | Browse and search your installed packages | 浏览或搜索已安装的软件包 |
 | Casks | Cask |
@@ -73,6 +75,7 @@
 | Installed | 已安装 |
 | Installed packages | 已安装软件包 |
 | Install | 安装 |
+| Installing | 安装中 |
 | Language | 语言 |
 | System Default | 跟随系统 |
 | English | English |
@@ -102,7 +105,9 @@
 | The Homebrew app quit unexpectedly | Homebrew 应用意外退出 |
 | Uncaught Exception | 未捕获异常 |
 | Uninstall | 卸载 |
+| Uninstalling | 卸载中 |
 | Upgrades | 更新 |
+| Upgrading | 升级中 |
 | Homebrew environment & diagnostics | Homebrew 环境与诊断 |
 | Your packages | 你的软件包 |
 | Your system is ready to brew | 你的系统已准备好使用 brew |
@@ -160,6 +165,8 @@
 | Copy all | 全部复制 |
 | Uninstalls this package from this Mac | 从此 Mac 卸载此软件包 |
 | Upgrades this package to the latest available version | 将此软件包更新到最新可用版本 |
+| Homebrew command failed. | Homebrew 命令执行失败。 |
+| Homebrew not found | 没有找到该 Homebrew |
 | No installed packages to check. | 没有可检查的已安装软件包。 |
 | Your installed package is up to date. | 已安装的软件包为最新版本。 |
 | All %lld installed packages are up to date. | 全部 %lld 个已安装的软件包均为最新版本。 |

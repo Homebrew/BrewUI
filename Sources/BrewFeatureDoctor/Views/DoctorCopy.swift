@@ -41,7 +41,10 @@ enum DoctorCopy {
         "For more information, see:": "For more information, see:",
         "The following taps are not trusted:": "The following taps are not trusted:",
         "Calling string comparison format for `depends_on macos:` is deprecated! Use `depends_on macos: :big_sur` " +
-            "instead.": "Calling string comparison format for `depends_on macos:` is deprecated! Use `depends_on macos: :big_sur` \("instead.")",
+            "instead.": """
+            Calling string comparison format for `depends_on macos:` is deprecated! Use `depends_on macos: :big_sur` \
+            instead.
+            """,
         "This is a Tier 2 configuration:": "This is a Tier 2 configuration:",
         "You can report issues with Tier 2 configurations to Homebrew/* repositories!": "You can report issues with Tier 2 configurations to Homebrew/* repositories!",
         "Read the above document before opening any issues or PRs.": "Read the above document before opening any issues or PRs.",

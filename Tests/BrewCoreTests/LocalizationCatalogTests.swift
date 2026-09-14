@@ -160,12 +160,19 @@ struct LocalizationCatalogTests {
         "No installed packages to check.": "没有可检查的已安装软件包。",
         "Your installed package is up to date.": "已安装的软件包为最新版本。",
         "All %lld installed packages are up to date.": "全部 %lld 个已安装的软件包均为最新版本。",
+        "No formulae match": "没找到匹配的 Formula",
+        "No casks match": "没找到匹配的 Cask",
+        "Installing": "安装中",
+        "Upgrading": "升级中",
+        "Uninstalling": "卸载中",
+        "Homebrew command failed.": "Homebrew 命令执行失败。",
+        "Homebrew not found": "没有找到该 Homebrew",
     ]
 
     @Test func `doctor and package detail copy has required translations`() throws {
         let strings = try Self.catalogStrings()
         for key in Self.requiredSimplifiedChineseKeys {
-            let entry = try #require(strings[key] as? [String: Any], "Missing catalog entry for (key)")
+            let entry = try #require(strings[key] as? [String: Any], "Missing catalog entry for \(key)")
             let localizations = try #require(entry["localizations"] as? [String: Any])
             let simplifiedChinese = try #require(localizations["zh-Hans"] as? [String: Any])
             let stringUnit = try #require(simplifiedChinese["stringUnit"] as? [String: Any])
