@@ -30,6 +30,13 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
         }
     }
 
+    var refreshesDoctorReport: Bool {
+        switch self {
+        case .doctor: true
+        case .installed, .upgrades, .discover, .configuration: false
+        }
+    }
+
     /// Test-facing identity for this destination. Kept as an explicit mapping rather than a
     /// `rawValue` bridge so renaming a case here can never silently repoint a UI test.
     var axDestination: AXID.SidebarDestination {

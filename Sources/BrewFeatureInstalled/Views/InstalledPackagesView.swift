@@ -4,6 +4,7 @@
 //
 
 import BrewAccessibilityID
+import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -14,8 +15,12 @@ struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
+    @Environment(\.packageListBanner) private var packageListBanner
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            packageListBanner()
+
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 Text("Your packages")
                     .font(.brewTitle2)

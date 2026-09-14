@@ -8,6 +8,8 @@ import SwiftUI
 
 #if DEBUG
     struct DebugMenuCommands: Commands {
+        @Bindable var selfUpgradeControl: SelfUpgradeDebugControl
+
         var body: some Commands {
             CommandMenu("Debug") {
                 Button("Clear UserDefaults") {
@@ -29,6 +31,10 @@ import SwiftUI
                         ).raise()
                     }
                 }
+
+                Divider()
+
+                Toggle("Show the Self-Upgrade Banner", isOn: $selfUpgradeControl.simulateUpgradeAvailable)
             }
         }
     }

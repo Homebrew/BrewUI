@@ -46,8 +46,7 @@ struct DoctorJSONFinding: Decodable {
 }
 
 struct DoctorJSONRemediation: Decodable {
-    /// The only source of anything the app offers to run: `text` regularly contains destructive lines
-    /// (`sudo rm -rf …`) that brew deliberately left out of this array.
+    /// The only source of anything the app offers to run — see ``DoctorJSONParser``.
     var commands: [String]
     var text: String
 

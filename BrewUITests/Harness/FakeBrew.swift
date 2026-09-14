@@ -6,9 +6,8 @@
 import BrewUITestContract
 import Foundation
 
-/// A deterministic stand-in for `brew`, plus the fixture tree it reads. The app spawns it through the
-/// real `BrewCommandService`, so `Process`, pipes, the drain and exit handling stay under test, and it
-/// runs without a login shell so `$@` is exactly the brew subcommand argv.
+/// A deterministic stand-in for `brew`, plus the fixture tree it reads. Spawned through the real
+/// `BrewCommandService`, so `Process`, pipes, the drain and exit handling stay under test.
 nonisolated enum FakeBrew {
     static func payload(for scenario: BrewUITestScenario) -> BrewUITestingFixturePayload {
         let fixtures = ScenarioFixtures.fixtures(for: scenario)

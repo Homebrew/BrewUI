@@ -4,6 +4,7 @@
 //
 
 import BrewAccessibilityID
+import BrewAppEnvironment
 import BrewCore
 import BrewUIComponents
 import SwiftUI
@@ -14,8 +15,12 @@ struct UpgradesPackagesView: View {
     @Bindable var viewModel: UpgradesViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
+    @Environment(\.packageListBanner) private var packageListBanner
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            packageListBanner()
+
             UpgradesHeaderView(viewModel: viewModel)
 
             if viewModel.totalOutdatedCount > 0 {

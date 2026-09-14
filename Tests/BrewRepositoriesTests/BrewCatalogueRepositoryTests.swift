@@ -130,9 +130,8 @@ struct BrewCatalogueRepositoryTests {
         async let first = repository.package(for: .formula(name: "deduped"))
         async let second = repository.package(for: .formula(name: "deduped"))
 
-        #expect(await waitUntil {
-            await apiClient.formulaCallCount() == 1
-        })
+        await apiClient.waitForFormulaFetch()
+        #expect(await apiClient.formulaCallCount() == 1)
         let dedupedPayload = try JSONDecoder().decode(
             FormulaCatalogueJSON.self,
             from: fixture.formulaCacheJSON(name: "deduped"),
@@ -354,6 +353,7 @@ private actor StubCatalogueAPIClient: BrewAPIClient {
 private actor DeferredFormulaStubCatalogueAPIClient: BrewAPIClient {
     private var formulaETags: [String?] = []
     private var continuation: CheckedContinuation<CatalogueResponse<FormulaCatalogueJSON>, Error>?
+    private var formulaFetchWaiters: [CheckedContinuation<Void, Never>] = []
 
     func fetchFormulaInstallOnRequestAnalytics(
         window _: BrewAnalyticsWindow,
@@ -371,9 +371,18 @@ private actor DeferredFormulaStubCatalogueAPIClient: BrewAPIClient {
 
     func fetchFormulaCatalogue(etag: String?) async throws -> CatalogueResponse<FormulaCatalogueJSON> {
         formulaETags.append(etag)
+        for waiter in formulaFetchWaiters {
+            waiter.resume()
+        }
+        formulaFetchWaiters = []
         return try await withCheckedThrowingContinuation { continuation in
             self.continuation = continuation
         }
+    }
+
+    func waitForFormulaFetch() async {
+        if !formulaETags.isEmpty { return }
+        await withCheckedContinuation { formulaFetchWaiters.append($0) }
     }
 
     func fetchCaskCatalogue(etag _: String?) async throws -> CatalogueResponse<CaskCatalogueJSON> {
@@ -523,20 +532,4 @@ private struct TestFixture {
         let quoted = dependencies.map { "\"\($0)\"" }.joined(separator: ", ")
         return "[\(quoted)]"
     }
-}
-
-private func waitUntil(
-    timeoutNanoseconds: UInt64 = 2_000_000_000,
-    pollNanoseconds: UInt64 = 20_000_000,
-    condition: @escaping @Sendable () async throws -> Bool,
-) async -> Bool {
-    let start = DispatchTime.now().uptimeNanoseconds
-    while DispatchTime.now().uptimeNanoseconds - start < timeoutNanoseconds {
-        let matches = try? await condition()
-        if matches == true {
-            return true
-        }
-        try? await Task.sleep(nanoseconds: pollNanoseconds)
-    }
-    return false
 }

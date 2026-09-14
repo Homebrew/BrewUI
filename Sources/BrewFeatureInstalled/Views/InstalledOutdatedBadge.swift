@@ -32,7 +32,7 @@ struct InstalledOutdatedBadge: View {
         }
         .accessibilityLabel(
             String(
-                localized: "Update available",
+                localized: "Upgrade available",
                 comment: "Installed outdated status badge accessibility label",
             ),
         )

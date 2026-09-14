@@ -16,6 +16,8 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case upgradeFormula
     case upgradeCask
     case upgradeAll
+    /// Distinct from ``upgradeCask`` so surfaces can treat the app updating itself differently.
+    case upgradeApp
     case uninstallFormula
     case uninstallCask
     case doctorFix
@@ -25,6 +27,11 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     /// console would otherwise paint the whole run in the error role.
     public var writesNormalOutputToStandardError: Bool {
         self == .doctorRead
+    }
+
+    /// `true` when interrupting the command would leave Homebrew half-changed.
+    public var isMutating: Bool {
+        self != .doctorRead
     }
 }
 

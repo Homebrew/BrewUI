@@ -98,6 +98,24 @@ struct LoginShellBrewCommandRunnerTests {
         #expect(invocation.executableURL.path == LoginShellResolver.defaultFallback.path)
     }
 
+    /// The shell exports what it inherits, so a variable pinned on it reaches brew.
+    @Test func `run forwards the pinned environment to the shell`() async throws {
+        let recorder = InvocationRecorder()
+        let wrapped = LoginShellBrewCommandRunner(
+            underlying: recorder,
+            shellResolver: LoginShellResolver(lookup: { URL(fileURLWithPath: "/bin/zsh") }),
+        )
+
+        _ = try await wrapped.run(
+            executableURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew"),
+            arguments: ["upgrade"],
+            options: BrewRunOptions(environment: ["HOMEBREW_NO_COLOR": "1"]),
+        )
+
+        let invocation = try #require(await recorder.first)
+        #expect(invocation.options.environment["HOMEBREW_NO_COLOR"] == "1")
+    }
+
     @Test func `run returns the underlying CommandOutput verbatim`() async throws {
         let expected = CommandOutput(
             standardOutput: "ok",
@@ -124,6 +142,7 @@ struct LoginShellBrewCommandRunnerTests {
 private struct RecordedInvocation {
     let executableURL: URL
     let arguments: [String]
+    let options: BrewRunOptions
 }
 
 private actor InvocationRecorder: BrewCommandRunning {
@@ -138,8 +157,8 @@ private actor InvocationRecorder: BrewCommandRunning {
         invocations.first
     }
 
-    func run(executableURL: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
-        invocations.append(RecordedInvocation(executableURL: executableURL, arguments: arguments))
+    func run(executableURL: URL, arguments: [String], options: BrewRunOptions) async throws -> CommandOutput {
+        invocations.append(RecordedInvocation(executableURL: executableURL, arguments: arguments, options: options))
         return stubbedOutput
     }
 }

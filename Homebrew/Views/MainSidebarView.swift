@@ -13,24 +13,6 @@ struct MainSidebarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .bottom, spacing: BrewSpacing.sm) {
-                Image("Mark")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 24)
-                Text("Homebrew")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-            }
-            .padding(.horizontal, BrewSpacing.md)
-            .padding(.vertical, BrewSpacing.md)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
-            .accessibilityLabel("Homebrew")
-
-            Divider()
-                .overlay(Color.brewBorderSeparator)
-
             sidebarRow(
                 title: "Installed",
                 emoji: "📦",

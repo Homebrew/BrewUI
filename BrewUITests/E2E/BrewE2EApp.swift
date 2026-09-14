@@ -6,8 +6,7 @@
 import XCTest
 
 /// Launches with **no** `-uiTesting` argument, so `BrewApp.init()` takes `.live()`: real login shell,
-/// real `brew`, real network. The injected determinism environment survives `-l -i` because a login
-/// shell adds to exported variables rather than clearing them.
+/// real `brew`, real network.
 @MainActor
 enum BrewE2EApp {
     static func launch() -> XCUIApplication {

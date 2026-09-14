@@ -49,10 +49,10 @@ final class UpgradesViewModel {
             .loading
         case let .failed(error):
             .failed(Self.userMessage(for: error))
-        case let .loaded(packages):
+        case .loaded:
             .loaded(
                 Self.filteredContent(
-                    InstalledPackagesContent(packages: packages.filter(\.outdated)),
+                    InstalledPackagesContent(packages: repository.outdatedPackages),
                     scope: scope,
                     query: searchQuery,
                 ),
@@ -75,7 +75,7 @@ final class UpgradesViewModel {
     /// Total installed package count from the underlying inventory, used by the
     /// "All N packages are at their latest versions." empty-state copy.
     var totalInstalledCount: Int {
-        (repository.state.value ?? []).count
+        repository.userManagedPackages.count
     }
 
     /// Outdated count from the underlying inventory, ignoring the active search.
@@ -337,8 +337,7 @@ final class UpgradesViewModel {
 // MARK: - Upgrade action
 
 extension UpgradesViewModel {
-    /// User-facing command rendered by the Updates header's `CommandBlockView`. Derived from the same
-    /// ``BrewUpgradeSelection`` that ``upgradeAll()`` submits, so the shown command always matches what runs.
+    /// Derived from the ``BrewUpgradeSelection`` ``upgradeAll()`` submits, so the shown command is what runs.
     var bulkUpgradeDisplayCommand: String {
         upgradeSelection.displayCommand
     }
@@ -420,14 +419,22 @@ extension UpgradesViewModel {
         if isSearchActive, !allRows.isEmpty {
             return .explicit(allRows.map(\.name))
         }
-        switch scope {
-        case .all:
-            return .all
-        case .formulae:
-            return .formulae
-        case .casks:
-            return .casks
+        let scoped: BrewUpgradeSelection = switch scope {
+        case .all: .all
+        case .formulae: .formulae
+        case .casks: .casks
         }
+        guard wouldSweepInTheAppsOwnCask(scoped) else {
+            return scoped
+        }
+        return .explicit(allRows.map(\.name))
+    }
+
+    /// `brew upgrade` and `brew upgrade --cask` name no packages, so they take the app's own cask with
+    /// them. Naming the rows instead is the only way to run the batch without it.
+    private func wouldSweepInTheAppsOwnCask(_ selection: BrewUpgradeSelection) -> Bool {
+        repository.isTheAppsOwnCaskOutdated
+            && selection.covers(packageID: SelfUpgradeIdentity.packageID, isOutdated: true)
     }
 
     /// Submits one batch `brew upgrade` for ``upgradeSelection`` under ``BrewOperationID/bulkUpgrade(_:)``
@@ -435,6 +442,9 @@ extension UpgradesViewModel {
     /// selection is a no-op. The repository's completion observer reconciles inventory on running→idle,
     /// so finished rows drop from the list when the run completes.
     func upgradeAll() {
+        guard !allRows.isEmpty else {
+            return
+        }
         let selection = upgradeSelection
         let id = BrewOperationID.bulkUpgrade(selection)
         let command = commandFactory.bulkUpgradeCommand(selection: selection)

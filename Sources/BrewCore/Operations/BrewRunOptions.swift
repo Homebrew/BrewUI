@@ -29,11 +29,16 @@ public struct BrewRunOptions: Sendable {
 
     public var output: OutputChannel
 
+    /// Pinned on top of the inherited environment, and on top of the colour the output channel forces.
+    public var environment: [String: String]
+
     public init(
         lineObserver: (@Sendable (BrewCommandOutputLine) -> Void)? = nil,
         output: OutputChannel = .pipes(forceColor: false),
+        environment: [String: String] = [:],
     ) {
         self.lineObserver = lineObserver
         self.output = output
+        self.environment = environment
     }
 }
