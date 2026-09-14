@@ -5,24 +5,21 @@ final class LocalizationUITests: BrewUITestCase {
     @MainActor
     func testSimplifiedChineseAcrossFeatures() throws {
         let app = try track(BrewApp.launch(scenario: .installedBasic, language: "zh-Hans"))
-        let installed = app.buttons[AXID.sidebarItem(.installed).rawValue]
-        XCTAssertTrue(installed.waitForExistence(timeout: BrewUITestTimeout.launch))
-        XCTAssertEqual(installed.label, "已安装")
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "4 个软件包"))
-            .firstMatch.waitForExistence(timeout: BrewUITestTimeout.command))
+        let installed = InstalledScreen(app: app).waitUntilLoaded(timeout: BrewUITestTimeout.launch)
+        let sidebarItem = BrewUIButton(app, .sidebarItem(.installed)).waitToExist()
+        XCTAssertEqual(sidebarItem.element.label, "已安装")
+        assertText("4 个软件包", on: installed)
 
-        app.buttons[AXID.sidebarItem(.upgrades).rawValue].click()
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "2 个软件包可升级"))
-            .firstMatch.waitForExistence(timeout: BrewUITestTimeout.command))
+        let upgrades = installed.sidebar.goToUpgrades()
+        assertText("2 个软件包可升级", on: upgrades)
 
-        app.buttons[AXID.sidebarItem(.doctor).rawValue].click()
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "系统已准备就绪"))
-            .firstMatch.waitForExistence(timeout: BrewUITestTimeout.command))
-        XCTAssertTrue(app.buttons["重新运行"].exists)
+        let doctor = upgrades.sidebar.goToDoctor()
+        assertText("系统已准备就绪", on: doctor)
+        XCTAssertTrue(doctor.root.element.buttons["重新运行"].waitForExistence(timeout: BrewUITestTimeout.default))
 
-        app.buttons[AXID.sidebarItem(.configuration).rawValue].click()
-        XCTAssertTrue(app.buttons["复制报告"].waitForExistence(timeout: BrewUITestTimeout.command))
-        XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", "构建设置")).firstMatch.exists)
+        let configuration = doctor.sidebar.goToConfiguration()
+        XCTAssertTrue(configuration.root.element.buttons["复制报告"].waitForExistence(timeout: BrewUITestTimeout.command))
+        assertText("构建设置", on: configuration)
         let attachment = XCTAttachment(screenshot: app.screenshot())
         attachment.name = "Simplified Chinese configuration"
         attachment.lifetime = .keepAlways
@@ -32,8 +29,25 @@ final class LocalizationUITests: BrewUITestCase {
     @MainActor
     func testSimplifiedChineseMissingHomebrewError() throws {
         let app = try track(BrewApp.launch(scenario: .brewNotFound, language: "zh-Hans"))
-        let error = app.buttons[AXID.errorState.rawValue]
-        XCTAssertTrue(error.waitForExistence(timeout: BrewUITestTimeout.command))
-        XCTAssertEqual(error.label, "找不到 Homebrew。请先安装，或确认 brew 位于默认位置。")
+        let installed = InstalledScreen(app: app).waitUntilLoaded(timeout: BrewUITestTimeout.launch)
+        installed.errorState.assertContains(
+            "找不到 Homebrew。请先安装，或确认 brew 位于默认位置。",
+            timeout: BrewUITestTimeout.command,
+        )
+    }
+
+    @MainActor
+    private func assertText(_ substring: String, on screen: some Screen, file: StaticString = #filePath, line: UInt = #line) {
+        // macOS exposes combined SwiftUI text through value while label can be empty.
+        let predicate = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)
+        let match = screen.root.element.descendants(matching: .staticText).matching(predicate).firstMatch
+        guard match.waitForExistence(timeout: BrewUITestTimeout.command) else {
+            XCTFail(
+                "Expected \(screen.root.id.rawValue) to contain “\(substring)”.\n\(BrewUITestDiagnostics.report(for: screen.app))",
+                file: file,
+                line: line,
+            )
+            return
+        }
     }
 }
