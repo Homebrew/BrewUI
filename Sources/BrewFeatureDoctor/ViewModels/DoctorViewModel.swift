@@ -105,13 +105,17 @@ final class DoctorViewModel {
     var subtitle: String {
         switch presentation {
         case .loading:
-            "Running brew doctor…"
+            String(localized: "Running brew doctor…", comment: "Doctor subtitle while running")
         case .healthy:
-            isRefreshing ? "Re-checking…" : "No problems found"
+            isRefreshing
+                ? String(localized: "Re-checking…", comment: "Doctor subtitle while refreshing")
+                : String(localized: "No problems found", comment: "Doctor subtitle for a healthy report")
         case .issues:
-            isRefreshing ? "Re-checking…" : "Warnings found"
+            isRefreshing
+                ? String(localized: "Re-checking…", comment: "Doctor subtitle while refreshing")
+                : String(localized: "Warnings found", comment: "Doctor subtitle when warnings are present")
         case .failed:
-            "The check could not be completed"
+            String(localized: "The check could not be completed", comment: "Doctor subtitle after a failed check")
         }
     }
 

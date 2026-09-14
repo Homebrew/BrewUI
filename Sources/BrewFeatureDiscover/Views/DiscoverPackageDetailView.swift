@@ -139,27 +139,42 @@ private struct DiscoverPackageDetailMetadataSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "Details")
+            PackageDetailSectionHeading(title: String(localized: "Details", comment: "Discover package details heading"))
             if let installedVersion = viewModel.installedVersionLabel {
                 detailRow(
-                    label: "Installed",
+                    label: String(localized: "Installed", comment: "Discover package installed version label"),
                     value: installedVersion,
                     valueColor: viewModel.isInstalledVersionOutdated ? .brewStatusWarning : .brewTextPrimary,
                     valueFontWeight: .heavy,
                 )
             }
-            detailRow(label: "Latest version", value: viewModel.stableVersionLabel)
+            detailRow(
+                label: String(localized: "Latest version", comment: "Discover package latest version label"),
+                value: viewModel.stableVersionLabel,
+            )
             if viewModel.showsInstallMetrics {
-                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
+                detailRow(
+                    label: String(localized: "30-day installs", comment: "Discover package install metrics label"),
+                    value: viewModel.installs30DayLabel,
+                )
             }
             if let dateValue = viewModel.installDateValue {
-                detailRow(label: "Installed on", value: dateValue)
+                detailRow(
+                    label: String(localized: "Installed on", comment: "Discover package install date label"),
+                    value: dateValue,
+                )
             }
             if let reason = viewModel.installReasonValue {
-                detailRow(label: "Install reason", value: reason)
+                detailRow(
+                    label: String(localized: "Install reason", comment: "Discover package install reason label"),
+                    value: reason,
+                )
             }
             if let license = viewModel.licenseLabel {
-                detailRow(label: "License", value: license)
+                detailRow(
+                    label: String(localized: "License", comment: "Discover package license label"),
+                    value: license,
+                )
             }
             if let tap = viewModel.tapDisplayValue {
                 sourceRow(tap: tap, url: viewModel.sourceURL)
@@ -233,7 +248,7 @@ private struct DiscoverPackageDetailDependenciesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            PackageDetailSectionHeading(title: "Dependencies")
+            PackageDetailSectionHeading(title: String(localized: "Dependencies", comment: "Discover package dependencies heading"))
             let deps = viewModel.dependencyNames
             if deps.isEmpty {
                 Text("No dependencies.")
@@ -262,11 +277,11 @@ private struct DiscoverPackageInstallSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "Install")
+            PackageDetailSectionHeading(title: String(localized: "Install", comment: "Discover package install heading"))
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: viewModel.installCommand,
-                    summaryText: "Installs this package on your Mac",
+                    summaryText: String(localized: "Installs this package on your Mac", comment: "Install command explanation"),
                 )
 
                 Button {

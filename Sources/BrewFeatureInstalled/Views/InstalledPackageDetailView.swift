@@ -112,9 +112,9 @@ struct InstalledPackageDetailView: View {
         InstalledPackageDetailMetadataSection(viewModel: viewModel)
         PackageDetailSectionDivider()
         PackageRelationshipSection(
-            title: "Dependencies",
+            title: String(localized: "Dependencies", comment: "Installed package dependencies heading"),
             relationships: viewModel.dependencyRelationships,
-            emptyText: "No dependencies.",
+            emptyText: String(localized: "No dependencies.", comment: "Empty installed package dependencies message"),
             dotStyle: .neutral,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
@@ -166,7 +166,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: uninstall.displayCommand,
-                    summaryText: "Uninstalls this package from this Mac",
+                    summaryText: String(localized: "Uninstalls this package from this Mac", comment: "Uninstall command explanation"),
                 )
 
                 Button {
@@ -234,7 +234,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: upgrade.displayCommand,
-                    summaryText: "Upgrades this package to the latest available version",
+                    summaryText: String(localized: "Upgrades this package to the latest available version", comment: "Upgrade command explanation"),
                 )
 
                 if let title = upgrade.primaryButtonTitle {

@@ -5,6 +5,7 @@
 
 import AppKit
 import BrewAccessibilityID
+import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -13,9 +14,14 @@ import SwiftUI
 /// Single scrolling pane presenting `brew config` output, with copy/refresh.
 struct ConfigView: View {
     @State private var viewModel: ConfigViewModel
+    @State private var selectedLanguage: AppLanguage
+    @State private var showsLanguageRestartAlert = false
+    private let languageStore: AppLanguageStore
 
-    init(repository: any ConfigRepository) {
+    init(repository: any ConfigRepository, languageStore: AppLanguageStore = AppLanguageStore()) {
         _viewModel = State(initialValue: ConfigViewModel(repository: repository))
+        _selectedLanguage = State(initialValue: languageStore.language)
+        self.languageStore = languageStore
     }
 
     var body: some View {
@@ -26,6 +32,19 @@ struct ConfigView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.configScreen)
+        .alert(
+            String(localized: "Restart Required", comment: "Language setting alert title"),
+            isPresented: $showsLanguageRestartAlert,
+        ) {
+            Button("OK") {}
+        } message: {
+            Text(
+                String(
+                    localized: "Language changes will take effect after restarting the app.",
+                    comment: "Language setting alert message",
+                ),
+            )
+        }
         .task {
             await viewModel.load()
         }
@@ -33,6 +52,7 @@ struct ConfigView: View {
 
     private var header: some View {
         HStack(spacing: BrewSpacing.sm) {
+            languagePicker
             Spacer(minLength: 0)
             Button("Copy report", systemImage: "doc.on.doc") {
                 copyReport()
@@ -45,6 +65,23 @@ struct ConfigView: View {
         .padding(.horizontal, BrewSpacing.lg)
         .padding(.vertical, BrewSpacing.md)
         .brewPaneContentWidth()
+    }
+
+    private var languagePicker: some View {
+        HStack(spacing: BrewSpacing.xs) {
+            Picker(String(localized: "Language", comment: "Configuration language setting label"), selection: $selectedLanguage) {
+                Text("System Default").tag(AppLanguage.system)
+                Text("English").tag(AppLanguage.english)
+                Text("Simplified Chinese").tag(AppLanguage.simplifiedChinese)
+            }
+            .pickerStyle(.menu)
+            .onChange(of: selectedLanguage) { oldLanguage, newLanguage in
+                languageStore.language = newLanguage
+                if LanguageSettingsPresentation.shouldPresentRestartAlert(from: oldLanguage, to: newLanguage) {
+                    showsLanguageRestartAlert = true
+                }
+            }
+        }
     }
 
     @ViewBuilder
