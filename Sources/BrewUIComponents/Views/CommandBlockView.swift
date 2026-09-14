@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 SwiftUI、AppKit 剪贴板和 BrewActionButton
+ * [OUTPUT]: 对外提供 可折叠、可复制的原始命令卡片
+ * [POS]: 命令展示边界；标题本地化，命令原样保留且展开状态独立于语言
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  CommandBlockView.swift
 //  BrewUIComponents
@@ -12,10 +18,10 @@ import SwiftUI
 public struct CommandBlockView: View {
     let commands: [String]
     let summaryText: String?
-    let title: String?
+    let title: LocalizedStringKey?
     let collapsible: Bool
 
-    public init(command: String, summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
+    public init(command: String, summaryText: String? = nil, title: LocalizedStringKey? = nil, collapsible: Bool = false) {
         commands = [command]
         self.summaryText = summaryText
         self.title = title
@@ -23,7 +29,7 @@ public struct CommandBlockView: View {
         _isExpanded = State(initialValue: !collapsible)
     }
 
-    public init(commands: [String], summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
+    public init(commands: [String], summaryText: String? = nil, title: LocalizedStringKey? = nil, collapsible: Bool = false) {
         self.commands = commands
         self.summaryText = summaryText
         self.title = title
@@ -79,11 +85,11 @@ public struct CommandBlockView: View {
         .background(Color.brewSurfaceRecessed)
     }
 
-    private var headerTitle: String {
+    private var headerTitle: LocalizedStringKey {
         commands.count > 1 ? "Terminal commands" : "Terminal command"
     }
 
-    private var copyTitle: String {
+    private var copyTitle: String.LocalizationValue {
         commands.count > 1 ? "Copy all" : "Copy"
     }
 

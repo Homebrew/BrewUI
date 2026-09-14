@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 DoctorIssueItem 和固定诊断替身
+ * [OUTPUT]: 提供 问题身份、可修复性与辅助功能回归测试
+ * [POS]: Doctor 展示契约；默认英文与宿主语言解耦
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  DoctorIssueItemTests.swift
 //  BrewTests
@@ -160,11 +166,11 @@ struct DoctorIssueItemTests {
             title: "Unlinked kegs",
             blocks: [Self.runnable(id: 0, command: "brew link x", arguments: ["link", "x"])],
         ))
-        #expect(item.accessibilityLabel == "Unlinked kegs, Fix available")
+        #expect(item.accessibilityLabel() == "Unlinked kegs, Fix available")
     }
 
     @Test func `accessibilityLabel is just the title when no fix is available`() {
         let item = DoctorIssueItem(issue: Self.issue(title: "Deprecated formulae", blocks: [Self.data(id: 0)]))
-        #expect(item.accessibilityLabel == "Deprecated formulae")
+        #expect(item.accessibilityLabel() == "Deprecated formulae")
     }
 }

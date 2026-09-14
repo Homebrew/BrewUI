@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 Foundation 与应用、UI 测试共用的语义标识
+ * [OUTPUT]: 提供 AXID 稳定标识，包括与翻译文案无关的语言菜单标识
+ * [POS]: 无 UI 依赖的测试契约；切换语言不改变元素身份
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  AXID.swift
 //  BrewAccessibilityID
@@ -12,6 +18,10 @@ import Foundation
 /// Row cases carry the package's Homebrew name/token (what `HomebrewPackageID.name` yields), so rows
 /// are addressable without matching on label or index.
 public enum AXID: Hashable, Sendable {
+    case languageMenu
+    case languageSystem
+    case languageOption(String)
+
     // Navigation
     case sidebar
     case sidebarItem(SidebarDestination)
@@ -66,6 +76,9 @@ public enum AXID: Hashable, Sendable {
     /// The string handed to `accessibilityIdentifier` and read back by `XCUIElement`.
     public var rawValue: String {
         switch self {
+        case .languageMenu: "language.menu"
+        case .languageSystem: "language.system"
+        case let .languageOption(language): "language.option.\(language)"
         case .sidebar: "sidebar"
         case let .sidebarItem(destination): "sidebar.item.\(destination.rawValue)"
         case .installedScreen: "installed.screen"

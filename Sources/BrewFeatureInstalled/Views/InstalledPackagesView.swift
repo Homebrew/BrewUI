@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖特性模型与当前语言环境
+ * [OUTPUT]: 实时展示数量与升级状态文案
+ * [POS]: 特性 View 在展示时解析文案，保留原有任务与选择
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledPackagesView.swift
 //  Brew
@@ -12,6 +18,7 @@ import SwiftUI
 
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: InstalledViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
@@ -25,7 +32,7 @@ struct InstalledPackagesView: View {
                 Text("Your packages")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageCountSubtitle)
+                Text(viewModel.packageCountSubtitle(localization: localization))
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
             }
@@ -38,7 +45,7 @@ struct InstalledPackagesView: View {
             Divider()
 
             AsyncContentView(
-                state: viewModel.state,
+                state: viewModel.localizedState(localization: localization),
                 onRetry: { Task { await viewModel.refresh() } },
                 loaded: { content in
                     installedList(content)

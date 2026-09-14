@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖行模型、操作状态与语言环境
+ * [OUTPUT]: 实时更新行无障碍描述
+ * [POS]: 列表行展示边界，不重置观察任务
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledListRowView.swift
 //  Brew
@@ -24,6 +30,7 @@ struct InstalledListRowRoot: View {
 }
 
 struct InstalledListRowView: View {
+    @Environment(\.brewLocalization) private var localization
     let package: InstalledBrewPackage
     @State private var viewModel: InstalledListRowViewModel
 
@@ -65,7 +72,7 @@ struct InstalledListRowView: View {
         }
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(viewModel.rowAccessibilityLabel)
+        .accessibilityLabel(viewModel.rowAccessibilityLabel(localization: localization))
     }
 
     private func iconBadge(viewModel: InstalledListRowViewModel) -> some View {

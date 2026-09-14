@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖升级协调器与类型化交接失败
+ * [OUTPUT]: 验证交接错误保存语义而非译文
+ * [POS]: 自升级状态测试，保持未知诊断原文
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  SelfUpgradeCoordinatorTests.swift
 //  BrewFeatureSelfUpgradeTests
@@ -119,7 +125,7 @@ struct SelfUpgradeCoordinatorTests {
         await coordinator.beginUpgrade()
 
         #expect(handoff.performCount == 1)
-        #expect(coordinator.phase == .failed(TestHandoffError.message))
+        #expect(coordinator.phase == .failed(.diagnostic(TestHandoffError.message)))
     }
 
     @Test func `beginUpgrade does nothing when no update is available`() async {
@@ -159,10 +165,10 @@ struct SelfUpgradeCoordinatorTests {
 
     @Test func `there is no failure message until a handoff fails`() async {
         let coordinator = makeCoordinator(status: status(available: true))
-        #expect(coordinator.failureMessage == nil)
+        #expect(coordinator.failureMessage() == nil)
 
         await coordinator.beginUpgrade()
-        #expect(coordinator.failureMessage == nil)
+        #expect(coordinator.failureMessage() == nil)
     }
 
     @Test func `a failed handoff exposes its message`() async {
@@ -171,7 +177,14 @@ struct SelfUpgradeCoordinatorTests {
 
         await coordinator.beginUpgrade()
 
-        #expect(coordinator.failureMessage == TestHandoffError.message)
+        #expect(coordinator.failureMessage() == TestHandoffError.message)
+    }
+
+    @Test func `helper unavailable is stored as A semantic failure`() async {
+        let handoff = RecordingSelfUpgradeHandoff(error: SelfUpgradeHandoffError.helperUnavailable)
+        let coordinator = makeCoordinator(status: status(available: true), handoff: handoff)
+        await coordinator.beginUpgrade()
+        #expect(coordinator.phase == .failed(.helperUnavailable))
     }
 
     // MARK: Launch outcome

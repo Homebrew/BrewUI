@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装特性展示函数
+ * [OUTPUT]: 验证默认语言下原有业务与文案契约
+ * [POS]: 特性单元测试，不改动业务预期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  UpgradesViewModelCheckFailureTests.swift
 //  BrewTests
@@ -20,10 +26,10 @@ struct UpgradesViewModelCheckFailureTests {
         ], refreshFailure: Self.brewError)
 
         #expect(viewModel.showsUpgradeCheckFailure)
-        #expect(viewModel.emptyUpgradeActionTitle == "Couldn't check for upgrades")
-        #expect(viewModel.outdatedSubtitle == "Couldn't check for upgrades")
+        #expect(viewModel.emptyUpgradeActionTitle() == "Couldn't check for upgrades")
+        #expect(viewModel.outdatedSubtitle() == "Couldn't check for upgrades")
         #expect(viewModel.upgradeCheckFailureMessage == "Not a git repository")
-        #expect(viewModel.upgradeCheckFailureDetail.hasPrefix("Not a git repository"))
+        #expect(viewModel.upgradeCheckFailureDetail().hasPrefix("Not a git repository"))
     }
 
     @Test @MainActor func `an empty inventory after a successful check still claims up to date`() {
@@ -32,8 +38,8 @@ struct UpgradesViewModelCheckFailureTests {
         ], refreshFailure: nil)
 
         #expect(!viewModel.showsUpgradeCheckFailure)
-        #expect(viewModel.emptyUpgradeActionTitle == UpgradesUpToDateCopy.headline)
-        #expect(viewModel.outdatedSubtitle == UpgradesUpToDateCopy.headline)
+        #expect(viewModel.emptyUpgradeActionTitle() == UpgradesUpToDateCopy.headline())
+        #expect(viewModel.outdatedSubtitle() == UpgradesUpToDateCopy.headline())
         #expect(viewModel.upgradeCheckFailureMessage == nil)
     }
 
@@ -46,7 +52,7 @@ struct UpgradesViewModelCheckFailureTests {
 
         #expect(!viewModel.showsUpgradeCheckFailure)
         #expect(viewModel.outdatedCount == 2)
-        #expect(viewModel.outdatedSubtitle == "2 packages can be upgraded — last check failed")
+        #expect(viewModel.outdatedSubtitle() == "2 packages can be upgraded — last check failed")
     }
 
     @Test @MainActor func `a failed check does not masquerade as a filtered-out list`() {
@@ -55,7 +61,7 @@ struct UpgradesViewModelCheckFailureTests {
         ], refreshFailure: Self.brewError)
 
         #expect(!viewModel.isFilteringOutEveryUpgrade)
-        #expect(viewModel.emptyUpgradeActionTitle != "Nothing to upgrade here")
+        #expect(viewModel.emptyUpgradeActionTitle() != "Nothing to upgrade here")
     }
 
     @Test @MainActor func `filters hiding every upgrade win over a failed check`() {
@@ -67,14 +73,14 @@ struct UpgradesViewModelCheckFailureTests {
         viewModel.searchQuery = "no-such-package"
 
         #expect(!viewModel.showsUpgradeCheckFailure)
-        #expect(viewModel.emptyUpgradeActionTitle == "Nothing to upgrade here")
+        #expect(viewModel.emptyUpgradeActionTitle() == "Nothing to upgrade here")
     }
 
     @Test @MainActor func `the failure detail spells out that empty means unknown`() {
         let viewModel = Self.makeViewModel(packages: [], refreshFailure: Self.brewError)
 
         #expect(
-            viewModel.upgradeCheckFailureDetail
+            viewModel.upgradeCheckFailureDetail()
                 .contains("can't tell whether anything needs upgrading"),
         )
     }

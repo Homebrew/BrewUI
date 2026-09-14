@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖展示模型与当前语言环境
+ * [OUTPUT]: 实时生成空态和状态提示
+ * [POS]: 界面展示层，不翻译包名、配置值或原始错误
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledOutdatedBadge.swift
 //  BrewFeatureInstalled
@@ -11,12 +17,10 @@ import SwiftUI
 /// Outlined like the kind pill it sits beside, and neutral rather than warning-coloured: an
 /// available upgrade is routine, and the version line underneath already carries the amber.
 struct InstalledOutdatedBadge: View {
+    @Environment(\.brewLocalization) private var localization
     var body: some View {
         Text(
-            String(
-                localized: "OUTDATED",
-                comment: "Installed outdated status badge label",
-            ),
+            localization.string("OUTDATED"),
         )
         .font(.brewCaption2)
         .foregroundStyle(Color.brewTextSecondary)
@@ -31,10 +35,7 @@ struct InstalledOutdatedBadge: View {
                 .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
         }
         .accessibilityLabel(
-            String(
-                localized: "Upgrade available",
-                comment: "Installed outdated status badge accessibility label",
-            ),
+            localization.string("Upgrade available"),
         )
     }
 }

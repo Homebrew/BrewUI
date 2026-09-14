@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 RelativeTimeText 时间桶与可注入的本地化解析闭包
+ * [OUTPUT]: 验证边界截断、未来时间和逐次展示解析契约
+ * [POS]: 共享展示组件的时间语义回归测试，避免语言切换复用缓存字符串
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  RelativeTimeTextTests.swift
 //  BrewUIComponentsTests
@@ -38,5 +44,12 @@ struct RelativeTimeTextTests {
     @Test func `a future timestamp reads as just now`() {
         #expect(RelativeTimeText.string(for: Self.now.addingTimeInterval(600), relativeTo: Self.now)
             == "just now")
+    }
+
+    @Test func `each rendering uses the current localizer rather than cached copy`() {
+        let date = Self.now.addingTimeInterval(-120)
+        let first = RelativeTimeText.string(for: date, relativeTo: Self.now, localize: { _ in "2 分钟前" })
+        let second = RelativeTimeText.string(for: date, relativeTo: Self.now, localize: { String(localized: $0) })
+        #expect((first, second) == ("2 分钟前", "2 minutes ago"))
     }
 }

@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖升级协调器与当前语言环境
+ * [OUTPUT]: 实时更新升级横幅文案
+ * [POS]: 升级展示层；语言切换不重新启动升级
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  SelfUpgradeBanner.swift
 //  BrewFeatureSelfUpgrade
@@ -26,10 +32,11 @@ public struct SelfUpgradeBanner: View {
 }
 
 struct SelfUpgradeBannerContent: View {
+    @Environment(\.brewLocalization) private var localization
     let coordinator: SelfUpgradeCoordinator
 
     private var presentation: SelfUpgradePresentation {
-        SelfUpgradePresentation(status: coordinator.status)
+        SelfUpgradePresentation(status: coordinator.status, localization: localization)
     }
 
     var body: some View {
@@ -39,7 +46,7 @@ struct SelfUpgradeBannerContent: View {
                 summary
                 actions
                     .padding(.top, BrewSpacing.sm)
-                if let failureMessage = coordinator.failureMessage {
+                if let failureMessage = coordinator.failureMessage(localization: localization) {
                     Text(failureMessage)
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewStatusError)

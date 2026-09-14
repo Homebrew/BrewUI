@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖业务状态与显式 AppLocalization 展示快照
+ * [OUTPUT]: 按当前语言派生文案，不改变查询、选择或命令状态
+ * [POS]: 特性展示模型；语言只作为文案函数输入，不进入业务生命周期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledViewModel.swift
 //  Brew
@@ -69,6 +75,13 @@ final class InstalledViewModel {
     /// Projects the shared repository's inventory through the active scope and search query. The
     /// repository is the single source of truth; this view model owns only screen-local filter and
     /// selection state.
+    func localizedState(localization: AppLocalization) -> LoadState<InstalledPackagesContent, String> {
+        if case let .failed(error) = repository.state {
+            return .failed(Self.userMessage(for: error, localization: localization))
+        }
+        return state
+    }
+
     var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
@@ -104,14 +117,14 @@ final class InstalledViewModel {
         return false
     }
 
-    var packageCountSubtitle: String {
+    func packageCountSubtitle(localization: AppLocalization = AppLocalization()) -> String {
         if shouldShowInitialLoadingIndicator {
-            return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
+            return localization.string("Loading packages…")
         }
         if totalPackageCount == 1 {
-            return "1 package"
+            return localization.string("1 package")
         }
-        return "\(totalPackageCount) packages"
+        return localization.string("\(totalPackageCount) packages")
     }
 
     var selectedPackage: InstalledBrewPackage? {
@@ -262,23 +275,20 @@ final class InstalledViewModel {
 
     /// Maps a repository failure into user-facing copy — the presentation decision the repository
     /// deliberately leaves to this layer.
-    private static func userMessage(for error: any Error) -> String {
+    private static func userMessage(for error: any Error, localization: AppLocalization = AppLocalization()) -> String {
         switch error {
         case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Installed tab error when brew binary missing",
-            )
+            return localization.string("Could not find Homebrew. Install it or ensure brew is in the default location.")
         case let BrewCommandError.failed(_, stderr):
             let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 return trimmed
             }
-            return String(localized: "Homebrew command failed.", comment: "Installed tab error generic brew failure")
+            return localization.string("Homebrew command failed.")
         case let BrewCommandError.launchFailed(underlying):
             return underlying
         default:
-            return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
+            return localization.string("Something went wrong loading packages.")
         }
     }
 }

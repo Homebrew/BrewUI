@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装行展示函数
+ * [OUTPUT]: 验证行无障碍状态
+ * [POS]: 行展示单元测试
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledPackageRowPresentationTests.swift
 //  BrewTests
@@ -46,7 +52,7 @@ struct InstalledPackageRowPresentationTests {
             ),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(vm.accessibilitySummary == "Git, DVCS, v2.0, Upgrade available to v2.1")
+        #expect(vm.accessibilitySummary() == "Git, DVCS, v2.0, Upgrade available to v2.1")
     }
 
     @Test func `formula chrome matches design tokens`() {

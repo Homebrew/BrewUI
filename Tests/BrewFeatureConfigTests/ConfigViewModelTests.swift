@@ -1,10 +1,33 @@
+/*
+ * [INPUT]: 依赖配置分组模型与英文文案解析
+ * [OUTPUT]: 验证配置分组顺序与原始报告一致性
+ * [POS]: 配置特性测试；不依赖宿主系统语言
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 import BrewCore
 @testable import BrewFeatureConfig
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Testing
 
 struct ConfigViewModelTests {
+    @Test @MainActor func `generic errors follow language while raw stderr remains unchanged`() throws {
+        let key = "Couldn't read the Homebrew configuration."
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("ConfigLocalization-\(UUID().uuidString).bundle")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let directory = root.appendingPathComponent("zh-Hans.lproj")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let data = try PropertyListSerialization.data(fromPropertyList: [key: "无法读取 Homebrew 配置。"], format: .xml, options: 0)
+        try data.write(to: directory.appendingPathComponent("Localizable.strings"))
+        let localization = try AppLocalization(language: "zh-Hans", bundle: #require(Bundle(url: root)))
+        let viewModel = ConfigViewModel(repository: ThrowingConfigRepository(error: ConfigOddError()))
+        #expect((
+            viewModel.userMessage(for: ConfigOddError(), localization: localization),
+            viewModel.userMessage(for: BrewCommandError.failed(exitCode: 1, stderr: key), localization: localization),
+        ) == ("无法读取 Homebrew 配置。", key))
+    }
+
     private static let snapshot = BrewConfigSnapshot(
         entries: [
             BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0"),
@@ -29,7 +52,7 @@ struct ConfigViewModelTests {
             return
         }
         let sections = viewModel.sections
-        #expect(sections.map(\.title) == ["Homebrew", "System", "Build settings"])
+        #expect(sections.map { AppLocalization(language: "en").string($0.title) } == ["Homebrew", "System", "Build settings"])
 
         let homebrew = sections.first { $0.id == "homebrew" }
         #expect(homebrew?.rows.map(\.label) == ["HOMEBREW_VERSION", "HOMEBREW_PREFIX"])
@@ -91,7 +114,7 @@ struct ConfigViewModelTests {
         await viewModel.load()
 
         #expect(!viewModel.isBrewNotFound)
-        guard case let .failed(message) = viewModel.pageState else {
+        guard case let .failed(message) = viewModel.pageState() else {
             Issue.record("expected a failed page state")
             return
         }
@@ -105,7 +128,7 @@ struct ConfigViewModelTests {
 
         await viewModel.load()
 
-        guard case let .failed(message) = viewModel.pageState else {
+        guard case let .failed(message) = viewModel.pageState() else {
             Issue.record("expected a failed page state")
             return
         }

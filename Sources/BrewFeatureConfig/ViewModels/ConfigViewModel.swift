@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 ConfigRepository 状态与 AppLocalization 展示快照
+ * [OUTPUT]: 提供 配置状态、刷新动作及当前语言错误信息
+ * [POS]: 配置展示模型；仅应用兜底文案翻译，stderr 保持原文
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  ConfigViewModel.swift
 //  BrewFeatureConfig
@@ -5,6 +11,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -25,12 +32,12 @@ final class ConfigViewModel {
 
     /// Maps the repository state to a user-facing `LoadState` the view renders via `AsyncContentView`.
     /// Errors are converted to a message string so the standard error chrome needs no model knowledge.
-    var pageState: LoadState<BrewConfigSnapshot, String> {
+    func pageState(localization: AppLocalization = AppLocalization(language: "en")) -> LoadState<BrewConfigSnapshot, String> {
         switch state {
         case let .loaded(snapshot):
             .loaded(snapshot)
         case let .failed(error):
-            .failed(userMessage(for: error))
+            .failed(userMessage(for: error, localization: localization))
         default:
             .loading
         }
@@ -50,16 +57,13 @@ final class ConfigViewModel {
     }
 
     /// Maps any repository error to the user-facing copy shown in the AsyncContentView's error state.
-    func userMessage(for error: any Error) -> String {
+    func userMessage(for error: any Error, localization: AppLocalization = AppLocalization(language: "en")) -> String {
         if case let BrewCommandError.failed(_, stderr) = error {
             let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
                 return trimmed
             }
         }
-        return String(
-            localized: "Couldn't read the Homebrew configuration.",
-            comment: "Configuration tab, generic load failure",
-        )
+        return localization.string("Couldn't read the Homebrew configuration.")
     }
 }

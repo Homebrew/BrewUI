@@ -659,3 +659,49 @@
 - **`BrewRunOptions.environment` is how the fake brew's fixture tree gets pinned.** It merges over `.inherit` *after* the colour variables the output channel sets, and `LoginShellBrewCommandRunner` forwards it to the shell, which exports it on to brew. `Environment.Key(rawValue:)` is the only public way in from a runtime string.
 - **The handoff refuses while a *mutating* brew command is in flight.** `NSApplication.terminate` would kill the subprocess the command center is streaming and the helper would start a second brew against the same Homebrew; `HelperSelfUpgradeHandoff` asks `commandCenter.runningPhases()` first and throws, which surfaces on the banner. `BrewOperationKind.isMutating` is the filter — `doctorRead` is the one scheduled kind that changes nothing, and it runs long enough that counting it would block every upgrade attempted while the Doctor tab is loading.
 - **The runner takes an injected `sleep`, like `SelfUpgradeHelperRun`.** Wall-clock timeouts of 0.5–3s pass alone and fail under the parallel suite, because the fake `brew` has not spawned before the deadline — which made the tests that matter most (a descendant surviving the timeout) pass vacuously. Tests drive the timeout off a readiness file the fake `brew` touches.
+
+
+### 2026-09-14 — Runtime language switching
+
+- Use native String Catalogs and an app-owned observable preference, never Bundle swizzling or a
+  language-dependent root `.id`. Locale changes must not restart installs, cache loads or navigation.
+- `String(localized:locale:)` alone is insufficient for selecting a different resource bundle; resolve
+  app-owned dynamic copy through the explicit `AppLocalization` language bundle at presentation time.
+- Keep raw diagnostics separate from localizable application copy with `AppMessage`; do not infer
+  translation keys from brew output. Independent NSHostingView roots need explicit language propagation.
+- UI tests use an isolated defaults suite forwarded through helper relaunch; normal app preferences and
+  the system's AppleLanguages are not modified.
+- Background macOS CUA reproduced stale native navigation titles after an in-place locale change:
+  window titles/subtitles must consume `AppLocalization` explicitly, not only localized SwiftUI literals.
+  Configuration was verified switching both directions without navigating away after the fix.
+- Native menus are owned/rebuilt by SwiftUI/AppKit, so translating once or only when opening a menu is
+  insufficient. Resolve standard menus by public AppKit references/actions and the app's existing View
+  shortcuts; never identify a translated menu by its display title. Preserve targets/actions/shortcuts.
+- Coalesce menu-change notifications onto the main run loop's common modes (including menu tracking),
+  suppress self-generated notification recursion, and avoid writes when the title is unchanged.
+- Background CUA fixtures may opt in through a Debug-only `BrewUITesting` bundle marker plus both
+  scenario/payload environment values. Normal bundles do not set it; release builds ignore it.
+  CLI/HTTP still use the existing isolated fixture paths, never the host's Homebrew.
+- Keep only one debug candidate process during CUA verification. Quit finished candidates before
+  replacing them and verify the remaining process path; identical app names can confuse observations.
+
+### 2026-09-14 — Native menu probe: visible and AX title diverge
+
+- In a real fixture, SwiftUIMenuItem reported a Chinese `title` but English `accessibilityTitle()`. Its getter still returned English immediately after `setAccessibilityTitle` returned. Ordinary NSMenuItem unit tests do not model this behavior.
+- Setting AX titles and replacing recognized standard-action items with ordinary NSMenuItem both failed the background CUA check; both experiments were removed. Do not claim popup menus are fixed or keep these approaches on the basis of unit tests alone.
+- The actual Commands-owned presentation path needs investigation before another bridge patch. Native menu popup screenshots were unavailable in background CUA, so the visible popup language has not been independently established.
+
+### 2026-09-14 — Standard command labels are owned at declaration time
+
+- Replacing appInfo/appVisibility/appTermination/newItem/saveItem/windowSize and editing command groups with explicit AppLocalization labels fixed the real CUA labels. Scene locale injection did not fix framework defaults; it was removed.
+- NativeMenuLocalization now only handles top-level menu names, never child labels. Its File/Edit role detection includes the application's unchanged native shortcut contracts because explicit SwiftUI buttons use generic menuAction selectors.
+- StandardEditingValidationState refreshes on menu tracking and window updates; NativeEditingActionRouter resolves and validates the current responder again at execution. CUA verified select-all, delete, undo and redo without touching the clipboard.
+- The main WindowGroup has a stable `main` identity for SwiftUI openWindow/dismissWindow; it never depends on language. CUA verified creating a second window and Cmd+W returning to the original window.
+- OS-injected AutoFill, tiling and Services retain the system language. Do not duplicate system items through unrelated command placements: windowArrangement added a duplicate Bring All to Front in the tested host and was removed.
+
+### 2026-09-14 — Traditional Chinese uses the existing locale infrastructure
+
+- `zh-Hant` is a third resource locale with Taiwan software vocabulary, not a second localization mechanism. Its 240 entries live alongside en/zh-Hans in the same catalog; bundled resources automatically populate LanguageCommands.
+- Resource tests verify zh-TW and zh-HK system preferences select zh-Hant, and the same stored AppMessage follows a three-language switch. LocalizationCatalogTests reads the actual shipping catalog to gate missing translations and malformed interpolation arguments.
+- Background CUA verified Traditional Chinese layout, persisted selection, and a running fake-brew installation across all three locales with unchanged PID/search/raw output through successful completion. No host packages were installed.
+- Final Traditional Chinese review made dependency direction explicit, aligned uninstall confirmation terminology, and used 意外結束 for unexpected termination. A real screenshot motivated the shorter `以 bottle 安裝 — %@`; the final confirmation dialog was inspected and cancelled without uninstalling anything.

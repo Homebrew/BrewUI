@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装详情展示函数
+ * [OUTPUT]: 验证原有详情与操作映射
+ * [POS]: 特性测试；显式调用展示函数而不修改业务预期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledDetailsViewModelTests.swift
 //  BrewTests
@@ -58,7 +64,7 @@ struct InstalledDetailsViewModelTests {
             package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.upgradeItem.displayCommand == "brew upgrade --formula wget")
+        #expect(viewModel.upgradeItem().displayCommand == "brew upgrade --formula wget")
     }
 
     @Test @MainActor func `upgradeDisplayCommand uses cask terminal flags`() {
@@ -66,7 +72,7 @@ struct InstalledDetailsViewModelTests {
             package: InstalledBrewPackage.fixture(name: "docker", kind: .cask),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.upgradeItem.displayCommand == "brew upgrade --cask docker")
+        #expect(viewModel.upgradeItem().displayCommand == "brew upgrade --cask docker")
     }
 
     @Test @MainActor func `upgradeDisplayCommand updates when package name changes`() {
@@ -75,7 +81,7 @@ struct InstalledDetailsViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.update(package: details(name: "wget@2"))
-        #expect(viewModel.upgradeItem.displayCommand == "brew upgrade --formula wget@2")
+        #expect(viewModel.upgradeItem().displayCommand == "brew upgrade --formula wget@2")
     }
 
     @Test @MainActor func `uninstallDisplayCommand reflects formula name`() {
@@ -83,7 +89,7 @@ struct InstalledDetailsViewModelTests {
             package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.uninstallItem.displayCommand == "brew uninstall --formula wget")
+        #expect(viewModel.uninstallItem().displayCommand == "brew uninstall --formula wget")
     }
 
     @Test @MainActor func `uninstallDisplayCommand uses cask terminal flags`() {
@@ -91,7 +97,7 @@ struct InstalledDetailsViewModelTests {
             package: InstalledBrewPackage.fixture(name: "docker", kind: .cask),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.uninstallItem.displayCommand == "brew uninstall --cask docker")
+        #expect(viewModel.uninstallItem().displayCommand == "brew uninstall --cask docker")
     }
 
     @Test @MainActor func `uninstallDisplayCommand updates when package name changes`() {
@@ -100,7 +106,7 @@ struct InstalledDetailsViewModelTests {
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
         viewModel.update(package: details(name: "wget@2"))
-        #expect(viewModel.uninstallItem.displayCommand == "brew uninstall --formula wget@2")
+        #expect(viewModel.uninstallItem().displayCommand == "brew uninstall --formula wget@2")
     }
 
     @Test @MainActor func `showsUpgradeChrome follows package outdated flag`() {
@@ -110,7 +116,7 @@ struct InstalledDetailsViewModelTests {
             package: outdatedDetails,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(outdatedVM.upgradeItem.showsUpgradeChrome)
+        #expect(outdatedVM.upgradeItem().showsUpgradeChrome)
 
         var currentDetails = details(name: "wget")
         currentDetails.outdated = false
@@ -118,7 +124,7 @@ struct InstalledDetailsViewModelTests {
             package: currentDetails,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(!currentVM.upgradeItem.showsUpgradeChrome)
+        #expect(!currentVM.upgradeItem().showsUpgradeChrome)
     }
 
     @Test @MainActor func `upgradePrimaryButtonTitle is nil when package is current`() {
@@ -126,7 +132,7 @@ struct InstalledDetailsViewModelTests {
             package: details(name: "wget"),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.upgradeItem.primaryButtonTitle == nil)
+        #expect(viewModel.upgradeItem().primaryButtonTitle == nil)
     }
 
     @Test @MainActor func `upgradePrimaryButtonTitle includes available version label`() {
@@ -137,7 +143,7 @@ struct InstalledDetailsViewModelTests {
             package: outdatedDetails,
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.upgradeItem.primaryButtonTitle?.contains("v9.9.9") == true)
+        #expect(viewModel.upgradeItem().primaryButtonTitle?.contains("v9.9.9") == true)
     }
 
     @Test @MainActor func `update package mutates derived presentation for upgrade button`() {
@@ -145,13 +151,13 @@ struct InstalledDetailsViewModelTests {
             package: details(name: "wget", version: "1.0.0"),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.upgradeItem.primaryButtonTitle == nil)
+        #expect(viewModel.upgradeItem().primaryButtonTitle == nil)
 
         var newer = details(name: "wget", version: "2.0.0")
         newer.outdated = true
         newer.latestVersion = "2.0.0"
         viewModel.update(package: newer)
-        #expect(viewModel.upgradeItem.primaryButtonTitle?.contains("v2.0.0") == true)
+        #expect(viewModel.upgradeItem().primaryButtonTitle?.contains("v2.0.0") == true)
     }
 
     @Test @MainActor func `uninstall presentation uses package name`() {
@@ -159,9 +165,9 @@ struct InstalledDetailsViewModelTests {
             package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
             brewCommandCenter: NoopBrewCommandCenter.forTesting(),
         )
-        #expect(viewModel.uninstallItem.primaryButtonTitle == "Uninstall")
-        #expect(viewModel.uninstallItem.confirmationTitle == "Uninstall wget?")
-        #expect(viewModel.uninstallItem.confirmationMessage == "This will remove wget from this Mac using Homebrew.")
+        #expect(viewModel.uninstallItem().primaryButtonTitle == "Uninstall")
+        #expect(viewModel.uninstallItem().confirmationTitle == "Uninstall wget?")
+        #expect(viewModel.uninstallItem().confirmationMessage == "This will remove wget from this Mac using Homebrew.")
     }
 
     @Test @MainActor func `detail row is not upgrading before observeRowUpdates runs`() {
@@ -184,7 +190,7 @@ struct InstalledDetailsViewModelTests {
         await viewModel.refreshRelationships()
         #expect(viewModel.showsUninstallBlockedPrimaryButtonChrome)
         #expect(viewModel.uninstallPrimaryButtonAction == .revealBlockedExplanation)
-        #expect(viewModel.uninstallItem.blockedCalloutContent != nil)
+        #expect(viewModel.uninstallItem().blockedCalloutContent != nil)
     }
 
     @Test @MainActor func `dependents uses injected repository for current package`() async {
@@ -332,7 +338,7 @@ struct InstalledDetailsViewModelUpgradeTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.upgradeSelectedPackage()
             await waitForUpgradeAttemptToFinish(on: viewModel)
-            #expect(viewModel.upgradeErrorMessage == nil)
+            #expect(viewModel.upgradeErrorMessage() == nil)
         }
     }
 
@@ -347,7 +353,7 @@ struct InstalledDetailsViewModelUpgradeTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.upgradeSelectedPackage()
             await waitForUpgradeError(on: viewModel)
-            #expect(viewModel.upgradeErrorMessage == "upgrade blocked")
+            #expect(viewModel.upgradeErrorMessage() == "upgrade blocked")
         }
     }
 
@@ -380,7 +386,7 @@ struct InstalledDetailsViewModelUpgradeTests {
             viewModel.upgradeSelectedPackage()
             await waitForUpgradeError(on: viewModel)
             #expect(
-                viewModel.upgradeErrorMessage ==
+                viewModel.upgradeErrorMessage() ==
                     "Could not find Homebrew. Install it or ensure brew is in the default location.",
             )
         }
@@ -397,7 +403,7 @@ struct InstalledDetailsViewModelUpgradeTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.upgradeSelectedPackage()
             await waitForUpgradeError(on: viewModel)
-            #expect(viewModel.upgradeErrorMessage == "spawn failed")
+            #expect(viewModel.upgradeErrorMessage() == "spawn failed")
         }
     }
 
@@ -412,7 +418,7 @@ struct InstalledDetailsViewModelUpgradeTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.upgradeSelectedPackage()
             await waitForUpgradeError(on: viewModel)
-            #expect(viewModel.upgradeErrorMessage == "Something went wrong while upgrading this package.")
+            #expect(viewModel.upgradeErrorMessage() == "Something went wrong while upgrading this package.")
         }
     }
 
@@ -446,7 +452,7 @@ struct InstalledDetailsViewModelUpgradeTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.uninstallSelectedPackage()
             await waitForUninstallAttemptToFinish(on: viewModel)
-            #expect(viewModel.uninstallErrorMessage == nil)
+            #expect(viewModel.uninstallErrorMessage() == nil)
         }
     }
 
@@ -461,7 +467,7 @@ struct InstalledDetailsViewModelUpgradeTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.uninstallSelectedPackage()
             await waitForUninstallError(on: viewModel)
-            #expect(viewModel.uninstallErrorMessage == "uninstall blocked")
+            #expect(viewModel.uninstallErrorMessage() == "uninstall blocked")
         }
     }
 
@@ -494,7 +500,7 @@ struct InstalledDetailsViewModelUpgradeTests {
             viewModel.uninstallSelectedPackage()
             await waitForUninstallError(on: viewModel)
             #expect(
-                viewModel.uninstallErrorMessage ==
+                viewModel.uninstallErrorMessage() ==
                     "Could not find Homebrew. Install it or ensure brew is in the default location.",
             )
         }
@@ -511,7 +517,7 @@ struct InstalledDetailsViewModelUpgradeTests {
         await withInstalledDetailPhaseObservation(on: viewModel) {
             viewModel.uninstallSelectedPackage()
             await waitForUninstallError(on: viewModel)
-            #expect(viewModel.uninstallErrorMessage == "Something went wrong while uninstalling this package.")
+            #expect(viewModel.uninstallErrorMessage() == "Something went wrong while uninstalling this package.")
         }
     }
 }

@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 SwiftUI、Discover 展示模型与 brewLocalization 环境
+ * [OUTPUT]: 提供 DiscoverPackagesView
+ * [POS]: Discover 界面组合；按当前语言渲染应用文案，外部包数据原样显示
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 import BrewAccessibilityID
 import BrewAppEnvironment
 import BrewCore
@@ -6,6 +12,7 @@ import SwiftUI
 
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: DiscoverViewModel
 
     @State private var searchFocus = SearchFocusArbiter()
@@ -21,7 +28,7 @@ struct DiscoverPackagesView: View {
             scopePicker
             Divider()
             AsyncContentView(
-                state: viewModel.activeState,
+                state: viewModel.activeState(localization: localization),
                 onRetry: { Task { await viewModel.reloadActive() } },
                 loaded: { packages in
                     DiscoverPackageSections(viewModel: viewModel, packages: packages, focus: $focus)
@@ -122,12 +129,12 @@ struct DiscoverPackagesView: View {
 
     /// Clearing the query back to empty must not kick the cursor out of the search field.
     private var canFocusList: Bool {
-        viewModel.trending.isLoaded && !viewModel.isSearching
+        viewModel.trending(localization: localization).isLoaded && !viewModel.isSearching
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            Text(viewModel.paneHeading)
+            Text(viewModel.paneHeading(localization: localization))
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
             HStack(spacing: BrewSpacing.xs) {
@@ -136,7 +143,7 @@ struct DiscoverPackagesView: View {
                         .font(.brewSubheadline)
                         .foregroundStyle(Color.brewTextBrand)
                 }
-                Text(viewModel.subtitleText)
+                Text(viewModel.subtitleText(localization: localization))
                     .font(.brewSubheadline)
                     .foregroundStyle(
                         viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
@@ -164,6 +171,7 @@ struct DiscoverPackagesView: View {
 /// Sectioned Discover list, split by package kind and filtered by the active scope. Renders an inline
 /// empty-state message when a visible section has no rows (e.g. a scope filter that excludes everything).
 private struct DiscoverPackageSections: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: DiscoverViewModel
     /// The redacted-placeholder or loaded packages handed down by `AsyncContentView` for this render.
     let packages: [DiscoveryBrewPackage]
@@ -181,12 +189,12 @@ private struct DiscoverPackageSections: View {
         ScrollViewReader { proxy in
             List {
                 if viewModel.showsFormulaeSection {
-                    Section(viewModel.formulaeSectionTitle) {
+                    Section(viewModel.formulaeSectionTitle(localization: localization)) {
                         sectionContent(formulae, kind: .formula)
                     }
                 }
                 if viewModel.showsCasksSection {
-                    Section(viewModel.casksSectionTitle) {
+                    Section(viewModel.casksSectionTitle(localization: localization)) {
                         sectionContent(casks, kind: .cask)
                     }
                 }
@@ -265,9 +273,9 @@ private struct DiscoverPackageSections: View {
     private func emptyStateMessage(for kind: HomebrewPackageKind) -> String {
         switch kind {
         case .formula:
-            String(localized: "No formulae match", comment: "Discover empty formulae section")
+            localization.string("No formulae match")
         case .cask:
-            String(localized: "No casks match", comment: "Discover empty casks section")
+            localization.string("No casks match")
         }
     }
 

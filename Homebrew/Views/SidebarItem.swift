@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖语义导航标识与当前语言快照
+ * [OUTPUT]: 提供原生导航菜单和稳定键盘快捷键
+ * [POS]: 菜单层显式解析语言，避免依赖窗口外不可见的 locale
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  SidebarItem.swift
 //  Homebrew
@@ -6,6 +12,7 @@
 //
 
 import BrewAccessibilityID
+import BrewUIComponents
 import SwiftUI
 
 /// Primary navigation items for the main window sidebar.
@@ -20,7 +27,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
         rawValue
     }
 
-    var title: LocalizedStringKey {
+    var title: String.LocalizationValue {
         switch self {
         case .installed: "Installed"
         case .upgrades: "Upgrades"
@@ -58,12 +65,16 @@ extension FocusedValues {
 public struct SidebarCommands: Commands {
     @FocusedValue(\.sidebarSelection) private var selection
 
-    public init() {}
+    private let localization: AppLocalization
+
+    public init(localization: AppLocalization = AppLocalization()) {
+        self.localization = localization
+    }
 
     public var body: some Commands {
         CommandGroup(after: .sidebar) {
             ForEach(Array(SidebarItem.allCases.enumerated()), id: \.element) { index, item in
-                Button(item.title) {
+                Button(localization.string(item.title)) {
                     selection?.wrappedValue = item
                 }
                 .keyboardShortcut(KeyEquivalent(Character("\(index + 1)")))

@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装特性展示函数
+ * [OUTPUT]: 验证默认语言下原有业务与文案契约
+ * [POS]: 特性单元测试，不改动业务预期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  UpgradesViewModelScopeTests.swift
 //  BrewTests
@@ -82,7 +88,7 @@ struct UpgradesViewModelScopeTests {
 
         vm.scope = .formulae
 
-        #expect(vm.outdatedSubtitle == "Showing 1 of 2 upgrades")
+        #expect(vm.outdatedSubtitle() == "Showing 1 of 2 upgrades")
     }
 
     @Test @MainActor func `outdatedSubtitle reports no matches when the scope hides everything`() {
@@ -93,7 +99,7 @@ struct UpgradesViewModelScopeTests {
 
         vm.scope = .casks
 
-        #expect(vm.outdatedSubtitle == "No matches in 2 outdated packages")
+        #expect(vm.outdatedSubtitle() == "No matches in 2 outdated packages")
     }
 
     // MARK: - isFiltering / resetFilters
@@ -203,13 +209,13 @@ struct UpgradesViewModelScopeTests {
 
     @Test @MainActor func `bulkUpgradeSummary describes the scoped selection`() {
         let vm = Self.makeViewModel(packages: Self.mixedOutdated)
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated package")
+        #expect(vm.bulkUpgradeSummary() == "Upgrades every outdated package")
 
         vm.scope = .formulae
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated formula")
+        #expect(vm.bulkUpgradeSummary() == "Upgrades every outdated formula")
 
         vm.scope = .casks
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated cask")
+        #expect(vm.bulkUpgradeSummary() == "Upgrades every outdated cask")
     }
 
     @Test @MainActor func `bulkUpgradeSummary counts the searched packages`() {
@@ -220,13 +226,13 @@ struct UpgradesViewModelScopeTests {
         ])
 
         vm.searchQuery = "git"
-        #expect(vm.bulkUpgradeSummary == "Upgrades the 2 packages matching your search")
+        #expect(vm.bulkUpgradeSummary() == "Upgrades the 2 packages matching your search")
 
         vm.searchQuery = "wget"
-        #expect(vm.bulkUpgradeSummary == "Upgrades the 1 package matching your search")
+        #expect(vm.bulkUpgradeSummary() == "Upgrades the 1 package matching your search")
 
         vm.searchQuery = "no-such-package"
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated package")
+        #expect(vm.bulkUpgradeSummary() == "Upgrades every outdated package")
     }
 
     // MARK: - Empty upgrade action
@@ -237,17 +243,17 @@ struct UpgradesViewModelScopeTests {
 
         vm.searchQuery = "no-such-package"
         #expect(vm.isFilteringOutEveryUpgrade)
-        #expect(vm.emptyUpgradeActionTitle == "Nothing to upgrade here")
+        #expect(vm.emptyUpgradeActionTitle() == "Nothing to upgrade here")
 
         let upToDate = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: false),
         ])
         #expect(!upToDate.isFilteringOutEveryUpgrade)
-        #expect(upToDate.emptyUpgradeActionTitle == "Everything is up to date")
+        #expect(upToDate.emptyUpgradeActionTitle() == "Everything is up to date")
 
         upToDate.scope = .casks
         #expect(!upToDate.isFilteringOutEveryUpgrade)
-        #expect(upToDate.emptyUpgradeActionTitle == "Everything is up to date")
+        #expect(upToDate.emptyUpgradeActionTitle() == "Everything is up to date")
     }
 
     @Test @MainActor func `scope that hides every upgrade reports the filtered title`() {
@@ -259,7 +265,7 @@ struct UpgradesViewModelScopeTests {
 
         #expect(vm.outdatedCount == 0)
         #expect(vm.isFilteringOutEveryUpgrade)
-        #expect(vm.emptyUpgradeActionTitle == "Nothing to upgrade here")
+        #expect(vm.emptyUpgradeActionTitle() == "Nothing to upgrade here")
     }
 
     // MARK: - upgradeAll submission

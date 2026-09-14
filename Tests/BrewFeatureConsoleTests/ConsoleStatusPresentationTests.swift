@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖控制台展示函数
+ * [OUTPUT]: 验证控制台生命周期标签契约
+ * [POS]: 控制台纯展示测试
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  ConsoleStatusPresentationTests.swift
 //  BrewTests
@@ -15,7 +21,7 @@ struct ConsoleStatusPresentationTests {
         let harness = ConsoleJobsHarness()
         await harness.awaitReady()
 
-        let presentation = harness.viewModel.statusPresentation
+        let presentation = harness.viewModel.statusPresentation()
 
         #expect(presentation.dotState == .idle)
         #expect(presentation.summary == .idle)
@@ -28,7 +34,7 @@ struct ConsoleStatusPresentationTests {
         let id = BrewOperationID(kind: .formula, name: "gh")
         await harness.emit(id: id, phase: .running(.installFormula))
 
-        let presentation = harness.viewModel.statusPresentation
+        let presentation = harness.viewModel.statusPresentation()
 
         #expect(presentation.dotState == .running)
         #expect(presentation.summary == .running(command: "brew install gh", shortLabel: "running"))
@@ -42,7 +48,7 @@ struct ConsoleStatusPresentationTests {
         await harness.emit(id: id, phase: .running(.installFormula))
         await harness.emit(id: id, phase: .idle)
 
-        let presentation = harness.viewModel.statusPresentation
+        let presentation = harness.viewModel.statusPresentation()
 
         #expect(presentation.dotState == .succeeded)
         #expect(presentation.summary == .completed(command: "brew install gh", succeeded: true, exitCode: 0))
@@ -56,7 +62,7 @@ struct ConsoleStatusPresentationTests {
         await harness.emit(id: id, phase: .running(.installFormula))
         await harness.emit(id: id, phase: .failed(reason: .brewCommand(exitCode: 9, stderr: "nope")))
 
-        let presentation = harness.viewModel.statusPresentation
+        let presentation = harness.viewModel.statusPresentation()
 
         #expect(presentation.dotState == .failed)
         #expect(presentation.summary == .completed(command: "brew install gh", succeeded: false, exitCode: 9))
@@ -72,7 +78,7 @@ struct ConsoleStatusPresentationTests {
         await harness.emit(id: done, phase: .idle)
         await harness.emit(id: running, phase: .running(.installFormula))
 
-        let presentation = harness.viewModel.statusPresentation
+        let presentation = harness.viewModel.statusPresentation()
 
         #expect(presentation.dotState == .running)
         if case let .running(command, _) = presentation.summary {
@@ -85,14 +91,14 @@ struct ConsoleStatusPresentationTests {
 
 struct BrewOperationPhaseShortLabelTests {
     @Test func `idle short label is 'done'`() {
-        #expect(BrewOperationPhase.idle.shortLabel == "done")
+        #expect(BrewOperationPhase.idle.shortLabel() == "done")
     }
 
     @Test func `running short label is 'running'`() {
-        #expect(BrewOperationPhase.running(.installFormula).shortLabel == "running")
+        #expect(BrewOperationPhase.running(.installFormula).shortLabel() == "running")
     }
 
     @Test func `failed short label is 'failed'`() {
-        #expect(BrewOperationPhase.failed(reason: .brewExecutableNotFound).shortLabel == "failed")
+        #expect(BrewOperationPhase.failed(reason: .brewExecutableNotFound).shortLabel() == "failed")
     }
 }

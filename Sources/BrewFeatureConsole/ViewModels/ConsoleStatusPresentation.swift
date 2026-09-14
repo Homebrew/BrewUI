@@ -1,9 +1,16 @@
+/*
+ * [INPUT]: 依赖命令阶段与当前语言快照
+ * [OUTPUT]: 生成控制台生命周期短标签
+ * [POS]: 控制台展示映射，不解释或翻译 stdout
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  ConsoleStatusPresentation.swift
 //  Brew
 //
 
 import BrewCore
+import BrewUIComponents
 import Foundation
 
 /// View-facing snapshot of "what does the collapsed status bar render right now" — keeps the view passive.
@@ -31,14 +38,14 @@ extension BrewOperationPhase {
     /// Plain-English label for surfaces (status bar, inline card).
     /// The center's phase enum is coarser than brew's stdout (`fetching`/`pouring`/`linking`) so this
     /// stays at the operation-lifecycle level. Sub-phase granularity would require stdout parsing.
-    var shortLabel: String {
+    func shortLabel(localization: AppLocalization = AppLocalization()) -> String {
         switch self {
         case .idle:
-            "done"
+            localization.string("done")
         case .running:
-            "running"
+            localization.string("running")
         case .failed:
-            "failed"
+            localization.string("failed")
         }
     }
 }

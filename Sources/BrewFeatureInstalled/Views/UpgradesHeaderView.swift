@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖特性模型与当前语言环境
+ * [OUTPUT]: 实时展示数量与升级状态文案
+ * [POS]: 特性 View 在展示时解析文案，保留原有任务与选择
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  UpgradesHeaderView.swift
 //  BrewFeatureInstalled
@@ -10,6 +16,7 @@ import SwiftUI
 
 /// Top of the Upgrades tab: title, subtitle, the bulk `brew upgrade` command, and the action row.
 struct UpgradesHeaderView: View {
+    @Environment(\.brewLocalization) private var localization
     let viewModel: UpgradesViewModel
 
     var body: some View {
@@ -18,7 +25,7 @@ struct UpgradesHeaderView: View {
                 Text("Available upgrades")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.outdatedSubtitle)
+                Text(viewModel.outdatedSubtitle(localization: localization))
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
             }
@@ -29,7 +36,7 @@ struct UpgradesHeaderView: View {
             if viewModel.state.isLoaded {
                 CommandBlockView(
                     command: viewModel.bulkUpgradeDisplayCommand,
-                    summaryText: viewModel.bulkUpgradeSummary,
+                    summaryText: viewModel.bulkUpgradeSummary(localization: localization),
                 )
 
                 actionRow
@@ -90,7 +97,7 @@ struct UpgradesHeaderView: View {
         HStack {
             statusGlyph
                 .accessibilityHidden(true)
-            Text(viewModel.emptyUpgradeActionTitle)
+            Text(viewModel.emptyUpgradeActionTitle(localization: localization))
                 .foregroundStyle(Color.brewTextSecondary)
         }
         .font(.brewBody)

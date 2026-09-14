@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装特性展示函数
+ * [OUTPUT]: 验证默认语言下原有业务与文案契约
+ * [POS]: 特性单元测试，不改动业务预期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledViewModelScopeTests.swift
 //  BrewTests
@@ -82,10 +88,10 @@ struct InstalledViewModelScopeTests {
         )
 
         vm.scope = .formulae
-        #expect(vm.packageCountSubtitle == "1 package")
+        #expect(vm.packageCountSubtitle() == "1 package")
 
         vm.scope = .casks
-        #expect(vm.packageCountSubtitle == "2 packages")
+        #expect(vm.packageCountSubtitle() == "2 packages")
     }
 
     @Test @MainActor func `selection falls back to first visible row when scope hides it`() async {

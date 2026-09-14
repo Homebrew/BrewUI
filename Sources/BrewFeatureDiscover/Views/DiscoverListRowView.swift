@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 SwiftUI、Discover 展示模型与 brewLocalization 环境
+ * [OUTPUT]: 提供 DiscoverListRowView
+ * [POS]: Discover 界面组合；按当前语言渲染应用文案，外部包数据原样显示
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
@@ -24,6 +30,7 @@ struct DiscoverListRowRoot: View {
 }
 
 struct DiscoverListRowView: View {
+    @Environment(\.brewLocalization) private var localization
     let discoveryPackage: DiscoveryBrewPackage
     @State private var viewModel: DiscoverListRowViewModel
 
@@ -66,7 +73,7 @@ struct DiscoverListRowView: View {
             viewModel.update(discoveryPackage: new)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(viewModel.rowAccessibilityLabel)
+        .accessibilityLabel(viewModel.rowAccessibilityLabel(localization: localization))
     }
 
     private var iconBadge: some View {
@@ -96,7 +103,7 @@ struct DiscoverListRowView: View {
 
             packageKindBadge
 
-            if viewModel.installedStatusLabel != nil {
+            if viewModel.installedStatusLabel(localization: localization) != nil {
                 DiscoverInstalledBadge()
             }
 
@@ -129,7 +136,7 @@ struct DiscoverListRowView: View {
                 Text("•")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
-                Text("\(viewModel.installs30DayLabel) installs (30d)")
+                Text("\(viewModel.installs30DayLabel(localization: localization)) installs (30d)")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
             }

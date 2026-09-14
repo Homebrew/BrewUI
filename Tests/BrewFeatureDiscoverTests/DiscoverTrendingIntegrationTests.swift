@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 Discover 展示模型与隔离仓库测试替身
+ * [OUTPUT]: 提供 DiscoverTrendingIntegrationTests
+ * [POS]: Discover 回归测试；默认英文展示方法保持旧行为，不依赖系统语言
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  DiscoverTrendingIntegrationTests.swift
 //  BrewTests
@@ -24,8 +30,8 @@ struct DiscoverTrendingIntegrationTests {
 
         await viewModel.load()
 
-        guard case .loaded = viewModel.trending else {
-            Issue.record("expected trending to load; got \(viewModel.trending)")
+        guard case .loaded = viewModel.trending() else {
+            Issue.record("expected trending to load; got \(viewModel.trending())")
             return
         }
         #expect(viewModel.visiblePackages.map(\.name) == ["wget", "bat", "a2ps", "raycast", "iterm2"])
@@ -42,8 +48,8 @@ struct DiscoverTrendingIntegrationTests {
 
         await viewModel.load()
 
-        guard case .failed = viewModel.trending else {
-            Issue.record("expected trending to fail on undecodable analytics; got \(viewModel.trending)")
+        guard case .failed = viewModel.trending() else {
+            Issue.record("expected trending to fail on undecodable analytics; got \(viewModel.trending())")
             return
         }
     }

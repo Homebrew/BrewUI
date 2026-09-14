@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖控制台模型、展开 Binding 与当前语言环境
+ * [OUTPUT]: 展示实时翻译的执行状态和控制台控件
+ * [POS]: 控制台展示边界；保留命令原文及展开状态
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  ConsoleStatusBar.swift
 //  Brew
@@ -10,11 +16,12 @@ import SwiftUI
 /// Always-visible collapsed strip showing the active (or most recent) brew operation
 /// with status dot, copyable command, phase label, and an expand affordance.
 struct ConsoleStatusBar: View {
+    @Environment(\.brewLocalization) private var localization
     @Binding var expanded: Bool
     let viewModel: ConsoleViewModel
 
     var body: some View {
-        let presentation = viewModel.statusPresentation
+        let presentation = viewModel.statusPresentation(localization: localization)
         HStack(spacing: BrewSpacing.md) {
             // Combined into one element so the whole "<command> — done" / "— failed · exit N"
             // sentence reads as a single string to VoiceOver and to UI tests.
@@ -37,8 +44,8 @@ struct ConsoleStatusBar: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             .buttonStyle(.borderless)
-            .help(expanded ? "Hide console" : "Show console")
-            .accessibilityLabel(expanded ? "Hide console" : "Show console")
+            .help(localization.string(expanded ? "Hide console" : "Show console"))
+            .accessibilityLabel(localization.string(expanded ? "Hide console" : "Show console"))
             .axid(.consoleToggle)
         }
         .padding(.horizontal, BrewSpacing.lg)

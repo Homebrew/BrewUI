@@ -1,50 +1,47 @@
+/*
+ * [INPUT]: 依赖自升级状态与当前语言快照
+ * [OUTPUT]: 派生自升级横幅、按钮及结果提示
+ * [POS]: 自升级展示边界，不修改升级协调器或重启流程
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  SelfUpgradePresentation.swift
 //  BrewFeatureSelfUpgrade
 //
 
 import BrewCore
+import BrewUIComponents
 import Foundation
 
 /// Copy for the alert the app shows on the launch after an upgrade attempt. One value carries both
 /// outcomes because SwiftUI presents only the first `.alert` attached to a view.
 public struct SelfUpgradeOutcomePresentation {
+    private let localization: AppLocalization
     public let outcome: SelfUpgradeOutcome
 
-    public init(outcome: SelfUpgradeOutcome) {
+    public init(outcome: SelfUpgradeOutcome, localization: AppLocalization = AppLocalization()) {
         self.outcome = outcome
+        self.localization = localization
     }
 
     public var title: String {
         switch outcome {
         case .succeeded:
-            String(
-                localized: "The Homebrew app is up to date",
-                comment: "Alert title on the launch after a successful self-upgrade",
-            )
+            localization.string("The Homebrew app is up to date")
         case .failed:
-            String(
-                localized: "The Homebrew app wasn’t upgraded",
-                comment: "Alert title on the launch after a self-upgrade that failed",
-            )
+            localization.string("The Homebrew app wasn’t upgraded")
         }
     }
 
     public var message: String {
         switch outcome {
         case .succeeded:
-            String(
-                localized: "The Homebrew app has been upgraded to the latest version.",
-                comment: "Alert body on the launch after a successful self-upgrade",
-            )
+            localization.string("The Homebrew app has been upgraded to the latest version.")
         case .failed:
-            String(
-                localized: """
-                The upgrade didn’t finish, so this is still the previous version. You can try again from \
-                the banner above your packages.
-                """,
-                comment: "Alert body on the launch after a self-upgrade that failed",
-            )
+            localization.string("""
+            The upgrade didn’t finish, so this is still the previous version. You can try again from \
+            the banner above your packages.
+            """)
         }
     }
 }
@@ -52,16 +49,19 @@ public struct SelfUpgradeOutcomePresentation {
 /// Copy for the self-upgrade banner.
 struct SelfUpgradePresentation {
     let status: SelfUpgradeStatus
+    private let localization: AppLocalization
+
+    init(status: SelfUpgradeStatus, localization: AppLocalization = AppLocalization()) {
+        self.status = status
+        self.localization = localization
+    }
 
     var eyebrow: String {
-        String(localized: "Upgrade Homebrew app", comment: "Self-upgrade banner eyebrow")
+        localization.string("Upgrade Homebrew app")
     }
 
     var bannerTitle: String {
-        String(
-            localized: "A new version of the Homebrew app is available",
-            comment: "Self-upgrade banner title",
-        )
+        localization.string("A new version of the Homebrew app is available")
     }
 
     var runningVersionDisplay: String {
@@ -82,14 +82,8 @@ struct SelfUpgradePresentation {
 
     var upgradeActionTitle: String {
         guard let latest = latestVersionDisplay else {
-            return String(
-                localized: "Upgrade the Homebrew app",
-                comment: "Self-upgrade banner button when brew reports no version for the upgrade",
-            )
+            return localization.string("Upgrade the Homebrew app")
         }
-        return String(
-            localized: "Upgrade to \(latest)",
-            comment: "Self-upgrade banner button, e.g. \"Upgrade to v1.5.0\"",
-        )
+        return localization.string("Upgrade to \(latest)")
     }
 }

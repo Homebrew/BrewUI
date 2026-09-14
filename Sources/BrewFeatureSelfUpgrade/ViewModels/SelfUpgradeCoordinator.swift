@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖交接协议、状态提供者与语言快照
+ * [OUTPUT]: 保存类型化交接失败并在展示时解析消息
+ * [POS]: 自升级协调层；语言变化不重发交接或重置升级状态
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  SelfUpgradeCoordinator.swift
 //  BrewFeatureSelfUpgrade
@@ -5,6 +11,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -14,7 +21,13 @@ public final class SelfUpgradeCoordinator {
     public enum Phase: Equatable, Sendable {
         case idle
         case handingOff
-        case failed(String)
+        case failed(Failure)
+    }
+
+    public enum Failure: Equatable, Sendable {
+        case operationRunning
+        case helperUnavailable
+        case diagnostic(String)
     }
 
     @ObservationIgnored private let statusProvider: any SelfUpgradeStatusProviding
@@ -61,11 +74,16 @@ public final class SelfUpgradeCoordinator {
         !isUpgradeInProgress && isUpgradeAvailable
     }
 
-    public var failureMessage: String? {
-        guard case let .failed(message) = phase else {
-            return nil
+    public func failureMessage(localization: AppLocalization = AppLocalization()) -> String? {
+        guard case let .failed(failure) = phase else { return nil }
+        switch failure {
+        case .operationRunning:
+            return localization.string("Wait for the running Homebrew command to finish, then upgrade the Homebrew app.")
+        case .helperUnavailable:
+            return localization.string("The upgrade helper is missing from this build of the Homebrew app.")
+        case let .diagnostic(message):
+            return message
         }
-        return message
     }
 
     /// An outdated cask with no version string has nothing to key a stored dismissal to, so this one
@@ -101,7 +119,14 @@ public final class SelfUpgradeCoordinator {
             // Reached only if the handoff returned without terminating (e.g. the stubbed helper).
             phase = .idle
         } catch {
-            phase = .failed(error.localizedDescription)
+            switch error {
+            case SelfUpgradeHandoffError.operationRunning:
+                phase = .failed(.operationRunning)
+            case SelfUpgradeHandoffError.helperUnavailable:
+                phase = .failed(.helperUnavailable)
+            default:
+                phase = .failed(.diagnostic(error.localizedDescription))
+            }
         }
     }
 

@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 DoctorSeverityStyle 与隔离语言资源
+ * [OUTPUT]: 提供 严重程度展示及语言即时解析回归测试
+ * [POS]: Doctor 共享展示契约；语言变化不改图标或颜色
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  DoctorSeverityStyleTests.swift
 //  BrewTests
@@ -6,11 +12,31 @@
 import BrewCore
 @testable import BrewFeatureDoctor
 import BrewUIComponents
+import Foundation
 import SwiftUI
 import Testing
 
 @MainActor
 struct DoctorSeverityStyleTests {
+    @Test func `severity names resolve the supplied language snapshot`() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("DoctorLocalization-\(UUID().uuidString).bundle")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let directory = root.appendingPathComponent("zh-Hans.lproj")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: ["Warning": "警告", "Danger": "危险", "Unsupported": "不受支持"],
+            format: .xml,
+            options: 0,
+        )
+        try data.write(to: directory.appendingPathComponent("Localizable.strings"))
+        let localization = try AppLocalization(language: "zh-Hans", bundle: #require(Bundle(url: root)))
+        #expect([
+            DoctorSeverityStyle.displayName(.caution, localization: localization),
+            DoctorSeverityStyle.displayName(.danger, localization: localization),
+            DoctorSeverityStyle.displayName(.unsupported, localization: localization),
+        ] == ["警告", "危险", "不受支持"])
+    }
+
     @Test func `displayName names each severity`() {
         #expect(DoctorSeverityStyle.displayName(.caution) == "Warning")
         #expect(DoctorSeverityStyle.displayName(.danger) == "Danger")

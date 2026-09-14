@@ -1,9 +1,16 @@
+/*
+ * [INPUT]: 依赖 原始诊断报告与当前语言展示快照
+ * [OUTPUT]: 提供 稳定问题身份、诊断块和辅助功能摘要
+ * [POS]: Doctor 问题映射；原始标题不翻译，修复提示在展示边界解析
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  DoctorIssueItem.swift
 //  BrewFeatureDoctor
 //
 
 import BrewCore
+import BrewUIComponents
 import Foundation
 
 /// Presentation mapping for a single ``DoctorIssue`` in the list/detail surface.
@@ -61,8 +68,8 @@ struct DoctorIssueItem: Identifiable, Equatable {
     }
 
     /// Label for voiceover mode — combines title with Fix available
-    var accessibilityLabel: String {
-        hasRunnableFix ? "\(title), Fix available" : title
+    func accessibilityLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String {
+        hasRunnableFix ? localization.string("\(title), Fix available") : title
     }
 }
 

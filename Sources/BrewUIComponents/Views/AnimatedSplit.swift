@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 AppKit 分栏拖动、SwiftUI 内容与当前本地化环境
+ * [OUTPUT]: 对外提供保留拖动和折叠状态的 AnimatedSplit
+ * [POS]: SwiftUI 与独立 NSHostingView 的桥接边界，显式传递语言环境而不重建承载视图
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  AnimatedSplit.swift
 //  Brew
@@ -51,8 +57,8 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> AnimatedSplitView {
-        let topHost = NSHostingView(rootView: top())
-        let bottomHost = NSHostingView(rootView: bottom())
+        let topHost = NSHostingView(rootView: localizedTop(context.environment))
+        let bottomHost = NSHostingView(rootView: localizedBottom(context.environment))
         let handleHost = NSHostingView(rootView: SplitDragHandle())
         // Don't let the hosting views impose their SwiftUI content's intrinsic size on the layout —
         // we set every frame manually. Without this the expanded pane snaps back to its content's
@@ -78,11 +84,11 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: AnimatedSplitView, context: Context) {
-        if let topHost = context.coordinator.topHost as? NSHostingView<Top> {
-            topHost.rootView = top()
+        if let topHost = context.coordinator.topHost as? NSHostingView<SplitLocalizedContent<Top>> {
+            topHost.rootView = localizedTop(context.environment)
         }
-        if let bottomHost = context.coordinator.bottomHost as? NSHostingView<Bottom> {
-            bottomHost.rootView = bottom()
+        if let bottomHost = context.coordinator.bottomHost as? NSHostingView<SplitLocalizedContent<Bottom>> {
+            bottomHost.rootView = localizedBottom(context.environment)
         }
 
         nsView.collapsedHeight = collapsedHeight
@@ -99,11 +105,33 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
         }
     }
 
+    private func localizedTop(_ environment: EnvironmentValues) -> SplitLocalizedContent<Top> {
+        SplitLocalizedContent(content: top(), localization: environment.brewLocalization, locale: environment.locale)
+    }
+
+    private func localizedBottom(_ environment: EnvironmentValues) -> SplitLocalizedContent<Bottom> {
+        SplitLocalizedContent(content: bottom(), localization: environment.brewLocalization, locale: environment.locale)
+    }
+
     @MainActor
     public final class Coordinator {
         weak var topHost: NSView?
         weak var bottomHost: NSView?
         var previousCollapsed: Bool?
+    }
+}
+
+/// 独立 hosting root 不会自动继承外层环境；固定包装类型保留子树身份。
+private struct SplitLocalizedContent<Content: View>: View {
+    let content: Content
+    let localization: AppLocalization
+    let locale: Locale
+
+    var body: some View {
+        content
+            .environment(\.brewLocalization, localization)
+            .environment(\.locale, locale)
+            .environment(\.layoutDirection, localization.layoutDirection)
     }
 }
 

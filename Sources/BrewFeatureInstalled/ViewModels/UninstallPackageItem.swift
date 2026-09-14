@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装包数据与显式当前语言快照
+ * [OUTPUT]: 派生可随语言重算的元信息或操作文案
+ * [POS]: 安装展示值；命令字符串与业务判定不受语言影响
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  UninstallPackageItem.swift
 //  Brew
@@ -9,10 +15,12 @@ import Foundation
 
 /// Presentation mapping for uninstall actions shown in Installed package detail subviews.
 struct UninstallPackageItem {
+    private let localization: AppLocalization
     private let package: InstalledBrewPackage
     private let blockingDependentCount: Int
 
-    init(package: InstalledBrewPackage, blockingDependentCount: Int = 0) {
+    init(package: InstalledBrewPackage, blockingDependentCount: Int = 0, localization: AppLocalization = AppLocalization()) {
+        self.localization = localization
         self.package = package
         self.blockingDependentCount = max(0, blockingDependentCount)
     }
@@ -27,10 +35,7 @@ struct UninstallPackageItem {
         guard isBlockedByDependents else {
             return nil
         }
-        return String(
-            localized: "Blocked by installed dependents. Activate to see why.",
-            comment: "Installed detail uninstall button accessibility hint when blocked",
-        )
+        return localization.string("Blocked by installed dependents. Activate to see why.")
     }
 
     /// Lead and body for the uninstall-blocked callout, when shown.
@@ -48,10 +53,7 @@ struct UninstallPackageItem {
         guard isBlockedByDependents else {
             return nil
         }
-        return String(
-            localized: "blocking uninstall",
-            comment: "Installed detail Used by badge when dependents block uninstall",
-        )
+        return localization.string("blocking uninstall")
     }
 
     /// Leading sentence for the uninstall-blocked callout (bold in UI).
@@ -59,10 +61,7 @@ struct UninstallPackageItem {
         guard isBlockedByDependents else {
             return nil
         }
-        return String(
-            localized: "Can't uninstall yet.",
-            comment: "Installed detail uninstall blocked callout lead sentence",
-        )
+        return localization.string("Can't uninstall yet.")
     }
 
     /// Body copy for the uninstall-blocked callout after the lead sentence.
@@ -72,16 +71,10 @@ struct UninstallPackageItem {
         }
         let name = package.name
         if blockingDependentCount == 1 {
-            return String(
-                localized: "1 package above depends on \(name). Uninstall it first.",
-                comment: "Installed detail uninstall blocked callout body for one dependent",
-            )
+            return localization.string("1 package above depends on \(name). Uninstall it first.")
         }
         let count = blockingDependentCount
-        return String(
-            localized: "\(count) packages above depend on \(name). Uninstall them first.",
-            comment: "Installed detail uninstall blocked callout body for multiple dependents",
-        )
+        return localization.string("\(count) packages above depend on \(name). Uninstall them first.")
     }
 
     /// Copyable Terminal command for uninstalling this package (`CONVENTIONS.md` — transparency).
@@ -96,26 +89,17 @@ struct UninstallPackageItem {
 
     /// Primary uninstall button label.
     var primaryButtonTitle: String {
-        String(
-            localized: "Uninstall",
-            comment: "Installed detail uninstall button title",
-        )
+        localization.string("Uninstall")
     }
 
     /// Confirmation title shown before uninstalling this package.
     var confirmationTitle: String {
-        String(
-            localized: "Uninstall \(package.name)?",
-            comment: "Installed detail uninstall confirmation title; interpolated package name",
-        )
+        localization.string("Uninstall \(package.name)?")
     }
 
     /// Confirmation detail shown before uninstalling this package.
     var confirmationMessage: String {
-        String(
-            localized: "This will remove \(package.name) from this Mac using Homebrew.",
-            comment: "Installed detail uninstall confirmation message; interpolated package name",
-        )
+        localization.string("This will remove \(package.name) from this Mac using Homebrew.")
     }
 }
 

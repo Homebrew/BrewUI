@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 FakeBrew 载荷与共享启动契约
+ * [OUTPUT]: 启动隔离的 UI 测试应用，每次测试使用独立语言偏好域
+ * [POS]: UI runner 的组合入口；偏好域通过环境传给自升级后的进程
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  BrewApp.swift
 //  BrewUITests
@@ -15,8 +21,8 @@ enum BrewApp {
     private static let maximumPayloadBytes = 512 * 1024
 
     /// Asserts nothing about what rendered; the caller decides what "loaded" means for its scenario.
-    static func launch(scenario: BrewUITestScenario) throws -> XCUIApplication {
-        let encoded = try FakeBrew.payload(for: scenario).encoded()
+    static func launch(scenario: BrewUITestScenario, commandDelays: [String: Int] = [:]) throws -> XCUIApplication {
+        let encoded = try FakeBrew.payload(for: scenario, commandDelays: commandDelays).encoded()
         guard encoded.utf8.count <= maximumPayloadBytes else {
             throw FakeBrewError.payloadTooLarge(bytes: encoded.utf8.count, limit: maximumPayloadBytes)
         }
@@ -26,6 +32,7 @@ enum BrewApp {
         app.launchArguments += [BrewUITestingEnvironmentKey.launchArgument, "YES"]
         app.launchEnvironment[BrewUITestingEnvironmentKey.scenario] = scenario.rawValue
         app.launchEnvironment[BrewUITestingEnvironmentKey.payload] = encoded
+        app.launchEnvironment[BrewUITestingEnvironmentKey.languagePreferencesDomain] = "BrewUI.UITestLanguage.\(UUID().uuidString)"
         app.launch()
         activate(app)
         return app
@@ -45,15 +52,19 @@ enum BrewApp {
     }
 
     /// `NSWorkspace` rather than `open -b`: a real install with the same bundle identifier would win.
+    static var processIdentifier: pid_t? {
+        runningTarget?.processIdentifier
+    }
+
+    private static var runningTarget: NSRunningApplication? {
+        NSWorkspace.shared.runningApplications
+            .filter { $0.bundleIdentifier == appBundleIdentifier }
+            .filter { $0.executableURL?.path.contains("/DerivedData/") == true }
+            .max { ($0.launchDate ?? .distantPast) < ($1.launchDate ?? .distantPast) }
+    }
+
     private static func reopen() {
-        guard let target = NSWorkspace.shared.runningApplications
-            .filter({ $0.bundleIdentifier == appBundleIdentifier })
-            .filter({ $0.executableURL?.path.contains("/DerivedData/") == true })
-            .max(by: { ($0.launchDate ?? .distantPast) < ($1.launchDate ?? .distantPast) }),
-            let bundleURL = target.bundleURL
-        else {
-            return
-        }
+        guard let bundleURL = runningTarget?.bundleURL else { return }
         NSWorkspace.shared.open(bundleURL)
     }
 }

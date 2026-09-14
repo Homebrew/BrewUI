@@ -1,15 +1,14 @@
+/*
+ * [INPUT]: 依赖 BrewCore 包身份、RepositoryInterfaces 状态与共享展示本地化
+ * [OUTPUT]: 提供 DiscoverPackageDetailViewModel
+ * [POS]: Discover 展示策略；语言解析不参与仓库或安装任务生命周期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import Foundation
 import Observation
-
-private let installDateFormatter: DateFormatter = {
-    let f = DateFormatter()
-    f.dateStyle = .medium
-    f.timeStyle = .none
-    return f
-}()
 
 @Observable
 @MainActor
@@ -26,7 +25,11 @@ final class DiscoverPackageDetailViewModel {
     /// the gap before ``installedRepository`` re-reads). See ``DiscoverInstallBusyPresentation``.
     private var awaitingInstallResolution = false
     /// Inline message when an install fails; cleared when a new install starts.
-    private(set) var installErrorMessage: String?
+    private var installFailure: AppMessage?
+
+    func installErrorMessage(localization: AppLocalization = AppLocalization(language: "en")) -> String? {
+        installFailure?.string(localization: localization)
+    }
 
     /// True while an install for this package is in flight (and bridging until the installed badge appears).
     var isInstalling: Bool {
@@ -83,8 +86,8 @@ final class DiscoverPackageDetailViewModel {
         discoveryPackage.latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    var installs30DayLabel: String {
-        discoveryPackage.thirtyDayInstallCount.formatted()
+    func installs30DayLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String {
+        discoveryPackage.thirtyDayInstallCount.formatted(.number.locale(localization.locale))
     }
 
     /// Catalogue search results carry no analytics (zero install count), so the stat is hidden for them.
@@ -109,34 +112,34 @@ final class DiscoverPackageDetailViewModel {
         }
     }
 
-    var installedStatusLabel: String? {
+    func installedStatusLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String? {
         guard installedPackage != nil else {
             return nil
         }
-        return String(localized: "Installed", comment: "Discover package installed status")
+        return localization.string("Installed")
     }
 
-    var installedVersionLabel: String? {
+    func installedVersionLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String? {
         guard let pkg = installedPackage,
               let raw = pkg.linkedKeg ?? pkg.installedVersions.first else { return nil }
         let base = InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
         let showLinked = pkg.installedVersions.count > 1 && pkg.linkedKeg != nil
-        return showLinked ? "\(base) (linked)" : base
+        return showLinked ? localization.string("\(base) (linked)") : base
     }
 
     var isInstalledVersionOutdated: Bool {
         installedPackage?.outdated ?? false
     }
 
-    var installDateValue: String? {
+    func installDateValue(localization: AppLocalization = AppLocalization(language: "en")) -> String? {
         guard let pkg = installedPackage, let date = pkg.installDate else { return nil }
-        let formatted = installDateFormatter.string(from: date)
-        return pkg.pouredFromBottle ? "Poured from bottle — \(formatted)" : formatted
+        let formatted = date.formatted(.dateTime.year().month(.abbreviated).day().locale(localization.locale))
+        return pkg.pouredFromBottle ? localization.string("Poured from bottle — \(formatted)") : formatted
     }
 
-    var installReasonValue: String? {
+    func installReasonValue(localization: AppLocalization = AppLocalization(language: "en")) -> String? {
         guard let pkg = installedPackage else { return nil }
-        return pkg.installedOnRequest ? nil : "As dependency"
+        return pkg.installedOnRequest ? nil : localization.string("As dependency")
     }
 
     var licenseLabel: String? {
@@ -156,14 +159,14 @@ final class DiscoverPackageDetailViewModel {
         discoveryPackage = package
         operationPhase = .idle
         awaitingInstallResolution = false
-        installErrorMessage = nil
+        installFailure = nil
     }
 
     func installSelectedPackage() {
         guard !isInstalling else {
             return
         }
-        installErrorMessage = nil
+        installFailure = nil
         let operationID = BrewOperationID(kind: packageKind, name: discoveryPackage.name)
         let command = commandFactory.installCommand(kind: packageKind, name: discoveryPackage.name)
         mutationTask?.cancel()
@@ -173,9 +176,9 @@ final class DiscoverPackageDetailViewModel {
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {
-                    installErrorMessage = failure.userFacingMessage
+                    installFailure = AppMessage(failure: failure)
                 } else {
-                    installErrorMessage = Self.userMessage(for: error)
+                    installFailure = Self.userMessage(for: error)
                 }
             }
         }
@@ -198,26 +201,20 @@ final class DiscoverPackageDetailViewModel {
         }
     }
 
-    private static func userMessage(for error: Error) -> String {
+    private static func userMessage(for error: Error) -> AppMessage {
         switch error {
         case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Discover detail error when brew binary missing",
-            )
+            return .localized("Could not find Homebrew. Install it or ensure brew is in the default location.")
         case let BrewCommandError.failed(_, stderr):
             let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
-                return trimmed
+                return .raw(trimmed)
             }
-            return String(localized: "Homebrew command failed.", comment: "Discover detail generic brew failure")
+            return .localized("Homebrew command failed.")
         case let BrewCommandError.launchFailed(underlying):
-            return underlying
+            return .raw(underlying)
         default:
-            return String(
-                localized: "Something went wrong while installing this package.",
-                comment: "Discover detail generic install error",
-            )
+            return .localized("Something went wrong while installing this package.")
         }
     }
 }

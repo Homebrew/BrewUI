@@ -90,3 +90,17 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 ## Updating this file
 
 Add patterns when they stabilize in code. Cross-cutting decisions go in `.ai/memory.md`.
+
+## Localization
+
+- Keep all app-owned translations in `Homebrew/Localizable.xcstrings`; views and Commands consume the
+  same `AppLocalization` snapshot from `LanguagePreferences`. Adding a locale requires resources and
+  Xcode region registration, not language-specific business branches.
+- `zh-Hant` uses Taiwan software terminology and Apple's native menu vocabulary (for example 檔案,
+  視窗, 拷貝, 貼上, 復原). Translate from the English meaning, not by converting Simplified Chinese
+  characters. Use 套件 / 解除安裝 / 重新整理 / 升級 consistently; retain Homebrew product/category names.
+- Preserve interpolation types, plural branches, commands, paths and raw diagnostics. Review dependency
+  direction and destructive-action copy explicitly. `LocalizationCatalogTests` checks the shipping
+  catalog's coverage and formatting arguments, while background UI checks verify actual rendering.
+- Native vocabulary references: [Apple's Taiwan menu guide](https://support.apple.com/zh-tw/guide/mac-help/mchlp1446/mac)
+  and [Finder view terminology](https://support.apple.com/zh-tw/guide/mac-help/-mchldaafb302/mac).

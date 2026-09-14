@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 Foundation 的序列化与压缩能力
+ * [OUTPUT]: 提供 fixture 载荷及跨测试启动、自升级重启的环境契约
+ * [POS]: App 与 UI runner 的无业务依赖边界，隔离真实用户的语言偏好
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  BrewUITestingFixturePayload.swift
 //  BrewUITestContract
@@ -10,6 +16,7 @@ public enum BrewUITestingEnvironmentKey {
     /// Its presence is what puts the app in test mode.
     public static let launchArgument = "-uiTesting"
     public static let scenario = "BREW_UITEST_SCENARIO"
+    public static let languagePreferencesDomain = "BREW_UITEST_LANGUAGE_DOMAIN"
     public static let payload = "BREW_UITEST_FIXTURE_PAYLOAD"
     /// Written by the app once the tree is installed, not by the test runner.
     public static let fixturesRoot = "BREW_UITEST_FIXTURES"

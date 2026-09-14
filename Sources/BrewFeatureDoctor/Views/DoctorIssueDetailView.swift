@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 Doctor 展示模型、原始诊断块与当前语言环境
+ * [OUTPUT]: 提供 问题详情及当前语言的严重程度标记
+ * [POS]: 诊断展示边界；保持输出、命令和链接原样
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  DoctorIssueDetailView.swift
 //  BrewFeatureDoctor
@@ -15,6 +21,7 @@ import SwiftUI
 /// rows). The reading flow matches what brew printed. Raw output stays at the bottom as the
 /// never-wrong fallback.
 struct DoctorIssueDetailView: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: DoctorViewModel
     let item: DoctorIssueItem
 
@@ -134,7 +141,7 @@ struct DoctorIssueDetailView: View {
             .disabled(viewModel.isFixRunning(item))
             .accessibilityLabel("Run Fix")
 
-            if let fixError = viewModel.fixError(item) {
+            if let fixError = viewModel.fixError(item, localization: localization) {
                 Text(fixError)
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewStatusError)
@@ -183,17 +190,18 @@ struct DoctorIssueDetailView: View {
 // MARK: - Subviews
 
 private struct DoctorSeverityBadge: View {
+    @Environment(\.brewLocalization) private var localization
     let severity: DoctorSeverity
 
     var body: some View {
-        Label(DoctorSeverityStyle.displayName(severity),
+        Label(DoctorSeverityStyle.displayName(severity, localization: localization),
               systemImage: DoctorSeverityStyle.icon(severity))
             .font(.brewCaption.weight(.semibold))
             .foregroundStyle(DoctorSeverityStyle.foreground(severity))
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.vertical, BrewSpacing.xxs)
             .background(DoctorSeverityStyle.background(severity), in: Capsule())
-            .accessibilityLabel("Severity: \(DoctorSeverityStyle.displayName(severity))")
+            .accessibilityLabel("Severity: \(DoctorSeverityStyle.displayName(severity, localization: localization))")
     }
 }
 

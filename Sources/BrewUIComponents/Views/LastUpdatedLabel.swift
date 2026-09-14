@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 Foundation 时间计算与 brewLocalization 当前语言解析
+ * [OUTPUT]: 对外提供 RelativeTimeText 与 LastUpdatedLabel
+ * [POS]: 相对时间展示边界；保留截断语义，在每次渲染时按当前语言解析完整短语
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  LastUpdatedLabel.swift
 //  BrewUIComponents
@@ -6,41 +12,50 @@
 import Foundation
 import SwiftUI
 
-/// Spelled out rather than left to `RelativeDateTimeFormatter`, which follows the system locale and would
-/// put a translated phrase after an English lead-in.
+/// 时间桶独立于语言；文案解析由展示层传入，避免缓存已翻译的字符串。
 public enum RelativeTimeText {
-    public static func string(for date: Date, relativeTo now: Date) -> String {
+    public static func string(
+        for date: Date,
+        relativeTo now: Date,
+        localize: (String.LocalizationValue) -> String = { String(localized: $0) },
+    ) -> String {
         let seconds = now.timeIntervalSince(date)
         guard seconds >= 60 else {
-            // Also covers a future date: a clock that moved backwards should read as "now", not a countdown.
-            return "just now"
+            return localize("just now")
         }
         let minutes = Int(seconds / 60)
         if minutes < 60 {
-            return "\(minutes) \(minutes == 1 ? "minute" : "minutes") ago"
+            return minutes == 1 ? localize("1 minute ago") : localize("\(minutes) minutes ago")
         }
         let hours = minutes / 60
         if hours < 24 {
-            return "\(hours) \(hours == 1 ? "hour" : "hours") ago"
+            return hours == 1 ? localize("1 hour ago") : localize("\(hours) hours ago")
         }
         let days = hours / 24
-        return "\(days) \(days == 1 ? "day" : "days") ago"
+        return days == 1 ? localize("1 day ago") : localize("\(days) days ago")
     }
 }
 
 public struct LastUpdatedLabel: View {
-    private let lead: String
+    @Environment(\.brewLocalization) private var localization
+
+    private let lead: String.LocalizationValue
     private let date: Date
 
     /// `lead` is the phrase the relative time is appended to, e.g. `"Last checked"`.
-    public init(lead: String, date: Date) {
+    public init(lead: String.LocalizationValue, date: Date) {
         self.lead = lead
         self.date = date
     }
 
     public var body: some View {
         TimelineView(.periodic(from: date, by: 60)) { context in
-            Text("\(lead) \(RelativeTimeText.string(for: date, relativeTo: context.date))")
+            let relativeTime = RelativeTimeText.string(
+                for: date,
+                relativeTo: context.date,
+                localize: localization.string,
+            )
+            Text(localization.string("\(localization.string(lead)) \(relativeTime)"))
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
         }

@@ -1,36 +1,31 @@
+/*
+ * [INPUT]: 依赖数量与语言快照
+ * [OUTPUT]: 生成升级空态数量文案
+ * [POS]: 安装特性的纯展示帮助函数
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  UpgradesUpToDateCopy.swift
 //  BrewFeatureInstalled
 //
 
+import BrewUIComponents
 import Foundation
 
 /// One phrase for "nothing to upgrade", shared by the four places the tab makes that claim at once.
 enum UpgradesUpToDateCopy {
-    static var headline: String {
-        String(
-            localized: "Everything is up to date",
-            comment: "Upgrades tab: canonical phrase for having no upgrades available",
-        )
+    static func headline(localization: AppLocalization = AppLocalization()) -> String {
+        localization.string("Everything is up to date")
     }
 
-    static func installedDetail(count: Int) -> String {
+    static func installedDetail(count: Int, localization: AppLocalization = AppLocalization()) -> String {
         switch count {
         case 0:
-            String(
-                localized: "No installed packages to check.",
-                comment: "Upgrades empty state when nothing is installed",
-            )
+            localization.string("No installed packages to check.")
         case 1:
-            String(
-                localized: "Your installed package is up to date.",
-                comment: "Upgrades empty state for a single installed package",
-            )
+            localization.string("Your installed package is up to date.")
         default:
-            String(
-                localized: "All \(count) installed packages are up to date.",
-                comment: "Upgrades empty state with total installed count",
-            )
+            localization.string("All \(count) installed packages are up to date.")
         }
     }
 }

@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装特性展示函数
+ * [OUTPUT]: 验证默认语言下原有业务与文案契约
+ * [POS]: 特性单元测试，不改动业务预期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledViewModelPresentationTests.swift
 //  BrewTests
@@ -51,14 +57,14 @@ struct InstalledViewModelPresentationTests {
             repository: unloadedInstalledRepository(),
         )
         let expected = String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
-        #expect(vm.packageCountSubtitle == expected)
+        #expect(vm.packageCountSubtitle() == expected)
     }
 
     @Test @MainActor func `packageCountSubtitle is singular for one package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "a", kind: .formula)],
         )
-        #expect(vm.packageCountSubtitle == "1 package")
+        #expect(vm.packageCountSubtitle() == "1 package")
     }
 
     @Test @MainActor func `packageCountSubtitle is plural for multiple packages`() async {
@@ -68,7 +74,7 @@ struct InstalledViewModelPresentationTests {
                 .fixture(name: "b", kind: .formula),
             ],
         )
-        #expect(vm.packageCountSubtitle == "2 packages")
+        #expect(vm.packageCountSubtitle() == "2 packages")
     }
 
     @Test @MainActor func `setSelection selects row when nothing selected`() async {

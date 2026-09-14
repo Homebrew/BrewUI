@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖特性仓库、命令中心与独立 LanguagePreferences 展示状态
+ * [OUTPUT]: 组装窗口、菜单、共享业务依赖与实时语言环境
+ * [POS]: 应用组合根；语言变化仅更新环境，不重建业务服务或窗口身份
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  BrewApp.swift
 //  Brew
@@ -5,6 +11,7 @@
 //  Created by Graeme Arthur on 6/3/2026.
 //
 
+import AppKit
 import BrewAppEnvironment
 import BrewCLI
 import BrewCore
@@ -25,6 +32,13 @@ struct BrewApp: App {
     private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!
 
     @Environment(\.scenePhase) private var scenePhase
+
+    @State private var languagePreferences: LanguagePreferences
+
+    private let nativeMenuRefresh = NativeMenuRefresh()
+    private let standardAppCommandState = StandardAppCommandState()
+    private let standardEditingState = StandardEditingValidationState()
+    private static let mainWindowID = "main"
 
     private let commandCenter: SerialBrewCommandCenter
     private let commandFactory: LiveBrewMutatingCommandFactory
@@ -54,6 +68,13 @@ struct BrewApp: App {
         // nil in every production launch, so both process-boundary seams below fall through to the
         // live wiring untouched.
         let uiTesting = BrewUITestingLaunchConfiguration.current()
+        let languageDefaults = uiTesting == nil ? UserDefaults.standard : ProcessInfo.processInfo.environment[
+            BrewUITestingEnvironmentKey.languagePreferencesDomain,
+        ].flatMap(UserDefaults.init(suiteName:))
+        _languagePreferences = State(initialValue: LanguagePreferences(
+            defaults: languageDefaults,
+            preferredLanguages: uiTesting == nil ? Locale.preferredLanguages : ["en"],
+        ))
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
         let fixtures = Self.installFixtures(uiTesting: uiTesting)
         let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
@@ -193,6 +214,9 @@ struct BrewApp: App {
         var environment: [String: String] = [:]
         environment[BrewUITestingEnvironmentKey.scenario] = uiTesting.scenario
         environment[BrewUITestingEnvironmentKey.payload] = uiTesting.payload
+        environment[BrewUITestingEnvironmentKey.languagePreferencesDomain] = ProcessInfo.processInfo.environment[
+            BrewUITestingEnvironmentKey.languagePreferencesDomain,
+        ]
         return environment
     }
 
@@ -238,8 +262,14 @@ struct BrewApp: App {
         return .uiTesting(brewURL: fixtures?.fakeBrewURL)
     }
 
+    private func refreshNativeMenus() {
+        standardAppCommandState.refresh()
+        standardEditingState.refresh()
+        nativeMenuRefresh.request(localization: languagePreferences.localization)
+    }
+
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: Self.mainWindowID) {
             MainWindowView()
                 .environment(\.brewCommandCenter, commandCenter)
                 .environment(\.mutatingCommandFactory, commandFactory)
@@ -274,22 +304,49 @@ struct BrewApp: App {
                     minHeight: BrewLayout.minWindowHeight,
                 )
                 .crashReportSheet(controller: crashReportController)
+                .environment(\.locale, languagePreferences.localization.locale)
+                .environment(\.layoutDirection, languagePreferences.localization.layoutDirection)
+                .environment(\.brewLocalization, languagePreferences.localization)
+                .task(id: languagePreferences.localization.locale.identifier) {
+                    // 等 SwiftUI 完成本轮 Commands 更新，只改现有原生菜单的标题。
+                    await Task.yield()
+                    refreshNativeMenus()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSWindow.didUpdateNotification)) { _ in
+                    // 焦点或选择变化后更新快捷键可用性，不要求先打开菜单。
+                    standardEditingState.refresh()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+                    refreshNativeMenus()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSMenu.didBeginTrackingNotification)) { _ in
+                    refreshNativeMenus()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSMenu.didChangeItemNotification)) { _ in
+                    refreshNativeMenus()
+                }
+                .onReceive(NotificationCenter.default.publisher(for: NSMenu.didAddItemNotification)) { _ in
+                    refreshNativeMenus()
+                }
         }
         .defaultSize(
             width: BrewLayout.defaultWindowWidth,
             height: BrewLayout.defaultWindowHeight,
         )
         .commands {
-            SearchCommands()
-            SidebarCommands()
-            RefreshCommands()
-            ConsoleCommands()
+            StandardEditingCommands(localization: languagePreferences.localization, state: standardEditingState)
+            StandardAppCommands(localization: languagePreferences.localization, mainWindowID: Self.mainWindowID, state: standardAppCommandState)
+            LanguageCommands(preferences: languagePreferences)
+            SearchCommands(localization: languagePreferences.localization)
+            SidebarCommands(localization: languagePreferences.localization)
+            RefreshCommands(localization: languagePreferences.localization)
+            ConsoleCommands(localization: languagePreferences.localization)
 
             // Replace the default "Homebrew Help" item (which points at a
             // non-existent help book) with a link to the online documentation.
             CommandGroup(replacing: .help) {
-                Link("Homebrew Documentation", destination: Self.documentationURL)
-                Link("Report an Issue…", destination: Self.reportIssueURL)
+                Link(languagePreferences.localization.string("Homebrew Documentation"), destination: Self.documentationURL)
+                Link(languagePreferences.localization.string("Report an Issue…"), destination: Self.reportIssueURL)
             }
         }
         #if DEBUG
@@ -368,5 +425,29 @@ extension BrewApp {
         )
         coordinator.registerLaunchOutcome(context.launchOutcome)
         return coordinator
+    }
+}
+
+/// 合并 SwiftUI 重新生成菜单时的一批通知；自身标题写入不再递归调度。
+@MainActor
+private final class NativeMenuRefresh {
+    private var isScheduled = false
+    private var isApplying = false
+    private var localization = AppLocalization()
+
+    func request(localization: AppLocalization) {
+        self.localization = localization
+        guard !isApplying, !isScheduled else { return }
+        isScheduled = true
+        // 菜单打开时处于 event-tracking run loop；普通 Task 可能等到菜单关闭才执行。
+        RunLoop.main.perform(inModes: [.common]) { [weak self] in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.isApplying = true
+                NativeMenuLocalization.applyStandard(to: NSApp, localization: self.localization)
+                self.isApplying = false
+                self.isScheduled = false
+            }
+        }
     }
 }

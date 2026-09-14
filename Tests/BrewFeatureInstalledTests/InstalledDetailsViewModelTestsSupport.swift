@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装操作的延迟错误消息
+ * [OUTPUT]: 验证操作失败与原始诊断保持
+ * [POS]: 安装特性错误回归测试
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 import BrewCLI
 import BrewCore
 import BrewCoreTestSupport
@@ -275,7 +281,7 @@ func waitForUpgradeAttemptToFinish(on viewModel: InstalledPackageDetailViewModel
 @MainActor
 func waitForUpgradeError(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
-        if viewModel.upgradeErrorMessage != nil { return }
+        if viewModel.upgradeErrorMessage() != nil { return }
         await Task.yield()
     }
     Issue.record("timed out waiting for upgradeErrorMessage")
@@ -304,7 +310,7 @@ func waitForUninstallAttemptToFinish(on viewModel: InstalledPackageDetailViewMod
 @MainActor
 func waitForUninstallError(on viewModel: InstalledPackageDetailViewModel) async {
     for _ in 0 ..< 100 {
-        if viewModel.uninstallErrorMessage != nil { return }
+        if viewModel.uninstallErrorMessage() != nil { return }
         await Task.yield()
     }
     Issue.record("timed out waiting for uninstallErrorMessage")

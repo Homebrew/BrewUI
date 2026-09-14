@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装特性展示函数
+ * [OUTPUT]: 验证默认语言下原有业务与文案契约
+ * [POS]: 特性单元测试，不改动业务预期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  UpgradesViewModelTests.swift
 //  BrewTests
@@ -96,15 +102,15 @@ struct UpgradesViewModelTests {
         let none = Self.makeViewModel(packages: [
             .fixture(name: "wget", kind: .formula, outdated: false),
         ])
-        #expect(none.outdatedSubtitle == "Everything is up to date")
+        #expect(none.outdatedSubtitle() == "Everything is up to date")
 
         let one = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: true),
         ])
-        #expect(one.outdatedSubtitle == "1 package can be upgraded")
+        #expect(one.outdatedSubtitle() == "1 package can be upgraded")
 
         let many = Self.makeViewModel(packages: Self.mixedPackages)
-        #expect(many.outdatedSubtitle == "2 packages can be upgraded")
+        #expect(many.outdatedSubtitle() == "2 packages can be upgraded")
     }
 
     @Test @MainActor func `outdatedSubtitle switches to Showing N of M while searching`() {
@@ -112,20 +118,20 @@ struct UpgradesViewModelTests {
 
         vm.searchQuery = "git"
 
-        #expect(vm.outdatedSubtitle == "Showing 1 of 2 upgrades")
+        #expect(vm.outdatedSubtitle() == "Showing 1 of 2 upgrades")
     }
 
     @Test @MainActor func `outdatedSubtitle calls out hidden upgrades when search matches nothing`() {
         let vm = Self.makeViewModel(packages: Self.mixedPackages)
 
         vm.searchQuery = "zzz-no-match"
-        #expect(vm.outdatedSubtitle == "No matches in 2 outdated packages")
+        #expect(vm.outdatedSubtitle() == "No matches in 2 outdated packages")
 
         let single = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: true),
         ])
         single.searchQuery = "zzz"
-        #expect(single.outdatedSubtitle == "No matches in 1 outdated package")
+        #expect(single.outdatedSubtitle() == "No matches in 1 outdated package")
     }
 
     @Test @MainActor func `upgradeAll submits exactly one bulk upgrade regardless of outdated count`() async {

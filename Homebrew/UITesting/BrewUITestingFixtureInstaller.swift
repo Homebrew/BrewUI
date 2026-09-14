@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖共享 fixture 载荷与 Foundation 文件系统
+ * [OUTPUT]: 在单次启动临时目录安装假 brew 和 HTTP 数据
+ * [POS]: 测试数据落盘边界，不写入真实 Homebrew 目录
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  BrewUITestingFixtureInstaller.swift
 //  Homebrew

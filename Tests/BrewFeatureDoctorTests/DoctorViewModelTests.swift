@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖诊断展示函数
+ * [OUTPUT]: 验证诊断状态短句契约
+ * [POS]: Doctor 单元测试
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  DoctorViewModelTests.swift
 //  BrewTests
@@ -8,6 +14,7 @@ import BrewCore
 @testable import BrewFeatureDoctor
 import BrewRepositoryInterfaces
 import BrewServicesTestSupport
+import BrewUIComponents
 import Foundation
 import Testing
 
@@ -96,7 +103,7 @@ struct DoctorViewModelTests {
         await viewModel.load(forceRefresh: true)
         let items = Self.displayedItems(report)
 
-        #expect(viewModel.presentation == .issues)
+        #expect(viewModel.presentation() == .issues)
         #expect(items.count == 2)
         #expect(items.first?.title == "You have unlinked kegs in your Cellar.")
         #expect(items.first?.hasRunnableFix == true)
@@ -106,7 +113,7 @@ struct DoctorViewModelTests {
 
     @Test func `projects healthy report`() {
         let viewModel = Self.viewModel(repository: StubDoctorRepository(report: DoctorReport(issues: [])))
-        #expect(viewModel.presentation == .healthy)
+        #expect(viewModel.presentation() == .healthy)
         #expect(viewModel.orderedIssueIDs.isEmpty)
     }
 
@@ -114,7 +121,7 @@ struct DoctorViewModelTests {
         let viewModel = Self.viewModel(
             repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
         )
-        #expect(viewModel.presentation == .failed(
+        #expect(viewModel.presentation() == .failed(
             "Could not find Homebrew. Install it or ensure brew is in the default location.",
         ))
     }
@@ -173,6 +180,34 @@ struct DoctorViewModelTests {
         viewModel.runFix(for: item)
         await waitUntil({ viewModel.fixError(item) != nil }, "fix error surfaced")
         #expect(viewModel.fixError(item) == "could not clean")
+    }
+
+    @Test func `an already failed fix resolves its message again without rerunning the command`() async throws {
+        let report = Self.cleanupReport()
+        let center = Self.recordingCenter(cleanupExitCode: 1)
+        let viewModel = Self.viewModel(
+            repository: StubDoctorRepository(report: report),
+            commandCenter: center,
+            commandFactory: LiveBrewMutatingCommandFactory(),
+        )
+        let item = Self.displayedItems(report)[0]
+        viewModel.runFix(for: item)
+        await waitUntil({ viewModel.fixError(item) != nil }, "fix error surfaced")
+
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("DoctorFailure-\(UUID().uuidString).bundle")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let directory = root.appendingPathComponent("zh-Hans.lproj")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        let data = try PropertyListSerialization.data(
+            fromPropertyList: ["Homebrew command failed.": "Homebrew 命令执行失败。"],
+            format: .xml,
+            options: 0,
+        )
+        try data.write(to: directory.appendingPathComponent("Localizable.strings"))
+        let localization = try AppLocalization(language: "zh-Hans", bundle: #require(Bundle(url: root)))
+        #expect((viewModel.fixError(item), viewModel.fixError(item, localization: localization)) == (
+            "Homebrew command failed.", "Homebrew 命令执行失败。",
+        ))
     }
 
     private static func recordingCenter(
@@ -404,34 +439,34 @@ struct DoctorViewModelTests {
 
     @Test func `subtitle while loading describes the running check`() {
         let viewModel = Self.viewModel(repository: LoadingDoctorRepository())
-        #expect(viewModel.subtitle == "Running brew doctor…")
+        #expect(viewModel.subtitle() == "Running brew doctor…")
     }
 
     @Test func `subtitle on healthy reflects refresh state`() {
         let repository = MutableDoctorRepository(report: DoctorReport(issues: []))
         let viewModel = Self.viewModel(repository: repository)
 
-        #expect(viewModel.subtitle == "No problems found")
+        #expect(viewModel.subtitle() == "No problems found")
 
         repository.setRefreshing(true)
-        #expect(viewModel.subtitle == "Re-checking…")
+        #expect(viewModel.subtitle() == "Re-checking…")
     }
 
     @Test func `subtitle on issues shows "Warnings found" when not refreshing`() {
         let repository = MutableDoctorRepository(report: Self.issuesReport())
         let viewModel = Self.viewModel(repository: repository)
 
-        #expect(viewModel.subtitle == "Warnings found")
+        #expect(viewModel.subtitle() == "Warnings found")
 
         repository.setRefreshing(true)
-        #expect(viewModel.subtitle == "Re-checking…")
+        #expect(viewModel.subtitle() == "Re-checking…")
     }
 
     @Test func `subtitle on failure shows a generic could-not-complete message`() {
         let viewModel = Self.viewModel(
             repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
         )
-        #expect(viewModel.subtitle == "The check could not be completed")
+        #expect(viewModel.subtitle() == "The check could not be completed")
     }
 
     // MARK: - shouldFocusList

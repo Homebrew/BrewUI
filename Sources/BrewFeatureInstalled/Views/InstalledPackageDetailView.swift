@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖安装详情模型与 SwiftUI 本地化环境
+ * [OUTPUT]: 展示延迟解析的详情分节标题与空态
+ * [POS]: 安装详情展示层；保留包选择与命令任务身份
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledPackageDetailView.swift
 //  Brew
@@ -35,6 +41,7 @@ struct InstalledPackageDetailRoot: View {
 
 /// Right-hand column: detail for the selected installed package.
 struct InstalledPackageDetailView: View {
+    @Environment(\.brewLocalization) private var localization
     let package: InstalledBrewPackage
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
     @State private var viewModel: InstalledPackageDetailViewModel
@@ -98,7 +105,7 @@ struct InstalledPackageDetailView: View {
     private func packageActionsFooter(viewModel: InstalledPackageDetailViewModel) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xl) {
             PackageDetailSectionDivider()
-            if viewModel.upgradeItem.showsUpgradeChrome {
+            if viewModel.upgradeItem(localization: localization).showsUpgradeChrome {
                 InstalledPackageDetailUpgradeChrome(viewModel: viewModel)
                 PackageDetailSectionDivider()
             }
@@ -128,9 +135,9 @@ struct InstalledPackageDetailView: View {
 
 /// Heading + always-expanded relationship list, used for Dependencies.
 private struct PackageRelationshipSection: View {
-    let title: String
+    let title: String.LocalizationValue
     let relationships: [PackageRelationshipItem]
-    let emptyText: String
+    let emptyText: LocalizedStringKey
     let dotStyle: PackageRelationshipDotStyle
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
 
@@ -154,10 +161,11 @@ private struct PackageRelationshipSection: View {
 
 /// Uninstall affordance and copyable `brew uninstall` command (`CONVENTIONS.md` — transparency).
 private struct InstalledPackageDetailUninstallChrome: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
-        let uninstall = viewModel.uninstallItem
+        let uninstall = viewModel.uninstallItem(localization: localization)
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Uninstall")
                 .font(.brewSubheadline.weight(.semibold))
@@ -166,7 +174,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: uninstall.displayCommand,
-                    summaryText: "Uninstalls this package from this Mac",
+                    summaryText: localization.string("Uninstalls this package from this Mac"),
                 )
 
                 Button {
@@ -209,7 +217,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                     UninstallBlockedCallout(lead: callout.lead, bodyText: callout.body)
                 }
 
-                if let uninstallError = viewModel.uninstallErrorMessage {
+                if let uninstallError = viewModel.uninstallErrorMessage(localization: localization) {
                     Text(uninstallError)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewStatusError)
@@ -222,10 +230,11 @@ private struct InstalledPackageDetailUninstallChrome: View {
 
 /// Upgrade affordance and copyable `brew upgrade` command (`CONVENTIONS.md` — transparency).
 private struct InstalledPackageDetailUpgradeChrome: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: InstalledPackageDetailViewModel
 
     var body: some View {
-        let upgrade = viewModel.upgradeItem
+        let upgrade = viewModel.upgradeItem(localization: localization)
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Upgrade")
                 .font(.brewSubheadline.weight(.semibold))
@@ -234,7 +243,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: upgrade.displayCommand,
-                    summaryText: "Upgrades this package to the latest available version",
+                    summaryText: localization.string("Upgrades this package to the latest available version"),
                 )
 
                 if let title = upgrade.primaryButtonTitle {
@@ -256,7 +265,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                         .axid(.upgradeButton)
                     }
                 }
-                if let upgradeError = viewModel.upgradeErrorMessage {
+                if let upgradeError = viewModel.upgradeErrorMessage(localization: localization) {
                     Text(upgradeError)
                         .font(.brewCallout)
                         .foregroundStyle(Color.brewStatusError)

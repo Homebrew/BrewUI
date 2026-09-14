@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 SwiftUI、Discover 展示模型与 brewLocalization 环境
+ * [OUTPUT]: 提供 DiscoverColumns
+ * [POS]: Discover 界面组合；按当前语言渲染应用文案，外部包数据原样显示
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces

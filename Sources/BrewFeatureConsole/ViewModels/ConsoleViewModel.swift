@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖命令记录与展示语言快照
+ * [OUTPUT]: 生成当前语言的控制台摘要
+ * [POS]: 控制台模型；语言不改变任务记录、订阅或执行
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  ConsoleViewModel.swift
 //  Brew
@@ -5,6 +11,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -74,11 +81,11 @@ final class ConsoleViewModel {
         )
     }
 
-    var statusPresentation: ConsoleStatusPresentation {
+    func statusPresentation(localization: AppLocalization = AppLocalization()) -> ConsoleStatusPresentation {
         if let active = activeJob {
             return ConsoleStatusPresentation(
                 dotState: active.dotState,
-                summary: .running(command: active.command, shortLabel: active.phase.shortLabel),
+                summary: .running(command: active.command, shortLabel: active.phase.shortLabel(localization: localization)),
                 isRunning: true,
             )
         }

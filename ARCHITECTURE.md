@@ -86,3 +86,28 @@ Use the [Homebrew JSON API](https://formulae.brew.sh/docs/api/) where it helps. 
 ## Updating this file
 
 Change when layers or major assumptions shift. Put **why** in `.ai/memory.md` when it is non-obvious or contentious.
+
+
+## Runtime localization
+
+The app owns one observable `LanguagePreferences`. Selection is persisted in its own defaults key,
+not `AppleLanguages`, and publishes immutable `AppLocalization` snapshots to the window and explicit
+menu inputs. SwiftUI locale/layout direction and the independent `AnimatedSplit` hosting roots receive
+that same snapshot. Changing language does not change view identity or recreate repositories/tasks.
+
+Native `Homebrew/Localizable.xcstrings` resources provide English, Simplified Chinese and Traditional Chinese (Taiwan terminology). Bundled locales
+populate the menu; missing entries fall back to English/source text. Presentation functions resolve
+app-owned interpolated text against an explicit language bundle. `AppMessage` keeps localizable copy
+separate from raw package descriptions, subprocess output and diagnostics, including stored failures.
+Infrastructure and domain layers do not depend on language state. OS-owned dialogs/menu items remain
+outside the app-owned live-switch guarantee.
+
+Fixture UI runs use a unique defaults domain, carried across self-upgrade relaunch and removed at
+teardown; they never write a real user's language selection.
+
+Application-owned standard commands are declared with SwiftUI CommandGroup replacements and resolve
+labels from the same AppLocalization snapshot as views. AppKit keeps responsibility for actions and
+responder validation; language changes do not recreate windows. The small native adapter only names
+top-level menus, identified through public references and existing keyboard shortcut contracts. It
+coalesces title changes without changing command children. OS-injected window tiling, AutoFill and
+third-party Services remain system-owned rather than being duplicated by the application.

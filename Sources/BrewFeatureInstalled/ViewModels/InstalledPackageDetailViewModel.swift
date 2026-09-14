@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖包操作状态、仓库与延迟消息
+ * [OUTPUT]: 提供详情展示数据及独立于语言的异步操作状态
+ * [POS]: 安装详情模型；展示快照不改变操作或关系加载生命周期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  InstalledPackageDetailViewModel.swift
 //  Brew
@@ -5,6 +11,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -21,9 +28,18 @@ final class InstalledPackageDetailViewModel {
 
     private(set) var package: InstalledBrewPackage
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
-    private(set) var upgradeErrorMessage: String?
+    private var upgradeFailure: AppMessage?
+
+    func upgradeErrorMessage(localization: AppLocalization = AppLocalization()) -> String? {
+        upgradeFailure?.string(localization: localization)
+    }
+
     /// Inline message when uninstall fails; cleared when a new uninstall starts.
-    private(set) var uninstallErrorMessage: String?
+    private var uninstallFailure: AppMessage?
+
+    func uninstallErrorMessage(localization: AppLocalization = AppLocalization()) -> String? {
+        uninstallFailure?.string(localization: localization)
+    }
 
     private(set) var isUpgrading: Bool = false
     private(set) var isUninstalling: Bool = false
@@ -51,33 +67,33 @@ final class InstalledPackageDetailViewModel {
     private(set) var dependentRelationships: [PackageRelationshipItem] = []
 
     /// Presentation mapping for the Details section metadata.
-    var metadataItem: PackageDetailMetadataItem {
-        PackageDetailMetadataItem(package: package)
+    func metadataItem(localization: AppLocalization = AppLocalization()) -> PackageDetailMetadataItem {
+        PackageDetailMetadataItem(package: package, localization: localization)
     }
 
     /// Presentation mapping for the Upgrade section.
-    var upgradeItem: UpgradePackageItem {
-        UpgradePackageItem(package: package)
+    func upgradeItem(localization: AppLocalization = AppLocalization()) -> UpgradePackageItem {
+        UpgradePackageItem(package: package, localization: localization)
     }
 
     /// True when an upgrade is available — mirrors ``InstalledListRowViewModel/showsUpgradeAvailable``.
     var showsUpgradeAvailable: Bool {
-        upgradeItem.showsUpgradeChrome
+        upgradeItem().showsUpgradeChrome
     }
 
     /// Presentation mapping for the Uninstall section.
-    var uninstallItem: UninstallPackageItem {
-        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
+    func uninstallItem(localization: AppLocalization = AppLocalization()) -> UninstallPackageItem {
+        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count, localization: localization)
     }
 
     /// Muted, reduced-opacity uninstall button styling while blocked and not actively uninstalling.
     var showsUninstallBlockedPrimaryButtonChrome: Bool {
-        uninstallItem.isBlockedByDependents && !isUninstalling
+        uninstallItem().isBlockedByDependents && !isUninstalling
     }
 
     /// What the primary uninstall control should do when activated.
     var uninstallPrimaryButtonAction: UninstallPrimaryButtonAction {
-        uninstallItem.isBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
+        uninstallItem().isBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
     }
 
     func handleUninstallPrimaryButtonTapped() {
@@ -91,7 +107,7 @@ final class InstalledPackageDetailViewModel {
 
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
-        metadataItem.homepageURL
+        metadataItem().homepageURL
     }
 
     init(
@@ -118,7 +134,7 @@ final class InstalledPackageDetailViewModel {
     private func refreshDependents() async {
         let dependents = await installedDependentsRepository.installedDependents(for: package.id)
         dependentRelationships = PackageRelationshipItem.dependents(dependents)
-        if !uninstallItem.isBlockedByDependents {
+        if !uninstallItem().isBlockedByDependents {
             showUninstallBlockedCallout = false
         }
     }
@@ -203,7 +219,7 @@ final class InstalledPackageDetailViewModel {
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {
-                    setErrorMessage(failure.userFacingMessage, for: action)
+                    setErrorMessage(AppMessage(failure: failure), for: action)
                 } else {
                     setErrorMessage(Self.userMessage(for: error, fallback: action.genericFailureMessage), for: action)
                 }
@@ -212,34 +228,31 @@ final class InstalledPackageDetailViewModel {
     }
 
     private func clearMutationErrors() {
-        upgradeErrorMessage = nil
-        uninstallErrorMessage = nil
+        upgradeFailure = nil
+        uninstallFailure = nil
     }
 
-    private func setErrorMessage(_ message: String, for action: PackageMutationAction) {
+    private func setErrorMessage(_ message: AppMessage, for action: PackageMutationAction) {
         switch action {
         case .upgrade:
-            upgradeErrorMessage = message
+            upgradeFailure = message
         case .uninstall:
-            uninstallErrorMessage = message
+            uninstallFailure = message
         }
     }
 
-    private static func userMessage(for error: Error, fallback: String) -> String {
+    private static func userMessage(for error: Error, fallback: AppMessage) -> AppMessage {
         switch error {
         case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Installed detail error when brew binary missing",
-            )
+            return .localized("Could not find Homebrew. Install it or ensure brew is in the default location.")
         case let BrewCommandError.failed(_, stderr):
             let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty {
-                return trimmed
+                return .raw(trimmed)
             }
-            return String(localized: "Homebrew command failed.", comment: "Installed detail generic brew failure")
+            return .localized("Homebrew command failed.")
         case let BrewCommandError.launchFailed(underlying):
-            return underlying
+            return .raw(underlying)
         default:
             return fallback
         }
@@ -250,18 +263,12 @@ private enum PackageMutationAction {
     case upgrade
     case uninstall
 
-    var genericFailureMessage: String {
+    var genericFailureMessage: AppMessage {
         switch self {
         case .upgrade:
-            String(
-                localized: "Something went wrong while upgrading this package.",
-                comment: "Installed detail generic upgrade error",
-            )
+            .localized("Something went wrong while upgrading this package.")
         case .uninstall:
-            String(
-                localized: "Something went wrong while uninstalling this package.",
-                comment: "Installed detail generic uninstall error",
-            )
+            .localized("Something went wrong while uninstalling this package.")
         }
     }
 }

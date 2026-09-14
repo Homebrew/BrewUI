@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖崩溃报告与 SwiftUI locale
+ * [OUTPUT]: 展示完整可翻译的说明，同时保留原始崩溃报告
+ * [POS]: 崩溃展示边界，不翻译诊断堆栈
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  CrashReportDialog.swift
 //  Brew
@@ -21,10 +27,12 @@ struct CrashReportDialog: View {
         VStack(alignment: .leading, spacing: 16) {
             header
 
-            Text("A report was saved after the app quit unexpectedly. You can send it " +
-                "to the Homebrew team on GitHub to help fix the problem, or discard it.")
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            Text("""
+            A report was saved after the app quit unexpectedly. You can send it \
+            to the Homebrew team on GitHub to help fix the problem, or discard it.
+            """)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
 
             GroupBox {
                 ScrollView {

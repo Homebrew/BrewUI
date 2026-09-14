@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖 BrewCore 包身份、RepositoryInterfaces 状态与共享展示本地化
+ * [OUTPUT]: 提供 DiscoverViewModel
+ * [POS]: Discover 展示策略；语言解析不参与仓库或安装任务生命周期
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -36,18 +42,27 @@ final class DiscoverViewModel {
         }
     }
 
-    var trending: LoadState<[DiscoveryBrewPackage], String> {
+    func trending(localization: AppLocalization = AppLocalization(language: "en")) -> LoadState<[DiscoveryBrewPackage], String> {
         switch discoverPackagesRepository.state {
         case .loading:
             .loading
         case let .loaded(packages):
             .loaded(packages)
         case let .failed(error):
-            .failed(Self.userMessage(for: error, searching: false))
+            .failed(Self.userMessage(for: error, searching: false).string(localization: localization))
         }
     }
 
-    private(set) var results: LoadState<[DiscoveryBrewPackage], String> = .loaded([])
+    private var searchState: LoadState<[DiscoveryBrewPackage], AppMessage> = .loaded([])
+
+    func results(localization: AppLocalization = AppLocalization(language: "en")) -> LoadState<[DiscoveryBrewPackage], String> {
+        switch searchState {
+        case .loading: .loading
+        case let .loaded(packages): .loaded(packages)
+        case let .failed(message): .failed(message.string(localization: localization))
+        }
+    }
+
     private(set) var selectedPackageID: BrewPackage.ID?
 
     init(
@@ -72,8 +87,8 @@ final class DiscoverViewModel {
         !normalizedQuery.isEmpty
     }
 
-    var activeState: LoadState<[DiscoveryBrewPackage], String> {
-        isSearching ? results : trending
+    func activeState(localization: AppLocalization = AppLocalization(language: "en")) -> LoadState<[DiscoveryBrewPackage], String> {
+        isSearching ? results(localization: localization) : trending(localization: localization)
     }
 
     /// Search results have no analytics, so install-count metadata is suppressed in that mode.
@@ -83,66 +98,54 @@ final class DiscoverViewModel {
 
     // MARK: - Heading
 
-    var paneHeading: String {
+    func paneHeading(localization: AppLocalization = AppLocalization(language: "en")) -> String {
         guard isSearching else {
-            return String(localized: "Trending", comment: "Discover list heading, trending landing")
+            return localization.string("Trending")
         }
-        if case .loaded = results, visiblePackages.isEmpty {
-            return String(localized: "No matches", comment: "Discover list heading, zero search results")
+        if case .loaded = searchState, visiblePackages.isEmpty {
+            return localization.string("No matches")
         }
-        return String(localized: "Results", comment: "Discover list heading, search results")
+        return localization.string("Results")
     }
 
-    var subtitleText: String {
-        switch activeState {
+    func subtitleText(localization: AppLocalization = AppLocalization(language: "en")) -> String {
+        switch activeState(localization: localization) {
         case .loading:
             return isSearching
-                ? String(localized: "Searching…", comment: "Discover subtitle while searching")
-                : String(localized: "Loading packages…", comment: "Discover subtitle while loading")
+                ? localization.string("Searching…")
+                : localization.string("Loading packages…")
         case .failed:
             return isSearching
-                ? String(localized: "Could not search packages", comment: "Discover subtitle on search error")
-                : String(localized: "Could not load packages", comment: "Discover subtitle on error")
+                ? localization.string("Could not search packages")
+                : localization.string("Could not load packages")
         case .loaded:
             guard isSearching else {
-                return String(
-                    localized: "Most-installed packages in the last 30 days",
-                    comment: "Discover subhead on the trending landing",
-                )
+                return localization.string("Most-installed packages in the last 30 days")
             }
-            return searchResultsSubtitle
+            return searchResultsSubtitle(localization: localization)
         }
     }
 
-    private var searchResultsSubtitle: String {
+    private func searchResultsSubtitle(localization: AppLocalization = AppLocalization(language: "en")) -> String {
         let count = visiblePackages.count
         if count == 0 {
-            return String(
-                localized: "Nothing found for “\(normalizedQuery)”",
-                comment: "Discover subhead, no search results",
-            )
+            return localization.string("Nothing found for “\(normalizedQuery)”")
         }
         if count == 1 {
-            return String(
-                localized: "1 package matches “\(normalizedQuery)”",
-                comment: "Discover subhead, single search result",
-            )
+            return localization.string("1 package matches “\(normalizedQuery)”")
         }
-        return String(
-            localized: "\(count) packages match “\(normalizedQuery)”",
-            comment: "Discover subhead, search result count",
-        )
+        return localization.string("\(count) packages match “\(normalizedQuery)”")
     }
 
     var showsSubtitleTrendIcon: Bool {
-        if case .loaded = activeState, !isSearching {
+        if case .loaded = activeState(), !isSearching {
             return true
         }
         return false
     }
 
     var isSubtitleError: Bool {
-        if case .failed = activeState {
+        if case .failed = activeState() {
             return true
         }
         return false
@@ -158,20 +161,20 @@ final class DiscoverViewModel {
         scope != .formulae
     }
 
-    var formulaeSectionTitle: String {
+    func formulaeSectionTitle(localization: AppLocalization = AppLocalization(language: "en")) -> String {
         isSearching
-            ? String(localized: "Formulae", comment: "Discover formulae section header while searching")
-            : String(localized: "Popular Formulae", comment: "Discover trending formulae section header")
+            ? localization.string("Formulae")
+            : localization.string("Popular Formulae")
     }
 
-    var casksSectionTitle: String {
+    func casksSectionTitle(localization: AppLocalization = AppLocalization(language: "en")) -> String {
         isSearching
-            ? String(localized: "Casks", comment: "Discover casks section header while searching")
-            : String(localized: "Popular Casks", comment: "Discover trending casks section header")
+            ? localization.string("Casks")
+            : localization.string("Popular Casks")
     }
 
     var visiblePackages: [DiscoveryBrewPackage] {
-        guard case let .loaded(packages) = activeState else {
+        guard case let .loaded(packages) = activeState() else {
             return []
         }
         var visible: [DiscoveryBrewPackage] = []
@@ -200,20 +203,14 @@ final class DiscoverViewModel {
         packages.filter { $0.kind == kind }
     }
 
-    private static func userMessage(for error: Error, searching: Bool) -> String {
+    private static func userMessage(for error: Error, searching: Bool) -> AppMessage {
         if case let BrewAPIClientError.transport(underlying) = error {
-            return underlying
+            return .raw(underlying)
         }
         if searching {
-            return String(
-                localized: "Something went wrong searching the catalogue.",
-                comment: "Discover tab generic search failure",
-            )
+            return .localized("Something went wrong searching the catalogue.")
         }
-        return String(
-            localized: "Something went wrong loading Discover packages.",
-            comment: "Discover tab generic load failure",
-        )
+        return .localized("Something went wrong loading Discover packages.")
     }
 }
 
@@ -274,20 +271,20 @@ extension DiscoverViewModel {
 
     func search() async {
         guard isSearching else {
-            results = .loaded([])
+            searchState = .loaded([])
             synchronizeSelectionWithVisibleRows()
             return
         }
-        results = .loading
+        searchState = .loading
         do {
             let matches = try await catalogueRepository.searchPackages(
                 matching: normalizedQuery,
                 limit: searchResultsLimit,
             )
             // Catalogue search has no analytics, so install counts are zero (hidden in this mode).
-            results = .loaded(matches.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) })
+            searchState = .loaded(matches.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) })
         } catch {
-            results = .failed(Self.userMessage(for: error, searching: true))
+            searchState = .failed(Self.userMessage(for: error, searching: true))
         }
         synchronizeSelectionWithVisibleRows()
     }

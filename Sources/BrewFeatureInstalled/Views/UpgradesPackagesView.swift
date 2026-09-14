@@ -1,3 +1,9 @@
+/*
+ * [INPUT]: 依赖特性模型与当前语言环境
+ * [OUTPUT]: 实时展示数量与升级状态文案
+ * [POS]: 特性 View 在展示时解析文案，保留原有任务与选择
+ * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+ */
 //
 //  UpgradesPackagesView.swift
 //  BrewFeatureInstalled
@@ -12,6 +18,7 @@ import SwiftUI
 /// Middle column of the Upgrades tab: header, batch Upgrade All, list of outdated packages,
 /// and a friendly empty state when nothing is outdated.
 struct UpgradesPackagesView: View {
+    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: UpgradesViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
@@ -29,7 +36,7 @@ struct UpgradesPackagesView: View {
             }
 
             AsyncContentView(
-                state: viewModel.state,
+                state: viewModel.localizedState(localization: localization),
                 onRetry: { Task { await viewModel.refresh() } },
                 loaded: { content in
                     if content.packages.isEmpty {
@@ -137,19 +144,19 @@ struct UpgradesPackagesView: View {
 
     private var allCaughtUpState: some View {
         centeredEmptyState(
-            title: viewModel.upToDateTitle,
-            subtitle: viewModel.upToDateDetail,
-            accessibilityLabel: viewModel.upToDateTitle,
+            title: viewModel.upToDateTitle(localization: localization),
+            subtitle: viewModel.upToDateDetail(localization: localization),
+            accessibilityLabel: viewModel.upToDateTitle(localization: localization),
         )
     }
 
     /// An empty list after a failed check means "unknown", not "up to date".
     private var upgradeCheckFailedState: some View {
         centeredEmptyState(
-            title: UpgradesViewModel.upgradeCheckFailedTitle,
-            subtitle: viewModel.upgradeCheckFailureDetail,
+            title: UpgradesViewModel.upgradeCheckFailedTitle(localization: localization),
+            subtitle: viewModel.upgradeCheckFailureDetail(localization: localization),
             actionTitle: "Try Again",
-            accessibilityLabel: UpgradesViewModel.upgradeCheckFailedTitle,
+            accessibilityLabel: UpgradesViewModel.upgradeCheckFailedTitle(localization: localization),
             icon: {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.brewTitle2)
@@ -164,10 +171,7 @@ struct UpgradesPackagesView: View {
     /// still exist in the inventory — distinct from the "all caught up" state.
     private var noSearchMatchesState: some View {
         centeredEmptyState(
-            title: String(
-                localized: "No matching upgrades",
-                comment: "Upgrades filter-empty state title",
-            ),
+            title: localization.string("No matching upgrades"),
             subtitle: noSearchMatchesSubtitle,
             actionTitle: "Show all upgrades",
             accessibilityLabel: noSearchMatchesSubtitle,
@@ -210,15 +214,9 @@ struct UpgradesPackagesView: View {
     private var noSearchMatchesSubtitle: String {
         let hidden = viewModel.totalOutdatedCount
         if hidden == 1 {
-            return String(
-                localized: "1 outdated package is hidden by the current filters.",
-                comment: "Upgrades filter-empty state with a single hidden outdated package",
-            )
+            return localization.string("1 outdated package is hidden by the current filters.")
         }
-        return String(
-            localized: "\(hidden) outdated packages are hidden by the current filters.",
-            comment: "Upgrades filter-empty state with multiple hidden outdated packages",
-        )
+        return localization.string("\(hidden) outdated packages are hidden by the current filters.")
     }
 }
 
