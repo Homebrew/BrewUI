@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖特性仓库、命令中心与独立 LanguagePreferences 展示状态
- * [OUTPUT]: 组装窗口、菜单、共享业务依赖与实时语言环境
- * [POS]: 应用组合根；语言变化仅更新环境，不重建业务服务或窗口身份
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  BrewApp.swift
 //  Brew

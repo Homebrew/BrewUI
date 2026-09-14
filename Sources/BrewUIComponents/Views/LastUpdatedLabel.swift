@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 Foundation 时间计算与 brewLocalization 当前语言解析
- * [OUTPUT]: 对外提供 RelativeTimeText 与 LastUpdatedLabel
- * [POS]: 相对时间展示边界；保留截断语义，在每次渲染时按当前语言解析完整短语
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  LastUpdatedLabel.swift
 //  BrewUIComponents

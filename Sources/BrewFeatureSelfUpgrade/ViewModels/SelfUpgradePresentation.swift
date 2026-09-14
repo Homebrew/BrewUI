@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖自升级状态与当前语言快照
- * [OUTPUT]: 派生自升级横幅、按钮及结果提示
- * [POS]: 自升级展示边界，不修改升级协调器或重启流程
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  SelfUpgradePresentation.swift
 //  BrewFeatureSelfUpgrade

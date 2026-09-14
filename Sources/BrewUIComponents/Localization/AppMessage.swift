@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 BrewCore 操作失败、Foundation 延迟字符串与 AppLocalization 当前语言快照
- * [OUTPUT]: 提供 AppMessage，区分应用文案和必须保持原样的诊断内容
- * [POS]: 展示消息边界；存储语义而非已翻译字符串，错误出现后仍可切换语言
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import BrewCore
 import Foundation
 

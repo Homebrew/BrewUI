@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖交接协议、命令中心与独立升级 helper
- * [OUTPUT]: 启动升级 helper 或返回类型化交接错误
- * [POS]: 应用级进程交接实现，不在错误抛出时解析语言
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  HelperSelfUpgradeHandoff.swift
 //  Brew

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 AppKit 菜单对象、测试 Bundle 与 NativeMenuLocalization
- * [OUTPUT]: 验证真实标准 action 绑定、同对象双向切换、未知菜单保护与幂等更新
- * [POS]: 原生菜单适配的离线契约测试；不启动窗口或替换系统菜单
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import AppKit
 @testable import BrewUIComponents
 import Foundation

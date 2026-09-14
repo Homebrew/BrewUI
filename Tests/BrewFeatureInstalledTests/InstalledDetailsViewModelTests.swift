@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖安装详情展示函数
- * [OUTPUT]: 验证原有详情与操作映射
- * [POS]: 特性测试；显式调用展示函数而不修改业务预期
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledDetailsViewModelTests.swift
 //  BrewTests

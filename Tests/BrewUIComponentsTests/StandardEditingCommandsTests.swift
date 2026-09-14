@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 StandardEditingCommands 的动作契约、可注入 responder 路由与测试本地化 Bundle
- * [OUTPUT]: 验证标准编辑动作保持 selector/快捷键语义，路由及焦点校验不依赖真实窗口
- * [POS]: 编辑命令展示边界的离线契约；不启动 AppKit 应用或替换系统菜单
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import AppKit
 @testable import BrewUIComponents
 import Foundation

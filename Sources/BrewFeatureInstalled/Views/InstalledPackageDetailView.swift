@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖安装详情模型与 SwiftUI 本地化环境
- * [OUTPUT]: 展示延迟解析的详情分节标题与空态
- * [POS]: 安装详情展示层；保留包选择与命令任务身份
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledPackageDetailView.swift
 //  Brew

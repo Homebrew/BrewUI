@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 fixture 启动器、AXID 与真实 XCUIApplication
- * [OUTPUT]: 验证切换语言即时更新窗口标题，不清空搜索或重启进程
- * [POS]: 本地化 UI 验收；使用假 brew，不修改宿主 Homebrew 安装
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import BrewAccessibilityID
 import XCTest
 

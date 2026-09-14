@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 Foundation 的延迟本地化文案
- * [OUTPUT]: 提供配置分组的本地化标题与原始诊断字段
- * [POS]: 配置展示映射；只有分组标题翻译，配置键值保留原文
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConfigSectionItem.swift
 //  BrewFeatureConfig

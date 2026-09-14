@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖业务状态与显式 AppLocalization 展示快照
- * [OUTPUT]: 按当前语言派生文案，不改变查询、选择或命令状态
- * [POS]: 特性展示模型；语言只作为文案函数输入，不进入业务生命周期
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledViewModel.swift
 //  Brew

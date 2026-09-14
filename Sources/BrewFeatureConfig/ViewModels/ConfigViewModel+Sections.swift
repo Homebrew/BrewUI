@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖配置快照、分组项与英文语言快照
- * [OUTPUT]: 生成延迟本地化分组及语言无关的诊断报告
- * [POS]: 配置展示映射；报告固定英文结构，界面按当前语言解析
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConfigViewModel+Sections.swift
 //  BrewFeatureConfig

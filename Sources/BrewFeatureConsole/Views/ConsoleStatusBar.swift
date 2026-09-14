@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖控制台模型、展开 Binding 与当前语言环境
- * [OUTPUT]: 展示实时翻译的执行状态和控制台控件
- * [POS]: 控制台展示边界；保留命令原文及展开状态
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConsoleStatusBar.swift
 //  Brew

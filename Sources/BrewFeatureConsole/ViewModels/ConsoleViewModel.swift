@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖命令记录与展示语言快照
- * [OUTPUT]: 生成当前语言的控制台摘要
- * [POS]: 控制台模型；语言不改变任务记录、订阅或执行
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConsoleViewModel.swift
 //  Brew

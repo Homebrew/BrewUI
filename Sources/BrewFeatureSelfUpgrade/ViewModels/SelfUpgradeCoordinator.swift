@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖交接协议、状态提供者与语言快照
- * [OUTPUT]: 保存类型化交接失败并在展示时解析消息
- * [POS]: 自升级协调层；语言变化不重发交接或重置升级状态
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  SelfUpgradeCoordinator.swift
 //  BrewFeatureSelfUpgrade

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖共享测试契约、进程参数和 Debug fixture bundle 的显式启动标记
- * [OUTPUT]: 仅在明确的测试启动中选择隔离的 CLI 与 HTTP 载荷
- * [POS]: App 的测试边界；发行版只接受原有 XCTest 参数，不读取 bundle 测试标记
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  BrewUITestingLaunchConfiguration.swift
 //  Homebrew

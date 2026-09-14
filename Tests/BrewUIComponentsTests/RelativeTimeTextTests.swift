@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 RelativeTimeText 时间桶与可注入的本地化解析闭包
- * [OUTPUT]: 验证边界截断、未来时间和逐次展示解析契约
- * [POS]: 共享展示组件的时间语义回归测试，避免语言切换复用缓存字符串
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  RelativeTimeTextTests.swift
 //  BrewUIComponentsTests

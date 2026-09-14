@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 Doctor 展示模型、原始诊断块与当前语言环境
- * [OUTPUT]: 提供 问题详情及当前语言的严重程度标记
- * [POS]: 诊断展示边界；保持输出、命令和链接原样
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorIssueDetailView.swift
 //  BrewFeatureDoctor

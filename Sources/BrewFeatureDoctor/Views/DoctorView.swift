@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖诊断模型与当前语言环境
- * [OUTPUT]: 即时更新诊断页状态说明
- * [POS]: Doctor 展示层，切换语言不重新执行检查
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorView.swift
 //  BrewFeatureDoctor

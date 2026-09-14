@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 Foundation 的本地化资源 Bundle 与 Locale
- * [OUTPUT]: 提供不可变 AppLocalization，将延迟文案按当前语言解析
- * [POS]: 展示边界的语言快照；不依赖偏好存储，也不改变命令或领域数据
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import Foundation
 import SwiftUI
 

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 Swift 并发与交接生命周期
- * [OUTPUT]: 提供 SelfUpgradeHandoff 及无 UI 文案的交接错误
- * [POS]: 交接协议边界；实现只返回失败原因，不选择界面语言
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  SelfUpgradeHandoff.swift
 //  BrewRepositoryInterfaces

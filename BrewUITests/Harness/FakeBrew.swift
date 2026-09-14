@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖内存 fixture 载荷与按命令注入的测试延迟
- * [OUTPUT]: 提供可观测运行中状态的假 brew 进程
- * [POS]: UI 测试 CLI 边界，延迟仅来自测试数据，不调用真实 brew
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  FakeBrew.swift
 //  BrewUITests

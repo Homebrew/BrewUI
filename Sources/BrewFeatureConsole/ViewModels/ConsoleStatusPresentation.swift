@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖命令阶段与当前语言快照
- * [OUTPUT]: 生成控制台生命周期短标签
- * [POS]: 控制台展示映射，不解释或翻译 stdout
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConsoleStatusPresentation.swift
 //  Brew

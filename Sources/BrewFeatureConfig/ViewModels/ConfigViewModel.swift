@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 ConfigRepository 状态与 AppLocalization 展示快照
- * [OUTPUT]: 提供 配置状态、刷新动作及当前语言错误信息
- * [POS]: 配置展示模型；仅应用兜底文案翻译，stderr 保持原文
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConfigViewModel.swift
 //  BrewFeatureConfig

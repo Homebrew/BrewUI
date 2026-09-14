@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖应用实际 String Catalog，不使用与产品脱节的翻译副本
- * [OUTPUT]: 验证三种语言覆盖、翻译状态及每个复数分支的格式参数一致性
- * [POS]: 资源发布契约；新增文案缺译或占位符损坏会阻止包测试通过
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import Foundation
 import Testing
 

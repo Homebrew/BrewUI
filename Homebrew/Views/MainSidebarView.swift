@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 SwiftUI locale、侧栏选择 Binding 与升级徽标
- * [OUTPUT]: 展示原生本地化导航项并保留稳定的选择和无障碍身份
- * [POS]: 窗口导航展示层；语言更新不触发导航状态重置
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  MainSidebarView.swift
 //  Brew

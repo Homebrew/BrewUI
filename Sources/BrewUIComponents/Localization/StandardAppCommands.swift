@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 SwiftUI CommandGroup、AppKit 标准应用动作与 AppLocalization
- * [OUTPUT]: 在 Commands 源头提供实时本地化的应用菜单，不覆盖生成后的菜单项
- * [POS]: 应用级命令展示边界；窗口与业务生命周期保持不变
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import AppKit
 import Observation
 import SwiftUI

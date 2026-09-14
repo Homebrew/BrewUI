@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 Doctor 仓库与展示语言快照
- * [OUTPUT]: 派生诊断文案并保存可延迟解析的修复失败
- * [POS]: 诊断展示层，原始 doctor 输出保持原样
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorViewModel.swift
 //  BrewFeatureDoctor

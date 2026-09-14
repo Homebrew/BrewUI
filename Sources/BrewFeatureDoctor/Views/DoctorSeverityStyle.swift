@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 诊断严重程度与 AppLocalization
- * [OUTPUT]: 提供 严重程度的图标、颜色和延迟解析名称
- * [POS]: Doctor 共享展示策略；语言不改变严重程度身份
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorSeverityStyle.swift
 //  BrewFeatureDoctor

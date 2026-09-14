@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖诊断展示函数
- * [OUTPUT]: 验证诊断状态短句契约
- * [POS]: Doctor 单元测试
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorViewModelTests.swift
 //  BrewTests

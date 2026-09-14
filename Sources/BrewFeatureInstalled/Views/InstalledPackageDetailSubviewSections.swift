@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖详情展示项与当前语言环境
- * [OUTPUT]: 实时渲染操作确认与元信息标签
- * [POS]: 详情 View 保留现有包、任务、滚动和弹窗身份
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledPackageDetailSubviewSections.swift
 //  Brew

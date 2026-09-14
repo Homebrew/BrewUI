@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖焦点控制台 Binding、展开偏好与语言快照
- * [OUTPUT]: 提供即时本地化的控制台菜单
- * [POS]: 特性菜单入口；切换语言不改变控制台展开偏好
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConsoleCommands.swift
 //  Brew

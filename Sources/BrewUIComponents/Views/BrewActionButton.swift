@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 SwiftUI 的交互状态与 brewLocalization 的当前语言解析
- * [OUTPUT]: 对外提供 BrewActionButton 与可测试的按钮确认外观
- * [POS]: 共享操作按钮；只在渲染时解析文案，确认任务不随语言变化重建
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  BrewActionButton.swift
 //  BrewUIComponents

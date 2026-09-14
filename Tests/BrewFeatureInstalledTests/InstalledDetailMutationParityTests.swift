@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖安装操作的延迟错误消息
- * [OUTPUT]: 验证操作失败与原始诊断保持
- * [POS]: 安装特性错误回归测试
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledDetailMutationParityTests.swift
 //  BrewTests

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖安装行展示函数
- * [OUTPUT]: 验证行无障碍状态
- * [POS]: 行展示单元测试
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledPackageRowPresentationTests.swift
 //  BrewTests

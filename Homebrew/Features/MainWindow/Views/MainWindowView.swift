@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖各特性根、稳定窗口状态与当前语言环境
- * [OUTPUT]: 组合主窗口，显式按当前语言解析原生导航标题和升级结果
- * [POS]: 窗口展示组合；保留导航、控制台与搜索状态
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import AppKit
 import BrewAccessibilityID
 import BrewAppEnvironment

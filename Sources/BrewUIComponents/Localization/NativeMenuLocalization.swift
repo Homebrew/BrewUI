@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 AppKit 的标准菜单引用、公开 action 与应用既有快捷键契约
- * [OUTPUT]: 按当前 AppLocalization 仅更新系统顶级菜单标题；子项文案由 SwiftUI Commands 自己声明
- * [POS]: SwiftUI Commands 的展示适配边界；未知菜单和第三方 Services 内容保持原样
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import AppKit
 import Foundation
 

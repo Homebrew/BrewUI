@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖特性模型与当前语言环境
- * [OUTPUT]: 实时展示数量与升级状态文案
- * [POS]: 特性 View 在展示时解析文案，保留原有任务与选择
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  UpgradesPackagesView.swift
 //  BrewFeatureInstalled

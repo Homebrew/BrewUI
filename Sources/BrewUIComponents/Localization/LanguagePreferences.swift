@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 Observation、应用私有 UserDefaults 与资源语言清单
- * [OUTPUT]: 提供 LanguagePreferences，立即发布语言快照并持久化用户选择
- * [POS]: UI 语言状态唯一所有者；由 App 注入，业务仓库与命令生命周期不依赖它
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import Foundation
 import Observation
 

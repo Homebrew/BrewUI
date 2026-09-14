@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖数量与语言快照
- * [OUTPUT]: 生成升级空态数量文案
- * [POS]: 安装特性的纯展示帮助函数
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  UpgradesUpToDateCopy.swift
 //  BrewFeatureInstalled

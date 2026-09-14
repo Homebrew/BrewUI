@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 SwiftUI CommandGroup、AppKit responder chain 与 AppLocalization
- * [OUTPUT]: 本地化编辑命令及可刷新的原生启用校验，不缓存 responder 或已翻译标题
- * [POS]: 编辑菜单的声明边界；动作执行时重新解析焦点，业务状态不参与语言切换
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import AppKit
 import Observation
 import SwiftUI

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖配置分组模型与英文文案解析
- * [OUTPUT]: 验证配置分组顺序与原始报告一致性
- * [POS]: 配置特性测试；不依赖宿主系统语言
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import BrewCore
 @testable import BrewFeatureConfig
 import BrewRepositoryInterfaces

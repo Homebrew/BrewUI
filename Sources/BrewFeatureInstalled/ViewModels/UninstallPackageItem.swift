@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖安装包数据与显式当前语言快照
- * [OUTPUT]: 派生可随语言重算的元信息或操作文案
- * [POS]: 安装展示值；命令字符串与业务判定不受语言影响
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  UninstallPackageItem.swift
 //  Brew

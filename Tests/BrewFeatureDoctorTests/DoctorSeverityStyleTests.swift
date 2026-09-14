@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 DoctorSeverityStyle 与隔离语言资源
- * [OUTPUT]: 提供 严重程度展示及语言即时解析回归测试
- * [POS]: Doctor 共享展示契约；语言变化不改图标或颜色
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorSeverityStyleTests.swift
 //  BrewTests

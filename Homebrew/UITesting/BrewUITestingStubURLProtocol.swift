@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖当前测试启动配置与 fixture HTTP 文件
- * [OUTPUT]: 在测试 URLSession 内响应预置数据或明确错误
- * [POS]: 测试网络边界，不将缺失 fixture 回退到真实网络
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  BrewUITestingStubURLProtocol.swift
 //  Homebrew

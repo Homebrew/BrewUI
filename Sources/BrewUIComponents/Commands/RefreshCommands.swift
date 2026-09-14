@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 SwiftUI FocusedValues 的窗口动作与显式 AppLocalization 快照
- * [OUTPUT]: 提供RefreshCommands及对应焦点动作环境
- * [POS]: 原生菜单展示边界；语言由应用注入，动作仍路由至当前焦点窗口
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  RefreshCommands.swift
 //  BrewUIComponents

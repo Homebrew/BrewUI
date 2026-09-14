@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 原始诊断报告与当前语言展示快照
- * [OUTPUT]: 提供 稳定问题身份、诊断块和辅助功能摘要
- * [POS]: Doctor 问题映射；原始标题不翻译，修复提示在展示边界解析
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorIssueItem.swift
 //  BrewFeatureDoctor

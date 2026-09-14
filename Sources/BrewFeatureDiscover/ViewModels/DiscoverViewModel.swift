@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 BrewCore 包身份、RepositoryInterfaces 状态与共享展示本地化
- * [OUTPUT]: 提供 DiscoverViewModel
- * [POS]: Discover 展示策略；语言解析不参与仓库或安装任务生命周期
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 FakeBrew 载荷与共享启动契约
- * [OUTPUT]: 启动隔离的 UI 测试应用，每次测试使用独立语言偏好域
- * [POS]: UI runner 的组合入口；偏好域通过环境传给自升级后的进程
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  BrewApp.swift
 //  BrewUITests

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖展示模型与当前语言环境
- * [OUTPUT]: 实时生成空态和状态提示
- * [POS]: 界面展示层，不翻译包名、配置值或原始错误
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledOutdatedBadge.swift
 //  BrewFeatureInstalled

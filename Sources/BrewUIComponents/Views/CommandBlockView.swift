@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 SwiftUI、AppKit 剪贴板和 BrewActionButton
- * [OUTPUT]: 对外提供 可折叠、可复制的原始命令卡片
- * [POS]: 命令展示边界；标题本地化，命令原样保留且展开状态独立于语言
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  CommandBlockView.swift
 //  BrewUIComponents

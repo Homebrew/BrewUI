@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖语义导航标识与当前语言快照
- * [OUTPUT]: 提供原生导航菜单和稳定键盘快捷键
- * [POS]: 菜单层显式解析语言，避免依赖窗口外不可见的 locale
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  SidebarItem.swift
 //  Homebrew

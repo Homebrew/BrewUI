@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 XCTest 生命周期与测试语言域契约
- * [OUTPUT]: 在测试结束时终止应用并清理本次语言偏好域
- * [POS]: UI runner 生命周期边界，不删除真实应用偏好
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  BrewUITestCase.swift
 //  BrewUITests

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 AppKit 分栏拖动、SwiftUI 内容与当前本地化环境
- * [OUTPUT]: 对外提供保留拖动和折叠状态的 AnimatedSplit
- * [POS]: SwiftUI 与独立 NSHostingView 的桥接边界，显式传递语言环境而不重建承载视图
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  AnimatedSplit.swift
 //  Brew

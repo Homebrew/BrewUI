@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖控制台展示函数
- * [OUTPUT]: 验证控制台生命周期标签契约
- * [POS]: 控制台纯展示测试
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  ConsoleStatusPresentationTests.swift
 //  BrewTests

@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 BrewUIComponents 的 LanguagePreferences 与隔离的 UserDefaults 域
- * [OUTPUT]: 验证语言偏好不会把系统继承值误认为应用覆盖，也不写入全局偏好
- * [POS]: 展示组件测试中的本地化策略契约，与 UI 测试共同覆盖持久化及同进程切换
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 import BrewUIComponents
 import Foundation
 import Testing

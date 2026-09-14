@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖升级协调器与类型化交接失败
- * [OUTPUT]: 验证交接错误保存语义而非译文
- * [POS]: 自升级状态测试，保持未知诊断原文
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  SelfUpgradeCoordinatorTests.swift
 //  BrewFeatureSelfUpgradeTests

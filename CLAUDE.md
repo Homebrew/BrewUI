@@ -37,20 +37,3 @@ final class ExampleViewModel {
     }
 }
 ```
-
-
-## 本次架构导航
-
-Swift 6（以 Package.swift 为准）+ SwiftUI + Foundation String Catalog + Observation
-
-<directory>
-Homebrew/ - 应用组合根与资源；向稳定窗口注入实时语言环境。
-Sources/ - 分层 SwiftPM 模块；本地化状态和消息解析位于 BrewUIComponents/Localization。
-Tests/ - Swift Testing 契约；语言资源测试使用独立 Bundle 与偏好域。
-BrewUITests/ - 假 brew 驱动的真实窗口验收；验证切换不重启或清空搜索。
-</directory>
-<config>
-Package.swift - 模块依赖与编译隔离规则的真实基准。
-Homebrew.xcodeproj/project.pbxproj - App 编译与英文、简体中文与繁体中文资源构建。
-ARCHITECTURE.md - 全局依赖方向及运行时本地化边界。
-</config>

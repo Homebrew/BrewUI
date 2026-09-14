@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖 DoctorIssueItem 和固定诊断替身
- * [OUTPUT]: 提供 问题身份、可修复性与辅助功能回归测试
- * [POS]: Doctor 展示契约；默认英文与宿主语言解耦
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  DoctorIssueItemTests.swift
 //  BrewTests

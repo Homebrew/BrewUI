@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖包状态与当前语言快照
- * [OUTPUT]: 按当前语言生成 VoiceOver 状态
- * [POS]: 列表展示模型；不改变 operation observer
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledListRowViewModel.swift
 //  Brew

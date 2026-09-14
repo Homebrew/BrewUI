@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖升级协调器与当前语言环境
- * [OUTPUT]: 实时更新升级横幅文案
- * [POS]: 升级展示层；语言切换不重新启动升级
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  SelfUpgradeBanner.swift
 //  BrewFeatureSelfUpgrade

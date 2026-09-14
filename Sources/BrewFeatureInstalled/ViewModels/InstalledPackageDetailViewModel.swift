@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖包操作状态、仓库与延迟消息
- * [OUTPUT]: 提供详情展示数据及独立于语言的异步操作状态
- * [POS]: 安装详情模型；展示快照不改变操作或关系加载生命周期
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledPackageDetailViewModel.swift
 //  Brew

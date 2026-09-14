@@ -1,9 +1,3 @@
-/*
- * [INPUT]: 依赖安装特性展示函数
- * [OUTPUT]: 验证默认语言下原有业务与文案契约
- * [POS]: 特性单元测试，不改动业务预期
- * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
- */
 //
 //  InstalledViewModelPresentationTests.swift
 //  BrewTests
