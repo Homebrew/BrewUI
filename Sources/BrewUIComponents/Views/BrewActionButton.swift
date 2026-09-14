@@ -47,14 +47,14 @@ public struct BrewActionButton: View {
             action()
             confirm()
         } label: {
-            Label(appearance.title, systemImage: appearance.systemImage)
+            Label(LocalizedStringKey(appearance.title), systemImage: appearance.systemImage)
                 .font(.brewCaption)
         }
         .buttonStyle(BrewActionButtonStyle(isHovered: isHovered))
         .onHover { isHovered = $0 }
-        .help(help ?? title)
+        .help(LocalizedStringKey(help ?? title))
         // The label changes while confirming; what a screen reader or a UI test matches on must not.
-        .accessibilityLabel(title)
+        .accessibilityLabel(LocalizedStringKey(title))
     }
 
     private func confirm() {

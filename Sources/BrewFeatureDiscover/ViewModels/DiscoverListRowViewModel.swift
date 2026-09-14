@@ -110,7 +110,7 @@ final class DiscoverListRowViewModel: Identifiable {
     private var accessibilityLabel: String {
         var parts = [name, packageKindChrome.badgeLabel]
         if showsInstallMetrics {
-            parts.append("\(installs30DayLabel) installs in 30 days")
+            parts.append(String(localized: "\(installs30DayLabel) installs in 30 days"))
         }
         if let installedStatusLabel {
             parts.append(installedStatusLabel)

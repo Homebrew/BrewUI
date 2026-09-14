@@ -109,9 +109,9 @@ final class InstalledViewModel {
             return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
         }
         if totalPackageCount == 1 {
-            return "1 package"
+            return String(localized: "1 package")
         }
-        return "\(totalPackageCount) packages"
+        return String(localized: "\(totalPackageCount) packages")
     }
 
     var selectedPackage: InstalledBrewPackage? {

@@ -87,6 +87,15 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 - Imperative subject lines (*Add …*, not *Added …*). One logical change per commit when practical.
 
+## Localization
+
+- `Homebrew/Localizable.xcstrings` is the application-owned catalog, with English source keys and Simplified Chinese (`zh-Hans`). All UI modules intentionally resolve the default table in `Bundle.main`; the app packages their shared translations. Package tests have no app bundle and therefore exercise the English fallback. Do not move the catalog into one feature's resource bundle without updating every lookup.
+- Use literal `LocalizedStringKey` values in SwiftUI and `String(localized:)` for presentation values that need a `String`. Keep complete interpolated sentences; preserve placeholder types and order in translations. Existing explicit singular/plural branches remain supported in both languages.
+- Shared chrome that accepts runtime string keys (`BrewActionButton`, `PackageDetailSectionHeading`, and command headings) requires manually managed catalog entries. New copy must include its Chinese translation; Xcode's app-target extraction does not discover every package or custom-component call site.
+- Language follows macOS, including its per-app language preference, on launch. No separate language preference or global defaults mutation is needed. English remains the fallback for unsupported languages.
+- Package names, versions, commands, API descriptions/caveats, configuration keys/values, and exported diagnostics retain their original text. `DoctorText` translates known diagnostic prose after parsing, including wrapped paragraphs; unknown text falls back unchanged. Raw output, issue identity and runnable commands remain untouched. The Chinese page name is “brew 诊断”.
+- `LocalizationCatalogTests` validates translation completeness and format arguments. `LocalizationUITests` launches the fixture-backed app in Chinese; the existing UI suite explicitly launches in English. Review both languages at the minimum window size before merging.
+
 ## Updating this file
 
 Add patterns when they stabilize in code. Cross-cutting decisions go in `.ai/memory.md`.

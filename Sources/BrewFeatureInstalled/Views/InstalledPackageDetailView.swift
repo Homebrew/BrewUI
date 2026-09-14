@@ -138,7 +138,7 @@ private struct PackageRelationshipSection: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             PackageDetailSectionHeading(title: title)
             if relationships.isEmpty {
-                Text(emptyText)
+                Text(LocalizedStringKey(emptyText))
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
@@ -166,7 +166,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: uninstall.displayCommand,
-                    summaryText: "Uninstalls this package from this Mac",
+                    summaryText: String(localized: "Uninstalls this package from this Mac"),
                 )
 
                 Button {
@@ -234,7 +234,7 @@ private struct InstalledPackageDetailUpgradeChrome: View {
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: upgrade.displayCommand,
-                    summaryText: "Upgrades this package to the latest available version",
+                    summaryText: String(localized: "Upgrades this package to the latest available version"),
                 )
 
                 if let title = upgrade.primaryButtonTitle {

@@ -70,9 +70,9 @@ final class InstalledListRowViewModel {
         }
         parts.append(installedVersionLabel)
         if showsUpgradeAvailable, let latest = availableVersionLabel {
-            parts.append("Upgrade available to \(latest)")
+            parts.append(String(localized: "Upgrade available to \(latest)"))
         } else {
-            parts.append("Installed and up to date")
+            parts.append(String(localized: "Installed and up to date"))
         }
         return parts.joined(separator: ", ")
     }

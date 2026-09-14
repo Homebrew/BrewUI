@@ -113,10 +113,10 @@ struct InstalledPackageDetailMetadataSection: View {
                 homepageRow(url: homepageURL, title: metadata.homepageDisplayTitle ?? homepageURL.absoluteString)
             }
             if metadata.isPinned {
-                detailRow(label: "Pinned", value: "Yes")
+                detailRow(label: "Pinned", value: String(localized: "Yes"))
             }
             if metadata.isKegOnly {
-                detailRow(label: "Keg-only", value: "Yes")
+                detailRow(label: "Keg-only", value: String(localized: "Yes"))
             }
             if let caveats = metadata.caveatsText {
                 caveatsCallout(text: caveats)
@@ -124,7 +124,7 @@ struct InstalledPackageDetailMetadataSection: View {
         }
     }
 
-    private func detailRow(label: String, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
+    private func detailRow(label: LocalizedStringKey, value: String, valueColor: Color = .brewTextPrimary, valueFontWeight: Font.Weight = .medium) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(label)
                 .font(.brewCallout)

@@ -20,11 +20,23 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let blocks: [DoctorBlock]
     let rawText: String
 
-    init(issue: DoctorIssue) {
+    init(issue: DoctorIssue, bundle: Bundle = .main) {
         id = Self.contentID(for: issue)
-        title = issue.title
+        title = DoctorText.localized(issue.title, bundle: bundle)
         severity = issue.severity
-        blocks = issue.blocks
+        blocks = issue.blocks.map { block in
+            let content: DoctorBlock.Content = if case let .prose(lines) = block.content {
+                .prose(DoctorText.prose(lines, bundle: bundle))
+            } else {
+                block.content
+            }
+            return DoctorBlock(
+                id: block.id,
+                precededByBlankLine: block.precededByBlankLine,
+                caption: block.caption.map { DoctorText.localized($0, bundle: bundle) },
+                content: content,
+            )
+        }
         rawText = issue.rawText
     }
 
@@ -62,7 +74,7 @@ struct DoctorIssueItem: Identifiable, Equatable {
 
     /// Label for voiceover mode — combines title with Fix available
     var accessibilityLabel: String {
-        hasRunnableFix ? "\(title), Fix available" : title
+        hasRunnableFix ? String(localized: "\(title), Fix available") : title
     }
 }
 
