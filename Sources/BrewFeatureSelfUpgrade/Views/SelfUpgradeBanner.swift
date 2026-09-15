@@ -43,7 +43,7 @@ struct SelfUpgradeBannerContent: View {
                     Text(failureMessage)
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewStatusError)
-                        .accessibilityLabel("Upgrade failed: \(failureMessage)")
+                        .accessibilityLabel(String(localized: "Upgrade failed: \(failureMessage)", bundle: #bundle, comment: "VoiceOver: self-upgrade error; %@ is the error text"))
                 }
             }
         }
@@ -88,7 +88,7 @@ struct SelfUpgradeBannerContent: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(presentation.bannerTitle), \(presentation.versionSummary)")
+        .accessibilityLabel(Text(verbatim: "\(presentation.bannerTitle), \(presentation.versionSummary)"))
     }
 
     private var actions: some View {
@@ -110,7 +110,7 @@ struct SelfUpgradeBannerContent: View {
             .accessibilityLabel(presentation.upgradeActionTitle)
             .axid(.selfUpgradeUpgradeButton)
 
-            Button("Later") {
+            Button(String(localized: "Later", bundle: #bundle, comment: "Self-upgrade banner: dismiss for now")) {
                 coordinator.dismiss()
             }
             .disabled(!coordinator.isUpgradeActionEnabled)

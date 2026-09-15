@@ -106,7 +106,7 @@ final class InstalledViewModel {
 
     var packageCountSubtitle: String {
         if shouldShowInitialLoadingIndicator {
-            return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
+            return String(localized: "Loading packages…", bundle: #bundle, comment: "Installed tab subtitle while fetching")
         }
         if totalPackageCount == 1 {
             return "1 package"

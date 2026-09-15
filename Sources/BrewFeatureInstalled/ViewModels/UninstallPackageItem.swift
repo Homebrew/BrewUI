@@ -29,6 +29,7 @@ struct UninstallPackageItem {
         }
         return String(
             localized: "Blocked by installed dependents. Activate to see why.",
+            bundle: #bundle,
             comment: "Installed detail uninstall button accessibility hint when blocked",
         )
     }
@@ -50,6 +51,7 @@ struct UninstallPackageItem {
         }
         return String(
             localized: "blocking uninstall",
+            bundle: #bundle,
             comment: "Installed detail Used by badge when dependents block uninstall",
         )
     }
@@ -61,6 +63,7 @@ struct UninstallPackageItem {
         }
         return String(
             localized: "Can't uninstall yet.",
+            bundle: #bundle,
             comment: "Installed detail uninstall blocked callout lead sentence",
         )
     }
@@ -74,12 +77,14 @@ struct UninstallPackageItem {
         if blockingDependentCount == 1 {
             return String(
                 localized: "1 package above depends on \(name). Uninstall it first.",
+                bundle: #bundle,
                 comment: "Installed detail uninstall blocked callout body for one dependent",
             )
         }
         let count = blockingDependentCount
         return String(
             localized: "\(count) packages above depend on \(name). Uninstall them first.",
+            bundle: #bundle,
             comment: "Installed detail uninstall blocked callout body for multiple dependents",
         )
     }
@@ -98,6 +103,7 @@ struct UninstallPackageItem {
     var primaryButtonTitle: String {
         String(
             localized: "Uninstall",
+            bundle: #bundle,
             comment: "Installed detail uninstall button title",
         )
     }
@@ -106,6 +112,7 @@ struct UninstallPackageItem {
     var confirmationTitle: String {
         String(
             localized: "Uninstall \(package.name)?",
+            bundle: #bundle,
             comment: "Installed detail uninstall confirmation title; interpolated package name",
         )
     }
@@ -114,6 +121,7 @@ struct UninstallPackageItem {
     var confirmationMessage: String {
         String(
             localized: "This will remove \(package.name) from this Mac using Homebrew.",
+            bundle: #bundle,
             comment: "Installed detail uninstall confirmation message; interpolated package name",
         )
     }

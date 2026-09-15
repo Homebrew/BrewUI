@@ -237,7 +237,7 @@ struct InstalledViewModelTests {
             Issue.record("expected error state")
             return
         }
-        #expect(message == InstalledPackagesTestSupport.localizedBrewExecutableNotFoundMessage())
+        #expect(message == "Could not find Homebrew. Install it or ensure brew is in the default location.")
     }
 
     @Test @MainActor func `load maps launch failure to underlying message`() async {
@@ -265,6 +265,6 @@ struct InstalledViewModelTests {
             Issue.record("expected error state")
             return
         }
-        #expect(message == InstalledPackagesTestSupport.localizedGenericLoadFailureMessage())
+        #expect(message == "Something went wrong loading packages.")
     }
 }

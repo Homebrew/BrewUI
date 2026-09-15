@@ -39,6 +39,7 @@ struct UpgradePackageItem {
         }
         return String(
             localized: "Upgrade to \(label)",
+            bundle: #bundle,
             comment: "Installed detail upgrade button; interpolated label shows target tap version.",
         )
     }

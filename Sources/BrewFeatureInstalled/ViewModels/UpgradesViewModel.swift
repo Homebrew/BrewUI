@@ -109,7 +109,7 @@ final class UpgradesViewModel {
     /// subtitle is a static tab description owned by `MainWindowView`.
     var outdatedSubtitle: String {
         if shouldShowInitialLoadingIndicator {
-            return String(localized: "Loading packages…", comment: "Upgrades tab subtitle while fetching")
+            return String(localized: "Loading packages…", bundle: #bundle, comment: "Upgrades tab subtitle while fetching")
         }
         if showsUpgradeCheckFailure {
             return Self.upgradeCheckFailedTitle
@@ -121,12 +121,14 @@ final class UpgradesViewModel {
         // The count came from the last check that succeeded, so it must not read as current.
         return String(
             localized: "\(subtitle) — last check failed",
+            bundle: #bundle,
             comment: "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
         )
     }
 
     static let upgradeCheckFailedTitle = String(
         localized: "Couldn't check for upgrades",
+        bundle: #bundle,
         comment: "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
     )
 
@@ -137,11 +139,13 @@ final class UpgradesViewModel {
         case 1:
             String(
                 localized: "1 package can be upgraded",
+                bundle: #bundle,
                 comment: "Upgrades tab subtitle for a single outdated package",
             )
         default:
             String(
                 localized: "\(totalOutdatedCount) packages can be upgraded",
+                bundle: #bundle,
                 comment: "Upgrades tab subtitle when multiple packages are outdated",
             )
         }
@@ -155,17 +159,20 @@ final class UpgradesViewModel {
         if visible > 0 {
             return String(
                 localized: "Showing \(visible) of \(total) upgrades",
+                bundle: #bundle,
                 comment: "Upgrades tab subtitle while filtering with at least one match",
             )
         }
         if total == 1 {
             return String(
                 localized: "No matches in 1 outdated package",
+                bundle: #bundle,
                 comment: "Upgrades tab subtitle when filters hide the single available upgrade",
             )
         }
         return String(
             localized: "No matches in \(total) outdated packages",
+            bundle: #bundle,
             comment: "Upgrades tab subtitle when filters hide every available upgrade",
         )
     }
@@ -338,16 +345,19 @@ extension UpgradesViewModel {
         case .all:
             String(
                 localized: "Upgrades every outdated package",
+                bundle: #bundle,
                 comment: "Upgrades header command summary for an unfiltered batch",
             )
         case .formulae:
             String(
                 localized: "Upgrades every outdated formula",
+                bundle: #bundle,
                 comment: "Upgrades header command summary scoped to formulae",
             )
         case .casks:
             String(
                 localized: "Upgrades every outdated cask",
+                bundle: #bundle,
                 comment: "Upgrades header command summary scoped to casks",
             )
         case let .explicit(names):
@@ -359,11 +369,13 @@ extension UpgradesViewModel {
         if count == 1 {
             return String(
                 localized: "Upgrades the 1 package matching your search",
+                bundle: #bundle,
                 comment: "Upgrades header command summary for a single searched package",
             )
         }
         return String(
             localized: "Upgrades the \(count) packages matching your search",
+            bundle: #bundle,
             comment: "Upgrades header command summary for multiple searched packages",
         )
     }
@@ -379,6 +391,7 @@ extension UpgradesViewModel {
         if isFilteringOutEveryUpgrade {
             return String(
                 localized: "Nothing to upgrade here",
+                bundle: #bundle,
                 comment: "Upgrades header stand-in when filters hide every available upgrade",
             )
         }
@@ -399,6 +412,7 @@ extension UpgradesViewModel {
         }
         return String(
             localized: "\(message)\n\nUntil this succeeds the app can't tell whether anything needs upgrading.",
+            bundle: #bundle,
             comment: "Upgrades empty state under a failed check: brew's error, then why the list is empty",
         )
     }

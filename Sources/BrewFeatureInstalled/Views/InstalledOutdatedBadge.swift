@@ -15,6 +15,7 @@ struct InstalledOutdatedBadge: View {
         Text(
             String(
                 localized: "OUTDATED",
+                bundle: #bundle,
                 comment: "Installed outdated status badge label",
             ),
         )
@@ -33,6 +34,7 @@ struct InstalledOutdatedBadge: View {
         .accessibilityLabel(
             String(
                 localized: "Upgrade available",
+                bundle: #bundle,
                 comment: "Installed outdated status badge accessibility label",
             ),
         )

@@ -136,7 +136,7 @@ struct InstalledListRowView: View {
             HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.xs) {
                 Text(current)
                     .foregroundStyle(Color.brewTextTertiary)
-                Text("→")
+                Text(verbatim: "→")
                     .foregroundStyle(Color.brewTextTertiary)
                 Text(latest)
                     .foregroundStyle(Color.brewTextBrand)
