@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+#
+# localize — build and run brew-localize (Tools/BrewLocalize) against the repo root.
+# Usage: scripts/localize sync [--check] | status [--markdown] | verify
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+xcrun swift build --package-path Tools/BrewLocalize -c release >/dev/null
+BIN="$(xcrun swift build --package-path Tools/BrewLocalize -c release --show-bin-path)/brew-localize"
+exec "$BIN" "$@" --root "$ROOT_DIR"

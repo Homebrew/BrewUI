@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# test — run all Swift Package tests (BrewKit + BrewUILint).
+# test — run all Swift Package tests (BrewKit + BrewUILint + BrewLocalize).
 #
 # Mirrors what CI runs in .github/workflows/pr_build_test.yml, so green
 # locally means green on CI.
@@ -15,5 +15,8 @@ xcrun swift test --package-path .
 
 echo "==> BrewUILint package tests"
 xcrun swift test --package-path Tools/BrewUILint
+
+echo "==> BrewLocalize package tests"
+xcrun swift test --package-path Tools/BrewLocalize
 
 echo "==> All package tests passed."

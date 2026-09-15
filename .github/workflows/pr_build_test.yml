@@ -15,6 +15,7 @@ on:
       - "Package.swift"
       - "Package.resolved"
       - "Tools/BrewUILint/**"
+      - "Tools/BrewLocalize/**"
       - "scripts/test"
       - "scripts/test-ui"
       - "Brewfile"
@@ -35,6 +36,7 @@ on:
       - "Package.swift"
       - "Package.resolved"
       - "Tools/BrewUILint/**"
+      - "Tools/BrewLocalize/**"
       - "scripts/test"
       - "scripts/test-ui"
       - "Mintfile"
@@ -120,6 +122,19 @@ jobs:
           set -o pipefail
           xcrun swift test --package-path Tools/BrewUILint | tee swift-test-brewuilint.log
 
+      - name: Cache BrewLocalize .build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: Tools/BrewLocalize/.build
+          key: ${{ runner.os }}-brewlocalize-${{ steps.swift-toolchain.outputs.fingerprint }}-${{ hashFiles('Tools/BrewLocalize/Package.swift', 'Tools/BrewLocalize/Sources/**', 'Tools/BrewLocalize/Tests/**') }}
+          restore-keys: |
+            ${{ runner.os }}-brewlocalize-${{ steps.swift-toolchain.outputs.fingerprint }}-
+
+      - name: Run BrewLocalize package tests
+        run: |
+          set -o pipefail
+          xcrun swift test --package-path Tools/BrewLocalize | tee swift-test-brewlocalize.log
+
       - name: Cache Homebrew prefix
         uses: Homebrew/actions/cache-homebrew-prefix@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
         with:
@@ -179,6 +194,7 @@ jobs:
             xcodebuild.log
             swift-test-brewkit.log
             swift-test-brewuilint.log
+            swift-test-brewlocalize.log
           retention-days: 7
 
   ui-test:
