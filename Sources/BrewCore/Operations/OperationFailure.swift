@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// User-visible and diagnostic failure surfaced through ``BrewOperationPhase/failed(reason:)`` (`Sendable` for actor-isolated state).
+/// Why a command-center operation failed, surfaced through ``BrewOperationPhase/failed(reason:)``.
 public enum OperationFailure: Equatable, Sendable {
     /// `brew` ran but exited non-zero; stderr is the primary user-visible detail when present.
     case brewCommand(exitCode: Int32, stderr: String)
@@ -16,38 +16,11 @@ public enum OperationFailure: Equatable, Sendable {
     /// Locator could not find `brew` in supported prefixes (`AGENTS.md`).
     case brewExecutableNotFound
 
-    /// Fallback for arbitrary errors: localized/user text plus optional diagnostic string.
-    case generic(userFacing: String, diagnostic: String?)
+    /// Any other error: its `localizedDescription` plus the full `String(describing:)` for logs.
+    case other(description: String, diagnostic: String?)
 
-    /// Primary line for UI and accessibility (derived per case).
-    public var userFacingMessage: String {
-        switch self {
-        case let .brewCommand(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(
-                localized: "Homebrew command failed.",
-                comment: "Shown when brew exits non-zero with no stderr",
-            )
-
-        case let .brewLaunchFailed(diagnostic):
-            return diagnostic
-
-        case .brewExecutableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Shown when brew binary is missing",
-            )
-
-        case let .generic(userFacing, _):
-            return userFacing
-        }
-    }
-
-    public init(userFacingMessage: String, diagnosticDescription: String? = nil) {
-        self = .generic(userFacing: userFacingMessage, diagnostic: diagnosticDescription)
+    public init(description: String, diagnostic: String? = nil) {
+        self = .other(description: description, diagnostic: diagnostic)
     }
 
     public init(catching error: Error) {
@@ -64,8 +37,8 @@ public enum OperationFailure: Equatable, Sendable {
             self = .brewExecutableNotFound
 
         default:
-            let userFacing = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-            self = .generic(userFacing: userFacing, diagnostic: String(describing: error))
+            let description = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            self = .other(description: description, diagnostic: String(describing: error))
         }
     }
 }

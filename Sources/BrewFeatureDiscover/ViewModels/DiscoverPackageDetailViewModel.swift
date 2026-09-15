@@ -173,7 +173,7 @@ final class DiscoverPackageDetailViewModel {
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {
-                    installErrorMessage = failure.userFacingMessage
+                    installErrorMessage = BrewErrorCopy.message(for: failure)
                 } else {
                     installErrorMessage = Self.userMessage(for: error)
                 }
@@ -199,25 +199,13 @@ final class DiscoverPackageDetailViewModel {
     }
 
     private static func userMessage(for error: Error) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Discover detail error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(localized: "Homebrew command failed.", comment: "Discover detail generic brew failure")
-        case let BrewCommandError.launchFailed(underlying):
-            return underlying
-        default:
-            return String(
+        BrewErrorCopy.message(
+            for: error,
+            fallback: String(
                 localized: "Something went wrong while installing this package.",
+                bundle: #bundle,
                 comment: "Discover detail generic install error",
-            )
-        }
+            ),
+        )
     }
 }
