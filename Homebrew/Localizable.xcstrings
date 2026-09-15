@@ -14,16 +14,40 @@
       "comment" : "Window subtitle, Doctor"
     },
     "Configuration" : {
-      "comment" : "Sidebar: brew config and environment"
+      "comment" : "Sidebar: brew config and environment",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuration"
+          }
+        }
+      }
     },
     "Discard" : {
       "comment" : "Crash report dialog: delete the report"
     },
     "Discover" : {
-      "comment" : "Sidebar: browse and search the catalog"
+      "comment" : "Sidebar: browse and search the catalog",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discover"
+          }
+        }
+      }
     },
     "Doctor" : {
-      "comment" : "Sidebar: brew doctor diagnostics"
+      "comment" : "Sidebar: brew doctor diagnostics",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doctor"
+          }
+        }
+      }
     },
     "Homebrew Documentation" : {
       "comment" : "Help menu"
@@ -32,7 +56,15 @@
       "comment" : "Window subtitle, Configuration"
     },
     "Installed" : {
-      "comment" : "Sidebar: installed packages"
+      "comment" : "Sidebar: installed packages",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installed"
+          }
+        }
+      }
     },
     "OK" : {
       "comment" : "Self-upgrade outcome alert: dismiss"
@@ -53,7 +85,15 @@
       "comment" : "Shown when the bundled self-upgrade helper executable cannot be found"
     },
     "Upgrades" : {
-      "comment" : "Sidebar: outdated packages"
+      "comment" : "Sidebar: outdated packages",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrades"
+          }
+        }
+      }
     },
     "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
       "comment" : "Shown when the self-upgrade is attempted while another brew command is still running"

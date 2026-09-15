@@ -45,6 +45,10 @@ The hook also runs BrewUILint over the production tree. If unresolved lint viola
 See [development setup](AGENTS.md#development-setup) for signing configuration, [conventions and testing](AGENTS.md#coding-conventions)
 for contributor guidance and [architecture](ARCHITECTURE.md) for system design.
 
+## 🌍 Translations
+
+Translations are community-sourced. See [localisation](AGENTS.md#localisation) for how to add or improve one.
+
 ## 🚧 Status
 
 Stable and under active development.

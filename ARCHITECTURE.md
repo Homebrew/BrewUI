@@ -147,3 +147,6 @@ height and preserves whether the final line actually ended in a newline.
   executable locator. No custom prefix or custom-tap management initially.
 - Homebrew remains the source of truth. Do not modify its internals or hide operations and errors.
 - Preserve keyboard navigation and VoiceOver semantics as well as visible labels.
+- One String Catalog per UI target, with English copy as the key. The app follows the macOS language
+  and falls back to English for each untranslated string. Non-UI layers carry no copy.
+  See [localisation](AGENTS.md#localisation).
