@@ -32,7 +32,7 @@ struct BrewActionButtonAppearanceTests {
             isConfirming: true,
         )
 
-        #expect((appearance.title, appearance.systemImage) == ("Cleared", "checkmark"))
+        #expect((String(localized: appearance.title), appearance.systemImage) == ("Cleared", "checkmark"))
     }
 
     @Test func `a button without a confirmation title never changes`() {
@@ -43,6 +43,6 @@ struct BrewActionButtonAppearanceTests {
             isConfirming: true,
         )
 
-        #expect((appearance.title, appearance.systemImage) == ("Save", "square.and.arrow.down"))
+        #expect((String(localized: appearance.title), appearance.systemImage) == ("Save", "square.and.arrow.down"))
     }
 }

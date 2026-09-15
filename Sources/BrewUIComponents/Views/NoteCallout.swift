@@ -30,11 +30,16 @@ public enum NoteCalloutTone: Sendable {
 }
 
 public struct NoteCallout: View {
-    private let text: String
+    private let text: Text
     private let tone: NoteCalloutTone
 
-    public init(_ text: String, tone: NoteCalloutTone = .brand) {
-        self.text = text
+    public init(_ text: LocalizedStringResource, tone: NoteCalloutTone = .brand) {
+        self.text = Text(text)
+        self.tone = tone
+    }
+
+    public init(verbatim text: String, tone: NoteCalloutTone = .brand) {
+        self.text = Text(verbatim: text)
         self.tone = tone
     }
 
@@ -43,7 +48,7 @@ public struct NoteCallout: View {
             Image(systemName: "info.circle.fill")
                 .font(.brewSubheadline)
                 .foregroundStyle(tone.iconColor)
-            Text(text)
+            text
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextPrimary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -60,9 +65,9 @@ public struct NoteCallout: View {
 #if DEBUG
     #Preview("Note callout") {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            NoteCallout("Casks and formulae are installed to different prefixes.")
+            NoteCallout(verbatim: "Casks and formulae are installed to different prefixes.")
             NoteCallout(
-                "Please note that these warnings are just used to help the Homebrew maintainers.",
+                verbatim: "Please note that these warnings are just used to help the Homebrew maintainers.",
                 tone: .info,
             )
         }
