@@ -260,26 +260,15 @@ final class InstalledViewModel {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    /// Maps a repository failure into user-facing copy — the presentation decision the repository
-    /// deliberately leaves to this layer.
     private static func userMessage(for error: any Error) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Installed tab error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(localized: "Homebrew command failed.", comment: "Installed tab error generic brew failure")
-        case let BrewCommandError.launchFailed(underlying):
-            return underlying
-        default:
-            return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
-        }
+        BrewErrorCopy.message(
+            for: error,
+            fallback: String(
+                localized: "Something went wrong loading packages.",
+                bundle: #bundle,
+                comment: "Installed tab generic error",
+            ),
+        )
     }
 }
 

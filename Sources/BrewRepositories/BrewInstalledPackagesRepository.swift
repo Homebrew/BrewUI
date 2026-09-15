@@ -222,16 +222,13 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     }
 
     private func decodeInfoJSON(from standardOutput: String) throws -> BrewInfoJSON {
+        let command = "brew info --installed --json=v2"
         let data = Data(standardOutput.utf8)
         do {
             return try JSONDecoder().decode(BrewInfoJSON.self, from: data)
         } catch {
-            throw BrewCommandError.launchFailed(
-                underlying: String(
-                    localized: "Failed to decode Homebrew JSON output.",
-                    comment: "Installed tab JSON decode failure",
-                ),
-            )
+            installedRepositoryLogger.error("Failed to decode \(command, privacy: .public): \(error)")
+            throw BrewRepositoryError.malformedBrewOutput(command: command)
         }
     }
 }
