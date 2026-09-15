@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "**/*.swift"
+      - "**/*.xcstrings"
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
@@ -13,11 +14,13 @@ on:
       - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - "scripts/localize"
       - ".github/workflows/swift_quality.yml"
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
       - "**/*.swift"
+      - "**/*.xcstrings"
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
@@ -25,6 +28,7 @@ on:
       - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - "scripts/localize"
       - ".github/workflows/swift_quality.yml"
 
 permissions:
@@ -85,3 +89,12 @@ jobs:
         run: |
           BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
           find Homebrew HomebrewUpgradeHelper Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
+
+      # Catalogs only in UI targets, and no empty translations (those render blank instead of
+      # falling back to English). Drift against the code is checked after the build in pr_build_test.
+      - name: Verify string catalogs
+        run: scripts/localize verify
+
+      # The quiet maintainer signal: what still needs translating, in the job summary, never a failure.
+      - name: Localization status
+        run: scripts/localize status --markdown >> "$GITHUB_STEP_SUMMARY"

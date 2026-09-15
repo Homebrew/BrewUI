@@ -8,14 +8,18 @@ final class RuleContext {
     /// in this run. Populated by `Runner` before rules walk; rules use this to relate an extension
     /// declared in one file back to the type it extends in another.
     let nonisolatedTypeNames: Set<String>
+    /// Type name -> its initializer labels declared `LocalizedStringResource` (`"_"` when unlabeled).
+    let copyParameters: [String: Set<String>]
 
     init(
         file: String,
         tree: SourceFileSyntax,
         nonisolatedTypeNames: Set<String> = [],
+        copyParameters: [String: Set<String>] = [:],
     ) {
         self.file = file
         self.nonisolatedTypeNames = nonisolatedTypeNames
+        self.copyParameters = copyParameters
         converter = SourceLocationConverter(fileName: file, tree: tree)
     }
 
