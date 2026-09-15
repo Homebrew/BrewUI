@@ -139,27 +139,31 @@ private struct DiscoverPackageDetailMetadataSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "Details")
+            PackageDetailSectionHeading(title: LocalizedStringResource("Details", bundle: #bundle, comment: "Package detail section heading"))
             if let installedVersion = viewModel.installedVersionLabel {
                 detailRow(
-                    label: "Installed",
+                    label: String(localized: "Installed", bundle: #bundle, comment: "Package detail row: installed version(s)"),
                     value: installedVersion,
                     valueColor: viewModel.isInstalledVersionOutdated ? .brewStatusWarning : .brewTextPrimary,
                     valueFontWeight: .heavy,
                 )
             }
-            detailRow(label: "Latest version", value: viewModel.stableVersionLabel)
+            detailRow(label: String(localized: "Latest version", bundle: #bundle, comment: "Package detail row"), value: viewModel.stableVersionLabel)
             if viewModel.showsInstallMetrics {
-                detailRow(label: "30-day installs", value: viewModel.installs30DayLabel)
+                detailRow(label: String(
+                    localized: "30-day installs",
+                    bundle: #bundle,
+                    comment: "Package detail row: Homebrew analytics install count",
+                ), value: viewModel.installs30DayLabel)
             }
             if let dateValue = viewModel.installDateValue {
-                detailRow(label: "Installed on", value: dateValue)
+                detailRow(label: String(localized: "Installed on", bundle: #bundle, comment: "Package detail row: install date"), value: dateValue)
             }
             if let reason = viewModel.installReasonValue {
-                detailRow(label: "Install reason", value: reason)
+                detailRow(label: String(localized: "Install reason", bundle: #bundle, comment: "Package detail row: on request or as a dependency"), value: reason)
             }
             if let license = viewModel.licenseLabel {
-                detailRow(label: "License", value: license)
+                detailRow(label: String(localized: "License", bundle: #bundle, comment: "Package detail row"), value: license)
             }
             if let tap = viewModel.tapDisplayValue {
                 sourceRow(tap: tap, url: viewModel.sourceURL)
@@ -186,7 +190,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
 
     private func sourceRow(tap: String, url: URL?) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
-            Text("Source")
+            Text("Source", bundle: #bundle, comment: "Package detail row: source tap")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .frame(width: labelWidth, alignment: .leading)
@@ -211,7 +215,7 @@ private struct DiscoverPackageDetailMetadataSection: View {
 
     private func homepageRow(url: URL) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
-            Text("Homepage")
+            Text("Homepage", bundle: #bundle, comment: "Package detail row: homepage link")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .frame(width: labelWidth, alignment: .leading)
@@ -233,10 +237,10 @@ private struct DiscoverPackageDetailDependenciesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            PackageDetailSectionHeading(title: "Dependencies")
+            PackageDetailSectionHeading(title: LocalizedStringResource("Dependencies", bundle: #bundle, comment: "Package detail section heading"))
             let deps = viewModel.dependencyNames
             if deps.isEmpty {
-                Text("No dependencies.")
+                Text("No dependencies.", bundle: #bundle, comment: "Package detail: empty dependency list")
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
@@ -262,11 +266,11 @@ private struct DiscoverPackageInstallSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            PackageDetailSectionHeading(title: "Install")
+            PackageDetailSectionHeading(title: LocalizedStringResource("Install", bundle: #bundle, comment: "Package detail section heading"))
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: viewModel.installCommand,
-                    summaryText: "Installs this package on your Mac",
+                    summaryText: LocalizedStringResource("Installs this package on your Mac", bundle: #bundle, comment: "Command block summary above brew install"),
                 )
 
                 Button {
@@ -277,12 +281,12 @@ private struct DiscoverPackageInstallSection: View {
                             .controlSize(.small)
                             .frame(minWidth: 120)
                     } else {
-                        Text("Install")
+                        Text("Install", bundle: #bundle, comment: "Discover detail: install button")
                     }
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(viewModel.isInstalling)
-                .accessibilityLabel(Text("Install"))
+                .accessibilityLabel(String(localized: "Install", bundle: #bundle, comment: "VoiceOver: install button"))
                 .axid(.installButton)
 
                 if let installErrorMessage = viewModel.installErrorMessage {
@@ -299,10 +303,10 @@ private struct DiscoverPackageInstallSection: View {
 struct DiscoverPackageDetailPlaceholder: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text("No selection")
+            Text("No selection", bundle: #bundle, comment: "Package detail placeholder title when nothing is selected")
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text("Choose a package from Discover to see details.")
+            Text("Choose a package from Discover to see details.", bundle: #bundle, comment: "Package detail placeholder body when nothing is selected")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
             Spacer()

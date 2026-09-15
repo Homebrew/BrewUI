@@ -9,7 +9,7 @@ import Foundation
 /// the UI-free `BrewConfigSnapshot` never carries section labels (`AGENTS.md` — presentation boundary).
 struct ConfigSectionItem: Identifiable {
     let id: String
-    let title: String
+    let title: LocalizedStringResource
     let rows: [ConfigDisplayRow]
 }
 

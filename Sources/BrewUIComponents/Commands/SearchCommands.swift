@@ -13,7 +13,7 @@ public struct SearchCommands: Commands {
 
     public var body: some Commands {
         CommandGroup(after: .textEditing) {
-            Button("Find") { focusSearchField?() }
+            Button(String(localized: "Find", bundle: #bundle, comment: "Edit menu: focus the search field (⌘F)")) { focusSearchField?() }
                 .keyboardShortcut("f") // ⌘F
                 .disabled(focusSearchField == nil)
         }
