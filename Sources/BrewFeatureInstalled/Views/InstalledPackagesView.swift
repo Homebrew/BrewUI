@@ -22,7 +22,7 @@ struct InstalledPackagesView: View {
             packageListBanner()
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages")
+                Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.packageCountSubtitle)
@@ -55,10 +55,10 @@ struct InstalledPackagesView: View {
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
     private var scopePicker: some View {
-        Picker("Scope", selection: $viewModel.scope) {
-            Text("All").tag(InstalledPackageScope.all)
-            Text("Formulae").tag(InstalledPackageScope.formulae)
-            Text("Casks").tag(InstalledPackageScope.casks)
+        Picker(String(localized: "Scope", bundle: #bundle, comment: "Installed tab: formula/cask scope picker label"), selection: $viewModel.scope) {
+            Text("All", bundle: #bundle, comment: "Scope picker: every package kind").tag(InstalledPackageScope.all)
+            Text("Formulae", bundle: #bundle, comment: "Scope picker: formulae only").tag(InstalledPackageScope.formulae)
+            Text("Casks", bundle: #bundle, comment: "Scope picker: casks only").tag(InstalledPackageScope.casks)
         }
         .pickerStyle(.segmented)
         .labelsHidden()
@@ -74,7 +74,7 @@ struct InstalledPackagesView: View {
                 }
             }
             .listStyle(.inset)
-            .accessibilityLabel("Installed packages")
+            .accessibilityLabel(String(localized: "Installed packages", bundle: #bundle, comment: "VoiceOver: the installed packages list"))
             .axid(.installedList)
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)

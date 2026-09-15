@@ -104,14 +104,18 @@ final class InstalledViewModel {
         return false
     }
 
-    var packageCountSubtitle: String {
+    var packageCountSubtitle: LocalizedStringResource {
         if shouldShowInitialLoadingIndicator {
-            return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
+            return LocalizedStringResource("Loading packages…", bundle: #bundle, comment: "Installed tab subtitle while fetching")
         }
         if totalPackageCount == 1 {
-            return "1 package"
+            return LocalizedStringResource("1 package", bundle: #bundle, comment: "Installed tab subtitle, exactly one package")
         }
-        return "\(totalPackageCount) packages"
+        return LocalizedStringResource(
+            "\(totalPackageCount) packages",
+            bundle: #bundle,
+            comment: "Installed tab subtitle; %lld is the package count (never 1)",
+        )
     }
 
     var selectedPackage: InstalledBrewPackage? {

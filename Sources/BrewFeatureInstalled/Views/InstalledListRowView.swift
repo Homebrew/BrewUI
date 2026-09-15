@@ -113,7 +113,7 @@ struct InstalledListRowView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.body)
                     .foregroundStyle(Color.brewStatusSuccess)
-                    .help("Installed and up to date")
+                    .help(String(localized: "Installed and up to date", bundle: #bundle, comment: "Installed list: tooltip on the up-to-date tick"))
             }
         }
     }
@@ -129,7 +129,7 @@ struct InstalledListRowView: View {
             HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.xs) {
                 Text(current)
                     .foregroundStyle(Color.brewTextTertiary)
-                Text("→")
+                Text(verbatim: "→")
                     .foregroundStyle(Color.brewTextTertiary)
                 Text(latest)
                     .foregroundStyle(Color.brewTextBrand)

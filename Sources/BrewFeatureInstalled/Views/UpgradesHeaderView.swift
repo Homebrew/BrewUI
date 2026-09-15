@@ -15,7 +15,7 @@ struct UpgradesHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Available upgrades")
+                Text("Available upgrades", bundle: #bundle, comment: "Upgrades tab heading")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.outdatedSubtitle)
@@ -55,13 +55,17 @@ struct UpgradesHeaderView: View {
         Button {
             viewModel.upgradeAll()
         } label: {
-            Text("Upgrade All (\(viewModel.outdatedCount))")
+            Text("Upgrade All (\(viewModel.outdatedCount))", bundle: #bundle, comment: "Upgrades tab button; %lld is the outdated count")
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.regular)
         .keyboardShortcut("u", modifiers: [.command, .shift])
         .disabled(viewModel.isUpgradingAny)
-        .accessibilityLabel("Upgrade all \(viewModel.outdatedCount) packages")
+        .accessibilityLabel(String(
+            localized: "Upgrade all \(viewModel.outdatedCount) packages",
+            bundle: #bundle,
+            comment: "VoiceOver: upgrade-all button; %lld is the outdated count",
+        ))
     }
 
     /// ⌘R is the window-wide refresh (``RefreshCommands``); this button is the upgrades-only one.
@@ -70,7 +74,7 @@ struct UpgradesHeaderView: View {
             Task { await viewModel.refresh() }
         } label: {
             // The label stays laid out while hidden, so swapping in the spinner cannot resize the button.
-            Label("Refresh", systemImage: "arrow.clockwise")
+            Label(String(localized: "Refresh", bundle: #bundle, comment: "Upgrades tab: re-check for upgrades button"), systemImage: "arrow.clockwise")
                 .opacity(viewModel.isRefreshing ? 0 : 1)
                 .overlay {
                     if viewModel.isRefreshing {
@@ -81,7 +85,7 @@ struct UpgradesHeaderView: View {
         }
         .controlSize(.regular)
         .disabled(viewModel.isRefreshing)
-        .accessibilityLabel("Check for upgrades again")
+        .accessibilityLabel(String(localized: "Check for upgrades again", bundle: #bundle, comment: "VoiceOver: upgrades refresh button"))
         .axid(.upgradesRefreshButton)
     }
 

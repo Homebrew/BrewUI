@@ -1,7 +1,36 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "A new version of the Homebrew app is available" : {
+      "comment" : "Self-upgrade banner title"
+    },
+    "Later" : {
+      "comment" : "Self-upgrade banner: dismiss for now"
+    },
+    "The Homebrew app has been upgraded to the latest version." : {
+      "comment" : "Alert body on the launch after a successful self-upgrade"
+    },
+    "The Homebrew app is up to date" : {
+      "comment" : "Alert title on the launch after a successful self-upgrade"
+    },
+    "The Homebrew app wasn’t upgraded" : {
+      "comment" : "Alert title on the launch after a self-upgrade that failed"
+    },
+    "The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages." : {
+      "comment" : "Alert body on the launch after a self-upgrade that failed"
+    },
+    "Upgrade Homebrew app" : {
+      "comment" : "Self-upgrade banner eyebrow"
+    },
+    "Upgrade failed: %@" : {
+      "comment" : "VoiceOver: self-upgrade error; %@ is the error text"
+    },
+    "Upgrade the Homebrew app" : {
+      "comment" : "Self-upgrade banner button when brew reports no version for the upgrade"
+    },
+    "Upgrade to %@" : {
+      "comment" : "Self-upgrade banner button, e.g. \"Upgrade to v1.5.0\""
+    }
   },
   "version" : "1.0"
 }
