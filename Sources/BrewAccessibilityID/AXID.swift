@@ -48,6 +48,8 @@ public enum AXID: Hashable, Sendable {
     case installButton
     case uninstallButton
     case upgradeButton
+    case pinButton
+    case unpinButton
     case console
     case consoleStatus
     case consoleToggle
@@ -91,6 +93,8 @@ public enum AXID: Hashable, Sendable {
         case .installButton: "detail.install"
         case .uninstallButton: "detail.uninstall"
         case .upgradeButton: "detail.upgrade"
+        case .pinButton: "detail.pin"
+        case .unpinButton: "detail.unpin"
         case .console: "console"
         case .consoleStatus: "console.status"
         case .consoleToggle: "console.toggle"

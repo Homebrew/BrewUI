@@ -107,6 +107,13 @@ struct InstalledListRowView: View {
                         .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
                 }
 
+            if viewModel.showsPinnedBadge {
+                Image(systemName: "pin.fill")
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .accessibilityHidden(true)
+            }
+
             statusBadge(viewModel: viewModel)
                 .accessibilityHidden(true)
 

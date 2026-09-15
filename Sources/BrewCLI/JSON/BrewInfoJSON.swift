@@ -123,6 +123,7 @@ struct BrewInfoCask: Decodable {
     var installedOnRequest: Bool
     var dependencies: [HomebrewPackageID]
     var outdated: Bool
+    var pinned: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -140,6 +141,7 @@ struct BrewInfoCask: Decodable {
             forKeys: [.dependencies, .dependsOn],
         )
         outdated = (try? container.decode(Bool.self, forKey: .outdated)) ?? false
+        pinned = (try? container.decode(Bool.self, forKey: .pinned)) ?? false
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -155,6 +157,7 @@ struct BrewInfoCask: Decodable {
         case dependencies
         case dependsOn = "depends_on"
         case outdated
+        case pinned
     }
 
     var firstDisplayName: String? {

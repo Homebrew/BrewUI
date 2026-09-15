@@ -20,6 +20,10 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case upgradeApp
     case uninstallFormula
     case uninstallCask
+    case pinFormula
+    case pinCask
+    case unpinFormula
+    case unpinCask
     case doctorFix
     case doctorRead
 

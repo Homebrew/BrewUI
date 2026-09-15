@@ -30,6 +30,20 @@ public enum BrewCommands {
         )
     }
 
+    public static func pin(_ name: String, kind: HomebrewPackageKind) -> BrewCommand {
+        BrewCommand(
+            operationKind: kind == .formula ? .pinFormula : .pinCask,
+            arguments: ["pin", flag(for: kind), name],
+        )
+    }
+
+    public static func unpin(_ name: String, kind: HomebrewPackageKind) -> BrewCommand {
+        BrewCommand(
+            operationKind: kind == .formula ? .unpinFormula : .unpinCask,
+            arguments: ["unpin", flag(for: kind), name],
+        )
+    }
+
     /// Batch `brew upgrade` for the given selection — everything outdated, a single kind, or an explicit list.
     public static func bulkUpgrade(_ selection: BrewUpgradeSelection) -> BrewCommand {
         BrewCommand(operationKind: .upgradeAll, arguments: selection.arguments)

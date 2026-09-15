@@ -84,10 +84,6 @@ struct PackageDetailMetadataItem {
         package.outdated
     }
 
-    var isPinned: Bool {
-        package.pinned
-    }
-
     var isKegOnly: Bool {
         package.kegOnly
     }

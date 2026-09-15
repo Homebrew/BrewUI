@@ -50,4 +50,12 @@ final class InstalledUITests: BrewUITestCase {
         launch(.installedLarge)
             .assertHasPackage("bulk-formula-000")
     }
+
+    @MainActor
+    func testPinThenUnpinOnInstalledDetail() {
+        launch(.installedBasic)
+            .openDetail(for: "wget")
+            .pin()
+            .unpin()
+    }
 }

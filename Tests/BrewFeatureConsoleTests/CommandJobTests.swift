@@ -56,6 +56,28 @@ struct CommandJobTests {
         #expect(job.command == "brew upgrade gh")
     }
 
+    @Test func `materialize for formula pin includes --formula flag`() {
+        let id = BrewOperationID(kind: .formula, name: "wget")
+        let job = CommandJob.materialize(
+            id: id,
+            kind: .pinFormula,
+            phase: .running(.pinFormula),
+        )
+
+        #expect(job.command == "brew pin --formula wget")
+    }
+
+    @Test func `materialize for cask unpin includes --cask flag`() {
+        let id = BrewOperationID(kind: .cask, name: "docker")
+        let job = CommandJob.materialize(
+            id: id,
+            kind: .unpinCask,
+            phase: .running(.unpinCask),
+        )
+
+        #expect(job.command == "brew unpin --cask docker")
+    }
+
     @Test func `materialize for maintenance op uses the id's stored display command`() {
         let id = BrewOperationID(maintenanceToken: "link:openssl@3", displayCommand: "brew link openssl@3")
         let job = CommandJob.materialize(

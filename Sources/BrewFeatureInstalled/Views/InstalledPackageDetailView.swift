@@ -102,6 +102,8 @@ struct InstalledPackageDetailView: View {
                 InstalledPackageDetailUpgradeChrome(viewModel: viewModel)
                 PackageDetailSectionDivider()
             }
+            InstalledPackageDetailPinChrome(viewModel: viewModel)
+            PackageDetailSectionDivider()
             InstalledPackageDetailUninstallChrome(viewModel: viewModel)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -147,6 +149,50 @@ private struct PackageRelationshipSection: View {
                     dotStyle: dotStyle,
                     onSelectInstalledPackage: onSelectInstalledPackage,
                 )
+            }
+        }
+    }
+}
+
+/// Pin/unpin affordance and copyable `brew pin` / `brew unpin` command (`CONVENTIONS.md` — transparency).
+private struct InstalledPackageDetailPinChrome: View {
+    @Bindable var viewModel: InstalledPackageDetailViewModel
+
+    var body: some View {
+        let pin = viewModel.pinItem
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            Text(pin.sectionTitle)
+                .font(.brewSubheadline.weight(.semibold))
+                .foregroundStyle(Color.brewTextPrimary)
+
+            VStack(alignment: .leading, spacing: BrewSpacing.md) {
+                CommandBlockView(
+                    command: pin.displayCommand,
+                    summaryText: pin.summaryText,
+                )
+
+                Button {
+                    viewModel.handlePinPrimaryButtonTapped()
+                } label: {
+                    if viewModel.showsPinBusy {
+                        ProgressView()
+                            .controlSize(.small)
+                            .frame(minWidth: 120)
+                    } else {
+                        Text(pin.primaryButtonTitle)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(viewModel.isMutatingPackage)
+                .accessibilityLabel(pin.primaryButtonTitle)
+                .axid(pin.isPinned ? .unpinButton : .pinButton)
+
+                if let pinError = viewModel.pinErrorMessage {
+                    Text(pinError)
+                        .font(.brewCallout)
+                        .foregroundStyle(Color.brewStatusError)
+                        .textSelection(.enabled)
+                }
             }
         }
     }

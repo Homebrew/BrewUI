@@ -48,6 +48,7 @@ struct BrewOperationIDTests {
             .installFormula, .installCask,
             .upgradeFormula, .upgradeCask, .upgradeAll, .upgradeApp,
             .uninstallFormula, .uninstallCask,
+            .pinFormula, .pinCask, .unpinFormula, .unpinCask,
             .doctorFix,
         ]
 

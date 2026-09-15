@@ -693,3 +693,10 @@
 
 - Darwin discards unread terminal output when the last replica descriptor closes. `BrewCommandService` must keep its replica open until draining finishes, including cancellation and launch failure. Close both descriptors in one `defer`; finish the drain only after a quiet poll that began after child exit.
 - The regression test holds the output observer until the child is reaped, then checks buffered and streamed stdout/stderr. This reproduces the output loss without depending on CI scheduling or adding a production test hook.
+
+## 2026-09-15 — Pin and unpin are mutating command-center operations
+
+- Installed detail Pin/Unpin schedules `brew pin` / `brew unpin` with `--formula` or `--cask` through `BrewMutatingCommandFactory` and `BrewCommandCenter`, same as install/upgrade/uninstall. Do not add a second execution path.
+- Cask `pinned` is decoded from `brew info --json=v2` (formulae already were). Inventory refresh on running→idle is what flips the control from Pin to Unpin; the app does not reimplement Homebrew's "skip pinned on upgrade" rule.
+- Pinned casks with `auto_updates true` may still update themselves outside Homebrew; that is CLI behaviour, not something BrewUI should hide or special-case in Upgrade All.
+

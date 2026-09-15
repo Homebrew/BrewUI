@@ -165,6 +165,14 @@ public extension CommandJob {
         case .uninstallCask:
             verb = "uninstall"
             isCask = true
+        case .pinFormula:
+            return "brew pin --formula \(name)"
+        case .pinCask:
+            return "brew pin --cask \(name)"
+        case .unpinFormula:
+            return "brew unpin --formula \(name)"
+        case .unpinCask:
+            return "brew unpin --cask \(name)"
         case .doctorFix, .doctorRead, .upgradeAll, .upgradeApp:
             // Unreachable: these materialize their display command in the outer switch.
             return "brew"

@@ -197,6 +197,14 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
         BrewCommands.uninstall(name, kind: kind)
     }
 
+    public func pinCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.pin(name, kind: kind)
+    }
+
+    public func unpinCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
+        BrewCommands.unpin(name, kind: kind)
+    }
+
     public func bulkUpgradeCommand(selection: BrewUpgradeSelection) -> BrewCommand {
         BrewCommands.bulkUpgrade(selection)
     }

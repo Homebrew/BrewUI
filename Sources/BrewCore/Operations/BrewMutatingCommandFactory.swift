@@ -13,6 +13,8 @@ public protocol BrewMutatingCommandFactory: Sendable {
     func installCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand
     func upgradeCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand
     func uninstallCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand
+    func pinCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand
+    func unpinCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand
 
     /// Builds a batch `brew upgrade` command for the given ``BrewUpgradeSelection`` — either everything
     /// outdated, a single kind (`--formula`/`--cask`), or an explicit list of names.

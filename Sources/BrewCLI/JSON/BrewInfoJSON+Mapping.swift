@@ -69,6 +69,7 @@ private extension BrewInfoCask {
             outdated: outdated,
             tap: BrewInfoJSON.trimmedOrNil(tap),
             installedOnRequest: installedOnRequest,
+            pinned: pinned,
         )
     }
 }

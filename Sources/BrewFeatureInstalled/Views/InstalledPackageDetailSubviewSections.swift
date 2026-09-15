@@ -45,6 +45,18 @@ struct InstalledPackageDetailHeroSection: View {
                         }
 
                     statusBadge
+
+                    if viewModel.pinItem.isPinned {
+                        Image(systemName: "pin.fill")
+                            .font(.brewTitle3)
+                            .foregroundStyle(Color.brewTextSecondary)
+                            .accessibilityLabel(
+                                String(
+                                    localized: "Pinned",
+                                    comment: "Installed detail hero accessibility label when the package is pinned",
+                                ),
+                            )
+                    }
                 }
 
                 if let subtitle = heroSubtitle {
@@ -111,9 +123,6 @@ struct InstalledPackageDetailMetadataSection: View {
             }
             if let homepageURL = metadata.homepageURL {
                 homepageRow(url: homepageURL, title: metadata.homepageDisplayTitle ?? homepageURL.absoluteString)
-            }
-            if metadata.isPinned {
-                detailRow(label: "Pinned", value: "Yes")
             }
             if metadata.isKegOnly {
                 detailRow(label: "Keg-only", value: "Yes")

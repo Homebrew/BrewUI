@@ -20,6 +20,7 @@ struct FixturePackage {
     let installedVersion: String?
     let latestVersion: String
     let dependencies: [String]
+    let pinned: Bool
 
     init(
         token: String,
@@ -29,6 +30,7 @@ struct FixturePackage {
         installedVersion: String? = nil,
         latestVersion: String,
         dependencies: [String] = [],
+        pinned: Bool = false,
     ) {
         self.token = token
         self.kind = kind
@@ -37,6 +39,7 @@ struct FixturePackage {
         self.installedVersion = installedVersion
         self.latestVersion = latestVersion
         self.dependencies = dependencies
+        self.pinned = pinned
     }
 
     var homepage: String {
@@ -71,7 +74,7 @@ struct FixturePackage {
             "dependencies": dependencies,
             "versions": ["stable": latestVersion],
             "installed": installed,
-            "pinned": false,
+            "pinned": pinned,
             "keg_only": false,
             "outdated": isOutdated,
         ]
@@ -93,6 +96,7 @@ struct FixturePackage {
             "installed_on_request": true,
             "depends_on": ["formula": dependencies],
             "outdated": isOutdated,
+            "pinned": pinned,
         ]
     }
 

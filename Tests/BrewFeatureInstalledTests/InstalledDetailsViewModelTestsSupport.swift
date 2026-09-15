@@ -319,6 +319,35 @@ func waitForUninstalling(on viewModel: InstalledPackageDetailViewModel) async {
     Issue.record("timed out waiting for isUninstalling")
 }
 
+@MainActor
+func waitForPinAttemptToFinish(on viewModel: InstalledPackageDetailViewModel) async {
+    for step in 0 ..< 300 {
+        await Task.yield()
+        if step >= 10, !viewModel.showsPinBusy {
+            return
+        }
+    }
+    Issue.record("timed out waiting for showsPinBusy to clear")
+}
+
+@MainActor
+func waitForPinError(on viewModel: InstalledPackageDetailViewModel) async {
+    for _ in 0 ..< 100 {
+        if viewModel.pinErrorMessage != nil { return }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for pinErrorMessage")
+}
+
+@MainActor
+func waitForPinning(on viewModel: InstalledPackageDetailViewModel) async {
+    for _ in 0 ..< 100 {
+        if viewModel.isPinning { return }
+        await Task.yield()
+    }
+    Issue.record("timed out waiting for isPinning")
+}
+
 /// Runs ``InstalledPackageDetailViewModel/observeRowUpdates()`` concurrently — required for upgrades to mirror the detail column lifecycle.
 @MainActor
 func withInstalledDetailPhaseObservation(

@@ -129,6 +129,28 @@ enum ScenarioFixtures {
         )
         set.brewFiles["uninstall_--formula_wget.next-info"] = infoJSON(for: remaining)
 
+        let pinnedWget = FixturePackage(
+            token: wget.token,
+            kind: .formula,
+            summary: wget.summary,
+            installedVersion: wget.installedVersion,
+            latestVersion: wget.latestVersion,
+            pinned: true,
+        )
+        let afterPin = [pinnedWget, ripgrep, iterm2, rectangle]
+        set.brewFiles["pin_--formula_wget.stdout"] = text(
+            """
+            ==> Pinning wget
+            """,
+        )
+        set.brewFiles["pin_--formula_wget.next-info"] = infoJSON(for: afterPin)
+        set.brewFiles["unpin_--formula_wget.stdout"] = text(
+            """
+            ==> Unpinning wget
+            """,
+        )
+        set.brewFiles["unpin_--formula_wget.next-info"] = infoJSON(for: installed)
+
         set.httpFiles = catalogueFiles(packages: installed)
             .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
         return set

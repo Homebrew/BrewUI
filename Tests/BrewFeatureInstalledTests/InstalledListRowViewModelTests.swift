@@ -187,6 +187,43 @@ struct InstalledListRowViewModelTests {
         viewModel.update(package: outdated)
         #expect(viewModel.showsUpgradeAvailable)
     }
+
+    @Test func `pinned package includes pinned in accessibility summary`() {
+        var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        package.pinned = true
+        let viewModel = InstalledListRowViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.showsPinnedBadge)
+        #expect(viewModel.rowAccessibilityLabel.contains("Pinned"))
+    }
+
+    @Test func `observeRowUpdates latches pin busy after running to idle while still unpinned`() async {
+        let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        let center = PhaseSequenceCommandCenter(phases: [.running(.pinFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsPinBusy)
+        #expect(viewModel.showsOperationBusy)
+        #expect(viewModel.rowAccessibilityLabel.contains("Pinning"))
+    }
+
+    @Test func `update package to pinned clears pin busy latch`() async {
+        let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        let center = PhaseSequenceCommandCenter(phases: [.running(.pinFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsPinBusy)
+
+        var refreshed = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        refreshed.pinned = true
+        viewModel.update(package: refreshed)
+
+        #expect(!viewModel.showsPinBusy)
+        #expect(viewModel.showsPinnedBadge)
+        #expect(!viewModel.showsOperationBusy)
+    }
 }
 
 private actor PhaseSequenceCommandCenter: BrewCommandCenter {

@@ -117,6 +117,14 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
         unimplemented()
     }
 
+    func pinCommand(kind _: HomebrewPackageKind, name _: String) -> BrewCommand {
+        unimplemented()
+    }
+
+    func unpinCommand(kind _: HomebrewPackageKind, name _: String) -> BrewCommand {
+        unimplemented()
+    }
+
     func bulkUpgradeCommand(selection _: BrewUpgradeSelection) -> BrewCommand {
         unimplemented()
     }

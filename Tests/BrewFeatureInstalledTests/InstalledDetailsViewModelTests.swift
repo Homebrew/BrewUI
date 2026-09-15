@@ -562,4 +562,126 @@ extension InstalledDetailsViewModelTests {
         #expect(!viewModel.showUninstallBlockedCallout)
         #expect(!viewModel.showUninstallConfirmation)
     }
+
+    @Test @MainActor func `pinDisplayCommand reflects formula name`() {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: InstalledBrewPackage.fixture(name: "wget", kind: .formula),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.pinItem.displayCommand == "brew pin --formula wget")
+    }
+
+    @Test @MainActor func `unpinDisplayCommand uses cask terminal flags when pinned`() {
+        var package = InstalledBrewPackage.fixture(name: "docker", kind: .cask)
+        package.pinned = true
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.pinItem.displayCommand == "brew unpin --cask docker")
+    }
+
+    @Test @MainActor func `handlePinPrimaryButtonTapped pins when unpinned`() async {
+        let center = SubmitRecordingCommandCenter()
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+        viewModel.handlePinPrimaryButtonTapped()
+        await center.waitForSubmitCallCount(1)
+        #expect(await center.recordedSubmitEntries.map(\.kind) == [.pinFormula])
+    }
+
+    @Test @MainActor func `handlePinPrimaryButtonTapped unpins when pinned`() async {
+        var package = details(name: "wget")
+        package.pinned = true
+        let center = SubmitRecordingCommandCenter()
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: center,
+        )
+        viewModel.handlePinPrimaryButtonTapped()
+        await center.waitForSubmitCallCount(1)
+        #expect(await center.recordedSubmitEntries.map(\.kind) == [.unpinFormula])
+    }
+}
+
+struct InstalledDetailsViewModelPinTests {
+    @Test @MainActor func `pin completes with idle phase and no error using noop center`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.pinSelectedPackage()
+            await waitForPinAttemptToFinish(on: viewModel)
+            #expect(viewModel.pinErrorMessage == nil)
+        }
+    }
+
+    @Test @MainActor func `pin failure sets pin error message`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: BrewCommandError.failed(exitCode: 1, stderr: "pin blocked"),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.pinSelectedPackage()
+            await waitForPinError(on: viewModel)
+            #expect(viewModel.pinErrorMessage == "pin blocked")
+        }
+    }
+
+    @Test @MainActor func `pin ignores reentry while already pinning`() async {
+        let center = RunningSubmitCountingCommandCenter(phase: .running(.pinFormula))
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+
+        viewModel.pinSelectedPackage()
+        let observer = Task { await viewModel.observeRowUpdates() }
+        defer { observer.cancel() }
+
+        await waitForPinning(on: viewModel)
+        viewModel.pinSelectedPackage()
+
+        #expect(await center.submitCallCount == 1)
+    }
+
+    @Test @MainActor func `unpin failure maps unknown errors to generic message`() async {
+        var package = details(name: "wget")
+        package.pinned = true
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            brewCommandCenter: ThrowingSubmitCommandCenter(
+                error: GenericUpgradeError(),
+            ),
+        )
+
+        await withInstalledDetailPhaseObservation(on: viewModel) {
+            viewModel.unpinSelectedPackage()
+            await waitForPinError(on: viewModel)
+            #expect(viewModel.pinErrorMessage == "Something went wrong while unpinning this package.")
+        }
+    }
+
+    @Test @MainActor func `isMutatingPackage is true while pin is running`() async {
+        let center = RunningSubmitCountingCommandCenter(phase: .running(.pinFormula))
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+
+        viewModel.pinSelectedPackage()
+        let observer = Task { await viewModel.observeRowUpdates() }
+        defer { observer.cancel() }
+
+        await waitForPinning(on: viewModel)
+        #expect(viewModel.isMutatingPackage)
+        #expect(viewModel.showsPinBusy)
+    }
 }

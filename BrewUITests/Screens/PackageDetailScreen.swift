@@ -28,6 +28,14 @@ struct PackageDetailScreen: Screen {
         BrewUIButton(app, .upgradeButton)
     }
 
+    var pinButton: BrewUIButton {
+        BrewUIButton(app, .pinButton)
+    }
+
+    var unpinButton: BrewUIButton {
+        BrewUIButton(app, .unpinButton)
+    }
+
     /// Returns to Discover; the package reaches Installed only once the inventory reconciles.
     func install(file: StaticString = #filePath, line: UInt = #line) -> DiscoverScreen {
         installButton.tap(file: file, line: line)
@@ -46,6 +54,32 @@ struct PackageDetailScreen: Screen {
     func upgrade(file: StaticString = #filePath, line: UInt = #line) -> InstalledScreen {
         upgradeButton.tap(file: file, line: line)
         return InstalledScreen(app: app)
+    }
+
+    /// The scroll is load-bearing: at the default window height the Pin control sits below the fold.
+    @discardableResult
+    func pin(
+        timeout: TimeInterval = BrewUITestTimeout.command,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        root.element.scroll(byDeltaX: 0, deltaY: -400)
+        pinButton.tap(file: file, line: line)
+        unpinButton.waitToExist(timeout: timeout, file: file, line: line)
+        return self
+    }
+
+    /// The scroll is load-bearing: at the default window height the Unpin control sits below the fold.
+    @discardableResult
+    func unpin(
+        timeout: TimeInterval = BrewUITestTimeout.command,
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        root.element.scroll(byDeltaX: 0, deltaY: -400)
+        unpinButton.tap(file: file, line: line)
+        pinButton.waitToExist(timeout: timeout, file: file, line: line)
+        return self
     }
 
     /// SwiftUI forwards no identifier onto a `confirmationDialog`, and whether AppKit reports it as a

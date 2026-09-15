@@ -24,10 +24,19 @@ final class InstalledPackageDetailViewModel {
     private(set) var upgradeErrorMessage: String?
     /// Inline message when uninstall fails; cleared when a new uninstall starts.
     private(set) var uninstallErrorMessage: String?
+    /// Inline message when pin or unpin fails; cleared when a new pin or unpin starts.
+    private(set) var pinErrorMessage: String?
 
     private(set) var isUpgrading: Bool = false
     private(set) var isUninstalling: Bool = false
+    private(set) var isPinning: Bool = false
+    private(set) var isUnpinning: Bool = false
     private(set) var isMutatingPackage: Bool = false
+
+    /// Single busy presentation for the pin/unpin control.
+    var showsPinBusy: Bool {
+        isPinning || isUnpinning
+    }
 
     var operationSubject: PackageOperationSubject {
         PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
@@ -68,6 +77,11 @@ final class InstalledPackageDetailViewModel {
     /// Presentation mapping for the Uninstall section.
     var uninstallItem: UninstallPackageItem {
         UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
+    }
+
+    /// Presentation mapping for the Pin / Unpin section.
+    var pinItem: PinPackageItem {
+        PinPackageItem(package: package)
     }
 
     /// Muted, reduced-opacity uninstall button styling while blocked and not actively uninstalling.
@@ -140,6 +154,8 @@ final class InstalledPackageDetailViewModel {
         operationPhase = .idle
         isUpgrading = false
         isUninstalling = false
+        isPinning = false
+        isUnpinning = false
         isMutatingPackage = false
         showUninstallConfirmation = false
         showUninstallBlockedCallout = false
@@ -166,6 +182,34 @@ final class InstalledPackageDetailViewModel {
         )
     }
 
+    func pinSelectedPackage() {
+        let operationID = BrewOperationID(kind: package.kind, name: package.name)
+        let command = commandFactory.pinCommand(kind: package.kind, name: package.name)
+        submitMutation(
+            action: .pin,
+            operationID: operationID,
+            command: command,
+        )
+    }
+
+    func unpinSelectedPackage() {
+        let operationID = BrewOperationID(kind: package.kind, name: package.name)
+        let command = commandFactory.unpinCommand(kind: package.kind, name: package.name)
+        submitMutation(
+            action: .unpin,
+            operationID: operationID,
+            command: command,
+        )
+    }
+
+    func handlePinPrimaryButtonTapped() {
+        if pinItem.isPinned {
+            unpinSelectedPackage()
+        } else {
+            pinSelectedPackage()
+        }
+    }
+
     func observeRowUpdates() async {
         for await phase in operationObserver.phases(for: operationSubject) {
             let oldPhase = operationPhase
@@ -179,7 +223,17 @@ final class InstalledPackageDetailViewModel {
                 oldPhase: oldPhase,
                 newPhase: phase,
             )
-            isMutatingPackage = isUpgrading || isUninstalling
+            isPinning = InstalledPinBusyPresentation.showsPinBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+                isPackagePinned: package.pinned,
+            )
+            isUnpinning = InstalledPinBusyPresentation.showsUnpinBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+                isPackagePinned: package.pinned,
+            )
+            isMutatingPackage = isUpgrading || isUninstalling || isPinning || isUnpinning
             if isUninstalling {
                 showUninstallBlockedCallout = false
             }
@@ -214,6 +268,7 @@ final class InstalledPackageDetailViewModel {
     private func clearMutationErrors() {
         upgradeErrorMessage = nil
         uninstallErrorMessage = nil
+        pinErrorMessage = nil
     }
 
     private func setErrorMessage(_ message: String, for action: PackageMutationAction) {
@@ -222,6 +277,8 @@ final class InstalledPackageDetailViewModel {
             upgradeErrorMessage = message
         case .uninstall:
             uninstallErrorMessage = message
+        case .pin, .unpin:
+            pinErrorMessage = message
         }
     }
 
@@ -249,6 +306,8 @@ final class InstalledPackageDetailViewModel {
 private enum PackageMutationAction {
     case upgrade
     case uninstall
+    case pin
+    case unpin
 
     var genericFailureMessage: String {
         switch self {
@@ -261,6 +320,16 @@ private enum PackageMutationAction {
             String(
                 localized: "Something went wrong while uninstalling this package.",
                 comment: "Installed detail generic uninstall error",
+            )
+        case .pin:
+            String(
+                localized: "Something went wrong while pinning this package.",
+                comment: "Installed detail generic pin error",
+            )
+        case .unpin:
+            String(
+                localized: "Something went wrong while unpinning this package.",
+                comment: "Installed detail generic unpin error",
             )
         }
     }

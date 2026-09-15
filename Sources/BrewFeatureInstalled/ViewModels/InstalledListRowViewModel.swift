@@ -20,6 +20,8 @@ final class InstalledListRowViewModel {
     private var operationPhase: BrewOperationPhase = .idle
     private(set) var showsUpgradeBusy: Bool = false
     private(set) var showsUninstallBusy: Bool = false
+    private(set) var showsPinBusy: Bool = false
+    private(set) var showsUnpinBusy: Bool = false
 
     var operationSubject: PackageOperationSubject {
         PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
@@ -56,6 +58,10 @@ final class InstalledListRowViewModel {
         package.outdated && availableVersionLabel != nil
     }
 
+    var showsPinnedBadge: Bool {
+        package.pinned
+    }
+
     var versionPresentation: InstalledListRowVersionPresentation {
         if showsUpgradeAvailable, let latest = availableVersionLabel {
             return .upgrade(current: installedVersionLabel, latest: latest)
@@ -74,12 +80,17 @@ final class InstalledListRowViewModel {
         } else {
             parts.append("Installed and up to date")
         }
+        if showsPinnedBadge {
+            parts.append(
+                String(localized: "Pinned", comment: "VoiceOver: installed package is pinned"),
+            )
+        }
         return parts.joined(separator: ", ")
     }
 
     /// Single busy presentation state for row chrome.
     var showsOperationBusy: Bool {
-        showsUpgradeBusy || showsUninstallBusy
+        showsUpgradeBusy || showsUninstallBusy || showsPinBusy || showsUnpinBusy
     }
 
     /// Full VoiceOver summary, including transient mutation state when present.
@@ -91,6 +102,14 @@ final class InstalledListRowViewModel {
         if showsUninstallBusy {
             let uninstalling = String(localized: "Uninstalling", comment: "VoiceOver: package uninstalling")
             return "\(accessibilitySummary), \(uninstalling)"
+        }
+        if showsPinBusy {
+            let pinning = String(localized: "Pinning", comment: "VoiceOver: package pinning")
+            return "\(accessibilitySummary), \(pinning)"
+        }
+        if showsUnpinBusy {
+            let unpinning = String(localized: "Unpinning", comment: "VoiceOver: package unpinning")
+            return "\(accessibilitySummary), \(unpinning)"
         }
         return accessibilitySummary
     }
@@ -108,6 +127,8 @@ final class InstalledListRowViewModel {
         operationPhase = .idle
         showsUpgradeBusy = false
         showsUninstallBusy = false
+        showsPinBusy = false
+        showsUnpinBusy = false
     }
 
     func observeRowUpdates() async {
@@ -122,6 +143,16 @@ final class InstalledListRowViewModel {
             showsUninstallBusy = InstalledUninstallBusyPresentation.showsUninstallBusy(
                 oldPhase: oldPhase,
                 newPhase: phase,
+            )
+            showsPinBusy = InstalledPinBusyPresentation.showsPinBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+                isPackagePinned: package.pinned,
+            )
+            showsUnpinBusy = InstalledPinBusyPresentation.showsUnpinBusy(
+                oldPhase: oldPhase,
+                newPhase: phase,
+                isPackagePinned: package.pinned,
             )
         }
     }

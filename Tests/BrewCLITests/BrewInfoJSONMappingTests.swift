@@ -104,4 +104,30 @@ struct BrewInfoJSONMappingTests {
 
         #expect(payload.installedPackages().map(\.name) == ["aria2", "Firefox", "Zsh"])
     }
+
+    @Test func `cask pinned true maps onto InstalledBrewPackage`() throws {
+        let json = """
+        {
+          "formulae": [],
+          "casks": [{ "token": "docker", "pinned": true }]
+        }
+        """
+
+        let payload = try JSONDecoder().decode(BrewInfoJSON.self, from: Data(json.utf8))
+        let docker = try #require(payload.installedPackages().first { $0.name == "docker" })
+        #expect(docker.pinned)
+    }
+
+    @Test func `cask pinned defaults to false when omitted`() throws {
+        let json = """
+        {
+          "formulae": [],
+          "casks": [{ "token": "docker" }]
+        }
+        """
+
+        let payload = try JSONDecoder().decode(BrewInfoJSON.self, from: Data(json.utf8))
+        let docker = try #require(payload.installedPackages().first { $0.name == "docker" })
+        #expect(!docker.pinned)
+    }
 }
