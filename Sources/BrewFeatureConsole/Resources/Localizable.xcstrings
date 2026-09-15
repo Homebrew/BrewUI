@@ -1,7 +1,75 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "Clear" : {
+      "comment" : "Console toolbar: remove finished jobs"
+    },
+    "Clear completed jobs" : {
+      "comment" : "Tooltip: console clear button"
+    },
+    "Cleared" : {
+      "comment" : "Console toolbar: shown briefly after clearing"
+    },
+    "Copied" : {
+      "comment" : "Console toolbar: shown briefly after copying"
+    },
+    "Copy" : {
+      "comment" : "Console toolbar: copy output"
+    },
+    "Copy output to clipboard" : {
+      "comment" : "Tooltip: console copy button"
+    },
+    "Dismiss" : {
+      "comment" : "Tooltip: close a finished job tab"
+    },
+    "Expand Console Panel Automatically" : {
+      "comment" : "View menu: open the console when a command starts"
+    },
+    "Hide Console" : {
+      "comment" : "View menu: collapse the console panel (⌘`)"
+    },
+    "Hide console" : {
+      "comment" : "Console status bar: collapse button\nConsole toolbar: collapse button"
+    },
+    "No activity" : {
+      "comment" : "Console empty state title\nConsole toolbar title when nothing has run"
+    },
+    "Ready" : {
+      "comment" : "Console status bar when nothing has run"
+    },
+    "Run a brew command to see output here." : {
+      "comment" : "Console empty state body"
+    },
+    "Save" : {
+      "comment" : "Console toolbar: save output to a file"
+    },
+    "Save output to file" : {
+      "comment" : "Tooltip: console save button"
+    },
+    "Show Console" : {
+      "comment" : "View menu: expand the console panel (⌘`)"
+    },
+    "Show console" : {
+      "comment" : "Console status bar: expand button"
+    },
+    "done" : {
+      "comment" : "Console status bar: operation finished"
+    },
+    "failed" : {
+      "comment" : "Console status bar: operation failed"
+    },
+    "running" : {
+      "comment" : "Console status bar: operation in progress"
+    },
+    "— %@" : {
+      "comment" : "Console status bar suffix while a command runs; %@ is the phase label"
+    },
+    "— done" : {
+      "comment" : "Console status bar suffix after a command succeeded"
+    },
+    "— failed · exit %d" : {
+      "comment" : "Console status bar suffix after a command failed; %d is the exit code"
+    }
   },
   "version" : "1.0"
 }
