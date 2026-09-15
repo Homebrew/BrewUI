@@ -12,10 +12,15 @@ import SwiftUI
 public struct CommandBlockView: View {
     let commands: [String]
     let summaryText: String?
-    let title: String?
+    let title: LocalizedStringResource?
     let collapsible: Bool
 
-    public init(command: String, summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
+    public init(
+        command: String,
+        summaryText: String? = nil,
+        title: LocalizedStringResource? = nil,
+        collapsible: Bool = false,
+    ) {
         commands = [command]
         self.summaryText = summaryText
         self.title = title
@@ -23,7 +28,12 @@ public struct CommandBlockView: View {
         _isExpanded = State(initialValue: !collapsible)
     }
 
-    public init(commands: [String], summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
+    public init(
+        commands: [String],
+        summaryText: String? = nil,
+        title: LocalizedStringResource? = nil,
+        collapsible: Bool = false,
+    ) {
         self.commands = commands
         self.summaryText = summaryText
         self.title = title
@@ -69,7 +79,11 @@ public struct CommandBlockView: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer()
-            BrewActionButton(copyTitle, systemImage: "doc.on.doc", confirmationTitle: "Copied") {
+            BrewActionButton(
+                copyTitle,
+                systemImage: "doc.on.doc",
+                confirmationTitle: LocalizedStringResource(uiComponents: "Copied"),
+            ) {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
             }
@@ -79,12 +93,16 @@ public struct CommandBlockView: View {
         .background(Color.brewSurfaceRecessed)
     }
 
-    private var headerTitle: String {
-        commands.count > 1 ? "Terminal commands" : "Terminal command"
+    private var headerTitle: LocalizedStringResource {
+        commands.count > 1
+            ? LocalizedStringResource(uiComponents: "Terminal commands")
+            : LocalizedStringResource(uiComponents: "Terminal command")
     }
 
-    private var copyTitle: String {
-        commands.count > 1 ? "Copy all" : "Copy"
+    private var copyTitle: LocalizedStringResource {
+        commands.count > 1
+            ? LocalizedStringResource(uiComponents: "Copy all")
+            : LocalizedStringResource(uiComponents: "Copy")
     }
 
     /// Deliberately not on ``Color/brewTerminal``: light-on-dark text under the system selection
