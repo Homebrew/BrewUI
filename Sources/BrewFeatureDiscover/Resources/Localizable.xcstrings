@@ -79,7 +79,15 @@
       "comment" : "Package detail row"
     },
     "License" : {
-      "comment" : "Package detail row"
+      "comment" : "Package detail row",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licence"
+          }
+        }
+      }
     },
     "Loading packages…" : {
       "comment" : "Discover subtitle while loading"
@@ -130,7 +138,15 @@
       "comment" : "Discover tab generic load failure"
     },
     "Something went wrong searching the catalog." : {
-      "comment" : "Discover tab generic search failure"
+      "comment" : "Discover tab generic search failure",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong searching the catalogue."
+          }
+        }
+      }
     },
     "Something went wrong while installing this package." : {
       "comment" : "Discover detail generic install error"

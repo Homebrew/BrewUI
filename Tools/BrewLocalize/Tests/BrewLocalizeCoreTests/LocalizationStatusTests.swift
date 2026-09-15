@@ -69,4 +69,18 @@ struct LocalizationStatusTests {
         let status = LocalizationStatus(catalogs: [(Fixtures.app, catalog)])
         #expect(status.counts["fr"] == .init(translated: 1, needsReview: 0, untranslated: 1))
     }
+
+    @Test
+    func `a translated state with an empty value still counts as untranslated`() throws {
+        let catalog = try Fixtures.catalog("""
+        {
+          "sourceLanguage" : "en",
+          "strings" : {
+            "Key" : { "comment" : "c", "localizations" : { "fr" : { "stringUnit" : { "state" : "translated", "value" : "" } } } }
+          }
+        }
+        """)
+        let status = LocalizationStatus(catalogs: [(Fixtures.app, catalog)])
+        #expect(status.counts["fr"] == .init(translated: 0, needsReview: 0, untranslated: 1))
+    }
 }

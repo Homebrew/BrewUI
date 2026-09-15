@@ -68,6 +68,7 @@ Use the [Homebrew JSON API](https://formulae.brew.sh/docs/api/) where it helps. 
 - **Homebrew is separate** — detect and degrade if missing; do not bundle Homebrew.
 - **Detection:** try `/opt/homebrew/bin/brew` then `/usr/local/bin/brew`.
 - **Open source** — patterns should stay contributor-friendly.
+- **Localisation** — one String Catalog per UI target, English copy as the key, the app follows the macOS language and falls back to English per string. Non-UI layers carry no copy. See [`docs/Localization.md`](docs/Localization.md).
 
 ### Platform constraints
 

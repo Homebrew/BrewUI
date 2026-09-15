@@ -25,7 +25,7 @@ enum Fixtures {
         },
         "New" : {
           "comment" : "c",
-          "localizations" : { "en-GB" : { "stringUnit" : { "state" : "new", "value" : "" } } }
+          "localizations" : { "en-GB" : { "stringUnit" : { "state" : "new", "value" : "N" } } }
         },
         "Missing" : { "comment" : "c" },
         "Stale" : {
@@ -41,7 +41,7 @@ enum Fixtures {
               "variations" : {
                 "plural" : {
                   "one" : { "stringUnit" : { "state" : "translated", "value" : "%lld package" } },
-                  "other" : { "stringUnit" : { "state" : "new", "value" : "" } }
+                  "other" : { "stringUnit" : { "state" : "new", "value" : "%lld pkgs" } }
                 }
               }
             }

@@ -37,6 +37,10 @@ After bootstrap, commits automatically run checks on staged Swift files:
 
 If unresolved lint violations remain, the commit is blocked and the hook prints specific SwiftLint failures so you can fix and re-commit.
 
+## 🌍 Translations
+
+Translations are community-sourced — see [`docs/Localization.md`](docs/Localization.md) for how to add or improve one.
+
 ## 🚧 Status
 
 Stable and under active development.

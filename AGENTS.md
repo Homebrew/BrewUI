@@ -86,17 +86,18 @@ When you change Swift sources or anything that affects Swift formatting or linti
    - `"$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint" $(find Brew Sources -name '*.swift')`
    - BrewUILint lints `Brew` + `Sources` (the whole production tree, all packages); `Tests` is excluded. It must run over all files in one pass — the `nonisolated`-extension rule needs to see every `nonisolated` type declaration to flag a bad extension on it.
    - Keep `Tools/BrewUILint/.build` between runs; deleting it forces a full rebuild (~2+ minutes).
+4. String catalogs: `scripts/localize sync --check` and `scripts/localize verify` (see `docs/Localization.md`). `scripts/localize sync` rewrites the catalogs after copy changes; commit them with the code.
 
 The pre-commit hook formats and lints **staged** Swift files (SwiftFormat/SwiftLint) and additionally runs **BrewUILint over the whole tree** on every commit; these manual commands validate the whole tree like CI and catch drift in unstaged paths.
 
 ### Tests (local parity with CI)
 
-`scripts/test` runs `swift test` for both packages — `BrewKit` (root `Package.swift`) and `BrewUILint` (`Tools/BrewUILint/Package.swift`) — matching what `.github/workflows/pr_build_test.yml` runs in CI.
+`scripts/test` runs `swift test` for all three packages — `BrewKit` (root `Package.swift`), `BrewUILint` and `BrewLocalize` (under `Tools/`) — matching what `.github/workflows/pr_build_test.yml` runs in CI.
 
 **Agents must run `scripts/test` and confirm it exits 0 at both of these points:**
 
 1. **Before any `git commit` you make.** Tests are intentionally **not** enforced by the pre-commit git hook (too slow to run on every staged-file commit during interactive work), so the responsibility moves to the agent. If `scripts/test` fails, fix it before committing — do not commit with failures, and do not skip the run.
-2. **Before reporting a code-changing turn complete to the user,** when that turn modified Swift sources under `Sources/`, `Tests/`, `Brew/`, or `Tools/BrewUILint/`, *or* changed `Package.swift` / `Package.resolved` / `.github/workflows/pr_build_test.yml`. For turns that only touch docs, YAML unrelated to tests, or other non-Swift files, the run is optional.
+2. **Before reporting a code-changing turn complete to the user,** when that turn modified Swift sources under `Sources/`, `Tests/`, `Homebrew/`, `Tools/BrewUILint/`, or `Tools/BrewLocalize/`, *or* changed `Package.swift` / `Package.resolved` / `.github/workflows/pr_build_test.yml`. For turns that only touch docs, YAML unrelated to tests, or other non-Swift files, the run is optional.
 
 If a test failure surfaces a real regression that's out of scope for the current turn, surface it to the user rather than silently skipping it — never paper over a red test with `.disabled` or `--filter` exclusions without flagging.
 

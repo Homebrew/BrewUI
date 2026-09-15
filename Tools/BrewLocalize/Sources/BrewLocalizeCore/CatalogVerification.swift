@@ -30,7 +30,16 @@ public enum CatalogVerification {
                     message: "\"\(key)\" has no comment. Pass `comment:` at the call site so translators get context.",
                 ))
             }
+            for (language, localization) in entry.localizations ?? [:] where language != catalog.sourceLanguage {
+                if localization.units.contains(where: { ($0.value ?? "").isEmpty }) {
+                    problems.append(Problem(
+                        path: location.path,
+                        message: "\"\(key)\" has an empty \(language) translation, which would show as blank text. "
+                            + "Remove the entry to fall back to English.",
+                    ))
+                }
+            }
         }
-        return problems
+        return problems.sorted { ($0.path, $0.message) < ($1.path, $1.message) }
     }
 }

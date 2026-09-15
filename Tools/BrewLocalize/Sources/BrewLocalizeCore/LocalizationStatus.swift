@@ -5,11 +5,12 @@ public enum TranslationState: Sendable {
     case needsReview
     case untranslated
 
-    /// Worst state wins so a partially reviewed plural still reads as needing work.
-    init(states: [String]) {
-        if states.isEmpty || states.contains("new") {
+    /// Worst unit wins so a partially reviewed plural still reads as needing work. An empty value
+    /// counts as untranslated whatever its state: it would compile to a blank string, not a fallback.
+    init(units: [StringCatalog.StringUnit]) {
+        if units.isEmpty || units.contains(where: { $0.state == "new" || ($0.value ?? "").isEmpty }) {
             self = .untranslated
-        } else if states.contains("needs_review") {
+        } else if units.contains(where: { $0.state == "needs_review" }) {
             self = .needsReview
         } else {
             self = .translated
@@ -56,7 +57,7 @@ public struct LocalizationStatus: Equatable, Sendable {
                 }
                 translatableKeys += 1
                 for language in allLanguages {
-                    let state = TranslationState(states: entry.localizations?[language]?.states ?? [])
+                    let state = TranslationState(units: entry.localizations?[language]?.units ?? [])
                     switch state {
                     case .translated: counts[language]?.translated += 1
                     case .needsReview: counts[language]?.needsReview += 1

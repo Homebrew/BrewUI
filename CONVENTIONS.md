@@ -79,6 +79,10 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Test shape:** Prefer **one logical behavior per `@Test`** — typically a **single `#expect`**, or **one** equality check on a small `Equatable` snapshot (e.g. expected rows + errors + flags) so related outcomes stay one assertion. **`BrewInstalledPackagesRepository.live()`** is not a unit-test target: it wires real `BrewCommandService` and filesystem discovery; rely on slice tests with fakes and UI/manual smoke if needed.
 
+## Localisation
+
+Copy lives only in UI packages (`Sources/BrewUIComponents`, `Sources/BrewFeature*`, the `Homebrew` app); every other layer throws a typed error enum and `BrewUIComponents/Copy/BrewErrorCopy` words it. At a call site use `Text("…", bundle: #bundle, comment: "…")`, `String(localized: "…", bundle: #bundle, comment: "…")`, or `Text(verbatim:)` for non-copy; carry copy as `String`, never `LocalizedStringKey`. BrewUILint's `localized_copy` and `localization_layer` rules enforce this; `scripts/localize sync` keeps the catalogs current. See [`docs/Localization.md`](docs/Localization.md).
+
 ## Dependencies
 
 - Prefer Foundation / SwiftUI. Add packages sparingly; justify in `Package.swift` and lock versions.

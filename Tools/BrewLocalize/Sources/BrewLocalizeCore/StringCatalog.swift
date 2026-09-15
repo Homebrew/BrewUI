@@ -22,15 +22,15 @@ public struct StringCatalog: Decodable, Sendable {
         public var stringUnit: StringUnit?
         public var variations: [String: [String: Localization]]?
 
-        /// Every state reachable through plural/device variations, depth first.
-        public var states: [String] {
-            var result: [String] = []
+        /// Every unit reachable through plural/device variations, depth first.
+        public var units: [StringUnit] {
+            var result: [StringUnit] = []
             if let stringUnit {
-                result.append(stringUnit.state)
+                result.append(stringUnit)
             }
             for (_, cases) in variations ?? [:] {
                 for (_, localization) in cases {
-                    result.append(contentsOf: localization.states)
+                    result.append(contentsOf: localization.units)
                 }
             }
             return result

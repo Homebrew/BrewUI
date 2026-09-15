@@ -38,4 +38,18 @@ struct CatalogVerificationTests {
         """)
         #expect(CatalogVerification.problems(in: catalog, at: Fixtures.package).isEmpty)
     }
+
+    @Test
+    func `an empty translation is rejected because it would render blank`() throws {
+        let catalog = try Fixtures.catalog("""
+        {
+          "sourceLanguage" : "en",
+          "strings" : {
+            "Installed" : { "comment" : "c", "localizations" : { "en-GB" : { "stringUnit" : { "state" : "translated", "value" : "" } } } }
+          }
+        }
+        """)
+        let messages = CatalogVerification.problems(in: catalog, at: Fixtures.package).map(\.message)
+        #expect(messages == ["\"Installed\" has an empty en-GB translation, which would show as blank text. Remove the entry to fall back to English."])
+    }
 }
