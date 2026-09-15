@@ -14,9 +14,10 @@ import Foundation
 /// The wrapper rewrites `run(executableURL: brew, arguments: [...])` into
 /// `<login-shell> -l -i -c <exec script> <brew> <args...>`. The `-l` flag forces the shell's profile files
 /// (`.zprofile`, `.bash_profile`) to load — that is where Homebrew installs `brew shellenv`. The
-/// `-i` flag additionally sources interactive rc files (`.zshrc`, `.bashrc`) so users who put
-/// their brew setup in those files also get parity; the tradeoff is that interactive rc files may
-/// print banners or expect a TTY, which we accept as the cost of exact-Terminal parity.
+/// `-i` flag additionally sources interactive rc files (`.zshrc`, `.bashrc`, `.xonshrc`) so users who
+/// put their brew setup in those files also get parity; the tradeoff is that interactive rc files may
+/// print banners or expect a TTY, which we accept as the cost of exact-Terminal parity. The script
+/// itself is spelled per shell family (POSIX, fish, xonsh) — see ``shellCommand(for:marker:output:)``.
 public struct LoginShellBrewCommandRunner: BrewCommandRunning {
     private let underlying: any BrewCommandRunning
     private let shellResolver: LoginShellResolver
@@ -69,14 +70,39 @@ public struct LoginShellBrewCommandRunner: BrewCommandRunning {
     /// Printed to the streams the child will actually use, right after `-l -i` startup and before
     /// `exec`, so ``removingStartupNoise(from:upTo:)`` has an exact line to cut rc-file noise at.
     static func shellCommand(for shell: URL, marker: String, output: BrewRunOptions.OutputChannel) -> String {
+        if shell.lastPathComponent == "xonsh" {
+            return xonshCommand(marker: marker, output: output)
+        }
         let announce = switch output {
         case .pipes:
             "printf '%s\\n' '\(marker)' 1>&2; printf '%s\\n' '\(marker)'; "
         case .pseudoTerminal:
             "printf '%s\\n' '\(marker)'; "
         }
+        // POSIX shells bind the arguments after `-c <script>` to `$0 $1 …`; fish binds them to `$argv`.
         let exec = shell.lastPathComponent == "fish" ? "exec $argv" : "exec \"$0\" \"$@\""
         return announce + exec
+    }
+
+    /// xonsh's `-c` runs Python-flavoured xonsh code and binds the trailing arguments to nothing — they
+    /// are only visible in `sys.argv`, after xonsh's own flags and our `-c <script>` pair, so the script
+    /// slices them out from there (the first `-c` is always ours because this runner builds the argv).
+    ///
+    /// The script stays in Python mode on purpose. With `-i` xonsh writes a terminal-title escape
+    /// (`ESC ] 0 ; … BEL`) to stdout ahead of every *subprocess-mode* command whenever `TERM` is set,
+    /// which would land after the marker and corrupt brew's first line of output. `print` and
+    /// `os.execvpe` are plain Python, so nothing is emitted; `${...}.detype()` hands the child the
+    /// same exported environment `xexec` would.
+    private static func xonshCommand(marker: String, output: BrewRunOptions.OutputChannel) -> String {
+        let announce = switch output {
+        case .pipes:
+            "print(\"\(marker)\", file=sys.stderr, flush=True); print(\"\(marker)\", flush=True); "
+        case .pseudoTerminal:
+            "print(\"\(marker)\", flush=True); "
+        }
+        return "import os, sys; argv = sys.argv[sys.argv.index(\"-c\") + 2:]; "
+            + announce
+            + "os.execvpe(argv[0], argv, ${...}.detype())"
     }
 
     static func shellArguments(executableURL: URL, arguments: [String]) -> [String] {

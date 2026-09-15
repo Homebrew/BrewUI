@@ -29,6 +29,20 @@ struct LoginShellBrewCommandRunnerTests {
         #expect(command.hasSuffix("exec $argv"))
     }
 
+    @Test func `shellCommand for xonsh stays in Python mode and execs the trailing sys.argv entries`() {
+        let command = LoginShellBrewCommandRunner.shellCommand(
+            for: URL(fileURLWithPath: "/Users/me/.local/bin/xonsh"),
+            marker: "MARK",
+            output: .pseudoTerminal,
+        )
+        #expect(
+            command
+                == "import os, sys; argv = sys.argv[sys.argv.index(\"-c\") + 2:]; "
+                + "print(\"MARK\", flush=True); "
+                + "os.execvpe(argv[0], argv, ${...}.detype())",
+        )
+    }
+
     @Test func `shellCommand announces the marker on both streams for pipes`() {
         let command = LoginShellBrewCommandRunner.shellCommand(
             for: URL(fileURLWithPath: "/bin/zsh"),
@@ -119,6 +133,35 @@ struct LoginShellBrewCommandRunnerTests {
         #expect(invocation.arguments[4] == "/opt/homebrew/bin/brew")
         #expect(invocation.arguments[5] == "config")
         #expect(invocation.arguments[6] == "--foo=it's")
+    }
+
+    @Test func `run uses xonsh-compatible exec script when login shell is xonsh`() async throws {
+        let recorder = InvocationRecorder()
+        let wrapped = LoginShellBrewCommandRunner(
+            underlying: recorder,
+            shellResolver: LoginShellResolver(
+                lookup: { URL(fileURLWithPath: "/opt/homebrew/bin/xonsh") },
+            ),
+            makeMarker: { "MARK" },
+        )
+
+        _ = try await wrapped.run(
+            executableURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew"),
+            arguments: ["info", "--json=v2", "wget"],
+        )
+
+        let invocation = try #require(await recorder.first)
+        #expect(invocation.executableURL.path == "/opt/homebrew/bin/xonsh")
+        #expect(invocation.arguments[0] == "-l")
+        #expect(invocation.arguments[1] == "-i")
+        #expect(invocation.arguments[2] == "-c")
+        #expect(
+            invocation.arguments[3]
+                == "import os, sys; argv = sys.argv[sys.argv.index(\"-c\") + 2:]; "
+                + "print(\"MARK\", file=sys.stderr, flush=True); print(\"MARK\", flush=True); "
+                + "os.execvpe(argv[0], argv, ${...}.detype())",
+        )
+        #expect(Array(invocation.arguments[4...]) == ["/opt/homebrew/bin/brew", "info", "--json=v2", "wget"])
     }
 
     @Test func `run falls back to default shell when Directory Services lookup yields nil`() async throws {
