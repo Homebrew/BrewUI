@@ -261,12 +261,12 @@ struct DiscoverViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        #expect(viewModel.formulaeSectionTitle == "Popular Formulae")
-        #expect(viewModel.casksSectionTitle == "Popular Casks")
+        #expect(String(localized: viewModel.formulaeSectionTitle) == "Popular Formulae")
+        #expect(String(localized: viewModel.casksSectionTitle) == "Popular Casks")
 
         viewModel.query = "git"
-        #expect(viewModel.formulaeSectionTitle == "Formulae")
-        #expect(viewModel.casksSectionTitle == "Casks")
+        #expect(String(localized: viewModel.formulaeSectionTitle) == "Formulae")
+        #expect(String(localized: viewModel.casksSectionTitle) == "Casks")
     }
 
     @Test @MainActor func `subtitle reflects loading state`() {
@@ -276,8 +276,8 @@ struct DiscoverViewModelTests {
             installedRepository: installedRepo(),
         )
 
-        #expect(viewModel.paneHeading == "Trending")
-        #expect(viewModel.subtitleText == "Loading packages…")
+        #expect(String(localized: viewModel.paneHeading) == "Trending")
+        #expect(String(localized: viewModel.subtitleText) == "Loading packages…")
         #expect(!viewModel.isSubtitleError)
     }
 
@@ -292,8 +292,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.paneHeading == "Trending")
-        #expect(viewModel.subtitleText == "Most-installed packages in the last 30 days")
+        #expect(String(localized: viewModel.paneHeading) == "Trending")
+        #expect(String(localized: viewModel.subtitleText) == "Most-installed packages in the last 30 days")
         #expect(viewModel.showsSubtitleTrendIcon)
         #expect(!viewModel.isSubtitleError)
     }
@@ -307,8 +307,8 @@ struct DiscoverViewModelTests {
 
         await viewModel.load()
 
-        #expect(viewModel.paneHeading == "Trending")
-        #expect(viewModel.subtitleText == "Could not load packages")
+        #expect(String(localized: viewModel.paneHeading) == "Trending")
+        #expect(String(localized: viewModel.subtitleText) == "Could not load packages")
         #expect(viewModel.isSubtitleError)
     }
 
@@ -493,8 +493,8 @@ struct DiscoverViewModelTests {
         viewModel.query = "git"
         await viewModel.search()
 
-        #expect(viewModel.paneHeading == "Results")
-        #expect(viewModel.subtitleText == "2 packages match “git”")
+        #expect(String(localized: viewModel.paneHeading) == "Results")
+        #expect(String(localized: viewModel.subtitleText) == "2 packages match “git”")
         #expect(!viewModel.showsSubtitleTrendIcon)
     }
 
@@ -512,8 +512,8 @@ struct DiscoverViewModelTests {
         viewModel.query = "git"
         await viewModel.search()
 
-        #expect(viewModel.paneHeading == "Results")
-        #expect(viewModel.subtitleText == "1 package matches “git”")
+        #expect(String(localized: viewModel.paneHeading) == "Results")
+        #expect(String(localized: viewModel.subtitleText) == "1 package matches “git”")
     }
 
     @Test @MainActor func `search subtitle reports no matches`() async {
@@ -528,8 +528,8 @@ struct DiscoverViewModelTests {
         viewModel.query = "zzz"
         await viewModel.search()
 
-        #expect(viewModel.paneHeading == "No matches")
-        #expect(viewModel.subtitleText == "Nothing found for “zzz”")
+        #expect(String(localized: viewModel.paneHeading) == "No matches")
+        #expect(String(localized: viewModel.subtitleText) == "Nothing found for “zzz”")
     }
 
     @Test @MainActor func `search maps transport errors to underlying message`() async {
@@ -551,7 +551,7 @@ struct DiscoverViewModelTests {
             return
         }
         #expect(message == "offline")
-        #expect(viewModel.subtitleText == "Could not search packages")
+        #expect(String(localized: viewModel.subtitleText) == "Could not search packages")
         #expect(viewModel.isSubtitleError)
     }
 
@@ -571,7 +571,7 @@ struct DiscoverViewModelTests {
             Issue.record("expected failed results state")
             return
         }
-        #expect(message == "Something went wrong searching the catalogue.")
+        #expect(message == "Something went wrong searching the catalog.")
     }
 
     @MainActor

@@ -9,6 +9,7 @@ struct DiscoverInstalledBadge: View {
             Text(
                 String(
                     localized: "INSTALLED",
+                    bundle: #bundle,
                     comment: "Discover installed status badge label",
                 ),
             )
@@ -24,6 +25,7 @@ struct DiscoverInstalledBadge: View {
         .accessibilityLabel(
             String(
                 localized: "Installed",
+                bundle: #bundle,
                 comment: "Discover installed status badge accessibility label",
             ),
         )

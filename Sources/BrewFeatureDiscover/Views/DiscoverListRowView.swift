@@ -109,14 +109,14 @@ struct DiscoverListRowView: View {
 
     private var metadataRow: some View {
         HStack(spacing: BrewSpacing.sm) {
-            Text("v\(viewModel.stableVersionLabel)")
+            Text(verbatim: "v\(viewModel.stableVersionLabel)")
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
             if viewModel.showsInstallMetrics {
-                Text("•")
+                Text(verbatim: "•")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
-                Text("\(viewModel.installs30DayLabel) installs (30d)")
+                Text("\(viewModel.installs30DayLabel) installs (30d)", bundle: #bundle, comment: "Discover row: 30-day install count; %@ is a formatted number")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
             }
