@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+#
+# localize — keep the String Catalogs in step with the code using Xcode's own tools.
+#
+#   scripts/localize sync [--check] [--skip-build] [--derived-data DIR]
+#   scripts/localize verify
+#   scripts/localize status [--markdown]
+#
+# `sync` builds the app so the compiler emits .stringsdata, then runs `xcstringstool sync` on
+# each catalog exactly as the Xcode IDE does after a build. `--check` reports drift instead of
+# writing. `--skip-build` reuses a build already in DIR (default: DerivedData).
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+APP_CATALOG="Homebrew/Localizable.xcstrings"
+CATALOGS=("$APP_CATALOG" Sources/*/Resources/Localizable.xcstrings)
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+target_for() {
+    case "$1" in
+        "$APP_CATALOG") echo "Homebrew" ;;
+        Sources/*) echo "$1" | cut -d/ -f2 ;;
+        *) echo "$1 is not a recognised catalog location" >&2; return 1 ;;
+    esac
+}
+
+languages_in() {
+    jq -r '.sourceLanguage as $src
+        | [.strings[].localizations // {} | keys[]] | unique[] | select(. != $src)' "$1"
+}
+
+is_ui_layer() {
+    case "$1" in
+        "$APP_CATALOG" | Sources/BrewUIComponents/Resources/Localizable.xcstrings | Sources/BrewFeature*/Resources/Localizable.xcstrings) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+build() {
+    echo "==> Building Brew so the compiler emits string data (DerivedData: $1)"
+    xcodebuild build -quiet \
+        -project Homebrew.xcodeproj -scheme Brew -derivedDataPath "$1" -destination "platform=macOS" \
+        -skipPackagePluginValidation -skipMacroValidation \
+        CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+}
+
+sync() {
+    local check=0 skip_build=0 derived_data="DerivedData" failed=0
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --check) check=1 ;;
+            --skip-build) skip_build=1 ;;
+            --derived-data) derived_data="$2"; shift ;;
+            *) echo "unknown option: $1" >&2; exit 64 ;;
+        esac
+        shift
+    done
+    [[ $skip_build -eq 1 ]] || build "$derived_data"
+
+    for catalog in "${CATALOGS[@]}"; do
+        local target stringsdata=() output="$catalog"
+        target="$(target_for "$catalog")"
+        while IFS= read -r file; do stringsdata+=("$file"); done < <(
+            find "$derived_data/Build/Intermediates.noindex" -path "*/${target}.build/Objects-normal/*" -name '*.stringsdata' 2>/dev/null | sort
+        )
+        if [[ ${#stringsdata[@]} -eq 0 ]]; then
+            echo "error: no .stringsdata for $target under $derived_data — build first or drop --skip-build" >&2
+            exit 1
+        fi
+        if [[ $check -eq 1 ]]; then
+            output="$TMP/$catalog"
+            mkdir -p "$(dirname "$output")"
+            cp "$catalog" "$output"
+        fi
+        # Notices about keys reused with different comments are informational.
+        xcrun xcstringstool sync "$output" --stringsdata "${stringsdata[@]}" 2>&1 | { grep -v "^notice:" || true; }
+        if [[ $check -eq 1 ]] && ! diff -u "$catalog" "$output" --label "$catalog" --label "$catalog (synced)"; then
+            failed=1
+        fi
+    done
+
+    if [[ $failed -eq 1 ]]; then
+        echo "" >&2
+        echo "String catalogs are out of date. Run scripts/localize sync (or build in Xcode) and commit the .xcstrings changes." >&2
+        exit 1
+    fi
+    [[ $check -eq 1 ]] && echo "String catalogs are in sync." || echo "String catalogs updated."
+}
+
+# An empty translation compiles to an empty string and renders blank, not as English; plurals
+# compile to .stringsdict rather than .strings.
+verify() {
+    local failed=0
+    command -v jq >/dev/null || { echo "verify needs jq (brew install jq)" >&2; exit 1; }
+    while IFS= read -r catalog; do
+        if ! is_ui_layer "$catalog"; then
+            echo "error: $catalog — copy lives only in BrewUIComponents, BrewFeature* and the Homebrew app" >&2
+            failed=1
+        fi
+    done < <(git ls-files '*.xcstrings')
+
+    # BrewUILint requires a comment at every call site, so a key without one bypassed the rule.
+    for catalog in "${CATALOGS[@]}"; do
+        while IFS= read -r key; do
+            echo "error: $catalog — \"$key\" has no translator comment; pass comment: at the call site (#Preview sample copy should not reach the catalog)" >&2
+            failed=1
+        done < <(jq -r '.strings | to_entries[] | select((.value.comment // "") == "") | .key' "$catalog")
+    done
+
+    local app_languages
+    app_languages="$(languages_in "$APP_CATALOG")"
+    for catalog in "${CATALOGS[@]}"; do
+        [[ "$catalog" == "$APP_CATALOG" ]] && continue
+        while IFS= read -r lang; do
+            if ! grep -qxF "$lang" <<<"$app_languages"; then
+                echo "error: $catalog — $lang has no translation in $APP_CATALOG, so macOS will not offer it in the language picker and these translations never load; translate at least one string there" >&2
+                failed=1
+            fi
+        done < <(languages_in "$catalog")
+    done
+
+    for catalog in "${CATALOGS[@]}"; do
+        local out="$TMP/compile/$(target_for "$catalog")"
+        mkdir -p "$out"
+        xcrun xcstringstool compile "$catalog" --output-directory "$out" >/dev/null
+        while IFS= read -r compiled; do
+            local lang
+            lang="$(basename "$(dirname "$compiled")" .lproj)"
+            while IFS= read -r key; do
+                echo "error: $catalog — \"$key\" has an empty $lang translation; remove the entry to fall back to English" >&2
+                failed=1
+            done < <(plutil -convert json -o - "$compiled" | jq -r 'to_entries[] | select([.value | .. | strings] | any(. == "")) | .key')
+        done < <(find "$out" \( -name '*.strings' -o -name '*.stringsdict' \))
+    done
+
+    [[ $failed -eq 0 ]] && echo "String catalogs verified." || exit 1
+}
+
+# A key counts as translated when it has a non-empty value, or any plural form.
+status() {
+    command -v jq >/dev/null || { echo "Skipping localization status: jq is not installed (brew install jq)."; return 0; }
+    local markdown=0
+    [[ "${1:-}" == "--markdown" ]] && markdown=1
+
+    for catalog in "${CATALOGS[@]}"; do
+        jq -r --arg app "$([[ "$catalog" == "$APP_CATALOG" ]] && echo 1 || echo 0)" '
+            .sourceLanguage as $src
+            | [.strings | to_entries[] | select((.value.extractionState // "") != "stale" and (.value.shouldTranslate // true))] as $keys
+            | ([$keys[].value.localizations // {} | keys[]] | unique | map(select(. != $src))) as $langs
+            | "TOTAL\t\($keys | length)",
+              ($langs[] as $lang
+               | [$keys[] | .value.localizations[$lang] // empty | select((.stringUnit.value // "") != "" or .variations != null)]
+               | "\($lang)\t\(length)\t\($app)")
+        ' "$catalog"
+    done | awk -F'\t' -v markdown="$markdown" '
+        $1 == "TOTAL" { total += $2; next }
+        { done[$1] += $2; if ($3 == 1) inApp[$1] = 1 }
+        END {
+            # awk iterates an associative array in unspecified order; sort for a stable table.
+            n = 0
+            for (lang in done) langs[++n] = lang
+            for (i = 2; i <= n; i++) {
+                key = langs[i]
+                for (j = i - 1; j >= 1 && langs[j] > key; j--) langs[j + 1] = langs[j]
+                langs[j + 1] = key
+            }
+            if (markdown) { print "| Language | Translated | Untranslated |"; print "|---|---|---|" }
+            for (i = 1; i <= n; i++) {
+                lang = langs[i]
+                if (markdown) printf "| %s | %d | %d |\n", lang, done[lang], total - done[lang]
+                else printf "%-8s %5d translated %5d untranslated\n", lang, done[lang], total - done[lang]
+            }
+            for (i = 1; i <= n; i++) if (!(langs[i] in inApp))
+                printf "\n⚠️ %s has no translation in Homebrew/Localizable.xcstrings, so macOS will not offer it in the language picker.\n", langs[i]
+        }
+    '
+}
+
+case "${1:-}" in
+    sync) shift; sync "$@" ;;
+    verify) verify ;;
+    status) shift; status "$@" ;;
+    *) sed -n '3,11p' "$0" | sed 's/^# \{0,1\}//'; exit 64 ;;
+esac
