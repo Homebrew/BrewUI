@@ -69,7 +69,11 @@ public struct CommandBlockView: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer()
-            BrewActionButton(copyTitle, systemImage: "doc.on.doc", confirmationTitle: "Copied") {
+            BrewActionButton(
+                copyTitle,
+                systemImage: "doc.on.doc",
+                confirmationTitle: String(localized: "Copied", bundle: #bundle, comment: "Command block: shown briefly after copying"),
+            ) {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
             }
@@ -80,11 +84,15 @@ public struct CommandBlockView: View {
     }
 
     private var headerTitle: String {
-        commands.count > 1 ? "Terminal commands" : "Terminal command"
+        commands.count > 1
+            ? String(localized: "Terminal commands", bundle: #bundle, comment: "Command block header, several commands")
+            : String(localized: "Terminal command", bundle: #bundle, comment: "Command block header, one command")
     }
 
     private var copyTitle: String {
-        commands.count > 1 ? "Copy all" : "Copy"
+        commands.count > 1
+            ? String(localized: "Copy all", bundle: #bundle, comment: "Command block: copy every command")
+            : String(localized: "Copy", bundle: #bundle, comment: "Command block: copy the command")
     }
 
     /// Deliberately not on ``Color/brewTerminal``: light-on-dark text under the system selection
@@ -103,7 +111,7 @@ public struct CommandBlockView: View {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 ForEach(Array(commands.enumerated()), id: \.offset) { index, command in
                     HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
-                        Text("\(index + 1).")
+                        Text(verbatim: "\(index + 1).")
                             .font(.brewCode)
                             .foregroundStyle(Color.brewTextSecondary)
                         Text(command)

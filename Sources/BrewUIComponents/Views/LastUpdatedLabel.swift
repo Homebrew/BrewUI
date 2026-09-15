@@ -6,25 +6,30 @@
 import Foundation
 import SwiftUI
 
-/// Spelled out rather than left to `RelativeDateTimeFormatter`, which follows the system locale and would
-/// put a translated phrase after an English lead-in.
+/// Coarser than `RelativeDateTimeFormatter` on purpose: minute granularity, no seconds, no "in …".
 public enum RelativeTimeText {
     public static func string(for date: Date, relativeTo now: Date) -> String {
         let seconds = now.timeIntervalSince(date)
         guard seconds >= 60 else {
             // Also covers a future date: a clock that moved backwards should read as "now", not a countdown.
-            return "just now"
+            return String(localized: "just now", bundle: #bundle, comment: "Relative time: under a minute ago")
         }
         let minutes = Int(seconds / 60)
         if minutes < 60 {
-            return "\(minutes) \(minutes == 1 ? "minute" : "minutes") ago"
+            return minutes == 1
+                ? String(localized: "1 minute ago", bundle: #bundle, comment: "Relative time")
+                : String(localized: "\(minutes) minutes ago", bundle: #bundle, comment: "Relative time, %lld ≥ 2")
         }
         let hours = minutes / 60
         if hours < 24 {
-            return "\(hours) \(hours == 1 ? "hour" : "hours") ago"
+            return hours == 1
+                ? String(localized: "1 hour ago", bundle: #bundle, comment: "Relative time")
+                : String(localized: "\(hours) hours ago", bundle: #bundle, comment: "Relative time, %lld ≥ 2")
         }
         let days = hours / 24
-        return "\(days) \(days == 1 ? "day" : "days") ago"
+        return days == 1
+            ? String(localized: "1 day ago", bundle: #bundle, comment: "Relative time")
+            : String(localized: "\(days) days ago", bundle: #bundle, comment: "Relative time, %lld ≥ 2")
     }
 }
 
@@ -40,7 +45,7 @@ public struct LastUpdatedLabel: View {
 
     public var body: some View {
         TimelineView(.periodic(from: date, by: 60)) { context in
-            Text("\(lead) \(RelativeTimeText.string(for: date, relativeTo: context.date))")
+            Text(verbatim: "\(lead) \(RelativeTimeText.string(for: date, relativeTo: context.date))")
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
         }

@@ -1,7 +1,60 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "%lld days ago" : {
+      "comment" : "Relative time, %lld ≥ 2"
+    },
+    "%lld hours ago" : {
+      "comment" : "Relative time, %lld ≥ 2"
+    },
+    "%lld minutes ago" : {
+      "comment" : "Relative time, %lld ≥ 2"
+    },
+    "1 day ago" : {
+      "comment" : "Relative time"
+    },
+    "1 hour ago" : {
+      "comment" : "Relative time"
+    },
+    "1 minute ago" : {
+      "comment" : "Relative time"
+    },
+    "Copied" : {
+      "comment" : "Command block: shown briefly after copying"
+    },
+    "Copy" : {
+      "comment" : "Command block: copy the command"
+    },
+    "Copy all" : {
+      "comment" : "Command block: copy every command"
+    },
+    "Could not find Homebrew. Install it or ensure brew is in the default location." : {
+      "comment" : "Error when the brew executable is not in either default prefix"
+    },
+    "Find" : {
+      "comment" : "Edit menu: focus the search field (⌘F)"
+    },
+    "Homebrew command failed." : {
+      "comment" : "Error when brew exits non-zero without printing anything to stderr"
+    },
+    "Homebrew returned output the app couldn’t read." : {
+      "comment" : "Error when brew succeeded but its JSON output failed to decode"
+    },
+    "Refresh" : {
+      "comment" : "View menu: refresh every surface (⌘R)"
+    },
+    "Retry" : {
+      "comment" : "Error state: retry the failed load"
+    },
+    "Terminal command" : {
+      "comment" : "Command block header, one command"
+    },
+    "Terminal commands" : {
+      "comment" : "Command block header, several commands"
+    },
+    "just now" : {
+      "comment" : "Relative time: under a minute ago"
+    }
   },
   "version" : "1.0"
 }
