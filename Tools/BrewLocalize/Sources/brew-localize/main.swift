@@ -52,9 +52,10 @@ do {
     switch invocation.command {
     case "sync":
         let check = invocation.flags.contains("--check")
+        let index = try CatalogSync.extract(root: invocation.root)
         var drifted: [CatalogSync.Outcome] = []
         for location in CatalogLocation.discover(root: invocation.root) {
-            let outcome = try CatalogSync.sync(location, root: invocation.root, check: check)
+            let outcome = try CatalogSync.sync(location, root: invocation.root, index: index, check: check)
             if outcome.changed {
                 drifted.append(outcome)
             } else if !check {
