@@ -1,7 +1,30 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "Build settings" : {
+      "comment" : "Configuration card title: HOMEBREW_* build options"
+    },
+    "Copy report" : {
+      "comment" : "Configuration header: copy the diagnostic report"
+    },
+    "Couldn't locate the brew executable. Install Homebrew, then refresh." : {
+      "comment" : "Configuration tab, brew-not-found message"
+    },
+    "Couldn't read the Homebrew configuration." : {
+      "comment" : "Configuration tab, generic load failure"
+    },
+    "Homebrew" : {
+      "comment" : "Configuration card title: brew version, prefix, taps"
+    },
+    "Homebrew not found" : {
+      "comment" : "Configuration tab, brew-not-found title"
+    },
+    "Refresh" : {
+      "comment" : "Configuration header: re-run brew config"
+    },
+    "System" : {
+      "comment" : "Configuration card title: macOS, CPU, Xcode"
+    }
   },
   "version" : "1.0"
 }

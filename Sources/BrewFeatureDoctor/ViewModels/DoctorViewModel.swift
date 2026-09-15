@@ -104,15 +104,16 @@ final class DoctorViewModel {
     /// Header subtitle copy. Mirrors ``presentation``; while a re-check runs on top of a prior report it
     /// switches to "Re-checking…" so the user knows the visible content is being refreshed.
     var subtitle: String {
+        let rechecking = String(localized: "Re-checking…", bundle: #bundle, comment: "Doctor subtitle while a re-check runs")
         switch presentation {
         case .loading:
-            "Running brew doctor…"
+            return String(localized: "Running brew doctor…", bundle: #bundle, comment: "Doctor subtitle during the first check")
         case .healthy:
-            isRefreshing ? "Re-checking…" : "No problems found"
+            return isRefreshing ? rechecking : String(localized: "No problems found", bundle: #bundle, comment: "Doctor subtitle, healthy")
         case .issues:
-            isRefreshing ? "Re-checking…" : "Warnings found"
+            return isRefreshing ? rechecking : String(localized: "Warnings found", bundle: #bundle, comment: "Doctor subtitle, issues listed")
         case .failed:
-            "The check could not be completed"
+            return String(localized: "The check could not be completed", bundle: #bundle, comment: "Doctor subtitle when brew doctor failed to run")
         }
     }
 

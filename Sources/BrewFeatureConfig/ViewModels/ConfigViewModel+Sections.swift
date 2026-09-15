@@ -15,9 +15,27 @@ extension ConfigViewModel {
     /// `HOMEBREW_*` Environment surface is handled by the editor card and intentionally absent here.
     func sections(for snapshot: BrewConfigSnapshot) -> [ConfigSectionItem] {
         var result: [ConfigSectionItem] = []
-        appendIfNonEmpty(&result, id: "homebrew", title: "Homebrew", group: .homebrew, in: snapshot.entries)
-        appendIfNonEmpty(&result, id: "system", title: "System", group: .system, in: snapshot.entries)
-        appendIfNonEmpty(&result, id: "build", title: "Build settings", group: .build, in: snapshot.entries)
+        appendIfNonEmpty(
+            &result,
+            id: "homebrew",
+            title: String(localized: "Homebrew", bundle: #bundle, comment: "Configuration card title: brew version, prefix, taps"),
+            group: .homebrew,
+            in: snapshot.entries,
+        )
+        appendIfNonEmpty(
+            &result,
+            id: "system",
+            title: String(localized: "System", bundle: #bundle, comment: "Configuration card title: macOS, CPU, Xcode"),
+            group: .system,
+            in: snapshot.entries,
+        )
+        appendIfNonEmpty(
+            &result,
+            id: "build",
+            title: String(localized: "Build settings", bundle: #bundle, comment: "Configuration card title: HOMEBREW_* build options"),
+            group: .build,
+            in: snapshot.entries,
+        )
         return result
     }
 

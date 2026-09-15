@@ -59,6 +59,7 @@ final class ConfigViewModel {
         }
         return String(
             localized: "Couldn't read the Homebrew configuration.",
+            bundle: #bundle,
             comment: "Configuration tab, generic load failure",
         )
     }

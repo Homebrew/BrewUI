@@ -28,14 +28,18 @@ struct DoctorView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Doctor")
+                Text("Doctor", bundle: #bundle, comment: "Doctor tab heading")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.subtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
                 if let lastCheckedAt = viewModel.lastCheckedAt {
-                    LastUpdatedLabel(lead: "Last checked", date: lastCheckedAt)
+                    LastUpdatedLabel(lead: String(
+                        localized: "Last checked",
+                        bundle: #bundle,
+                        comment: "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”",
+                    ), date: lastCheckedAt)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -54,16 +58,16 @@ struct DoctorView: View {
                 if viewModel.isRefreshing {
                     ProgressView()
                         .controlSize(.small)
-                        .accessibilityLabel("Re-checking")
+                        .accessibilityLabel(String(localized: "Re-checking", bundle: #bundle, comment: "VoiceOver: Doctor re-check spinner"))
                 }
                 if viewModel.rawDoctorOutput != nil {
-                    Button("Copy output") {
+                    Button(String(localized: "Copy output", bundle: #bundle, comment: "Doctor header: copy raw brew doctor output")) {
                         viewModel.copyDoctorOutput()
                     }
                     .controlSize(.small)
-                    .accessibilityLabel("Copy brew doctor output")
+                    .accessibilityLabel(String(localized: "Copy brew doctor output", bundle: #bundle, comment: "VoiceOver: Doctor copy-output button"))
                 }
-                Button("Run Again") {
+                Button(String(localized: "Run Again", bundle: #bundle, comment: "Doctor header: re-run brew doctor")) {
                     Task { await viewModel.load(forceRefresh: true) }
                 }
                 .controlSize(.small)
@@ -92,10 +96,10 @@ struct DoctorView: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 44))
                 .foregroundStyle(Color.brewStatusSuccess)
-            Text("Your system is ready to brew")
+            Text("Your system is ready to brew", bundle: #bundle, comment: "Doctor healthy state title")
                 .font(.brewTitle3)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text("brew doctor found no problems.")
+            Text("brew doctor found no problems.", bundle: #bundle, comment: "Doctor healthy state body")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
         }
@@ -138,7 +142,7 @@ struct DoctorView: View {
             }
             .focused($isFocused)
             .listStyle(.inset)
-            .accessibilityLabel("Doctor issues")
+            .accessibilityLabel(String(localized: "Doctor issues", bundle: #bundle, comment: "VoiceOver: the Doctor issues list"))
             .onKeyPress(.upArrow) {
                 viewModel.selectPrevious()
                 return .handled

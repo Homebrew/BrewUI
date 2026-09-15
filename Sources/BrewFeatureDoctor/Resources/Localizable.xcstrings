@@ -1,7 +1,78 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "Copy brew doctor output" : {
+      "comment" : "VoiceOver: Doctor copy-output button"
+    },
+    "Copy output" : {
+      "comment" : "Doctor header: copy raw brew doctor output"
+    },
+    "Danger" : {
+      "comment" : "Doctor severity name"
+    },
+    "Doctor" : {
+      "comment" : "Doctor tab heading"
+    },
+    "Doctor issues" : {
+      "comment" : "VoiceOver: the Doctor issues list"
+    },
+    "Fix available" : {
+      "comment" : "Doctor issue row badge"
+    },
+    "Last checked" : {
+      "comment" : "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”"
+    },
+    "Needs admin · runs in Terminal" : {
+      "comment" : "Doctor fix note: the command needs sudo so it opens in Terminal"
+    },
+    "No problems found" : {
+      "comment" : "Doctor subtitle, healthy"
+    },
+    "No selection" : {
+      "comment" : "Doctor detail placeholder title when nothing is selected"
+    },
+    "Raw output" : {
+      "comment" : "Doctor detail: collapsible header for the raw brew doctor text"
+    },
+    "Re-checking" : {
+      "comment" : "VoiceOver: Doctor re-check spinner"
+    },
+    "Re-checking…" : {
+      "comment" : "Doctor subtitle while a re-check runs"
+    },
+    "Run Again" : {
+      "comment" : "Doctor header: re-run brew doctor"
+    },
+    "Run Fix" : {
+      "comment" : "Doctor detail: run the suggested fix button\nVoiceOver: run-fix button"
+    },
+    "Run diagnostics, then choose an issue to see details and fixes." : {
+      "comment" : "Doctor detail placeholder body when nothing is selected"
+    },
+    "Running brew doctor…" : {
+      "comment" : "Doctor subtitle during the first check"
+    },
+    "Severity: %@" : {
+      "comment" : "VoiceOver: Doctor severity badge; %@ is the severity name"
+    },
+    "The check could not be completed" : {
+      "comment" : "Doctor subtitle when brew doctor failed to run"
+    },
+    "Unsupported" : {
+      "comment" : "Doctor severity name: unsupported configuration"
+    },
+    "Warning" : {
+      "comment" : "Doctor severity name"
+    },
+    "Warnings found" : {
+      "comment" : "Doctor subtitle, issues listed"
+    },
+    "Your system is ready to brew" : {
+      "comment" : "Doctor healthy state title"
+    },
+    "brew doctor found no problems." : {
+      "comment" : "Doctor healthy state body"
+    }
   },
   "version" : "1.0"
 }

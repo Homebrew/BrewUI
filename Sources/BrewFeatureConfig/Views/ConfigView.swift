@@ -34,11 +34,11 @@ struct ConfigView: View {
     private var header: some View {
         HStack(spacing: BrewSpacing.sm) {
             Spacer(minLength: 0)
-            Button("Copy report", systemImage: "doc.on.doc") {
+            Button(String(localized: "Copy report", bundle: #bundle, comment: "Configuration header: copy the diagnostic report"), systemImage: "doc.on.doc") {
                 copyReport()
             }
             .disabled(!viewModel.canCopyReport)
-            Button("Refresh", systemImage: "arrow.clockwise") {
+            Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
                 Task { await viewModel.refresh() }
             }
         }
@@ -77,9 +77,10 @@ struct ConfigView: View {
     private var brewNotFoundState: some View {
         emptyState(
             systemImage: "questionmark.folder",
-            title: String(localized: "Homebrew not found", comment: "Configuration tab, brew-not-found title"),
+            title: String(localized: "Homebrew not found", bundle: #bundle, comment: "Configuration tab, brew-not-found title"),
             message: String(
                 localized: "Couldn't locate the brew executable. Install Homebrew, then refresh.",
+                bundle: #bundle,
                 comment: "Configuration tab, brew-not-found message",
             ),
         )
@@ -103,7 +104,7 @@ struct ConfigView: View {
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .multilineTextAlignment(.center)
-            Button("Refresh", systemImage: "arrow.clockwise") {
+            Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
                 Task { await viewModel.refresh() }
             }
             .padding(.top, BrewSpacing.xs)
