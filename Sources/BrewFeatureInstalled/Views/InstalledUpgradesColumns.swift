@@ -194,10 +194,10 @@ struct InstalledUpgradesContainer: View {
         }
     }
 
-    private var activeSearchPrompt: LocalizedStringKey {
+    private var activeSearchPrompt: String {
         switch mode {
-        case .installed: "Search Installed Packages"
-        case .upgrades: "Search Upgrades"
+        case .installed: String(localized: "Search Installed Packages", bundle: #bundle, comment: "Search field placeholder, Installed tab")
+        case .upgrades: String(localized: "Search Upgrades", bundle: #bundle, comment: "Search field placeholder, Upgrades tab")
         }
     }
 }

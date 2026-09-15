@@ -239,11 +239,13 @@ private enum PackageMutationAction {
         case .upgrade:
             String(
                 localized: "Something went wrong while upgrading this package.",
+                bundle: #bundle,
                 comment: "Installed detail generic upgrade error",
             )
         case .uninstall:
             String(
                 localized: "Something went wrong while uninstalling this package.",
+                bundle: #bundle,
                 comment: "Installed detail generic uninstall error",
             )
         }

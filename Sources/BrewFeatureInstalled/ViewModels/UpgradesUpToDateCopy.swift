@@ -10,6 +10,7 @@ enum UpgradesUpToDateCopy {
     static var headline: String {
         String(
             localized: "Everything is up to date",
+            bundle: #bundle,
             comment: "Upgrades tab: canonical phrase for having no upgrades available",
         )
     }
@@ -19,16 +20,19 @@ enum UpgradesUpToDateCopy {
         case 0:
             String(
                 localized: "No installed packages to check.",
+                bundle: #bundle,
                 comment: "Upgrades empty state when nothing is installed",
             )
         case 1:
             String(
                 localized: "Your installed package is up to date.",
+                bundle: #bundle,
                 comment: "Upgrades empty state for a single installed package",
             )
         default:
             String(
                 localized: "All \(count) installed packages are up to date.",
+                bundle: #bundle,
                 comment: "Upgrades empty state with total installed count",
             )
         }
