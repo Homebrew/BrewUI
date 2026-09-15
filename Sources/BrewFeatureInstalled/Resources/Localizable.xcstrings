@@ -118,7 +118,15 @@
       "comment" : "Package detail row"
     },
     "License" : {
-      "comment" : "Package detail row"
+      "comment" : "Package detail row",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licence"
+          }
+        }
+      }
     },
     "Loading packages…" : {
       "comment" : "Installed tab subtitle while fetching\nUpgrades tab subtitle while fetching"

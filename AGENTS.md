@@ -49,6 +49,8 @@ CI workflows and git hooks are the source of truth for executable enforcement.
   `Tests/`, `Homebrew/` or `Tools/BrewUILint/`, or changing `Package.swift`,
   `Package.resolved` or `.github/workflows/pr_build_test.yml`. It is optional for other documentation
   and non-Swift changes when no commit is being made.
+- After changing user-facing copy, run `scripts/localize sync` and commit the `.xcstrings` changes
+  with the code. See [localisation](#localisation).
 - For UI changes, run `scripts/test-ui` and review the manual checks in [testing](#testing).
 - Never run `scripts/test-e2e` unless explicitly asked. It uses real Homebrew and the network and
   installs and uninstalls `hello`. `scripts/test-ui` is the deterministic suite.
@@ -136,6 +138,8 @@ Follow the [Swift API Design Guidelines](https://www.swift.org/documentation/api
   diagnostics. Never use force unwraps or `try!`, including in tests; use `#require` or `XCTUnwrap`.
 - Render web URLs as tappable `Link` controls that also show the literal URL.
 - Use DocC comments for non-obvious APIs and brief inline comments explaining why.
+- Keep user-facing copy in UI packages only, carried as `LocalizedStringResource` and written with
+  `#bundle` and a translator comment. See [localisation](#localisation).
 
 ### Previews, theme and accessibility
 
@@ -195,11 +199,83 @@ mint run swiftlint lint --strict
 swift build --package-path Tools/BrewUILint -c release --enable-experimental-prebuilts
 BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
 find Homebrew HomebrewUpgradeHelper Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
+scripts/localize verify
 ```
 
 Run BrewUILint over the whole production tree in one invocation: its `nonisolated` extension rule
-needs to see all declarations. Tests are excluded. Keep `Tools/BrewUILint/.build` between runs to
-avoid rebuilding SwiftSyntax.
+needs to see all declarations, and `localized_copy` needs every `LocalizedStringResource` parameter
+declaration to know which arguments carry copy. Tests are excluded. Keep `Tools/BrewUILint/.build`
+between runs to avoid rebuilding SwiftSyntax.
+
+## Localisation
+
+The app follows the macOS language, including the per-app language under *Applications* in System
+Settings, and falls back to English for each untranslated string, so a partially translated language
+is fine to ship. Homebrew's own console output is always English.
+
+### Translating
+
+Each UI target keeps its strings in a `Localizable.xcstrings` catalog: `Homebrew/` for the shell,
+sidebar and menus, and `Resources/` in `BrewUIComponents` and each `BrewFeature*` package. The key is
+the English copy, and each entry's comment says where it appears and what any `%@` or `%lld` stands
+for. Add a language in Xcode with `+`, or by hand as a `localizations` entry on the string.
+
+- macOS only lists a language in the per-app picker if the app bundle ships it, so
+  `Homebrew/Localizable.xcstrings` needs a translation in your language before the package catalogs
+  matter.
+- Never leave a translation empty. An empty value renders as blank text rather than falling back to
+  English, so remove the entry instead.
+- English needs only two plural forms, so the copy picks between two keys itself (`1 package` and
+  `%lld packages`). A language with more categories varies the `%lld` key by plural (*Vary By Plural*
+  in Xcode) and translates `1 package` as well, because the code chooses between them before the
+  catalog is consulted.
+
+`scripts/localize verify` fails on all three, and on a key that reaches a catalog without a
+translator comment. `scripts/localize status` shows how far each language is, and CI prints it in the
+Swift Quality job summary.
+
+### Writing copy
+
+Only UI packages hold copy: `BrewUIComponents`, `BrewFeature*` and the `Homebrew` app. Lower layers
+throw typed error enums and `BrewUIComponents/Copy/BrewErrorCopy` words them. BrewUILint's
+`localization_layer` rule enforces that boundary and `localized_copy` checks the call sites:
+
+```swift
+Text("Doctor", bundle: #bundle, comment: "Doctor tab heading")
+LocalizedStringResource("Run Again", bundle: #bundle, comment: "Doctor: re-run diagnostics")
+String(localized: "\(version) (linked)", bundle: #bundle, comment: "…%@ is the version")
+Text(verbatim: "v\(version)")   // not copy: versions, package names, commands
+```
+
+- `#bundle` resolves to the package's own resource bundle. Without it a package string is looked up
+  in the app bundle and silently never localises. Never use `LocalizedStringKey`, which carries no
+  bundle at all.
+- Carry copy between layers as `LocalizedStringResource`. It keeps the bundle and comment with the
+  key and resolves when rendered, and declaring a ViewModel property or component parameter with that
+  type is what enrols it in `localized_copy`, which flags bare literals passed to one. Pre-commit and
+  CI lint the whole tree and so see components from every package; the Xcode build plugin runs per
+  target.
+- Copy composed with text Homebrew produced, such as a version, a `brew doctor` title or stderr,
+  stays a `String` built with `String(localized:)`, because a resource cannot hold runtime text.
+  Components that show it take a `verbatim:` initialiser such as `NoteCallout(verbatim:)`. Text that
+  must match `brew` word for word stays verbatim too.
+- `#Preview` sample copy goes through `previewCopy(_:)`. A literal in a `LocalizedStringResource`
+  parameter is an extraction site and would otherwise be sent to translators.
+- Resolve a resource with `String(localized: resource)` where copy feeds a `String` API, and in
+  tests, which assert on the resolved text.
+
+### Keeping catalogs in sync
+
+Building in Xcode updates the catalogs; `swift build` and `swift test` do not, so new copy resolves
+to its English key but reaches no catalog until an Xcode build. `scripts/localize sync` does the same
+from the command line, and CI fails if a catalog no longer matches the code. Changing English copy
+makes a new key and marks the old one stale, kept while it still has translations; delete stale
+entries once nothing needs them.
+
+To check a build, run it with `-AppleLanguages "(en-GB)"` to force a language, or
+`-NSShowNonLocalizedStrings YES` to show copy that bypasses localisation in capitals.
+*Scheme › Options › App Language › Double-Length Pseudolanguage* stretches every localised string;
+anything that does not stretch is verbatim.
 
 ## Dead-code analysis
 
