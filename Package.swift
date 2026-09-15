@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "BrewKit",
+    defaultLocalization: "en",
     platforms: [
         .macOS("26.0"),
     ],
@@ -86,9 +87,10 @@ let package = Package(
         ),
         .target(
             name: "BrewUIComponents",
-            dependencies: ["BrewAccessibilityID", "BrewCore"],
+            dependencies: ["BrewAccessibilityID", "BrewCore", "BrewRepositoryInterfaces"],
             resources: [
                 .process("Resources/Media.xcassets"),
+                .process("Resources/Localizable.xcstrings"),
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -170,6 +172,9 @@ let package = Package(
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
             ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
+            ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
@@ -182,6 +187,9 @@ let package = Package(
                 "BrewCore",
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
+            ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -197,6 +205,9 @@ let package = Package(
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
             ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
+            ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
@@ -210,6 +221,9 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
+            ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -225,6 +239,9 @@ let package = Package(
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
             ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
+            ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
                 .swiftLanguageMode(.v6),
@@ -238,6 +255,9 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
+            ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
