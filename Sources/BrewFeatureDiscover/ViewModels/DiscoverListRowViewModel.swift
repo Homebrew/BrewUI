@@ -86,7 +86,7 @@ final class DiscoverListRowViewModel: Identifiable {
         guard installedRepository.isInstalled(id) else {
             return nil
         }
-        return String(localized: "Installed", comment: "Discover list row installed status")
+        return String(localized: "Installed", bundle: #bundle, comment: "Discover list row installed status")
     }
 
     /// True while an install for this package is in flight (and bridging until the installed badge appears).
@@ -101,7 +101,7 @@ final class DiscoverListRowViewModel: Identifiable {
     var rowAccessibilityLabel: String {
         var summary = accessibilityLabel
         if showsInstallBusy {
-            let installing = String(localized: "Installing", comment: "VoiceOver: package installing")
+            let installing = String(localized: "Installing", bundle: #bundle, comment: "VoiceOver: package installing")
             summary += ", \(installing)"
         }
         return summary

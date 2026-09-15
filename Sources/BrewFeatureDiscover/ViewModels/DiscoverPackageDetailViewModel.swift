@@ -113,7 +113,7 @@ final class DiscoverPackageDetailViewModel {
         guard installedPackage != nil else {
             return nil
         }
-        return String(localized: "Installed", comment: "Discover package installed status")
+        return String(localized: "Installed", bundle: #bundle, comment: "Discover package installed status")
     }
 
     var installedVersionLabel: String? {
@@ -131,12 +131,16 @@ final class DiscoverPackageDetailViewModel {
     var installDateValue: String? {
         guard let pkg = installedPackage, let date = pkg.installDate else { return nil }
         let formatted = installDateFormatter.string(from: date)
-        return pkg.pouredFromBottle ? "Poured from bottle — \(formatted)" : formatted
+        return pkg.pouredFromBottle
+            ? String(localized: "Poured from bottle — \(formatted)", bundle: #bundle, comment: "Install date row; %@ is the formatted date")
+            : formatted
     }
 
     var installReasonValue: String? {
         guard let pkg = installedPackage else { return nil }
-        return pkg.installedOnRequest ? nil : "As dependency"
+        return pkg.installedOnRequest
+            ? nil
+            : String(localized: "As dependency", bundle: #bundle, comment: "Install reason row: installed only because another package needed it")
     }
 
     var licenseLabel: String? {

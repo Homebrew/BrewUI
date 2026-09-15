@@ -85,28 +85,29 @@ final class DiscoverViewModel {
 
     var paneHeading: String {
         guard isSearching else {
-            return String(localized: "Trending", comment: "Discover list heading, trending landing")
+            return String(localized: "Trending", bundle: #bundle, comment: "Discover list heading, trending landing")
         }
         if case .loaded = results, visiblePackages.isEmpty {
-            return String(localized: "No matches", comment: "Discover list heading, zero search results")
+            return String(localized: "No matches", bundle: #bundle, comment: "Discover list heading, zero search results")
         }
-        return String(localized: "Results", comment: "Discover list heading, search results")
+        return String(localized: "Results", bundle: #bundle, comment: "Discover list heading, search results")
     }
 
     var subtitleText: String {
         switch activeState {
         case .loading:
             return isSearching
-                ? String(localized: "Searching…", comment: "Discover subtitle while searching")
-                : String(localized: "Loading packages…", comment: "Discover subtitle while loading")
+                ? String(localized: "Searching…", bundle: #bundle, comment: "Discover subtitle while searching")
+                : String(localized: "Loading packages…", bundle: #bundle, comment: "Discover subtitle while loading")
         case .failed:
             return isSearching
-                ? String(localized: "Could not search packages", comment: "Discover subtitle on search error")
-                : String(localized: "Could not load packages", comment: "Discover subtitle on error")
+                ? String(localized: "Could not search packages", bundle: #bundle, comment: "Discover subtitle on search error")
+                : String(localized: "Could not load packages", bundle: #bundle, comment: "Discover subtitle on error")
         case .loaded:
             guard isSearching else {
                 return String(
                     localized: "Most-installed packages in the last 30 days",
+                    bundle: #bundle,
                     comment: "Discover subhead on the trending landing",
                 )
             }
@@ -119,17 +120,20 @@ final class DiscoverViewModel {
         if count == 0 {
             return String(
                 localized: "Nothing found for “\(normalizedQuery)”",
+                bundle: #bundle,
                 comment: "Discover subhead, no search results",
             )
         }
         if count == 1 {
             return String(
                 localized: "1 package matches “\(normalizedQuery)”",
+                bundle: #bundle,
                 comment: "Discover subhead, single search result",
             )
         }
         return String(
             localized: "\(count) packages match “\(normalizedQuery)”",
+            bundle: #bundle,
             comment: "Discover subhead, search result count",
         )
     }
@@ -160,14 +164,14 @@ final class DiscoverViewModel {
 
     var formulaeSectionTitle: String {
         isSearching
-            ? String(localized: "Formulae", comment: "Discover formulae section header while searching")
-            : String(localized: "Popular Formulae", comment: "Discover trending formulae section header")
+            ? String(localized: "Formulae", bundle: #bundle, comment: "Discover formulae section header while searching")
+            : String(localized: "Popular Formulae", bundle: #bundle, comment: "Discover trending formulae section header")
     }
 
     var casksSectionTitle: String {
         isSearching
-            ? String(localized: "Casks", comment: "Discover casks section header while searching")
-            : String(localized: "Popular Casks", comment: "Discover trending casks section header")
+            ? String(localized: "Casks", bundle: #bundle, comment: "Discover casks section header while searching")
+            : String(localized: "Popular Casks", bundle: #bundle, comment: "Discover trending casks section header")
     }
 
     var visiblePackages: [DiscoveryBrewPackage] {
@@ -206,12 +210,14 @@ final class DiscoverViewModel {
         }
         if searching {
             return String(
-                localized: "Something went wrong searching the catalogue.",
+                localized: "Something went wrong searching the catalog.",
+                bundle: #bundle,
                 comment: "Discover tab generic search failure",
             )
         }
         return String(
             localized: "Something went wrong loading Discover packages.",
+            bundle: #bundle,
             comment: "Discover tab generic load failure",
         )
     }

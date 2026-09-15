@@ -571,7 +571,7 @@ struct DiscoverViewModelTests {
             Issue.record("expected failed results state")
             return
         }
-        #expect(message == "Something went wrong searching the catalogue.")
+        #expect(message == "Something went wrong searching the catalog.")
     }
 
     @MainActor
