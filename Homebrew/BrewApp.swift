@@ -288,8 +288,8 @@ struct BrewApp: App {
             // Replace the default "Homebrew Help" item (which points at a
             // non-existent help book) with a link to the online documentation.
             CommandGroup(replacing: .help) {
-                Link("Homebrew Documentation", destination: Self.documentationURL)
-                Link("Report an Issue…", destination: Self.reportIssueURL)
+                Link(String(localized: "Homebrew Documentation", bundle: #bundle, comment: "Help menu"), destination: Self.documentationURL)
+                Link(String(localized: "Report an Issue…", bundle: #bundle, comment: "Help menu: opens the GitHub issue form"), destination: Self.reportIssueURL)
             }
         }
         #if DEBUG

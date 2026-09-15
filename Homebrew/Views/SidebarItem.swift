@@ -20,13 +20,14 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
         rawValue
     }
 
-    var title: LocalizedStringKey {
+    /// Sidebar row, View menu item, and window title share this one string.
+    var title: String {
         switch self {
-        case .installed: "Installed"
-        case .upgrades: "Upgrades"
-        case .discover: "Discover"
-        case .doctor: "Doctor"
-        case .configuration: "Configuration"
+        case .installed: String(localized: "Installed", bundle: #bundle, comment: "Sidebar: installed packages")
+        case .upgrades: String(localized: "Upgrades", bundle: #bundle, comment: "Sidebar: outdated packages")
+        case .discover: String(localized: "Discover", bundle: #bundle, comment: "Sidebar: browse and search the catalog")
+        case .doctor: String(localized: "Doctor", bundle: #bundle, comment: "Sidebar: brew doctor diagnostics")
+        case .configuration: String(localized: "Configuration", bundle: #bundle, comment: "Sidebar: brew config and environment")
         }
     }
 

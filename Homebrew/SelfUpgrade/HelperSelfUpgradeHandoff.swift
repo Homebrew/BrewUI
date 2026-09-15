@@ -85,6 +85,7 @@ private struct SelfUpgradeBlockedByRunningOperation: LocalizedError {
     var errorDescription: String? {
         String(
             localized: "Wait for the running Homebrew command to finish, then upgrade the Homebrew app.",
+            bundle: #bundle,
             comment: "Shown when the self-upgrade is attempted while another brew command is still running",
         )
     }
@@ -94,6 +95,7 @@ private struct SelfUpgradeHelperUnavailable: LocalizedError {
     var errorDescription: String? {
         String(
             localized: "The upgrade helper is missing from this build of the Homebrew app.",
+            bundle: #bundle,
             comment: "Shown when the bundled self-upgrade helper executable cannot be found",
         )
     }

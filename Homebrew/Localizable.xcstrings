@@ -1,7 +1,63 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-
+    "A report was saved after the app quit unexpectedly. You can send it to the Homebrew team on GitHub to help fix the problem, or discard it." : {
+      "comment" : "Crash report dialog body"
+    },
+    "Browse and search %@ packages" : {
+      "comment" : "Window subtitle, Discover; %lld is the approximate catalog size"
+    },
+    "Browse or search your installed packages" : {
+      "comment" : "Window subtitle, Installed"
+    },
+    "Check your Homebrew installation for problems" : {
+      "comment" : "Window subtitle, Doctor"
+    },
+    "Configuration" : {
+      "comment" : "Sidebar: brew config and environment"
+    },
+    "Discard" : {
+      "comment" : "Crash report dialog: delete the report"
+    },
+    "Discover" : {
+      "comment" : "Sidebar: browse and search the catalog"
+    },
+    "Doctor" : {
+      "comment" : "Sidebar: brew doctor diagnostics"
+    },
+    "Homebrew Documentation" : {
+      "comment" : "Help menu"
+    },
+    "Homebrew environment & diagnostics" : {
+      "comment" : "Window subtitle, Configuration"
+    },
+    "Installed" : {
+      "comment" : "Sidebar: installed packages"
+    },
+    "OK" : {
+      "comment" : "Self-upgrade outcome alert: dismiss"
+    },
+    "Report an Issue…" : {
+      "comment" : "Help menu: opens the GitHub issue form"
+    },
+    "Report on GitHub…" : {
+      "comment" : "Crash report dialog: open a prefilled GitHub issue"
+    },
+    "Review and upgrade outdated packages" : {
+      "comment" : "Window subtitle, Upgrades"
+    },
+    "The Homebrew app quit unexpectedly" : {
+      "comment" : "Crash report dialog title"
+    },
+    "The upgrade helper is missing from this build of the Homebrew app." : {
+      "comment" : "Shown when the bundled self-upgrade helper executable cannot be found"
+    },
+    "Upgrades" : {
+      "comment" : "Sidebar: outdated packages"
+    },
+    "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
+      "comment" : "Shown when the self-upgrade is attempted while another brew command is still running"
+    }
   },
   "version" : "1.0"
 }

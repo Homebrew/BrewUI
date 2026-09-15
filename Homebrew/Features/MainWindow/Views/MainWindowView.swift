@@ -64,7 +64,7 @@ struct MainWindowView: View {
     }
 
     private var acknowledgeButton: some View {
-        Button("OK") { selfUpgradeCoordinator?.acknowledgeUpgradeCompletion() }
+        Button(String(localized: "OK", bundle: #bundle, comment: "Self-upgrade outcome alert: dismiss")) { selfUpgradeCoordinator?.acknowledgeUpgradeCompletion() }
             .axid(.selfUpgradeOutcomeAcknowledgeButton)
     }
 
@@ -126,24 +126,28 @@ struct MainWindowView: View {
                 mode: selectedSidebarItem == .upgrades ? .upgrades : .installed,
                 deepLinkSelection: $pendingInstalledSelection,
             )
-            .navigationTitle(selectedSidebarItem == .upgrades ? "Upgrades" : "Installed")
+            .navigationTitle(selectedSidebarItem.title)
             .navigationSubtitle(
                 selectedSidebarItem == .upgrades
-                    ? "Review and upgrade outdated packages"
-                    : "Browse or search your installed packages",
+                    ? String(localized: "Review and upgrade outdated packages", bundle: #bundle, comment: "Window subtitle, Upgrades")
+                    : String(localized: "Browse or search your installed packages", bundle: #bundle, comment: "Window subtitle, Installed"),
             )
         case .discover:
             DiscoverColumnsRoot()
-                .navigationTitle("Discover")
-                .navigationSubtitle("Browse and search \(Self.approximateCatalogueSize) packages")
+                .navigationTitle(selectedSidebarItem.title)
+                .navigationSubtitle(String(
+                    localized: "Browse and search \(Self.approximateCatalogueSize) packages",
+                    bundle: #bundle,
+                    comment: "Window subtitle, Discover; %lld is the approximate catalog size",
+                ))
         case .doctor:
             DoctorColumnsRoot()
-                .navigationTitle("Doctor")
-                .navigationSubtitle("Check your Homebrew installation for problems")
+                .navigationTitle(selectedSidebarItem.title)
+                .navigationSubtitle(String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor"))
         case .configuration:
             ConfigColumnsRoot()
-                .navigationTitle("Configuration")
-                .navigationSubtitle("Homebrew environment & diagnostics")
+                .navigationTitle(selectedSidebarItem.title)
+                .navigationSubtitle(String(localized: "Homebrew environment & diagnostics", bundle: #bundle, comment: "Window subtitle, Configuration"))
         }
     }
 }
