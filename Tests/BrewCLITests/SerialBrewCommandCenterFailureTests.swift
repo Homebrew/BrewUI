@@ -52,10 +52,10 @@ struct SerialBrewCommandCenterFailureTests {
 
 private func failureMessage(from center: SerialBrewCommandCenter) async -> String {
     let phase = await center.phase(for: .maintenance(token: "install", displayCommand: "brew install wget"))
-    guard case let .failed(reason) = phase else {
+    guard case let .failed(.brewCommand(_, stderr)) = phase else {
         return ""
     }
-    return reason.userFacingMessage
+    return stderr.trimmingCharacters(in: .whitespacesAndNewlines)
 }
 
 private func makeCenter(_ runner: FixedOutputRunner) -> SerialBrewCommandCenter {

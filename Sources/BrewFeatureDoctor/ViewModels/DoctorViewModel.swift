@@ -6,6 +6,7 @@
 import AppKit
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -55,7 +56,7 @@ final class DoctorViewModel {
         case let .loaded(report):
             .loaded(report)
         case let .failed(error):
-            .failed(OperationFailure(catching: error).userFacingMessage)
+            .failed(BrewErrorCopy.message(for: OperationFailure(catching: error)))
         }
     }
 
@@ -245,9 +246,9 @@ final class DoctorViewModel {
                 }
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 let message: String = if case let .failed(reason) = latestPhase {
-                    reason.userFacingMessage
+                    BrewErrorCopy.message(for: reason)
                 } else {
-                    OperationFailure(catching: error).userFacingMessage
+                    BrewErrorCopy.message(for: OperationFailure(catching: error))
                 }
                 fixErrorMessages[token] = message
                 runningFixTokens.remove(token)

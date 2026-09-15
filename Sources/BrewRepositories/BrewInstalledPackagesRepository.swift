@@ -228,12 +228,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         do {
             return try JSONDecoder().decode(BrewInfoJSON.self, from: data)
         } catch {
-            throw BrewCommandError.launchFailed(
-                underlying: String(
-                    localized: "Failed to decode Homebrew JSON output.",
-                    comment: "Installed tab JSON decode failure",
-                ),
-            )
+            throw BrewRepositoryError.malformedBrewOutput(command: "brew info --installed --json=v2")
         }
     }
 }
