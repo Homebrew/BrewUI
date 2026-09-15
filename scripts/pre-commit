@@ -47,6 +47,31 @@ while IFS= read -r -d '' file; do
     fi
 done < <(git diff --cached --name-only --diff-filter=ACMR -z)
 
+localizable_changes=0
+while IFS= read -r -d '' file; do
+    if [[ "${file}" == *.swift || "${file}" == *.xcstrings ]]; then
+        localizable_changes=1
+    fi
+done < <(git diff --cached --name-only -z)
+
+# String catalogs must match the code (see docs/Localization.md). Skipped for commits that touch
+# neither Swift nor catalogs; the package build behind it is incremental after the first run.
+if [[ ${localizable_changes} -eq 1 ]]; then
+    echo "pre-commit: checking string catalogs are in sync (scripts/localize sync --check)..."
+    set +e
+    localize_output="$(scripts/localize sync --check 2>&1)"
+    localize_status=$?
+    set -e
+    if [[ ${localize_status} -ne 0 ]]; then
+        echo ""
+        echo "pre-commit: commit blocked — string catalogs are out of date."
+        echo "Run scripts/localize sync, then stage the .xcstrings files."
+        echo ""
+        echo "${localize_output}" | tail -n 40
+        exit 1
+    fi
+fi
+
 if [[ ${#swift_files[@]} -eq 0 ]]; then
     echo "pre-commit: no staged Swift files, skipping format/lint checks."
     exit 0

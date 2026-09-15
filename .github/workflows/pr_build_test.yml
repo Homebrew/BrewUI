@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "Brew/**"
+      - "Homebrew/**"
       - "BrewTests/**"
       - "BrewUITests/**"
       - "Homebrew.xcodeproj/**"
@@ -26,7 +26,7 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
-      - "Brew/**"
+      - "Homebrew/**"
       - "BrewTests/**"
       - "BrewUITests/**"
       - "Homebrew.xcodeproj/**"

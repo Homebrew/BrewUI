@@ -6,24 +6,34 @@ on:
       - main
     paths:
       - "**/*.swift"
+      - "**/*.xcstrings"
+      - "Package.swift"
+      - "Package.resolved"
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
       - "Mintfile"
       - "Tools/BrewUILint/**"
+      - "Tools/BrewLocalize/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - "scripts/localize"
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
       - "**/*.swift"
+      - "**/*.xcstrings"
+      - "Package.swift"
+      - "Package.resolved"
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
       - "Mintfile"
       - "Tools/BrewUILint/**"
+      - "Tools/BrewLocalize/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - "scripts/localize"
 
 permissions:
   contents: read
@@ -82,4 +92,26 @@ jobs:
       - name: Run BrewUILint
         run: |
           BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
-          find Brew Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
+          find Homebrew Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
+
+      - name: Cache BrewLocalize build
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            Tools/BrewLocalize/.build
+            .build/localize
+          key: ${{ runner.os }}-brewlocalize-quality-${{ steps.swift-toolchain.outputs.fingerprint }}-${{ hashFiles('Tools/BrewLocalize/Package.swift', 'Tools/BrewLocalize/Sources/**', 'Package.swift', 'Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-brewlocalize-quality-${{ steps.swift-toolchain.outputs.fingerprint }}-
+
+      # Catalogs must match the code so translators see every string. This builds the package once
+      # (cached above) to get the compiler's own string extraction.
+      - name: Check string catalogs are in sync
+        run: scripts/localize sync --check
+
+      - name: Verify string catalogs
+        run: scripts/localize verify
+
+      # The quiet maintainer signal: what still needs translating, in the job summary, never a failure.
+      - name: Localization status
+        run: scripts/localize status --markdown >> "$GITHUB_STEP_SUMMARY"

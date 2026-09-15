@@ -31,4 +31,19 @@ enum LintHarness {
         visitor.walk(tree)
         return context.violations
     }
+
+    static func lintLocalizedCopyRule(_ source: String, file: String = "Sources/BrewFeatureDoctor/Views/Test.swift") -> [Violation] {
+        lint(LocalizedCopyRule(), source: source, file: file)
+    }
+
+    static func lintLocalizationLayerRule(_ source: String, file: String) -> [Violation] {
+        lint(LocalizationLayerRule(), source: source, file: file)
+    }
+
+    private static func lint(_ rule: some Rule, source: String, file: String) -> [Violation] {
+        let tree = Parser.parse(source: source)
+        let context = RuleContext(file: file, tree: tree)
+        rule.makeVisitor(context: context).walk(tree)
+        return context.violations
+    }
 }
