@@ -14,9 +14,9 @@ struct ConsoleBody: View {
         switch viewModel.bodyContent {
         case .noActivity:
             ContentUnavailableView(
-                "No activity",
+                String(localized: "No activity", bundle: #bundle, comment: "Console empty state title"),
                 systemImage: "terminal",
-                description: Text("Run a brew command to see output here."),
+                description: Text("Run a brew command to see output here.", bundle: #bundle, comment: "Console empty state body"),
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Color.brewSurfaceElevated)
