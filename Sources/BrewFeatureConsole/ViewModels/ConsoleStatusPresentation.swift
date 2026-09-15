@@ -34,11 +34,11 @@ extension BrewOperationPhase {
     var shortLabel: String {
         switch self {
         case .idle:
-            "done"
+            String(localized: "done", bundle: #bundle, comment: "Console status bar: operation finished")
         case .running:
-            "running"
+            String(localized: "running", bundle: #bundle, comment: "Console status bar: operation in progress")
         case .failed:
-            "failed"
+            String(localized: "failed", bundle: #bundle, comment: "Console status bar: operation failed")
         }
     }
 }
