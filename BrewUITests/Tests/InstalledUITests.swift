@@ -50,4 +50,12 @@ final class InstalledUITests: BrewUITestCase {
         launch(.installedLarge)
             .assertHasPackage("bulk-formula-000")
     }
+
+    @MainActor
+    func testExportBrewfileSheetExplainsDumpBeforeADestinationIsChosen() {
+        launch(.installedBasic)
+            .openExportBrewfileSheet()
+            .assertExportSheetExplainsDump()
+            .assertExportSubmitIsDisabled()
+    }
 }

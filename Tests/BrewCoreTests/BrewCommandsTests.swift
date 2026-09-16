@@ -57,4 +57,24 @@ struct BrewCommandsTests {
         #expect(command.arguments == ["doctor"])
         #expect(command.operationKind == .doctorRead)
     }
+
+    @Test func `bundleDump builds dump argv and kind`() {
+        let command = BrewCommands.bundleDump(filePath: "/tmp/Brewfile")
+        #expect(command.arguments == [
+            "bundle",
+            "dump",
+            "--file=/tmp/Brewfile",
+            "--force",
+            "--formula",
+            "--cask",
+            "--tap",
+        ])
+        #expect(command.operationKind == .bundleDump)
+    }
+
+    @Test func `bundleDump keeps a path with spaces as one argv element`() {
+        let command = BrewCommands.bundleDump(filePath: "/tmp/My Brewfile")
+        #expect(command.arguments[2] == "--file=/tmp/My Brewfile")
+        #expect(command.arguments.count == 7)
+    }
 }

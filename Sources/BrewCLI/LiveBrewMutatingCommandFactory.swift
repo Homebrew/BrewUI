@@ -29,4 +29,8 @@ public struct LiveBrewMutatingCommandFactory: BrewMutatingCommandFactory {
     public func doctorFixCommand(arguments: [String]) -> BrewCommand {
         BrewCommands.doctorFix(arguments: arguments)
     }
+
+    public func bundleDumpCommand(filePath: String) -> BrewCommand {
+        BrewCommands.bundleDump(filePath: filePath)
+    }
 }

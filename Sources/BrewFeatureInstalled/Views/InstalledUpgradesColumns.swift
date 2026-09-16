@@ -43,6 +43,7 @@ public struct InstalledUpgradesRoot: View {
 struct InstalledUpgradesContainer: View {
     @State private var installed: InstalledViewModel
     @State private var upgrades: UpgradesViewModel
+    @State private var brewfileExport: BrewfileExportViewModel
 
     @State private var searchFocus = SearchFocusArbiter()
     @FocusState private var focus: SearchFocusTarget?
@@ -68,6 +69,12 @@ struct InstalledUpgradesContainer: View {
         _upgrades = State(
             initialValue: UpgradesViewModel(
                 repository: installedPackagesRepository,
+                brewCommandCenter: brewCommandCenter,
+                commandFactory: mutatingCommandFactory,
+            ),
+        )
+        _brewfileExport = State(
+            initialValue: BrewfileExportViewModel(
                 brewCommandCenter: brewCommandCenter,
                 commandFactory: mutatingCommandFactory,
             ),
@@ -168,6 +175,7 @@ struct InstalledUpgradesContainer: View {
         case .installed:
             InstalledColumns(
                 viewModel: installed,
+                exportViewModel: brewfileExport,
                 deepLinkSelection: $deepLinkSelection,
                 focus: $focus,
             )

@@ -21,4 +21,8 @@ public protocol BrewMutatingCommandFactory: Sendable {
     /// Builds a maintenance command running the given `brew` argument vector (e.g. a `brew doctor` fix
     /// like `["link", "openssl@3"]` or `["cleanup"]`).
     func doctorFixCommand(arguments: [String]) -> BrewCommand
+
+    /// Builds `brew bundle dump` for `filePath`. The factory only constructs command data; the caller
+    /// owns save-panel confirmation and filesystem UI.
+    func bundleDumpCommand(filePath: String) -> BrewCommand
 }

@@ -13,6 +13,7 @@ import SwiftUI
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
+    var exportViewModel: BrewfileExportViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
     @Environment(\.packageListBanner) private var packageListBanner
@@ -21,19 +22,7 @@ struct InstalledPackagesView: View {
         VStack(alignment: .leading, spacing: 0) {
             packageListBanner()
 
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageCountSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BrewSpacing.lg)
-            .accessibilityElement(children: .combine)
-            .accessibilityHeading(.h1)
-
+            header
             scopePicker
             Divider()
 
@@ -48,9 +37,58 @@ struct InstalledPackagesView: View {
         }
         .accessibilityElement(children: .contain)
         .axid(.installedScreen)
+        .sheet(isPresented: exportSheetPresented) {
+            BrewfileExportSheet(viewModel: exportViewModel)
+        }
         .task {
             await viewModel.load()
         }
+    }
+
+    private var header: some View {
+        HStack(alignment: .top, spacing: BrewSpacing.md) {
+            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                Text("Your packages")
+                    .font(.brewTitle2)
+                    .foregroundStyle(Color.brewTextPrimary)
+                Text(viewModel.packageCountSubtitle)
+                    .font(.brewSubheadline)
+                    .foregroundStyle(Color.brewTextSecondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+            .accessibilityHeading(.h1)
+
+            Button(BrewfileExportItem.headerButtonTitle) {
+                exportViewModel.openSheet()
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            .fixedSize()
+            .disabled(!viewModel.state.isLoaded)
+            .accessibilityLabel(BrewfileExportItem.sheetTitle)
+            .accessibilityHint(
+                String(
+                    localized: "Exports installed formulae, casks, and taps with brew bundle dump.",
+                    comment: "VoiceOver hint for the Installed header Brewfile export button",
+                ),
+            )
+            .axid(.installedExportBrewfileButton)
+        }
+        .padding(BrewSpacing.lg)
+    }
+
+    private var exportSheetPresented: Binding<Bool> {
+        Binding(
+            get: { exportViewModel.isSheetPresented },
+            set: { presented in
+                if presented {
+                    exportViewModel.openSheet()
+                } else {
+                    exportViewModel.requestDismiss()
+                }
+            },
+        )
     }
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
@@ -140,7 +178,14 @@ struct InstalledPackagesView: View {
     #Preview("Installed list - loaded") {
         let viewModel = InstalledViewModel(repository: PreviewSupport.makeInstalledPackagesRepository())
         SearchFocusPreviewHost { focus in
-            InstalledPackagesView(viewModel: viewModel, focus: focus)
+            InstalledPackagesView(
+                viewModel: viewModel,
+                exportViewModel: BrewfileExportViewModel(
+                    brewCommandCenter: PreviewSupport.commandCenter,
+                    commandFactory: PreviewSupport.mutatingCommandFactory,
+                ),
+                focus: focus,
+            )
         }
         .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
         .task {
@@ -154,7 +199,14 @@ struct InstalledPackagesView: View {
             repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
         )
         SearchFocusPreviewHost { focus in
-            InstalledPackagesView(viewModel: viewModel, focus: focus)
+            InstalledPackagesView(
+                viewModel: viewModel,
+                exportViewModel: BrewfileExportViewModel(
+                    brewCommandCenter: PreviewSupport.commandCenter,
+                    commandFactory: PreviewSupport.mutatingCommandFactory,
+                ),
+                focus: focus,
+            )
         }
         .environment(\.brewCommandCenter, PreviewSupport.commandCenter)
         .task {

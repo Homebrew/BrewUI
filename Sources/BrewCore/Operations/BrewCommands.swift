@@ -53,6 +53,16 @@ public enum BrewCommands {
         BrewCommand(operationKind: .doctorRead, arguments: ["doctor"])
     }
 
+    /// `brew bundle dump` to a user-chosen path. Homebrew owns Brewfile serialization; `--force` is required
+    /// after the save panel has already confirmed replacing an existing file. The positive selectors keep
+    /// the dump to formulae, casks, and supporting taps rather than unrelated Bundle integrations.
+    public static func bundleDump(filePath: String) -> BrewCommand {
+        BrewCommand(
+            operationKind: .bundleDump,
+            arguments: ["bundle", "dump", "--file=\(filePath)", "--force", "--formula", "--cask", "--tap"],
+        )
+    }
+
     private static func flag(for kind: HomebrewPackageKind) -> String {
         kind == .formula ? "--formula" : "--cask"
     }

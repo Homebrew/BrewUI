@@ -6,6 +6,7 @@ import SwiftUI
 
 struct InstalledColumns: View {
     let viewModel: InstalledViewModel
+    let exportViewModel: BrewfileExportViewModel
     @Binding var deepLinkSelection: InstalledBrewPackage.ID?
     @FocusState.Binding var focus: SearchFocusTarget?
 
@@ -13,6 +14,7 @@ struct InstalledColumns: View {
         HSplitView {
             InstalledPackagesView(
                 viewModel: viewModel,
+                exportViewModel: exportViewModel,
                 focus: $focus,
             )
             .frame(

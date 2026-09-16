@@ -67,6 +67,21 @@ struct CommandJobTests {
         #expect(job.command == "brew link openssl@3")
     }
 
+    @Test func `materialize for bundle dump uses the id's stored display command`() {
+        let displayCommand = "brew bundle dump --file=/tmp/Brewfile --force --formula --cask --tap"
+        let id = BrewOperationID(
+            maintenanceToken: "bundle-dump:/tmp/Brewfile",
+            displayCommand: displayCommand,
+        )
+        let job = CommandJob.materialize(
+            id: id,
+            kind: .bundleDump,
+            phase: .running(.bundleDump),
+        )
+
+        #expect(job.command == displayCommand)
+    }
+
     @Test func `materialize for bulk upgrade id renders the shared display command`() {
         let job = CommandJob.materialize(
             id: .bulkUpgrade(.all),

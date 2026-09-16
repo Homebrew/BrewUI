@@ -22,6 +22,9 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case uninstallCask
     case doctorFix
     case doctorRead
+    /// Writes a Brewfile at a user-chosen path via `brew bundle dump`. Mutating from BrewUI's
+    /// perspective because it overwrites that file; Homebrew still owns which packages are listed.
+    case bundleDump
 
     /// `true` when the command's ordinary output arrives on stderr, as `brew doctor`'s does — the
     /// console would otherwise paint the whole run in the error role.

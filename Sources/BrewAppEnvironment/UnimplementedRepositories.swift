@@ -124,6 +124,10 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func doctorFixCommand(arguments _: [String]) -> BrewCommand {
         unimplemented()
     }
+
+    func bundleDumpCommand(filePath _: String) -> BrewCommand {
+        unimplemented()
+    }
 }
 
 @Observable

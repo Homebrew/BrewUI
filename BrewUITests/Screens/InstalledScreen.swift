@@ -72,4 +72,67 @@ struct InstalledScreen: Screen {
         list.row(token).tap(file: file, line: line)
         return PackageDetailScreen(app: app).waitUntilLoaded(file: file, line: line)
     }
+
+    var exportBrewfileButton: BrewUIButton {
+        BrewUIButton(app, .installedExportBrewfileButton)
+    }
+
+    var exportSheet: BrewUIElement {
+        BrewUIElement(app, .brewfileExportSheet)
+    }
+
+    var exportChooseLocationButton: BrewUIButton {
+        BrewUIButton(app, .brewfileExportChooseLocationButton, in: exportSheet.element)
+    }
+
+    var exportSubmitButton: BrewUIButton {
+        BrewUIButton(app, .brewfileExportSubmitButton, in: exportSheet.element)
+    }
+
+    @discardableResult
+    func openExportBrewfileSheet(
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        exportBrewfileButton
+            .assertIsEnabled(timeout: BrewUITestTimeout.launch, file: file, line: line)
+            .tap(file: file, line: line)
+        exportSheet.waitToExist(file: file, line: line)
+        return self
+    }
+
+    @discardableResult
+    func assertExportSheetExplainsDump(
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        exportSheet.waitToExist(file: file, line: line)
+        let predicate = NSPredicate(
+            format: "label CONTAINS %@ OR value CONTAINS %@",
+            "installed on request",
+            "installed on request",
+        )
+        let match = exportSheet.element.descendants(matching: .staticText).matching(predicate).firstMatch
+        guard match.waitForExistence(timeout: BrewUITestTimeout.default) else {
+            XCTFail(
+                """
+                Expected the Brewfile export sheet to explain installed-on-request dump behavior.
+                \(BrewUITestDiagnostics.report(for: app))
+                """,
+                file: file,
+                line: line,
+            )
+            return self
+        }
+        return self
+    }
+
+    @discardableResult
+    func assertExportSubmitIsDisabled(
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        exportSubmitButton.assertIsDisabled(file: file, line: line)
+        return self
+    }
 }

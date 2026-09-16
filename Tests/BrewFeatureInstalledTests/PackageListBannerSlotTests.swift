@@ -55,10 +55,20 @@ struct PackageListBannerSlotTests {
         let viewModel = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "ripgrep", kind: .formula)],
         )
-        let empty = height(FocusHost { InstalledPackagesView(viewModel: viewModel, focus: $0) })
+        let exportViewModel = BrewfileExportViewModel(
+            brewCommandCenter: StubBrewCommandCenter(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+        let empty = height(
+            FocusHost {
+                InstalledPackagesView(viewModel: viewModel, exportViewModel: exportViewModel, focus: $0)
+            },
+        )
         let filled = height(
-            FocusHost { InstalledPackagesView(viewModel: viewModel, focus: $0) }
-                .environment(\.packageListBanner, PackageListBanner { probe }),
+            FocusHost {
+                InstalledPackagesView(viewModel: viewModel, exportViewModel: exportViewModel, focus: $0)
+            }
+            .environment(\.packageListBanner, PackageListBanner { probe }),
         )
 
         #expect(filled - empty == Self.probeHeight)

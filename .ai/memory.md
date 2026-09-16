@@ -693,3 +693,9 @@
 
 - Darwin discards unread terminal output when the last replica descriptor closes. `BrewCommandService` must keep its replica open until draining finishes, including cancellation and launch failure. Close both descriptors in one `defer`; finish the drain only after a quiet poll that began after child exit.
 - The regression test holds the output observer until the child is reaped, then checks buffered and streamed stdout/stderr. This reproduces the output loss without depending on CI scheduling or adding a production test hook.
+
+## 2026-09-16 — Brewfile export is `brew bundle dump`, not pin/unpin
+
+- Installed can export a Brewfile through transparent `brew bundle dump --file=… --force --formula --cask --tap`. Homebrew owns installed-on-request selection and Brewfile DSL; BrewUI must not synthesize or rewrite the file.
+- Export is maintenance-identity command-center work (token `bundle-dump:<standardized-path>`), not a package operation. Import, restore, and package selection during import remain out of scope.
+- Do not reintroduce pin/unpin. PR #207 was closed after maintainers rejected pinned-package UX as fragile; that work is unrelated to export.
