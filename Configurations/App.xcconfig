@@ -6,3 +6,8 @@
 
 #include "Signing.xcconfig"
 #include "Version.xcconfig"
+
+// Sparkle configuration is intentionally injected by the release workflow.
+// Development builds stay updater-disabled until a public Ed25519 key is supplied.
+SPARKLE_PUBLIC_ED_KEY =
+SPARKLE_FEED_URL = https:/$()/github.com/Homebrew/BrewUI/releases/latest/download/appcast.xml

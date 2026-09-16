@@ -39,6 +39,7 @@ struct BrewApp: App {
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
     private let crashReportController: CrashReportController
+    private let sparkleUpdateController: SparkleUpdateController
     private let selfUpgradeCoordinator: SelfUpgradeCoordinator
     #if DEBUG
         private let selfUpgradeDebugControl = SelfUpgradeDebugControl()
@@ -46,9 +47,8 @@ struct BrewApp: App {
 
     init() {
         // Install crash capture before any other launch work so startup crashes are recorded.
-        let crashReportStore = CrashReportStore()
-        CrashReportInstaller.install(store: crashReportStore, environment: .current())
-        crashReportController = CrashReportController(store: crashReportStore)
+        crashReportController = Self.makeCrashReportController()
+        sparkleUpdateController = SparkleUpdateController()
 
         let inventoryCache = InstalledInventoryCache()
         // nil in every production launch, so both process-boundary seams below fall through to the
@@ -109,6 +109,12 @@ struct BrewApp: App {
 
     /// Cleared at launch, so a previous run's ETag or refresh timestamp cannot decide this run's fetches.
     private static let uiTestingDefaultsPrefix = "UITesting."
+
+    private static func makeCrashReportController() -> CrashReportController {
+        let store = CrashReportStore()
+        CrashReportInstaller.install(store: store, environment: .current())
+        return CrashReportController(store: store)
+    }
 
     /// Fatal on failure by design: continuing without fixtures would surface later as a product bug.
     private static func installFixtures(
@@ -284,6 +290,7 @@ struct BrewApp: App {
             SidebarCommands()
             RefreshCommands()
             ConsoleCommands()
+            SparkleUpdateCommands(updater: sparkleUpdateController)
 
             // Replace the default "Homebrew Help" item (which points at a
             // non-existent help book) with a link to the online documentation.

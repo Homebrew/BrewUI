@@ -56,6 +56,20 @@ BrewUI clears the environment again afterwards and discards startup output so ba
 reach Homebrew's reports or the console. If startup fails before Homebrew runs, its diagnostics are retained.
 See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Files.html).
 
+## Updating BrewUI
+
+BrewUI supports both installation paths:
+
+- Homebrew cask installs use the existing BrewUI self-upgrade banner and
+  `brew upgrade --cask homebrew-app`.
+- Standalone PKG installs use the app's `Homebrew > Check for Updates…` command.
+  Release builds use Sparkle to download and verify the signed application ZIP,
+  so the PKG is only needed for the initial installation.
+
+A build released before Sparkle support cannot update itself. It must be
+reinstalled once from a current release; later standalone updates can be
+started from inside the app.
+
 ## 🛠️ Development
 
 After cloning:

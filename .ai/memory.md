@@ -693,3 +693,10 @@
 
 - Darwin discards unread terminal output when the last replica descriptor closes. `BrewCommandService` must keep its replica open until draining finishes, including cancellation and launch failure. Close both descriptors in one `defer`; finish the drain only after a quiet poll that began after child exit.
 - The regression test holds the output observer until the child is reaped, then checks buffered and streamed stdout/stderr. This reproduces the output loss without depending on CI scheduling or adding a production test hook.
+
+## 2026-09-16 — Sparkle updates for standalone PKG installs
+
+- **BrewUI keeps the existing Homebrew cask self-upgrade handoff.** Standalone PKG installs now get a manual `Homebrew > Check for Updates…` command backed by Sparkle 2.10.0; the controller is inert unless a release bundle contains both the HTTPS feed and an Ed25519 public key.
+- **Sparkle is an Xcode-only binary package dependency.** It is linked to the app target rather than the root package targets, and generated `Info.plist` metadata is stamped in the existing final version phase. The phase depends on the generated plist so the Sparkle keys survive Xcode processing.
+- **Release packaging owns the signing contract.** CI injects the public key, verifies the exported app and framework, signs an appcast from the Developer ID ZIP with the private key supplied through the workflow secret, uploads it, and publishes it with the release. The ZIP is the updater payload; the PKG remains the initial-install path.
+- **Verification is deliberately split.** Local tests cover configuration gating, package tests, source linting, final bundle metadata and framework presence; hosted Developer ID signing, notarization, appcast publication and a live update remain release-CI checks.

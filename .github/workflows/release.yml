@@ -100,6 +100,8 @@ jobs:
       PKG_APPLE_DEVELOPER_TEAM_ID: ${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}
       PKG_APPLE_ID_EMAIL: ${{ secrets.PKG_APPLE_ID_EMAIL }}
       PKG_APPLE_ID_APP_SPECIFIC_PASSWORD: ${{ secrets.PKG_APPLE_ID_APP_SPECIFIC_PASSWORD }}
+      SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
+      SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
 
   release:
     needs: [prepare, build]
@@ -146,6 +148,14 @@ jobs:
 
           gh run download "$RUN_ID" --name Homebrew-pkg --dir dist
           gh run download "$RUN_ID" --name Homebrew-app --dir dist
+          if ! gh run download "$RUN_ID" --name Homebrew-appcast --dir appcast; then
+            if [ "$dry_run" = true ]; then
+              echo "::warning::No Homebrew-appcast artifact on run $RUN_ID; tolerated for this dry run."
+              exit 0
+            fi
+            echo "::error::The release build is missing the Homebrew-appcast artifact."
+            exit 1
+          fi
           # The dSYMs artifact only exists on builds cut after it was introduced,
           # so a dry run promoting an older main build won't have one. Tolerate
           # that here; a real release still requires it (checked below).
@@ -153,6 +163,7 @@ jobs:
           shopt -s nullglob
           pkgs=(dist/Homebrew-*.pkg)
           zips=(dist/Homebrew-*.zip)
+          appcasts=(appcast/appcast.xml)
           dsyms=(dsyms/Homebrew-*.dSYMs.zip)
           if [ ${#pkgs[@]} -eq 0 ] || [ ${#zips[@]} -eq 0 ]; then
             echo "::error::Downloaded artifacts are missing a Homebrew-*.pkg or Homebrew-*.zip."
@@ -169,11 +180,25 @@ jobs:
             echo "::error::Downloaded artifacts are missing a Homebrew-*.dSYMs.zip."
             exit 1
           fi
+          if [ ${#appcasts[@]} -eq 0 ]; then
+            if [ "$dry_run" = true ]; then
+              echo "::warning::Downloaded artifacts are missing appcast.xml; tolerated for this dry run."
+              exit 0
+            fi
+            echo "::error::Downloaded artifacts are missing appcast.xml."
+            exit 1
+          fi
+          APPCAST_PATH="${appcasts[0]}"
 
           base=$(basename "$PKG_PATH")
           VERSION="${base#Homebrew-}"; VERSION="${VERSION%.pkg}"
           if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
             echo "::error::Could not parse a semver from artifact name '$base'."
+            exit 1
+          fi
+          if ! grep -q "Homebrew-$VERSION.zip" "$APPCAST_PATH" ||
+             ! grep -q "sparkle:edSignature=" "$APPCAST_PATH"; then
+            echo "::error::appcast.xml is not signed or does not reference Homebrew-$VERSION.zip."
             exit 1
           fi
           TAG="v$VERSION"
@@ -189,6 +214,7 @@ jobs:
           {
             echo "PKG_PATH=$PKG_PATH"
             echo "APP_ZIP=$APP_ZIP"
+            echo "APPCAST_PATH=$APPCAST_PATH"
             echo "DSYM_ZIP=$DSYM_ZIP"
             echo "VERSION=$VERSION"
             echo "TAG=$TAG"
@@ -203,10 +229,11 @@ jobs:
           subject-path: |
             ${{ env.PKG_PATH }}
             ${{ env.APP_ZIP }}
+            ${{ env.APPCAST_PATH }}
             ${{ env.DSYM_ZIP }}
 
       - name: Create tag and release
         if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
         run: |
-          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" "$DSYM_ZIP" \
+          gh release create "$TAG" "$PKG_PATH" "$APP_ZIP" "$APPCAST_PATH" "$DSYM_ZIP" \
             --target "$TARGET" --generate-notes

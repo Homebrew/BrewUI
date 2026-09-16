@@ -40,6 +40,10 @@ on:
         required: true
       PKG_APPLE_ID_APP_SPECIFIC_PASSWORD:
         required: true
+      SPARKLE_PUBLIC_ED_KEY:
+        required: true
+      SPARKLE_PRIVATE_ED_KEY:
+        required: true
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.ref || github.ref }}
@@ -153,21 +157,26 @@ jobs:
         # derive from git).
         env:
           MARKETING_VERSION_OVERRIDE: ${{ inputs.version }}
+          SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
         run: |
           # --timestamp requests a secure Apple timestamp (mandatory for
           # Developer ID signing and notarisation); --options runtime enables
           # the hardened runtime. Both are pinned here so codesign is
           # deterministic on CI rather than relying on Xcode defaults. The
           # version/build are injected by the stamp build phase, not here.
+          # The explicit DerivedData path also gives release packaging a stable
+          # location for Sparkle's generate_appcast tool.
           xcodebuild archive \
             -project Homebrew.xcodeproj \
             -scheme Brew \
             -configuration Release \
             -archivePath "$RUNNER_TEMP/Homebrew.xcarchive" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Developer ID Application" \
             DEVELOPMENT_TEAM="${{ secrets.PKG_APPLE_DEVELOPER_TEAM_ID }}" \
-            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH --timestamp --options runtime"
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH --timestamp --options runtime" \
+            SPARKLE_PUBLIC_ED_KEY="$SPARKLE_PUBLIC_ED_KEY"
 
       # Fail fast with a clear message if the archived app did not get a secure
       # timestamp, rather than surfacing it later at notarisation.
@@ -224,6 +233,59 @@ jobs:
             exit 1
           fi
           echo "App version $BUNDLE_VERSION matches derived version $VERSION."
+
+      - name: Verify Sparkle updater metadata
+        env:
+          SPARKLE_PUBLIC_ED_KEY: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
+        run: |
+          APP_BUNDLE_PATH="$RUNNER_TEMP/export/Homebrew.app"
+          SPARKLE_FRAMEWORK="$APP_BUNDLE_PATH/Contents/Frameworks/Sparkle.framework"
+          if [ ! -d "$SPARKLE_FRAMEWORK" ]; then
+            echo "Exported app is missing Sparkle.framework."
+            exit 1
+          fi
+
+          FEED_URL=$(/usr/libexec/PlistBuddy -c 'Print :SUFeedURL' \
+            "$APP_BUNDLE_PATH/Contents/Info.plist")
+          EXPECTED_FEED_URL="https://github.com/$GITHUB_REPOSITORY/releases/latest/download/appcast.xml"
+          if [ "$FEED_URL" != "$EXPECTED_FEED_URL" ]; then
+            echo "Sparkle feed URL '$FEED_URL' does not match '$EXPECTED_FEED_URL'."
+            exit 1
+          fi
+
+          for key in SUAutomaticallyUpdate SUEnableAutomaticChecks; do
+            value=$(/usr/libexec/PlistBuddy -c "Print :$key" \
+              "$APP_BUNDLE_PATH/Contents/Info.plist")
+            if [ "$value" != "false" ]; then
+              echo "$key must be false, got '$value'."
+              exit 1
+            fi
+          done
+          for key in SURequireSignedFeed SUVerifyUpdateBeforeExtraction; do
+            value=$(/usr/libexec/PlistBuddy -c "Print :$key" \
+              "$APP_BUNDLE_PATH/Contents/Info.plist")
+            if [ "$value" != "true" ]; then
+              echo "$key must be true, got '$value'."
+              exit 1
+            fi
+          done
+
+          if [ "$NOTARIZE" = "true" ]; then
+            if [ -z "$SPARKLE_PUBLIC_ED_KEY" ]; then
+              echo "Release builds require SPARKLE_PUBLIC_ED_KEY."
+              exit 1
+            fi
+            BUNDLE_PUBLIC_KEY=$(/usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' \
+              "$APP_BUNDLE_PATH/Contents/Info.plist")
+            if [ "$BUNDLE_PUBLIC_KEY" != "$SPARKLE_PUBLIC_ED_KEY" ]; then
+              echo "Sparkle public key in the app does not match the release secret."
+              exit 1
+            fi
+          elif /usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' \
+            "$APP_BUNDLE_PATH/Contents/Info.plist" >/dev/null 2>&1; then
+            echo "Non-release build unexpectedly contains a Sparkle public key."
+            exit 1
+          fi
 
       - name: Notarize and staple app
         if: env.NOTARIZE == 'true'
@@ -342,6 +404,46 @@ jobs:
           ditto -c -k --keepParent "$RUNNER_TEMP/export/Homebrew.app" "$APP_ZIP"
           echo "APP_ZIP=$APP_ZIP" >> "$GITHUB_ENV"
 
+      - name: Generate signed Sparkle appcast
+        if: env.NOTARIZE == 'true'
+        env:
+          SPARKLE_PRIVATE_ED_KEY: ${{ secrets.SPARKLE_PRIVATE_ED_KEY }}
+        run: |
+          if [ -z "$SPARKLE_PRIVATE_ED_KEY" ]; then
+            echo "Release builds require SPARKLE_PRIVATE_ED_KEY."
+            exit 1
+          fi
+          GENERATE_APPCAST="$RUNNER_TEMP/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin/generate_appcast"
+          if [ ! -x "$GENERATE_APPCAST" ]; then
+            echo "Sparkle generate_appcast tool not found at $GENERATE_APPCAST."
+            exit 1
+          fi
+
+          UPDATES_DIR="$RUNNER_TEMP/sparkle-updates"
+          mkdir -p "$UPDATES_DIR"
+          cp "$APP_ZIP" "$UPDATES_DIR/"
+          RELEASE_URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/v$VERSION"
+          printf '%s\n' "$SPARKLE_PRIVATE_ED_KEY" | "$GENERATE_APPCAST" \
+            --ed-key-file - \
+            --download-url-prefix "https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION/" \
+            --full-release-notes-url "$RELEASE_URL" \
+            --link "https://github.com/$GITHUB_REPOSITORY" \
+            -o "$RUNNER_TEMP/appcast.xml" \
+            "$UPDATES_DIR"
+          if [ ! -s "$RUNNER_TEMP/appcast.xml" ]; then
+            echo "Sparkle did not generate a non-empty appcast."
+            exit 1
+          fi
+          if ! grep -q "sparkle:edSignature=" "$RUNNER_TEMP/appcast.xml"; then
+            echo "Generated appcast is missing an Ed25519 signature."
+            exit 1
+          fi
+          if ! grep -q "Homebrew-$VERSION.zip" "$RUNNER_TEMP/appcast.xml"; then
+            echo "Generated appcast does not reference the release ZIP."
+            exit 1
+          fi
+          echo "APPCAST_PATH=$RUNNER_TEMP/appcast.xml" >> "$GITHUB_ENV"
+
       - name: Zip dSYMs
         if: env.NOTARIZE == 'true'
         run: |
@@ -368,6 +470,14 @@ jobs:
         with:
           name: Homebrew-app
           path: ${{ env.APP_ZIP }}
+          retention-days: 90
+
+      - name: Upload appcast artifact
+        if: env.NOTARIZE == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Homebrew-appcast
+          path: ${{ env.APPCAST_PATH }}
           retention-days: 90
 
       - name: Upload dSYMs artifact

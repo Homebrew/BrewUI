@@ -31,6 +31,7 @@
 		EEBB110300000000000000E3 /* HomebrewUpgradeHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBB120100000000000000A1 /* HomebrewUpgradeHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		EEBB110400000000000000E4 /* BrewSelfUpgradeHelperCore in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100300000000000000F3 /* BrewSelfUpgradeHelperCore */; };
 		EEBB110500000000000000E5 /* BrewFeatureSelfUpgrade in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100400000000000000F4 /* BrewFeatureSelfUpgrade */; };
+		EECC110100000000000000F1 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = EECC100100000000000000F1 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -138,6 +139,7 @@
 				EEAA111000000000000000C0 /* BrewUITestContract in Frameworks */,
 				EEBB110100000000000000E1 /* BrewSelfUpgradeContract in Frameworks */,
 				EEBB110500000000000000E5 /* BrewFeatureSelfUpgrade in Frameworks */,
+				EECC110100000000000000F1 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,6 +262,7 @@
 				EEAA101000000000000000D0 /* BrewUITestContract */,
 				EEBB100100000000000000F1 /* BrewSelfUpgradeContract */,
 				EEBB100400000000000000F4 /* BrewFeatureSelfUpgrade */,
+				EECC100100000000000000F1 /* Sparkle */,
 			);
 			productName = Brew;
 			productReference = EEC39EBF2F5AB4B900269514 /* Homebrew.app */;
@@ -351,6 +354,7 @@
 			packageReferences = (
 				EEAA00012F70000000000001 /* XCLocalSwiftPackageReference "Tools/BrewUILint" */,
 				EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */,
+				EECC1F0000000000000000FF /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EEC39EC02F5AB4B900269514 /* Products */;
@@ -401,6 +405,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
+				"$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
 			);
 			name = "Stamp app version";
 			outputFileListPaths = (
@@ -818,6 +823,17 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		EECC1F0000000000000000FF /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		EEAA00012F70000000000002 /* BrewUILintPlugin */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -928,6 +944,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewFeatureSelfUpgrade;
+		};
+		EECC100100000000000000F1 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EECC1F0000000000000000FF /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

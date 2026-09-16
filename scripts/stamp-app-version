@@ -16,13 +16,34 @@ if [[ ! -f "$PLIST" ]]; then
   exit 1
 fi
 
-# Set the key if it exists (GENERATE_INFOPLIST_FILE creates both), else add it.
-plist_set() {
+# Set the key if it exists (GENERATE_INFOPLIST_FILE creates the bundle
+# metadata), else add it.
+plist_set_string() {
   local key=$1 value=$2
   /usr/libexec/PlistBuddy -c "Set :$key $value" "$PLIST" 2>/dev/null \
     || /usr/libexec/PlistBuddy -c "Add :$key string $value" "$PLIST"
 }
 
-plist_set CFBundleShortVersionString "$VERSION"
-plist_set CFBundleVersion "$BUILD"
-echo "stamp-app-version: stamped $VERSION ($BUILD) into $PLIST"
+plist_set_bool() {
+  local key=$1 value=$2
+  /usr/libexec/PlistBuddy -c "Set :$key $value" "$PLIST" 2>/dev/null \
+    || /usr/libexec/PlistBuddy -c "Add :$key bool $value" "$PLIST"
+}
+
+plist_set_string CFBundleShortVersionString "$VERSION"
+plist_set_string CFBundleVersion "$BUILD"
+
+# Sparkle's feed and public key are injected into the generated plist here
+# because Xcode only emits its built-in INFOPLIST_KEY_* mappings. A local build
+# has no public key and therefore remains updater-disabled; the release workflow
+# supplies the Ed25519 key as a build setting.
+plist_set_string SUFeedURL "${SPARKLE_FEED_URL:?}"
+if [[ -n "${SPARKLE_PUBLIC_ED_KEY:-}" ]]; then
+  plist_set_string SUPublicEDKey "$SPARKLE_PUBLIC_ED_KEY"
+fi
+plist_set_bool SUAutomaticallyUpdate false
+plist_set_bool SUEnableAutomaticChecks false
+plist_set_bool SURequireSignedFeed true
+plist_set_bool SUVerifyUpdateBeforeExtraction true
+
+echo "stamp-app-version: stamped $VERSION ($BUILD) and Sparkle metadata into $PLIST"
