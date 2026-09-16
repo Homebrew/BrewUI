@@ -8,14 +8,14 @@ import SwiftUI
 
 /// Vertical split that hosts two SwiftUI views with a draggable handle between them, where the bottom
 /// pane collapses to a fixed height. Hand-rolled instead of `NSSplitView` so we get full control over
-/// both the drag (handled by `NSPanGestureRecognizer` for smooth, gesture-pipeline-free updates) and
+/// both the drag (handled by native `NSView` mouse tracking for direct, gesture-pipeline-free updates) and
 /// the collapse/expand animation (frame interpolation via `NSAnimationContext` — `NSSplitView`'s
 /// animator path doesn't keep the divider chrome in sync, and `withAnimation` doesn't bridge into
 /// either anyway).
 public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     let collapsed: Bool
     let collapsedHeight: CGFloat
-    let expandedHeight: CGFloat
+    @Binding var expandedHeight: CGFloat
     let minExpandedHeight: CGFloat
     let maxExpandedHeight: CGFloat
     /// Space the top pane keeps when the two cannot both be satisfied. The bottom pane yields to it.
@@ -27,7 +27,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     public init(
         collapsed: Bool,
         collapsedHeight: CGFloat,
-        expandedHeight: CGFloat,
+        expandedHeight: Binding<CGFloat>,
         minExpandedHeight: CGFloat,
         maxExpandedHeight: CGFloat,
         minTopHeight: CGFloat = 0,
@@ -37,7 +37,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     ) {
         self.collapsed = collapsed
         self.collapsedHeight = collapsedHeight
-        self.expandedHeight = expandedHeight
+        _expandedHeight = expandedHeight
         self.minExpandedHeight = minExpandedHeight
         self.maxExpandedHeight = maxExpandedHeight
         self.minTopHeight = minTopHeight
@@ -47,29 +47,27 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     }
 
     public func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(expandedHeight: $expandedHeight)
     }
 
     public func makeNSView(context: Context) -> AnimatedSplitView {
         let topHost = NSHostingView(rootView: top())
         let bottomHost = NSHostingView(rootView: bottom())
-        let handleHost = NSHostingView(rootView: SplitDragHandle())
         // Don't let the hosting views impose their SwiftUI content's intrinsic size on the layout —
         // we set every frame manually. Without this the expanded pane snaps back to its content's
         // intrinsic height after a collapse/expand cycle instead of honouring the requested height.
         topHost.sizingOptions = []
         bottomHost.sizingOptions = []
-        handleHost.sizingOptions = []
         let view = AnimatedSplitView(
             top: topHost,
             bottom: bottomHost,
-            handle: handleHost,
             initialBottomHeight: collapsed ? collapsedHeight : expandedHeight,
             collapsed: collapsed,
             collapsedHeight: collapsedHeight,
             minExpandedHeight: minExpandedHeight,
             maxExpandedHeight: maxExpandedHeight,
             minTopHeight: minTopHeight,
+            onExpandedHeightChange: context.coordinator.persistExpandedHeight,
         )
         context.coordinator.topHost = topHost
         context.coordinator.bottomHost = bottomHost
@@ -78,6 +76,7 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: AnimatedSplitView, context: Context) {
+        context.coordinator.expandedHeight = $expandedHeight
         if let topHost = context.coordinator.topHost as? NSHostingView<Top> {
             topHost.rootView = top()
         }
@@ -101,9 +100,18 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
 
     @MainActor
     public final class Coordinator {
+        var expandedHeight: Binding<CGFloat>
         weak var topHost: NSView?
         weak var bottomHost: NSView?
         var previousCollapsed: Bool?
+
+        init(expandedHeight: Binding<CGFloat>) {
+            self.expandedHeight = expandedHeight
+        }
+
+        func persistExpandedHeight(_ height: CGFloat) {
+            expandedHeight.wrappedValue = height
+        }
     }
 }
 
@@ -126,20 +134,23 @@ public final class AnimatedSplitView: NSView {
     private(set) var collapsed: Bool
     private var bottomHeight: CGFloat
     private var dragStartHeight: CGFloat?
+    private var isUserSized = false
+    private let onExpandedHeightChange: (CGFloat) -> Void
 
     init(
         top: NSView,
         bottom: NSView,
-        handle: NSView,
         initialBottomHeight: CGFloat,
         collapsed: Bool,
         collapsedHeight: CGFloat,
         minExpandedHeight: CGFloat,
         maxExpandedHeight: CGFloat,
         minTopHeight: CGFloat,
+        onExpandedHeightChange: @escaping (CGFloat) -> Void = { _ in },
     ) {
         topHost = top
         bottomHost = bottom
+        let handle = SplitDragHandleView()
         handleHost = handle
         let divider = NSHostingView(rootView: Color.brewBorderSeparator)
         divider.sizingOptions = []
@@ -150,14 +161,18 @@ public final class AnimatedSplitView: NSView {
         self.minExpandedHeight = minExpandedHeight
         self.maxExpandedHeight = maxExpandedHeight
         self.minTopHeight = minTopHeight
+        self.onExpandedHeightChange = onExpandedHeightChange
         super.init(frame: .zero)
         wantsLayer = true
         addSubview(topHost)
         addSubview(bottomHost)
         addSubview(handleHost)
         addSubview(dividerHost)
-        let pan = NSPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
-        handleHost.addGestureRecognizer(pan)
+        handle.onDragBegan = { [weak self] in self?.beginHandleDrag() }
+        handle.onDragChanged = { [weak self] translationY in
+            self?.updateHandleDrag(translationY: translationY)
+        }
+        handle.onDragEnded = { [weak self] in self?.endHandleDrag() }
     }
 
     @available(*, unavailable)
@@ -172,6 +187,7 @@ public final class AnimatedSplitView: NSView {
 
     func setBottomHeight(_ newHeight: CGFloat, collapsed: Bool, animation: NSAnimationContextSpec?) {
         self.collapsed = collapsed
+        isUserSized = false
         let target = clamp(newHeight, collapsed: collapsed)
         bottomHeight = target
         if let animation {
@@ -195,7 +211,7 @@ public final class AnimatedSplitView: NSView {
         let handleH = collapsed ? 0 : Self.handleThickness
         let dividerH = Self.dividerThickness
         // Recomputed per layout, so growing the window back restores the height that was asked for.
-        let bottomH = fit(bottom)
+        let bottomH = fit(bottom, preservesTopMinimum: !isUserSized)
         let topH = max(0, total - bottomH - handleH - dividerH)
 
         // NSView coordinates are bottom-up by default: y=0 is the bottom edge. Stacking from the
@@ -229,11 +245,12 @@ public final class AnimatedSplitView: NSView {
         )
     }
 
-    private func fit(_ value: CGFloat) -> CGFloat {
+    private func fit(_ value: CGFloat, preservesTopMinimum: Bool) -> CGFloat {
         fittedSplitBottomHeight(
             value,
             total: bounds.height,
             collapsed: collapsed,
+            preservesTopMinimum: preservesTopMinimum,
             limits: SplitHeightLimits(
                 collapsedHeight: collapsedHeight,
                 minExpanded: minExpandedHeight,
@@ -243,23 +260,89 @@ public final class AnimatedSplitView: NSView {
         )
     }
 
-    @objc private func handlePan(_ recognizer: NSPanGestureRecognizer) {
-        switch recognizer.state {
-        case .began:
-            dragStartHeight = bottomHeight
-        case .changed:
-            guard let start = dragStartHeight else {
-                return
-            }
-            // Non-flipped NSView: positive translation.y == cursor moved up == bottom pane grows.
-            let proposed = start + recognizer.translation(in: self).y
-            bottomHeight = fit(clamp(proposed, collapsed: false))
-            applyLayout(forBottomHeight: bottomHeight, animated: false)
-        case .ended, .cancelled, .failed:
-            dragStartHeight = nil
-        default:
-            break
+    func beginHandleDrag() {
+        guard !collapsed else {
+            return
         }
+        dragStartHeight = bottomHost.frame.height
+        isUserSized = true
+    }
+
+    func updateHandleDrag(translationY: CGFloat) {
+        guard let start = dragStartHeight else {
+            return
+        }
+        // Non-flipped NSView: positive translation.y == cursor moved up == bottom pane grows.
+        bottomHeight = clamp(start + translationY, collapsed: false)
+        applyLayout(forBottomHeight: bottomHeight, animated: false)
+    }
+
+    func endHandleDrag() {
+        guard dragStartHeight != nil else {
+            return
+        }
+        dragStartHeight = nil
+        onExpandedHeightChange(bottomHeight)
+    }
+}
+
+private final class SplitDragHandleView: NSHostingView<SplitDragHandle> {
+    var onDragBegan: () -> Void = {}
+    var onDragChanged: (CGFloat) -> Void = { _ in }
+    var onDragEnded: () -> Void = {}
+
+    private var dragStartY: CGFloat?
+
+    convenience init() {
+        self.init(rootView: SplitDragHandle())
+    }
+
+    required init(rootView: SplitDragHandle) {
+        super.init(rootView: rootView)
+        sizingOptions = []
+    }
+
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
+        nil
+    }
+
+    override var mouseDownCanMoveWindow: Bool {
+        false
+    }
+
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        guard let superview else {
+            return nil
+        }
+        // AppKit supplies this point in the receiver's superview coordinate space.
+        let localPoint = convert(point, from: superview)
+        return bounds.contains(localPoint) ? self : nil
+    }
+
+    override func resetCursorRects() {
+        super.resetCursorRects()
+        addCursorRect(bounds, cursor: .resizeUpDown)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        dragStartY = event.locationInWindow.y
+        onDragBegan()
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let dragStartY else {
+            return
+        }
+        onDragChanged(event.locationInWindow.y - dragStartY)
+    }
+
+    override func mouseUp(with _: NSEvent) {
+        guard dragStartY != nil else {
+            return
+        }
+        dragStartY = nil
+        onDragEnded()
     }
 }
 
@@ -273,13 +356,6 @@ private struct SplitDragHandle: View {
                     .frame(width: 28, height: 2)
             }
             .contentShape(Rectangle())
-            .onHover { inside in
-                if inside {
-                    NSCursor.resizeUpDown.push()
-                } else {
-                    NSCursor.pop()
-                }
-            }
     }
 }
 
@@ -327,12 +403,14 @@ func fittedSplitBottomHeight(
     _ value: CGFloat,
     total: CGFloat,
     collapsed: Bool,
+    preservesTopMinimum: Bool = true,
     limits: SplitHeightLimits,
 ) -> CGFloat {
     let available = max(0, total - limits.chrome)
     guard !collapsed else {
         return min(limits.collapsedHeight, available)
     }
-    let yieldingToTop = min(value, max(0, available - limits.minTop))
+    let topMinimum = preservesTopMinimum ? limits.minTop : 0
+    let yieldingToTop = min(value, max(0, available - topMinimum))
     return min(max(yieldingToTop, limits.minExpanded), available)
 }

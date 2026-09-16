@@ -9,7 +9,7 @@ import BrewUIComponents
 import SwiftUI
 
 /// Bottom-of-window console. Collapsed → status strip only. Expanded → toolbar + output body.
-/// The pane height (and the drag affordance to resize it) is owned by the parent ``VSplitView`` in
+/// The pane height (and the drag affordance to resize it) is owned by the parent ``AnimatedSplit`` in
 /// ``MainWindowView``; this view just renders the chrome and content for whatever size it's given.
 struct ConsolePanel: View {
     @Binding var expanded: Bool

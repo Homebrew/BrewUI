@@ -693,3 +693,9 @@
 
 - Darwin discards unread terminal output when the last replica descriptor closes. `BrewCommandService` must keep its replica open until draining finishes, including cancellation and launch failure. Close both descriptors in one `defer`; finish the drain only after a quiet poll that began after child exit.
 - The regression test holds the output observer until the child is reaped, then checks buffered and streamed stdout/stderr. This reproduces the output loss without depending on CI scheduling or adding a production test hook.
+
+## 2026-09-16 — Console split resizing uses native mouse tracking
+
+- `AnimatedSplit` owns a narrow AppKit `SplitDragHandleView` instead of attaching an `NSPanGestureRecognizer` to a generic hosting view. Its `hitTest(_:)` input is in the superview coordinate space and must be converted before checking the handle's bounds; treating it as local coordinates makes clicks fall through to the package list.
+- `minTopHeight` remains the automatic layout preference when the console first expands, but an explicit handle drag may move past that preference. The drag starts from the pane's fitted on-screen height, then persists the requested console height through a SwiftUI binding backed by `@SceneStorage`.
+- `AnimatedSplitTests` cover the coordinate-space hit test, manual resizing past the top-pane preference, and persistence of the requested height.

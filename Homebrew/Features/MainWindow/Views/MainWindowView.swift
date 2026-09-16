@@ -31,7 +31,7 @@ struct MainWindowView: View {
             AnimatedSplit(
                 collapsed: !consoleExpanded,
                 collapsedHeight: BrewLayout.consoleCollapsedHeight,
-                expandedHeight: consoleHeight,
+                expandedHeight: consoleHeightBinding,
                 minExpandedHeight: BrewLayout.consoleMinExpandedHeight,
                 maxExpandedHeight: BrewLayout.consoleMaxExpandedHeight,
                 minTopHeight: BrewLayout.mainPaneMinHeight,
@@ -61,6 +61,13 @@ struct MainWindowView: View {
         } message: { outcome in
             Text(SelfUpgradeOutcomePresentation(outcome: outcome).message)
         }
+    }
+
+    private var consoleHeightBinding: Binding<CGFloat> {
+        Binding(
+            get: { CGFloat(consoleHeight) },
+            set: { consoleHeight = Double($0) },
+        )
     }
 
     private var acknowledgeButton: some View {
