@@ -35,7 +35,7 @@ Follow [Swift API Design Guidelines](https://www.swift.org/documentation/api-des
 
 ## Design system
 
-UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`BrewColors`, `BrewSpacing` / `BrewLayout` / `BrewRadius`, `BrewFonts`). Do not hard-code colours, spacing, or typography in feature views — **add or extend tokens** in Theme when new semantics appear. Cursor agents: see [`.cursor/rules/design-system.mdc`](.cursor/rules/design-system.mdc).
+UI in `Homebrew/` uses **semantic tokens** under [`Sources/BrewUIComponents/Theme/`](Sources/BrewUIComponents/Theme/) (`BrewColors`, `BrewSpacing` / `BrewLayout` / `BrewRadius`, `BrewFonts`). Do not hard-code colours, spacing, or typography in feature views — **add or extend tokens** in Theme when new semantics appear. Cursor agents: see [`.cursor/rules/design-system.mdc`](.cursor/rules/design-system.mdc).
 
 ## Implementation notes
 
@@ -75,7 +75,7 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Accessibility:** Meaningful labels (and hints where needed) on interactive controls; keyboard shortcuts where it matters. **UI test IDs:** the `AXID` enum in [`Sources/BrewAccessibilityID/`](Sources/BrewAccessibilityID/), linked by both the app and `BrewUITests`. Attach it with `.axid(_:)`; never write a raw identifier string in a view or a test. Identity is orthogonal to labels — keep `accessibilityLabel` for VoiceOver.
 
-**Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub only **boundaries**: `BrewCommandRunning` (subprocess) and, when needed, `BrewExecutableLocating` (e.g. `MissingBrewExecutableLocator` for “brew not found”). Prefer **slice tests** that use the real `BrewInstalledPackagesRepository` (and thus real parsing) with those fakes; shared helpers live under [`BrewTests/TestSupport/`](BrewTests/TestSupport/). Pure presentation tests may use `InstalledViewModel`’s `init(testing…)` without a repository. Cover errors and async paths, not only happy paths. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for layer flow.
+**Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub only **boundaries**: `BrewCommandRunning` (subprocess) and, when needed, `BrewExecutableLocating` (e.g. `MissingBrewExecutableLocator` for “brew not found”). Prefer **slice tests** that use the real `BrewInstalledPackagesRepository` (and thus real parsing) with those fakes; shared helpers live in the [`BrewCoreTestSupport`](Sources/BrewCoreTestSupport/) and [`BrewServicesTestSupport`](Sources/BrewServicesTestSupport/) targets. Pure presentation tests may use `InstalledViewModel`’s `init(testing…)` without a repository. Cover errors and async paths, not only happy paths. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for layer flow.
 
 **Test shape:** Prefer **one logical behavior per `@Test`** — typically a **single `#expect`**, or **one** equality check on a small `Equatable` snapshot (e.g. expected rows + errors + flags) so related outcomes stay one assertion. **`BrewInstalledPackagesRepository.live()`** is not a unit-test target: it wires real `BrewCommandService` and filesystem discovery; rely on slice tests with fakes and UI/manual smoke if needed.
 
