@@ -52,6 +52,18 @@ struct InstalledListRowViewModelTests {
         #expect(viewModel.name == "Visual Studio Code")
     }
 
+    @Test func `deprecated package is not described as up to date`() {
+        var package = InstalledBrewPackage.fixture(name: "youtube-dl")
+        package.deprecated = true
+        let viewModel = InstalledListRowViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.isDeprecated)
+        #expect(viewModel.accessibilitySummary.contains("Deprecated"))
+        #expect(!viewModel.accessibilitySummary.contains("up to date"))
+    }
+
     @Test func `observeRowUpdates applies first phase from noop center`() async {
         let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         let center = NoopBrewCommandCenter.forTesting()

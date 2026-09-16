@@ -118,10 +118,16 @@ struct InstalledListRowView: View {
     private func statusBadge(viewModel: InstalledListRowViewModel) -> some View {
         if viewModel.showsUpgradeAvailable {
             InstalledOutdatedBadge()
+        } else if viewModel.isDeprecated {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.body)
+                .foregroundStyle(Color.brewStatusWarning)
+                .help("Deprecated")
         } else {
             Image(systemName: "checkmark.circle.fill")
                 .font(.body)
                 .foregroundStyle(Color.brewStatusSuccess)
+                .help("Installed and up to date")
         }
     }
 
