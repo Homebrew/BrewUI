@@ -2,7 +2,7 @@
 //  InstalledPackagesTestSupport.swift
 //  BrewServicesTestSupport
 //
-//  Shared boundary fakes for BrewInstalledPackagesRepository slice tests (`CONVENTIONS.md` — Testing).
+//  Shared boundary fakes for BrewInstalledPackagesRepository slice tests (`AGENTS.md` — Testing).
 //
 
 import BrewCLI

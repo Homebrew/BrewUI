@@ -35,7 +35,6 @@ included:
 
 excluded:
   - .build
-  - docs
   - scripts
 
 line_length:

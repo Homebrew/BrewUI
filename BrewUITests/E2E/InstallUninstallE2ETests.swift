@@ -6,7 +6,7 @@
 import XCTest
 
 /// The mutating canaries: real catalogue decode, real subprocess, real bottle, real `brew info`
-/// refresh. `hello` is owned by this suite and nothing may depend on it — see `E2E/README.md`.
+/// refresh. `hello` is owned by this suite and nothing may depend on it — see `AGENTS.md#live-end-to-end-canaries`.
 final class InstallUninstallE2ETests: BrewE2ETestCase {
     private let canary = "hello"
 

@@ -152,7 +152,7 @@ private struct PackageRelationshipSection: View {
     }
 }
 
-/// Uninstall affordance and copyable `brew uninstall` command (`CONVENTIONS.md` — transparency).
+/// Uninstall affordance and copyable `brew uninstall` command (`ARCHITECTURE.md` — transparency).
 private struct InstalledPackageDetailUninstallChrome: View {
     @Bindable var viewModel: InstalledPackageDetailViewModel
 
@@ -220,7 +220,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
     }
 }
 
-/// Upgrade affordance and copyable `brew upgrade` command (`CONVENTIONS.md` — transparency).
+/// Upgrade affordance and copyable `brew upgrade` command (`ARCHITECTURE.md` — transparency).
 private struct InstalledPackageDetailUpgradeChrome: View {
     @Bindable var viewModel: InstalledPackageDetailViewModel
 

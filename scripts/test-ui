@@ -4,7 +4,7 @@
 #
 # Mirrors what CI runs in .github/workflows/pr_build_test.yml, so green
 # locally means green on CI. Launches real app windows — see
-# BrewUITests/TROUBLESHOOTING.md before running this on a machine you're
+# AGENTS.md#test-troubleshooting before running this on a machine you're
 # actively using (keep the screen unlocked, don't touch the keyboard/mouse
 # mid-run).
 #

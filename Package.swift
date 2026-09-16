@@ -29,7 +29,7 @@ let package = Package(
         .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
     ],
     dependencies: [
-        // Justification (`CONVENTIONS.md` — Dependencies): a controlling-terminal pty needs `setsid()`
+        // Justification (`AGENTS.md`, Coding conventions): a controlling-terminal pty needs `setsid()`
         // between fork and exec, which `Foundation.Process` cannot express. `Subprocess` exposes it as
         // `PlatformOptions.createSession`, plus the fd hand-off and process-group teardown the pty path
         // needs. Confined to `BrewCLI` behind `BrewCommandRunning`, which has one production conformer.
