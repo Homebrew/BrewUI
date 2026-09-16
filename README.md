@@ -24,7 +24,7 @@ brew install --cask homebrew-app
 
 BrewUI always launches Homebrew through `/bin/zsh`, including app self-upgrades. It disables
 optional user and system shell startup files with `--no-rcs --no-global-rcs` and supplies a clean environment.
-`PATH` contains only the directory of the located `brew` executable followed by `/usr/bin:/bin`.
+`PATH` contains only the directory of the located `brew` executable and its sibling `sbin`, followed by `/usr/bin:/bin`.
 Your login shell, shell aliases, exported variables and custom `PATH` do not configure Homebrew in BrewUI.
 
 **Put your Homebrew configuration variables in `brew.env` files.** Homebrew reads these itself:
