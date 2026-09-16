@@ -1,7 +1,7 @@
 ---
 description: Package domain model lookup identity.
 globs:
-  - Brew/Models/**/*.swift
+  - Sources/BrewCore/Models/**/*.swift
 alwaysApply: false
 ---
 

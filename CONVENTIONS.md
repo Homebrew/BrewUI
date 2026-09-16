@@ -57,7 +57,7 @@ UI in `Homebrew/` uses **semantic tokens** under [`Sources/BrewUIComponents/Them
 
 **Domain-to-presentation mapping boundary:** Do not add UI-facing presentation properties/extensions directly on domain model types. Map domain models into presentation in one of two places only: (1) feature ViewModels for top-level surfaces, or (2) feature `*Item` types for subview/action-specific presentation data.
 
-**Canonical package identity:** `HomebrewPackageID` (`Brew/Models/HomebrewPackageReference.swift`) is the single canonical identity type for every Homebrew package across the app. Any domain model, list item, or value that identifies — or is directly backed by — a package must type that identity as `HomebrewPackageID`, never a bare `String` name/token or an ad-hoc id type. `Identifiable.id` on package-backed types must be a `HomebrewPackageID` (the type is its own `ID`). Use its cases for stable formula/cask lookup (`.formula(name:)` for formulae, `.cask(token:)` for casks), and construct from raw `String` names only at decode/transport boundaries.
+**Canonical package identity:** `HomebrewPackageID` (`Sources/BrewCore/Models/HomebrewPackageID.swift`) is the single canonical identity type for every Homebrew package across the app. Any domain model, list item, or value that identifies — or is directly backed by — a package must type that identity as `HomebrewPackageID`, never a bare `String` name/token or an ad-hoc id type. `Identifiable.id` on package-backed types must be a `HomebrewPackageID` (the type is its own `ID`). Use its cases for stable formula/cask lookup (`.formula(name:)` for formulae, `.cask(token:)` for casks), and construct from raw `String` names only at decode/transport boundaries.
 
 **Root view dependency ownership:** When a feature defines a `*Root` view wrapper, the root is the dependency-composition boundary for that surface. Root views must read app-level dependencies (for example `@Environment` values), construct and inject content-view dependencies, and own view-model lifecycle boundaries. Content views must focus on rendering and behavior and must not acquire those app-level dependencies directly when a root exists.
 
@@ -67,7 +67,7 @@ UI in `Homebrew/` uses **semantic tokens** under [`Sources/BrewUIComponents/Them
 
 **Loadable UI state:** For screens/panels that are expected to load asynchronously and can fail, model presentation state as a single enum on the ViewModel (for example: `.loading`, `.loaded(Data)`, `.error(String)`) instead of separate `isLoading`/`data`/`error` fields. This keeps states mutually exclusive, reduces invalid combinations, and gives views a single `switch`-based rendering path.
 
-**Previews:** Use centralized preview data/mocks from `Brew/PreviewSupport/AppPreviewSupport.swift`; do not define one-off inline mock repositories/services in preview blocks. Add new preview sample data and lightweight preview fakes to that file so it remains the single source of truth.
+**Previews:** Use centralized preview data/mocks from `Sources/BrewRepositoryInterfaces/PreviewSupport/PreviewSupport.swift`; do not define one-off inline mock repositories/services in preview blocks. Add new preview sample data and lightweight preview fakes to that file so it remains the single source of truth.
 
 **Preview placement:** Keep each view’s `#Preview` blocks at the bottom of the same file as that view, not in standalone `+Previews.swift` files.
 

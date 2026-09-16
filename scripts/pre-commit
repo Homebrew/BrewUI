@@ -29,7 +29,7 @@ if ! xcrun swift build --package-path Tools/BrewUILint -c release >/dev/null 2>&
 fi
 brewuilint_bin="$(xcrun swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
 set +e
-brewuilint_output="$(find Homebrew Sources -name '*.swift' -print0 | xargs -0 "${brewuilint_bin}" 2>&1)"
+brewuilint_output="$(find Homebrew HomebrewUpgradeHelper Sources -name '*.swift' -print0 | xargs -0 "${brewuilint_bin}" 2>&1)"
 brewuilint_status=$?
 set -e
 if [[ ${brewuilint_status} -ne 0 ]]; then
