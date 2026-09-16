@@ -701,3 +701,7 @@
 
 - Darwin discards unread terminal output when the last replica descriptor closes. `BrewCommandService` must keep its replica open until draining finishes, including cancellation and launch failure. Close both descriptors in one `defer`; finish the drain only after a quiet poll that began after child exit.
 - The regression test holds the output observer until the child is reaped, then checks buffered and streamed stdout/stderr. This reproduces the output loss without depending on CI scheduling or adding a production test hook.
+
+## 2026-09-16 – Include Homebrew sbin in the isolated PATH
+
+- `ZshBrewCommandRunner` adds the located brew directory's sibling `sbin` before `/usr/bin:/bin`. Omitting it produced a Doctor warning when installed formulae supplied executables there. The path is derived from the located executable, so it follows either Homebrew prefix without inheriting shell configuration; self-upgrades use the same runner.

@@ -40,7 +40,9 @@ public struct ZshBrewCommandRunner: BrewCommandRunning {
         }
         environment.merge(options.environment) { _, override in override }
         environment["SHELL"] = "/bin/zsh"
-        environment["PATH"] = executableURL.deletingLastPathComponent().path + ":/usr/bin:/bin"
+        let binDirectory = executableURL.deletingLastPathComponent()
+        environment["PATH"] = binDirectory.path + ":"
+            + binDirectory.deletingLastPathComponent().appendingPathComponent("sbin").path + ":/usr/bin:/bin"
         let assignments = environment.map { "\($0.key)=\($0.value)" }
         let startup = ZshStartupOutput()
         var wrappedOptions = options

@@ -101,7 +101,28 @@ struct ZshBrewCommandRunnerTests {
             options: BrewRunOptions(environment: ["PATH": "/unexpected", "SHELL": "/bin/bash"]),
         )
 
-        #expect(output.standardOutput == "/bin:/usr/bin:/bin|/bin/zsh")
+        #expect(output.standardOutput == "/bin:/sbin:/usr/bin:/bin|/bin/zsh")
+    }
+
+    @Test func `executables in Homebrew sbin can be run by name`() async throws {
+        let prefix = FileManager.default.temporaryDirectory.appendingPathComponent("brew prefix \(UUID())")
+        defer { try? FileManager.default.removeItem(at: prefix) }
+        for directory in ["bin", "sbin"] {
+            try FileManager.default.createDirectory(at: prefix.appendingPathComponent(directory), withIntermediateDirectories: true)
+        }
+        let executable = prefix.appendingPathComponent("bin/brew")
+        try FileManager.default.createSymbolicLink(at: executable, withDestinationURL: URL(fileURLWithPath: "/bin/sh"))
+        try FileManager.default.createSymbolicLink(
+            at: prefix.appendingPathComponent("sbin/sbin-probe"),
+            withDestinationURL: URL(fileURLWithPath: "/usr/bin/printf"),
+        )
+
+        let output = try await ZshBrewCommandRunner().run(
+            executableURL: executable,
+            arguments: ["-c", "sbin-probe 'found sbin'"],
+        )
+
+        #expect(output == CommandOutput(standardOutput: "found sbin", standardError: "", terminationStatus: 0))
     }
 
     @Test func `buffered output and failure status are preserved`() async throws {
