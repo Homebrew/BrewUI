@@ -65,6 +65,11 @@ final class InstalledPackageDetailViewModel {
         upgradeItem.showsUpgradeChrome
     }
 
+    /// Homebrew marked the formula or cask deprecated.
+    var isDeprecated: Bool {
+        package.deprecated
+    }
+
     /// Presentation mapping for the Uninstall section.
     var uninstallItem: UninstallPackageItem {
         UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)

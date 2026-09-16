@@ -75,10 +75,11 @@ final class InstalledListRowViewModel {
         parts.append(installedVersionLabel)
         if showsUpgradeAvailable, let latest = availableVersionLabel {
             parts.append("Upgrade available to \(latest)")
-        } else if isDeprecated {
-            parts.append("Deprecated")
-        } else {
+        } else if !isDeprecated {
             parts.append("Installed and up to date")
+        }
+        if isDeprecated {
+            parts.append("Deprecated")
         }
         return parts.joined(separator: ", ")
     }

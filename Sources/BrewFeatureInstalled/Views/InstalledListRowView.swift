@@ -116,18 +116,19 @@ struct InstalledListRowView: View {
 
     @ViewBuilder
     private func statusBadge(viewModel: InstalledListRowViewModel) -> some View {
-        if viewModel.showsUpgradeAvailable {
-            InstalledOutdatedBadge()
-        } else if viewModel.isDeprecated {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.body)
-                .foregroundStyle(Color.brewStatusWarning)
-                .help("Deprecated")
-        } else {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.body)
-                .foregroundStyle(Color.brewStatusSuccess)
-                .help("Installed and up to date")
+        HStack(spacing: BrewSpacing.sm) {
+            if viewModel.showsUpgradeAvailable {
+                InstalledOutdatedBadge()
+            }
+            if viewModel.isDeprecated {
+                InstalledDeprecatedBadge()
+            }
+            if !viewModel.showsUpgradeAvailable && !viewModel.isDeprecated {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(Color.brewStatusSuccess)
+                    .help("Installed and up to date")
+            }
         }
     }
 
@@ -176,6 +177,24 @@ struct InstalledListRowView: View {
     #Preview("Cask") {
         InstalledListRowView(
             package: PreviewSupport.currentCask,
+            brewCommandCenter: PreviewSupport.commandCenter,
+        )
+        .padding()
+        .frame(width: 400)
+    }
+
+    #Preview("Deprecated formula") {
+        InstalledListRowView(
+            package: PreviewSupport.deprecatedFormula,
+            brewCommandCenter: PreviewSupport.commandCenter,
+        )
+        .padding()
+        .frame(width: 400)
+    }
+
+    #Preview("Deprecated outdated formula") {
+        InstalledListRowView(
+            package: PreviewSupport.deprecatedOutdatedFormula,
             brewCommandCenter: PreviewSupport.commandCenter,
         )
         .padding()

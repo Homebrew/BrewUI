@@ -55,6 +55,49 @@ public enum PreviewSupport {
         linkedKeg: "4.39.0",
     )
 
+    public static let deprecatedFormula = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "mysql@8.0",
+            displayName: "mysql@8.0",
+            kind: .formula,
+            description: "Open source relational database management system",
+            homepage: "https://dev.mysql.com/doc/refman/8.0/en/",
+            latestVersion: "8.0.46",
+            dependencies: [],
+        ),
+        installedVersions: ["8.0.46"],
+        outdated: false,
+        license: "GPL-2.0-only",
+        tap: "homebrew/core",
+        installedOnRequest: true,
+        pouredFromBottle: true,
+        installDate: Date(timeIntervalSinceNow: -86400 * 14),
+        linkedKeg: "8.0.46",
+        deprecated: true,
+    )
+
+    /// Matches a typical `mysql@8.0` keg that is both deprecated and behind latest.
+    public static let deprecatedOutdatedFormula = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "mysql@8.0",
+            displayName: "mysql@8.0",
+            kind: .formula,
+            description: "Open source relational database management system",
+            homepage: "https://dev.mysql.com/doc/refman/8.0/en/",
+            latestVersion: "8.0.46",
+            dependencies: [],
+        ),
+        installedVersions: ["8.0.43_3"],
+        outdated: true,
+        license: "GPL-2.0-only",
+        tap: "homebrew/core",
+        installedOnRequest: true,
+        pouredFromBottle: true,
+        installDate: Date(timeIntervalSinceNow: -86400 * 14),
+        linkedKeg: "8.0.43_3",
+        deprecated: true,
+    )
+
     public static let discoverPreviewPackage = DiscoveryBrewPackage(
         package: BrewPackage(
             name: "git",
@@ -198,6 +241,7 @@ public enum PreviewSupport {
             installDate: Date(timeIntervalSinceNow: -86400 * 7),
             linkedKeg: "22.14.0",
         ),
+        deprecatedFormula,
         currentCask,
     ]
 

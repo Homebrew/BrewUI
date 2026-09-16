@@ -58,13 +58,19 @@ struct InstalledPackageDetailHeroSection: View {
 
     @ViewBuilder
     private var statusBadge: some View {
-        if viewModel.showsUpgradeAvailable {
-            InstalledOutdatedBadge()
-        } else {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.brewTitle3)
-                .foregroundStyle(Color.brewStatusSuccess)
-                .accessibilityLabel("Installed")
+        HStack(spacing: BrewSpacing.sm) {
+            if viewModel.showsUpgradeAvailable {
+                InstalledOutdatedBadge()
+            }
+            if viewModel.isDeprecated {
+                InstalledDeprecatedBadge()
+            }
+            if !viewModel.showsUpgradeAvailable && !viewModel.isDeprecated {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.brewTitle3)
+                    .foregroundStyle(Color.brewStatusSuccess)
+                    .accessibilityLabel("Installed")
+            }
         }
     }
 
