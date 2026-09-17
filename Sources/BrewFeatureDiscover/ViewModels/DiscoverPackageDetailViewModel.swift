@@ -159,6 +159,16 @@ final class DiscoverPackageDetailViewModel {
         installErrorMessage = nil
     }
 
+    /// Releases the install busy bridge when the post-install reconcile settled without the
+    /// package becoming installed (e.g. the inventory refresh failed), so the button does not
+    /// spin forever. A running install is left alone.
+    func releaseLatchedOperationState() {
+        guard !operationPhase.isRunning else {
+            return
+        }
+        awaitingInstallResolution = false
+    }
+
     func installSelectedPackage() {
         guard !isInstalling else {
             return

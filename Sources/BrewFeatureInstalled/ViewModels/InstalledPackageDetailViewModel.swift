@@ -146,6 +146,18 @@ final class InstalledPackageDetailViewModel {
         clearMutationErrors()
     }
 
+    /// `InstalledListRowViewModel/releaseLatchedOperationState()` counterpart for the detail pane:
+    /// releases the busy latch when the reconcile fetch settled without new package data. Kept
+    /// error messages stay — they describe the operation itself, not the reconcile.
+    func releaseLatchedOperationState() {
+        guard !operationPhase.isRunning else {
+            return
+        }
+        isUpgrading = false
+        isUninstalling = false
+        isMutatingPackage = false
+    }
+
     func upgradeSelectedPackage() {
         let operationID = BrewOperationID(kind: package.kind, name: package.name)
         let command = commandFactory.upgradeCommand(kind: package.kind, name: package.name)

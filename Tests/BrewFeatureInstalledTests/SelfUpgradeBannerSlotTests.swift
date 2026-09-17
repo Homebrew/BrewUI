@@ -86,6 +86,9 @@ struct SelfUpgradeBannerSlotTests {
             .environment(\.selfUpgradeCoordinator, coordinator)
             .environment(\.brewCommandCenter, StubBrewCommandCenter())
             .environment(\.mutatingCommandFactory, StubMutatingCommandFactory())
+            // Rows read the inventory's fetch revision from the environment; stub it the way the
+            // composition root would, or the unimplemented default traps while hosting.
+            .environment(\.installedPackagesRepository, StubInstalledPackagesRepository(packages: []))
     }
 
     private func height(_ view: some View) -> CGFloat {

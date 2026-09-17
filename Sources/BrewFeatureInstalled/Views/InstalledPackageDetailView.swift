@@ -28,6 +28,7 @@ struct InstalledPackageDetailRoot: View {
             mutatingCommandFactory: mutatingCommandFactory,
             installedDependentsRepository: installedDependentsRepository,
             installedInventoryReading: installedPackagesRepository,
+            fetchRevision: installedPackagesRepository.fetchRevision,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
     }
@@ -37,6 +38,10 @@ struct InstalledPackageDetailRoot: View {
 struct InstalledPackageDetailView: View {
     let package: InstalledBrewPackage
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
+    /// Settled inventory fetches, fed from the environment by ``InstalledPackageDetailRoot``
+    /// (`0` in previews). A change releases the busy latch when the reconcile settled without
+    /// changing this package.
+    let fetchRevision: Int
     @State private var viewModel: InstalledPackageDetailViewModel
 
     init(
@@ -45,10 +50,12 @@ struct InstalledPackageDetailView: View {
         mutatingCommandFactory: any BrewMutatingCommandFactory,
         installedDependentsRepository: any InstalledDependentsRepository,
         installedInventoryReading: any InstalledInventoryReading,
+        fetchRevision: Int = 0,
         onSelectInstalledPackage: @escaping (InstalledBrewPackage.ID) -> Void = { _ in },
     ) {
         self.package = package
         self.onSelectInstalledPackage = onSelectInstalledPackage
+        self.fetchRevision = fetchRevision
         _viewModel = State(
             initialValue: InstalledPackageDetailViewModel(
                 package: package,
@@ -78,6 +85,9 @@ struct InstalledPackageDetailView: View {
             Task {
                 await viewModel.refreshRelationships()
             }
+        }
+        .onChange(of: fetchRevision) {
+            viewModel.releaseLatchedOperationState()
         }
     }
 

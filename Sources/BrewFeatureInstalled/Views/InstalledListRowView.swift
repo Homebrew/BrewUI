@@ -13,11 +13,13 @@ import SwiftUI
 struct InstalledListRowRoot: View {
     let package: InstalledBrewPackage
     @Environment(\.brewCommandCenter) private var brewCommandCenter
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
 
     var body: some View {
         InstalledListRowView(
             package: package,
             brewCommandCenter: brewCommandCenter,
+            fetchRevision: installedPackagesRepository.fetchRevision,
         )
         .id(package.id)
     }
@@ -25,9 +27,13 @@ struct InstalledListRowRoot: View {
 
 struct InstalledListRowView: View {
     let package: InstalledBrewPackage
+    /// Settled inventory fetches, fed from the environment by ``InstalledListRowRoot`` (`0` in
+    /// previews). A change releases the busy latch when the reconcile settled without changing
+    /// this package — see ``InstalledListRowViewModel/releaseLatchedOperationState()``.
+    let fetchRevision: Int
     @State private var viewModel: InstalledListRowViewModel
 
-    init(package: InstalledBrewPackage, brewCommandCenter: BrewCommandCenter) {
+    init(package: InstalledBrewPackage, brewCommandCenter: BrewCommandCenter, fetchRevision: Int = 0) {
         _viewModel = State(
             initialValue: InstalledListRowViewModel(
                 package: package,
@@ -35,6 +41,7 @@ struct InstalledListRowView: View {
             ),
         )
         self.package = package
+        self.fetchRevision = fetchRevision
     }
 
     var body: some View {
@@ -46,6 +53,9 @@ struct InstalledListRowView: View {
         }
         .onChange(of: package) { _, new in
             viewModel.update(package: new)
+        }
+        .onChange(of: fetchRevision) {
+            viewModel.releaseLatchedOperationState()
         }
     }
 

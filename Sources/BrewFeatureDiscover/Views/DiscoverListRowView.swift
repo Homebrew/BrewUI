@@ -17,6 +17,7 @@ struct DiscoverListRowRoot: View {
             discoveryPackage: discoveryPackage,
             installedRepository: installedPackagesRepository,
             brewCommandCenter: brewCommandCenter,
+            fetchRevision: installedPackagesRepository.fetchRevision,
             showsInstallMetrics: showsInstallMetrics,
         )
         .id(discoveryPackage.id)
@@ -25,15 +26,21 @@ struct DiscoverListRowRoot: View {
 
 struct DiscoverListRowView: View {
     let discoveryPackage: DiscoveryBrewPackage
+    /// Settled inventory fetches, fed from the environment by ``DiscoverListRowRoot`` (`0` in
+    /// previews). A change releases the install busy bridge when the reconcile settled without
+    /// the package becoming installed.
+    let fetchRevision: Int
     @State private var viewModel: DiscoverListRowViewModel
 
     init(
         discoveryPackage: DiscoveryBrewPackage,
         installedRepository: any InstalledPackageStatusReading,
         brewCommandCenter: any BrewCommandCenter,
+        fetchRevision: Int = 0,
         showsInstallMetrics: Bool = true,
     ) {
         self.discoveryPackage = discoveryPackage
+        self.fetchRevision = fetchRevision
         _viewModel = State(
             initialValue: DiscoverListRowViewModel(
                 discoveryPackage: discoveryPackage,
@@ -62,6 +69,9 @@ struct DiscoverListRowView: View {
         }
         .onChange(of: discoveryPackage) { _, new in
             viewModel.update(discoveryPackage: new)
+        }
+        .onChange(of: fetchRevision) {
+            viewModel.releaseLatchedOperationState()
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(viewModel.rowAccessibilityLabel)

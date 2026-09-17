@@ -83,6 +83,9 @@ private struct FocusHost<Content: View>: View {
     @ViewBuilder let content: (FocusState<SearchFocusTarget?>.Binding) -> Content
 
     var body: some View {
+        // Rows read the inventory's fetch revision from the environment; stub it the way the
+        // composition root would, or the unimplemented default traps while hosting.
         content($focus)
+            .environment(\.installedPackagesRepository, StubInstalledPackagesRepository(packages: []))
     }
 }
