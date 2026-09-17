@@ -65,6 +65,7 @@ The brew.sh site uses a clean sans-serif for prose and a monospaced font for all
 | **Display** | SF Pro Display | `.title` / `.largeTitle` | Used for app name, empty states |
 | **Heading** | SF Pro Display Semibold | `.title2`, `.title3` | Section headers, panel titles |
 | **Body** | SF Pro Text Regular | `.body` | Standard readable text |
+| **Body Emphasized** | SF Pro Text Semibold | `.body.weight(.semibold)` | List row titles — ranks the row's name above its secondary and metadata lines |
 | **Label** | SF Pro Text Medium | `.callout`, `.subheadline` | List row labels, form labels |
 | **Caption** | SF Pro Text Regular | `.caption`, `.caption2` | Metadata, timestamps, version strings |
 | **Code / Command** | SF Mono Regular | `.body` with `.monospaced()` | Command output, brew commands |
@@ -79,6 +80,7 @@ The brew.sh site uses a clean sans-serif for prose and a monospaced font for all
 | `fontSize.title2` | 17 | 22 | Panel header |
 | `fontSize.title3` | 15 | 20 | Sub-section header |
 | `fontSize.body` | 13 | 18 | Standard body text (macOS default) |
+| `fontSize.bodyEmphasized` | 13 | 18 | List row titles — same size as body, semibold weight |
 | `fontSize.callout` | 12 | 16 | Secondary info rows |
 | `fontSize.caption` | 11 | 14 | Metadata, badges |
 | `fontSize.code` | 12 | 18 | Terminal / command output (SF Mono) |

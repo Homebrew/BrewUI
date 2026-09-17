@@ -660,6 +660,14 @@
 - **The handoff refuses while a *mutating* brew command is in flight.** `NSApplication.terminate` would kill the subprocess the command center is streaming and the helper would start a second brew against the same Homebrew; `HelperSelfUpgradeHandoff` asks `commandCenter.runningPhases()` first and throws, which surfaces on the banner. `BrewOperationKind.isMutating` is the filter — `doctorRead` is the one scheduled kind that changes nothing, and it runs long enough that counting it would block every upgrade attempted while the Doctor tab is loading.
 - **The runner takes an injected `sleep`, like `SelfUpgradeHelperRun`.** Wall-clock timeouts of 0.5–3s pass alone and fail under the parallel suite, because the fake `brew` has not spawned before the deadline — which made the tests that matter most (a descendant surviving the timeout) pass vacuously. Tests drive the timeout off a readiness file the fake `brew` touches.
 
+## 2026-09-10 — Package list rows drop the leading icon
+
+- **The icon carried no information, so it was noise on a scanning surface.** Every installed row drew the same `cube.box.fill` and every Discover row the same `shippingbox.fill`, inside a 36pt stroked circle tinted by kind. The glyph never varied, and the tint duplicated the FORMULA/CASK pill sitting a few points to its right — so the only thing the leading column did was push the name off the list's left edge and give the row a second alignment axis to parse. Removing it makes the name, description and version line share one axis.
+- **The name is now `Font.brewBodyEmphasized`** (a new token: `.body.weight(.semibold)`, same 13pt size). With the icon gone the row needs its rank stated typographically — semibold name, `brewCallout` secondary description, `brewCaption` tertiary metadata is a three-step hierarchy that reads without any chrome.
+- **Row titles are `.lineLimit(1)`.** Without it SwiftUI truncated one long name and wrapped the next depending on the pills beside it, so the kind pill floated against the second line on some rows and not others. Truncating keeps the name column straight at the 300pt list minimum; the full name stays on the row's accessibility label and in the detail pane.
+- **The kind pill's chrome now carries `brewHiddenWhenRedacted()`**, which the icon's circle used to be the only caller of. `.redacted(reason: .placeholder)` greys text and symbols but leaves `Shape` alone, so the pill's fill and 1px stroke stayed crisp around a redacted label on every skeleton row.
+- **Considered and not done:** moving the kind pill down to the metadata line, and dropping the green up-to-date checkmark (a constant on every current package, so it carries nothing while scanning). Both were offered and declined — the checkmark change alters what the row communicates, not just how it looks.
+
 ## 2026-09-13 — Sidebar icons use SF Symbols
 
 - Sidebar rows render `Image(systemName:)` glyphs, not emoji (issue #165). macOS convention; symbols tint with selection state and align via `BrewLayout.sidebarIconWidth`.
@@ -699,3 +707,7 @@
 - `AnimatedSplit` owns a narrow AppKit `SplitDragHandleView` instead of attaching an `NSPanGestureRecognizer` to a generic hosting view. Its `hitTest(_:)` input is in the superview coordinate space and must be converted before checking the handle's bounds; treating it as local coordinates makes clicks fall through to the package list.
 - `minTopHeight` remains the automatic layout preference when the console first expands, but an explicit handle drag may move past that preference. The drag starts from the pane's fitted on-screen height, then persists the requested console height through a SwiftUI binding backed by `@SceneStorage`.
 - `AnimatedSplitTests` cover the coordinate-space hit test, manual resizing past the top-pane preference, and persistence of the requested height.
+  
+## 2026-09-16 – Include Homebrew sbin in the isolated PATH
+
+- `ZshBrewCommandRunner` adds the located brew directory's sibling `sbin` before `/usr/bin:/bin`. Omitting it produced a Doctor warning when installed formulae supplied executables there. The path is derived from the located executable, so it follows either Homebrew prefix without inheriting shell configuration; self-upgrades use the same runner.

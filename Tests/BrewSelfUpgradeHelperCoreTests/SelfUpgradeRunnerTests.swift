@@ -291,7 +291,11 @@ struct SelfUpgradeRunnerTests {
             timeout: 30,
         )
 
-        #expect(transcript.lines == [brew.url.deletingLastPathComponent().path + ":/usr/bin:/bin"])
+        #expect(transcript.lines == [
+            brew.url.deletingLastPathComponent().path + ":"
+                + brew.url.deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("sbin").path
+                + ":/usr/bin:/bin",
+        ])
     }
 
     /// The transcript is a file, so escape codes in it are noise rather than colour.

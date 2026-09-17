@@ -25,6 +25,9 @@ public extension Font {
     /// Standard body text — 13pt SF Pro Text.
     static let brewBody: Font = .body
 
+    /// List row titles — 13pt SF Pro Text Semibold.
+    static let brewBodyEmphasized: Font = .body.weight(.semibold)
+
     /// Secondary info rows — 12pt SF Pro Text.
     static let brewCallout: Font = .callout
 

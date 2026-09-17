@@ -50,42 +50,28 @@ struct InstalledListRowView: View {
     }
 
     private func rowContent(viewModel: InstalledListRowViewModel) -> some View {
-        HStack(alignment: .center, spacing: BrewSpacing.md) {
-            iconBadge(viewModel: viewModel)
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                titleRow(viewModel: viewModel)
-                if viewModel.hasDescription {
-                    Text(viewModel.descriptionText)
-                        .font(.brewCallout)
-                        .foregroundStyle(Color.brewTextSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                versionLine(viewModel: viewModel)
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            titleRow(viewModel: viewModel)
+            if viewModel.hasDescription {
+                Text(viewModel.descriptionText)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            versionLine(viewModel: viewModel)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(viewModel.rowAccessibilityLabel)
     }
 
-    private func iconBadge(viewModel: InstalledListRowViewModel) -> some View {
-        ZStack {
-            Circle()
-                .strokeBorder(accentColor(viewModel.kind.chrome.accent), lineWidth: 1)
-                .frame(width: 36, height: 36)
-                .brewHiddenWhenRedacted()
-            Image(systemName: "cube.box.fill")
-                .font(.body)
-                .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
-        }
-        .accessibilityHidden(true)
-    }
-
     private func titleRow(viewModel: InstalledListRowViewModel) -> some View {
         HStack(spacing: BrewSpacing.sm) {
             Text(viewModel.name)
-                .font(.brewBody)
+                .font(.brewBodyEmphasized)
                 .foregroundStyle(Color.brewTextPrimary)
+                .lineLimit(1)
 
             if viewModel.showsOperationBusy {
                 ProgressView()
@@ -101,10 +87,11 @@ struct InstalledListRowView: View {
                 .background {
                     Capsule()
                         .fill(Color.brewSurfaceElevated)
-                }
-                .overlay {
-                    Capsule()
-                        .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        .overlay {
+                            Capsule()
+                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        }
+                        .brewHiddenWhenRedacted()
                 }
 
             statusBadge(viewModel: viewModel)
