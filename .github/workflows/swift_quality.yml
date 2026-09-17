@@ -13,6 +13,7 @@ on:
       - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - ".github/workflows/swift_quality.yml"
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
@@ -24,6 +25,7 @@ on:
       - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - ".github/workflows/swift_quality.yml"
 
 permissions:
   contents: read
@@ -82,4 +84,4 @@ jobs:
       - name: Run BrewUILint
         run: |
           BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
-          find Brew Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
+          find Homebrew HomebrewUpgradeHelper Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"

@@ -26,9 +26,10 @@ disabled_rules:
   - orphaned_doc_comment
 
 included:
-  - Brew
   - BrewTests
   - BrewUITests
+  - Homebrew
+  - HomebrewUpgradeHelper
   - Sources
   - Tests
 

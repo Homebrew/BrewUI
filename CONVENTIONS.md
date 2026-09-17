@@ -35,7 +35,7 @@ Follow [Swift API Design Guidelines](https://www.swift.org/documentation/api-des
 
 ## Design system
 
-UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`BrewColors`, `BrewSpacing` / `BrewLayout` / `BrewRadius`, `BrewFonts`). Do not hard-code colours, spacing, or typography in feature views — **add or extend tokens** in Theme when new semantics appear. Cursor agents: see [`.cursor/rules/design-system.mdc`](.cursor/rules/design-system.mdc).
+UI in `Homebrew/` uses **semantic tokens** under [`Sources/BrewUIComponents/Theme/`](Sources/BrewUIComponents/Theme/) (`BrewColors`, `BrewSpacing` / `BrewLayout` / `BrewRadius`, `BrewFonts`). Do not hard-code colours, spacing, or typography in feature views — **add or extend tokens** in Theme when new semantics appear. Cursor agents: see [`.cursor/rules/design-system.mdc`](.cursor/rules/design-system.mdc).
 
 ## Implementation notes
 
@@ -57,7 +57,7 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Domain-to-presentation mapping boundary:** Do not add UI-facing presentation properties/extensions directly on domain model types. Map domain models into presentation in one of two places only: (1) feature ViewModels for top-level surfaces, or (2) feature `*Item` types for subview/action-specific presentation data.
 
-**Canonical package identity:** `HomebrewPackageID` (`Brew/Models/HomebrewPackageReference.swift`) is the single canonical identity type for every Homebrew package across the app. Any domain model, list item, or value that identifies — or is directly backed by — a package must type that identity as `HomebrewPackageID`, never a bare `String` name/token or an ad-hoc id type. `Identifiable.id` on package-backed types must be a `HomebrewPackageID` (the type is its own `ID`). Use its cases for stable formula/cask lookup (`.formula(name:)` for formulae, `.cask(token:)` for casks), and construct from raw `String` names only at decode/transport boundaries.
+**Canonical package identity:** `HomebrewPackageID` (`Sources/BrewCore/Models/HomebrewPackageID.swift`) is the single canonical identity type for every Homebrew package across the app. Any domain model, list item, or value that identifies — or is directly backed by — a package must type that identity as `HomebrewPackageID`, never a bare `String` name/token or an ad-hoc id type. `Identifiable.id` on package-backed types must be a `HomebrewPackageID` (the type is its own `ID`). Use its cases for stable formula/cask lookup (`.formula(name:)` for formulae, `.cask(token:)` for casks), and construct from raw `String` names only at decode/transport boundaries.
 
 **Root view dependency ownership:** When a feature defines a `*Root` view wrapper, the root is the dependency-composition boundary for that surface. Root views must read app-level dependencies (for example `@Environment` values), construct and inject content-view dependencies, and own view-model lifecycle boundaries. Content views must focus on rendering and behavior and must not acquire those app-level dependencies directly when a root exists.
 
@@ -67,7 +67,7 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Loadable UI state:** For screens/panels that are expected to load asynchronously and can fail, model presentation state as a single enum on the ViewModel (for example: `.loading`, `.loaded(Data)`, `.error(String)`) instead of separate `isLoading`/`data`/`error` fields. This keeps states mutually exclusive, reduces invalid combinations, and gives views a single `switch`-based rendering path.
 
-**Previews:** Use centralized preview data/mocks from `Brew/PreviewSupport/AppPreviewSupport.swift`; do not define one-off inline mock repositories/services in preview blocks. Add new preview sample data and lightweight preview fakes to that file so it remains the single source of truth.
+**Previews:** Use centralized preview data/mocks from `Sources/BrewRepositoryInterfaces/PreviewSupport/PreviewSupport.swift`; do not define one-off inline mock repositories/services in preview blocks. Add new preview sample data and lightweight preview fakes to that file so it remains the single source of truth.
 
 **Preview placement:** Keep each view’s `#Preview` blocks at the bottom of the same file as that view, not in standalone `+Previews.swift` files.
 
@@ -75,7 +75,7 @@ UI in `Brew/` uses **semantic tokens** under [`Brew/Theme/`](Brew/Theme/) (`Brew
 
 **Accessibility:** Meaningful labels (and hints where needed) on interactive controls; keyboard shortcuts where it matters. **UI test IDs:** the `AXID` enum in [`Sources/BrewAccessibilityID/`](Sources/BrewAccessibilityID/), linked by both the app and `BrewUITests`. Attach it with `.axid(_:)`; never write a raw identifier string in a view or a test. Identity is orthogonal to labels — keep `accessibilityLabel` for VoiceOver.
 
-**Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub only **boundaries**: `BrewCommandRunning` (subprocess) and, when needed, `BrewExecutableLocating` (e.g. `MissingBrewExecutableLocator` for “brew not found”). Prefer **slice tests** that use the real `BrewInstalledPackagesRepository` (and thus real parsing) with those fakes; shared helpers live under [`BrewTests/TestSupport/`](BrewTests/TestSupport/). Pure presentation tests may use `InstalledViewModel`’s `init(testing…)` without a repository. Cover errors and async paths, not only happy paths. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for layer flow.
+**Testing:** Prefer [Swift Testing](https://developer.apple.com/documentation/testing/); XCTest is fine. **Never** invoke real `brew` in tests — mock/stub only **boundaries**: `BrewCommandRunning` (subprocess) and, when needed, `BrewExecutableLocating` (e.g. `MissingBrewExecutableLocator` for “brew not found”). Prefer **slice tests** that use the real `BrewInstalledPackagesRepository` (and thus real parsing) with those fakes; shared helpers live in the [`BrewCoreTestSupport`](Sources/BrewCoreTestSupport/) and [`BrewServicesTestSupport`](Sources/BrewServicesTestSupport/) targets. Pure presentation tests may use `InstalledViewModel`’s `init(testing…)` without a repository. Cover errors and async paths, not only happy paths. See [`ARCHITECTURE.md`](ARCHITECTURE.md) for layer flow.
 
 **Test shape:** Prefer **one logical behavior per `@Test`** — typically a **single `#expect`**, or **one** equality check on a small `Equatable` snapshot (e.g. expected rows + errors + flags) so related outcomes stay one assertion. **`BrewInstalledPackagesRepository.live()`** is not a unit-test target: it wires real `BrewCommandService` and filesystem discovery; rely on slice tests with fakes and UI/manual smoke if needed.
 

@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - "Brew/**"
+      - "Homebrew/**"
+      - "HomebrewUpgradeHelper/**"
       - "BrewTests/**"
       - "BrewUITests/**"
       - "Homebrew.xcodeproj/**"
-      - "Brew.entitlements"
       - "Sources/**"
       - "Tests/**"
       - "Package.swift"
@@ -25,11 +25,11 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
-      - "Brew/**"
+      - "Homebrew/**"
+      - "HomebrewUpgradeHelper/**"
       - "BrewTests/**"
       - "BrewUITests/**"
       - "Homebrew.xcodeproj/**"
-      - "Brew.entitlements"
       - "Sources/**"
       - "Tests/**"
       - "Package.swift"
