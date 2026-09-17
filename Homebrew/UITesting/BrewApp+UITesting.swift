@@ -17,12 +17,16 @@ extension BrewApp {
     /// Cleared at launch, so a previous run's ETag or refresh timestamp cannot decide this run's fetches.
     static let uiTestingDefaultsPrefix = "UITesting."
 
+    /// Everything the runner asked of this process before the composition root reads anything.
     /// Fatal on failure by design: continuing without fixtures would surface later as a product bug.
-    static func installFixtures(
+    static func prepareUITestingProcess(
         uiTesting: BrewUITestingLaunchConfiguration?,
     ) -> BrewUITestingFixtureInstaller.Installation? {
         guard let uiTesting else {
             return nil
+        }
+        if uiTesting.resetsWindowState {
+            clearAutosavedWindowState()
         }
         do {
             return try BrewUITestingFixtureInstaller.install(
@@ -124,6 +128,17 @@ extension BrewApp {
             return SelfUpgradeHandoffDefaults.productionLogFileURL()
         }
         return fixtures.containerURL.appendingPathComponent("self-upgrade.log")
+    }
+
+    /// AppKit reads both at window creation, and a new window with no saved frame is sized to fit the
+    /// split view's restored columns — so the second key matters as much as the first.
+    static func clearAutosavedWindowState() {
+        let defaults = UserDefaults.standard
+        for key in defaults.dictionaryRepresentation().keys
+            where key.hasPrefix("NSWindow Frame ") || key.hasPrefix("NSSplitView Subview Frames ")
+        {
+            defaults.removeObject(forKey: key)
+        }
     }
 
     static func clearUITestingDefaults() {

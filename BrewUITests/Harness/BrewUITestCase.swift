@@ -65,10 +65,11 @@ class BrewUITestCase: XCTestCase {
     @discardableResult
     func launch(
         _ scenario: BrewUITestScenario,
+        environment: [String: String] = [:],
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> InstalledScreen {
-        let app = launchUnverified(scenario, file: file, line: line)
+        let app = launchUnverified(scenario, environment: environment, file: file, line: line)
         return InstalledScreen(app: app).waitUntilLoaded(timeout: BrewUITestTimeout.launch, file: file, line: line)
     }
 
@@ -77,11 +78,12 @@ class BrewUITestCase: XCTestCase {
     @discardableResult
     func launchUnverified(
         _ scenario: BrewUITestScenario,
+        environment: [String: String] = [:],
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> XCUIApplication {
         do {
-            let app = try BrewApp.launch(scenario: scenario)
+            let app = try BrewApp.launch(scenario: scenario, environment: environment)
             launchedApp = app
             return app
         } catch {

@@ -55,7 +55,7 @@ struct BrewApp: App {
         // live wiring untouched.
         let uiTesting = BrewUITestingLaunchConfiguration.current()
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
-        let fixtures = Self.installFixtures(uiTesting: uiTesting)
+        let fixtures = Self.prepareUITestingProcess(uiTesting: uiTesting)
         let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
         // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
         let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
