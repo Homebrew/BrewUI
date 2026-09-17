@@ -55,7 +55,7 @@ struct BrewApp: App {
         // live wiring untouched.
         let uiTesting = BrewUITestingLaunchConfiguration.current()
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
-        let fixtures = Self.installFixtures(uiTesting: uiTesting)
+        let fixtures = Self.prepareUITestingProcess(uiTesting: uiTesting)
         let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
         // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
         let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
@@ -105,137 +105,6 @@ struct BrewApp: App {
         #endif
 
         NSWindow.allowsAutomaticWindowTabbing = false
-    }
-
-    /// Cleared at launch, so a previous run's ETag or refresh timestamp cannot decide this run's fetches.
-    private static let uiTestingDefaultsPrefix = "UITesting."
-
-    /// Fatal on failure by design: continuing without fixtures would surface later as a product bug.
-    private static func installFixtures(
-        uiTesting: BrewUITestingLaunchConfiguration?,
-    ) -> BrewUITestingFixtureInstaller.Installation? {
-        guard let uiTesting else {
-            return nil
-        }
-        do {
-            return try BrewUITestingFixtureInstaller.install(
-                payload: uiTesting.payload,
-                scenario: uiTesting.scenario,
-            )
-        } catch {
-            fatalError("UI-test fixtures could not be installed: \(error)")
-        }
-    }
-
-    /// Network seam. Under `-uiTesting` with a scenario, requests are served in-process by
-    /// ``BrewUITestingStubURLProtocol`` on a private ephemeral session; otherwise this is `live()`.
-    private static func makeAPIClient(uiTesting: BrewUITestingLaunchConfiguration?) -> any BrewAPIClient {
-        guard let uiTesting, uiTesting.scenario != nil else {
-            return URLSessionBrewAPIClient.live()
-        }
-        return URLSessionBrewAPIClient.stubbed(protocolClasses: [BrewUITestingStubURLProtocol.self])
-    }
-
-    /// Catalogue cache seam. Under `-uiTesting` the bytes land in the run's container, so fixtures
-    /// cannot outlive the run or overwrite a real install's cache.
-    private static func makeCatalogueCache(
-        fixtures: BrewUITestingFixtureInstaller.Installation?,
-    ) -> CatalogueCache {
-        guard let fixtures else {
-            return CatalogueCache()
-        }
-        clearUITestingDefaults()
-        return CatalogueCache(
-            cacheDirectoryURL: fixtures.containerURL.appendingPathComponent(
-                "CatalogueCache",
-                isDirectory: true,
-            ),
-            defaultsKeyPrefix: defaultsKeyPrefix(base: "CatalogueCache", fixtures: fixtures),
-        )
-    }
-
-    /// Analytics cache seam. Same isolation rationale as ``makeCatalogueCache(fixtures:)``.
-    private static func makeDiscoverAnalyticsCache(
-        fixtures: BrewUITestingFixtureInstaller.Installation?,
-    ) -> DiscoverAnalyticsCache {
-        guard let fixtures else {
-            return DiscoverAnalyticsCache()
-        }
-        return DiscoverAnalyticsCache(
-            cacheDirectoryURL: fixtures.containerURL.appendingPathComponent(
-                "DiscoverAnalytics",
-                isDirectory: true,
-            ),
-            defaultsKeyPrefix: defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
-        )
-    }
-
-    private static func defaultsKeyPrefix(
-        base: String,
-        fixtures: BrewUITestingFixtureInstaller.Installation?,
-    ) -> String {
-        fixtures == nil ? base : uiTestingDefaultsPrefix + base
-    }
-
-    /// Carried forward, or the relaunched process comes up pointed at the real Homebrew mid-test.
-    private static func relaunchArguments(uiTesting: BrewUITestingLaunchConfiguration?) -> [String] {
-        guard uiTesting != nil else {
-            return []
-        }
-        return [BrewUITestingEnvironmentKey.launchArgument, "YES"]
-    }
-
-    /// `fixturesRoot` is omitted: the relaunched app reinstalls the fixture tree into its own temp directory.
-    private static func relaunchEnvironment(uiTesting: BrewUITestingLaunchConfiguration?) -> [String: String] {
-        guard let uiTesting else {
-            return [:]
-        }
-        var environment: [String: String] = [:]
-        environment[BrewUITestingEnvironmentKey.scenario] = uiTesting.scenario
-        environment[BrewUITestingEnvironmentKey.payload] = uiTesting.payload
-        return environment
-    }
-
-    private static func upgradeEnvironment(
-        fixtures: BrewUITestingFixtureInstaller.Installation?,
-        uiTesting: BrewUITestingLaunchConfiguration?,
-    ) -> [String: String] {
-        guard let fixtures, let scenario = uiTesting?.scenario else {
-            return [:]
-        }
-        return [
-            BrewUITestingEnvironmentKey.fixturesRoot: fixtures.rootURL.path,
-            BrewUITestingEnvironmentKey.scenario: scenario,
-        ]
-    }
-
-    /// Under `-uiTesting` the transcript stays in the run's container, clear of a real install's log.
-    private static func selfUpgradeLogFileURL(
-        fixtures: BrewUITestingFixtureInstaller.Installation?,
-    ) -> URL {
-        guard let fixtures else {
-            return SelfUpgradeHandoffDefaults.productionLogFileURL()
-        }
-        return fixtures.containerURL.appendingPathComponent("self-upgrade.log")
-    }
-
-    private static func clearUITestingDefaults() {
-        let defaults = UserDefaults.standard
-        for key in defaults.dictionaryRepresentation().keys where key.hasPrefix(uiTestingDefaultsPrefix) {
-            defaults.removeObject(forKey: key)
-        }
-    }
-
-    /// Shell seam. A UI-test launch that installed no fake resolves nothing, rather than falling back
-    /// to the machine's real Homebrew.
-    private static func executionContext(
-        uiTesting: BrewUITestingLaunchConfiguration?,
-        fixtures: BrewUITestingFixtureInstaller.Installation?,
-    ) -> BrewCommandExecutionContext {
-        guard uiTesting != nil else {
-            return .live()
-        }
-        return .uiTesting(brewURL: fixtures?.fakeBrewURL)
     }
 
     var body: some Scene {

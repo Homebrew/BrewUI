@@ -15,7 +15,7 @@ enum BrewApp {
     private static let maximumPayloadBytes = 512 * 1024
 
     /// Asserts nothing about what rendered; the caller decides what "loaded" means for its scenario.
-    static func launch(scenario: BrewUITestScenario) throws -> XCUIApplication {
+    static func launch(scenario: BrewUITestScenario, environment: [String: String] = [:]) throws -> XCUIApplication {
         let encoded = try FakeBrew.payload(for: scenario).encoded()
         guard encoded.utf8.count <= maximumPayloadBytes else {
             throw FakeBrewError.payloadTooLarge(bytes: encoded.utf8.count, limit: maximumPayloadBytes)
@@ -26,6 +26,7 @@ enum BrewApp {
         app.launchArguments += [BrewUITestingEnvironmentKey.launchArgument, "YES"]
         app.launchEnvironment[BrewUITestingEnvironmentKey.scenario] = scenario.rawValue
         app.launchEnvironment[BrewUITestingEnvironmentKey.payload] = encoded
+        app.launchEnvironment.merge(environment) { _, extra in extra }
         app.launch()
         activate(app)
         return app
