@@ -28,14 +28,17 @@ struct DoctorView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Doctor")
+                Text(LocalizedStringResource(doctor: "Doctor"))
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.subtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
                 if let lastCheckedAt = viewModel.lastCheckedAt {
-                    LastUpdatedLabel(lead: "Last checked", date: lastCheckedAt)
+                    LastUpdatedLabel(
+                        lead: LocalizedStringResource(doctor: "Last checked"),
+                        date: lastCheckedAt,
+                    )
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -54,16 +57,16 @@ struct DoctorView: View {
                 if viewModel.isRefreshing {
                     ProgressView()
                         .controlSize(.small)
-                        .accessibilityLabel("Re-checking")
+                        .accessibilityLabel(LocalizedStringResource(doctor: "Re-checking"))
                 }
                 if viewModel.rawDoctorOutput != nil {
-                    Button("Copy output") {
+                    Button(LocalizedStringResource(doctor: "Copy output")) {
                         viewModel.copyDoctorOutput()
                     }
                     .controlSize(.small)
-                    .accessibilityLabel("Copy brew doctor output")
+                    .accessibilityLabel(LocalizedStringResource(doctor: "Copy brew doctor output"))
                 }
-                Button("Run Again") {
+                Button(LocalizedStringResource(doctor: "Run Again")) {
                     Task { await viewModel.load(forceRefresh: true) }
                 }
                 .controlSize(.small)
@@ -92,15 +95,17 @@ struct DoctorView: View {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: 44))
                 .foregroundStyle(Color.brewStatusSuccess)
-            Text("Your system is ready to brew")
+            Text(LocalizedStringResource(doctor: "Your system is ready to brew"))
                 .font(.brewTitle3)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text("brew doctor found no problems.")
+            Text(LocalizedStringResource(doctor: "brew doctor found no problems."))
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .padding(BrewSpacing.xl)
+        .accessibilityElement(children: .contain)
+        .axid(.doctorHealthyState)
     }
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
@@ -138,7 +143,7 @@ struct DoctorView: View {
             }
             .focused($isFocused)
             .listStyle(.inset)
-            .accessibilityLabel("Doctor issues")
+            .accessibilityLabel(LocalizedStringResource(doctor: "Doctor issues"))
             .onKeyPress(.upArrow) {
                 viewModel.selectPrevious()
                 return .handled
@@ -163,7 +168,9 @@ private struct DoctorSeveritySectionHeader: View {
 
 private struct DoctorReassuranceNote: View {
     var body: some View {
-        NoteCallout(DoctorCopy.warningPreamble, tone: .info)
+        // `verbatim:`, not a resource: this is `brew doctor`'s own wording, echoed word for word
+        // beside the output it explains. See ``DoctorCopy``.
+        NoteCallout(verbatim: DoctorCopy.warningPreamble, tone: .info)
             .padding(.horizontal, BrewSpacing.lg)
             .padding(.bottom, BrewSpacing.sm)
     }

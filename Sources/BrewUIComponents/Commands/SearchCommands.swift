@@ -13,7 +13,7 @@ public struct SearchCommands: Commands {
 
     public var body: some Commands {
         CommandGroup(after: .textEditing) {
-            Button("Find") { focusSearchField?() }
+            Button(LocalizedStringResource(uiComponents: "Find")) { focusSearchField?() }
                 .keyboardShortcut("f") // ⌘F
                 .disabled(focusSearchField == nil)
         }

@@ -29,6 +29,9 @@ public struct PackageKindChrome: Equatable {
 }
 
 public extension HomebrewPackageKind {
+    /// `badgeLabel` stays English in every localization: "formula" and "cask" are Homebrew's own
+    /// names for the two kinds of package, the same words `brew` prints and the docs use, so a
+    /// translated badge would name something the rest of the ecosystem does not.
     var chrome: PackageKindChrome {
         switch self {
         case .formula:

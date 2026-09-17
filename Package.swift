@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "BrewKit",
+    defaultLocalization: "en",
     platforms: [
         .macOS("26.0"),
     ],
@@ -89,6 +90,7 @@ let package = Package(
             dependencies: ["BrewAccessibilityID", "BrewCore"],
             resources: [
                 .process("Resources/Media.xcassets"),
+                .process("Resources/Localizable.xcstrings"),
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
@@ -224,6 +226,9 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewAppEnvironment",
+            ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
             ],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),

@@ -102,9 +102,12 @@ struct DoctorIssueDetailView: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             captionText(block.caption)
             if steps.contains(where: \.needsAdmin) {
-                Label("Needs admin · runs in Terminal", systemImage: "lock.fill")
-                    .font(.brewCaption)
-                    .foregroundStyle(Color.brewTextTertiary)
+                Label(
+                    LocalizedStringResource(doctor: "Needs admin · runs in Terminal"),
+                    systemImage: "lock.fill",
+                )
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextTertiary)
             }
             CommandBlockView(commands: steps.map(\.displayCommand))
             if isPrimaryRunnable(block) {
@@ -127,12 +130,12 @@ struct DoctorIssueDetailView: View {
                         .controlSize(.small)
                         .frame(minWidth: 120)
                 } else {
-                    Text("Run Fix")
+                    Text(LocalizedStringResource(doctor: "Run Fix"))
                 }
             }
             .buttonStyle(.borderedProminent)
             .disabled(viewModel.isFixRunning(item))
-            .accessibilityLabel("Run Fix")
+            .accessibilityLabel(LocalizedStringResource(doctor: "Run Fix"))
 
             if let fixError = viewModel.fixError(item) {
                 Text(fixError)
@@ -176,7 +179,11 @@ struct DoctorIssueDetailView: View {
     // MARK: - Raw output
 
     private var rawOutputSection: some View {
-        CommandBlockView(command: item.rawText, title: "Raw output", collapsible: true)
+        CommandBlockView(
+            command: item.rawText,
+            title: LocalizedStringResource(doctor: "Raw output"),
+            collapsible: true,
+        )
     }
 }
 
@@ -193,7 +200,9 @@ private struct DoctorSeverityBadge: View {
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.vertical, BrewSpacing.xxs)
             .background(DoctorSeverityStyle.background(severity), in: Capsule())
-            .accessibilityLabel("Severity: \(DoctorSeverityStyle.displayName(severity))")
+            .accessibilityLabel(LocalizedStringResource(
+                doctor: "Severity: \(DoctorSeverityStyle.displayName(severity))",
+            ))
     }
 }
 
@@ -220,10 +229,10 @@ private struct DoctorLinkRow: View {
 struct DoctorDetailPlaceholder: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text("No selection")
+            Text(LocalizedStringResource(doctor: "No selection"))
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text("Run diagnostics, then choose an issue to see details and fixes.")
+            Text(LocalizedStringResource(doctor: "Run diagnostics, then choose an issue to see details and fixes."))
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
             Spacer()
