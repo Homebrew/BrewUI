@@ -58,8 +58,8 @@ public enum BrewLayout {
     /// Default window width.
     public static let defaultWindowWidth: CGFloat = 1000
 
-    /// Default window height.
-    public static let defaultWindowHeight: CGFloat = 650
+    /// Default window height. Kept above ``minWindowHeight`` so a first launch opens at the size asked for.
+    public static let defaultWindowHeight: CGFloat = 720
 
     /// Minimum supported window width.
     public static let minWindowWidth: CGFloat = 820
