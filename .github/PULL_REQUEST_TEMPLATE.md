@@ -11,7 +11,7 @@
 <!-- Swift changes: scripts/test, SwiftFormat, SwiftLint and BrewUILint per AGENTS.md. UI changes: scripts/test-ui and relevant manual checks, including keyboard/VoiceOver and light/dark appearance. -->
 <!-- Support performance claims with comparable before/after measurements (for example, Instruments traces). -->
 
-- [ ] I followed the [conventions](https://github.com/Homebrew/BrewUI/blob/HEAD/CONVENTIONS.md) and [workflow](https://github.com/Homebrew/BrewUI/blob/HEAD/AGENTS.md), checked for duplicate [PRs](https://github.com/Homebrew/BrewUI/pulls) and kept this change focused.
+- [ ] I followed the [conventions and workflow](https://github.com/Homebrew/BrewUI/blob/HEAD/AGENTS.md#development-setup), checked for duplicate [PRs](https://github.com/Homebrew/BrewUI/pulls) and kept this change focused.
 - [ ] I added regression coverage for bug fixes or explained why automated coverage is impractical, and reported the relevant validation above.
 
 ## Screenshots

@@ -2,7 +2,7 @@ name: Live E2E Canaries
 
 # Real Homebrew and real network: this installs and uninstalls `hello` on the
 # runner, which is safe because the runner is ephemeral.
-# See BrewUITests/E2E/README.md.
+# See AGENTS.md#live-end-to-end-canaries.
 on:
   pull_request:
     types: [opened, reopened, synchronize]

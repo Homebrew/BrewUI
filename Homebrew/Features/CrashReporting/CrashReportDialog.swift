@@ -7,7 +7,7 @@ import BrewCrashReporting
 import SwiftUI
 
 /// The dialog shown on the launch after a crash, offering to file the report as
-/// a GitHub issue or discard it. Passive (per `CONVENTIONS.md`): it renders the
+/// a GitHub issue or discard it. Passive (per `AGENTS.md`): it renders the
 /// report and forwards report/dismiss intents to its owner.
 struct CrashReportDialog: View {
     let report: CrashReport

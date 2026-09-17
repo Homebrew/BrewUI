@@ -19,7 +19,7 @@ struct UpgradePackageItem {
         package.outdated
     }
 
-    /// Copyable Terminal command for upgrading this package (`CONVENTIONS.md` — transparency).
+    /// Copyable Terminal command for upgrading this package (`ARCHITECTURE.md` — transparency).
     var displayCommand: String {
         switch package.kind {
         case .formula:

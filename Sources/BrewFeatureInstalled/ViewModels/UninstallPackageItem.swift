@@ -84,7 +84,7 @@ struct UninstallPackageItem {
         )
     }
 
-    /// Copyable Terminal command for uninstalling this package (`CONVENTIONS.md` — transparency).
+    /// Copyable Terminal command for uninstalling this package (`ARCHITECTURE.md` — transparency).
     var displayCommand: String {
         switch package.kind {
         case .formula:

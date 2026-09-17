@@ -10,7 +10,7 @@ import Foundation
 import Observation
 
 /// Coarse view-facing projection of the repository's diagnostics state so the view binds to one decision
-/// per state instead of re-deriving it from the report (`CONVENTIONS.md` — passive views).
+/// per state instead of re-deriving it from the report (`AGENTS.md` — passive views).
 enum DoctorPresentation: Equatable {
     case loading
     case healthy

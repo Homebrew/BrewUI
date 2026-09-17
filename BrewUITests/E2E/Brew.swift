@@ -102,7 +102,7 @@ enum BrewFixtureError: LocalizedError, CustomStringConvertible {
             """
             The live suite needs Homebrew installed on this machine; no executable at \
             \(searched.joined(separator: " or ")). This suite is gated to Homebrew-equipped runners \
-            (see BrewUITests/E2E/README.md) — it cannot be made to pass without one.
+            (see AGENTS.md#live-end-to-end-canaries) — it cannot be made to pass without one.
             """
         case let .couldNotRun(command, underlying):
             "Could not spawn “brew \(command)” for test setup: \(underlying)"
