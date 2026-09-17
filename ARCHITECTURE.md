@@ -1,6 +1,6 @@
 # Architecture
 
-BrewUI uses a lightweight MVVM-C structure:
+BrewUI uses [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) and [MVVM](https://en.wikipedia.org/wiki/Model-view-viewmodel) on the presentation layers.
 
 ```text
 View → ViewModel → Repository or Interactor → Services → brew CLI or JSON API
