@@ -36,6 +36,10 @@ build/
 .build/
 .swiftpm/
 
+# Documentation dependencies
+/docs/vendor
+/vendor/bundle
+
 # Per-developer signing config (copy from Configurations/Signing.local.xcconfig.example)
 Configurations/Signing.local.xcconfig
 
