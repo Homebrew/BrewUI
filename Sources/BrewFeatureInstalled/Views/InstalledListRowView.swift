@@ -114,7 +114,6 @@ struct InstalledListRowView: View {
         }
     }
 
-    @ViewBuilder
     private func statusBadge(viewModel: InstalledListRowViewModel) -> some View {
         HStack(spacing: BrewSpacing.sm) {
             if viewModel.showsUpgradeAvailable {
@@ -123,7 +122,7 @@ struct InstalledListRowView: View {
             if viewModel.isDeprecated {
                 InstalledDeprecatedBadge()
             }
-            if !viewModel.showsUpgradeAvailable && !viewModel.isDeprecated {
+            if !viewModel.showsUpgradeAvailable, !viewModel.isDeprecated {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.body)
                     .foregroundStyle(Color.brewStatusSuccess)

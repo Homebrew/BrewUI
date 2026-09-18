@@ -56,7 +56,6 @@ struct InstalledPackageDetailHeroSection: View {
         }
     }
 
-    @ViewBuilder
     private var statusBadge: some View {
         HStack(spacing: BrewSpacing.sm) {
             if viewModel.showsUpgradeAvailable {
@@ -65,7 +64,7 @@ struct InstalledPackageDetailHeroSection: View {
             if viewModel.isDeprecated {
                 InstalledDeprecatedBadge()
             }
-            if !viewModel.showsUpgradeAvailable && !viewModel.isDeprecated {
+            if !viewModel.showsUpgradeAvailable, !viewModel.isDeprecated {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.brewTitle3)
                     .foregroundStyle(Color.brewStatusSuccess)
