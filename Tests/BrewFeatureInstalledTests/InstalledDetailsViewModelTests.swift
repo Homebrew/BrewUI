@@ -320,6 +320,16 @@ struct InstalledDetailsViewModelTests {
         viewModel.update(package: outdatedDetails)
         #expect(viewModel.showsUpgradeAvailable)
     }
+
+    @Test @MainActor func `isDeprecated follows the package deprecated flag`() {
+        var deprecatedDetails = details(name: "mysql@8.0")
+        deprecatedDetails.deprecated = true
+        let viewModel = makeInstalledDetailsViewModel(
+            package: deprecatedDetails,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.isDeprecated)
+    }
 }
 
 struct InstalledDetailsViewModelUpgradeTests {

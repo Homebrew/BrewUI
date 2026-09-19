@@ -56,6 +56,10 @@ final class InstalledListRowViewModel {
         package.outdated && availableVersionLabel != nil
     }
 
+    var isDeprecated: Bool {
+        package.deprecated
+    }
+
     var versionPresentation: InstalledListRowVersionPresentation {
         if showsUpgradeAvailable, let latest = availableVersionLabel {
             return .upgrade(current: installedVersionLabel, latest: latest)
@@ -71,8 +75,11 @@ final class InstalledListRowViewModel {
         parts.append(installedVersionLabel)
         if showsUpgradeAvailable, let latest = availableVersionLabel {
             parts.append("Upgrade available to \(latest)")
-        } else {
+        } else if !isDeprecated {
             parts.append("Installed and up to date")
+        }
+        if isDeprecated {
+            parts.append("Deprecated")
         }
         return parts.joined(separator: ", ")
     }
