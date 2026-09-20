@@ -177,6 +177,22 @@ final class InstalledViewModel {
         searchPreviewSelectedPackageID = nil
     }
 
+    func reconcileSelection(
+        afterChangingFrom previousIDs: [InstalledBrewPackage.ID],
+        to currentIDs: [InstalledBrewPackage.ID],
+    ) {
+        guard let selectedPackageID,
+              !repository.userManagedPackages.contains(where: { $0.id == selectedPackageID }),
+              let removedIndex = previousIDs.firstIndex(of: selectedPackageID)
+        else {
+            return
+        }
+
+        self.selectedPackageID = previousIDs[..<removedIndex]
+            .reversed()
+            .first(where: currentIDs.contains) ?? currentIDs.first
+    }
+
     func selectInstalledPackage(id: InstalledBrewPackage.ID) {
         guard allRows.contains(where: { $0.id == id }) else {
             return

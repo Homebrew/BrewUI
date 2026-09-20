@@ -139,8 +139,18 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
-    @Test @MainActor func `refresh repoints selection when selected package disappears`() async {
+    @Test @MainActor func `removed selection moves to the preceding package`() async {
         let firstJSON = """
+        {
+          "formulae": [
+            { "name": "git", "installed": [{ "version": "1.0.0" }] },
+            { "name": "jq", "installed": [{ "version": "1.0.0" }] },
+            { "name": "wget", "installed": [{ "version": "1.0.0" }] }
+          ],
+          "casks": []
+        }
+        """
+        let secondJSON = """
         {
           "formulae": [
             { "name": "git", "installed": [{ "version": "1.0.0" }] },
@@ -149,19 +159,19 @@ struct InstalledViewModelTests {
           "casks": []
         }
         """
-        let secondJSON = """
-        { "formulae": [{ "name": "wget", "installed": [{ "version": "1.0.0" }] }], "casks": [] }
-        """
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: QueuedBrewInfoRunner(infoJSON: [firstJSON, secondJSON]),
         )
         let vm = makeInstalledViewModel(repository: repo)
         await vm.load()
-        vm.setSelection(.formula(name: "git"))
+        let previousIDs = vm.state.value?.orderedPackageIDs ?? []
+        vm.setSelection(.formula(name: "jq"))
 
         await vm.refresh()
+        let currentIDs = vm.state.value?.orderedPackageIDs ?? []
+        vm.reconcileSelection(afterChangingFrom: previousIDs, to: currentIDs)
 
-        #expect(vm.selectedPackage?.id == .formula(name: "wget"))
+        #expect(vm.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `init with initialSelection picks that package when inventory contains it`() {

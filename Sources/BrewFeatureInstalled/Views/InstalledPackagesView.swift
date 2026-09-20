@@ -83,7 +83,8 @@ struct InstalledPackagesView: View {
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, in: content, with: proxy)
             }
-            .onChange(of: content.packages.map(\.id)) { _, _ in
+            .onChange(of: content.packages.map(\.id)) { previousIDs, currentIDs in
+                viewModel.reconcileSelection(afterChangingFrom: previousIDs, to: currentIDs)
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
             .onKeyPress(.upArrow) {
