@@ -106,8 +106,8 @@ public enum PreviewSupport {
     }
 }
 
-extension PreviewSupport {
-    public static let deprecatedFormula = InstalledBrewPackage(
+public extension PreviewSupport {
+    static let deprecatedFormula = InstalledBrewPackage(
         package: BrewPackage(
             name: "mysql@8.0",
             displayName: "mysql@8.0",
@@ -129,7 +129,7 @@ extension PreviewSupport {
     )
 
     /// Matches a typical `mysql@8.0` keg that is both deprecated and behind latest.
-    public static let deprecatedOutdatedFormula = InstalledBrewPackage(
+    static let deprecatedOutdatedFormula = InstalledBrewPackage(
         package: BrewPackage(
             name: "mysql@8.0",
             displayName: "mysql@8.0",
@@ -150,10 +150,10 @@ extension PreviewSupport {
         deprecated: true,
     )
 
-    public static let healthyDoctorReport = DoctorReport(issues: [])
+    static let healthyDoctorReport = DoctorReport(issues: [])
 
     /// A sample report with a runnable cleanup fix and an advisory-only issue (no `brew` fix).
-    public static let doctorReport = DoctorReport(issues: [
+    static let doctorReport = DoctorReport(issues: [
         DoctorIssue(
             title: "Some cached downloads are stale.",
             severity: .caution,
@@ -192,7 +192,7 @@ extension PreviewSupport {
         ),
     ])
 
-    public static let configSnapshot = BrewConfigSnapshot(
+    static let configSnapshot = BrewConfigSnapshot(
         entries: [
             BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0"),
             BrewConfigEntry(key: "ORIGIN", value: "https://github.com/Homebrew/brew"),
@@ -222,7 +222,7 @@ extension PreviewSupport {
 
     // MARK: - Backing sample data (preview-only)
 
-    public static let installedPackages: [InstalledBrewPackage] = [
+    static let installedPackages: [InstalledBrewPackage] = [
         outdatedFormula,
         InstalledBrewPackage(
             package: BrewPackage(
