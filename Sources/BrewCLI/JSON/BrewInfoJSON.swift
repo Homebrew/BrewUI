@@ -40,6 +40,7 @@ struct BrewInfoFormula: Decodable {
     var kegOnly: Bool
     var caveats: String?
     var outdated: Bool
+    var deprecated: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -61,6 +62,7 @@ struct BrewInfoFormula: Decodable {
         kegOnly = (try? container.decode(Bool.self, forKey: .kegOnly)) ?? false
         caveats = try? container.decode(String.self, forKey: .caveats)
         outdated = (try? container.decode(Bool.self, forKey: .outdated)) ?? false
+        deprecated = (try? container.decode(Bool.self, forKey: .deprecated)) ?? false
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -80,6 +82,7 @@ struct BrewInfoFormula: Decodable {
         case kegOnly = "keg_only"
         case caveats
         case outdated
+        case deprecated
     }
 }
 
@@ -123,6 +126,7 @@ struct BrewInfoCask: Decodable {
     var installedOnRequest: Bool
     var dependencies: [HomebrewPackageID]
     var outdated: Bool
+    var deprecated: Bool
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -140,6 +144,7 @@ struct BrewInfoCask: Decodable {
             forKeys: [.dependencies, .dependsOn],
         )
         outdated = (try? container.decode(Bool.self, forKey: .outdated)) ?? false
+        deprecated = (try? container.decode(Bool.self, forKey: .deprecated)) ?? false
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -155,6 +160,7 @@ struct BrewInfoCask: Decodable {
         case dependencies
         case dependsOn = "depends_on"
         case outdated
+        case deprecated
     }
 
     var firstDisplayName: String? {

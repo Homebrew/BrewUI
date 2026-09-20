@@ -27,6 +27,8 @@ public struct InstalledBrewPackage: Identifiable, Hashable, Sendable {
     public var pinned: Bool
     /// True when the formula is keg-only (not linked into the prefix by default).
     public var kegOnly: Bool
+    /// True when Homebrew marks the formula/cask deprecated.
+    public var deprecated: Bool
     /// Post-install caveats text, if any.
     public var caveats: String?
 
@@ -97,6 +99,7 @@ public struct InstalledBrewPackage: Identifiable, Hashable, Sendable {
         linkedKeg: String? = nil,
         pinned: Bool = false,
         kegOnly: Bool = false,
+        deprecated: Bool = false,
         caveats: String? = nil,
     ) {
         self.package = package
@@ -111,6 +114,7 @@ public struct InstalledBrewPackage: Identifiable, Hashable, Sendable {
         self.linkedKeg = linkedKeg
         self.pinned = pinned
         self.kegOnly = kegOnly
+        self.deprecated = deprecated
         self.caveats = caveats
     }
 }
