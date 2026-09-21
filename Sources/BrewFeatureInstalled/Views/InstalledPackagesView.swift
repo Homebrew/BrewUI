@@ -151,7 +151,10 @@ struct InstalledPackagesView: View {
 #if DEBUG
 
     #Preview("Installed list - loaded") {
-        let viewModel = InstalledViewModel(repository: PreviewSupport.makeInstalledPackagesRepository())
+        let viewModel = InstalledViewModel(
+            repository: PreviewSupport.makeInstalledPackagesRepository(),
+            preferences: StubInstalledPreferences(),
+        )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)
         }
@@ -165,6 +168,7 @@ struct InstalledPackagesView: View {
     #Preview("Installed list - empty") {
         let viewModel = InstalledViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
+            preferences: StubInstalledPreferences(),
         )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)

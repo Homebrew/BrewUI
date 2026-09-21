@@ -179,7 +179,7 @@ struct InstalledViewModelTests {
         let wget = InstalledBrewPackage.fixture(name: "wget", kind: .formula)
         let repo = StubInstalledPackagesRepository(packages: [git, wget])
 
-        let vm = InstalledViewModel(repository: repo, initialSelection: wget.id)
+        let vm = InstalledViewModel(repository: repo, preferences: StubInstalledPreferences(), initialSelection: wget.id)
 
         #expect(vm.selectedPackage?.id == wget.id)
     }
@@ -189,7 +189,7 @@ struct InstalledViewModelTests {
         let missing = InstalledBrewPackage.ID.formula(name: "not-installed")
         let repo = StubInstalledPackagesRepository(packages: [git])
 
-        let vm = InstalledViewModel(repository: repo, initialSelection: missing)
+        let vm = InstalledViewModel(repository: repo, preferences: StubInstalledPreferences(), initialSelection: missing)
 
         // activeSelectedPackageID drops the candidate when it isn't in allRows
         // and falls back to firstVisibleRowID — the deep link doesn't strand
@@ -211,7 +211,7 @@ struct InstalledViewModelTests {
             commandRunner: QueuedBrewInfoRunner(infoJSON: [json]),
         )
         let target = InstalledBrewPackage.ID.formula(name: "wget")
-        let vm = InstalledViewModel(repository: repo, initialSelection: target)
+        let vm = InstalledViewModel(repository: repo, preferences: StubInstalledPreferences(), initialSelection: target)
 
         // Repo is still .loading — allRows is empty so activeSelectedPackageID returns nil.
         #expect(vm.selectedPackage == nil)

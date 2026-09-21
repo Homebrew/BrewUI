@@ -15,7 +15,7 @@ import Testing
 
 @MainActor
 func makeInstalledViewModel(repository: BrewInstalledPackagesRepository) -> InstalledViewModel {
-    InstalledViewModel(repository: repository)
+    InstalledViewModel(repository: repository, preferences: StubInstalledPreferences())
 }
 
 /// Repository that has not loaded yet — stays in `.loading` until `load()` is called.

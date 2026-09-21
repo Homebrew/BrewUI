@@ -7,6 +7,7 @@ import BrewCore
 import BrewCoreTestSupport
 @testable import BrewFeatureInstalled
 import BrewRepositories
+import BrewRepositoryInterfaces
 import Foundation
 import Testing
 
@@ -27,6 +28,33 @@ struct InstalledViewModelHideDependenciesTests {
         #expect(vm.loadedCaskPackages.map(\.name) == ["slack"])
         #expect(vm.totalPackageCount == 3)
         #expect(String(localized: vm.packageCountSubtitle) == "3 packages")
+    }
+
+    @Test @MainActor func `hideDependencies is seeded from preferences`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                .fixture(name: "git", installedOnRequest: true),
+                .fixture(name: "pcre2", installedOnRequest: false),
+            ],
+            preferences: StubInstalledPreferences(hideDependencies: true),
+        )
+
+        #expect(vm.hideDependencies == true)
+        #expect(vm.loadedFormulaPackages.map(\.name) == ["git"])
+    }
+
+    @Test @MainActor func `changing hideDependencies writes through to preferences`() async {
+        let preferences = StubInstalledPreferences()
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [.fixture(name: "git", installedOnRequest: true)],
+            preferences: preferences,
+        )
+
+        vm.hideDependencies = true
+        #expect(preferences.hideDependencies == true)
+
+        vm.hideDependencies = false
+        #expect(preferences.hideDependencies == false)
     }
 
     @Test @MainActor func `hideDependencies true filters out packages installed as dependencies`() async {
@@ -94,7 +122,6 @@ struct InstalledViewModelHideDependenciesTests {
         vm.setSelection(.formula(name: "pcre2"))
         #expect(vm.activeSelectedPackageID == .formula(name: "pcre2"))
 
-        // Hiding dependencies hides pcre2; selection falls back to the first visible package.
         vm.hideDependencies = true
         #expect(vm.activeSelectedPackageID == .formula(name: "git"))
     }
@@ -111,7 +138,6 @@ struct InstalledViewModelHideDependenciesTests {
         vm.hideDependencies = true
         #expect(vm.activeSelectedPackageID == .formula(name: "git"))
 
-        // The committed selection was not discarded, so clearing the filter restores it.
         vm.hideDependencies = false
         #expect(vm.activeSelectedPackageID == .formula(name: "pcre2"))
     }
