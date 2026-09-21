@@ -294,6 +294,9 @@ let package = Package(
         .testTarget(
             name: "BrewCrashReportingTests",
             dependencies: ["BrewCrashReporting"],
+            resources: [
+                .copy("Fixtures"),
+            ],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
