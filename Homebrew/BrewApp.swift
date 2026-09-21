@@ -45,17 +45,13 @@ struct BrewApp: App {
     #endif
 
     init() {
-        // Install crash capture before any other launch work so startup crashes are recorded.
-        let crashReportStore = CrashReportStore()
-        CrashReportInstaller.install(store: crashReportStore, environment: .current())
-        crashReportController = CrashReportController(store: crashReportStore)
-
         let inventoryCache = InstalledInventoryCache()
         // nil in every production launch, so both process-boundary seams below fall through to the
         // live wiring untouched.
         let uiTesting = BrewUITestingLaunchConfiguration.current()
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
         let fixtures = Self.prepareUITestingProcess(uiTesting: uiTesting)
+        crashReportController = Self.makeCrashReportController(fixtures: fixtures)
         let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
         // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
         let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()

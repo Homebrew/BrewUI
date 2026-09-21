@@ -7,41 +7,64 @@
 import Foundation
 import Testing
 
-private func makeTemporaryStore() -> CrashReportStore {
-    let directory = FileManager.default.temporaryDirectory
-        .appendingPathComponent("CrashReportControllerTests-\(UUID().uuidString)", isDirectory: true)
-    return CrashReportStore(directoryURL: directory)
-}
-
 @MainActor
 struct CrashReportControllerTests {
-    @Test func `loading surfaces the oldest report first`() async throws {
-        let store = makeTemporaryStore()
-        try store.save(text: "older", date: Date(timeIntervalSince1970: 1000))
-        try store.save(text: "newer", date: Date(timeIntervalSince1970: 2000))
-        let controller = CrashReportController(store: store)
+    private let defaults: UserDefaults
+    private let root: URL
 
-        await controller.loadPendingReports()
-
-        #expect(controller.currentReport?.text == "older")
+    init() throws {
+        let name = "CrashReportControllerTests-\(UUID().uuidString)"
+        defaults = try #require(UserDefaults(suiteName: name))
+        root = FileManager.default.temporaryDirectory.appendingPathComponent(name, isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let fixture = try #require(Bundle.module.url(
+            forResource: "stack-guard-sigsegv",
+            withExtension: "ips",
+            subdirectory: "Fixtures",
+        ))
+        try Data(contentsOf: fixture).write(to: root.appendingPathComponent("Homebrew-2026-09-20-223007.ips"))
     }
 
-    @Test func `discarding advances to the next report and deletes it from disk`() async throws {
-        let store = makeTemporaryStore()
-        try store.save(text: "older", date: Date(timeIntervalSince1970: 1000))
-        try store.save(text: "newer", date: Date(timeIntervalSince1970: 2000))
-        let controller = CrashReportController(store: store)
+    private func makeController() -> CrashReportController {
+        CrashReportController(directory: DiagnosticReportDirectory(directoryURL: root), defaults: defaults)
+    }
+
+    @Test func `loading surfaces a report macOS wrote`() async {
+        let controller = makeController()
+
         await controller.loadPendingReports()
 
-        let older = try #require(controller.currentReport)
-        controller.discard(older)
+        #expect(controller.currentReport?.id == "Homebrew-2026-09-20-223007.ips")
+        #expect(controller.currentReport?.text.contains("Exception: EXC_BAD_ACCESS (SIGSEGV)") == true)
+    }
 
-        #expect(controller.currentReport?.text == "newer")
-        #expect(store.pendingReports().map(\.text) == ["newer"])
+    @Test func `discarding acknowledges the report and leaves the file for macOS`() async throws {
+        let controller = makeController()
+        await controller.loadPendingReports()
+        let report = try #require(controller.currentReport)
+
+        controller.discard(report)
+
+        #expect(controller.currentReport == nil)
+        #expect(FileManager.default.fileExists(atPath: root.appendingPathComponent(report.id).path))
+    }
+
+    @Test func `an acknowledged report is not surfaced on the next launch`() async throws {
+        let first = makeController()
+        await first.loadPendingReports()
+        try first.discard(#require(first.currentReport))
+
+        let next = makeController()
+        await next.loadPendingReports()
+
+        #expect(next.currentReport == nil)
     }
 
     @Test func `current report is nil when nothing is pending`() async {
-        let controller = CrashReportController(store: makeTemporaryStore())
+        let controller = CrashReportController(
+            directory: DiagnosticReportDirectory(directoryURL: root.appendingPathComponent("empty")),
+            defaults: defaults,
+        )
 
         await controller.loadPendingReports()
 
