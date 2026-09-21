@@ -99,7 +99,7 @@ struct InstalledViewModelHideDependenciesTests {
         #expect(vm.activeSelectedPackageID == .formula(name: "git"))
     }
 
-    @Test @MainActor func `unchecking hideDependencies restores the previously hidden selection`() async {
+    @Test @MainActor func `switching hideDependencies off restores the previously hidden selection`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [
                 .fixture(name: "git", installedOnRequest: true),

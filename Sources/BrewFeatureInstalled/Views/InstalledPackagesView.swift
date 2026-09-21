@@ -67,15 +67,15 @@ struct InstalledPackagesView: View {
         .padding(.bottom, BrewSpacing.sm)
     }
 
-    /// Direct packages vs. dependencies filter checkbox.
     private var hideDependenciesToggle: some View {
         Toggle(String(localized: "Hide dependencies", bundle: #bundle, comment: "Installed tab: hide dependency-only packages"), isOn: $viewModel.hideDependencies)
-            .toggleStyle(.checkbox)
+            .toggleStyle(.switch)
+            .controlSize(.mini)
             .font(.brewSubheadline)
             .foregroundStyle(Color.brewTextSecondary)
             .padding(.horizontal, BrewSpacing.lg)
             .padding(.bottom, BrewSpacing.md)
-            .axid(.installedHideDependenciesCheckbox)
+            .axid(.installedHideDependenciesSwitch)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
