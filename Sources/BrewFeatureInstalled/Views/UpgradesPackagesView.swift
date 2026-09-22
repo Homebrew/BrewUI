@@ -24,7 +24,7 @@ struct UpgradesPackagesView: View {
             UpgradesHeaderView(viewModel: viewModel)
 
             if viewModel.totalOutdatedCount > 0 {
-                scopePicker
+                filterBar
                 Divider()
             }
 
@@ -54,15 +54,26 @@ struct UpgradesPackagesView: View {
         }
     }
 
-    /// Kind filter shown whenever there is outdated inventory to narrow. Filters client-side; never refetches.
-    private var scopePicker: some View {
-        Picker("Scope", selection: $viewModel.scope) {
-            Text("All").tag(InstalledPackageScope.all)
-            Text("Formulae").tag(InstalledPackageScope.formulae)
-            Text("Casks").tag(InstalledPackageScope.casks)
+    /// Filters shown whenever there is outdated inventory to narrow. Filter client-side; never refetch.
+    private var filterBar: some View {
+        HStack(spacing: BrewSpacing.md) {
+            Picker("Scope", selection: $viewModel.scope) {
+                Text("All").tag(InstalledPackageScope.all)
+                Text("Formulae").tag(InstalledPackageScope.formulae)
+                Text("Casks").tag(InstalledPackageScope.casks)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            Toggle(isOn: $viewModel.showsTopLevelPackagesOnly) {
+                // Truncates under narrow windows rather than raising the column's minimum width.
+                Text("Top-Level Only")
+                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .toggleStyle(.checkbox)
+            .axid(.upgradesTopLevelFilter)
         }
-        .pickerStyle(.segmented)
-        .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
         .padding(.vertical, BrewSpacing.md)
     }

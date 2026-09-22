@@ -34,7 +34,7 @@ struct InstalledPackagesView: View {
             .accessibilityElement(children: .combine)
             .accessibilityHeading(.h1)
 
-            scopePicker
+            filterBar
             Divider()
 
             AsyncContentView(
@@ -53,15 +53,26 @@ struct InstalledPackagesView: View {
         }
     }
 
-    /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
-    private var scopePicker: some View {
-        Picker("Scope", selection: $viewModel.scope) {
-            Text("All").tag(InstalledPackageScope.all)
-            Text("Formulae").tag(InstalledPackageScope.formulae)
-            Text("Casks").tag(InstalledPackageScope.casks)
+    /// Persistent filters, always visible. Filter the loaded inventory client-side; never refetch.
+    private var filterBar: some View {
+        HStack(spacing: BrewSpacing.md) {
+            Picker("Scope", selection: $viewModel.scope) {
+                Text("All").tag(InstalledPackageScope.all)
+                Text("Formulae").tag(InstalledPackageScope.formulae)
+                Text("Casks").tag(InstalledPackageScope.casks)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            Toggle(isOn: $viewModel.showsTopLevelPackagesOnly) {
+                // Truncates under narrow windows rather than raising the column's minimum width.
+                Text("Top-Level Only")
+                    .lineLimit(1)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .toggleStyle(.checkbox)
+            .axid(.installedTopLevelFilter)
         }
-        .pickerStyle(.segmented)
-        .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
         .padding(.bottom, BrewSpacing.md)
     }

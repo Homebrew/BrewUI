@@ -24,6 +24,8 @@ enum ScenarioFixtures {
             emptyFixtures()
         case .installedBasic:
             installedBasicFixtures()
+        case .installedTopLevel:
+            installedTopLevelFixtures()
         case .installedLarge:
             installedLargeFixtures()
         case .doctorHasIssues:
@@ -36,10 +38,21 @@ enum ScenarioFixtures {
             malformedInstalledInfoFixtures()
         case .installFailure:
             installFailureFixtures()
+        case .selfUpgradeAvailable, .selfUpgradeRunsBrew, .selfUpgradeBrewFails:
+            selfUpgradeFixtures(for: scenario)
+        }
+    }
+
+    /// The self-upgrade trio shares one installed world; only the pair whose helper really runs
+    /// `brew upgrade` answers that command.
+    private static func selfUpgradeFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
+        switch scenario {
         case .selfUpgradeAvailable:
             selfUpgradeAvailableFixtures()
         case .selfUpgradeRunsBrew, .selfUpgradeBrewFails:
             selfUpgradeRunsBrewFixtures(upgradeSucceeds: scenario == .selfUpgradeRunsBrew)
+        default:
+            preconditionFailure("Unhandled self-upgrade scenario: \(scenario)")
         }
     }
 
@@ -129,6 +142,40 @@ enum ScenarioFixtures {
         )
         set.brewFiles["uninstall_--formula_wget.next-info"] = infoJSON(for: remaining)
 
+        set.httpFiles = catalogueFiles(packages: installed)
+            .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
+        return set
+    }
+
+    /// A dependency chain for the top-level filter: `openssl` is a dependency of two installed formulae
+    /// and is itself outdated, so both tabs have a row the filter must hide.
+    private static func installedTopLevelFixtures() -> FixtureSet {
+        let openssl = FixturePackage(
+            token: "openssl",
+            kind: .formula,
+            summary: "Cryptography and SSL/TLS toolkit",
+            installedVersion: "3.4.0",
+            latestVersion: "3.5.0",
+        )
+        let wgetWithDependency = FixturePackage(
+            token: "wget",
+            kind: .formula,
+            summary: "Internet file retriever",
+            installedVersion: "1.25.0",
+            latestVersion: "1.25.0",
+            dependencies: [openssl.token],
+        )
+        let ripgrepWithDependency = FixturePackage(
+            token: "ripgrep",
+            kind: .formula,
+            summary: "Search tool like grep and The Silver Searcher",
+            installedVersion: "14.1.0",
+            latestVersion: "14.1.1",
+            dependencies: [openssl.token],
+        )
+        let installed = [openssl, wgetWithDependency, ripgrepWithDependency, rectangle]
+        var set = FixtureSet()
+        set.brewFiles = baseBrewFiles(installed: installed)
         set.httpFiles = catalogueFiles(packages: installed)
             .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
         return set

@@ -12,6 +12,8 @@ enum BrewUITestScenario: String, CaseIterable {
     case empty
     /// Two formulae and two casks installed; one formula is outdated.
     case installedBasic
+    /// A dependency chain among installed packages, outdated rows included, for the top-level filter.
+    case installedTopLevel
     /// Enough formulae that `brew info` overruns a pipe buffer, which only a concurrent drain survives.
     case installedLarge
     /// `brew doctor` reports warnings and exits non-zero, which is data rather than failure.

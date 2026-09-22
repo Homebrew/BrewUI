@@ -21,10 +21,12 @@ public enum AXID: Hashable, Sendable {
     case installedList
     case installedRow(token: String)
     case installedSearchField
+    case installedTopLevelFilter
     case upgradesScreen
     case upgradesList
     case upgradesRow(token: String)
     case upgradesRefreshButton
+    case upgradesTopLevelFilter
 
     // Self-upgrade
     case selfUpgradeBanner
@@ -72,10 +74,12 @@ public enum AXID: Hashable, Sendable {
         case .installedList: "installed.list"
         case let .installedRow(token): "installed.row.\(token)"
         case .installedSearchField: "installed.search"
+        case .installedTopLevelFilter: "installed.toplevelfilter"
         case .upgradesScreen: "upgrades.screen"
         case .upgradesList: "upgrades.list"
         case let .upgradesRow(token): "upgrades.row.\(token)"
         case .upgradesRefreshButton: "upgrades.refresh"
+        case .upgradesTopLevelFilter: "upgrades.toplevelfilter"
         case .selfUpgradeBanner: "selfupgrade.banner"
         case .selfUpgradeUpgradeButton: "selfupgrade.upgrade"
         case .selfUpgradeLaterButton: "selfupgrade.later"

@@ -44,6 +44,31 @@ final class InstalledUITests: BrewUITestCase {
             .assertDoesNotHavePackage("wget")
     }
 
+    /// openssl is a dependency of wget and ripgrep, so only the top-level checkbox can hide it.
+    @MainActor
+    func testTopLevelFilterHidesDependencies() {
+        launch(.installedTopLevel)
+            .assertHasPackage("openssl")
+            .toggleTopLevelFilter()
+            .assertDoesNotHavePackage("openssl")
+            .assertHasPackage("wget")
+            .assertHasPackage("ripgrep")
+            .assertHasPackage("rectangle")
+    }
+
+    /// The same dependency is itself outdated, so the Upgrades filter must hide it from there too.
+    @MainActor
+    func testTopLevelFilterHidesOutdatedDependencies() {
+        launch(.installedTopLevel)
+            .sidebar
+            .goToUpgrades()
+            .assertHasPackage("openssl")
+            .toggleTopLevelFilter()
+            .assertDoesNotHavePackage("openssl")
+            .assertHasPackage("ripgrep")
+            .assertHasPackage("rectangle")
+    }
+
     /// Reading after `waitUntilExit` rather than draining concurrently would deadlock on this input.
     @MainActor
     func testRendersAnInventoryLargerThanOnePipeBuffer() {

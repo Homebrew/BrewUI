@@ -24,6 +24,17 @@ struct UpgradesScreen: Screen {
         BrewUISearchField(app)
     }
 
+    var topLevelFilterToggle: BrewUIButton {
+        BrewUIButton(app, .upgradesTopLevelFilter)
+    }
+
+    /// Toggles the "Top-Level Only" checkbox; filtering stays client-side, only the visible rows change.
+    @discardableResult
+    func toggleTopLevelFilter(file: StaticString = #filePath, line: UInt = #line) -> Self {
+        topLevelFilterToggle.tap(file: file, line: line)
+        return self
+    }
+
     @discardableResult
     func assertHasPackage(
         _ token: String,

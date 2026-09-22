@@ -38,6 +38,12 @@ struct InstalledPackagesContent: Equatable {
             InstalledPackagesContent(packages: caskPackages)
         }
     }
+
+    /// Narrows the content to top-level packages — nothing installed depends on them
+    /// (`brew leaves` semantics). The excluded IDs must come from the full inventory.
+    func filteredToTopLevelPackages(excluding dependencyPackageIDs: Set<HomebrewPackageID>) -> InstalledPackagesContent {
+        InstalledPackagesContent(packages: packages.filter { !dependencyPackageIDs.contains($0.id) })
+    }
 }
 
 @Observable
@@ -60,7 +66,18 @@ final class InstalledViewModel {
             guard oldValue != scope else {
                 return
             }
-            updateSelectionForScopeChange()
+            updateSelectionForFilterChange()
+        }
+    }
+
+    /// Top-level filter: hides packages that another installed package depends on. Client-side,
+    /// alongside the scope picker and search query; never refetches.
+    var showsTopLevelPackagesOnly = false {
+        didSet {
+            guard oldValue != showsTopLevelPackagesOnly else {
+                return
+            }
+            updateSelectionForFilterChange()
         }
     }
 
@@ -79,6 +96,8 @@ final class InstalledViewModel {
             .loaded(Self.filteredContent(
                 InstalledPackagesContent(packages: repository.userManagedPackages),
                 scope: scope,
+                showsTopLevelPackagesOnly: showsTopLevelPackagesOnly,
+                dependencyPackageIDs: repository.userManagedDependencyPackageIDs,
                 query: searchQuery,
             ))
         }
@@ -225,10 +244,11 @@ final class InstalledViewModel {
         }
     }
 
-    /// Re-homes the search preview when a scope change hides the previewed row. Committed selections
-    /// are left untouched: `activeSelectedPackageID` already falls back to the first visible row while a
-    /// selection is scoped out, and restores it if the user widens the scope again.
-    private func updateSelectionForScopeChange() {
+    /// Re-homes the search preview when a filter change (scope or top-level) hides the previewed row.
+    /// Committed selections are left untouched: `activeSelectedPackageID` already falls back to the
+    /// first visible row while a selection is filtered out, and restores it if the user widens the
+    /// filters again.
+    private func updateSelectionForFilterChange() {
         guard isSearchActive, !didCommitSelectionDuringSearch else {
             return
         }
@@ -242,15 +262,20 @@ final class InstalledViewModel {
     private static func filteredContent(
         _ content: InstalledPackagesContent,
         scope: InstalledPackageScope,
+        showsTopLevelPackagesOnly: Bool,
+        dependencyPackageIDs: Set<HomebrewPackageID>,
         query: String,
     ) -> InstalledPackagesContent {
-        let scoped = content.filtered(by: scope)
+        var narrowed = content.filtered(by: scope)
+        if showsTopLevelPackagesOnly {
+            narrowed = narrowed.filteredToTopLevelPackages(excluding: dependencyPackageIDs)
+        }
         let normalizedQuery = normalizedSearchQuery(query)
         guard !normalizedQuery.isEmpty else {
-            return scoped
+            return narrowed
         }
 
-        let filteredRows = scoped.packages.filter {
+        let filteredRows = narrowed.packages.filter {
             $0.name.localizedCaseInsensitiveContains(normalizedQuery)
         }
         return InstalledPackagesContent(packages: filteredRows)
