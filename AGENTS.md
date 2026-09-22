@@ -219,6 +219,8 @@ Each UI target keeps its strings in a `Localizable.xcstrings` catalog: `Homebrew
 sidebar and menus, and `Resources/` in `BrewUIComponents` and each `BrewFeature*` package. The key is
 the English copy, and each entry's comment says where it appears and what any `%@` or `%lld` stands
 for. Add a language in Xcode with `+`, or by hand as a `localizations` entry on the string.
+[Translations](README.md#-translations) in the README walks a contributor through adding a language,
+translating a string and changing English copy.
 
 - macOS only lists a language in the per-app picker if the app bundle ships it, so
   `Homebrew/Localizable.xcstrings` needs a translation in your language before the package catalogs
