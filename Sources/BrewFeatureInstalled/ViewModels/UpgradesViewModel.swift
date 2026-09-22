@@ -66,7 +66,7 @@ final class UpgradesViewModel {
                     InstalledPackagesContent(packages: repository.outdatedPackages),
                     scope: scope,
                     showsTopLevelPackagesOnly: showsTopLevelPackagesOnly,
-                    dependencyPackageIDs: repository.userManagedDependencyPackageIDs,
+                    dependencyPackageIDs: showsTopLevelPackagesOnly ? repository.userManagedDependencyPackageIDs : [],
                     query: searchQuery,
                 ),
             )
