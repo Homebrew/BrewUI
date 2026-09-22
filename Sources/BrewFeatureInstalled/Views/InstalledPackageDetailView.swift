@@ -112,9 +112,9 @@ struct InstalledPackageDetailView: View {
         InstalledPackageDetailMetadataSection(viewModel: viewModel)
         PackageDetailSectionDivider()
         PackageRelationshipSection(
-            title: "Dependencies",
+            title: LocalizedStringResource("Dependencies", bundle: #bundle, comment: "Package detail section heading"),
             relationships: viewModel.dependencyRelationships,
-            emptyText: "No dependencies.",
+            emptyText: LocalizedStringResource("No dependencies.", bundle: #bundle, comment: "Package detail: empty dependency list"),
             dotStyle: .neutral,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
@@ -128,9 +128,9 @@ struct InstalledPackageDetailView: View {
 
 /// Heading + always-expanded relationship list, used for Dependencies.
 private struct PackageRelationshipSection: View {
-    let title: String
+    let title: LocalizedStringResource
     let relationships: [PackageRelationshipItem]
-    let emptyText: String
+    let emptyText: LocalizedStringResource
     let dotStyle: PackageRelationshipDotStyle
     let onSelectInstalledPackage: (InstalledBrewPackage.ID) -> Void
 
@@ -159,14 +159,14 @@ private struct InstalledPackageDetailUninstallChrome: View {
     var body: some View {
         let uninstall = viewModel.uninstallItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text("Uninstall")
+            Text("Uninstall", bundle: #bundle, comment: "Package detail section heading")
                 .font(.brewSubheadline.weight(.semibold))
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: uninstall.displayCommand,
-                    summaryText: "Uninstalls this package from this Mac",
+                    summaryText: LocalizedStringResource("Uninstalls this package from this Mac", bundle: #bundle, comment: "Command block summary above brew uninstall"),
                 )
 
                 Button {
@@ -198,7 +198,7 @@ private struct InstalledPackageDetailUninstallChrome: View {
                     Button(uninstall.primaryButtonTitle, role: .destructive) {
                         viewModel.uninstallSelectedPackage()
                     }
-                    Button("Cancel", role: .cancel) {}
+                    Button(String(localized: "Cancel", bundle: #bundle, comment: "Uninstall confirmation: keep the package"), role: .cancel) {}
                 } message: {
                     Text(uninstall.confirmationMessage)
                 }
@@ -227,14 +227,18 @@ private struct InstalledPackageDetailUpgradeChrome: View {
     var body: some View {
         let upgrade = viewModel.upgradeItem
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text("Upgrade")
+            Text("Upgrade", bundle: #bundle, comment: "Package detail section heading")
                 .font(.brewSubheadline.weight(.semibold))
                 .foregroundStyle(Color.brewTextPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.md) {
                 CommandBlockView(
                     command: upgrade.displayCommand,
-                    summaryText: "Upgrades this package to the latest available version",
+                    summaryText: LocalizedStringResource(
+                        "Upgrades this package to the latest available version",
+                        bundle: #bundle,
+                        comment: "Command block summary above brew upgrade",
+                    ),
                 )
 
                 if let title = upgrade.primaryButtonTitle {
@@ -271,10 +275,10 @@ private struct InstalledPackageDetailUpgradeChrome: View {
 struct InstalledPackageDetailPlaceholder: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text("No selection")
+            Text("No selection", bundle: #bundle, comment: "Package detail placeholder title when nothing is selected")
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text("Choose a package from the list to see details.")
+            Text("Choose a package from the list to see details.", bundle: #bundle, comment: "Package detail placeholder body when nothing is selected")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
             Spacer()

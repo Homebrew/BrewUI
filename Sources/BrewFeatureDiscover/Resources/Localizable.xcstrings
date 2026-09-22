@@ -1,0 +1,168 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ (linked)" : {
+      "comment" : "Installed version label; %@ is the version, annotated when that keg is the linked one"
+    },
+    "%@ installs (30d)" : {
+      "comment" : "Discover row: 30-day install count; %@ is a formatted number"
+    },
+    "%@ installs in 30 days" : {
+      "comment" : "VoiceOver: install count over the last 30 days; %@ is the formatted count"
+    },
+    "%lld packages match “%@”" : {
+      "comment" : "Discover subhead, search result count",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld packages match “%2$@”"
+          }
+        }
+      }
+    },
+    "1 package matches “%@”" : {
+      "comment" : "Discover subhead, single search result"
+    },
+    "30-day installs" : {
+      "comment" : "Package detail row: Homebrew analytics install count"
+    },
+    "All" : {
+      "comment" : "Scope picker: every package kind"
+    },
+    "As dependency" : {
+      "comment" : "Install reason row: installed only because another package needed it"
+    },
+    "Casks" : {
+      "comment" : "Discover casks section header while searching\nScope picker: casks only"
+    },
+    "Choose a package from Discover to see details." : {
+      "comment" : "Package detail placeholder body when nothing is selected"
+    },
+    "Could not load packages" : {
+      "comment" : "Discover subtitle on error"
+    },
+    "Could not search packages" : {
+      "comment" : "Discover subtitle on search error"
+    },
+    "Dependencies" : {
+      "comment" : "Package detail section heading"
+    },
+    "Details" : {
+      "comment" : "Package detail section heading"
+    },
+    "Discover packages" : {
+      "comment" : "VoiceOver: the Discover results list"
+    },
+    "Formulae" : {
+      "comment" : "Discover formulae section header while searching\nScope picker: formulae only"
+    },
+    "Homepage" : {
+      "comment" : "Package detail row: homepage link"
+    },
+    "INSTALLED" : {
+      "comment" : "Discover installed status badge label"
+    },
+    "Install" : {
+      "comment" : "Discover detail: install button\nPackage detail section heading\nVoiceOver: install button"
+    },
+    "Install reason" : {
+      "comment" : "Package detail row: on request or as a dependency"
+    },
+    "Installed" : {
+      "comment" : "Discover installed status badge accessibility label\nDiscover list row installed status\nDiscover package installed status\nPackage detail row: installed version(s)"
+    },
+    "Installed on" : {
+      "comment" : "Package detail row: install date"
+    },
+    "Installing" : {
+      "comment" : "VoiceOver: package installing"
+    },
+    "Installs this package on your Mac" : {
+      "comment" : "Command block summary above brew install"
+    },
+    "Latest version" : {
+      "comment" : "Package detail row"
+    },
+    "License" : {
+      "comment" : "Package detail row",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licence"
+          }
+        }
+      }
+    },
+    "Loading packages…" : {
+      "comment" : "Discover subtitle while loading"
+    },
+    "Most-installed packages in the last 30 days" : {
+      "comment" : "Discover subhead on the trending landing"
+    },
+    "No casks match" : {
+      "comment" : "Discover empty casks section"
+    },
+    "No dependencies." : {
+      "comment" : "Package detail: empty dependency list"
+    },
+    "No formulae match" : {
+      "comment" : "Discover empty formulae section"
+    },
+    "No matches" : {
+      "comment" : "Discover list heading, zero search results"
+    },
+    "No selection" : {
+      "comment" : "Package detail placeholder title when nothing is selected"
+    },
+    "Nothing found for “%@”" : {
+      "comment" : "Discover subhead, no search results"
+    },
+    "Popular Casks" : {
+      "comment" : "Discover trending casks section header"
+    },
+    "Popular Formulae" : {
+      "comment" : "Discover trending formulae section header"
+    },
+    "Poured from bottle — %@" : {
+      "comment" : "Install date row; %@ is the formatted date"
+    },
+    "Results" : {
+      "comment" : "Discover list heading, search results"
+    },
+    "Scope" : {
+      "comment" : "Discover tab: formula/cask scope picker label"
+    },
+    "Search Homebrew’s Packages" : {
+      "comment" : "Search field placeholder, Discover tab"
+    },
+    "Searching…" : {
+      "comment" : "Discover subtitle while searching"
+    },
+    "Something went wrong loading Discover packages." : {
+      "comment" : "Discover tab generic load failure"
+    },
+    "Something went wrong searching the catalog." : {
+      "comment" : "Discover tab generic search failure",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong searching the catalogue."
+          }
+        }
+      }
+    },
+    "Something went wrong while installing this package." : {
+      "comment" : "Discover detail generic install error"
+    },
+    "Source" : {
+      "comment" : "Package detail row: source tap"
+    },
+    "Trending" : {
+      "comment" : "Discover list heading, trending landing"
+    }
+  },
+  "version" : "1.0"
+}

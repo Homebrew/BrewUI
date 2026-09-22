@@ -5,6 +5,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -51,15 +52,13 @@ final class ConfigViewModel {
 
     /// Maps any repository error to the user-facing copy shown in the AsyncContentView's error state.
     func userMessage(for error: any Error) -> String {
-        if case let BrewCommandError.failed(_, stderr) = error {
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-        }
-        return String(
-            localized: "Couldn't read the Homebrew configuration.",
-            comment: "Configuration tab, generic load failure",
+        BrewErrorCopy.message(
+            for: error,
+            fallback: String(
+                localized: "Couldn't read the Homebrew configuration.",
+                bundle: #bundle,
+                comment: "Configuration tab, generic load failure",
+            ),
         )
     }
 }

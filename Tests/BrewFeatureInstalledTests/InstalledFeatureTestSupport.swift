@@ -12,6 +12,7 @@ enum InstalledFeatureTestSupport {
     static func loadedViewModel(
         formulae: [InstalledBrewPackage] = [],
         casks: [InstalledBrewPackage] = [],
+        preferences: any InstalledPreferences = StubInstalledPreferences(),
     ) async -> InstalledViewModel {
         let cache = InstalledInventoryCache()
         let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: formulae + casks)
@@ -20,7 +21,7 @@ enum InstalledFeatureTestSupport {
             commandRunner: MockBrewCommandRunner(responses: [:]),
             cache: cache,
         )
-        let viewModel = InstalledViewModel(repository: repository)
+        let viewModel = InstalledViewModel(repository: repository, preferences: preferences)
         await viewModel.load()
         return viewModel
     }

@@ -57,7 +57,7 @@ struct InstalledUpgradeBusyPresentationTests {
     }
 
     @Test func `running to failed clears busy`() {
-        let failure = OperationFailure(userFacingMessage: "upgrade failed")
+        let failure = OperationFailure(description: "upgrade failed")
         #expect(
             !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
                 oldPhase: .running(.upgradeFormula),

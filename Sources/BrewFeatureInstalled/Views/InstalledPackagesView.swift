@@ -22,7 +22,7 @@ struct InstalledPackagesView: View {
             packageListBanner()
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages")
+                Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.packageCountSubtitle)
@@ -35,6 +35,7 @@ struct InstalledPackagesView: View {
             .accessibilityHeading(.h1)
 
             scopePicker
+            hideDependenciesToggle
             Divider()
 
             AsyncContentView(
@@ -55,15 +56,26 @@ struct InstalledPackagesView: View {
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
     private var scopePicker: some View {
-        Picker("Scope", selection: $viewModel.scope) {
-            Text("All").tag(InstalledPackageScope.all)
-            Text("Formulae").tag(InstalledPackageScope.formulae)
-            Text("Casks").tag(InstalledPackageScope.casks)
+        Picker(String(localized: "Scope", bundle: #bundle, comment: "Installed tab: formula/cask scope picker label"), selection: $viewModel.scope) {
+            Text("All", bundle: #bundle, comment: "Scope picker: every package kind").tag(InstalledPackageScope.all)
+            Text("Formulae", bundle: #bundle, comment: "Scope picker: formulae only").tag(InstalledPackageScope.formulae)
+            Text("Casks", bundle: #bundle, comment: "Scope picker: casks only").tag(InstalledPackageScope.casks)
         }
         .pickerStyle(.segmented)
         .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
-        .padding(.bottom, BrewSpacing.md)
+        .padding(.bottom, BrewSpacing.sm)
+    }
+
+    private var hideDependenciesToggle: some View {
+        Toggle(String(localized: "Hide dependencies", bundle: #bundle, comment: "Installed tab: hide dependency-only packages"), isOn: $viewModel.hideDependencies)
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+            .font(.brewSubheadline)
+            .foregroundStyle(Color.brewTextSecondary)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.md)
+            .axid(.installedHideDependenciesSwitch)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
@@ -74,7 +86,7 @@ struct InstalledPackagesView: View {
                 }
             }
             .listStyle(.inset)
-            .accessibilityLabel("Installed packages")
+            .accessibilityLabel(String(localized: "Installed packages", bundle: #bundle, comment: "VoiceOver: the installed packages list"))
             .axid(.installedList)
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
@@ -139,7 +151,10 @@ struct InstalledPackagesView: View {
 #if DEBUG
 
     #Preview("Installed list - loaded") {
-        let viewModel = InstalledViewModel(repository: PreviewSupport.makeInstalledPackagesRepository())
+        let viewModel = InstalledViewModel(
+            repository: PreviewSupport.makeInstalledPackagesRepository(),
+            preferences: StubInstalledPreferences(),
+        )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)
         }
@@ -153,6 +168,7 @@ struct InstalledPackagesView: View {
     #Preview("Installed list - empty") {
         let viewModel = InstalledViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
+            preferences: StubInstalledPreferences(),
         )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)

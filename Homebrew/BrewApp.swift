@@ -32,6 +32,7 @@ struct BrewApp: App {
     private let catalogueCache: CatalogueCache
     private let discoverAnalyticsCache: DiscoverAnalyticsCache
     private let installedPackagesRepository: BrewInstalledPackagesRepository
+    private let installedPreferences: UserDefaultsInstalledPreferences
     private let commandJobsRepository: BrewCommandJobsRepository
     private let installedDependentsRepository: BrewInstalledDependentsRepository
     private let catalogueRepository: BrewCatalogueRepository
@@ -72,10 +73,9 @@ struct BrewApp: App {
         discoverAnalyticsCache = discoverAnalytics
         commandCenter = center
         commandFactory = LiveBrewMutatingCommandFactory()
-        installedPackagesRepository = BrewInstalledPackagesRepository(
-            executionContext: executionContext,
-            cache: inventoryCache,
-            commandCenter: center,
+        installedPackagesRepository = BrewInstalledPackagesRepository(executionContext: executionContext, cache: inventoryCache, commandCenter: center)
+        installedPreferences = UserDefaultsInstalledPreferences(
+            defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "installed", fixtures: fixtures),
         )
         commandJobsRepository = BrewCommandJobsRepository(commandCenter: center)
         installedDependentsRepository = BrewInstalledDependentsRepository(cache: inventoryCache)
@@ -113,6 +113,7 @@ struct BrewApp: App {
                 .environment(\.brewCommandCenter, commandCenter)
                 .environment(\.mutatingCommandFactory, commandFactory)
                 .environment(\.installedPackagesRepository, installedPackagesRepository)
+                .environment(\.installedPreferences, installedPreferences)
                 .environment(\.commandJobsRepository, commandJobsRepository)
                 .environment(\.installedDependentsRepository, installedDependentsRepository)
                 .environment(\.catalogueRepository, catalogueRepository)
@@ -157,8 +158,8 @@ struct BrewApp: App {
             // Replace the default "Homebrew Help" item (which points at a
             // non-existent help book) with a link to the online documentation.
             CommandGroup(replacing: .help) {
-                Link("Homebrew Documentation", destination: Self.documentationURL)
-                Link("Report an Issue…", destination: Self.reportIssueURL)
+                Link(String(localized: "Homebrew Documentation", bundle: #bundle, comment: "Help menu"), destination: Self.documentationURL)
+                Link(String(localized: "Report an Issue…", bundle: #bundle, comment: "Help menu: opens the GitHub issue form"), destination: Self.reportIssueURL)
             }
         }
         #if DEBUG

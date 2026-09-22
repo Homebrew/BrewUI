@@ -20,11 +20,13 @@ public struct SelfUpgradeOutcomePresentation {
         case .succeeded:
             String(
                 localized: "The Homebrew app is up to date",
+                bundle: #bundle,
                 comment: "Alert title on the launch after a successful self-upgrade",
             )
         case .failed:
             String(
                 localized: "The Homebrew app wasn’t upgraded",
+                bundle: #bundle,
                 comment: "Alert title on the launch after a self-upgrade that failed",
             )
         }
@@ -35,6 +37,7 @@ public struct SelfUpgradeOutcomePresentation {
         case .succeeded:
             String(
                 localized: "The Homebrew app has been upgraded to the latest version.",
+                bundle: #bundle,
                 comment: "Alert body on the launch after a successful self-upgrade",
             )
         case .failed:
@@ -43,6 +46,7 @@ public struct SelfUpgradeOutcomePresentation {
                 The upgrade didn’t finish, so this is still the previous version. You can try again from \
                 the banner above your packages.
                 """,
+                bundle: #bundle,
                 comment: "Alert body on the launch after a self-upgrade that failed",
             )
         }
@@ -54,12 +58,13 @@ struct SelfUpgradePresentation {
     let status: SelfUpgradeStatus
 
     var eyebrow: String {
-        String(localized: "Upgrade Homebrew app", comment: "Self-upgrade banner eyebrow")
+        String(localized: "Upgrade Homebrew app", bundle: #bundle, comment: "Self-upgrade banner eyebrow")
     }
 
     var bannerTitle: String {
         String(
             localized: "A new version of the Homebrew app is available",
+            bundle: #bundle,
             comment: "Self-upgrade banner title",
         )
     }
@@ -84,11 +89,13 @@ struct SelfUpgradePresentation {
         guard let latest = latestVersionDisplay else {
             return String(
                 localized: "Upgrade the Homebrew app",
+                bundle: #bundle,
                 comment: "Self-upgrade banner button when brew reports no version for the upgrade",
             )
         }
         return String(
             localized: "Upgrade to \(latest)",
+            bundle: #bundle,
             comment: "Self-upgrade banner button, e.g. \"Upgrade to v1.5.0\"",
         )
     }

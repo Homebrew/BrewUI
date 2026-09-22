@@ -121,7 +121,7 @@ struct SerialBrewCommandCenterTests {
             Issue.record("expected failed phase")
             return
         }
-        #expect(!failure.userFacingMessage.isEmpty)
+        #expect(failure == .brewCommand(exitCode: 1, stderr: "boom"))
     }
 
     @Test func `capture mode returns output and does not treat a non-zero exit as failure`() async throws {

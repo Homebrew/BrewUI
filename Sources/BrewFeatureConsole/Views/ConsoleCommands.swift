@@ -15,13 +15,16 @@ public struct ConsoleCommands: Commands {
 
     public var body: some Commands {
         CommandGroup(after: .toolbar) {
-            Button(expanded == true ? "Hide Console" : "Show Console") {
+            Button(expanded == true
+                ? String(localized: "Hide Console", bundle: #bundle, comment: "View menu: collapse the console panel (⌘`)")
+                : String(localized: "Show Console", bundle: #bundle, comment: "View menu: expand the console panel (⌘`)"))
+            {
                 expanded?.toggle()
             }
             .keyboardShortcut("`", modifiers: .command)
             .disabled(expanded == nil)
 
-            Toggle("Expand Console Panel Automatically", isOn: $autoExpandConsole)
+            Toggle(String(localized: "Expand Console Panel Automatically", bundle: #bundle, comment: "View menu: open the console when a command starts"), isOn: $autoExpandConsole)
         }
     }
 }

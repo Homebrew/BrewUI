@@ -203,13 +203,13 @@ struct UpgradesViewModelScopeTests {
 
     @Test @MainActor func `bulkUpgradeSummary describes the scoped selection`() {
         let vm = Self.makeViewModel(packages: Self.mixedOutdated)
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated package")
+        #expect(String(localized: vm.bulkUpgradeSummary) == "Upgrades every outdated package")
 
         vm.scope = .formulae
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated formula")
+        #expect(String(localized: vm.bulkUpgradeSummary) == "Upgrades every outdated formula")
 
         vm.scope = .casks
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated cask")
+        #expect(String(localized: vm.bulkUpgradeSummary) == "Upgrades every outdated cask")
     }
 
     @Test @MainActor func `bulkUpgradeSummary counts the searched packages`() {
@@ -220,13 +220,13 @@ struct UpgradesViewModelScopeTests {
         ])
 
         vm.searchQuery = "git"
-        #expect(vm.bulkUpgradeSummary == "Upgrades the 2 packages matching your search")
+        #expect(String(localized: vm.bulkUpgradeSummary) == "Upgrades the 2 packages matching your search")
 
         vm.searchQuery = "wget"
-        #expect(vm.bulkUpgradeSummary == "Upgrades the 1 package matching your search")
+        #expect(String(localized: vm.bulkUpgradeSummary) == "Upgrades the 1 package matching your search")
 
         vm.searchQuery = "no-such-package"
-        #expect(vm.bulkUpgradeSummary == "Upgrades every outdated package")
+        #expect(String(localized: vm.bulkUpgradeSummary) == "Upgrades every outdated package")
     }
 
     // MARK: - Empty upgrade action

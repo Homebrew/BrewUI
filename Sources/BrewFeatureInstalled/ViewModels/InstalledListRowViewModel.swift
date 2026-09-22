@@ -92,11 +92,11 @@ final class InstalledListRowViewModel {
     /// Full VoiceOver summary, including transient mutation state when present.
     var rowAccessibilityLabel: String {
         if showsUpgradeBusy {
-            let upgrading = String(localized: "Upgrading", comment: "VoiceOver: package upgrading")
+            let upgrading = String(localized: "Upgrading", bundle: #bundle, comment: "VoiceOver: package upgrading")
             return "\(accessibilitySummary), \(upgrading)"
         }
         if showsUninstallBusy {
-            let uninstalling = String(localized: "Uninstalling", comment: "VoiceOver: package uninstalling")
+            let uninstalling = String(localized: "Uninstalling", bundle: #bundle, comment: "VoiceOver: package uninstalling")
             return "\(accessibilitySummary), \(uninstalling)"
         }
         return accessibilitySummary

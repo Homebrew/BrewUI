@@ -21,7 +21,7 @@ struct DoctorIssueRowView: View {
                     .foregroundStyle(Color.brewTextPrimary)
                     .lineLimit(2)
                 if item.hasRunnableFix {
-                    Label("Fix available", systemImage: "wrench.and.screwdriver")
+                    Label(String(localized: "Fix available", bundle: #bundle, comment: "Doctor issue row badge"), systemImage: "wrench.and.screwdriver")
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewTextBrand)
                 }

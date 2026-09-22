@@ -15,6 +15,7 @@ struct InstalledDeprecatedBadge: View {
         Text(
             String(
                 localized: "DEPRECATED",
+                bundle: #bundle,
                 comment: "Installed deprecated status badge label",
             ),
         )
@@ -29,6 +30,7 @@ struct InstalledDeprecatedBadge: View {
         .accessibilityLabel(
             String(
                 localized: "Deprecated",
+                bundle: #bundle,
                 comment: "Installed deprecated status badge accessibility label",
             ),
         )

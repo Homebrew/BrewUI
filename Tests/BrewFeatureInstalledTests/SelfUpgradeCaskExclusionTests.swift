@@ -64,6 +64,7 @@ struct SelfUpgradeCaskExclusionTests {
     @Test func `the Installed list leaves it out`() {
         let viewModel = InstalledViewModel(
             repository: StubInstalledPackagesRepository(packages: Self.packagesIncludingTheApp),
+            preferences: StubInstalledPreferences(),
         )
 
         guard case let .loaded(content) = viewModel.state else {
