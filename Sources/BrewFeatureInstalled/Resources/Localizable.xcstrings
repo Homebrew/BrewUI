@@ -102,6 +102,9 @@
     "Formulae" : {
       "comment" : "Scope picker: formulae only"
     },
+    "Hide dependencies" : {
+      "comment" : "Installed tab: hide dependency-only packages"
+    },
     "Homepage" : {
       "comment" : "Package detail row: homepage link"
     },

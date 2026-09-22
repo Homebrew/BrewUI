@@ -35,6 +35,7 @@ struct InstalledPackagesView: View {
             .accessibilityHeading(.h1)
 
             scopePicker
+            hideDependenciesToggle
             Divider()
 
             AsyncContentView(
@@ -63,7 +64,18 @@ struct InstalledPackagesView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
-        .padding(.bottom, BrewSpacing.md)
+        .padding(.bottom, BrewSpacing.sm)
+    }
+
+    private var hideDependenciesToggle: some View {
+        Toggle(String(localized: "Hide dependencies", bundle: #bundle, comment: "Installed tab: hide dependency-only packages"), isOn: $viewModel.hideDependencies)
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+            .font(.brewSubheadline)
+            .foregroundStyle(Color.brewTextSecondary)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.md)
+            .axid(.installedHideDependenciesSwitch)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
@@ -139,7 +151,10 @@ struct InstalledPackagesView: View {
 #if DEBUG
 
     #Preview("Installed list - loaded") {
-        let viewModel = InstalledViewModel(repository: PreviewSupport.makeInstalledPackagesRepository())
+        let viewModel = InstalledViewModel(
+            repository: PreviewSupport.makeInstalledPackagesRepository(),
+            preferences: StubInstalledPreferences(),
+        )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)
         }
@@ -153,6 +168,7 @@ struct InstalledPackagesView: View {
     #Preview("Installed list - empty") {
         let viewModel = InstalledViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
+            preferences: StubInstalledPreferences(),
         )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)

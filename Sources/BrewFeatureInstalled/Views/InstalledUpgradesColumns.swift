@@ -11,6 +11,7 @@ public struct InstalledUpgradesRoot: View {
     public enum Mode: Sendable { case installed, upgrades }
 
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+    @Environment(\.installedPreferences) private var installedPreferences
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
     @Environment(\.navigateToInstalledPackage) private var navigateToInstalledPackage
@@ -29,6 +30,7 @@ public struct InstalledUpgradesRoot: View {
     public var body: some View {
         InstalledUpgradesContainer(
             installedPackagesRepository: installedPackagesRepository,
+            installedPreferences: installedPreferences,
             brewCommandCenter: brewCommandCenter,
             mutatingCommandFactory: mutatingCommandFactory,
             navigateToInstalledPackage: navigateToInstalledPackage,
@@ -53,6 +55,7 @@ struct InstalledUpgradesContainer: View {
 
     init(
         installedPackagesRepository: any InstalledPackagesRepository,
+        installedPreferences: any InstalledPreferences,
         brewCommandCenter: any BrewCommandCenter,
         mutatingCommandFactory: any BrewMutatingCommandFactory,
         navigateToInstalledPackage: @escaping @MainActor (InstalledBrewPackage.ID) -> Void,
@@ -62,6 +65,7 @@ struct InstalledUpgradesContainer: View {
         _installed = State(
             initialValue: InstalledViewModel(
                 repository: installedPackagesRepository,
+                preferences: installedPreferences,
                 initialSelection: deepLinkSelection.wrappedValue,
             ),
         )

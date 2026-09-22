@@ -12,6 +12,9 @@ public extension EnvironmentValues {
     /// installed-aware features. The default traps — the composition root must inject a live instance.
     @Entry var installedPackagesRepository: any InstalledPackagesRepository = UnimplementedInstalledPackagesRepository()
 
+    /// Persisted Installed-tab preferences, injected by the composition root.
+    @Entry var installedPreferences: any InstalledPreferences = StubInstalledPreferences()
+
     /// Discover top-packages source, injected by the composition root.
     @Entry var discoverPackagesRepository: any DiscoverPackagesRepository = UnimplementedDiscoverPackagesRepository()
 
