@@ -10,6 +10,10 @@ import Foundation
 enum BrewUITestScenario: String, CaseIterable {
     /// Nothing installed, empty catalogue, healthy doctor.
     case empty
+    /// Read-only service inventory, including a failed service without a running process.
+    case servicesBasic
+    case servicesFailure
+    case servicesRefresh
     /// Two formulae and two casks installed; one formula is outdated.
     case installedBasic
     /// Enough formulae that `brew info` overruns a pipe buffer, which only a concurrent drain survives.

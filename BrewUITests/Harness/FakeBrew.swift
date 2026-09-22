@@ -40,6 +40,7 @@ nonisolated enum FakeBrew {
     /// | `<argv>.stderr` | written to stderr |
     /// | `<argv>.exitcode` | exit status; defaults to 0 |
     /// | `<argv>.next-info` | on success, becomes the answer to every later `brew info` |
+    /// | `<argv>.next-stdout` | on success, becomes this command's next answer |
     ///
     /// `<argv>` is the argument vector joined with `_`, e.g. `install_--formula_ripgrep`. `.next-info`
     /// is how a stateless script models "the world changed" for the reconcile that follows a run.
@@ -80,6 +81,11 @@ nonisolated enum FakeBrew {
     if [[ "${status}" -eq 0 && -f "${base}.next-info" ]]; then
         mkdir -p "${state_dir}"
         cp "${base}.next-info" "${state_dir}/\(ScenarioFixtures.installedInfoKey).stdout"
+    fi
+
+    if [[ "${status}" -eq 0 && -f "${base}.next-stdout" ]]; then
+        mkdir -p "${state_dir}"
+        cp "${base}.next-stdout" "${state_dir}/${key}.stdout"
     fi
 
     exit "${status}"

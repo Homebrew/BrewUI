@@ -1,0 +1,93 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "All" : {
+      "comment" : "Services filter: every service"
+    },
+    "Check the error log for details." : {
+      "comment" : "Service details: error status guidance"
+    },
+    "Configuration file" : {
+      "comment" : "Service details: launchd service file path"
+    },
+    "Copied" : {
+      "comment" : "Service files: confirms the path was copied"
+    },
+    "Copy" : {
+      "comment" : "Service files: copy a file path"
+    },
+    "Copy path: %@" : {
+      "comment" : "Service files: copy button; %@ is the configuration or log path label"
+    },
+    "Couldn't read Homebrew services." : {
+      "comment" : "Services: fallback message when reading the service inventory fails"
+    },
+    "Details" : {
+      "comment" : "Service details: section containing ownership and login registration"
+    },
+    "Error log" : {
+      "comment" : "Service details: standard error log path"
+    },
+    "Exit code" : {
+      "comment" : "Service details: last process exit code reported by Homebrew"
+    },
+    "Files" : {
+      "comment" : "Service details: section containing configuration and log paths"
+    },
+    "Loading services…" : {
+      "comment" : "Services: initial loading indicator"
+    },
+    "No" : {
+      "comment" : "Service details: reported boolean is false"
+    },
+    "No error log path reported." : {
+      "comment" : "Service details: Homebrew returned an error without an error log path"
+    },
+    "No services in this view." : {
+      "comment" : "Services: empty inventory or no services matching the status filter"
+    },
+    "Process ID (PID)" : {
+      "comment" : "Service details: process identifier reported by Homebrew"
+    },
+    "Refresh" : {
+      "comment" : "Services: read the current service inventory"
+    },
+    "Running" : {
+      "comment" : "Services filter: running processes"
+    },
+    "Schedulable" : {
+      "comment" : "Service details: whether the service defines a cron schedule or fixed interval"
+    },
+    "Select a service to view details." : {
+      "comment" : "Services: no row selected or selected service hidden by the filter"
+    },
+    "Services" : {
+      "comment" : "Services list heading"
+    },
+    "Shows services for the current user" : {
+      "comment" : "Services command: reads the current user inventory"
+    },
+    "Standard log" : {
+      "comment" : "Service details: standard output log path"
+    },
+    "Starts at login" : {
+      "comment" : "Service details: whether Homebrew registered this service for login"
+    },
+    "Status" : {
+      "comment" : "Services: status filter label"
+    },
+    "Stopped" : {
+      "comment" : "Services filter: services without a running process"
+    },
+    "Unknown" : {
+      "comment" : "Service details: Homebrew did not report this value"
+    },
+    "User" : {
+      "comment" : "Service details: service owner reported by Homebrew"
+    },
+    "Yes" : {
+      "comment" : "Service details: reported boolean is true"
+    }
+  },
+  "version" : "1.0"
+}

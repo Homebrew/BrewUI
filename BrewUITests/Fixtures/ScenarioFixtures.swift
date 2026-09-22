@@ -20,8 +20,8 @@ enum ScenarioFixtures {
 
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
-        case .empty, .brewNotFound:
-            emptyFixtures()
+        case .empty, .brewNotFound, .servicesBasic, .servicesFailure, .servicesRefresh:
+            emptyInstalledFixtures(for: scenario)
         case .installedBasic:
             installedBasicFixtures()
         case .installedLarge:
@@ -295,11 +295,45 @@ enum ScenarioFixtures {
 
     // MARK: - Builders
 
+    private static func emptyInstalledFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
+        switch scenario {
+        case .servicesBasic, .servicesFailure: servicesFixtures(failing: scenario == .servicesFailure)
+        case .servicesRefresh: servicesRefreshFixtures()
+        default: emptyFixtures()
+        }
+    }
+
+    private static func servicesFixtures(failing: Bool) -> FixtureSet {
+        var set = emptyFixtures()
+        let key = "services_info_--all_--json"
+        if failing {
+            set.brewFiles["\(key).stderr"] = text("Unable to read services")
+            set.brewFiles["\(key).exitcode"] = text("1")
+        } else {
+            set.brewFiles["\(key).stdout"] = json([
+                ["name": "redis", "status": "started", "running": true, "pid": 43210, "user": "test", "registered": true, "schedulable": false,
+                 "file": "/fixtures/redis.plist", "log_path": "/fixtures/redis.log", "error_log_path": "/fixtures/redis-error.log"],
+                ["name": "postgresql@17", "status": "none", "running": false, "registered": false, "schedulable": true],
+                ["name": "unbound", "status": "error", "running": false, "exit_code": 78],
+            ])
+        }
+        return set
+    }
+
+    private static func servicesRefreshFixtures() -> FixtureSet {
+        var set = servicesFixtures(failing: false)
+        let key = "services_info_--all_--json"
+        set.brewFiles["\(key).next-stdout"] = set.brewFiles["\(key).stdout"]
+        set.brewFiles["\(key).stdout"] = json([])
+        return set
+    }
+
     /// The read-only commands every scenario must answer.
     private static func baseBrewFiles(installed: [FixturePackage]) -> [String: Data] {
         [
             "\(installedInfoKey).stdout": infoJSON(for: installed),
             "config.stdout": configOutput,
+            "services_info_--all_--json.stdout": json([]),
             "doctor.stdout": text("Your system is ready to brew.\n"),
             "doctor_--json.stdout": json(["tier": 1, "findings": []]),
         ]
