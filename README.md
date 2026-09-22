@@ -45,6 +45,57 @@ The hook also runs BrewUILint over the production tree. If unresolved lint viola
 See [development setup](AGENTS.md#development-setup) for signing configuration, [conventions and testing](AGENTS.md#coding-conventions)
 for contributor guidance and [architecture](ARCHITECTURE.md) for system design.
 
+## 🌍 Translations
+
+Translations are community-sourced and a partial one is welcome: any string without a translation
+falls back to English. Copy lives in one `Localizable.xcstrings` catalog per UI target, `Homebrew/`
+for the window, sidebar and menus, and `Resources/` in `BrewUIComponents` and each `BrewFeature*`
+package. Edit a catalog in Xcode. See [localisation](AGENTS.md#localisation) for the reasoning
+behind the steps below.
+
+### Adding a language
+
+1. Open `Homebrew/Localizable.xcstrings`, press `+`, pick the language and translate at least one
+   string there. macOS only lists a language in the per-app picker under *Applications* in System
+   Settings when the app bundle ships it, so a language that exists only in a package catalog never
+   loads and `scripts/localize verify` fails. Adding it also records the language in `knownRegions`
+   in `Homebrew.xcodeproj`; commit that.
+2. Add the language to each package catalog you want to translate and do as much of it as you like.
+3. Never leave a translation blank. An empty value renders as empty text rather than falling back to
+   English, so delete the entry instead of clearing it. `verify` fails on a blank.
+4. Run `scripts/localize verify`, then `scripts/localize status` to see how far the language has got.
+
+### Translating a string
+
+1. Find the catalog that holds it:
+   `grep -rl "Run Again" Homebrew/Localizable.xcstrings Sources/*/Resources/Localizable.xcstrings`.
+2. Read the comment before translating. It says where the string appears and what each `%@` or
+   `%lld` stands for.
+3. Keep every format specifier the English has, and number them (`%1$@`, `%2$lld`) if your language
+   needs a different order. Nothing checks this for you and a mismatch shows the wrong value at
+   runtime.
+4. English needs only two plural forms, so the code picks between two keys itself (`1 package` and
+   `%lld packages`). A language with more categories varies the `%lld` key by plural
+   (*Vary By Plural* in Xcode) and translates `1 package` as well.
+5. Mark the string as reviewed once you are happy with it. One left in *Needs Review* still ships,
+   so the state is a note to yourself rather than a gate.
+6. Run `scripts/localize verify`.
+
+### Changing English copy
+
+The key is the English text, so rewording a string makes a new entry rather than editing one.
+
+1. Change the literal in the Swift source, keeping `bundle: #bundle` and updating the `comment:` if
+   the meaning moved.
+2. Run `scripts/localize sync`, which an Xcode build does for you. It adds the new key and marks the
+   old one `"extractionState" : "stale"`, keeping its translations.
+3. Carry each translation over to the new key where the wording still means the same thing. Where it
+   does not, leave it behind so the string falls back to English until someone translates it again.
+4. Delete the stale entry once its translations have been carried over or discarded. Nothing fails
+   while one lingers, but a catalog full of them buries the entries still worth rescuing.
+5. Commit the `.xcstrings` changes with the code. CI compares the catalogs against the built sources
+   and fails if they have drifted.
+
 ## 🚧 Status
 
 Stable and under active development.

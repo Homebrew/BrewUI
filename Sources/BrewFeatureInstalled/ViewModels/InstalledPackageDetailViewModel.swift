@@ -5,6 +5,7 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -208,9 +209,12 @@ final class InstalledPackageDetailViewModel {
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {
-                    setErrorMessage(failure.userFacingMessage, for: action)
+                    setErrorMessage(BrewErrorCopy.message(for: failure), for: action)
                 } else {
-                    setErrorMessage(Self.userMessage(for: error, fallback: action.genericFailureMessage), for: action)
+                    setErrorMessage(
+                        BrewErrorCopy.message(for: error, fallback: action.genericFailureMessage),
+                        for: action,
+                    )
                 }
             }
         }
@@ -229,26 +233,6 @@ final class InstalledPackageDetailViewModel {
             uninstallErrorMessage = message
         }
     }
-
-    private static func userMessage(for error: Error, fallback: String) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Installed detail error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(localized: "Homebrew command failed.", comment: "Installed detail generic brew failure")
-        case let BrewCommandError.launchFailed(underlying):
-            return underlying
-        default:
-            return fallback
-        }
-    }
 }
 
 private enum PackageMutationAction {
@@ -260,11 +244,13 @@ private enum PackageMutationAction {
         case .upgrade:
             String(
                 localized: "Something went wrong while upgrading this package.",
+                bundle: #bundle,
                 comment: "Installed detail generic upgrade error",
             )
         case .uninstall:
             String(
                 localized: "Something went wrong while uninstalling this package.",
+                bundle: #bundle,
                 comment: "Installed detail generic uninstall error",
             )
         }

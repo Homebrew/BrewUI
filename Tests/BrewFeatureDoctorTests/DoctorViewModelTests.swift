@@ -404,34 +404,34 @@ struct DoctorViewModelTests {
 
     @Test func `subtitle while loading describes the running check`() {
         let viewModel = Self.viewModel(repository: LoadingDoctorRepository())
-        #expect(viewModel.subtitle == "Running brew doctor…")
+        #expect(String(localized: viewModel.subtitle) == "Running brew doctor…")
     }
 
     @Test func `subtitle on healthy reflects refresh state`() {
         let repository = MutableDoctorRepository(report: DoctorReport(issues: []))
         let viewModel = Self.viewModel(repository: repository)
 
-        #expect(viewModel.subtitle == "No problems found")
+        #expect(String(localized: viewModel.subtitle) == "No problems found")
 
         repository.setRefreshing(true)
-        #expect(viewModel.subtitle == "Re-checking…")
+        #expect(String(localized: viewModel.subtitle) == "Re-checking…")
     }
 
     @Test func `subtitle on issues shows "Warnings found" when not refreshing`() {
         let repository = MutableDoctorRepository(report: Self.issuesReport())
         let viewModel = Self.viewModel(repository: repository)
 
-        #expect(viewModel.subtitle == "Warnings found")
+        #expect(String(localized: viewModel.subtitle) == "Warnings found")
 
         repository.setRefreshing(true)
-        #expect(viewModel.subtitle == "Re-checking…")
+        #expect(String(localized: viewModel.subtitle) == "Re-checking…")
     }
 
     @Test func `subtitle on failure shows a generic could-not-complete message`() {
         let viewModel = Self.viewModel(
             repository: StubDoctorRepository(error: BrewLookupError.executableNotFound),
         )
-        #expect(viewModel.subtitle == "The check could not be completed")
+        #expect(String(localized: viewModel.subtitle) == "The check could not be completed")
     }
 
     // MARK: - shouldFocusList

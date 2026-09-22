@@ -10,10 +10,10 @@ import SwiftUI
 /// An action that leaves no visible trace (copying to the pasteboard, clearing a list) passes a
 /// `confirmationTitle`: the button swaps to a tick and that title for a few seconds.
 public struct BrewActionButton: View {
-    private let title: String
+    private let title: LocalizedStringResource
     private let systemImage: String
-    private let confirmationTitle: String?
-    private let help: String?
+    private let confirmationTitle: LocalizedStringResource?
+    private let help: LocalizedStringResource?
     private let action: () -> Void
 
     @State private var isHovered = false
@@ -23,10 +23,10 @@ public struct BrewActionButton: View {
     private static let confirmationDuration: Duration = .seconds(5)
 
     public init(
-        _ title: String,
+        _ title: LocalizedStringResource,
         systemImage: String,
-        confirmationTitle: String? = nil,
-        help: String? = nil,
+        confirmationTitle: LocalizedStringResource? = nil,
+        help: LocalizedStringResource? = nil,
         action: @escaping () -> Void,
     ) {
         self.title = title
@@ -54,7 +54,7 @@ public struct BrewActionButton: View {
         .onHover { isHovered = $0 }
         .help(help ?? title)
         // The label changes while confirming; what a screen reader or a UI test matches on must not.
-        .accessibilityLabel(title)
+        .accessibilityLabel(Text(title))
     }
 
     private func confirm() {
@@ -74,10 +74,15 @@ public struct BrewActionButton: View {
 
 /// What a ``BrewActionButton`` shows right now.
 struct BrewActionButtonAppearance: Equatable {
-    let title: String
+    let title: LocalizedStringResource
     let systemImage: String
 
-    init(title: String, systemImage: String, confirmationTitle: String?, isConfirming: Bool) {
+    init(
+        title: LocalizedStringResource,
+        systemImage: String,
+        confirmationTitle: LocalizedStringResource?,
+        isConfirming: Bool,
+    ) {
         if isConfirming, let confirmationTitle {
             self.title = confirmationTitle
             self.systemImage = "checkmark"
@@ -118,18 +123,22 @@ private struct BrewActionButtonStyle: ButtonStyle {
 #if DEBUG
     #Preview {
         HStack(spacing: BrewSpacing.xs) {
-            BrewActionButton("Save", systemImage: "square.and.arrow.down", help: "Save output to file") {}
             BrewActionButton(
-                "Copy",
-                systemImage: "doc.on.doc",
-                confirmationTitle: "Copied",
-                help: "Copy output to clipboard",
+                previewCopy("Save"),
+                systemImage: "square.and.arrow.down",
+                help: previewCopy("Save output to file"),
             ) {}
             BrewActionButton(
-                "Clear",
+                previewCopy("Copy"),
+                systemImage: "doc.on.doc",
+                confirmationTitle: previewCopy("Copied"),
+                help: previewCopy("Copy output to clipboard"),
+            ) {}
+            BrewActionButton(
+                previewCopy("Clear"),
                 systemImage: "trash",
-                confirmationTitle: "Cleared",
-                help: "Clear completed jobs",
+                confirmationTitle: previewCopy("Cleared"),
+                help: previewCopy("Clear completed jobs"),
             ) {}
         }
         .padding()

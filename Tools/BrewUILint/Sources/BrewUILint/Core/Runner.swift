@@ -13,6 +13,7 @@ enum Runner {
         var parsedFiles: [(path: String, tree: SourceFileSyntax)] = []
         parsedFiles.reserveCapacity(files.count)
         var nonisolatedTypeNames: Set<String> = []
+        var copyParameters: [String: Set<String>] = [:]
 
         for path in files {
             let source = try String(contentsOfFile: path, encoding: .utf8)
@@ -22,6 +23,10 @@ enum Runner {
             let collector = NonisolatedTypeCollector(viewMode: .sourceAccurate)
             collector.walk(tree)
             nonisolatedTypeNames.formUnion(collector.nonisolatedTypeNames)
+
+            let copyCollector = CopyParameterCollector(viewMode: .sourceAccurate)
+            copyCollector.walk(tree)
+            copyParameters.merge(copyCollector.copyParameters) { $0.union($1) }
         }
 
         for (path, tree) in parsedFiles {
@@ -29,6 +34,7 @@ enum Runner {
                 file: path,
                 tree: tree,
                 nonisolatedTypeNames: nonisolatedTypeNames,
+                copyParameters: copyParameters,
             )
 
             for ruleType in RuleRegistry.allRules {

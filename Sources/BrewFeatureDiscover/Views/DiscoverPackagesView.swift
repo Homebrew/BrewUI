@@ -40,7 +40,7 @@ struct DiscoverPackagesView: View {
             text: $viewModel.query,
             isPresented: searchFieldPresented,
             placement: .toolbar,
-            prompt: "Search Homebrew's Packages",
+            prompt: String(localized: "Search Homebrew’s Packages", bundle: #bundle, comment: "Search field placeholder, Discover tab"),
         )
         .searchFocused($focus, equals: .searchField)
         .focusedSceneValue(\.focusSearchField, focusSearchField)
@@ -149,10 +149,10 @@ struct DiscoverPackagesView: View {
 
     /// Persistent kind filter, always visible (trending and results). Filters client-side; never refetches.
     private var scopePicker: some View {
-        Picker("Scope", selection: $viewModel.scope) {
-            Text("All").tag(DiscoverSearchScope.all)
-            Text("Formulae").tag(DiscoverSearchScope.formulae)
-            Text("Casks").tag(DiscoverSearchScope.casks)
+        Picker(String(localized: "Scope", bundle: #bundle, comment: "Discover tab: formula/cask scope picker label"), selection: $viewModel.scope) {
+            Text("All", bundle: #bundle, comment: "Scope picker: every package kind").tag(DiscoverSearchScope.all)
+            Text("Formulae", bundle: #bundle, comment: "Scope picker: formulae only").tag(DiscoverSearchScope.formulae)
+            Text("Casks", bundle: #bundle, comment: "Scope picker: casks only").tag(DiscoverSearchScope.casks)
         }
         .pickerStyle(.segmented)
         .labelsHidden()
@@ -192,7 +192,7 @@ private struct DiscoverPackageSections: View {
                 }
             }
             .listStyle(.inset)
-            .accessibilityLabel("Discover packages")
+            .accessibilityLabel(String(localized: "Discover packages", bundle: #bundle, comment: "VoiceOver: the Discover results list"))
             .axid(.discoverList)
             .onAppear {
                 scrollToSelection(viewModel.selectedPackageID, with: proxy)
@@ -265,9 +265,9 @@ private struct DiscoverPackageSections: View {
     private func emptyStateMessage(for kind: HomebrewPackageKind) -> String {
         switch kind {
         case .formula:
-            String(localized: "No formulae match", comment: "Discover empty formulae section")
+            String(localized: "No formulae match", bundle: #bundle, comment: "Discover empty formulae section")
         case .cask:
-            String(localized: "No casks match", comment: "Discover empty casks section")
+            String(localized: "No casks match", bundle: #bundle, comment: "Discover empty casks section")
         }
     }
 

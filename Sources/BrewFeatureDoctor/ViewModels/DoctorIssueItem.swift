@@ -60,9 +60,16 @@ struct DoctorIssueItem: Identifiable, Equatable {
         primaryRunnableStep?.displayCommand
     }
 
-    /// Label for voiceover mode — combines title with Fix available
+    /// `title` is `brew doctor`'s own wording, so only the annotation is localised.
     var accessibilityLabel: String {
-        hasRunnableFix ? "\(title), Fix available" : title
+        guard hasRunnableFix else {
+            return title
+        }
+        return String(
+            localized: "\(title), Fix available",
+            bundle: #bundle,
+            comment: "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
+        )
     }
 }
 

@@ -40,7 +40,7 @@ struct InstalledUninstallBusyPresentationTests {
     }
 
     @Test func `running uninstall to failed clears busy`() {
-        let failure = OperationFailure(userFacingMessage: "uninstall failed")
+        let failure = OperationFailure(description: "uninstall failed")
         #expect(
             !InstalledUninstallBusyPresentation.showsUninstallBusy(
                 oldPhase: .running(.uninstallFormula),

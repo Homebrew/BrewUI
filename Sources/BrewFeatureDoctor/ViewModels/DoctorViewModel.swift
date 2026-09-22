@@ -6,6 +6,7 @@
 import AppKit
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
@@ -55,7 +56,7 @@ final class DoctorViewModel {
         case let .loaded(report):
             .loaded(report)
         case let .failed(error):
-            .failed(OperationFailure(catching: error).userFacingMessage)
+            .failed(BrewErrorCopy.message(for: OperationFailure(catching: error)))
         }
     }
 
@@ -102,16 +103,17 @@ final class DoctorViewModel {
 
     /// Header subtitle copy. Mirrors ``presentation``; while a re-check runs on top of a prior report it
     /// switches to "Re-checking…" so the user knows the visible content is being refreshed.
-    var subtitle: String {
+    var subtitle: LocalizedStringResource {
+        let rechecking = LocalizedStringResource("Re-checking…", bundle: #bundle, comment: "Doctor subtitle while a re-check runs")
         switch presentation {
         case .loading:
-            "Running brew doctor…"
+            return LocalizedStringResource("Running brew doctor…", bundle: #bundle, comment: "Doctor subtitle during the first check")
         case .healthy:
-            isRefreshing ? "Re-checking…" : "No problems found"
+            return isRefreshing ? rechecking : LocalizedStringResource("No problems found", bundle: #bundle, comment: "Doctor subtitle, healthy")
         case .issues:
-            isRefreshing ? "Re-checking…" : "Warnings found"
+            return isRefreshing ? rechecking : LocalizedStringResource("Warnings found", bundle: #bundle, comment: "Doctor subtitle, issues listed")
         case .failed:
-            "The check could not be completed"
+            return LocalizedStringResource("The check could not be completed", bundle: #bundle, comment: "Doctor subtitle when brew doctor failed to run")
         }
     }
 
@@ -245,9 +247,9 @@ final class DoctorViewModel {
                 }
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 let message: String = if case let .failed(reason) = latestPhase {
-                    reason.userFacingMessage
+                    BrewErrorCopy.message(for: reason)
                 } else {
-                    OperationFailure(catching: error).userFacingMessage
+                    BrewErrorCopy.message(for: OperationFailure(catching: error))
                 }
                 fixErrorMessages[token] = message
                 runningFixTokens.remove(token)
