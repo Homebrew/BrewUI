@@ -142,7 +142,7 @@ struct MainWindowView: View {
         selectedSidebarItem.title
     }
 
-    private var currentNavigationSubtitle: String {
+    private var currentNavigationSubtitle: LocalizedStringKey {
         switch selectedSidebarItem {
         case .installed:
             "Browse or search your installed packages"
