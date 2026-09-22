@@ -27,4 +27,15 @@ final class NavigationUITests: BrewUITestCase {
             .goToInstalled()
             .assertHasPackage("wget")
     }
+
+    @MainActor
+    func testTogglingSidebarPreservesContent() {
+        let installed = launch(.installedBasic)
+
+        installed.app.typeKey("s", modifierFlags: [.control, .command])
+        installed.assertHasPackage("wget")
+
+        installed.app.typeKey("s", modifierFlags: [.control, .command])
+        installed.sidebar.goToDoctor()
+    }
 }

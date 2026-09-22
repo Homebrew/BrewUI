@@ -20,12 +20,13 @@ struct MainWindowView: View {
     @Environment(\.doctorRepository) private var doctorRepository
 
     @State var selectedSidebarItem: SidebarItem = .installed
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             sidebarColumn
         } detail: {
             AnimatedSplit(
@@ -41,6 +42,8 @@ struct MainWindowView: View {
             } bottom: {
                 ConsolePanelRoot(expanded: $consoleExpanded)
             }
+            .navigationTitle(currentNavigationTitle)
+            .navigationSubtitle(currentNavigationSubtitle)
             .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         }
         .navigationSplitViewStyle(.automatic)
@@ -126,24 +129,31 @@ struct MainWindowView: View {
                 mode: selectedSidebarItem == .upgrades ? .upgrades : .installed,
                 deepLinkSelection: $pendingInstalledSelection,
             )
-            .navigationTitle(selectedSidebarItem == .upgrades ? "Upgrades" : "Installed")
-            .navigationSubtitle(
-                selectedSidebarItem == .upgrades
-                    ? "Review and upgrade outdated packages"
-                    : "Browse or search your installed packages",
-            )
         case .discover:
             DiscoverColumnsRoot()
-                .navigationTitle("Discover")
-                .navigationSubtitle("Browse and search \(Self.approximateCatalogueSize) packages")
         case .doctor:
             DoctorColumnsRoot()
-                .navigationTitle("Doctor")
-                .navigationSubtitle("Check your Homebrew installation for problems")
         case .configuration:
             ConfigColumnsRoot()
-                .navigationTitle("Configuration")
-                .navigationSubtitle("Homebrew environment & diagnostics")
+        }
+    }
+
+    private var currentNavigationTitle: LocalizedStringKey {
+        selectedSidebarItem.title
+    }
+
+    private var currentNavigationSubtitle: String {
+        switch selectedSidebarItem {
+        case .installed:
+            "Browse or search your installed packages"
+        case .upgrades:
+            "Review and upgrade outdated packages"
+        case .discover:
+            "Browse and search \(Self.approximateCatalogueSize) packages"
+        case .doctor:
+            "Check your Homebrew installation for problems"
+        case .configuration:
+            "Homebrew environment & diagnostics"
         }
     }
 }
