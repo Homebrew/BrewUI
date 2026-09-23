@@ -20,7 +20,9 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let blocks: [DoctorBlock]
     let rawText: String
 
-    init(issue: DoctorIssue, bundle: Bundle = #bundle) {
+    init(issue: DoctorIssue, bundle: Bundle? = nil) {
+        // Resolve here: a default-argument macro can expand in the caller's resource-free module.
+        let bundle = bundle ?? #bundle
         id = Self.contentID(for: issue)
         title = DoctorText.localized(issue.title, bundle: bundle)
         severity = issue.severity
