@@ -18,13 +18,13 @@ public struct UpgradesSidebarBadge: View {
     public var body: some View {
         let count = repository.outdatedCount
         if count > 0 {
-            Text("\(count)")
+            Text(count, format: .number)
                 .font(.brewCaption2.weight(.semibold))
                 .foregroundStyle(Color.brewTextOnWarning)
                 .padding(.horizontal, BrewSpacing.xs)
                 .padding(.vertical, BrewSpacing.xxs)
                 .background(Capsule().fill(Color.brewStatusWarningBold))
-                .accessibilityLabel("\(count) upgrades available")
+                .accessibilityLabel(String(localized: "\(count) upgrades available", bundle: #bundle, comment: "VoiceOver: sidebar badge; %lld is the outdated count"))
         }
     }
 }

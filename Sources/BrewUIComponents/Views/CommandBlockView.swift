@@ -11,11 +11,16 @@ import SwiftUI
 /// renders a numbered list with one "Copy all" affordance instead of N loose buttons.
 public struct CommandBlockView: View {
     let commands: [String]
-    let summaryText: String?
-    let title: String?
+    let summaryText: LocalizedStringResource?
+    let title: LocalizedStringResource?
     let collapsible: Bool
 
-    public init(command: String, summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
+    public init(
+        command: String,
+        summaryText: LocalizedStringResource? = nil,
+        title: LocalizedStringResource? = nil,
+        collapsible: Bool = false,
+    ) {
         commands = [command]
         self.summaryText = summaryText
         self.title = title
@@ -23,7 +28,12 @@ public struct CommandBlockView: View {
         _isExpanded = State(initialValue: !collapsible)
     }
 
-    public init(commands: [String], summaryText: String? = nil, title: String? = nil, collapsible: Bool = false) {
+    public init(
+        commands: [String],
+        summaryText: LocalizedStringResource? = nil,
+        title: LocalizedStringResource? = nil,
+        collapsible: Bool = false,
+    ) {
         self.commands = commands
         self.summaryText = summaryText
         self.title = title
@@ -58,18 +68,22 @@ public struct CommandBlockView: View {
                         isExpanded.toggle()
                     }
                 } label: {
-                    Label(LocalizedStringKey(title ?? headerTitle), systemImage: isExpanded ? "chevron.down" : "chevron.right")
+                    Label(title ?? headerTitle, systemImage: isExpanded ? "chevron.down" : "chevron.right")
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewTextSecondary)
                 }
                 .buttonStyle(.plain)
             } else {
-                Label(LocalizedStringKey(title ?? headerTitle), systemImage: "terminal")
+                Label(title ?? headerTitle, systemImage: "terminal")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextSecondary)
             }
             Spacer()
-            BrewActionButton(copyTitle, systemImage: "doc.on.doc", confirmationTitle: "Copied") {
+            BrewActionButton(
+                copyTitle,
+                systemImage: "doc.on.doc",
+                confirmationTitle: LocalizedStringResource("Copied", bundle: #bundle, comment: "Command block: shown briefly after copying"),
+            ) {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(commands.joined(separator: "\n"), forType: .string)
             }
@@ -79,12 +93,16 @@ public struct CommandBlockView: View {
         .background(Color.brewSurfaceRecessed)
     }
 
-    private var headerTitle: String {
-        commands.count > 1 ? "Terminal commands" : "Terminal command"
+    private var headerTitle: LocalizedStringResource {
+        commands.count > 1
+            ? LocalizedStringResource("Terminal commands", bundle: #bundle, comment: "Command block header, several commands")
+            : LocalizedStringResource("Terminal command", bundle: #bundle, comment: "Command block header, one command")
     }
 
-    private var copyTitle: String {
-        commands.count > 1 ? "Copy all" : "Copy"
+    private var copyTitle: LocalizedStringResource {
+        commands.count > 1
+            ? LocalizedStringResource("Copy all", bundle: #bundle, comment: "Command block: copy every command")
+            : LocalizedStringResource("Copy", bundle: #bundle, comment: "Command block: copy the command")
     }
 
     /// Deliberately not on ``Color/brewTerminal``: light-on-dark text under the system selection
@@ -103,7 +121,7 @@ public struct CommandBlockView: View {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 ForEach(Array(commands.enumerated()), id: \.offset) { index, command in
                     HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
-                        Text("\(index + 1).")
+                        Text(verbatim: "\(index + 1).")
                             .font(.brewCode)
                             .foregroundStyle(Color.brewTextSecondary)
                         Text(command)
@@ -119,7 +137,7 @@ public struct CommandBlockView: View {
         }
     }
 
-    private func footer(_ text: String) -> some View {
+    private func footer(_ text: LocalizedStringResource) -> some View {
         Text(text)
             .font(.brewCaption)
             .foregroundStyle(Color.brewTextSecondary)
@@ -135,7 +153,7 @@ public struct CommandBlockView: View {
     #Preview("Single") {
         CommandBlockView(
             command: "brew upgrade --formula git",
-            summaryText: "Upgrades this package to the latest available version",
+            summaryText: previewCopy("Upgrades this package to the latest available version"),
         )
         .frame(width: 360)
         .padding()
@@ -147,7 +165,7 @@ public struct CommandBlockView: View {
                 "rm -rf /usr/local/Library",
                 "brew tap homebrew/core",
             ],
-            summaryText: "Re-establishes the Homebrew/core tap",
+            summaryText: previewCopy("Re-establishes the Homebrew/core tap"),
         )
         .frame(width: 360)
         .padding()

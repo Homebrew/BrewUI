@@ -29,8 +29,8 @@ struct ConsoleToolbar: View {
                     .frame(width: 18, height: 18)
             }
             .buttonStyle(.borderless)
-            .help("Hide console")
-            .accessibilityLabel("Hide console")
+            .help(hideLabel)
+            .accessibilityLabel(Text(hideLabel))
             .axid(.consoleToggle)
         }
         .padding(.horizontal, BrewSpacing.md)
@@ -38,12 +38,16 @@ struct ConsoleToolbar: View {
         .background(Color.brewSurface)
     }
 
+    private var hideLabel: LocalizedStringResource {
+        LocalizedStringResource("Hide console", bundle: #bundle, comment: "Console toolbar: collapse button")
+    }
+
     @ViewBuilder
     private var jobPills: some View {
         let selectedID = viewModel.selectedJob?.id
         let orderedJobs = viewModel.orderedJobs
         if orderedJobs.isEmpty {
-            Text("No activity")
+            Text("No activity", bundle: #bundle, comment: "Console toolbar title when nothing has run")
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(Color.brewTextSecondary)
                 .padding(.leading, BrewSpacing.xs)
@@ -67,23 +71,27 @@ struct ConsoleToolbar: View {
     private var actionButtons: some View {
         if let job = viewModel.selectedJob {
             // Saving ends in a save panel, which is its own confirmation.
-            BrewActionButton("Save", systemImage: "square.and.arrow.down", help: "Save output to file") {
+            BrewActionButton(
+                LocalizedStringResource("Save", bundle: #bundle, comment: "Console toolbar: save output to a file"),
+                systemImage: "square.and.arrow.down",
+                help: LocalizedStringResource("Save output to file", bundle: #bundle, comment: "Tooltip: console save button"),
+            ) {
                 ConsoleOutputExport.save(job)
             }
             BrewActionButton(
-                "Copy",
+                LocalizedStringResource("Copy", bundle: #bundle, comment: "Console toolbar: copy output"),
                 systemImage: "doc.on.doc",
-                confirmationTitle: "Copied",
-                help: "Copy output to clipboard",
+                confirmationTitle: LocalizedStringResource("Copied", bundle: #bundle, comment: "Console toolbar: shown briefly after copying"),
+                help: LocalizedStringResource("Copy output to clipboard", bundle: #bundle, comment: "Tooltip: console copy button"),
             ) {
                 ConsoleOutputExport.copy(job)
             }
         }
         BrewActionButton(
-            "Clear",
+            LocalizedStringResource("Clear", bundle: #bundle, comment: "Console toolbar: remove finished jobs"),
             systemImage: "trash",
-            confirmationTitle: "Cleared",
-            help: "Clear completed jobs",
+            confirmationTitle: LocalizedStringResource("Cleared", bundle: #bundle, comment: "Console toolbar: shown briefly after clearing"),
+            help: LocalizedStringResource("Clear completed jobs", bundle: #bundle, comment: "Tooltip: console clear button"),
         ) {
             viewModel.clearCompleted()
         }
@@ -123,7 +131,7 @@ private struct JobPill: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help("Dismiss")
+                .help(String(localized: "Dismiss", bundle: #bundle, comment: "Tooltip: close a finished job tab"))
             }
         }
         .padding(.horizontal, BrewSpacing.sm)

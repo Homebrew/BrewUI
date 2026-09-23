@@ -1,0 +1,271 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Clear": {
+      "comment": "Console toolbar: remove finished jobs",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除"
+          }
+        }
+      }
+    },
+    "Clear completed jobs": {
+      "comment": "Tooltip: console clear button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除已完成的任务"
+          }
+        }
+      }
+    },
+    "Cleared": {
+      "comment": "Console toolbar: shown briefly after clearing",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已清除"
+          }
+        }
+      }
+    },
+    "Copied": {
+      "comment": "Console toolbar: shown briefly after copying",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已复制"
+          }
+        }
+      }
+    },
+    "Copy": {
+      "comment": "Console toolbar: copy output",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制"
+          }
+        }
+      }
+    },
+    "Copy output to clipboard": {
+      "comment": "Tooltip: console copy button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将输出复制到剪贴板"
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "comment": "Tooltip: close a finished job tab",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "Expand Console Panel Automatically": {
+      "comment": "View menu: open the console when a command starts",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动展开控制台"
+          }
+        }
+      }
+    },
+    "Hide Console": {
+      "comment": "View menu: collapse the console panel (⌘`)",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏控制台"
+          }
+        }
+      }
+    },
+    "Hide console": {
+      "comment": "Console status bar: collapse button\nConsole toolbar: collapse button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏控制台"
+          }
+        }
+      }
+    },
+    "No activity": {
+      "comment": "Console empty state title\nConsole toolbar title when nothing has run",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂无活动"
+          }
+        }
+      }
+    },
+    "Ready": {
+      "comment": "Console status bar when nothing has run",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "就绪"
+          }
+        }
+      }
+    },
+    "Run a brew command to see output here.": {
+      "comment": "Console empty state body",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 brew 命令后，可在此查看输出。"
+          }
+        }
+      }
+    },
+    "Save": {
+      "comment": "Console toolbar: save output to a file",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存"
+          }
+        }
+      }
+    },
+    "Save output to file": {
+      "comment": "Tooltip: console save button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将输出保存到文件"
+          }
+        }
+      }
+    },
+    "Show Console": {
+      "comment": "View menu: expand the console panel (⌘`)",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示控制台"
+          }
+        }
+      }
+    },
+    "Show console": {
+      "comment": "Console status bar: expand button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示控制台"
+          }
+        }
+      }
+    },
+    "done": {
+      "comment": "Console status bar: operation finished",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已完成"
+          }
+        }
+      }
+    },
+    "failed": {
+      "comment": "Console status bar: operation failed",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "失败"
+          }
+        }
+      }
+    },
+    "running": {
+      "comment": "Console status bar: operation in progress",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在运行"
+          }
+        }
+      }
+    },
+    "— %@": {
+      "comment": "Console status bar suffix while a command runs; %@ is the phase label",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— %@"
+          }
+        }
+      }
+    },
+    "— done": {
+      "comment": "Console status bar suffix after a command succeeded",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— 已完成"
+          }
+        }
+      }
+    },
+    "— failed · exit %d": {
+      "comment": "Console status bar suffix after a command failed; %d is the exit code",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "— 失败 · 退出码 %d"
+          }
+        }
+      }
+    },
+    "brew doctor": {
+      "extractionState": "manual",
+      "comment": "Console diagnostic task label only; executable commands remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brew 诊断"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

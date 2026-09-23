@@ -11,8 +11,8 @@ import System
 /// A pty pair: the primary (POSIX: master) stays here, the replica (POSIX: slave) becomes the child's
 /// stdout/stderr and is a real terminal device, so `isatty` holds in the child.
 ///
-/// The replica must be closed in this process once the child is spawned. While any replica descriptor
-/// stays open here the kernel sees a potential writer, so reads on the primary never report EOF.
+/// Keep the local replica open until output is drained: Darwin discards queued bytes when the last
+/// replica closes. The runner uses child exit and a quiet poll interval to finish without waiting for EOF.
 ///
 /// The descriptors never change after `init`, so ``read(timeout:)`` touches `primaryFD` unlocked; the
 /// lock guards only the closed flags, and `read` could not hold it anyway while parked on `poll`. What
@@ -60,7 +60,7 @@ final class PseudoTerminal: @unchecked Sendable {
         return FileDescriptor(rawValue: replicaFD)
     }
 
-    /// Call immediately after the child is spawned; see the ownership note on the type. Idempotent.
+    /// Call after draining output; see the ownership note on the type. Idempotent.
     func closeReplica() {
         lock.lock()
         defer { lock.unlock() }

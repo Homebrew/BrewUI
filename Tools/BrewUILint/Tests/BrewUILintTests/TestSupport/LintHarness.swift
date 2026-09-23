@@ -31,4 +31,26 @@ enum LintHarness {
         visitor.walk(tree)
         return context.violations
     }
+
+    /// Does the same copy-parameter pre-pass `Runner` does, so one source string can declare a
+    /// component and call it.
+    static func lintLocalizedCopyRule(_ source: String, file: String = "Sources/BrewFeatureDoctor/Views/Test.swift") -> [Violation] {
+        let tree = Parser.parse(source: source)
+        let collector = CopyParameterCollector(viewMode: .sourceAccurate)
+        collector.walk(tree)
+        let context = RuleContext(file: file, tree: tree, copyParameters: collector.copyParameters)
+        LocalizedCopyRule().makeVisitor(context: context).walk(tree)
+        return context.violations
+    }
+
+    static func lintLocalizationLayerRule(_ source: String, file: String) -> [Violation] {
+        lint(LocalizationLayerRule(), source: source, file: file)
+    }
+
+    private static func lint(_ rule: some Rule, source: String, file: String) -> [Violation] {
+        let tree = Parser.parse(source: source)
+        let context = RuleContext(file: file, tree: tree)
+        rule.makeVisitor(context: context).walk(tree)
+        return context.violations
+    }
 }

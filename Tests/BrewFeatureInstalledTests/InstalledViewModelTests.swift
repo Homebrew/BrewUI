@@ -139,8 +139,18 @@ struct InstalledViewModelTests {
         #expect(vm.selectedPackage?.id == selectedID)
     }
 
-    @Test @MainActor func `refresh repoints selection when selected package disappears`() async {
+    @Test @MainActor func `removed selection moves to the preceding package`() async {
         let firstJSON = """
+        {
+          "formulae": [
+            { "name": "git", "installed": [{ "version": "1.0.0" }] },
+            { "name": "jq", "installed": [{ "version": "1.0.0" }] },
+            { "name": "wget", "installed": [{ "version": "1.0.0" }] }
+          ],
+          "casks": []
+        }
+        """
+        let secondJSON = """
         {
           "formulae": [
             { "name": "git", "installed": [{ "version": "1.0.0" }] },
@@ -149,19 +159,19 @@ struct InstalledViewModelTests {
           "casks": []
         }
         """
-        let secondJSON = """
-        { "formulae": [{ "name": "wget", "installed": [{ "version": "1.0.0" }] }], "casks": [] }
-        """
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: QueuedBrewInfoRunner(infoJSON: [firstJSON, secondJSON]),
         )
         let vm = makeInstalledViewModel(repository: repo)
         await vm.load()
-        vm.setSelection(.formula(name: "git"))
+        let previousIDs = vm.state.value?.orderedPackageIDs ?? []
+        vm.setSelection(.formula(name: "jq"))
 
         await vm.refresh()
+        let currentIDs = vm.state.value?.orderedPackageIDs ?? []
+        vm.reconcileSelection(afterChangingFrom: previousIDs, to: currentIDs)
 
-        #expect(vm.selectedPackage?.id == .formula(name: "wget"))
+        #expect(vm.selectedPackage?.id == .formula(name: "git"))
     }
 
     @Test @MainActor func `init with initialSelection picks that package when inventory contains it`() {
@@ -169,7 +179,7 @@ struct InstalledViewModelTests {
         let wget = InstalledBrewPackage.fixture(name: "wget", kind: .formula)
         let repo = StubInstalledPackagesRepository(packages: [git, wget])
 
-        let vm = InstalledViewModel(repository: repo, initialSelection: wget.id)
+        let vm = InstalledViewModel(repository: repo, preferences: StubInstalledPreferences(), initialSelection: wget.id)
 
         #expect(vm.selectedPackage?.id == wget.id)
     }
@@ -179,7 +189,7 @@ struct InstalledViewModelTests {
         let missing = InstalledBrewPackage.ID.formula(name: "not-installed")
         let repo = StubInstalledPackagesRepository(packages: [git])
 
-        let vm = InstalledViewModel(repository: repo, initialSelection: missing)
+        let vm = InstalledViewModel(repository: repo, preferences: StubInstalledPreferences(), initialSelection: missing)
 
         // activeSelectedPackageID drops the candidate when it isn't in allRows
         // and falls back to firstVisibleRowID — the deep link doesn't strand
@@ -201,7 +211,7 @@ struct InstalledViewModelTests {
             commandRunner: QueuedBrewInfoRunner(infoJSON: [json]),
         )
         let target = InstalledBrewPackage.ID.formula(name: "wget")
-        let vm = InstalledViewModel(repository: repo, initialSelection: target)
+        let vm = InstalledViewModel(repository: repo, preferences: StubInstalledPreferences(), initialSelection: target)
 
         // Repo is still .loading — allRows is empty so activeSelectedPackageID returns nil.
         #expect(vm.selectedPackage == nil)
@@ -237,7 +247,7 @@ struct InstalledViewModelTests {
             Issue.record("expected error state")
             return
         }
-        #expect(message == InstalledPackagesTestSupport.localizedBrewExecutableNotFoundMessage())
+        #expect(message == "Could not find Homebrew. Install it or ensure brew is in the default location.")
     }
 
     @Test @MainActor func `load maps launch failure to underlying message`() async {
@@ -265,6 +275,6 @@ struct InstalledViewModelTests {
             Issue.record("expected error state")
             return
         }
-        #expect(message == InstalledPackagesTestSupport.localizedGenericLoadFailureMessage())
+        #expect(message == "Something went wrong loading packages.")
     }
 }

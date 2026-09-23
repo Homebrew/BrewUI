@@ -7,7 +7,7 @@ import BrewCore
 import Foundation
 
 /// Asks `brew config`, which prints `HOMEBREW_NO_INSTALL_FROM_API: set` only when it is set.
-/// Probed once: changing it means editing a shell profile, which needs a relaunch anyway.
+/// Probed once per app launch. Relaunch after changing this setting in `brew.env`.
 public actor BrewConfigEnvironmentReader: HomebrewEnvironmentReading {
     private static let noInstallFromAPIKey = "HOMEBREW_NO_INSTALL_FROM_API"
 

@@ -10,7 +10,7 @@ import BrewUIComponents
 import SwiftUI
 
 /// Dependency-composition boundary for the Doctor surface: reads app-level dependencies from the
-/// environment and constructs the feature view model (`CONVENTIONS.md` — root-view ownership).
+/// environment and constructs the feature view model (`ARCHITECTURE.md` — root-view ownership).
 public struct DoctorColumnsRoot: View {
     @Environment(\.doctorRepository) private var doctorRepository
     @Environment(\.brewCommandCenter) private var brewCommandCenter

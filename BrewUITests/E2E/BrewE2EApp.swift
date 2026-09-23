@@ -5,17 +5,14 @@
 
 import XCTest
 
-/// Launches with **no** `-uiTesting` argument, so `BrewApp.init()` takes `.live()`: real login shell,
+/// Launches with **no** `-uiTesting` argument, so `BrewApp.init()` takes `.live()`: isolated system zsh,
 /// real `brew`, real network.
 @MainActor
 enum BrewE2EApp {
     static func launch() -> XCUIApplication {
         let app = XCUIApplication()
-        // Shared page objects assert English console labels, independent of the machine's language.
+        // Shared page objects assert English labels, independent of the machine language.
         app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en"]
-        for (key, value) in Brew.determinismEnvironment {
-            app.launchEnvironment[key] = value
-        }
         app.launch()
         BrewApp.activate(app)
         return app

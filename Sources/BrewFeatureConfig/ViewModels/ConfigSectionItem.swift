@@ -6,10 +6,10 @@
 import Foundation
 
 /// A presentation-ready group of config rows (title + ordered rows), mapped from the domain snapshot so
-/// the UI-free `BrewConfigSnapshot` never carries section labels (`CONVENTIONS.md` — presentation boundary).
+/// the UI-free `BrewConfigSnapshot` never carries section labels (`AGENTS.md` — presentation boundary).
 struct ConfigSectionItem: Identifiable {
     let id: String
-    let title: String
+    let title: LocalizedStringResource
     let rows: [ConfigDisplayRow]
 }
 

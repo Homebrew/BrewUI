@@ -1,37 +1,29 @@
-# PR: [short title]
+# What and why
 
-## Summary
+<!-- PRs propose concrete changes to BrewUI. Use https://github.com/orgs/Homebrew/discussions for questions and general opinions. -->
+<!-- Keep the headings and checkboxes, even when a box does not apply. Stripped templates may be closed automatically; edit the same PR to restore the template and reopen it. -->
 
-Brief description of what this PR does and why. One or two sentences; link to an issue if applicable.
+<!-- Describe the problem, the resulting behaviour and why it helps. For bugs, include reproduction steps and the before/after result. Link an existing issue if applicable; opening one first is not required. -->
 
-## Changes
+## Validation
 
-- Bullet list of what changed (files, areas, behaviour).
-- Group or subsections if the PR touches several areas.
+<!-- List checks actually run and their results, plus anything not run and why. For app changes, include macOS version, processor and Xcode/Swift versions. -->
+<!-- Swift changes: scripts/test, SwiftFormat, SwiftLint and BrewUILint per AGENTS.md. UI changes: scripts/test-ui and relevant manual checks, including keyboard/VoiceOver and light/dark appearance. -->
+<!-- Support performance claims with comparable before/after measurements (for example, Instruments traces). -->
 
-## Why this split (optional)
+- [ ] I followed the [conventions and workflow](https://github.com/Homebrew/BrewUI/blob/HEAD/AGENTS.md#development-setup), checked for duplicate [PRs](https://github.com/Homebrew/BrewUI/pulls) and kept this change focused.
+- [ ] I added regression coverage for bug fixes or explained why automated coverage is impractical, and reported the relevant validation above.
 
-If this PR is deliberately scoped (e.g. foundation before features), explain the split so reviewers understand follow-ups.
+## Screenshots
 
-## Testing
+<!-- Before and after screenshots are required for visible changes. For changes with no visual impact, replace the table with "Not applicable" and explain why. -->
 
-- [ ] Steps you ran locally to verify (e.g. build, tests, manual checks).
-- [ ] Add or remove items to match this PR’s scope.
+| Before | After |
+| --- | --- |
+| <!-- Add screenshot. --> | <!-- Add screenshot. --> |
 
-## PR checklist
-
-- [ ] Have you followed this repository's contribution and workflow guidance?
-- [ ] Have you explained what changed and why this should land now?
-- [ ] Have you run relevant local checks for the changed scope?
-- [ ] Are changes scoped and free of unrelated modifications?
-
------
+## AI assistance
 
 - [ ] AI was used to generate or assist with generating this PR.
-- [ ] If yes, describe exactly how AI was used and what manual verification was performed.
 
------
-
-## Follow-ups (optional)
-
-Anything deliberately out of scope for this PR (e.g. “CI in a follow-up”) or notes for stacked review.
+<!-- If checked, name the tool/model, describe how it was used and distinguish your own verification from checks performed by AI. -->

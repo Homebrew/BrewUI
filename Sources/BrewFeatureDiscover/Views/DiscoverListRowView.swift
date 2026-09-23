@@ -45,19 +45,17 @@ struct DiscoverListRowView: View {
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: BrewSpacing.md) {
-            iconBadge
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                titleRow
-                if viewModel.hasDescription {
-                    Text(viewModel.descriptionText)
-                        .font(.brewCallout)
-                        .foregroundStyle(Color.brewTextSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                metadataRow
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            titleRow
+            if viewModel.hasDescription {
+                Text(viewModel.descriptionText)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            metadataRow
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, BrewSpacing.sm)
         .task(id: discoveryPackage.id) {
             await viewModel.observeRowUpdates()
@@ -69,24 +67,12 @@ struct DiscoverListRowView: View {
         .accessibilityLabel(viewModel.rowAccessibilityLabel)
     }
 
-    private var iconBadge: some View {
-        ZStack {
-            Circle()
-                .strokeBorder(accentColor(viewModel.packageKindChrome.accent), lineWidth: 1)
-                .frame(width: 36, height: 36)
-                .brewHiddenWhenRedacted()
-            Image(systemName: "shippingbox.fill")
-                .font(.body)
-                .foregroundStyle(accentColor(viewModel.packageKindChrome.accent))
-        }
-        .accessibilityHidden(true)
-    }
-
     private var titleRow: some View {
         HStack(spacing: BrewSpacing.sm) {
             Text(viewModel.name)
-                .font(.brewBody)
+                .font(.brewBodyEmphasized)
                 .foregroundStyle(Color.brewTextPrimary)
+                .lineLimit(1)
 
             if viewModel.showsInstallBusy {
                 ProgressView()
@@ -113,23 +99,24 @@ struct DiscoverListRowView: View {
             .background {
                 Capsule()
                     .fill(Color.brewSurfaceElevated)
-            }
-            .overlay {
-                Capsule()
-                    .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                    .overlay {
+                        Capsule()
+                            .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                    }
+                    .brewHiddenWhenRedacted()
             }
     }
 
     private var metadataRow: some View {
         HStack(spacing: BrewSpacing.sm) {
-            Text("v\(viewModel.stableVersionLabel)")
+            Text(verbatim: "v\(viewModel.stableVersionLabel)")
                 .font(.brewCaption)
                 .foregroundStyle(Color.brewTextTertiary)
             if viewModel.showsInstallMetrics {
-                Text("•")
+                Text(verbatim: "•")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
-                Text("\(viewModel.installs30DayLabel) installs (30d)")
+                Text("\(viewModel.installs30DayLabel) installs (30d)", bundle: #bundle, comment: "Discover row: 30-day install count; %@ is a formatted number")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
             }

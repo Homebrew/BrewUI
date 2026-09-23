@@ -1,94 +1,157 @@
-# ARCHITECTURE.md
+# Architecture
 
-> High-level system design for BrewUI. Update when structure changes. **Owns:** layers, data flow, integrations (Homebrew CLI / JSON API), and product constraints. **Defers** naming and day-to-day coding patterns to [`CONVENTIONS.md`](CONVENTIONS.md). Record durable rationale in [`.ai/memory.md`](.ai/memory.md).
+BrewUI uses [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) and [MVVM](https://en.wikipedia.org/wiki/Model-view-viewmodel) on the presentation layers.
 
-## Tech Stack
-
-| Concern | Choice |
-|---|---|
-| Language | Swift 6.0 (strict concurrency mode) |
-| UI Framework | SwiftUI — pure; use AppKit only when SwiftUI cannot meet a requirement |
-| State management | `@Observable` (Swift 5.9+) |
-| Concurrency | `async`/`await` throughout; actor isolation for shared mutable state |
-| Package manager | Swift Package Manager |
-| macOS targets | Tahoe 26, Sequoia 15, Sonoma 14 — **minimum: Tahoe 26** |
-| Data sources | Homebrew JSON API (`formulae.brew.sh`) + `brew` CLI subprocess |
-| Deployment | Unsandboxed macOS app (default Homebrew prefix) |
-
-## System shape
-
-Flow: **View → ViewModel → Repository *or* Interactor → Services →** `brew` CLI **or** JSON API.
-
-Guiding patterns:
-
-- **MVVM-C (lightweight):** Views stay declarative; ViewModels own presentation state; coordination/navigation policy is centralized in small coordinator-style shell types when needed.
-- **Clean Architecture principles:** Depend inward on abstractions, keep use cases in Interactors/Repositories, isolate infrastructure in Services, and keep UI/framework concerns out of domain decisions.
-- **Emergent architecture:** Prefer the smallest pattern that solves today’s problem; evolve structure incrementally as features and complexity grow.
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                    BrewUI (macOS App)                        │
-│  Views (SwiftUI) ──▶ ViewModels                              │
-│         │                    │                               │
-│         │          Repositories    Interactors               │
-│         │                 └────┬────┘                        │
-│         │                      Services (brew + JSON API)   │
-└────────────────────────────────┼─────────────────────────────┘
-                                 ▼
-              brew CLI (subprocess) · formulae.brew.sh JSON API
+```text
+View → ViewModel → Repository or Interactor → Services → brew CLI or JSON API
 ```
 
-## Core components
+Views render state and forward actions. ViewModels own presentation state and mapping.
+Repositories adapt data sources; Interactors represent individual use cases. Services isolate
+external integrations. Domain models remain independent of UI frameworks and transport formats.
+Navigation and composition belong in the app shell. Prefer the smallest pattern that solves the
+current problem and extend it when real usage warrants it.
 
-- **Views:** SwiftUI; thin — bind state, forward actions.
-- **Feature root views (`*Root`):** Composition boundaries that bridge app-level dependencies into feature content. Root wrappers read environment-level dependencies and construct/inject content-view dependencies while managing view-model lifecycle boundaries.
-- **ViewModels:** Presentation state and mapping; delegate work downward. Keep domain rules in Interactors or Models, not here.
-- **Presentation boundary:** Domain models remain UI-agnostic. Map domain values to UI-ready properties through feature ViewModels for top-level surfaces, or dedicated feature Item types for subview/action-level presentation needs.
-- **Repositories:** CRUD-shaped access to a **data source** (CLI output, API, storage, in-memory). Swap the implementation, keep the contract.
-- **Interactors:** One **use case** each — not generic CRUD (e.g. a doctor run). Prefer protocols + real/mock impls for tests. (One-shot reads such as the `brew config` snapshot are modelled as **Repositories** here, not Interactors.)
-- **Services:** Infrastructure grouped by integration boundaries.
-- **Command center:** `BrewCommandCenter` (actor protocol; app default `SerialBrewCommandCenter`) — **serializes** mutating `brew` work, tracks **in-flight / failed** **operation** state (`BrewOperationID` + `BrewOperationPhase`) for UI across surfaces, and runs **small `BrewMutatingCommand` types** that call `BrewCommandRunning` + the brew locator. It does **not** own **read/parsing** of `brew list` / `brew info` output — that stays in **repositories**. Feature-scoped executors (e.g. upgrade helpers) should stay **thin** and be invoked **from** commands the center schedules, not as a second parallel pipeline.
-- **Models:** Domain-only value types and relationships shared across layers. Keep UI/presentation helpers, transport decoding models, and infrastructure-state containers out of domain models.
+## Modules and ownership
+
+| Location | Responsibility |
+| --- | --- |
+| `Homebrew/` | App entry point, shell, dependency composition and app-only integrations |
+| `Sources/BrewCore/` | Domain models, command contracts and shared value types |
+| `Sources/BrewCLI/` | Executable discovery, subprocess execution and brew command transport |
+| `Sources/BrewNetworking/` | JSON API client and network transport |
+| `Sources/BrewRepositoryInterfaces/` | Repository contracts and shared preview support |
+| `Sources/BrewRepositories/` | Data access, mapping, inventory and catalogue caches |
+| `Sources/BrewAppEnvironment/` | Shared environment dependencies and composition slots |
+| `Sources/BrewFeature*/` | Feature views, ViewModels and presentation items |
+| `Sources/BrewUIComponents/` | Shared UI, theme tokens and colour assets |
+| `Sources/BrewAccessibilityID/`, `Sources/BrewUITestContract/` | Dependency-free contracts shared by the app and UI tests |
+| `HomebrewUpgradeHelper/`, `Sources/BrewSelfUpgrade*/` | Self-upgrade executable, contract and testable helper core |
+| `Tests/`, `BrewTests/`, `BrewUITests/` | Package, hosted and UI tests |
+| `Tools/BrewUILint/` | Project-specific Swift lint rules |
+
+Features do not import sibling features. The shell composes them through shared abstractions,
+such as `PackageListBanner` in `BrewAppEnvironment`. Feature `*Root` views acquire app-level
+environment dependencies, inject non-optional dependencies into content views and own ViewModel
+lifetimes. Content views concentrate on rendering; they do not work around misplaced dependency
+acquisition with optional ViewModels.
+
+Feature folders use `Views/` and `ViewModels/`; feature `*Item` types belong in `ViewModels/`.
+`Models/` contains domain value types and relationships only. Command JSON, API payloads,
+database mappings and cache snapshots stay with their infrastructure boundary.
 
 ## Command execution
 
-Run Homebrew commands **asynchronously** via subprocess; support **cancellation**; **stream or preserve** stdout/stderr for transparency and logs. Always make the **exact command** visible to the user; treat **CLI text output as unstable** (tolerant parsing, fallbacks).
+`BrewCommandCenter` is an actor protocol. `SerialBrewCommandCenter` serialises scheduled work,
+coalesces duplicate operation IDs and publishes phase/output streams. Mutating commands go through
+this shared pipeline; feature executors remain thin. Repositories own read/parsing work such as
+installed inventory. Doctor reads also use the centre so their output appears in the console.
 
-## JSON API
+Commands run asynchronously with cancellation and preserved or streamed stdout/stderr. Production
+execution, including self-upgrades, uses `ZshBrewCommandRunner` and the
+[isolated system zsh environment](#homebrew-configuration). Arguments and environment assignments
+travel as literal argv rather than interpolated shell code. Startup markers filter `/etc/zshenv`
+output on both streams, including when terminal allocation falls back to pipes; startup failures
+retain their diagnostics.
 
-Use the [Homebrew JSON API](https://formulae.brew.sh/docs/api/) where it helps. Prefer **optional / resilient decoding** — schema can change; **never crash** on unknown fields. Combine with CLI only as needed when the app grows.
+Subprocess cancellation tears down the whole process group and awaits completion before returning.
+On Darwin, keep the pseudo-terminal replica open until output draining has finished, including
+cancellation and launch failure. Closing it when the child exits can discard unread output.
 
-## Constraints & decisions
+Show copyable Terminal commands to users and preserve execution output. User-facing command text
+omits parsing-only flags such as `--json=v2`. Treat CLI text as unstable: tolerate unknown keys and
+format changes rather than assuming a fixed transcript.
 
-- **macOS-only.** No iOS / iPadOS / cross-platform for now.
-- **Default Homebrew prefix only:** `/opt/homebrew` (Apple Silicon) or `/usr/local` (Intel). No custom prefix initially.
-- **No custom taps initially** — core tap scope.
-- **`brew` is the source of truth** — BrewUI does not poke Homebrew internals.
-- **Transparency** — users see what runs; no hidden commands.
-- **Homebrew is separate** — detect and degrade if missing; do not bundle Homebrew.
-- **Detection:** try `/opt/homebrew/bin/brew` then `/usr/local/bin/brew`.
-- **Open source** — patterns should stay contributor-friendly.
+## Homebrew configuration
 
-### Platform constraints
+BrewUI always launches Homebrew through `/bin/zsh`, including app self-upgrades. It disables
+optional user and system shell startup files with `--no-rcs --no-global-rcs` and supplies a clean environment.
+`PATH` contains only the directory of the located `brew` executable and its sibling `sbin`, followed by `/usr/bin:/bin`.
+Your login shell, shell aliases, exported variables and custom `PATH` do not configure Homebrew in BrewUI.
 
-- **CLI drift:** `brew` text is not a stable API — parsers must be tolerant.
-- **JSON drift:** decoding must stay resilient as the API evolves.
-- **UI tests:** async output and sheets need deliberate sync; avoid flakiness.
-- **Accessibility:** desktop workflows need keyboard and VoiceOver semantics, not only labels.
+**Put your Homebrew configuration variables in `brew.env` files.** Homebrew reads these itself:
 
-## Resources
+| Scope | File |
+| --- | --- |
+| User | `~/.homebrew/brew.env` |
+| Installation | `<Homebrew prefix>/etc/homebrew/brew.env` |
+| System | `/etc/homebrew/brew.env` |
 
-Application UI translations live in `Homebrew/Localizable.xcstrings`, packaged by the app target.
-Feature packages and shared UI deliberately use the app's default localization table (`Bundle.main`).
-English is the source and fallback language; Simplified Chinese follows the macOS app language preference.
-Homebrew data and raw command output remain verbatim; known diagnostic prose is translated at the
-feature presentation boundary. See `CONVENTIONS.md` for authoring and verification.
+For example, add this line to `~/.homebrew/brew.env`:
 
-- [`CONVENTIONS.md`](CONVENTIONS.md)
-- [Homebrew JSON API](https://formulae.brew.sh/docs/api/)
-- [Swift Concurrency](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/)
-- [SwiftUI](https://developer.apple.com/documentation/swiftui)
+```text
+HOMEBREW_NO_ENV_HINTS=1
+```
 
-## Updating this file
+Use literal `NAME=value` lines without `export`, shell expansion or command substitution.
+User settings normally override installation settings, which override system settings.
+`HOMEBREW_SYSTEM_ENV_TAKES_PRIORITY=1` in the system file makes that file take precedence.
+See [Homebrew's environment documentation](https://docs.brew.sh/Manpage#environment).
+An `XDG_CONFIG_HOME` exported by your shell is also ignored; use the user file above.
 
-Change when layers or major assumptions shift. Put **why** in `.ai/memory.md` when it is non-obvious or contentious.
+Relaunch BrewUI after changing configuration, then check the Configuration tab. Its report and
+Doctor describe Homebrew's environment in the app and may differ from Terminal. BrewUI still
+sets output controls for its console and self-upgrade log.
+
+System zsh always reads `/etc/zshenv`, if present; its execution cannot be disabled.
+BrewUI clears the environment again afterwards and discards startup output so banners do not
+reach Homebrew's reports or the console. If startup fails before Homebrew runs, its diagnostics are retained.
+See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Files.html).
+
+## Data and storage
+
+- `HomebrewPackageID` is the canonical package identity, including `Identifiable.id` on package-backed
+  types. Construct `.formula(name:)` or `.cask(token:)` at transport boundaries. Display names may
+  differ from canonical names used in commands and lookups.
+- `BrewPackage` contains shared package metadata. `InstalledBrewPackage` adds installed state;
+  `DiscoveryBrewPackage` adds analytics. Do not leak installed-only fields into catalogue models.
+- Decode transport payloads inside infrastructure boundaries and return domain models or explicit
+  feature contracts. Ignore unknown JSON fields, but do not silently default required values.
+  Catalogue arrays may skip malformed entries while recording their decode failures; analytics
+  decoding rejects malformed required fields and counts.
+- The installed repository owns the shared inventory and dependency graph. Refresh after mutations
+  while retaining visible data. Keep refresh failures visible until a fetch actually succeeds;
+  replaying a cached snapshot must not imply a successful check.
+- Catalogue caches own storage and ETags; repositories own freshness, stale-while-revalidate policy
+  and in-flight request coalescing. Cold-load failures surface; background failures can retain cached
+  data. Discover repositories enrich analytics through catalogue lookups.
+- Storage is namespaced as `<root>/sh.brew.app/…`. Rebuildable catalogue and analytics data belong in
+  `~/Library/Caches`; pending crash reports belong in `~/Library/Application Support`; transcripts
+  belong in `~/Library/Logs`. Keep these roots separate by recoverability.
+
+## Self-upgrades and console
+
+The app's `homebrew-app` cask is excluded from package lists, counts and bulk upgrades, while the raw
+inventory retains it for self-upgrade detection. Use Homebrew's `outdated` flag rather than comparing
+version strings. Say **upgrade** for installing a newer version; **update** refers to refreshing taps.
+
+The banner coordinates a helper handoff: wait for app exit, upgrade, record the outcome, then relaunch.
+Refuse the handoff while a mutating command is running. Resolve the executable and argv before quitting
+and pass the contract as a JSON file. If waiting for exit times out, abandon the run. The helper uses
+the same command runner as the app and writes `~/Library/Logs/sh.brew.app/self-upgrade.log`.
+Consume its outcome from the app's named defaults suite before constructing caches and show success
+or failure through one alert. Banner dismissal is per version; the debug banner cannot upgrade an
+installed copy of the app.
+
+`BrewCommandJobsRepository` projects command state; `ConsoleViewModel` owns per-window selection.
+Console expansion and height use `@SceneStorage`. The console uses a selectable `NSTextView` so
+selection spans lines, applies transcript suffix edits to preserve selection and follows output only
+while the reader remains at the end. Terminal assembly keeps revisable rows bounded by terminal
+height and preserves whether the final line actually ended in a newline.
+
+## Product constraints
+
+- macOS only, using SwiftUI with AppKit bridges when SwiftUI cannot meet a requirement.
+- Unsandboxed, with Homebrew installed separately. Detect missing Homebrew and degrade gracefully.
+- Default prefixes only: discover `/opt/homebrew/bin/brew` before `/usr/local/bin/brew` through the
+  executable locator. No custom prefix or custom-tap management initially.
+- Homebrew remains the source of truth. Do not modify its internals or hide operations and errors.
+- Preserve keyboard navigation and VoiceOver semantics as well as visible labels.
+- One String Catalog per UI target, with English copy as the key. The app follows the macOS language
+  and falls back to English for each untranslated string. Non-UI layers carry no copy.
+  See [localisation](AGENTS.md#localisation).
+
+Simplified Chinese translations live in each owning UI target's catalog. `DoctorText` translates
+known diagnostic prose at the presentation boundary, including wrapped paragraphs; unknown text,
+raw output, issue identity, commands and configuration keys/values remain unchanged. The Chinese
+Doctor page and console task are named “brew 诊断”.

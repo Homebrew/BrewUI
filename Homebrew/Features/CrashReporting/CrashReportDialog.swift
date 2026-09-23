@@ -7,7 +7,7 @@ import BrewCrashReporting
 import SwiftUI
 
 /// The dialog shown on the launch after a crash, offering to file the report as
-/// a GitHub issue or discard it. Passive (per `CONVENTIONS.md`): it renders the
+/// a GitHub issue or discard it. Passive (per `AGENTS.md`): it renders the
 /// report and forwards report/dismiss intents to its owner.
 struct CrashReportDialog: View {
     let report: CrashReport
@@ -21,10 +21,14 @@ struct CrashReportDialog: View {
         VStack(alignment: .leading, spacing: 16) {
             header
 
-            Text("""
-            A report was saved after the app quit unexpectedly. You can send it \
-            to the Homebrew team on GitHub to help fix the problem, or discard it.
-            """)
+            Text(
+                """
+                A report was saved after the app quit unexpectedly. You can send it to the Homebrew team on \
+                GitHub to help fix the problem, or discard it.
+                """,
+                bundle: #bundle,
+                comment: "Crash report dialog body",
+            )
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)
 
@@ -51,7 +55,7 @@ struct CrashReportDialog: View {
                 .font(.largeTitle)
                 .foregroundStyle(.orange)
                 .accessibilityHidden(true)
-            Text("The Homebrew app quit unexpectedly")
+            Text("The Homebrew app quit unexpectedly", bundle: #bundle, comment: "Crash report dialog title")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .fixedSize(horizontal: false, vertical: true)
@@ -61,8 +65,8 @@ struct CrashReportDialog: View {
     private var footer: some View {
         HStack {
             Spacer()
-            Button("Discard", role: .cancel, action: onDismiss)
-            Button("Report on GitHub…") {
+            Button(String(localized: "Discard", bundle: #bundle, comment: "Crash report dialog: delete the report"), role: .cancel, action: onDismiss)
+            Button(String(localized: "Report on GitHub…", bundle: #bundle, comment: "Crash report dialog: open a prefilled GitHub issue")) {
                 openURL(issueURL)
                 onDismiss()
             }

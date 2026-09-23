@@ -1,0 +1,103 @@
+name: Bug report
+description: Report a specific problem with the Homebrew macOS app and provide details to reproduce it.
+type: Bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This tracker is for actionable bugs and feature requests for **BrewUI, the Homebrew macOS app**.
+        Usage questions, general opinions and disagreement without a specific problem belong in [Homebrew Discussions](https://github.com/orgs/Homebrew/discussions).
+        Reports without enough detail to investigate may be closed.
+        Keep the template headings and checkboxes. Issues with a stripped template may be closed automatically and reopened when you edit the same issue to restore it.
+  - type: checkboxes
+    id: verification
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have searched the [issues](https://github.com/Homebrew/BrewUI/issues?q=is%3Aissue) and [pull requests](https://github.com/Homebrew/BrewUI/pulls?q=is%3Apr) for duplicates.
+          required: true
+        - label: I am reporting a specific problem with BrewUI and have described how to reproduce it, or the circumstances of an intermittent failure.
+          required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+      description: Describe the task you were trying to complete, what went wrong and any exact error message.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What should the app have done?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the screen, actions, package names and whether they are formulae or casks. Say how often this happens and the last working app version, if known. For intermittent crashes, describe what you were doing.
+      placeholder: |
+        1. Open the app and select…
+        2. …
+        3. Observe…
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App version and build
+      description: Use Homebrew > About Homebrew, or Finder > Get Info if the app will not launch. Include the build number if available or the commit for a source build. Check the [latest release](https://github.com/Homebrew/BrewUI/releases/latest) and explain if you cannot try it.
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: How was the app installed?
+      options:
+        - Homebrew cask
+        - GitHub release download
+        - Built from source
+        - Other (describe below)
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and build
+      description: In System Settings > General > About, click the macOS version to see the build number. Include whether you are using a beta.
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Mac processor
+      description: Find the chip or processor in About This Mac. If running under Rosetta, mention it in the additional context.
+      options:
+        - Apple silicon
+        - Intel
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: brew-config
+    attributes:
+      label: Homebrew configuration
+      description: In the app, open Configuration and choose Copy report, or paste `brew config` from Terminal. This includes the Homebrew version and prefix. If Homebrew is missing or the report is unavailable, say so. Remove private values before posting.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, screenshots and crash reports
+      description: |
+        Select the affected command in the app's console and use Copy or Save to include its output. Attach screenshots or a recording for visual problems.
+        For a crash, copy the report shown when reopening the app, or attach the Homebrew crash report from macOS Console. For a hang, attach a sample from Activity Monitor if available.
+        For Homebrew command failures, include the Doctor output. If you have already tried the same command in Terminal, include the result and whether it differs from the app.
+        Remove tokens, credentials and private information before posting.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: For source builds or build failures, include Xcode and Swift versions (`xcodebuild -version` and `swift --version`), Debug/Release configuration and relevant build errors. For UI issues, mention appearance, display scaling, language or accessibility settings that affect reproduction. Include how you launched the app if relevant (Finder, Terminal or Xcode).

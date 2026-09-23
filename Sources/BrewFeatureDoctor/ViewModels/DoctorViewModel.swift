@@ -6,11 +6,12 @@
 import AppKit
 import BrewCore
 import BrewRepositoryInterfaces
+import BrewUIComponents
 import Foundation
 import Observation
 
 /// Coarse view-facing projection of the repository's diagnostics state so the view binds to one decision
-/// per state instead of re-deriving it from the report (`CONVENTIONS.md` — passive views).
+/// per state instead of re-deriving it from the report (`AGENTS.md` — passive views).
 enum DoctorPresentation: Equatable {
     case loading
     case healthy
@@ -55,7 +56,7 @@ final class DoctorViewModel {
         case let .loaded(report):
             .loaded(report)
         case let .failed(error):
-            .failed(OperationFailure(catching: error).userFacingMessage)
+            .failed(BrewErrorCopy.message(for: OperationFailure(catching: error)))
         }
     }
 
@@ -102,24 +103,17 @@ final class DoctorViewModel {
 
     /// Header subtitle copy. Mirrors ``presentation``; while a re-check runs on top of a prior report it
     /// switches to "Re-checking…" so the user knows the visible content is being refreshed.
-    var subtitle: String {
+    var subtitle: LocalizedStringResource {
+        let rechecking = LocalizedStringResource("Re-checking…", bundle: #bundle, comment: "Doctor subtitle while a re-check runs")
         switch presentation {
         case .loading:
-            String(localized: "Running brew doctor…")
+            return LocalizedStringResource("Running brew doctor…", bundle: #bundle, comment: "Doctor subtitle during the first check")
         case .healthy:
-            if isRefreshing {
-                String(localized: "Re-checking…")
-            } else {
-                String(localized: "No problems found")
-            }
+            return isRefreshing ? rechecking : LocalizedStringResource("No problems found", bundle: #bundle, comment: "Doctor subtitle, healthy")
         case .issues:
-            if isRefreshing {
-                String(localized: "Re-checking…")
-            } else {
-                String(localized: "Warnings found")
-            }
+            return isRefreshing ? rechecking : LocalizedStringResource("Warnings found", bundle: #bundle, comment: "Doctor subtitle, issues listed")
         case .failed:
-            String(localized: "The check could not be completed")
+            return LocalizedStringResource("The check could not be completed", bundle: #bundle, comment: "Doctor subtitle when brew doctor failed to run")
         }
     }
 
@@ -253,9 +247,9 @@ final class DoctorViewModel {
                 }
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 let message: String = if case let .failed(reason) = latestPhase {
-                    reason.userFacingMessage
+                    BrewErrorCopy.message(for: reason)
                 } else {
-                    OperationFailure(catching: error).userFacingMessage
+                    BrewErrorCopy.message(for: OperationFailure(catching: error))
                 }
                 fixErrorMessages[token] = message
                 runningFixTokens.remove(token)

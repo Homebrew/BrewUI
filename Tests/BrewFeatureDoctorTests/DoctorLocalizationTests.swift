@@ -8,7 +8,7 @@ struct DoctorLocalizationTests {
     private func withChineseBundle(_ body: (Bundle) throws -> Void) throws {
         let root = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-        let data = try Data(contentsOf: root.appendingPathComponent("Homebrew/Localizable.xcstrings"))
+        let data = try Data(contentsOf: root.appendingPathComponent("Sources/BrewFeatureDoctor/Resources/Localizable.xcstrings"))
         let catalog = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
         let entries = try #require(catalog["strings"] as? [String: [String: Any]])
         var translations: [String: String] = [:]

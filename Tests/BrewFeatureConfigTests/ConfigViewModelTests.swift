@@ -29,7 +29,7 @@ struct ConfigViewModelTests {
             return
         }
         let sections = viewModel.sections
-        #expect(sections.map(\.title) == ["Homebrew", "System", "Build settings"])
+        #expect(sections.map { String(localized: $0.title) } == ["Homebrew", "System", "Build settings"])
 
         let homebrew = sections.first { $0.id == "homebrew" }
         #expect(homebrew?.rows.map(\.label) == ["HOMEBREW_VERSION", "HOMEBREW_PREFIX"])

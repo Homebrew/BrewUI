@@ -3,6 +3,11 @@
 > Long-term knowledge about this project. Append new entries; do not delete history.
 > Format: `## YYYY-MM-DD — Topic`
 
+## 2026-09-23 — Main branch localisation integration
+
+- Current translations use the upstream per-UI-target catalogs and `#bundle`, superseding the app-only `Bundle.main` design below. Chinese diagnostic presentation remains in `BrewFeatureDoctor`; raw output and runnable commands stay unchanged.
+- Current contributor guidance is consolidated in `AGENTS.md` and `ARCHITECTURE.md`. This file is retained as historical context rather than replacing those documents.
+
 ## 2026-09-14 — Simplified Chinese localization
 
 - The application owns one `Homebrew/Localizable.xcstrings` catalog (`en` source, `zh-Hans` translation). Existing package UI resolves `Bundle.main` deliberately, so there is no new feature dependency or duplicated per-module translation resource. Unsupported languages fall back to the English keys.

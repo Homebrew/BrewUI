@@ -35,19 +35,27 @@ struct PackageDetailMetadataItem {
         guard package.installedVersions.count > 1, package.linkedKeg != nil else {
             return joined
         }
-        return String(localized: "\(joined) (linked)")
+        return String(
+            localized: "\(joined) (linked)",
+            bundle: #bundle,
+            comment: "Installed versions row; %@ is the version list, annotated when one keg is linked",
+        )
     }
 
     /// Nil when there is no install date to show.
     var installDateValue: String? {
         guard let date = package.installDate else { return nil }
         let formatted = Self.installDateFormatter.string(from: date)
-        return package.pouredFromBottle ? String(localized: "Poured from bottle — \(formatted)") : formatted
+        return package.pouredFromBottle
+            ? String(localized: "Poured from bottle — \(formatted)", bundle: #bundle, comment: "Install date row; %@ is the formatted date")
+            : formatted
     }
 
     /// Nil when the package was installed on request (the default); non-nil for dependency installs.
     var installReasonValue: String? {
-        package.installedOnRequest ? nil : String(localized: "As dependency")
+        package.installedOnRequest
+            ? nil
+            : String(localized: "As dependency", bundle: #bundle, comment: "Install reason row: installed only because another package needed it")
     }
 
     var licenseValue: String? {

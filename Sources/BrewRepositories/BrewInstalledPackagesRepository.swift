@@ -67,7 +67,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     }
 
     /// Takes the context rather than building its own runner, so the composition root points every
-    /// brew invocation at one place: production's login shell, or a UI test's fake executable.
+    /// brew invocation at one place: production's isolated zsh runner, or a UI test's fake executable.
     public convenience init(
         executionContext: BrewCommandExecutionContext,
         cache: InstalledInventoryCache,
@@ -86,9 +86,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         completionObserverTask?.cancel()
     }
 
-    /// Production wiring: brew spawned through the user's login + interactive shell
-    /// (``LoginShellBrewCommandRunner``) so `brew info --installed --json=v2` reads the same world
-    /// as Terminal. Reconciles off `commandCenter`.
+    /// Production wiring: the shared zsh execution policy, reconciled off `commandCenter`.
     public static func live(
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
@@ -224,16 +222,13 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     }
 
     private func decodeInfoJSON(from standardOutput: String) throws -> BrewInfoJSON {
+        let command = "brew info --installed --json=v2"
         let data = Data(standardOutput.utf8)
         do {
             return try JSONDecoder().decode(BrewInfoJSON.self, from: data)
         } catch {
-            throw BrewCommandError.launchFailed(
-                underlying: String(
-                    localized: "Failed to decode Homebrew JSON output.",
-                    comment: "Installed tab JSON decode failure",
-                ),
-            )
+            installedRepositoryLogger.error("Failed to decode \(command, privacy: .public): \(error)")
+            throw BrewRepositoryError.malformedBrewOutput(command: command)
         }
     }
 }

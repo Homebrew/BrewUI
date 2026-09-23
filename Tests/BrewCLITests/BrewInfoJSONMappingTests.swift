@@ -104,4 +104,27 @@ struct BrewInfoJSONMappingTests {
 
         #expect(payload.installedPackages().map(\.name) == ["aria2", "Firefox", "Zsh"])
     }
+
+    @Test func `deprecated formulae and casks keep the flag from brew info json`() throws {
+        let json = """
+        {
+          "formulae": [
+            { "name": "youtube-dl", "deprecated": true },
+            { "name": "git", "deprecated": false }
+          ],
+          "casks": [
+            { "token": "docker", "deprecated": true },
+            { "token": "alfred" }
+          ]
+        }
+        """
+
+        let payload = try JSONDecoder().decode(BrewInfoJSON.self, from: Data(json.utf8))
+        let packages = payload.installedPackages()
+
+        #expect(packages.first { $0.name == "youtube-dl" }?.deprecated == true)
+        #expect(packages.first { $0.name == "git" }?.deprecated == false)
+        #expect(packages.first { $0.name == "docker" }?.deprecated == true)
+        #expect(packages.first { $0.name == "alfred" }?.deprecated == false)
+    }
 }

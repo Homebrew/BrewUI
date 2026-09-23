@@ -20,7 +20,7 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let blocks: [DoctorBlock]
     let rawText: String
 
-    init(issue: DoctorIssue, bundle: Bundle = .main) {
+    init(issue: DoctorIssue, bundle: Bundle = #bundle) {
         id = Self.contentID(for: issue)
         title = DoctorText.localized(issue.title, bundle: bundle)
         severity = issue.severity
@@ -72,9 +72,16 @@ struct DoctorIssueItem: Identifiable, Equatable {
         primaryRunnableStep?.displayCommand
     }
 
-    /// Label for voiceover mode — combines title with Fix available
+    /// Combines the presented issue title with a localised fix annotation.
     var accessibilityLabel: String {
-        hasRunnableFix ? String(localized: "\(title), Fix available") : title
+        guard hasRunnableFix else {
+            return title
+        }
+        return String(
+            localized: "\(title), Fix available",
+            bundle: #bundle,
+            comment: "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
+        )
     }
 }
 

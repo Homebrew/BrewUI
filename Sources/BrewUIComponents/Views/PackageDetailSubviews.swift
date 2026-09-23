@@ -7,14 +7,14 @@ import SwiftUI
 
 /// Section heading used across package-detail surfaces.
 public struct PackageDetailSectionHeading: View {
-    let title: String
+    let title: LocalizedStringResource
 
-    public init(title: String) {
+    public init(title: LocalizedStringResource) {
         self.title = title
     }
 
     public var body: some View {
-        Text(LocalizedStringKey(title))
+        Text(title)
             .font(.brewSubheadline.weight(.semibold))
             .foregroundStyle(Color.brewTextPrimary)
     }

@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "**/*.swift"
+      - "**/*.xcstrings"
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
@@ -13,10 +14,13 @@ on:
       - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - "scripts/localize"
+      - ".github/workflows/swift_quality.yml"
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
       - "**/*.swift"
+      - "**/*.xcstrings"
       - ".swiftlint*"
       - ".swiftformat"
       - "Brewfile"
@@ -24,6 +28,8 @@ on:
       - "Tools/BrewUILint/**"
       - "scripts/bootstrap"
       - "scripts/pre-commit"
+      - "scripts/localize"
+      - ".github/workflows/swift_quality.yml"
 
 permissions:
   contents: read
@@ -39,7 +45,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Cache Homebrew prefix
-        uses: Homebrew/actions/cache-homebrew-prefix@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
+        uses: Homebrew/actions/cache-homebrew-prefix@1e34f2e2acaa766b7efacb8c26352e6abbb023f9 # 2026.09.13.1
         with:
           brewfile: true
           uninstall: true
@@ -82,4 +88,13 @@ jobs:
       - name: Run BrewUILint
         run: |
           BREWUILINT="$(swift build --package-path Tools/BrewUILint -c release --show-bin-path)/BrewUILint"
-          find Brew Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
+          find Homebrew HomebrewUpgradeHelper Sources -name '*.swift' -print0 | xargs -0 "$BREWUILINT"
+
+      # Catalogs only in UI targets, and no empty translations (those render blank instead of
+      # falling back to English). Drift against the code is checked after the build in pr_build_test.
+      - name: Verify string catalogs
+        run: scripts/localize verify
+
+      # The quiet maintainer signal: what still needs translating, in the job summary, never a failure.
+      - name: Localization status
+        run: scripts/localize status --markdown >> "$GITHUB_STEP_SUMMARY"

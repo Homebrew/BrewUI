@@ -10,8 +10,7 @@ import Foundation
 ///
 /// Each warning is parsed into an ordered list of typed ``DoctorBlock``s (`.prose` / `.command` /
 /// `.data` / `.link`), each keeping the colon-introduced caption that produced it. Classification of an
-/// indented block follows the first-member rule from
-/// `.ai/plans/DoctorParsing-Plan-Addendum.md`: a `dataNounCue` guard forces `.data` *before* the
+/// indented block follows the first-member rule: a `dataNounCue` guard forces `.data` *before* the
 /// first-member command test for lists whose first item could read as a command; otherwise the first
 /// member's content (command / link / else) decides the mode. The executable allowlist is consulted
 /// once per block plus as a `.prose` fallback for stray commands sitting under period-ending prose.

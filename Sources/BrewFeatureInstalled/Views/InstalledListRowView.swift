@@ -50,42 +50,28 @@ struct InstalledListRowView: View {
     }
 
     private func rowContent(viewModel: InstalledListRowViewModel) -> some View {
-        HStack(alignment: .center, spacing: BrewSpacing.md) {
-            iconBadge(viewModel: viewModel)
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                titleRow(viewModel: viewModel)
-                if viewModel.hasDescription {
-                    Text(viewModel.descriptionText)
-                        .font(.brewCallout)
-                        .foregroundStyle(Color.brewTextSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                versionLine(viewModel: viewModel)
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            titleRow(viewModel: viewModel)
+            if viewModel.hasDescription {
+                Text(viewModel.descriptionText)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            versionLine(viewModel: viewModel)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, BrewSpacing.sm)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(viewModel.rowAccessibilityLabel)
     }
 
-    private func iconBadge(viewModel: InstalledListRowViewModel) -> some View {
-        ZStack {
-            Circle()
-                .strokeBorder(accentColor(viewModel.kind.chrome.accent), lineWidth: 1)
-                .frame(width: 36, height: 36)
-                .brewHiddenWhenRedacted()
-            Image(systemName: "cube.box.fill")
-                .font(.body)
-                .foregroundStyle(accentColor(viewModel.kind.chrome.accent))
-        }
-        .accessibilityHidden(true)
-    }
-
     private func titleRow(viewModel: InstalledListRowViewModel) -> some View {
         HStack(spacing: BrewSpacing.sm) {
             Text(viewModel.name)
-                .font(.brewBody)
+                .font(.brewBodyEmphasized)
                 .foregroundStyle(Color.brewTextPrimary)
+                .lineLimit(1)
 
             if viewModel.showsOperationBusy {
                 ProgressView()
@@ -101,10 +87,11 @@ struct InstalledListRowView: View {
                 .background {
                     Capsule()
                         .fill(Color.brewSurfaceElevated)
-                }
-                .overlay {
-                    Capsule()
-                        .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        .overlay {
+                            Capsule()
+                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                        }
+                        .brewHiddenWhenRedacted()
                 }
 
             statusBadge(viewModel: viewModel)
@@ -114,14 +101,20 @@ struct InstalledListRowView: View {
         }
     }
 
-    @ViewBuilder
     private func statusBadge(viewModel: InstalledListRowViewModel) -> some View {
-        if viewModel.showsUpgradeAvailable {
-            InstalledOutdatedBadge()
-        } else {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.body)
-                .foregroundStyle(Color.brewStatusSuccess)
+        HStack(spacing: BrewSpacing.sm) {
+            if viewModel.showsUpgradeAvailable {
+                InstalledOutdatedBadge()
+            }
+            if viewModel.isDeprecated {
+                InstalledDeprecatedBadge()
+            }
+            if !viewModel.showsUpgradeAvailable, !viewModel.isDeprecated {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(Color.brewStatusSuccess)
+                    .help(String(localized: "Installed and up to date", bundle: #bundle, comment: "Installed list: tooltip on the up-to-date tick"))
+            }
         }
     }
 
@@ -136,7 +129,7 @@ struct InstalledListRowView: View {
             HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.xs) {
                 Text(current)
                     .foregroundStyle(Color.brewTextTertiary)
-                Text("→")
+                Text(verbatim: "→")
                     .foregroundStyle(Color.brewTextTertiary)
                 Text(latest)
                     .foregroundStyle(Color.brewTextBrand)
@@ -170,6 +163,24 @@ struct InstalledListRowView: View {
     #Preview("Cask") {
         InstalledListRowView(
             package: PreviewSupport.currentCask,
+            brewCommandCenter: PreviewSupport.commandCenter,
+        )
+        .padding()
+        .frame(width: 400)
+    }
+
+    #Preview("Deprecated formula") {
+        InstalledListRowView(
+            package: PreviewSupport.deprecatedFormula,
+            brewCommandCenter: PreviewSupport.commandCenter,
+        )
+        .padding()
+        .frame(width: 400)
+    }
+
+    #Preview("Deprecated outdated formula") {
+        InstalledListRowView(
+            package: PreviewSupport.deprecatedOutdatedFormula,
             brewCommandCenter: PreviewSupport.commandCenter,
         )
         .padding()

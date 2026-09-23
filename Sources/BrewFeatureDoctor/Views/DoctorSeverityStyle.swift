@@ -14,9 +14,9 @@ import SwiftUI
 enum DoctorSeverityStyle {
     static func displayName(_ severity: DoctorSeverity) -> String {
         switch severity {
-        case .caution: String(localized: "Warning")
-        case .danger: String(localized: "Danger")
-        case .unsupported: String(localized: "Unsupported")
+        case .caution: String(localized: "Warning", bundle: #bundle, comment: "Doctor severity name")
+        case .danger: String(localized: "Danger", bundle: #bundle, comment: "Doctor severity name")
+        case .unsupported: String(localized: "Unsupported", bundle: #bundle, comment: "Doctor severity name: unsupported configuration")
         }
     }
 

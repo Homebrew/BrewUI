@@ -35,6 +35,9 @@ public enum BrewLayout {
     /// Default sidebar width.
     public static let sidebarWidth: CGFloat = 220
 
+    /// Fixed width for sidebar row symbols so titles align regardless of glyph width.
+    public static let sidebarIconWidth: CGFloat = 20
+
     /// Detail inspector panel width.
     public static let inspectorWidth: CGFloat = 280
 
@@ -55,8 +58,8 @@ public enum BrewLayout {
     /// Default window width.
     public static let defaultWindowWidth: CGFloat = 1000
 
-    /// Default window height.
-    public static let defaultWindowHeight: CGFloat = 650
+    /// Default window height. Kept above ``minWindowHeight`` so a first launch opens at the size asked for.
+    public static let defaultWindowHeight: CGFloat = 720
 
     /// Minimum supported window width.
     public static let minWindowWidth: CGFloat = 820

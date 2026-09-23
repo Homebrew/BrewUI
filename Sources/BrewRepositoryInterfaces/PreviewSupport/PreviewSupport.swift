@@ -100,10 +100,60 @@ public enum PreviewSupport {
         StubDoctorRepository(report: report)
     }
 
-    public static let healthyDoctorReport = DoctorReport(issues: [])
+    @MainActor
+    public static func makeConfigRepository() -> any ConfigRepository {
+        StubConfigRepository(snapshot: configSnapshot)
+    }
+}
+
+public extension PreviewSupport {
+    static let deprecatedFormula = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "mysql@8.0",
+            displayName: "mysql@8.0",
+            kind: .formula,
+            description: "Open source relational database management system",
+            homepage: "https://dev.mysql.com/doc/refman/8.0/en/",
+            latestVersion: "8.0.46",
+            dependencies: [],
+        ),
+        installedVersions: ["8.0.46"],
+        outdated: false,
+        license: "GPL-2.0-only",
+        tap: "homebrew/core",
+        installedOnRequest: true,
+        pouredFromBottle: true,
+        installDate: Date(timeIntervalSinceNow: -86400 * 14),
+        linkedKeg: "8.0.46",
+        deprecated: true,
+    )
+
+    /// Matches a typical `mysql@8.0` keg that is both deprecated and behind latest.
+    static let deprecatedOutdatedFormula = InstalledBrewPackage(
+        package: BrewPackage(
+            name: "mysql@8.0",
+            displayName: "mysql@8.0",
+            kind: .formula,
+            description: "Open source relational database management system",
+            homepage: "https://dev.mysql.com/doc/refman/8.0/en/",
+            latestVersion: "8.0.46",
+            dependencies: [],
+        ),
+        installedVersions: ["8.0.43_3"],
+        outdated: true,
+        license: "GPL-2.0-only",
+        tap: "homebrew/core",
+        installedOnRequest: true,
+        pouredFromBottle: true,
+        installDate: Date(timeIntervalSinceNow: -86400 * 14),
+        linkedKeg: "8.0.43_3",
+        deprecated: true,
+    )
+
+    static let healthyDoctorReport = DoctorReport(issues: [])
 
     /// A sample report with a runnable cleanup fix and an advisory-only issue (no `brew` fix).
-    public static let doctorReport = DoctorReport(issues: [
+    static let doctorReport = DoctorReport(issues: [
         DoctorIssue(
             title: "Some cached downloads are stale.",
             severity: .caution,
@@ -142,12 +192,7 @@ public enum PreviewSupport {
         ),
     ])
 
-    @MainActor
-    public static func makeConfigRepository() -> any ConfigRepository {
-        StubConfigRepository(snapshot: configSnapshot)
-    }
-
-    public static let configSnapshot = BrewConfigSnapshot(
+    static let configSnapshot = BrewConfigSnapshot(
         entries: [
             BrewConfigEntry(key: "HOMEBREW_VERSION", value: "4.3.0"),
             BrewConfigEntry(key: "ORIGIN", value: "https://github.com/Homebrew/brew"),
@@ -177,7 +222,7 @@ public enum PreviewSupport {
 
     // MARK: - Backing sample data (preview-only)
 
-    public static let installedPackages: [InstalledBrewPackage] = [
+    static let installedPackages: [InstalledBrewPackage] = [
         outdatedFormula,
         InstalledBrewPackage(
             package: BrewPackage(
@@ -198,6 +243,7 @@ public enum PreviewSupport {
             installDate: Date(timeIntervalSinceNow: -86400 * 7),
             linkedKeg: "22.14.0",
         ),
+        deprecatedFormula,
         currentCask,
     ]
 

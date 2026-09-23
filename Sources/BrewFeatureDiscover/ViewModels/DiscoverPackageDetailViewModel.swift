@@ -113,7 +113,7 @@ final class DiscoverPackageDetailViewModel {
         guard installedPackage != nil else {
             return nil
         }
-        return String(localized: "Installed", comment: "Discover package installed status")
+        return String(localized: "Installed", bundle: #bundle, comment: "Discover package installed status")
     }
 
     var installedVersionLabel: String? {
@@ -121,7 +121,14 @@ final class DiscoverPackageDetailViewModel {
               let raw = pkg.linkedKeg ?? pkg.installedVersions.first else { return nil }
         let base = InstalledBrewVersionFormatting.displayVersionLabel(trimmedRaw: raw)
         let showLinked = pkg.installedVersions.count > 1 && pkg.linkedKeg != nil
-        return showLinked ? String(localized: "\(base) (linked)") : base
+        guard showLinked else {
+            return base
+        }
+        return String(
+            localized: "\(base) (linked)",
+            bundle: #bundle,
+            comment: "Installed version label; %@ is the version, annotated when that keg is the linked one",
+        )
     }
 
     var isInstalledVersionOutdated: Bool {
@@ -131,12 +138,16 @@ final class DiscoverPackageDetailViewModel {
     var installDateValue: String? {
         guard let pkg = installedPackage, let date = pkg.installDate else { return nil }
         let formatted = installDateFormatter.string(from: date)
-        return pkg.pouredFromBottle ? String(localized: "Poured from bottle — \(formatted)") : formatted
+        return pkg.pouredFromBottle
+            ? String(localized: "Poured from bottle — \(formatted)", bundle: #bundle, comment: "Install date row; %@ is the formatted date")
+            : formatted
     }
 
     var installReasonValue: String? {
         guard let pkg = installedPackage else { return nil }
-        return pkg.installedOnRequest ? nil : String(localized: "As dependency")
+        return pkg.installedOnRequest
+            ? nil
+            : String(localized: "As dependency", bundle: #bundle, comment: "Install reason row: installed only because another package needed it")
     }
 
     var licenseLabel: String? {
@@ -173,7 +184,7 @@ final class DiscoverPackageDetailViewModel {
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {
-                    installErrorMessage = failure.userFacingMessage
+                    installErrorMessage = BrewErrorCopy.message(for: failure)
                 } else {
                     installErrorMessage = Self.userMessage(for: error)
                 }
@@ -199,25 +210,13 @@ final class DiscoverPackageDetailViewModel {
     }
 
     private static func userMessage(for error: Error) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Discover detail error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(localized: "Homebrew command failed.", comment: "Discover detail generic brew failure")
-        case let BrewCommandError.launchFailed(underlying):
-            return underlying
-        default:
-            return String(
+        BrewErrorCopy.message(
+            for: error,
+            fallback: String(
                 localized: "Something went wrong while installing this package.",
+                bundle: #bundle,
                 comment: "Discover detail generic install error",
-            )
-        }
+            ),
+        )
     }
 }

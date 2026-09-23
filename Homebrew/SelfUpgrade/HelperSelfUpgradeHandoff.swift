@@ -15,7 +15,6 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
     let brewExecutableURL: @MainActor () throws -> URL
     /// Asked before quitting: terminating would kill the `brew` an install is streaming through.
     let commandCenter: any BrewCommandCenter
-    let usesLoginShell: Bool
     let defaultsKeyPrefix: String
     /// Carried across the relaunch so a UI-test run comes back still pointed at its fixtures.
     let relaunchArguments: [String]
@@ -64,7 +63,6 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
             relaunchEnvironment: relaunchEnvironment,
             brewExecutablePath: brewExecutableURL.path,
             upgradeArguments: BrewCommands.selfUpgrade().arguments,
-            usesLoginShell: usesLoginShell,
             upgradeEnvironment: upgradeEnvironment,
             logFilePath: logFileURL.path,
             defaultsSuiteName: Bundle.main.bundleIdentifier ?? SelfUpgradeIdentity.bundleIdentifier,
@@ -85,6 +83,7 @@ private struct SelfUpgradeBlockedByRunningOperation: LocalizedError {
     var errorDescription: String? {
         String(
             localized: "Wait for the running Homebrew command to finish, then upgrade the Homebrew app.",
+            bundle: #bundle,
             comment: "Shown when the self-upgrade is attempted while another brew command is still running",
         )
     }
@@ -94,6 +93,7 @@ private struct SelfUpgradeHelperUnavailable: LocalizedError {
     var errorDescription: String? {
         String(
             localized: "The upgrade helper is missing from this build of the Homebrew app.",
+            bundle: #bundle,
             comment: "Shown when the bundled self-upgrade helper executable cannot be found",
         )
     }

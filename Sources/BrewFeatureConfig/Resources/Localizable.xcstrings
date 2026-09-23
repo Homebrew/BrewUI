@@ -1,0 +1,105 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Build settings": {
+      "comment": "Configuration card title: HOMEBREW_* build options",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "构建设置"
+          }
+        }
+      }
+    },
+    "Copy report": {
+      "comment": "Configuration header: copy the diagnostic report",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制报告"
+          }
+        }
+      }
+    },
+    "Couldn't locate the brew executable. Install Homebrew, then refresh.": {
+      "comment": "Configuration tab, brew-not-found message",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 brew 可执行文件。请安装 Homebrew 后刷新。"
+          }
+        }
+      }
+    },
+    "Couldn't read the Homebrew configuration.": {
+      "comment": "Configuration tab, generic load failure",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法读取 Homebrew 配置。"
+          }
+        }
+      }
+    },
+    "Homebrew": {
+      "comment": "Configuration card title: brew version, prefix, taps",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew"
+          }
+        }
+      }
+    },
+    "Homebrew not found": {
+      "comment": "Configuration tab, brew-not-found title",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到 Homebrew"
+          }
+        }
+      }
+    },
+    "Homebrew settings are read from brew.env files. Shell profiles and exported variables are ignored. Put user settings in ~/.homebrew/brew.env, then relaunch BrewUI.": {
+      "comment": "Configuration tab: where Homebrew reads its settings from",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 从 brew.env 文件读取设置，不使用 Shell 配置文件及其导出的变量。请将用户设置写入 ~/.homebrew/brew.env，然后重新启动 BrewUI。"
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "comment": "Configuration header: re-run brew config",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新"
+          }
+        }
+      }
+    },
+    "System": {
+      "comment": "Configuration card title: macOS, CPU, Xcode",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

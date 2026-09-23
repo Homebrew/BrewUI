@@ -1,0 +1,10 @@
+# Released apps submit crash reports through issues/new?title=...&body=....
+# Keep that route available until crash reporting uses the bug form.
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and general discussion
+    url: https://github.com/orgs/Homebrew/discussions
+    about: Ask for help or discuss opinions and design preferences here. BrewUI issues need a specific bug or feature request.
+  - name: Homebrew CLI, formula or cask issue
+    url: https://github.com/Homebrew/brew/issues/new/choose
+    about: If the same failure occurs in Terminal independently of BrewUI, use Homebrew's issue chooser to find the right repository. App-specific failures belong here.

@@ -9,6 +9,8 @@
     }
   ],
   "defaultOptions" : {
+    "language" : "en",
+    "region" : "US",
     "screenshotDestination" : "testRunnerAndAttachments",
     "testExecutionOrdering" : "random",
     "testTimeoutsEnabled" : true,

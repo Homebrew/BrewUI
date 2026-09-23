@@ -86,7 +86,7 @@ final class DiscoverListRowViewModel: Identifiable {
         guard installedRepository.isInstalled(id) else {
             return nil
         }
-        return String(localized: "Installed", comment: "Discover list row installed status")
+        return String(localized: "Installed", bundle: #bundle, comment: "Discover list row installed status")
     }
 
     /// True while an install for this package is in flight (and bridging until the installed badge appears).
@@ -101,7 +101,7 @@ final class DiscoverListRowViewModel: Identifiable {
     var rowAccessibilityLabel: String {
         var summary = accessibilityLabel
         if showsInstallBusy {
-            let installing = String(localized: "Installing", comment: "VoiceOver: package installing")
+            let installing = String(localized: "Installing", bundle: #bundle, comment: "VoiceOver: package installing")
             summary += ", \(installing)"
         }
         return summary
@@ -110,7 +110,11 @@ final class DiscoverListRowViewModel: Identifiable {
     private var accessibilityLabel: String {
         var parts = [name, packageKindChrome.badgeLabel]
         if showsInstallMetrics {
-            parts.append(String(localized: "\(installs30DayLabel) installs in 30 days"))
+            parts.append(String(
+                localized: "\(installs30DayLabel) installs in 30 days",
+                bundle: #bundle,
+                comment: "VoiceOver: install count over the last 30 days; %@ is the formatted count",
+            ))
         }
         if let installedStatusLabel {
             parts.append(installedStatusLabel)

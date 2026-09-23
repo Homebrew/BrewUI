@@ -19,7 +19,7 @@ struct UpgradePackageItem {
         package.outdated
     }
 
-    /// Copyable Terminal command for upgrading this package (`CONVENTIONS.md` — transparency).
+    /// Copyable Terminal command for upgrading this package (`ARCHITECTURE.md` — transparency).
     var displayCommand: String {
         switch package.kind {
         case .formula:
@@ -39,6 +39,7 @@ struct UpgradePackageItem {
         }
         return String(
             localized: "Upgrade to \(label)",
+            bundle: #bundle,
             comment: "Installed detail upgrade button; interpolated label shows target tap version.",
         )
     }

@@ -8,8 +8,7 @@ import Foundation
 
 public extension BrewCommandExecutionContext {
     /// The real ``BrewCommandService`` pointed at a fake `brew`, so spawning, pipes and streaming stay
-    /// under test. Deliberately *not* ``LoginShellBrewCommandRunner``: wrapping the fake in the
-    /// developer's login shell would source their dotfiles and make runs machine-dependent.
+    /// under test. The fake inherits the fixture environment published by the UI-test installer.
     ///
     /// `nil` resolves nothing, which drives the brew-not-found surfaces and stops a launch that named
     /// no fake from falling through to a real Homebrew install.

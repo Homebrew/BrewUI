@@ -38,12 +38,18 @@ struct InstalledPackagesContent: Equatable {
             InstalledPackagesContent(packages: caskPackages)
         }
     }
+
+    func filtered(hidingDependencies: Bool) -> InstalledPackagesContent {
+        guard hidingDependencies else { return self }
+        return InstalledPackagesContent(packages: packages.filter(\.installedOnRequest))
+    }
 }
 
 @Observable
 @MainActor
 final class InstalledViewModel {
     @ObservationIgnored private let repository: any InstalledInventoryObserving
+    @ObservationIgnored private let preferences: any InstalledPreferences
 
     private var preSearchSelectedPackageID: InstalledBrewPackage.ID?
     private var searchPreviewSelectedPackageID: InstalledBrewPackage.ID?
@@ -60,15 +66,26 @@ final class InstalledViewModel {
             guard oldValue != scope else {
                 return
             }
-            updateSelectionForScopeChange()
+            updateSelectionForFilterChange()
+        }
+    }
+
+    /// Computed over `preferences` (itself `Observable`) so the value survives relaunch.
+    var hideDependencies: Bool {
+        get { preferences.hideDependencies }
+        set {
+            guard newValue != preferences.hideDependencies else {
+                return
+            }
+            preferences.hideDependencies = newValue
+            updateSelectionForFilterChange()
         }
     }
 
     private var selectedPackageID: InstalledBrewPackage.ID?
 
-    /// Projects the shared repository's inventory through the active scope and search query. The
-    /// repository is the single source of truth; this view model owns only screen-local filter and
-    /// selection state.
+    /// Projects the repository's inventory through scope, dependency filter and search. The repository
+    /// is the source of truth; this view model owns only screen-local filter and selection state.
     var state: LoadState<InstalledPackagesContent, String> {
         switch repository.state {
         case .loading:
@@ -79,6 +96,7 @@ final class InstalledViewModel {
             .loaded(Self.filteredContent(
                 InstalledPackagesContent(packages: repository.userManagedPackages),
                 scope: scope,
+                hideDependencies: hideDependencies,
                 query: searchQuery,
             ))
         }
@@ -104,14 +122,18 @@ final class InstalledViewModel {
         return false
     }
 
-    var packageCountSubtitle: String {
+    var packageCountSubtitle: LocalizedStringResource {
         if shouldShowInitialLoadingIndicator {
-            return String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
+            return LocalizedStringResource("Loading packages…", bundle: #bundle, comment: "Installed tab subtitle while fetching")
         }
         if totalPackageCount == 1 {
-            return String(localized: "1 package")
+            return LocalizedStringResource("1 package", bundle: #bundle, comment: "Installed tab subtitle, exactly one package")
         }
-        return String(localized: "\(totalPackageCount) packages")
+        return LocalizedStringResource(
+            "\(totalPackageCount) packages",
+            bundle: #bundle,
+            comment: "Installed tab subtitle; %lld is the package count (never 1)",
+        )
     }
 
     var selectedPackage: InstalledBrewPackage? {
@@ -125,9 +147,11 @@ final class InstalledViewModel {
     /// candidate resolves naturally via observation-driven re-render.
     init(
         repository: any InstalledInventoryObserving,
+        preferences: any InstalledPreferences,
         initialSelection: InstalledBrewPackage.ID? = nil,
     ) {
         self.repository = repository
+        self.preferences = preferences
         selectedPackageID = initialSelection
     }
 
@@ -175,6 +199,22 @@ final class InstalledViewModel {
     func clearSelection() {
         selectedPackageID = firstVisibleRowID()
         searchPreviewSelectedPackageID = nil
+    }
+
+    func reconcileSelection(
+        afterChangingFrom previousIDs: [InstalledBrewPackage.ID],
+        to currentIDs: [InstalledBrewPackage.ID],
+    ) {
+        guard let selectedPackageID,
+              !repository.userManagedPackages.contains(where: { $0.id == selectedPackageID }),
+              let removedIndex = previousIDs.firstIndex(of: selectedPackageID)
+        else {
+            return
+        }
+
+        self.selectedPackageID = previousIDs[..<removedIndex]
+            .reversed()
+            .first(where: currentIDs.contains) ?? currentIDs.first
     }
 
     func selectInstalledPackage(id: InstalledBrewPackage.ID) {
@@ -225,10 +265,9 @@ final class InstalledViewModel {
         }
     }
 
-    /// Re-homes the search preview when a scope change hides the previewed row. Committed selections
-    /// are left untouched: `activeSelectedPackageID` already falls back to the first visible row while a
-    /// selection is scoped out, and restores it if the user widens the scope again.
-    private func updateSelectionForScopeChange() {
+    /// Re-homes the search preview when a filter hides the previewed row. Committed selections are left
+    /// alone: `activeSelectedPackageID` already falls back while filtered out and restores afterwards.
+    private func updateSelectionForFilterChange() {
         guard isSearchActive, !didCommitSelectionDuringSearch else {
             return
         }
@@ -242,9 +281,12 @@ final class InstalledViewModel {
     private static func filteredContent(
         _ content: InstalledPackagesContent,
         scope: InstalledPackageScope,
+        hideDependencies: Bool,
         query: String,
     ) -> InstalledPackagesContent {
-        let scoped = content.filtered(by: scope)
+        let scoped = content
+            .filtered(by: scope)
+            .filtered(hidingDependencies: hideDependencies)
         let normalizedQuery = normalizedSearchQuery(query)
         guard !normalizedQuery.isEmpty else {
             return scoped
@@ -260,26 +302,15 @@ final class InstalledViewModel {
         query.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    /// Maps a repository failure into user-facing copy — the presentation decision the repository
-    /// deliberately leaves to this layer.
     private static func userMessage(for error: any Error) -> String {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return String(
-                localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-                comment: "Installed tab error when brew binary missing",
-            )
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-            return String(localized: "Homebrew command failed.", comment: "Installed tab error generic brew failure")
-        case let BrewCommandError.launchFailed(underlying):
-            return underlying
-        default:
-            return String(localized: "Something went wrong loading packages.", comment: "Installed tab generic error")
-        }
+        BrewErrorCopy.message(
+            for: error,
+            fallback: String(
+                localized: "Something went wrong loading packages.",
+                bundle: #bundle,
+                comment: "Installed tab generic error",
+            ),
+        )
     }
 }
 

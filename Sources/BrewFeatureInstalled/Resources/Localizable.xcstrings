@@ -1,0 +1,1004 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@\n\nUntil this succeeds the app can't tell whether anything needs upgrading." : {
+      "comment" : "Upgrades empty state under a failed check: brew's error, then why the list is empty",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@\n\n检查成功后，才能确定是否有软件包需要升级。"
+          }
+        }
+      }
+    },
+    "%@ (linked)" : {
+      "comment" : "Installed versions row; %@ is the version list, annotated when one keg is linked",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@（已链接）"
+          }
+        }
+      }
+    },
+    "%@ — last check failed" : {
+      "comment" : "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — 上次检查失败"
+          }
+        }
+      }
+    },
+    "%@, not installed" : {
+      "comment" : "VoiceOver: dependency row for a package that is not installed; %@ is its name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@，未安装"
+          }
+        }
+      }
+    },
+    "%lld outdated packages are hidden by the current filters." : {
+      "comment" : "Upgrades filter-empty state with multiple hidden outdated packages",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前筛选条件隐藏了 %lld 个可升级的软件包。"
+          }
+        }
+      }
+    },
+    "%lld packages" : {
+      "comment" : "Installed tab subtitle; %lld is the package count (never 1)",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个软件包"
+          }
+        }
+      }
+    },
+    "%lld packages above depend on %@. Uninstall them first." : {
+      "comment" : "Installed detail uninstall blocked callout body for multiple dependents",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld packages above depend on %2$@. Uninstall them first."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上方 %lld 个软件包依赖 %@，请先将它们卸载。"
+          }
+        }
+      }
+    },
+    "%lld packages can be upgraded" : {
+      "comment" : "Upgrades tab subtitle when multiple packages are outdated",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个软件包可升级"
+          }
+        }
+      }
+    },
+    "%lld upgrades available" : {
+      "comment" : "VoiceOver: sidebar badge; %lld is the outdated count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有 %lld 项可用升级"
+          }
+        }
+      }
+    },
+    "1 outdated package is hidden by the current filters." : {
+      "comment" : "Upgrades filter-empty state with a single hidden outdated package",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前筛选条件隐藏了 1 个可升级的软件包。"
+          }
+        }
+      }
+    },
+    "1 package" : {
+      "comment" : "Installed tab subtitle, exactly one package",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 个软件包"
+          }
+        }
+      }
+    },
+    "1 package above depends on %@. Uninstall it first." : {
+      "comment" : "Installed detail uninstall blocked callout body for one dependent",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上方 1 个软件包依赖 %@，请先将其卸载。"
+          }
+        }
+      }
+    },
+    "1 package can be upgraded" : {
+      "comment" : "Upgrades tab subtitle for a single outdated package",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 个软件包可升级"
+          }
+        }
+      }
+    },
+    "All" : {
+      "comment" : "Scope picker: every package kind",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
+          }
+        }
+      }
+    },
+    "All %lld installed packages are up to date." : {
+      "comment" : "Upgrades empty state with total installed count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部 %lld 个已安装的软件包均为最新版本。"
+          }
+        }
+      }
+    },
+    "As dependency" : {
+      "comment" : "Install reason row: installed only because another package needed it",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作为依赖项安装"
+          }
+        }
+      }
+    },
+    "Available upgrades" : {
+      "comment" : "Upgrades tab heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用升级"
+          }
+        }
+      }
+    },
+    "Blocked by installed dependents. Activate to see why." : {
+      "comment" : "Installed detail uninstall button accessibility hint when blocked",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "其他已安装的软件包依赖此软件包，无法卸载。点击查看原因。"
+          }
+        }
+      }
+    },
+    "Can't uninstall yet." : {
+      "comment" : "Installed detail uninstall blocked callout lead sentence",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂时无法卸载。"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "comment" : "Uninstall confirmation: keep the package",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
+    },
+    "Casks" : {
+      "comment" : "Scope picker: casks only",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用程序"
+          }
+        }
+      }
+    },
+    "Check for upgrades again" : {
+      "comment" : "VoiceOver: upgrades refresh button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新检查可用升级"
+          }
+        }
+      }
+    },
+    "Choose a package from the list to see details." : {
+      "comment" : "Package detail placeholder body when nothing is selected",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从列表中选择软件包以查看详情。"
+          }
+        }
+      }
+    },
+    "Couldn't check for upgrades" : {
+      "comment" : "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法检查可用升级"
+          }
+        }
+      }
+    },
+    "DEPRECATED" : {
+      "comment" : "Installed deprecated status badge label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已弃用"
+          }
+        }
+      }
+    },
+    "Dependencies" : {
+      "comment" : "Package detail section heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依赖项"
+          }
+        }
+      }
+    },
+    "Dependents" : {
+      "comment" : "Package detail section heading: packages that depend on this one",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依赖此软件包的程序"
+          }
+        }
+      }
+    },
+    "Deprecated" : {
+      "comment" : "Installed deprecated status badge accessibility label\nVoiceOver: installed package is deprecated",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已弃用"
+          }
+        }
+      }
+    },
+    "Details" : {
+      "comment" : "Package detail section heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "详情"
+          }
+        }
+      }
+    },
+    "Everything is up to date" : {
+      "comment" : "Upgrades tab: canonical phrase for having no upgrades available",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有软件包均为最新版本"
+          }
+        }
+      }
+    },
+    "Formulae" : {
+      "comment" : "Scope picker: formulae only",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "命令行工具"
+          }
+        }
+      }
+    },
+    "Hide dependencies" : {
+      "comment" : "Installed tab: hide dependency-only packages",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏依赖项"
+          }
+        }
+      }
+    },
+    "Homepage" : {
+      "comment" : "Package detail row: homepage link",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "主页"
+          }
+        }
+      }
+    },
+    "Install reason" : {
+      "comment" : "Package detail row: on request or as a dependency",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装原因"
+          }
+        }
+      }
+    },
+    "Installed" : {
+      "comment" : "Package detail row: installed version(s)\nVoiceOver: package is installed",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装"
+          }
+        }
+      }
+    },
+    "Installed and up to date" : {
+      "comment" : "Installed list: tooltip on the up-to-date tick\nVoiceOver: installed package has no upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装且为最新版本"
+          }
+        }
+      }
+    },
+    "Installed on" : {
+      "comment" : "Package detail row: install date",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装时间"
+          }
+        }
+      }
+    },
+    "Installed packages" : {
+      "comment" : "VoiceOver: the installed packages list",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装的软件包"
+          }
+        }
+      }
+    },
+    "Keg-only" : {
+      "comment" : "Package detail row: formula is keg-only",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "仅安装到独立目录"
+          }
+        }
+      }
+    },
+    "Latest version" : {
+      "comment" : "Package detail row",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最新版本"
+          }
+        }
+      }
+    },
+    "License" : {
+      "comment" : "Package detail row",
+      "localizations" : {
+        "en-GB" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licence"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "许可证"
+          }
+        }
+      }
+    },
+    "Loading packages…" : {
+      "comment" : "Installed tab subtitle while fetching\nUpgrades tab subtitle while fetching",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在加载软件包…"
+          }
+        }
+      }
+    },
+    "No dependencies." : {
+      "comment" : "Package detail: empty dependency list",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无依赖项。"
+          }
+        }
+      }
+    },
+    "No dependents." : {
+      "comment" : "Package detail: nothing depends on this package",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有其他软件包依赖此软件包。"
+          }
+        }
+      }
+    },
+    "No installed packages to check." : {
+      "comment" : "Upgrades empty state when nothing is installed",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有已安装的软件包可供检查。"
+          }
+        }
+      }
+    },
+    "No matches in %lld outdated packages" : {
+      "comment" : "Upgrades tab subtitle when filters hide every available upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个可升级的软件包中没有匹配项"
+          }
+        }
+      }
+    },
+    "No matches in 1 outdated package" : {
+      "comment" : "Upgrades tab subtitle when filters hide the single available upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 个可升级的软件包中没有匹配项"
+          }
+        }
+      }
+    },
+    "No matching upgrades" : {
+      "comment" : "Upgrades filter-empty state title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有匹配的可用升级"
+          }
+        }
+      }
+    },
+    "No selection" : {
+      "comment" : "Package detail placeholder title when nothing is selected",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未选择项目"
+          }
+        }
+      }
+    },
+    "None." : {
+      "comment" : "Package detail: empty relationship list",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无。"
+          }
+        }
+      }
+    },
+    "Nothing to upgrade here" : {
+      "comment" : "Upgrades header stand-in when filters hide every available upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有可升级的软件包"
+          }
+        }
+      }
+    },
+    "OUTDATED" : {
+      "comment" : "Installed outdated status badge label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可升级"
+          }
+        }
+      }
+    },
+    "Open installed package %@" : {
+      "comment" : "VoiceOver: dependency row that jumps to that package; %@ is its name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开已安装的软件包 %@"
+          }
+        }
+      }
+    },
+    "Outdated packages" : {
+      "comment" : "VoiceOver: the outdated packages list",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可升级的软件包"
+          }
+        }
+      }
+    },
+    "Pinned" : {
+      "comment" : "Package detail row: brew pin",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已锁定版本"
+          }
+        }
+      }
+    },
+    "Poured from bottle — %@" : {
+      "comment" : "Install date row; %@ is the formatted date",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从预编译包安装 — %@"
+          }
+        }
+      }
+    },
+    "Refresh" : {
+      "comment" : "Upgrades tab: re-check for upgrades button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        }
+      }
+    },
+    "Scope" : {
+      "comment" : "Installed tab: formula/cask scope picker label\nUpgrades tab: formula/cask scope picker label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "范围"
+          }
+        }
+      }
+    },
+    "Search Installed Packages" : {
+      "comment" : "Search field placeholder, Installed tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索已安装的软件包"
+          }
+        }
+      }
+    },
+    "Search Upgrades" : {
+      "comment" : "Search field placeholder, Upgrades tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索可升级的软件包"
+          }
+        }
+      }
+    },
+    "Show all upgrades" : {
+      "comment" : "Upgrades tab: clear the scope and search filters",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示全部可用升级"
+          }
+        }
+      }
+    },
+    "Showing %lld of %lld upgrades" : {
+      "comment" : "Upgrades tab subtitle while filtering with at least one match",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Showing %1$lld of %2$lld upgrades"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示 %lld 项升级，共 %lld 项"
+          }
+        }
+      }
+    },
+    "Something went wrong loading packages." : {
+      "comment" : "Installed tab generic error\nUpgrades tab generic error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "加载软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong while uninstalling this package." : {
+      "comment" : "Installed detail generic uninstall error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载此软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong while upgrading this package." : {
+      "comment" : "Installed detail generic upgrade error",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级此软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "comment" : "Package detail row: source tap",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "来源"
+          }
+        }
+      }
+    },
+    "This will remove %@ from this Mac using Homebrew." : {
+      "comment" : "Installed detail uninstall confirmation message; interpolated package name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将使用 Homebrew 从此 Mac 移除 %@。"
+          }
+        }
+      }
+    },
+    "Try Again" : {
+      "comment" : "Upgrades tab: re-run the failed upgrade check",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        }
+      }
+    },
+    "Uninstall" : {
+      "comment" : "Installed detail uninstall button title\nPackage detail section heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载"
+          }
+        }
+      }
+    },
+    "Uninstall %@?" : {
+      "comment" : "Installed detail uninstall confirmation title; interpolated package name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "卸载 %@？"
+          }
+        }
+      }
+    },
+    "Uninstalling" : {
+      "comment" : "VoiceOver: package uninstalling",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在卸载"
+          }
+        }
+      }
+    },
+    "Uninstalls this package from this Mac" : {
+      "comment" : "Command block summary above brew uninstall",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从此 Mac 卸载软件包"
+          }
+        }
+      }
+    },
+    "Upgrade" : {
+      "comment" : "Package detail section heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级"
+          }
+        }
+      }
+    },
+    "Upgrade All (%lld)" : {
+      "comment" : "Upgrades tab button; %lld is the outdated count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部升级（%lld）"
+          }
+        }
+      }
+    },
+    "Upgrade all %lld packages" : {
+      "comment" : "VoiceOver: upgrade-all button; %lld is the outdated count",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级全部 %lld 个软件包"
+          }
+        }
+      }
+    },
+    "Upgrade available" : {
+      "comment" : "Installed outdated status badge accessibility label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有可用升级"
+          }
+        }
+      }
+    },
+    "Upgrade available to %@" : {
+      "comment" : "VoiceOver: %@ is the available version",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可升级至 %@"
+          }
+        }
+      }
+    },
+    "Upgrade to %@" : {
+      "comment" : "Installed detail upgrade button; interpolated label shows target tap version.",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级至 %@"
+          }
+        }
+      }
+    },
+    "Upgrades every outdated cask" : {
+      "comment" : "Upgrades header command summary scoped to casks",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级所有有新版本的应用程序"
+          }
+        }
+      }
+    },
+    "Upgrades every outdated formula" : {
+      "comment" : "Upgrades header command summary scoped to formulae",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级所有有新版本的命令行工具"
+          }
+        }
+      }
+    },
+    "Upgrades every outdated package" : {
+      "comment" : "Upgrades header command summary for an unfiltered batch",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级所有有新版本的软件包"
+          }
+        }
+      }
+    },
+    "Upgrades the %lld packages matching your search" : {
+      "comment" : "Upgrades header command summary for multiple searched packages",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级与搜索条件匹配的 %lld 个软件包"
+          }
+        }
+      }
+    },
+    "Upgrades the 1 package matching your search" : {
+      "comment" : "Upgrades header command summary for a single searched package",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级与搜索条件匹配的 1 个软件包"
+          }
+        }
+      }
+    },
+    "Upgrades this package to the latest available version" : {
+      "comment" : "Command block summary above brew upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将此软件包升级至最新可用版本"
+          }
+        }
+      }
+    },
+    "Upgrading" : {
+      "comment" : "VoiceOver: package upgrading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在升级"
+          }
+        }
+      }
+    },
+    "Yes" : {
+      "comment" : "Package detail value for a true flag",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是"
+          }
+        }
+      }
+    },
+    "Your installed package is up to date." : {
+      "comment" : "Upgrades empty state for a single installed package",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装的软件包为最新版本。"
+          }
+        }
+      }
+    },
+    "Your packages" : {
+      "comment" : "Installed tab heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装的软件包"
+          }
+        }
+      }
+    },
+    "blocking uninstall" : {
+      "comment" : "Installed detail Used by badge when dependents block uninstall",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "阻止卸载"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

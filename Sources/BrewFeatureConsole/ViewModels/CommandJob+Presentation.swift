@@ -11,7 +11,7 @@ extension CommandJob {
     /// The tab names the task; command tooltips and exported logs retain executable syntax.
     var tabTitle: String {
         if kind == .doctorRead {
-            return String(localized: "brew doctor", comment: "Console tab for the diagnostic task, not a shell command")
+            return String(localized: "brew doctor", bundle: #bundle, comment: "Console tab for the diagnostic task, not a shell command")
         }
         return command
     }
