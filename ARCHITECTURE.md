@@ -154,4 +154,4 @@ height and preserves whether the final line actually ended in a newline.
 Simplified Chinese translations live in each owning UI target's catalog. `DoctorText` translates
 known diagnostic prose at the presentation boundary, including wrapped paragraphs; unknown text,
 raw output, issue identity, commands and configuration keys/values remain unchanged. The Chinese
-Doctor page and console task are named “brew 诊断”.
+Doctor page is named “诊断”; the console task is named “brew 诊断”.
