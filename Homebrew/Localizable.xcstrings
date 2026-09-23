@@ -45,6 +45,17 @@
         }
       }
     },
+    "Clear UserDefaults": {
+      "comment": "Debug menu: clear saved app preferences",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除偏好设置"
+          }
+        }
+      }
+    },
     "Configuration": {
       "comment": "Sidebar: brew config and environment",
       "localizations": {
@@ -58,6 +69,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "配置"
+          }
+        }
+      }
+    },
+    "Debug": {
+      "comment": "Developer debug menu title",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调试"
           }
         }
       }
@@ -103,6 +125,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "brew 诊断"
+          }
+        }
+      }
+    },
+    "Fatal Error (signal)": {
+      "comment": "Debug crash test: trigger a fatal error signal",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "致命错误（信号）"
+          }
+        }
+      }
+    },
+    "Force Crash": {
+      "comment": "Debug submenu: deliberately crash the app to test reporting",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "强制崩溃"
           }
         }
       }
@@ -190,6 +234,17 @@
         }
       }
     },
+    "Show the Self-Upgrade Banner": {
+      "comment": "Debug toggle: preview the app self-upgrade banner",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示应用升级横幅"
+          }
+        }
+      }
+    },
     "The Homebrew app quit unexpectedly": {
       "comment": "Crash report dialog title",
       "localizations": {
@@ -208,6 +263,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "此版本的 Homebrew 应用缺少升级辅助程序。"
+          }
+        }
+      }
+    },
+    "Uncaught Exception": {
+      "comment": "Debug crash test: raise an uncaught exception",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未捕获的异常"
           }
         }
       }

@@ -1,6 +1,45 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Some directories in the Caskroom do not have valid metadata.": {
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caskroom 中部分目录缺少有效的元数据。"
+          }
+        }
+      }
+    },
+    "The following cask cannot be upgraded as-is:": {
+      "comment": "Known Homebrew diagnostic prose introducing a cask path; leave the path unchanged.",
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下应用程序目前无法直接升级："
+          }
+        }
+      }
+    },
+    "The following casks cannot be upgraded as-is:": {
+      "comment": "Known Homebrew diagnostic prose introducing multiple cask paths; leave the paths unchanged.",
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下应用程序目前无法直接升级："
+          }
+        }
+      }
+    },
     "%@, Fix available": {
       "comment": "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
       "localizations": {

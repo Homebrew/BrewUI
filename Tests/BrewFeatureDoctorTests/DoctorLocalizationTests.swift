@@ -45,6 +45,35 @@ struct DoctorLocalizationTests {
         }
     }
 
+    @Test(arguments: ["cask", "casks"])
+    func `invalid cask metadata warning translates without changing repair data`(noun: String) throws {
+        try withChineseBundle { bundle in
+            let path = "/opt/homebrew/Caskroom/parallels"
+            let caption = "The following \(noun) cannot be upgraded as-is:"
+            let command = DoctorFixStep(
+                displayCommand: "brew reinstall --cask --force parallels",
+                arguments: ["reinstall", "--cask", "--force", "parallels"],
+                needsAdmin: false,
+            )
+            let issue = DoctorIssue(
+                title: "Some directories in the Caskroom do not have valid metadata.",
+                severity: .caution,
+                blocks: [
+                    DoctorBlock(id: 0, caption: caption, content: .data([path])),
+                    DoctorBlock(id: 1, caption: "To fix this, run:", content: .command([command])),
+                ],
+                rawBody: "\(caption)\n  \(path)\nTo fix this, run:\n  \(command.displayCommand)",
+            )
+            let item = DoctorIssueItem(issue: issue, bundle: bundle)
+            #expect(item.title == "Caskroom 中部分目录缺少有效的元数据。")
+            #expect(item.blocks.first?.caption == "以下应用程序目前无法直接升级：")
+            #expect(item.blocks.first?.content == .data([path]))
+            #expect(item.rawText == issue.rawText)
+            #expect(item.id == DoctorIssueItem.contentID(for: issue))
+            #expect(item.primaryRunnableStep == command)
+        }
+    }
+
     @Test func `wrapped paragraphs translate while unknown output stays intact`() throws {
         try withChineseBundle { bundle in
             let lines = [

@@ -1,3 +1,4 @@
+import AppKit
 import BrewAccessibilityID
 import XCTest
 
@@ -24,6 +25,23 @@ final class LocalizationUITests: BrewUITestCase {
         attachment.name = "Simplified Chinese configuration"
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    @MainActor
+    func testChineseConfigurationCopiesEnglishReport() throws {
+        let app = try track(BrewApp.launch(scenario: .installedBasic, language: "zh-Hans"))
+        let installed = InstalledScreen(app: app).waitUntilLoaded(timeout: BrewUITestTimeout.launch)
+        let configuration = installed.sidebar.goToConfiguration()
+        assertText("构建设置", on: configuration)
+        let copy = configuration.root.element.buttons["复制报告"]
+        XCTAssertTrue(copy.waitForExistence(timeout: BrewUITestTimeout.command))
+        copy.click()
+
+        let report = try XCTUnwrap(NSPasteboard.general.string(forType: .string))
+        XCTAssertTrue(report.contains("\n\nSystem\n"))
+        XCTAssertTrue(report.contains("\n\nBuild settings\n"))
+        XCTAssertFalse(report.contains("\n\n系统\n"))
+        XCTAssertFalse(report.contains("\n\n构建设置\n"))
     }
 
     @MainActor
