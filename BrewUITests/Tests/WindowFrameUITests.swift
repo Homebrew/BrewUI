@@ -20,7 +20,7 @@ final class WindowFrameUITests: BrewUITestCase {
         let window = first.windows.firstMatch
         let initial = window.frame
 
-        let resized = window.resizeWindow(by: CGVector(dx: -120, dy: -30))
+        let resized = window.resizeWindowWidth(by: -120)
         XCTAssertNotEqual(resized.size, initial.size, "The drag did not resize the window from \(initial)")
 
         first.quit()
