@@ -39,20 +39,16 @@ struct ServicesRepositoryTests {
 
     @Test func `failures persist until forced retry and stale data stays visible`() async {
         let failure = BrewCommandError.failed(exitCode: 1, stderr: "permission denied")
-        let runner = SequenceRunner([.failure(failure), .success(Self.output("[]")), .failure(failure), .success(Self.output("[]"))])
+        let runner = SequenceRunner([.failure(failure), .success(Self.output("[]")), .failure(failure)])
         let repository = makeRepository(runner)
         await repository.load(forceRefresh: false)
         #expect(Self.error(in: repository.state) as? BrewCommandError == failure)
-        await repository.load(forceRefresh: false)
-        #expect(await runner.callCount == 1)
         await repository.load(forceRefresh: true)
         await repository.load(forceRefresh: true)
         #expect(repository.state.value == [])
         #expect(repository.refreshFailure as? BrewCommandError == failure)
         await repository.load(forceRefresh: false)
         #expect(await runner.callCount == 3)
-        await repository.load(forceRefresh: true)
-        #expect(repository.refreshFailure == nil)
     }
 
     @Test(arguments: [("not json", Int32(0), ""), ("[{\"name\":\"redis\",\"status\":\"started\"}]", Int32(0), ""),

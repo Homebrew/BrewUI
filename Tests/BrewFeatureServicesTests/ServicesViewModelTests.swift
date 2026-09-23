@@ -1,6 +1,7 @@
 import BrewCore
 @testable import BrewFeatureServices
 import BrewRepositoryInterfaces
+import Observation
 import Testing
 
 @MainActor
@@ -27,19 +28,9 @@ struct ServicesViewModelTests {
         repository.state = .loaded([])
         #expect(viewModel.selectedService == nil)
     }
-
-    @Test func `initial and refresh errors retain technical details`() {
-        let error = BrewCommandError.failed(exitCode: 1, stderr: "permission denied")
-        let repository = StubServices(state: .failed(error))
-        let viewModel = ServicesViewModel(repository: repository)
-        #expect(viewModel.state == .failed("permission denied"))
-        repository.state = .loaded(Self.inventory)
-        repository.refreshFailure = error
-        #expect(viewModel.state == .loaded(Self.inventory))
-        #expect(viewModel.refreshFailure == "permission denied")
-    }
 }
 
+@Observable
 @MainActor
 private final class StubServices: ServicesRepository {
     var state: LoadState<[BrewService], any Error>

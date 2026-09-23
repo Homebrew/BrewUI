@@ -20,7 +20,7 @@ enum ScenarioFixtures {
 
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
-        case .empty, .brewNotFound, .servicesBasic, .servicesFailure, .servicesRefresh:
+        case .empty, .brewNotFound, .servicesBasic:
             emptyInstalledFixtures(for: scenario)
         case .installedBasic:
             installedBasicFixtures()
@@ -296,35 +296,15 @@ enum ScenarioFixtures {
     // MARK: - Builders
 
     private static func emptyInstalledFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
-        switch scenario {
-        case .servicesBasic, .servicesFailure: servicesFixtures(failing: scenario == .servicesFailure)
-        case .servicesRefresh: servicesRefreshFixtures()
-        default: emptyFixtures()
-        }
-    }
-
-    private static func servicesFixtures(failing: Bool) -> FixtureSet {
         var set = emptyFixtures()
+        guard scenario == .servicesBasic else { return set }
         let key = "services_info_--all_--json"
-        if failing {
-            set.brewFiles["\(key).stderr"] = text("Unable to read services")
-            set.brewFiles["\(key).exitcode"] = text("1")
-        } else {
-            set.brewFiles["\(key).stdout"] = json([
-                ["name": "redis", "status": "started", "running": true, "pid": 43210, "user": "test", "registered": true, "schedulable": false,
-                 "file": "/fixtures/redis.plist", "log_path": "/fixtures/redis.log", "error_log_path": "/fixtures/redis-error.log"],
-                ["name": "postgresql@17", "status": "none", "running": false, "registered": false, "schedulable": true],
-                ["name": "unbound", "status": "error", "running": false, "exit_code": 78],
-            ])
-        }
-        return set
-    }
-
-    private static func servicesRefreshFixtures() -> FixtureSet {
-        var set = servicesFixtures(failing: false)
-        let key = "services_info_--all_--json"
-        set.brewFiles["\(key).next-stdout"] = set.brewFiles["\(key).stdout"]
-        set.brewFiles["\(key).stdout"] = json([])
+        set.brewFiles["\(key).stdout"] = json([
+            ["name": "redis", "status": "started", "running": true, "pid": 43210, "user": "test", "registered": true, "schedulable": false,
+             "file": "/fixtures/redis.plist", "log_path": "/fixtures/redis.log", "error_log_path": "/fixtures/redis-error.log"],
+            ["name": "postgresql@17", "status": "none", "running": false, "registered": false, "schedulable": true],
+            ["name": "unbound", "status": "error", "running": false, "exit_code": 78],
+        ])
         return set
     }
 

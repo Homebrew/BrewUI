@@ -40,7 +40,6 @@ struct ServicesView: View {
             }
             .frame(minWidth: BrewLayout.installedListColumnMinWidth, idealWidth: BrewLayout.installedListColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            // Keep the split pane stable when the selection resets the inner scroll position.
             VStack(alignment: .leading, spacing: 0) {
                 ScrollView {
                     if let service = viewModel.selectedService {

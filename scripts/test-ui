@@ -17,6 +17,19 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Restore the user's input method even if XCTest fails after selecting the U.S. layout.
+selected_input_source="$(swift -e 'import Carbon; let source = TISCopyCurrentKeyboardInputSource().takeRetainedValue(); guard let value = TISGetInputSourceProperty(source, kTISPropertyInputSourceID) else { exit(2) }; print(Unmanaged<CFString>.fromOpaque(value).takeUnretainedValue())')"
+restore_input_source() {
+  BREWUI_INPUT_SOURCE_ID="$selected_input_source" swift -e '
+    import Carbon
+    let id = ProcessInfo.processInfo.environment["BREWUI_INPUT_SOURCE_ID"] ?? ""
+    let query = [kTISPropertyInputSourceID as String: id]
+    guard let source = (TISCreateInputSourceList(query as CFDictionary, false).takeRetainedValue() as? [TISInputSource])?.first else { exit(2) }
+    exit(TISSelectInputSource(source))
+  ' || echo "Warning: could not restore input source $selected_input_source" >&2
+}
+trap restore_input_source EXIT
+
 echo "==> Resolving package dependencies"
 xcodebuild -resolvePackageDependencies -project Homebrew.xcodeproj
 

@@ -5,6 +5,7 @@
 
 import AppKit
 import BrewUITestContract
+import Carbon
 import XCTest
 
 /// Launches the app under test against a scenario. The fixture tree travels in the launch environment
@@ -40,9 +41,20 @@ enum BrewApp {
     static func activate(_ app: XCUIApplication) {
         app.activate()
         _ = app.wait(for: .runningForeground, timeout: BrewUITestTimeout.launch)
+        defer { selectUSKeyboardLayout() }
         guard app.windows.count == 0 else { return }
         reopen()
         _ = app.windows.firstMatch.waitForExistence(timeout: BrewUITestTimeout.launch)
+    }
+
+    /// Input methods can compose XCTest's literal keystrokes and summon Keyboard settings.
+    private static func selectUSKeyboardLayout() {
+        let query = [kTISPropertyInputSourceID as String: "com.apple.keylayout.US"]
+        guard let source = (TISCreateInputSourceList(query as CFDictionary, false).takeRetainedValue() as? [TISInputSource])?.first else {
+            XCTFail("The U.S. keyboard layout is unavailable")
+            return
+        }
+        XCTAssertEqual(TISSelectInputSource(source), noErr)
     }
 
     /// `NSWorkspace` rather than `open -b`: a real install with the same bundle identifier would win.
