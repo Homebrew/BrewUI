@@ -4,6 +4,7 @@
 //
 
 @testable import BrewFeatureDoctor
+import Foundation
 import Testing
 
 /// Drift away from brew's own wording is a defect, not a style choice.
@@ -14,12 +15,19 @@ struct DoctorCopyTests {
     working fine: please don't worry or file an issue; just ignore this. Thanks!
     """
 
-    @Test func `warningPreamble matches brew doctor word for word`() {
+    @Test func `english warningPreamble matches brew doctor word for word`() {
         let unwrapped = Self.brewPreamble.replacingOccurrences(of: "\n", with: " ")
-        #expect(DoctorCopy.warningPreamble == unwrapped)
+        #expect(warningPreamble(locale: "en") == unwrapped)
     }
 
-    @Test func `warningPreamble carries no hard line breaks so it can reflow`() {
-        #expect(!DoctorCopy.warningPreamble.contains("\n"))
+    @Test(arguments: ["en", "zh-Hans"])
+    func `warningPreamble carries no hard line breaks so it can reflow`(locale: String) {
+        #expect(!warningPreamble(locale: locale).contains("\n"))
+    }
+
+    private func warningPreamble(locale: String) -> String {
+        var resource = DoctorCopy.warningPreamble
+        resource.locale = Locale(identifier: locale)
+        return String(localized: resource)
     }
 }

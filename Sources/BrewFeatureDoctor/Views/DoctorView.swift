@@ -167,7 +167,7 @@ private struct DoctorSeveritySectionHeader: View {
 
 private struct DoctorReassuranceNote: View {
     var body: some View {
-        NoteCallout(verbatim: DoctorCopy.warningPreamble, tone: .info)
+        NoteCallout(DoctorCopy.warningPreamble, tone: .info)
             .padding(.horizontal, BrewSpacing.lg)
             .padding(.bottom, BrewSpacing.sm)
     }
