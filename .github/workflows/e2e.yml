@@ -2,7 +2,7 @@ name: Live E2E Canaries
 
 # Real Homebrew and real network: this installs and uninstalls `hello` on the
 # runner, which is safe because the runner is ephemeral.
-# See BrewUITests/E2E/README.md.
+# See AGENTS.md#live-end-to-end-canaries.
 on:
   pull_request:
     types: [opened, reopened, synchronize]
@@ -43,6 +43,13 @@ jobs:
           TEST_FILTER: ${{ inputs.test_filter }}
         run: |
           set -o pipefail
+          mkdir -p "$HOME/.homebrew"
+          cat > "$HOME/.homebrew/brew.env" <<'EOF'
+          HOMEBREW_NO_AUTO_UPDATE=1
+          HOMEBREW_NO_ANALYTICS=1
+          HOMEBREW_NO_INSTALL_CLEANUP=1
+          HOMEBREW_NO_ENV_HINTS=1
+          EOF
           if [[ -n "${TEST_FILTER}" ]]; then
             scripts/test-e2e -only-testing:"${TEST_FILTER}" | tee xcodebuild-e2e.log
           else

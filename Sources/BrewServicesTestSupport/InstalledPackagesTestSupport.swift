@@ -2,7 +2,7 @@
 //  InstalledPackagesTestSupport.swift
 //  BrewServicesTestSupport
 //
-//  Shared boundary fakes for BrewInstalledPackagesRepository slice tests (`CONVENTIONS.md` — Testing).
+//  Shared boundary fakes for BrewInstalledPackagesRepository slice tests (`AGENTS.md` — Testing).
 //
 
 import BrewCLI
@@ -46,22 +46,6 @@ public enum InstalledPackagesTestSupport {
             return []
         }
         return packages
-    }
-
-    // MARK: Localized copy (must match `InstalledViewModel.userMessage`)
-
-    public static func localizedBrewExecutableNotFoundMessage() -> String {
-        String(
-            localized: "Could not find Homebrew. Install it or ensure brew is in the default location.",
-            comment: "Installed tab error when brew binary missing",
-        )
-    }
-
-    public static func localizedGenericLoadFailureMessage() -> String {
-        String(
-            localized: "Something went wrong loading packages.",
-            comment: "Installed tab generic error",
-        )
     }
 
     /// Response for `brew info --installed --json=v2`.

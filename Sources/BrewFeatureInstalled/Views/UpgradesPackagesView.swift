@@ -12,7 +12,6 @@ import SwiftUI
 /// Middle column of the Upgrades tab: header, batch Upgrade All, list of outdated packages,
 /// and a friendly empty state when nothing is outdated.
 struct UpgradesPackagesView: View {
-    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: UpgradesViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
@@ -30,7 +29,7 @@ struct UpgradesPackagesView: View {
             }
 
             AsyncContentView(
-                state: viewModel.localizedState(localization: localization),
+                state: viewModel.state,
                 onRetry: { Task { await viewModel.refresh() } },
                 loaded: { content in
                     if content.packages.isEmpty {
@@ -57,10 +56,10 @@ struct UpgradesPackagesView: View {
 
     /// Kind filter shown whenever there is outdated inventory to narrow. Filters client-side; never refetches.
     private var scopePicker: some View {
-        Picker("Scope", selection: $viewModel.scope) {
-            Text("All").tag(InstalledPackageScope.all)
-            Text("Formulae").tag(InstalledPackageScope.formulae)
-            Text("Casks").tag(InstalledPackageScope.casks)
+        Picker(String(localized: "Scope", bundle: #bundle, comment: "Upgrades tab: formula/cask scope picker label"), selection: $viewModel.scope) {
+            Text("All", bundle: #bundle, comment: "Scope picker: every package kind").tag(InstalledPackageScope.all)
+            Text("Formulae", bundle: #bundle, comment: "Scope picker: formulae only").tag(InstalledPackageScope.formulae)
+            Text("Casks", bundle: #bundle, comment: "Scope picker: casks only").tag(InstalledPackageScope.casks)
         }
         .pickerStyle(.segmented)
         .labelsHidden()
@@ -76,7 +75,7 @@ struct UpgradesPackagesView: View {
                 }
             }
             .listStyle(.inset)
-            .accessibilityLabel("Outdated packages")
+            .accessibilityLabel(String(localized: "Outdated packages", bundle: #bundle, comment: "VoiceOver: the outdated packages list"))
             .axid(.upgradesList)
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
@@ -138,19 +137,19 @@ struct UpgradesPackagesView: View {
 
     private var allCaughtUpState: some View {
         centeredEmptyState(
-            title: viewModel.upToDateTitle(localization: localization),
-            subtitle: viewModel.upToDateDetail(localization: localization),
-            accessibilityLabel: viewModel.upToDateTitle(localization: localization),
+            title: viewModel.upToDateTitle,
+            subtitle: viewModel.upToDateDetail,
+            accessibilityLabel: viewModel.upToDateTitle,
         )
     }
 
     /// An empty list after a failed check means "unknown", not "up to date".
     private var upgradeCheckFailedState: some View {
         centeredEmptyState(
-            title: UpgradesViewModel.upgradeCheckFailedTitle(localization: localization),
-            subtitle: viewModel.upgradeCheckFailureDetail(localization: localization),
-            actionTitle: "Try Again",
-            accessibilityLabel: UpgradesViewModel.upgradeCheckFailedTitle(localization: localization),
+            title: UpgradesViewModel.upgradeCheckFailedTitle,
+            subtitle: viewModel.upgradeCheckFailureDetail,
+            actionTitle: String(localized: "Try Again", bundle: #bundle, comment: "Upgrades tab: re-run the failed upgrade check"),
+            accessibilityLabel: UpgradesViewModel.upgradeCheckFailedTitle,
             icon: {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .font(.brewTitle2)
@@ -165,9 +164,13 @@ struct UpgradesPackagesView: View {
     /// still exist in the inventory — distinct from the "all caught up" state.
     private var noSearchMatchesState: some View {
         centeredEmptyState(
-            title: localization.string("No matching upgrades"),
+            title: String(
+                localized: "No matching upgrades",
+                bundle: #bundle,
+                comment: "Upgrades filter-empty state title",
+            ),
             subtitle: noSearchMatchesSubtitle,
-            actionTitle: "Show all upgrades",
+            actionTitle: String(localized: "Show all upgrades", bundle: #bundle, comment: "Upgrades tab: clear the scope and search filters"),
             accessibilityLabel: noSearchMatchesSubtitle,
             action: { viewModel.resetFilters() },
         )
@@ -176,7 +179,7 @@ struct UpgradesPackagesView: View {
     private func centeredEmptyState(
         title: String,
         subtitle: String,
-        actionTitle: LocalizedStringKey? = nil,
+        actionTitle: String? = nil,
         accessibilityLabel: String,
         @ViewBuilder icon: () -> some View = { EmptyView() },
         action: (() -> Void)? = nil,
@@ -208,9 +211,17 @@ struct UpgradesPackagesView: View {
     private var noSearchMatchesSubtitle: String {
         let hidden = viewModel.totalOutdatedCount
         if hidden == 1 {
-            return localization.string("1 outdated package is hidden by the current filters.")
+            return String(
+                localized: "1 outdated package is hidden by the current filters.",
+                bundle: #bundle,
+                comment: "Upgrades filter-empty state with a single hidden outdated package",
+            )
         }
-        return localization.string("\(hidden) outdated packages are hidden by the current filters.")
+        return String(
+            localized: "\(hidden) outdated packages are hidden by the current filters.",
+            bundle: #bundle,
+            comment: "Upgrades filter-empty state with multiple hidden outdated packages",
+        )
     }
 }
 

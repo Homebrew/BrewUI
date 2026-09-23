@@ -5,16 +5,17 @@ on:
     branches:
       - main
     paths:
-      - "Brew/**"
+      - "Homebrew/**"
+      - "HomebrewUpgradeHelper/**"
       - "BrewTests/**"
       - "BrewUITests/**"
       - "Homebrew.xcodeproj/**"
-      - "Brew.entitlements"
       - "Sources/**"
       - "Tests/**"
       - "Package.swift"
       - "Package.resolved"
       - "Tools/BrewUILint/**"
+      - "scripts/localize"
       - "scripts/test"
       - "scripts/test-ui"
       - "Brewfile"
@@ -25,16 +26,17 @@ on:
   pull_request:
     types: [opened, reopened, synchronize]
     paths:
-      - "Brew/**"
+      - "Homebrew/**"
+      - "HomebrewUpgradeHelper/**"
       - "BrewTests/**"
       - "BrewUITests/**"
       - "Homebrew.xcodeproj/**"
-      - "Brew.entitlements"
       - "Sources/**"
       - "Tests/**"
       - "Package.swift"
       - "Package.resolved"
       - "Tools/BrewUILint/**"
+      - "scripts/localize"
       - "scripts/test"
       - "scripts/test-ui"
       - "Mintfile"
@@ -90,6 +92,11 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | tee xcodebuild.log
 
+      # Xcode emits the compiler's string data during the build above but only the IDE writes it
+      # back into the catalogs, so do that here and fail if a catalog no longer matches the code.
+      - name: Check string catalogs are in sync
+        run: scripts/localize sync --check --skip-build --derived-data DerivedData
+
       - name: Capture Swift toolchain fingerprint
         id: swift-toolchain
         run: echo "fingerprint=$(swift --version | shasum -a 256 | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
@@ -121,7 +128,7 @@ jobs:
           xcrun swift test --package-path Tools/BrewUILint | tee swift-test-brewuilint.log
 
       - name: Cache Homebrew prefix
-        uses: Homebrew/actions/cache-homebrew-prefix@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
+        uses: Homebrew/actions/cache-homebrew-prefix@1e34f2e2acaa766b7efacb8c26352e6abbb023f9 # 2026.09.13.1
         with:
           brewfile: true
           uninstall: true

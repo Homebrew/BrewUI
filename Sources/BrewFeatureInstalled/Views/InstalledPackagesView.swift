@@ -12,7 +12,6 @@ import SwiftUI
 
 /// Middle column of the main window: “Installed” chrome and the package list.
 struct InstalledPackagesView: View {
-    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: InstalledViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
@@ -23,10 +22,10 @@ struct InstalledPackagesView: View {
             packageListBanner()
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages")
+                Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageCountSubtitle(localization: localization))
+                Text(viewModel.packageCountSubtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
             }
@@ -36,10 +35,11 @@ struct InstalledPackagesView: View {
             .accessibilityHeading(.h1)
 
             scopePicker
+            hideDependenciesToggle
             Divider()
 
             AsyncContentView(
-                state: viewModel.localizedState(localization: localization),
+                state: viewModel.state,
                 onRetry: { Task { await viewModel.refresh() } },
                 loaded: { content in
                     installedList(content)
@@ -56,15 +56,26 @@ struct InstalledPackagesView: View {
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
     private var scopePicker: some View {
-        Picker("Scope", selection: $viewModel.scope) {
-            Text("All").tag(InstalledPackageScope.all)
-            Text("Formulae").tag(InstalledPackageScope.formulae)
-            Text("Casks").tag(InstalledPackageScope.casks)
+        Picker(String(localized: "Scope", bundle: #bundle, comment: "Installed tab: formula/cask scope picker label"), selection: $viewModel.scope) {
+            Text("All", bundle: #bundle, comment: "Scope picker: every package kind").tag(InstalledPackageScope.all)
+            Text("Formulae", bundle: #bundle, comment: "Scope picker: formulae only").tag(InstalledPackageScope.formulae)
+            Text("Casks", bundle: #bundle, comment: "Scope picker: casks only").tag(InstalledPackageScope.casks)
         }
         .pickerStyle(.segmented)
         .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
-        .padding(.bottom, BrewSpacing.md)
+        .padding(.bottom, BrewSpacing.sm)
+    }
+
+    private var hideDependenciesToggle: some View {
+        Toggle(String(localized: "Hide dependencies", bundle: #bundle, comment: "Installed tab: hide dependency-only packages"), isOn: $viewModel.hideDependencies)
+            .toggleStyle(.switch)
+            .controlSize(.mini)
+            .font(.brewSubheadline)
+            .foregroundStyle(Color.brewTextSecondary)
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.md)
+            .axid(.installedHideDependenciesSwitch)
     }
 
     private func installedList(_ content: InstalledPackagesContent) -> some View {
@@ -75,7 +86,7 @@ struct InstalledPackagesView: View {
                 }
             }
             .listStyle(.inset)
-            .accessibilityLabel("Installed packages")
+            .accessibilityLabel(String(localized: "Installed packages", bundle: #bundle, comment: "VoiceOver: the installed packages list"))
             .axid(.installedList)
             .onAppear {
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
@@ -84,7 +95,8 @@ struct InstalledPackagesView: View {
             .onChange(of: viewModel.activeSelectedPackageID) { _, selectedID in
                 scrollToSelection(selectedID, in: content, with: proxy)
             }
-            .onChange(of: content.packages.map(\.id)) { _, _ in
+            .onChange(of: content.packages.map(\.id)) { previousIDs, currentIDs in
+                viewModel.reconcileSelection(afterChangingFrom: previousIDs, to: currentIDs)
                 scrollToSelection(viewModel.activeSelectedPackageID, in: content, with: proxy)
             }
             .onKeyPress(.upArrow) {
@@ -139,7 +151,10 @@ struct InstalledPackagesView: View {
 #if DEBUG
 
     #Preview("Installed list - loaded") {
-        let viewModel = InstalledViewModel(repository: PreviewSupport.makeInstalledPackagesRepository())
+        let viewModel = InstalledViewModel(
+            repository: PreviewSupport.makeInstalledPackagesRepository(),
+            preferences: StubInstalledPreferences(),
+        )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)
         }
@@ -153,6 +168,7 @@ struct InstalledPackagesView: View {
     #Preview("Installed list - empty") {
         let viewModel = InstalledViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
+            preferences: StubInstalledPreferences(),
         )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)

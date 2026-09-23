@@ -82,10 +82,10 @@ struct InstalledViewModelScopeTests {
         )
 
         vm.scope = .formulae
-        #expect(vm.packageCountSubtitle() == "1 package")
+        #expect(String(localized: vm.packageCountSubtitle) == "1 package")
 
         vm.scope = .casks
-        #expect(vm.packageCountSubtitle() == "2 packages")
+        #expect(String(localized: vm.packageCountSubtitle) == "2 packages")
     }
 
     @Test @MainActor func `selection falls back to first visible row when scope hides it`() async {

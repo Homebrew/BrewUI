@@ -160,11 +160,11 @@ struct DoctorIssueItemTests {
             title: "Unlinked kegs",
             blocks: [Self.runnable(id: 0, command: "brew link x", arguments: ["link", "x"])],
         ))
-        #expect(item.accessibilityLabel() == "Unlinked kegs, Fix available")
+        #expect(item.accessibilityLabel == "Unlinked kegs, Fix available")
     }
 
     @Test func `accessibilityLabel is just the title when no fix is available`() {
         let item = DoctorIssueItem(issue: Self.issue(title: "Deprecated formulae", blocks: [Self.data(id: 0)]))
-        #expect(item.accessibilityLabel() == "Deprecated formulae")
+        #expect(item.accessibilityLabel == "Deprecated formulae")
     }
 }

@@ -4,7 +4,6 @@
 //
 
 import BrewCore
-import BrewUIComponents
 import Foundation
 
 /// Read-only presentation surface of the Configuration tab — the four-card layout, the Copy report
@@ -16,9 +15,27 @@ extension ConfigViewModel {
     /// `HOMEBREW_*` Environment surface is handled by the editor card and intentionally absent here.
     func sections(for snapshot: BrewConfigSnapshot) -> [ConfigSectionItem] {
         var result: [ConfigSectionItem] = []
-        appendIfNonEmpty(&result, id: "homebrew", title: "Homebrew", group: .homebrew, in: snapshot.entries)
-        appendIfNonEmpty(&result, id: "system", title: "System", group: .system, in: snapshot.entries)
-        appendIfNonEmpty(&result, id: "build", title: "Build settings", group: .build, in: snapshot.entries)
+        appendIfNonEmpty(
+            &result,
+            id: "homebrew",
+            title: LocalizedStringResource("Homebrew", bundle: #bundle, comment: "Configuration card title: brew version, prefix, taps"),
+            group: .homebrew,
+            in: snapshot.entries,
+        )
+        appendIfNonEmpty(
+            &result,
+            id: "system",
+            title: LocalizedStringResource("System", bundle: #bundle, comment: "Configuration card title: macOS, CPU, Xcode"),
+            group: .system,
+            in: snapshot.entries,
+        )
+        appendIfNonEmpty(
+            &result,
+            id: "build",
+            title: LocalizedStringResource("Build settings", bundle: #bundle, comment: "Configuration card title: HOMEBREW_* build options"),
+            group: .build,
+            in: snapshot.entries,
+        )
         return result
     }
 
@@ -48,7 +65,7 @@ extension ConfigViewModel {
     }
 
     private func sectionReport(for section: ConfigSectionItem) -> String {
-        let title = AppLocalization(language: "en").string(section.title)
+        let title = String(localized: section.title)
         let body = section.rows
             .map { "\($0.label): \($0.value)" }
             .joined(separator: "\n")
@@ -84,7 +101,7 @@ extension ConfigViewModel {
     private func appendIfNonEmpty(
         _ result: inout [ConfigSectionItem],
         id: String,
-        title: String.LocalizationValue,
+        title: LocalizedStringResource,
         group: ConfigGroup,
         in entries: [BrewConfigEntry],
     ) {

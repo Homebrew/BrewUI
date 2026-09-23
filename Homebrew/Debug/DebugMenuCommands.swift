@@ -3,7 +3,6 @@
 //  Brew
 //
 
-import BrewUIComponents
 import Foundation
 import SwiftUI
 
@@ -11,34 +10,40 @@ import SwiftUI
     struct DebugMenuCommands: Commands {
         @Bindable var selfUpgradeControl: SelfUpgradeDebugControl
 
-        let localization: AppLocalization
-
         var body: some Commands {
-            CommandMenu(localization.string("Debug")) {
-                Button(localization.string("Clear UserDefaults")) {
+            CommandMenu(Text(verbatim: "Debug")) {
+                debugButton("Clear UserDefaults") {
                     UserDefaultsDebug.clearAll()
                 }
 
                 Divider()
 
                 // Exercises the crash-reporting flow: the report appears on next launch.
-                Menu(localization.string("Force Crash")) {
-                    Button(localization.string("Fatal Error (signal)")) {
+                Menu {
+                    debugButton("Fatal Error (signal)") {
                         fatalError("Debug menu: forced fatalError")
                     }
-                    Button(localization.string("Uncaught Exception")) {
+                    debugButton("Uncaught Exception") {
                         NSException(
                             name: .genericException,
                             reason: "Debug menu: forced NSException",
                             userInfo: nil,
                         ).raise()
                     }
+                } label: {
+                    Text(verbatim: "Force Crash")
                 }
 
                 Divider()
 
-                Toggle(localization.string("Show the Self-Upgrade Banner"), isOn: $selfUpgradeControl.simulateUpgradeAvailable)
+                Toggle(isOn: $selfUpgradeControl.simulateUpgradeAvailable) {
+                    Text(verbatim: "Show the Self-Upgrade Banner")
+                }
             }
+        }
+
+        private func debugButton(_ title: String, action: @escaping () -> Void) -> some View {
+            Button(action: action) { Text(verbatim: title) }
         }
     }
 #endif

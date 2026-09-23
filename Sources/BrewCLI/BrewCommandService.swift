@@ -79,6 +79,10 @@ private extension BrewCommandService {
         arguments: [String],
         options: BrewRunOptions,
     ) async throws -> CommandOutput {
+        defer {
+            terminal.closeReplica()
+            terminal.closePrimary()
+        }
         let childHasExited = TerminalDrainGate()
         let sink = options.lineObserver
 
@@ -95,15 +99,10 @@ private extension BrewCommandService {
                 input: .none,
                 output: .fileDescriptor(terminal.replicaDescriptor, closeAfterSpawningProcess: false),
                 error: .fileDescriptor(terminal.replicaDescriptor, closeAfterSpawningProcess: false),
-                body: { _ in
-                    // Runs once the child is spawned, the only safe moment to drop our replica copy.
-                    terminal.closeReplica()
-                },
             )
 
             childHasExited.open()
             let transcript = await drained
-            terminal.closePrimary()
             try Task.checkCancellation()
 
             return CommandOutput(
@@ -113,10 +112,8 @@ private extension BrewCommandService {
             )
         } catch {
             // Reap the drain before rethrowing, so no thread is left parked on the primary.
-            terminal.closeReplica()
             childHasExited.open()
             _ = await drained
-            terminal.closePrimary()
 
             if error is CancellationError {
                 throw error
@@ -144,6 +141,8 @@ private extension BrewCommandService {
                 var readFailure: Int32?
 
                 loop: while true {
+                    // Only a quiet interval after exit can prove the final output has been drained.
+                    let childHadExited = gate.isOpen
                     switch terminal.read() {
                     case let .data(chunk):
                         undecoded.append(chunk)
@@ -152,7 +151,7 @@ private extension BrewCommandService {
                             emit(event, sink: sink)
                         }
                     case .timedOut:
-                        if gate.isOpen {
+                        if childHadExited {
                             break loop
                         }
                     case .endOfInput:

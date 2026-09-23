@@ -22,18 +22,9 @@ final class InstalledPackageDetailViewModel {
 
     private(set) var package: InstalledBrewPackage
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
-    private var upgradeFailure: AppMessage?
-
-    func upgradeErrorMessage(localization: AppLocalization = AppLocalization()) -> String? {
-        upgradeFailure?.string(localization: localization)
-    }
-
+    private(set) var upgradeErrorMessage: String?
     /// Inline message when uninstall fails; cleared when a new uninstall starts.
-    private var uninstallFailure: AppMessage?
-
-    func uninstallErrorMessage(localization: AppLocalization = AppLocalization()) -> String? {
-        uninstallFailure?.string(localization: localization)
-    }
+    private(set) var uninstallErrorMessage: String?
 
     private(set) var isUpgrading: Bool = false
     private(set) var isUninstalling: Bool = false
@@ -61,33 +52,38 @@ final class InstalledPackageDetailViewModel {
     private(set) var dependentRelationships: [PackageRelationshipItem] = []
 
     /// Presentation mapping for the Details section metadata.
-    func metadataItem(localization: AppLocalization = AppLocalization()) -> PackageDetailMetadataItem {
-        PackageDetailMetadataItem(package: package, localization: localization)
+    var metadataItem: PackageDetailMetadataItem {
+        PackageDetailMetadataItem(package: package)
     }
 
     /// Presentation mapping for the Upgrade section.
-    func upgradeItem(localization: AppLocalization = AppLocalization()) -> UpgradePackageItem {
-        UpgradePackageItem(package: package, localization: localization)
+    var upgradeItem: UpgradePackageItem {
+        UpgradePackageItem(package: package)
     }
 
     /// True when an upgrade is available — mirrors ``InstalledListRowViewModel/showsUpgradeAvailable``.
     var showsUpgradeAvailable: Bool {
-        upgradeItem().showsUpgradeChrome
+        upgradeItem.showsUpgradeChrome
+    }
+
+    /// Homebrew marked the formula or cask deprecated.
+    var isDeprecated: Bool {
+        package.deprecated
     }
 
     /// Presentation mapping for the Uninstall section.
-    func uninstallItem(localization: AppLocalization = AppLocalization()) -> UninstallPackageItem {
-        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count, localization: localization)
+    var uninstallItem: UninstallPackageItem {
+        UninstallPackageItem(package: package, blockingDependentCount: dependentRelationships.count)
     }
 
     /// Muted, reduced-opacity uninstall button styling while blocked and not actively uninstalling.
     var showsUninstallBlockedPrimaryButtonChrome: Bool {
-        uninstallItem().isBlockedByDependents && !isUninstalling
+        uninstallItem.isBlockedByDependents && !isUninstalling
     }
 
     /// What the primary uninstall control should do when activated.
     var uninstallPrimaryButtonAction: UninstallPrimaryButtonAction {
-        uninstallItem().isBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
+        uninstallItem.isBlockedByDependents ? .revealBlockedExplanation : .presentConfirmation
     }
 
     func handleUninstallPrimaryButtonTapped() {
@@ -101,7 +97,7 @@ final class InstalledPackageDetailViewModel {
 
     /// Valid homepage URL for display, if available.
     var homepageURL: URL? {
-        metadataItem().homepageURL
+        metadataItem.homepageURL
     }
 
     init(
@@ -128,7 +124,7 @@ final class InstalledPackageDetailViewModel {
     private func refreshDependents() async {
         let dependents = await installedDependentsRepository.installedDependents(for: package.id)
         dependentRelationships = PackageRelationshipItem.dependents(dependents)
-        if !uninstallItem().isBlockedByDependents {
+        if !uninstallItem.isBlockedByDependents {
             showUninstallBlockedCallout = false
         }
     }
@@ -213,42 +209,28 @@ final class InstalledPackageDetailViewModel {
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {
-                    setErrorMessage(AppMessage(failure: failure), for: action)
+                    setErrorMessage(BrewErrorCopy.message(for: failure), for: action)
                 } else {
-                    setErrorMessage(Self.userMessage(for: error, fallback: action.genericFailureMessage), for: action)
+                    setErrorMessage(
+                        BrewErrorCopy.message(for: error, fallback: action.genericFailureMessage),
+                        for: action,
+                    )
                 }
             }
         }
     }
 
     private func clearMutationErrors() {
-        upgradeFailure = nil
-        uninstallFailure = nil
+        upgradeErrorMessage = nil
+        uninstallErrorMessage = nil
     }
 
-    private func setErrorMessage(_ message: AppMessage, for action: PackageMutationAction) {
+    private func setErrorMessage(_ message: String, for action: PackageMutationAction) {
         switch action {
         case .upgrade:
-            upgradeFailure = message
+            upgradeErrorMessage = message
         case .uninstall:
-            uninstallFailure = message
-        }
-    }
-
-    private static func userMessage(for error: Error, fallback: AppMessage) -> AppMessage {
-        switch error {
-        case BrewLookupError.executableNotFound:
-            return .localized("Could not find Homebrew. Install it or ensure brew is in the default location.")
-        case let BrewCommandError.failed(_, stderr):
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return .raw(trimmed)
-            }
-            return .localized("Homebrew command failed.")
-        case let BrewCommandError.launchFailed(underlying):
-            return .raw(underlying)
-        default:
-            return fallback
+            uninstallErrorMessage = message
         }
     }
 }
@@ -257,12 +239,20 @@ private enum PackageMutationAction {
     case upgrade
     case uninstall
 
-    var genericFailureMessage: AppMessage {
+    var genericFailureMessage: String {
         switch self {
         case .upgrade:
-            .localized("Something went wrong while upgrading this package.")
+            String(
+                localized: "Something went wrong while upgrading this package.",
+                bundle: #bundle,
+                comment: "Installed detail generic upgrade error",
+            )
         case .uninstall:
-            .localized("Something went wrong while uninstalling this package.")
+            String(
+                localized: "Something went wrong while uninstalling this package.",
+                bundle: #bundle,
+                comment: "Installed detail generic uninstall error",
+            )
         }
     }
 }

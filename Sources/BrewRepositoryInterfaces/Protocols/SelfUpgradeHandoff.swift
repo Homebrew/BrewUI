@@ -11,9 +11,3 @@ import Foundation
 public protocol SelfUpgradeHandoff: Sendable {
     func performUpgrade() async throws
 }
-
-/// Recoverable failure at the handoff boundary; presentation copy is decided by the UI layer.
-public enum SelfUpgradeHandoffError: Error, Sendable {
-    case operationRunning
-    case helperUnavailable
-}

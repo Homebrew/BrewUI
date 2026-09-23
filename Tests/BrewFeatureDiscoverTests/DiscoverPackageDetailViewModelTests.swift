@@ -24,10 +24,10 @@ struct DiscoverPackageDetailViewModelTests {
 
         #expect(viewModel.packageKind == .formula)
         #expect(viewModel.installCommand == "brew install wget")
-        #expect(viewModel.installedStatusLabel() == "Installed")
-        #expect(viewModel.installedVersionLabel() == "v1.9.0")
+        #expect(viewModel.installedStatusLabel == "Installed")
+        #expect(viewModel.installedVersionLabel == "v1.9.0")
         #expect(viewModel.stableVersionLabel == "2.0.0")
-        #expect(viewModel.installs30DayLabel() == "3,500")
+        #expect(viewModel.installs30DayLabel == "3,500")
         #expect(viewModel.showsInstallMetrics)
         #expect(viewModel.homepageURL?.absoluteString == "https://example.org")
     }
@@ -42,7 +42,7 @@ struct DiscoverPackageDetailViewModelTests {
             commandFactory: StubMutatingCommandFactory(),
         )
 
-        #expect(viewModel.installedVersionLabel() == "v1.9.0")
+        #expect(viewModel.installedVersionLabel == "v1.9.0")
     }
 
     @Test @MainActor func `linked annotation appears for linked keg when multiple versions are installed`() {
@@ -55,7 +55,7 @@ struct DiscoverPackageDetailViewModelTests {
             commandFactory: StubMutatingCommandFactory(),
         )
 
-        #expect(viewModel.installedVersionLabel() == "v2.0.0 (linked)")
+        #expect(viewModel.installedVersionLabel == "v2.0.0 (linked)")
     }
 
     @Test @MainActor func `cask package maps cask install command and not installed status`() {
@@ -71,10 +71,10 @@ struct DiscoverPackageDetailViewModelTests {
 
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.installCommand == "brew install --cask iterm2")
-        #expect(viewModel.installedStatusLabel() == nil)
-        #expect(viewModel.installedVersionLabel() == nil)
+        #expect(viewModel.installedStatusLabel == nil)
+        #expect(viewModel.installedVersionLabel == nil)
         #expect(viewModel.stableVersionLabel.isEmpty)
-        #expect(viewModel.installs30DayLabel() == "500")
+        #expect(viewModel.installs30DayLabel == "500")
         #expect(viewModel.homepageURL == nil)
     }
 
@@ -206,8 +206,8 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.packageKind == .cask)
         #expect(viewModel.installCommand == "brew install --cask docker")
         // The new package isn't in the installed repository, so installed labels go to nil.
-        #expect(viewModel.installedStatusLabel() == nil)
-        #expect(viewModel.installedVersionLabel() == nil)
+        #expect(viewModel.installedStatusLabel == nil)
+        #expect(viewModel.installedVersionLabel == nil)
         #expect(viewModel.stableVersionLabel == "4.0.0")
         #expect(viewModel.homepageURL?.absoluteString == "https://docker.com")
     }

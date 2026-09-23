@@ -9,10 +9,18 @@
 
 <!-- List checks actually run and their results, plus anything not run and why. For app changes, include macOS version, processor and Xcode/Swift versions. -->
 <!-- Swift changes: scripts/test, SwiftFormat, SwiftLint and BrewUILint per AGENTS.md. UI changes: scripts/test-ui and relevant manual checks, including keyboard/VoiceOver and light/dark appearance. -->
-<!-- Include screenshots or recordings for visible changes. Support performance claims with comparable before/after measurements (for example, Instruments traces). -->
+<!-- Support performance claims with comparable before/after measurements (for example, Instruments traces). -->
 
-- [ ] I followed the [conventions](https://github.com/Homebrew/BrewUI/blob/HEAD/CONVENTIONS.md) and [workflow](https://github.com/Homebrew/BrewUI/blob/HEAD/AGENTS.md), checked for duplicate [PRs](https://github.com/Homebrew/BrewUI/pulls) and kept this change focused.
+- [ ] I followed the [conventions and workflow](https://github.com/Homebrew/BrewUI/blob/HEAD/AGENTS.md#development-setup), checked for duplicate [PRs](https://github.com/Homebrew/BrewUI/pulls) and kept this change focused.
 - [ ] I added regression coverage for bug fixes or explained why automated coverage is impractical, and reported the relevant validation above.
+
+## Screenshots
+
+<!-- Before and after screenshots are required for visible changes. For changes with no visual impact, replace the table with "Not applicable" and explain why. -->
+
+| Before | After |
+| --- | --- |
+| <!-- Add screenshot. --> | <!-- Add screenshot. --> |
 
 ## AI assistance
 

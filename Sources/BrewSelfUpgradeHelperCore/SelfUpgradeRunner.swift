@@ -25,24 +25,13 @@ public struct SelfUpgradeRunner: Sendable {
     private let sleep: @Sendable (TimeInterval) async throws -> Void
 
     public init(
-        commandRunner: any BrewCommandRunning,
+        commandRunner: any BrewCommandRunning = ZshBrewCommandRunner(),
         transcriptSink: @escaping @Sendable (String) -> Void = { _ in },
         sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) },
     ) {
         self.commandRunner = commandRunner
         self.transcriptSink = transcriptSink
         self.sleep = sleep
-    }
-
-    /// See ``SelfUpgradeHandoffSpec/usesLoginShell``.
-    public init(
-        usesLoginShell: Bool,
-        transcriptSink: @escaping @Sendable (String) -> Void = { _ in },
-    ) {
-        self.init(
-            commandRunner: usesLoginShell ? LoginShellBrewCommandRunner() : BrewCommandService(),
-            transcriptSink: transcriptSink,
-        )
     }
 
     public func run(

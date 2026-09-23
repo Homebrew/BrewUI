@@ -15,7 +15,6 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
     let brewExecutableURL: @MainActor () throws -> URL
     /// Asked before quitting: terminating would kill the `brew` an install is streaming through.
     let commandCenter: any BrewCommandCenter
-    let usesLoginShell: Bool
     let defaultsKeyPrefix: String
     /// Carried across the relaunch so a UI-test run comes back still pointed at its fixtures.
     let relaunchArguments: [String]
@@ -31,12 +30,12 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
             return kind.isMutating
         }
         guard !mutating else {
-            throw SelfUpgradeHandoffError.operationRunning
+            throw SelfUpgradeBlockedByRunningOperation()
         }
         let helperURL = Bundle.main.bundleURL
             .appendingPathComponent("Contents/Helpers/HomebrewUpgradeHelper")
         guard FileManager.default.isExecutableFile(atPath: helperURL.path) else {
-            throw SelfUpgradeHandoffError.helperUnavailable
+            throw SelfUpgradeHelperUnavailable()
         }
         // Before anything is written or quit: `brew` missing is the one failure the app can still report.
         let brewURL = try brewExecutableURL()
@@ -64,7 +63,6 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
             relaunchEnvironment: relaunchEnvironment,
             brewExecutablePath: brewExecutableURL.path,
             upgradeArguments: BrewCommands.selfUpgrade().arguments,
-            usesLoginShell: usesLoginShell,
             upgradeEnvironment: upgradeEnvironment,
             logFilePath: logFileURL.path,
             defaultsSuiteName: Bundle.main.bundleIdentifier ?? SelfUpgradeIdentity.bundleIdentifier,
@@ -78,5 +76,25 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
             .appendingPathComponent("self-upgrade-handoff-\(UUID().uuidString).json")
         try spec.encoded().write(to: specURL, options: .atomic)
         return specURL
+    }
+}
+
+private struct SelfUpgradeBlockedByRunningOperation: LocalizedError {
+    var errorDescription: String? {
+        String(
+            localized: "Wait for the running Homebrew command to finish, then upgrade the Homebrew app.",
+            bundle: #bundle,
+            comment: "Shown when the self-upgrade is attempted while another brew command is still running",
+        )
+    }
+}
+
+private struct SelfUpgradeHelperUnavailable: LocalizedError {
+    var errorDescription: String? {
+        String(
+            localized: "The upgrade helper is missing from this build of the Homebrew app.",
+            bundle: #bundle,
+            comment: "Shown when the bundled self-upgrade helper executable cannot be found",
+        )
     }
 }

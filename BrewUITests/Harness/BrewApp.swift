@@ -15,8 +15,8 @@ enum BrewApp {
     private static let maximumPayloadBytes = 512 * 1024
 
     /// Asserts nothing about what rendered; the caller decides what "loaded" means for its scenario.
-    static func launch(scenario: BrewUITestScenario, commandDelays: [String: Int] = [:]) throws -> XCUIApplication {
-        let encoded = try FakeBrew.payload(for: scenario, commandDelays: commandDelays).encoded()
+    static func launch(scenario: BrewUITestScenario, environment: [String: String] = [:]) throws -> XCUIApplication {
+        let encoded = try FakeBrew.payload(for: scenario).encoded()
         guard encoded.utf8.count <= maximumPayloadBytes else {
             throw FakeBrewError.payloadTooLarge(bytes: encoded.utf8.count, limit: maximumPayloadBytes)
         }
@@ -26,7 +26,7 @@ enum BrewApp {
         app.launchArguments += [BrewUITestingEnvironmentKey.launchArgument, "YES"]
         app.launchEnvironment[BrewUITestingEnvironmentKey.scenario] = scenario.rawValue
         app.launchEnvironment[BrewUITestingEnvironmentKey.payload] = encoded
-        app.launchEnvironment[BrewUITestingEnvironmentKey.languagePreferencesDomain] = "BrewUI.UITestLanguage.\(UUID().uuidString)"
+        app.launchEnvironment.merge(environment) { _, extra in extra }
         app.launch()
         activate(app)
         return app
@@ -46,19 +46,15 @@ enum BrewApp {
     }
 
     /// `NSWorkspace` rather than `open -b`: a real install with the same bundle identifier would win.
-    static var processIdentifier: pid_t? {
-        runningTarget?.processIdentifier
-    }
-
-    private static var runningTarget: NSRunningApplication? {
-        NSWorkspace.shared.runningApplications
-            .filter { $0.bundleIdentifier == appBundleIdentifier }
-            .filter { $0.executableURL?.path.contains("/DerivedData/") == true }
-            .max { ($0.launchDate ?? .distantPast) < ($1.launchDate ?? .distantPast) }
-    }
-
     private static func reopen() {
-        guard let bundleURL = runningTarget?.bundleURL else { return }
+        guard let target = NSWorkspace.shared.runningApplications
+            .filter({ $0.bundleIdentifier == appBundleIdentifier })
+            .filter({ $0.executableURL?.path.contains("/DerivedData/") == true })
+            .max(by: { ($0.launchDate ?? .distantPast) < ($1.launchDate ?? .distantPast) }),
+            let bundleURL = target.bundleURL
+        else {
+            return
+        }
         NSWorkspace.shared.open(bundleURL)
     }
 }

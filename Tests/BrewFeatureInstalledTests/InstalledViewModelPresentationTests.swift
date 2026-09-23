@@ -51,14 +51,14 @@ struct InstalledViewModelPresentationTests {
             repository: unloadedInstalledRepository(),
         )
         let expected = String(localized: "Loading packages…", comment: "Installed tab subtitle while fetching")
-        #expect(vm.packageCountSubtitle() == expected)
+        #expect(String(localized: vm.packageCountSubtitle) == expected)
     }
 
     @Test @MainActor func `packageCountSubtitle is singular for one package`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "a", kind: .formula)],
         )
-        #expect(vm.packageCountSubtitle() == "1 package")
+        #expect(String(localized: vm.packageCountSubtitle) == "1 package")
     }
 
     @Test @MainActor func `packageCountSubtitle is plural for multiple packages`() async {
@@ -68,7 +68,7 @@ struct InstalledViewModelPresentationTests {
                 .fixture(name: "b", kind: .formula),
             ],
         )
-        #expect(vm.packageCountSubtitle() == "2 packages")
+        #expect(String(localized: vm.packageCountSubtitle) == "2 packages")
     }
 
     @Test @MainActor func `setSelection selects row when nothing selected`() async {

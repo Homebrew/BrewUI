@@ -15,7 +15,6 @@ import SwiftUI
 /// rows). The reading flow matches what brew printed. Raw output stays at the bottom as the
 /// never-wrong fallback.
 struct DoctorIssueDetailView: View {
-    @Environment(\.brewLocalization) private var localization
     @Bindable var viewModel: DoctorViewModel
     let item: DoctorIssueItem
 
@@ -103,7 +102,11 @@ struct DoctorIssueDetailView: View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             captionText(block.caption)
             if steps.contains(where: \.needsAdmin) {
-                Label("Needs admin · runs in Terminal", systemImage: "lock.fill")
+                Label(String(
+                    localized: "Needs admin · runs in Terminal",
+                    bundle: #bundle,
+                    comment: "Doctor fix note: the command needs sudo so it opens in Terminal",
+                ), systemImage: "lock.fill")
                     .font(.brewCaption)
                     .foregroundStyle(Color.brewTextTertiary)
             }
@@ -128,14 +131,14 @@ struct DoctorIssueDetailView: View {
                         .controlSize(.small)
                         .frame(minWidth: 120)
                 } else {
-                    Text("Run Fix")
+                    Text("Run Fix", bundle: #bundle, comment: "Doctor detail: run the suggested fix button")
                 }
             }
             .buttonStyle(.borderedProminent)
             .disabled(viewModel.isFixRunning(item))
-            .accessibilityLabel("Run Fix")
+            .accessibilityLabel(String(localized: "Run Fix", bundle: #bundle, comment: "VoiceOver: run-fix button"))
 
-            if let fixError = viewModel.fixError(item, localization: localization) {
+            if let fixError = viewModel.fixError(item) {
                 Text(fixError)
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewStatusError)
@@ -177,25 +180,32 @@ struct DoctorIssueDetailView: View {
     // MARK: - Raw output
 
     private var rawOutputSection: some View {
-        CommandBlockView(command: item.rawText, title: "Raw output", collapsible: true)
+        CommandBlockView(command: item.rawText, title: LocalizedStringResource(
+            "Raw output",
+            bundle: #bundle,
+            comment: "Doctor detail: collapsible header for the raw brew doctor text",
+        ), collapsible: true)
     }
 }
 
 // MARK: - Subviews
 
 private struct DoctorSeverityBadge: View {
-    @Environment(\.brewLocalization) private var localization
     let severity: DoctorSeverity
 
     var body: some View {
-        Label(DoctorSeverityStyle.displayName(severity, localization: localization),
+        Label(DoctorSeverityStyle.displayName(severity),
               systemImage: DoctorSeverityStyle.icon(severity))
             .font(.brewCaption.weight(.semibold))
             .foregroundStyle(DoctorSeverityStyle.foreground(severity))
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.vertical, BrewSpacing.xxs)
             .background(DoctorSeverityStyle.background(severity), in: Capsule())
-            .accessibilityLabel("Severity: \(DoctorSeverityStyle.displayName(severity, localization: localization))")
+            .accessibilityLabel(String(
+                localized: "Severity: \(DoctorSeverityStyle.displayName(severity))",
+                bundle: #bundle,
+                comment: "VoiceOver: Doctor severity badge; %@ is the severity name",
+            ))
     }
 }
 
@@ -222,10 +232,10 @@ private struct DoctorLinkRow: View {
 struct DoctorDetailPlaceholder: View {
     var body: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            Text("No selection")
+            Text("No selection", bundle: #bundle, comment: "Doctor detail placeholder title when nothing is selected")
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
-            Text("Run diagnostics, then choose an issue to see details and fixes.")
+            Text("Run diagnostics, then choose an issue to see details and fixes.", bundle: #bundle, comment: "Doctor detail placeholder body when nothing is selected")
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
             Spacer()

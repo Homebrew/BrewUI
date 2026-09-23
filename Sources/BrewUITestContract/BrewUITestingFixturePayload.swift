@@ -10,10 +10,12 @@ public enum BrewUITestingEnvironmentKey {
     /// Its presence is what puts the app in test mode.
     public static let launchArgument = "-uiTesting"
     public static let scenario = "BREW_UITEST_SCENARIO"
-    public static let languagePreferencesDomain = "BREW_UITEST_LANGUAGE_DOMAIN"
     public static let payload = "BREW_UITEST_FIXTURE_PAYLOAD"
     /// Written by the app once the tree is installed, not by the test runner.
     public static let fixturesRoot = "BREW_UITEST_FIXTURES"
+    /// Any value: the app forgets every autosaved window and split-view frame before it opens a window.
+    /// The runner is sandboxed and cannot reach the app's defaults itself.
+    public static let resetWindowState = "BREW_UITEST_RESET_WINDOW_STATE"
 }
 
 /// The fixture tree, in transit: relative paths to bytes, JSON then deflated then base64'd.

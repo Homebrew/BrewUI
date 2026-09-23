@@ -52,6 +52,37 @@ struct InstalledListRowViewModelTests {
         #expect(viewModel.name == "Visual Studio Code")
     }
 
+    @Test func `deprecated package is not described as up to date`() {
+        var package = InstalledBrewPackage.fixture(name: "youtube-dl")
+        package.deprecated = true
+        let viewModel = InstalledListRowViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.isDeprecated)
+        #expect(viewModel.accessibilitySummary.contains("Deprecated"))
+        #expect(!viewModel.accessibilitySummary.contains("up to date"))
+    }
+
+    @Test func `deprecated outdated package reports both upgrade and deprecated`() {
+        var package = InstalledBrewPackage.fixture(
+            name: "mysql@8.0",
+            latestVersion: "8.0.46",
+            installedVersions: ["8.0.43_3"],
+            outdated: true,
+        )
+        package.deprecated = true
+        let viewModel = InstalledListRowViewModel(
+            package: package,
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
+        #expect(viewModel.showsUpgradeAvailable)
+        #expect(viewModel.isDeprecated)
+        #expect(viewModel.accessibilitySummary.contains("Upgrade available"))
+        #expect(viewModel.accessibilitySummary.contains("Deprecated"))
+        #expect(!viewModel.accessibilitySummary.contains("up to date"))
+    }
+
     @Test func `observeRowUpdates applies first phase from noop center`() async {
         let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         let center = NoopBrewCommandCenter.forTesting()
@@ -71,7 +102,7 @@ struct InstalledListRowViewModelTests {
         await viewModel.observeRowUpdates()
         #expect(viewModel.showsUpgradeBusy)
         #expect(viewModel.showsOperationBusy)
-        #expect(viewModel.rowAccessibilityLabel().contains("Upgrading"))
+        #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
     }
 
     @Test func `covering bulk upgrade shows busy on the row`() async {
@@ -84,7 +115,7 @@ struct InstalledListRowViewModelTests {
 
         #expect(viewModel.showsUpgradeBusy)
         #expect(viewModel.showsOperationBusy)
-        #expect(viewModel.rowAccessibilityLabel().contains("Upgrading"))
+        #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
     }
 
     @Test func `bulk formula upgrade does not show busy on an outdated cask row`() async {
@@ -108,7 +139,7 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
         #expect(viewModel.showsUninstallBusy)
         #expect(viewModel.showsOperationBusy)
-        #expect(viewModel.rowAccessibilityLabel().contains("Uninstalling"))
+        #expect(viewModel.rowAccessibilityLabel.contains("Uninstalling"))
     }
 
     @Test func `update package clears upgrade busy latch and operation busy`() async {
@@ -126,7 +157,7 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
         #expect(!viewModel.showsUninstallBusy)
         #expect(!viewModel.showsOperationBusy)
-        #expect(!viewModel.rowAccessibilityLabel().contains("Upgrading"))
+        #expect(!viewModel.rowAccessibilityLabel.contains("Upgrading"))
     }
 
     @Test func `update package clears uninstall busy latch and operation busy`() async {
@@ -143,7 +174,7 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
         #expect(!viewModel.showsUninstallBusy)
         #expect(!viewModel.showsOperationBusy)
-        #expect(!viewModel.rowAccessibilityLabel().contains("Uninstalling"))
+        #expect(!viewModel.rowAccessibilityLabel.contains("Uninstalling"))
     }
 
     @Test func `update package flips row version presentation when outdated changes`() {

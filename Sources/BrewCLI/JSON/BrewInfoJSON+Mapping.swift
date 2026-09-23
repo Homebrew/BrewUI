@@ -46,6 +46,7 @@ private extension BrewInfoFormula {
             linkedKeg: BrewInfoJSON.trimmedOrNil(linkedKeg),
             pinned: pinned,
             kegOnly: kegOnly,
+            deprecated: deprecated,
             caveats: BrewInfoJSON.trimmedOrNil(caveats),
         )
     }
@@ -69,6 +70,7 @@ private extension BrewInfoCask {
             outdated: outdated,
             tap: BrewInfoJSON.trimmedOrNil(tap),
             installedOnRequest: installedOnRequest,
+            deprecated: deprecated,
         )
     }
 }

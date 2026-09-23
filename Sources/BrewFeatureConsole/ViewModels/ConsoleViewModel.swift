@@ -5,7 +5,6 @@
 
 import BrewCore
 import BrewRepositoryInterfaces
-import BrewUIComponents
 import Foundation
 import Observation
 
@@ -75,11 +74,11 @@ final class ConsoleViewModel {
         )
     }
 
-    func statusPresentation(localization: AppLocalization = AppLocalization()) -> ConsoleStatusPresentation {
+    var statusPresentation: ConsoleStatusPresentation {
         if let active = activeJob {
             return ConsoleStatusPresentation(
                 dotState: active.dotState,
-                summary: .running(command: active.command, shortLabel: active.phase.shortLabel(localization: localization)),
+                summary: .running(command: active.command, shortLabel: active.phase.shortLabel),
                 isRunning: true,
             )
         }

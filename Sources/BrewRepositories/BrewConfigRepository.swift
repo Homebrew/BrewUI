@@ -41,7 +41,7 @@ public final class BrewConfigRepository: ConfigRepository {
     }
 
     /// Takes the context rather than building its own runner, so the composition root points every
-    /// brew invocation at one place: production's login shell, or a UI test's fake executable.
+    /// brew invocation at one place: production's isolated zsh runner, or a UI test's fake executable.
     public convenience init(executionContext: BrewCommandExecutionContext) {
         self.init(
             commandRunner: executionContext.commandRunner,
@@ -49,8 +49,7 @@ public final class BrewConfigRepository: ConfigRepository {
         )
     }
 
-    /// Production wiring: brew is spawned through the user's login + interactive shell
-    /// (``LoginShellBrewCommandRunner``) so `brew config` reflects the same environment as Terminal.
+    /// Production wiring: `brew config` reports the environment used by every app command.
     public static func live() -> BrewConfigRepository {
         BrewConfigRepository(executionContext: .live())
     }

@@ -39,11 +39,4 @@ struct RelativeTimeTextTests {
         #expect(RelativeTimeText.string(for: Self.now.addingTimeInterval(600), relativeTo: Self.now)
             == "just now")
     }
-
-    @Test func `each rendering uses the current localizer rather than cached copy`() {
-        let date = Self.now.addingTimeInterval(-120)
-        let first = RelativeTimeText.string(for: date, relativeTo: Self.now, localize: { _ in "2 分钟前" })
-        let second = RelativeTimeText.string(for: date, relativeTo: Self.now, localize: { String(localized: $0) })
-        #expect((first, second) == ("2 分钟前", "2 minutes ago"))
-    }
 }

@@ -3,12 +3,15 @@ import SwiftUI
 
 /// Installed status pill shared by discover list rows and package detail.
 struct DiscoverInstalledBadge: View {
-    @Environment(\.brewLocalization) private var localization
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.xs) {
             Image(systemName: "checkmark.circle")
             Text(
-                localization.string("INSTALLED"),
+                String(
+                    localized: "INSTALLED",
+                    bundle: #bundle,
+                    comment: "Discover installed status badge label",
+                ),
             )
         }
         .font(.brewCaption2)
@@ -20,7 +23,11 @@ struct DiscoverInstalledBadge: View {
                 .fill(Color.brewStatusSuccessSubtle)
         }
         .accessibilityLabel(
-            localization.string("Installed"),
+            String(
+                localized: "Installed",
+                bundle: #bundle,
+                comment: "Discover installed status badge accessibility label",
+            ),
         )
     }
 }

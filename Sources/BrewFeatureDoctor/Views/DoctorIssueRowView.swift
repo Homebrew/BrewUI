@@ -9,7 +9,6 @@ import SwiftUI
 /// One `brew doctor` warning in the issues list: a severity glyph (matching the row's severity), the
 /// summary, and a "fix available" hint.
 struct DoctorIssueRowView: View {
-    @Environment(\.brewLocalization) private var localization
     let item: DoctorIssueItem
 
     var body: some View {
@@ -22,7 +21,7 @@ struct DoctorIssueRowView: View {
                     .foregroundStyle(Color.brewTextPrimary)
                     .lineLimit(2)
                 if item.hasRunnableFix {
-                    Label("Fix available", systemImage: "wrench.and.screwdriver")
+                    Label(String(localized: "Fix available", bundle: #bundle, comment: "Doctor issue row badge"), systemImage: "wrench.and.screwdriver")
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewTextBrand)
                 }
@@ -33,6 +32,6 @@ struct DoctorIssueRowView: View {
         .frame(minHeight: 48)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(item.accessibilityLabel(localization: localization))
+        .accessibilityLabel(item.accessibilityLabel)
     }
 }

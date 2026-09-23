@@ -8,7 +8,10 @@ import SwiftUI
 
 /// Loads any crash reports left by a previous launch and presents
 /// ``CrashReportDialog`` for them one at a time.
-private struct CrashReportSheetModifier: ViewModifier {
+///
+/// Internal, not private: a file-private type's name prints as "(unknown context at $addr)", which
+/// varies per launch and broke every UserDefaults key SwiftUI derived from the window's view type.
+struct CrashReportSheetModifier: ViewModifier {
     @Bindable var controller: CrashReportController
 
     func body(content: Content) -> some View {

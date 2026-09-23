@@ -4,7 +4,6 @@
 //
 
 import BrewCore
-import BrewUIComponents
 import Foundation
 
 /// Presentation mapping for a single ``DoctorIssue`` in the list/detail surface.
@@ -61,9 +60,16 @@ struct DoctorIssueItem: Identifiable, Equatable {
         primaryRunnableStep?.displayCommand
     }
 
-    /// Label for voiceover mode — combines title with Fix available
-    func accessibilityLabel(localization: AppLocalization = AppLocalization(language: "en")) -> String {
-        hasRunnableFix ? localization.string("\(title), Fix available") : title
+    /// `title` is `brew doctor`'s own wording, so only the annotation is localised.
+    var accessibilityLabel: String {
+        guard hasRunnableFix else {
+            return title
+        }
+        return String(
+            localized: "\(title), Fix available",
+            bundle: #bundle,
+            comment: "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
+        )
     }
 }
 

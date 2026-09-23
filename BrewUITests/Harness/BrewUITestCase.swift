@@ -3,7 +3,6 @@
 //  BrewUITests
 //
 
-import BrewUITestContract
 import XCTest
 
 /// Base class for the suite. `continueAfterFailure = false`, or one missing element buries itself in
@@ -26,9 +25,6 @@ class BrewUITestCase: XCTestCase {
         // swiftlint:disable:next assume_isolated
         MainActor.assumeIsolated {
             app?.terminate()
-            if let domain = app?.launchEnvironment[BrewUITestingEnvironmentKey.languagePreferencesDomain] {
-                UserDefaults(suiteName: domain)?.removePersistentDomain(forName: domain)
-            }
         }
         super.tearDown()
     }
@@ -69,10 +65,11 @@ class BrewUITestCase: XCTestCase {
     @discardableResult
     func launch(
         _ scenario: BrewUITestScenario,
+        environment: [String: String] = [:],
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> InstalledScreen {
-        let app = launchUnverified(scenario, file: file, line: line)
+        let app = launchUnverified(scenario, environment: environment, file: file, line: line)
         return InstalledScreen(app: app).waitUntilLoaded(timeout: BrewUITestTimeout.launch, file: file, line: line)
     }
 
@@ -81,11 +78,12 @@ class BrewUITestCase: XCTestCase {
     @discardableResult
     func launchUnverified(
         _ scenario: BrewUITestScenario,
+        environment: [String: String] = [:],
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> XCUIApplication {
         do {
-            let app = try BrewApp.launch(scenario: scenario)
+            let app = try BrewApp.launch(scenario: scenario, environment: environment)
             launchedApp = app
             return app
         } catch {

@@ -6,6 +6,7 @@
 @testable import BrewCLI
 import BrewCore
 import Foundation
+import Synchronization
 import Testing
 
 @Suite(.serialized)
@@ -39,6 +40,38 @@ struct BrewCommandServicePseudoTerminalTests {
         )
 
         #expect(collector.allLines().filter(\.isComplete).map(\.text) == ["one", "two", "three"])
+    }
+
+    @Test func `terminal output survives the child exiting while the observer is busy`() async throws {
+        let release = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: release) }
+        let collector = OutputCollector()
+        let exitedBeforeReading = Mutex(false)
+
+        let output = try await BrewCommandService().run(
+            executableURL: URL(fileURLWithPath: "/bin/zsh"),
+            arguments: [
+                "-c",
+                "printf '%s\\n' $$; while [[ ! -e \"$1\" ]]; do sleep 0.01; done; printf 'out\\n'; printf 'err\\n' >&2; exit 12",
+                "brewui", release.path,
+            ],
+            options: BrewRunOptions(lineObserver: { line in
+                collector.append(line)
+                guard line.isComplete, let pid = Int32(line.text) else { return }
+                _ = FileManager.default.createFile(atPath: release.path, contents: nil)
+                // Hold the reader until the child is reaped, leaving its final output queued.
+                let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+                while kill(pid, 0) == 0, ContinuousClock.now < deadline {
+                    usleep(1000)
+                }
+                exitedBeforeReading.withLock { $0 = kill(pid, 0) == -1 && errno == ESRCH }
+            }, output: .pseudoTerminal),
+        )
+
+        #expect(exitedBeforeReading.withLock { $0 })
+        #expect(output.standardOutput.hasSuffix("\nout\nerr\n"))
+        #expect(output.terminationStatus == 12)
+        #expect(collector.allLines().filter(\.isComplete).dropFirst().map(\.text) == ["out", "err"])
     }
 
     @Test func `pseudo-terminal run merges stderr into the stdout stream`() async throws {

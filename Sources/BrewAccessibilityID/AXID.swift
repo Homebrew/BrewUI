@@ -12,10 +12,6 @@ import Foundation
 /// Row cases carry the package's Homebrew name/token (what `HomebrewPackageID.name` yields), so rows
 /// are addressable without matching on label or index.
 public enum AXID: Hashable, Sendable {
-    case languageMenu
-    case languageSystem
-    case languageOption(String)
-
     // Navigation
     case sidebar
     case sidebarItem(SidebarDestination)
@@ -25,6 +21,7 @@ public enum AXID: Hashable, Sendable {
     case installedList
     case installedRow(token: String)
     case installedSearchField
+    case installedHideDependenciesSwitch
     case upgradesScreen
     case upgradesList
     case upgradesRow(token: String)
@@ -70,15 +67,13 @@ public enum AXID: Hashable, Sendable {
     /// The string handed to `accessibilityIdentifier` and read back by `XCUIElement`.
     public var rawValue: String {
         switch self {
-        case .languageMenu: "language.menu"
-        case .languageSystem: "language.system"
-        case let .languageOption(language): "language.option.\(language)"
         case .sidebar: "sidebar"
         case let .sidebarItem(destination): "sidebar.item.\(destination.rawValue)"
         case .installedScreen: "installed.screen"
         case .installedList: "installed.list"
         case let .installedRow(token): "installed.row.\(token)"
         case .installedSearchField: "installed.search"
+        case .installedHideDependenciesSwitch: "installed.hideDependencies"
         case .upgradesScreen: "upgrades.screen"
         case .upgradesList: "upgrades.list"
         case let .upgradesRow(token): "upgrades.row.\(token)"

@@ -4,7 +4,6 @@
 //
 
 import BrewCore
-import BrewUIComponents
 import Foundation
 import Observation
 
@@ -57,6 +56,10 @@ final class InstalledListRowViewModel {
         package.outdated && availableVersionLabel != nil
     }
 
+    var isDeprecated: Bool {
+        package.deprecated
+    }
+
     var versionPresentation: InstalledListRowVersionPresentation {
         if showsUpgradeAvailable, let latest = availableVersionLabel {
             return .upgrade(current: installedVersionLabel, latest: latest)
@@ -64,16 +67,31 @@ final class InstalledListRowViewModel {
         return .installed(installedVersionLabel)
     }
 
-    func accessibilitySummary(localization: AppLocalization = AppLocalization()) -> String {
+    var accessibilitySummary: String {
         var parts = [name]
         if hasDescription {
             parts.append(descriptionText)
         }
         parts.append(installedVersionLabel)
         if showsUpgradeAvailable, let latest = availableVersionLabel {
-            parts.append(localization.string("Upgrade available to \(latest)"))
-        } else {
-            parts.append(localization.string("Installed and up to date"))
+            parts.append(String(
+                localized: "Upgrade available to \(latest)",
+                bundle: #bundle,
+                comment: "VoiceOver: installed row with an available upgrade; the value is the latest version",
+            ))
+        } else if !isDeprecated {
+            parts.append(String(
+                localized: "Installed and up to date",
+                bundle: #bundle,
+                comment: "Installed list: tooltip on the up-to-date tick",
+            ))
+        }
+        if isDeprecated {
+            parts.append(String(
+                localized: "Deprecated",
+                bundle: #bundle,
+                comment: "Installed deprecated status badge accessibility label",
+            ))
         }
         return parts.joined(separator: ", ")
     }
@@ -84,16 +102,16 @@ final class InstalledListRowViewModel {
     }
 
     /// Full VoiceOver summary, including transient mutation state when present.
-    func rowAccessibilityLabel(localization: AppLocalization = AppLocalization()) -> String {
+    var rowAccessibilityLabel: String {
         if showsUpgradeBusy {
-            let upgrading = localization.string("Upgrading")
-            return "\(accessibilitySummary(localization: localization)), \(upgrading)"
+            let upgrading = String(localized: "Upgrading", bundle: #bundle, comment: "VoiceOver: package upgrading")
+            return "\(accessibilitySummary), \(upgrading)"
         }
         if showsUninstallBusy {
-            let uninstalling = localization.string("Uninstalling")
-            return "\(accessibilitySummary(localization: localization)), \(uninstalling)"
+            let uninstalling = String(localized: "Uninstalling", bundle: #bundle, comment: "VoiceOver: package uninstalling")
+            return "\(accessibilitySummary), \(uninstalling)"
         }
-        return accessibilitySummary(localization: localization)
+        return accessibilitySummary
     }
 
     init(package: InstalledBrewPackage, brewCommandCenter: BrewCommandCenter) {

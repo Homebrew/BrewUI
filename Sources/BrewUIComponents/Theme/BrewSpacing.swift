@@ -32,11 +32,6 @@ public enum BrewSpacing {
 // MARK: - Layout Constants (§6)
 
 public enum BrewLayout {
-    /// Reading width for the free-standing confirmation panel; taller copy grows the height.
-    public static let confirmationWidth: CGFloat = 360
-    /// App icon at the top of the confirmation panel.
-    public static let confirmationIconSize: CGFloat = 64
-
     /// Default sidebar width.
     public static let sidebarWidth: CGFloat = 220
 
@@ -63,8 +58,8 @@ public enum BrewLayout {
     /// Default window width.
     public static let defaultWindowWidth: CGFloat = 1000
 
-    /// Default window height.
-    public static let defaultWindowHeight: CGFloat = 650
+    /// Default window height. Kept above ``minWindowHeight`` so a first launch opens at the size asked for.
+    public static let defaultWindowHeight: CGFloat = 720
 
     /// Minimum supported window width.
     public static let minWindowWidth: CGFloat = 820

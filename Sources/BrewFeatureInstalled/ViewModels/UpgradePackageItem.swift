@@ -9,11 +9,9 @@ import Foundation
 
 /// Presentation mapping for upgrade actions shown in Installed package detail.
 struct UpgradePackageItem {
-    private let localization: AppLocalization
     private let package: InstalledBrewPackage
 
-    init(package: InstalledBrewPackage, localization: AppLocalization = AppLocalization()) {
-        self.localization = localization
+    init(package: InstalledBrewPackage) {
         self.package = package
     }
 
@@ -21,7 +19,7 @@ struct UpgradePackageItem {
         package.outdated
     }
 
-    /// Copyable Terminal command for upgrading this package (`CONVENTIONS.md` — transparency).
+    /// Copyable Terminal command for upgrading this package (`ARCHITECTURE.md` — transparency).
     var displayCommand: String {
         switch package.kind {
         case .formula:
@@ -39,6 +37,10 @@ struct UpgradePackageItem {
         guard let label = InstalledBrewVersionFormatting.upgradeDisplayLabel(from: package.latestVersion) else {
             return nil
         }
-        return localization.string("Upgrade to \(label)")
+        return String(
+            localized: "Upgrade to \(label)",
+            bundle: #bundle,
+            comment: "Installed detail upgrade button; interpolated label shows target tap version.",
+        )
     }
 }

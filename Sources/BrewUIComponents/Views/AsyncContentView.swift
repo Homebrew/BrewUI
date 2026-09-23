@@ -16,7 +16,7 @@ import SwiftUI
 /// placeholder is on screen.
 ///
 /// `Failure` is fixed to `String`: ViewModels map their repository errors to user-facing copy before
-/// handing the state here (`CONVENTIONS.md` — Loadable UI state), so ``ErrorStateView`` only needs a
+/// handing the state here (`AGENTS.md` — Loadable UI state), so ``ErrorStateView`` only needs a
 /// message.
 public struct AsyncContentView<Content: Placeholdable, LoadedView: View>: View {
     let state: LoadState<Content, String>
@@ -68,7 +68,7 @@ struct ErrorStateView: View {
                 .foregroundStyle(Color.brewStatusError)
                 .multilineTextAlignment(.center)
             if let onRetry {
-                Button("Retry", action: onRetry)
+                Button(String(localized: "Retry", bundle: #bundle, comment: "Error state: retry the failed load"), action: onRetry)
                     .axid(.errorRetryButton)
             }
         }

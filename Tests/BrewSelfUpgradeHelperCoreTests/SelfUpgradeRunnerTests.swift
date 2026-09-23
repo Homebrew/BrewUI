@@ -17,7 +17,7 @@ struct SelfUpgradeRunnerTests {
         let brew = try FakeExecutable(script: "exit 0")
         defer { brew.remove() }
 
-        let outcome = await FakeExecutable.runner().run(
+        let outcome = await SelfUpgradeRunner().run(
             executablePath: brew.path,
             arguments: ["upgrade", "--cask", "homebrew-app"],
             environment: [:],
@@ -32,7 +32,7 @@ struct SelfUpgradeRunnerTests {
         let brew = try FakeExecutable(script: "exit 12")
         defer { brew.remove() }
 
-        let outcome = await FakeExecutable.runner().run(
+        let outcome = await SelfUpgradeRunner().run(
             executablePath: brew.path,
             arguments: ["upgrade"],
             environment: [:],
@@ -47,7 +47,7 @@ struct SelfUpgradeRunnerTests {
         let brew = try FakeExecutable(script: "kill -TERM $$; sleep 5")
         defer { brew.remove() }
 
-        let outcome = await FakeExecutable.runner().run(
+        let outcome = await SelfUpgradeRunner().run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -61,7 +61,7 @@ struct SelfUpgradeRunnerTests {
 
     /// The app resolves `brew` before it quits, so the path can be stale by the time the helper runs it.
     @Test func `a path with no executable fails without launching anything`() async {
-        let outcome = await FakeExecutable.runner().run(
+        let outcome = await SelfUpgradeRunner().run(
             executablePath: "/nonexistent/brew",
             arguments: ["upgrade"],
             environment: [:],
@@ -73,7 +73,7 @@ struct SelfUpgradeRunnerTests {
     }
 
     @Test func `a directory is not an executable`() async {
-        let outcome = await FakeExecutable.runner().run(
+        let outcome = await SelfUpgradeRunner().run(
             executablePath: NSTemporaryDirectory(),
             arguments: ["upgrade"],
             environment: [:],
@@ -91,7 +91,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let started = Date()
-        let outcome = await FakeExecutable.runner().run(
+        let outcome = await SelfUpgradeRunner().run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -202,7 +202,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        let outcome = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
+        let outcome = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -219,7 +219,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
+        _ = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -235,7 +235,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        let outcome = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
+        let outcome = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: [:],
@@ -253,7 +253,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
+        _ = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: ["upgrade", "--cask", "homebrew-app"],
             environment: [:],
@@ -269,7 +269,7 @@ struct SelfUpgradeRunnerTests {
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
+        _ = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: ["BREW_UITEST_SCENARIO": "selfUpgradeAvailable"],
@@ -279,19 +279,23 @@ struct SelfUpgradeRunnerTests {
         #expect(transcript.lines == ["selfUpgradeAvailable"])
     }
 
-    @Test func `the inherited environment survives alongside the pinned one`() async throws {
+    @Test func `self upgrade uses the same restricted PATH as the app`() async throws {
         let brew = try FakeExecutable(script: #"echo "${PATH}""#)
         defer { brew.remove() }
 
         let transcript = TranscriptRecorder()
-        _ = await FakeExecutable.runner(transcriptSink: { transcript.append($0) }).run(
+        _ = await SelfUpgradeRunner(transcriptSink: { transcript.append($0) }).run(
             executablePath: brew.path,
             arguments: [],
             environment: ["PINNED": "yes"],
             timeout: 30,
         )
 
-        #expect(transcript.lines == [ProcessInfo.processInfo.environment["PATH"]])
+        #expect(transcript.lines == [
+            brew.url.deletingLastPathComponent().path + ":"
+                + brew.url.deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("sbin").path
+                + ":/usr/bin:/bin",
+        ])
     }
 
     /// The transcript is a file, so escape codes in it are noise rather than colour.
@@ -349,12 +353,6 @@ private struct FakeExecutable {
 
     func remove() {
         try? FileManager.default.removeItem(at: url)
-    }
-
-    /// Invoked directly, for the reason `BrewCommandExecutionContext.uiTesting(brewURL:)` does the same:
-    /// the login shell would source the developer's dotfiles.
-    static func runner(transcriptSink: @escaping @Sendable (String) -> Void = { _ in }) -> SelfUpgradeRunner {
-        SelfUpgradeRunner(usesLoginShell: false, transcriptSink: transcriptSink)
     }
 }
 

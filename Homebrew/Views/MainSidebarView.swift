@@ -14,7 +14,7 @@ struct MainSidebarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             sidebarRow(
-                title: "Installed",
+                title: SidebarItem.installed.title,
                 systemImage: "cube.box.fill",
                 item: .installed,
             )
@@ -22,7 +22,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.sm)
 
             sidebarRow(
-                title: "Upgrades",
+                title: SidebarItem.upgrades.title,
                 systemImage: "arrow.up.circle",
                 item: .upgrades,
                 trailingAccessory: { UpgradesSidebarBadge() },
@@ -31,7 +31,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
-                title: "Discover",
+                title: SidebarItem.discover.title,
                 systemImage: "magnifyingglass",
                 item: .discover,
             )
@@ -39,7 +39,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
-                title: "Doctor",
+                title: SidebarItem.doctor.title,
                 systemImage: "stethoscope",
                 item: .doctor,
             )
@@ -47,7 +47,7 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
-                title: "Configuration",
+                title: SidebarItem.configuration.title,
                 systemImage: "gearshape",
                 item: .configuration,
             )
@@ -66,7 +66,7 @@ struct MainSidebarView: View {
 
     @ViewBuilder
     private func sidebarRow(
-        title: LocalizedStringKey,
+        title: String,
         systemImage: String,
         item: SidebarItem,
         @ViewBuilder trailingAccessory: () -> some View = { EmptyView() },

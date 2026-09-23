@@ -26,12 +26,12 @@ final class ConfigViewModel {
 
     /// Maps the repository state to a user-facing `LoadState` the view renders via `AsyncContentView`.
     /// Errors are converted to a message string so the standard error chrome needs no model knowledge.
-    func pageState(localization: AppLocalization = AppLocalization(language: "en")) -> LoadState<BrewConfigSnapshot, String> {
+    var pageState: LoadState<BrewConfigSnapshot, String> {
         switch state {
         case let .loaded(snapshot):
             .loaded(snapshot)
         case let .failed(error):
-            .failed(userMessage(for: error, localization: localization))
+            .failed(userMessage(for: error))
         default:
             .loading
         }
@@ -51,13 +51,14 @@ final class ConfigViewModel {
     }
 
     /// Maps any repository error to the user-facing copy shown in the AsyncContentView's error state.
-    func userMessage(for error: any Error, localization: AppLocalization = AppLocalization(language: "en")) -> String {
-        if case let BrewCommandError.failed(_, stderr) = error {
-            let trimmed = stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                return trimmed
-            }
-        }
-        return localization.string("Couldn't read the Homebrew configuration.")
+    func userMessage(for error: any Error) -> String {
+        BrewErrorCopy.message(
+            for: error,
+            fallback: String(
+                localized: "Couldn't read the Homebrew configuration.",
+                bundle: #bundle,
+                comment: "Configuration tab, generic load failure",
+            ),
+        )
     }
 }

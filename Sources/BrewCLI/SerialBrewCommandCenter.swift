@@ -49,31 +49,12 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
 
     private var trackedPhasesByID: [BrewOperationID: BrewOperationPhase] = [:]
     private var inflightByID: [BrewOperationID: Task<CommandOutput, Error>] = [:]
-    private var relaunchLocked = false
     private var phaseListenersByID: [BrewOperationID: [PhaseStreamListener]] = [:]
     private var allPhaseListeners: [AllPhaseStreamListener] = []
     private var allOutputListeners: [AllOutputStreamListener] = []
 
     public init(executionContext: BrewCommandExecutionContext) {
         self.executionContext = executionContext
-    }
-
-    /// Atomically take the safe-relaunch window when no brew work is running.
-    ///
-    /// The actor boundary makes the idle check and lock a single action: a racing `brew`
-    /// run either loses the lock or is already in the inflight map. Never cancel work that
-    /// has already started.
-    public func beginRelaunch() -> Bool {
-        guard !relaunchLocked, inflightByID.isEmpty else {
-            return false
-        }
-        relaunchLocked = true
-        return true
-    }
-
-    /// Release a previously taken relaunch window, for example after the helper fails to start.
-    public func cancelRelaunch() {
-        relaunchLocked = false
     }
 
     public func phase(for id: BrewOperationID) async -> BrewOperationPhase {
@@ -137,10 +118,6 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
         id: BrewOperationID,
         mode: BrewExecutionMode,
     ) async throws -> CommandOutput {
-        // Check the lock before coalescing or creating work: the relaunch window accepts no new commands.
-        guard !relaunchLocked else {
-            throw CancellationError()
-        }
         if let existing = inflightByID[id] {
             return try await existing.value
         }

@@ -26,11 +26,10 @@ public struct SelfUpgradeBanner: View {
 }
 
 struct SelfUpgradeBannerContent: View {
-    @Environment(\.brewLocalization) private var localization
     let coordinator: SelfUpgradeCoordinator
 
     private var presentation: SelfUpgradePresentation {
-        SelfUpgradePresentation(status: coordinator.status, localization: localization)
+        SelfUpgradePresentation(status: coordinator.status)
     }
 
     var body: some View {
@@ -40,11 +39,11 @@ struct SelfUpgradeBannerContent: View {
                 summary
                 actions
                     .padding(.top, BrewSpacing.sm)
-                if let failureMessage = coordinator.failureMessage(localization: localization) {
+                if let failureMessage = coordinator.failureMessage {
                     Text(failureMessage)
                         .font(.brewCaption)
                         .foregroundStyle(Color.brewStatusError)
-                        .accessibilityLabel("Upgrade failed: \(failureMessage)")
+                        .accessibilityLabel(String(localized: "Upgrade failed: \(failureMessage)", bundle: #bundle, comment: "VoiceOver: self-upgrade error; %@ is the error text"))
                 }
             }
         }
@@ -89,7 +88,7 @@ struct SelfUpgradeBannerContent: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(presentation.bannerTitle), \(presentation.versionSummary)")
+        .accessibilityLabel(Text(verbatim: "\(presentation.bannerTitle), \(presentation.versionSummary)"))
     }
 
     private var actions: some View {
@@ -111,7 +110,7 @@ struct SelfUpgradeBannerContent: View {
             .accessibilityLabel(presentation.upgradeActionTitle)
             .axid(.selfUpgradeUpgradeButton)
 
-            Button("Later") {
+            Button(String(localized: "Later", bundle: #bundle, comment: "Self-upgrade banner: dismiss for now")) {
                 coordinator.dismiss()
             }
             .disabled(!coordinator.isUpgradeActionEnabled)

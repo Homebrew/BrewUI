@@ -10,12 +10,11 @@ import SwiftUI
 /// Always-visible collapsed strip showing the active (or most recent) brew operation
 /// with status dot, copyable command, phase label, and an expand affordance.
 struct ConsoleStatusBar: View {
-    @Environment(\.brewLocalization) private var localization
     @Binding var expanded: Bool
     let viewModel: ConsoleViewModel
 
     var body: some View {
-        let presentation = viewModel.statusPresentation(localization: localization)
+        let presentation = viewModel.statusPresentation
         HStack(spacing: BrewSpacing.md) {
             // Combined into one element so the whole "<command> — done" / "— failed · exit N"
             // sentence reads as a single string to VoiceOver and to UI tests.
@@ -38,8 +37,8 @@ struct ConsoleStatusBar: View {
                     .foregroundStyle(Color.brewTextSecondary)
             }
             .buttonStyle(.borderless)
-            .help(localization.string(expanded ? "Hide console" : "Show console"))
-            .accessibilityLabel(localization.string(expanded ? "Hide console" : "Show console"))
+            .help(toggleLabel)
+            .accessibilityLabel(Text(toggleLabel))
             .axid(.consoleToggle)
         }
         .padding(.horizontal, BrewSpacing.lg)
@@ -51,29 +50,35 @@ struct ConsoleStatusBar: View {
         }
     }
 
+    private var toggleLabel: LocalizedStringResource {
+        expanded
+            ? LocalizedStringResource("Hide console", bundle: #bundle, comment: "Console status bar: collapse button")
+            : LocalizedStringResource("Show console", bundle: #bundle, comment: "Console status bar: expand button")
+    }
+
     @ViewBuilder
     private func summaryText(_ summary: ConsoleStatusPresentation.Summary) -> some View {
         switch summary {
         case let .running(command, shortLabel):
             commandText(command)
-            Text("— \(shortLabel)")
+            Text("— \(shortLabel)", bundle: #bundle, comment: "Console status bar suffix while a command runs; %@ is the phase label")
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(Color.brewTextSecondary)
 
         case let .completed(command, succeeded, exitCode):
             commandText(command)
             if succeeded {
-                Text("— done")
+                Text("— done", bundle: #bundle, comment: "Console status bar suffix after a command succeeded")
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(Color.brewTextSecondary)
             } else {
-                Text("— failed · exit \(exitCode)")
+                Text("— failed · exit \(exitCode)", bundle: #bundle, comment: "Console status bar suffix after a command failed; %d is the exit code")
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(Color.brewStatusError)
             }
 
         case .idle:
-            Text("Ready")
+            Text("Ready", bundle: #bundle, comment: "Console status bar when nothing has run")
                 .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(Color.brewTextSecondary)
         }

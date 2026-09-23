@@ -12,7 +12,6 @@ import SwiftUI
 
 /// Single scrolling pane presenting `brew config` output, with copy/refresh.
 struct ConfigView: View {
-    @Environment(\.brewLocalization) private var localization
     @State private var viewModel: ConfigViewModel
 
     init(repository: any ConfigRepository) {
@@ -35,11 +34,11 @@ struct ConfigView: View {
     private var header: some View {
         HStack(spacing: BrewSpacing.sm) {
             Spacer(minLength: 0)
-            Button("Copy report", systemImage: "doc.on.doc") {
+            Button(String(localized: "Copy report", bundle: #bundle, comment: "Configuration header: copy the diagnostic report"), systemImage: "doc.on.doc") {
                 copyReport()
             }
             .disabled(!viewModel.canCopyReport)
-            Button("Refresh", systemImage: "arrow.clockwise") {
+            Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
                 Task { await viewModel.refresh() }
             }
         }
@@ -54,7 +53,7 @@ struct ConfigView: View {
             brewNotFoundState
         } else {
             AsyncContentView(
-                state: viewModel.pageState(localization: localization),
+                state: viewModel.pageState,
                 onRetry: { Task { await viewModel.refresh() } },
                 loaded: { snapshot in
                     loadedCards(snapshot: snapshot)
@@ -63,9 +62,17 @@ struct ConfigView: View {
         }
     }
 
+    private var settingsNote: LocalizedStringResource {
+        LocalizedStringResource("""
+        Homebrew settings are read from brew.env files. Shell profiles and exported variables are ignored. \
+        Put user settings in ~/.homebrew/brew.env, then relaunch BrewUI.
+        """, bundle: #bundle, comment: "Configuration tab: where Homebrew reads its settings from")
+    }
+
     private func loadedCards(snapshot: BrewConfigSnapshot) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
+                NoteCallout(settingsNote, tone: .info)
                 ForEach(viewModel.sections(for: snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }
@@ -78,8 +85,12 @@ struct ConfigView: View {
     private var brewNotFoundState: some View {
         emptyState(
             systemImage: "questionmark.folder",
-            title: localization.string("Homebrew not found"),
-            message: localization.string("Couldn't locate the brew executable. Install Homebrew, then refresh."),
+            title: String(localized: "Homebrew not found", bundle: #bundle, comment: "Configuration tab, brew-not-found title"),
+            message: String(
+                localized: "Couldn't locate the brew executable. Install Homebrew, then refresh.",
+                bundle: #bundle,
+                comment: "Configuration tab, brew-not-found message",
+            ),
         )
         .axid(.brewNotFoundState)
     }
@@ -101,7 +112,7 @@ struct ConfigView: View {
                 .font(.brewCallout)
                 .foregroundStyle(Color.brewTextSecondary)
                 .multilineTextAlignment(.center)
-            Button("Refresh", systemImage: "arrow.clockwise") {
+            Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
                 Task { await viewModel.refresh() }
             }
             .padding(.top, BrewSpacing.xs)

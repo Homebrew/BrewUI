@@ -11,7 +11,7 @@ import Foundation
 import Observation
 
 /// Coarse view-facing projection of the repository's diagnostics state so the view binds to one decision
-/// per state instead of re-deriving it from the report (`CONVENTIONS.md` — passive views).
+/// per state instead of re-deriving it from the report (`AGENTS.md` — passive views).
 enum DoctorPresentation: Equatable {
     case loading
     case healthy
@@ -33,7 +33,7 @@ final class DoctorViewModel {
     /// Fix tokens currently running — drives per-row progress and blocks duplicate submits.
     private(set) var runningFixTokens: Set<String> = []
     /// Inline fix errors keyed by fix token.
-    private var fixFailures: [String: AppMessage] = [:]
+    private(set) var fixErrorMessages: [String: String] = [:]
 
     init(
         doctorRepository: any DoctorRepository,
@@ -49,19 +49,19 @@ final class DoctorViewModel {
 
     /// View-friendly mapping of the repository's load state with the failure mapped to user-facing copy.
     /// Drives the body's ``AsyncContentView`` (redacted placeholder on `.loading`, retry on `.failed`).
-    func state(localization: AppLocalization = AppLocalization(language: "en")) -> LoadState<DoctorReport, String> {
+    var state: LoadState<DoctorReport, String> {
         switch doctorRepository.state {
         case .loading:
             .loading
         case let .loaded(report):
             .loaded(report)
         case let .failed(error):
-            .failed(AppMessage(failure: OperationFailure(catching: error)).string(localization: localization))
+            .failed(BrewErrorCopy.message(for: OperationFailure(catching: error)))
         }
     }
 
-    func presentation(localization: AppLocalization = AppLocalization(language: "en")) -> DoctorPresentation {
-        switch state(localization: localization) {
+    var presentation: DoctorPresentation {
+        switch state {
         case .loading:
             .loading
         case let .loaded(report):
@@ -79,11 +79,11 @@ final class DoctorViewModel {
     /// Drives the issues list's `@FocusState`. The list only owns keyboard focus once a report has
     /// loaded — loading and failure states have no rows to focus.
     var shouldFocusList: Bool {
-        doctorRepository.state.isLoaded
+        state.isLoaded
     }
 
     var rawDoctorOutput: String? {
-        guard case let .loaded(report) = doctorRepository.state, !report.rawOutput.isEmpty else {
+        guard case let .loaded(report) = state, !report.rawOutput.isEmpty else {
             return nil
         }
         return report.rawOutput
@@ -93,7 +93,7 @@ final class DoctorViewModel {
     /// with issues — is on screen. Hidden during the initial load and on failure (the failure surface owns
     /// its own retry affordance via ``AsyncContentView``).
     var showsHeaderControls: Bool {
-        switch presentation() {
+        switch presentation {
         case .healthy, .issues:
             true
         case .loading, .failed:
@@ -103,21 +103,22 @@ final class DoctorViewModel {
 
     /// Header subtitle copy. Mirrors ``presentation``; while a re-check runs on top of a prior report it
     /// switches to "Re-checking…" so the user knows the visible content is being refreshed.
-    func subtitle(localization: AppLocalization = AppLocalization()) -> String {
-        switch presentation() {
+    var subtitle: LocalizedStringResource {
+        let rechecking = LocalizedStringResource("Re-checking…", bundle: #bundle, comment: "Doctor subtitle while a re-check runs")
+        switch presentation {
         case .loading:
-            localization.string("Running brew doctor…")
+            return LocalizedStringResource("Running brew doctor…", bundle: #bundle, comment: "Doctor subtitle during the first check")
         case .healthy:
-            if isRefreshing { localization.string("Re-checking…") } else { localization.string("No problems found") }
+            return isRefreshing ? rechecking : LocalizedStringResource("No problems found", bundle: #bundle, comment: "Doctor subtitle, healthy")
         case .issues:
-            if isRefreshing { localization.string("Re-checking…") } else { localization.string("Warnings found") }
+            return isRefreshing ? rechecking : LocalizedStringResource("Warnings found", bundle: #bundle, comment: "Doctor subtitle, issues listed")
         case .failed:
-            localization.string("The check could not be completed")
+            return LocalizedStringResource("The check could not be completed", bundle: #bundle, comment: "Doctor subtitle when brew doctor failed to run")
         }
     }
 
     var lastCheckedAt: Date? {
-        guard case .loaded = doctorRepository.state else {
+        guard case .loaded = state else {
             return nil
         }
         return doctorRepository.reportedAt
@@ -126,7 +127,7 @@ final class DoctorViewModel {
     /// Linear scan over `report.issues` keyed by the content id. `brew doctor` reports a handful of
     /// issues at most and this only runs when the detail pane re-renders.
     var selectedIssue: DoctorIssueItem? {
-        guard let id = selectedIssueID, case let .loaded(report) = doctorRepository.state else {
+        guard let id = selectedIssueID, case let .loaded(report) = state else {
             return nil
         }
         return report.issues.lazy.map(DoctorIssueItem.init(issue:)).first { $0.id == id }
@@ -139,7 +140,7 @@ final class DoctorViewModel {
     /// Issue ids in the order their rows render — grouped by descending severity, matching
     /// `DoctorIssueGroup.grouped(from:)` — so keyboard navigation steps through the list as shown.
     var orderedIssueIDs: [Int] {
-        guard case let .loaded(report) = doctorRepository.state else {
+        guard case let .loaded(report) = state else {
             return []
         }
         return DoctorIssueGroup.grouped(from: report).flatMap { $0.items.map(\.id) }
@@ -172,11 +173,11 @@ final class DoctorViewModel {
         return runningFixTokens.contains(token)
     }
 
-    func fixError(_ item: DoctorIssueItem, localization: AppLocalization = AppLocalization(language: "en")) -> String? {
+    func fixError(_ item: DoctorIssueItem) -> String? {
         guard let token = item.fixToken else {
             return nil
         }
-        return fixFailures[token]?.string(localization: localization)
+        return fixErrorMessages[token]
     }
 
     // MARK: - Intents
@@ -197,7 +198,7 @@ final class DoctorViewModel {
     /// surviving issues have shifted position. Drops the selection if the issue is gone and defaults
     /// to the first issue when nothing is selected.
     private func synchronizeSelectionWithLoadedReport() {
-        guard case let .loaded(report) = doctorRepository.state else {
+        guard case let .loaded(report) = state else {
             return
         }
         let ids = Set(report.issues.lazy.map(DoctorIssueItem.contentID(for:)))
@@ -224,7 +225,7 @@ final class DoctorViewModel {
 
         let operationID = BrewOperationID(maintenanceToken: token, displayCommand: token)
         let command = commandFactory.doctorFixCommand(arguments: arguments)
-        fixFailures[token] = nil
+        fixErrorMessages[token] = nil
         runningFixTokens.insert(token)
         fixTasks[token]?.cancel()
         fixTasks[token] = Task { @MainActor [weak self] in
@@ -245,12 +246,12 @@ final class DoctorViewModel {
                     return
                 }
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
-                let message = if case let .failed(reason) = latestPhase {
-                    AppMessage(failure: reason)
+                let message: String = if case let .failed(reason) = latestPhase {
+                    BrewErrorCopy.message(for: reason)
                 } else {
-                    AppMessage(failure: OperationFailure(catching: error))
+                    BrewErrorCopy.message(for: OperationFailure(catching: error))
                 }
-                fixFailures[token] = message
+                fixErrorMessages[token] = message
                 runningFixTokens.remove(token)
                 return
             }

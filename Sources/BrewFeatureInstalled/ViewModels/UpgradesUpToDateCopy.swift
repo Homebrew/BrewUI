@@ -3,23 +3,38 @@
 //  BrewFeatureInstalled
 //
 
-import BrewUIComponents
 import Foundation
 
 /// One phrase for "nothing to upgrade", shared by the four places the tab makes that claim at once.
 enum UpgradesUpToDateCopy {
-    static func headline(localization: AppLocalization = AppLocalization()) -> String {
-        localization.string("Everything is up to date")
+    static var headline: String {
+        String(
+            localized: "Everything is up to date",
+            bundle: #bundle,
+            comment: "Upgrades tab: canonical phrase for having no upgrades available",
+        )
     }
 
-    static func installedDetail(count: Int, localization: AppLocalization = AppLocalization()) -> String {
+    static func installedDetail(count: Int) -> String {
         switch count {
         case 0:
-            localization.string("No installed packages to check.")
+            String(
+                localized: "No installed packages to check.",
+                bundle: #bundle,
+                comment: "Upgrades empty state when nothing is installed",
+            )
         case 1:
-            localization.string("Your installed package is up to date.")
+            String(
+                localized: "Your installed package is up to date.",
+                bundle: #bundle,
+                comment: "Upgrades empty state for a single installed package",
+            )
         default:
-            localization.string("All \(count) installed packages are up to date.")
+            String(
+                localized: "All \(count) installed packages are up to date.",
+                bundle: #bundle,
+                comment: "Upgrades empty state with total installed count",
+            )
         }
     }
 }

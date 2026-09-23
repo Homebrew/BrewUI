@@ -8,8 +8,7 @@ import Foundation
 /// Arranges and cleans up live-suite state through the machine's real `brew`, never as the code under
 /// test: the tests themselves act through the app's own path to brew.
 nonisolated enum Brew {
-    /// Applied to every brew this suite runs, the app's included. Without `HOMEBREW_NO_AUTO_UPDATE` an
-    /// install can spend minutes updating the tap first, which reads as a hung test.
+    /// Applied to fixture setup and cleanup. CI puts the same settings in `brew.env` for the app.
     static let determinismEnvironment = [
         "HOMEBREW_NO_AUTO_UPDATE": "1",
         "HOMEBREW_NO_ANALYTICS": "1",
@@ -103,7 +102,7 @@ enum BrewFixtureError: LocalizedError, CustomStringConvertible {
             """
             The live suite needs Homebrew installed on this machine; no executable at \
             \(searched.joined(separator: " or ")). This suite is gated to Homebrew-equipped runners \
-            (see BrewUITests/E2E/README.md) — it cannot be made to pass without one.
+            (see AGENTS.md#live-end-to-end-canaries) — it cannot be made to pass without one.
             """
         case let .couldNotRun(command, underlying):
             "Could not spawn “brew \(command)” for test setup: \(underlying)"
