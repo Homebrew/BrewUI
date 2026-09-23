@@ -27,6 +27,7 @@ rm -rf UITestResults.xcresult
 # connection" on a real Mac, even though the identical run against the default
 # ~/Library/Developer/Xcode/DerivedData location passes in seconds. Root cause not chased down
 # further than that — use the default location rather than the one that's confirmed broken.
+# Keep ad-hoc signing enabled: the copied XCTRunner must be re-signed after the test bundle is added.
 xcodebuild test \
   -project Homebrew.xcodeproj \
   -scheme Brew-UI \
@@ -37,7 +38,6 @@ xcodebuild test \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY=- \
   CODE_SIGNING_REQUIRED=NO \
-  CODE_SIGNING_ALLOWED=NO \
   "$@"
 
 echo "==> UI tests passed."
