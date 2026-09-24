@@ -138,22 +138,24 @@ struct MainWindowView: View {
         }
     }
 
-    private var currentNavigationTitle: LocalizedStringKey {
+    private var currentNavigationTitle: String {
         selectedSidebarItem.title
     }
 
-    private var currentNavigationSubtitle: LocalizedStringKey {
+    private var currentNavigationSubtitle: String {
         switch selectedSidebarItem {
         case .installed:
-            "Browse or search your installed packages"
+            String(localized: "Browse or search your installed packages", bundle: #bundle, comment: "Window subtitle, Installed")
         case .upgrades:
-            "Review and upgrade outdated packages"
+            String(localized: "Review and upgrade outdated packages", bundle: #bundle, comment: "Window subtitle, Upgrades")
         case .discover:
-            "Browse and search \(Self.approximateCatalogueSize) packages"
+            String(localized: "Browse and search \(Self.approximateCatalogueSize)+ packages", bundle: #bundle, comment: "Window subtitle, Discover; %lld is the approximate catalog size")
         case .doctor:
-            "Check your Homebrew installation for problems"
+            String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor")
         case .configuration:
-            "Homebrew environment & diagnostics"
+            String(localized: "Homebrew environment & diagnostics", bundle: #bundle, comment: "Window subtitle, Configuration")
+        }
+    }
             .navigationTitle(selectedSidebarItem.title)
             .navigationSubtitle(
                 selectedSidebarItem == .upgrades
