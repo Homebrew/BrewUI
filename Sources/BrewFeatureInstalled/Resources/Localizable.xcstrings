@@ -81,6 +81,9 @@
     "Couldn't check for upgrades" : {
       "comment" : "Upgrades tab: the outdated check failed, so the tab cannot report an answer"
     },
+    "Couldn't save the Brewfile." : {
+      "comment" : "Installed tab, generic Brewfile save failure"
+    },
     "DEPRECATED" : {
       "comment" : "Installed deprecated status badge label"
     },
@@ -187,6 +190,15 @@
     },
     "Refresh" : {
       "comment" : "Upgrades tab: re-check for upgrades button"
+    },
+    "Save Brewfile…" : {
+      "comment" : "Installed header: save the installed environment as a Brewfile"
+    },
+    "Saved a Brewfile to %@" : {
+      "comment" : "Installed tab: confirmation after saving a Brewfile; %@ is the file path"
+    },
+    "Saving Brewfile…" : {
+      "comment" : "Installed header: a Brewfile dump is running"
     },
     "Scope" : {
       "comment" : "Installed tab: formula/cask scope picker label\nUpgrades tab: formula/cask scope picker label"

@@ -57,4 +57,15 @@ struct BrewCommandsTests {
         #expect(command.arguments == ["doctor"])
         #expect(command.operationKind == .doctorRead)
     }
+
+    @Test func `bundleDump writes the chosen file under bundleDump`() {
+        let command = BrewCommands.bundleDump(fileURL: URL(fileURLWithPath: "/tmp/Brewfile"))
+        #expect(command.arguments == ["bundle", "dump", "--file=/tmp/Brewfile", "--force"])
+        #expect(command.operationKind == .bundleDump)
+    }
+
+    @Test func `displayCommand renders the literal a person would type`() {
+        let command = BrewCommands.bundleDump(fileURL: URL(fileURLWithPath: "/tmp/Brewfile"))
+        #expect(command.displayCommand == "brew bundle dump --file=/tmp/Brewfile --force")
+    }
 }

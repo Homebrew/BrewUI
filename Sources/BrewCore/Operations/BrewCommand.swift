@@ -20,3 +20,12 @@ public struct BrewCommand: Sendable, Equatable {
         self.arguments = arguments
     }
 }
+
+public extension BrewCommand {
+    /// The literal a person would type — `"brew "` joined with ``arguments``. Maintenance operations
+    /// carry this into their ``BrewOperationID``, so the console renders the same string that ran
+    /// (``BrewUpgradeSelection/displayCommand`` derives its batch rendering the same way).
+    var displayCommand: String {
+        "brew " + arguments.joined(separator: " ")
+    }
+}
