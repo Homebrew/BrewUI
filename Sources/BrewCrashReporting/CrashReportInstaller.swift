@@ -15,7 +15,17 @@ import Foundation
 /// `open`/`write`/`backtrace_symbols_fd`/`close` before re-raising so the OS
 /// still records its own report. It never builds Swift strings.
 public enum CrashReportInstaller {
-    private static let handledSignals: [Int32] = [SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP]
+    static let handledSignals: [Int32] = [SIGABRT, SIGBUS, SIGFPE, SIGILL, SIGSEGV, SIGTRAP]
+
+    /// Restores default disposition (`SIG_DFL`) for all handled signals.
+    static func restoreDefaultSignalDispositions() {
+        signal(SIGABRT, SIG_DFL)
+        signal(SIGBUS, SIG_DFL)
+        signal(SIGFPE, SIG_DFL)
+        signal(SIGILL, SIG_DFL)
+        signal(SIGSEGV, SIG_DFL)
+        signal(SIGTRAP, SIG_DFL)
+    }
 
     /// Call once, early in launch. `date` is fixed here because the signal
     /// handler cannot compute a timestamp safely.
@@ -80,9 +90,25 @@ private nonisolated(unsafe) var exceptionStore: CrashReportStore?
 // swiftlint:disable:next nonisolated_unsafe
 private nonisolated(unsafe) var exceptionEnvironment: CrashReportEnvironment?
 
+// swiftlint:disable:next nonisolated_unsafe
+private nonisolated(unsafe) var isHandlingFatalSignal: sig_atomic_t = 0
+
 // MARK: - Signal path (async-signal-safe)
 
 private let handleFatalSignal: @convention(c) (Int32) -> Void = { signalNumber in
+    // Guard against re-entrant signal delivery if a secondary fault occurs.
+    if isHandlingFatalSignal != 0 {
+        _exit(128 + signalNumber)
+    }
+    isHandlingFatalSignal = 1
+
+    // Explicitly restore default disposition for all handled signals.
+    // On Darwin, SA_RESETHAND is silently ignored for SIGILL and SIGTRAP, which would
+    // cause synchronous re-raise to recurse until stack exhaustion. Restoring SIG_DFL
+    // across all handled signals also ensures any secondary fault during report writing
+    // terminates immediately instead of entering a signal recursion loop.
+    CrashReportInstaller.restoreDefaultSignalDispositions()
+
     if let path = signalReportPath {
         let fileDescriptor = open(path, O_WRONLY | O_CREAT | O_APPEND, 0o644)
         if fileDescriptor >= 0 {
@@ -95,8 +121,8 @@ private let handleFatalSignal: @convention(c) (Int32) -> Void = { signalNumber i
         }
     }
 
-    // `SA_RESETHAND` has already restored the default disposition; re-raise so
-    // the OS records its own report and the process terminates.
+    // Default disposition was restored above; re-raise so the OS records
+    // its own report and the process terminates.
     raise(signalNumber)
 }
 
