@@ -49,6 +49,8 @@ struct ConfigViewModelTests {
 
         let report = viewModel.copyReport
         #expect(report.contains("Homebrew\nHOMEBREW_VERSION: 4.3.0"))
+        #expect(report.contains("\n\nSystem\nCPU: 16-core"))
+        #expect(report.contains("\n\nBuild settings\nHOMEBREW_MAKE_JOBS: 16"))
         #expect(report.contains("Environment (HOMEBREW_*)\nHOMEBREW_NO_ANALYTICS: 1"))
         #expect(viewModel.canCopyReport)
     }

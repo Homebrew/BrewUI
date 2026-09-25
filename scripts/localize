@@ -65,7 +65,7 @@ sync() {
         local target stringsdata=() output="$catalog"
         target="$(target_for "$catalog")"
         while IFS= read -r file; do stringsdata+=("$file"); done < <(
-            find "$derived_data/Build/Intermediates.noindex" -path "*/${target}.build/Objects-normal/*" -name '*.stringsdata' 2>/dev/null | sort
+            find "$derived_data/Build/Intermediates.noindex" \( -path "*/${target}.build/Objects-normal/*" -o -path "*/${target}-t.build/Objects-normal/*" \) -name '*.stringsdata' 2>/dev/null | sort
         )
         if [[ ${#stringsdata[@]} -eq 0 ]]; then
             echo "error: no .stringsdata for $target under $derived_data — build first or drop --skip-build" >&2

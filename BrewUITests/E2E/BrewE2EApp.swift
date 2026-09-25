@@ -11,6 +11,8 @@ import XCTest
 enum BrewE2EApp {
     static func launch() -> XCUIApplication {
         let app = XCUIApplication()
+        // Shared page objects assert English labels, independent of the machine language.
+        app.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en"]
         app.launch()
         BrewApp.activate(app)
         return app

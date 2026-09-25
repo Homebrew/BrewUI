@@ -1,168 +1,530 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "%@ (linked)" : {
-      "comment" : "Installed version label; %@ is the version, annotated when that keg is the linked one"
-    },
-    "%@ installs (30d)" : {
-      "comment" : "Discover row: 30-day install count; %@ is a formatted number"
-    },
-    "%@ installs in 30 days" : {
-      "comment" : "VoiceOver: install count over the last 30 days; %@ is the formatted count"
-    },
-    "%lld packages match “%@”" : {
-      "comment" : "Discover subhead, search result count",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld packages match “%2$@”"
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ (linked)": {
+      "comment": "Installed version label; %@ is the version, annotated when that keg is the linked one",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@（已链接）"
           }
         }
       }
     },
-    "1 package matches “%@”" : {
-      "comment" : "Discover subhead, single search result"
-    },
-    "30-day installs" : {
-      "comment" : "Package detail row: Homebrew analytics install count"
-    },
-    "All" : {
-      "comment" : "Scope picker: every package kind"
-    },
-    "As dependency" : {
-      "comment" : "Install reason row: installed only because another package needed it"
-    },
-    "Casks" : {
-      "comment" : "Discover casks section header while searching\nScope picker: casks only"
-    },
-    "Choose a package from Discover to see details." : {
-      "comment" : "Package detail placeholder body when nothing is selected"
-    },
-    "Could not load packages" : {
-      "comment" : "Discover subtitle on error"
-    },
-    "Could not search packages" : {
-      "comment" : "Discover subtitle on search error"
-    },
-    "Dependencies" : {
-      "comment" : "Package detail section heading"
-    },
-    "Details" : {
-      "comment" : "Package detail section heading"
-    },
-    "Discover packages" : {
-      "comment" : "VoiceOver: the Discover results list"
-    },
-    "Formulae" : {
-      "comment" : "Discover formulae section header while searching\nScope picker: formulae only"
-    },
-    "Homepage" : {
-      "comment" : "Package detail row: homepage link"
-    },
-    "INSTALLED" : {
-      "comment" : "Discover installed status badge label"
-    },
-    "Install" : {
-      "comment" : "Discover detail: install button\nPackage detail section heading\nVoiceOver: install button"
-    },
-    "Install reason" : {
-      "comment" : "Package detail row: on request or as a dependency"
-    },
-    "Installed" : {
-      "comment" : "Discover installed status badge accessibility label\nDiscover list row installed status\nDiscover package installed status\nPackage detail row: installed version(s)"
-    },
-    "Installed on" : {
-      "comment" : "Package detail row: install date"
-    },
-    "Installing" : {
-      "comment" : "VoiceOver: package installing"
-    },
-    "Installs this package on your Mac" : {
-      "comment" : "Command block summary above brew install"
-    },
-    "Latest version" : {
-      "comment" : "Package detail row"
-    },
-    "License" : {
-      "comment" : "Package detail row",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licence"
+    "%@ installs (30d)": {
+      "comment": "Discover row: 30-day install count; %@ is a formatted number",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近 30 天安装 %@ 次"
           }
         }
       }
     },
-    "Loading packages…" : {
-      "comment" : "Discover subtitle while loading"
-    },
-    "Most-installed packages in the last 30 days" : {
-      "comment" : "Discover subhead on the trending landing"
-    },
-    "No casks match" : {
-      "comment" : "Discover empty casks section"
-    },
-    "No dependencies." : {
-      "comment" : "Package detail: empty dependency list"
-    },
-    "No formulae match" : {
-      "comment" : "Discover empty formulae section"
-    },
-    "No matches" : {
-      "comment" : "Discover list heading, zero search results"
-    },
-    "No selection" : {
-      "comment" : "Package detail placeholder title when nothing is selected"
-    },
-    "Nothing found for “%@”" : {
-      "comment" : "Discover subhead, no search results"
-    },
-    "Popular Casks" : {
-      "comment" : "Discover trending casks section header"
-    },
-    "Popular Formulae" : {
-      "comment" : "Discover trending formulae section header"
-    },
-    "Poured from bottle — %@" : {
-      "comment" : "Install date row; %@ is the formatted date"
-    },
-    "Results" : {
-      "comment" : "Discover list heading, search results"
-    },
-    "Scope" : {
-      "comment" : "Discover tab: formula/cask scope picker label"
-    },
-    "Search Homebrew’s Packages" : {
-      "comment" : "Search field placeholder, Discover tab"
-    },
-    "Searching…" : {
-      "comment" : "Discover subtitle while searching"
-    },
-    "Something went wrong loading Discover packages." : {
-      "comment" : "Discover tab generic load failure"
-    },
-    "Something went wrong searching the catalog." : {
-      "comment" : "Discover tab generic search failure",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Something went wrong searching the catalogue."
+    "%@ installs in 30 days": {
+      "comment": "VoiceOver: install count over the last 30 days; %@ is the formatted count",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近 30 天安装 %@ 次"
           }
         }
       }
     },
-    "Something went wrong while installing this package." : {
-      "comment" : "Discover detail generic install error"
+    "%lld packages match “%@”": {
+      "comment": "Discover subhead, search result count",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$lld packages match “%2$@”"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个软件包与“%@”匹配"
+          }
+        }
+      }
     },
-    "Source" : {
-      "comment" : "Package detail row: source tap"
+    "1 package matches “%@”": {
+      "comment": "Discover subhead, single search result",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 个软件包与“%@”匹配"
+          }
+        }
+      }
     },
-    "Trending" : {
-      "comment" : "Discover list heading, trending landing"
+    "30-day installs": {
+      "comment": "Package detail row: Homebrew analytics install count",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近 30 天安装次数"
+          }
+        }
+      }
+    },
+    "All": {
+      "comment": "Scope picker: every package kind",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
+          }
+        }
+      }
+    },
+    "As dependency": {
+      "comment": "Install reason row: installed only because another package needed it",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作为依赖项安装"
+          }
+        }
+      }
+    },
+    "Casks": {
+      "comment": "Discover casks section header while searching\nScope picker: casks only",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用程序"
+          }
+        }
+      }
+    },
+    "Choose a package from Discover to see details.": {
+      "comment": "Package detail placeholder body when nothing is selected",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从发现列表中选择软件包以查看详情。"
+          }
+        }
+      }
+    },
+    "Could not load packages": {
+      "comment": "Discover subtitle on error",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法加载软件包"
+          }
+        }
+      }
+    },
+    "Could not search packages": {
+      "comment": "Discover subtitle on search error",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法搜索软件包"
+          }
+        }
+      }
+    },
+    "Dependencies": {
+      "comment": "Package detail section heading",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "依赖项"
+          }
+        }
+      }
+    },
+    "Details": {
+      "comment": "Package detail section heading",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "详情"
+          }
+        }
+      }
+    },
+    "Discover packages": {
+      "comment": "VoiceOver: the Discover results list",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现软件包"
+          }
+        }
+      }
+    },
+    "Formulae": {
+      "comment": "Discover formulae section header while searching\nScope picker: formulae only",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令行工具"
+          }
+        }
+      }
+    },
+    "Homepage": {
+      "comment": "Package detail row: homepage link",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主页"
+          }
+        }
+      }
+    },
+    "INSTALLED": {
+      "comment": "Discover installed status badge label",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装"
+          }
+        }
+      }
+    },
+    "Install": {
+      "comment": "Discover detail: install button\nPackage detail section heading\nVoiceOver: install button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装"
+          }
+        }
+      }
+    },
+    "Install reason": {
+      "comment": "Package detail row: on request or as a dependency",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装原因"
+          }
+        }
+      }
+    },
+    "Installed": {
+      "comment": "Discover installed status badge accessibility label\nDiscover list row installed status\nDiscover package installed status\nPackage detail row: installed version(s)",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装"
+          }
+        }
+      }
+    },
+    "Installed on": {
+      "comment": "Package detail row: install date",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装时间"
+          }
+        }
+      }
+    },
+    "Installing": {
+      "comment": "VoiceOver: package installing",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在安装"
+          }
+        }
+      }
+    },
+    "Installs this package on your Mac": {
+      "comment": "Command block summary above brew install",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 Mac 上安装软件包"
+          }
+        }
+      }
+    },
+    "Latest version": {
+      "comment": "Package detail row",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最新版本"
+          }
+        }
+      }
+    },
+    "License": {
+      "comment": "Package detail row",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Licence"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "许可证"
+          }
+        }
+      }
+    },
+    "Loading packages…": {
+      "comment": "Discover subtitle while loading",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在加载软件包…"
+          }
+        }
+      }
+    },
+    "Most-installed packages in the last 30 days": {
+      "comment": "Discover subhead on the trending landing",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "过去 30 天安装次数最多的软件包"
+          }
+        }
+      }
+    },
+    "No casks match": {
+      "comment": "Discover empty casks section",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的应用程序"
+          }
+        }
+      }
+    },
+    "No dependencies.": {
+      "comment": "Package detail: empty dependency list",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无依赖项。"
+          }
+        }
+      }
+    },
+    "No formulae match": {
+      "comment": "Discover empty formulae section",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的命令行工具"
+          }
+        }
+      }
+    },
+    "No matches": {
+      "comment": "Discover list heading, zero search results",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配项"
+          }
+        }
+      }
+    },
+    "No selection": {
+      "comment": "Package detail placeholder title when nothing is selected",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未选择项目"
+          }
+        }
+      }
+    },
+    "Nothing found for “%@”": {
+      "comment": "Discover subhead, no search results",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有找到与“%@”匹配的软件包"
+          }
+        }
+      }
+    },
+    "Popular Casks": {
+      "comment": "Discover trending casks section header",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门应用程序"
+          }
+        }
+      }
+    },
+    "Popular Formulae": {
+      "comment": "Discover trending formulae section header",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门命令行工具"
+          }
+        }
+      }
+    },
+    "Poured from bottle — %@": {
+      "comment": "Install date row; %@ is the formatted date",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从预编译包安装 — %@"
+          }
+        }
+      }
+    },
+    "Results": {
+      "comment": "Discover list heading, search results",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索结果"
+          }
+        }
+      }
+    },
+    "Scope": {
+      "comment": "Discover tab: formula/cask scope picker label",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "范围"
+          }
+        }
+      }
+    },
+    "Search Homebrew’s Packages": {
+      "comment": "Search field placeholder, Discover tab",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索 Homebrew 软件包"
+          }
+        }
+      }
+    },
+    "Searching…": {
+      "comment": "Discover subtitle while searching",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在搜索…"
+          }
+        }
+      }
+    },
+    "Something went wrong loading Discover packages.": {
+      "comment": "Discover tab generic load failure",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "加载发现列表时发生错误。"
+          }
+        }
+      }
+    },
+    "Something went wrong searching the catalog.": {
+      "comment": "Discover tab generic search failure",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something went wrong searching the catalogue."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索软件包目录时出错。"
+          }
+        }
+      }
+    },
+    "Something went wrong while installing this package.": {
+      "comment": "Discover detail generic install error",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "安装此软件包时发生错误。"
+          }
+        }
+      }
+    },
+    "Source": {
+      "comment": "Package detail row: source tap",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "来源"
+          }
+        }
+      }
+    },
+    "Trending": {
+      "comment": "Discover list heading, trending landing",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "热门"
+          }
+        }
+      }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

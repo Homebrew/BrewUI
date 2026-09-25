@@ -344,6 +344,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"zh-Hans",
 				"en-GB",
 				Base,
 			);

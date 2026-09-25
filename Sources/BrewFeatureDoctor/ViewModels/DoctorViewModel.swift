@@ -130,7 +130,7 @@ final class DoctorViewModel {
         guard let id = selectedIssueID, case let .loaded(report) = state else {
             return nil
         }
-        return report.issues.lazy.map(DoctorIssueItem.init(issue:)).first { $0.id == id }
+        return report.issues.lazy.map { DoctorIssueItem(issue: $0) }.first { $0.id == id }
     }
 
     func setSelection(_ id: Int?) {

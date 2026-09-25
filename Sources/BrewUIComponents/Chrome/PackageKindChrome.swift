@@ -33,12 +33,12 @@ public extension HomebrewPackageKind {
         switch self {
         case .formula:
             PackageKindChrome(
-                badgeLabel: "FORMULA",
+                badgeLabel: String(localized: "FORMULA", bundle: #bundle, comment: "Package kind badge: command-line formula"),
                 accent: .brandPrimary,
             )
         case .cask:
             PackageKindChrome(
-                badgeLabel: "CASK",
+                badgeLabel: String(localized: "CASK", bundle: #bundle, comment: "Package kind badge: application cask"),
                 accent: .statusInfo,
             )
         }

@@ -1,103 +1,311 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "A report was saved after the app quit unexpectedly. You can send it to the Homebrew team on GitHub to help fix the problem, or discard it." : {
-      "comment" : "Crash report dialog body"
-    },
-    "Browse and search %lld+ packages" : {
-      "comment" : "Window subtitle, Discover; %lld is the approximate catalog size"
-    },
-    "Browse or search your installed packages" : {
-      "comment" : "Window subtitle, Installed"
-    },
-    "Check your Homebrew installation for problems" : {
-      "comment" : "Window subtitle, Doctor"
-    },
-    "Configuration" : {
-      "comment" : "Sidebar: brew config and environment",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Configuration"
+  "sourceLanguage": "en",
+  "strings": {
+    "A report was saved after the app quit unexpectedly. You can send it to the Homebrew team on GitHub to help fix the problem, or discard it.": {
+      "comment": "Crash report dialog body",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "应用意外退出后已保存报告。你可以通过 GitHub 将报告发送给 Homebrew 团队以帮助解决问题，也可以丢弃报告。"
           }
         }
       }
     },
-    "Discard" : {
-      "comment" : "Crash report dialog: delete the report"
-    },
-    "Discover" : {
-      "comment" : "Sidebar: browse and search the catalog",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Discover"
+    "Browse and search %lld+ packages": {
+      "comment": "Window subtitle, Discover; %lld is the approximate catalog size",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览和搜索 %lld+ 个软件包"
           }
         }
       }
     },
-    "Doctor" : {
-      "comment" : "Sidebar: brew doctor diagnostics",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Doctor"
+    "Browse or search your installed packages": {
+      "comment": "Window subtitle, Installed",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览或搜索已安装的软件包"
           }
         }
       }
     },
-    "Homebrew Documentation" : {
-      "comment" : "Help menu"
-    },
-    "Homebrew environment & diagnostics" : {
-      "comment" : "Window subtitle, Configuration"
-    },
-    "Installed" : {
-      "comment" : "Sidebar: installed packages",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installed"
+    "Check your Homebrew installation for problems": {
+      "comment": "Window subtitle, Doctor",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检查 Homebrew 安装是否存在问题"
           }
         }
       }
     },
-    "OK" : {
-      "comment" : "Self-upgrade outcome alert: dismiss"
-    },
-    "Report an Issue…" : {
-      "comment" : "Help menu: opens the GitHub issue form"
-    },
-    "Report on GitHub…" : {
-      "comment" : "Crash report dialog: open a prefilled GitHub issue"
-    },
-    "Review and upgrade outdated packages" : {
-      "comment" : "Window subtitle, Upgrades"
-    },
-    "The Homebrew app quit unexpectedly" : {
-      "comment" : "Crash report dialog title"
-    },
-    "The upgrade helper is missing from this build of the Homebrew app." : {
-      "comment" : "Shown when the bundled self-upgrade helper executable cannot be found"
-    },
-    "Upgrades" : {
-      "comment" : "Sidebar: outdated packages",
-      "localizations" : {
-        "en-GB" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upgrades"
+    "Clear UserDefaults": {
+      "comment": "Debug menu: clear saved app preferences",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除偏好设置"
           }
         }
       }
     },
-    "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
-      "comment" : "Shown when the self-upgrade is attempted while another brew command is still running"
+    "Configuration": {
+      "comment": "Sidebar: brew config and environment",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuration"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配置"
+          }
+        }
+      }
+    },
+    "Debug": {
+      "comment": "Developer debug menu title",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "调试"
+          }
+        }
+      }
+    },
+    "Discard": {
+      "comment": "Crash report dialog: delete the report",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "丢弃"
+          }
+        }
+      }
+    },
+    "Discover": {
+      "comment": "Sidebar: browse and search the catalog",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discover"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现"
+          }
+        }
+      }
+    },
+    "Doctor": {
+      "comment": "Sidebar: brew doctor diagnostics",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doctor"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "诊断"
+          }
+        }
+      }
+    },
+    "Fatal Error (signal)": {
+      "comment": "Debug crash test: trigger a fatal error signal",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "致命错误（信号）"
+          }
+        }
+      }
+    },
+    "Force Crash": {
+      "comment": "Debug submenu: deliberately crash the app to test reporting",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "强制崩溃"
+          }
+        }
+      }
+    },
+    "Homebrew Documentation": {
+      "comment": "Help menu",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 文档"
+          }
+        }
+      }
+    },
+    "Homebrew environment & diagnostics": {
+      "comment": "Window subtitle, Configuration",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 环境与诊断"
+          }
+        }
+      }
+    },
+    "Installed": {
+      "comment": "Sidebar: installed packages",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installed"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已安装"
+          }
+        }
+      }
+    },
+    "OK": {
+      "comment": "Self-upgrade outcome alert: dismiss",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
+          }
+        }
+      }
+    },
+    "Report an Issue…": {
+      "comment": "Help menu: opens the GitHub issue form",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告问题…"
+          }
+        }
+      }
+    },
+    "Report on GitHub…": {
+      "comment": "Crash report dialog: open a prefilled GitHub issue",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 GitHub 上报告…"
+          }
+        }
+      }
+    },
+    "Review and upgrade outdated packages": {
+      "comment": "Window subtitle, Upgrades",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "查看并升级有新版本的软件包"
+          }
+        }
+      }
+    },
+    "Show the Self-Upgrade Banner": {
+      "comment": "Debug toggle: preview the app self-upgrade banner",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示应用升级横幅"
+          }
+        }
+      }
+    },
+    "The Homebrew app quit unexpectedly": {
+      "comment": "Crash report dialog title",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 应用意外退出"
+          }
+        }
+      }
+    },
+    "The upgrade helper is missing from this build of the Homebrew app.": {
+      "comment": "Shown when the bundled self-upgrade helper executable cannot be found",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此版本的 Homebrew 应用缺少升级辅助程序。"
+          }
+        }
+      }
+    },
+    "Uncaught Exception": {
+      "comment": "Debug crash test: raise an uncaught exception",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未捕获的异常"
+          }
+        }
+      }
+    },
+    "Upgrades": {
+      "comment": "Sidebar: outdated packages",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upgrades"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "升级"
+          }
+        }
+      }
+    },
+    "Wait for the running Homebrew command to finish, then upgrade the Homebrew app.": {
+      "comment": "Shown when the self-upgrade is attempted while another brew command is still running",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请等待正在运行的 Homebrew 命令结束，再升级 Homebrew 应用。"
+          }
+        }
+      }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

@@ -1,81 +1,1022 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "%@, Fix available" : {
-      "comment" : "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title"
+  "sourceLanguage": "en",
+  "strings": {
+    "Some directories in the Caskroom do not have valid metadata.": {
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caskroom 中部分目录缺少有效的元数据。"
+          }
+        }
+      }
     },
-    "Copy brew doctor output" : {
-      "comment" : "VoiceOver: Doctor copy-output button"
+    "The following cask cannot be upgraded as-is:": {
+      "comment": "Known Homebrew diagnostic prose introducing a cask path; leave the path unchanged.",
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下应用程序目前无法直接升级："
+          }
+        }
+      }
     },
-    "Copy output" : {
-      "comment" : "Doctor header: copy raw brew doctor output"
+    "The following casks cannot be upgraded as-is:": {
+      "comment": "Known Homebrew diagnostic prose introducing multiple cask paths; leave the paths unchanged.",
+      "extractionState": "manual",
+      "generatesSymbol": false,
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下应用程序目前无法直接升级："
+          }
+        }
+      }
     },
-    "Danger" : {
-      "comment" : "Doctor severity name"
+    "%@, Fix available": {
+      "comment": "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@，可修复"
+          }
+        }
+      }
     },
-    "Doctor" : {
-      "comment" : "Doctor tab heading"
+    "Copy brew doctor output": {
+      "comment": "VoiceOver: Doctor copy-output button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制 brew 诊断输出"
+          }
+        }
+      }
     },
-    "Doctor issues" : {
-      "comment" : "VoiceOver: the Doctor issues list"
+    "Copy output": {
+      "comment": "Doctor header: copy raw brew doctor output",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制输出"
+          }
+        }
+      }
     },
-    "Fix available" : {
-      "comment" : "Doctor issue row badge"
+    "Danger": {
+      "comment": "Doctor severity name",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "严重问题"
+          }
+        }
+      }
     },
-    "Last checked" : {
-      "comment" : "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”"
+    "Doctor": {
+      "comment": "Doctor tab heading",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "诊断"
+          }
+        }
+      }
     },
-    "Needs admin · runs in Terminal" : {
-      "comment" : "Doctor fix note: the command needs sudo so it opens in Terminal"
+    "Doctor issues": {
+      "comment": "VoiceOver: the Doctor issues list",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "诊断问题"
+          }
+        }
+      }
     },
-    "No problems found" : {
-      "comment" : "Doctor subtitle, healthy"
+    "Fix available": {
+      "comment": "Doctor issue row badge",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可修复"
+          }
+        }
+      }
     },
-    "No selection" : {
-      "comment" : "Doctor detail placeholder title when nothing is selected"
+    "Last checked": {
+      "comment": "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上次检查"
+          }
+        }
+      }
     },
-    "Raw output" : {
-      "comment" : "Doctor detail: collapsible header for the raw brew doctor text"
+    "Needs admin · runs in Terminal": {
+      "comment": "Doctor fix note: the command needs sudo so it opens in Terminal",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要管理员权限 · 在终端中运行"
+          }
+        }
+      }
     },
-    "Re-checking" : {
-      "comment" : "VoiceOver: Doctor re-check spinner"
+    "No problems found": {
+      "comment": "Doctor subtitle, healthy",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未发现问题"
+          }
+        }
+      }
     },
-    "Re-checking…" : {
-      "comment" : "Doctor subtitle while a re-check runs"
+    "No selection": {
+      "comment": "Doctor detail placeholder title when nothing is selected",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未选择项目"
+          }
+        }
+      }
     },
-    "Run Again" : {
-      "comment" : "Doctor header: re-run brew doctor"
+    "Raw output": {
+      "comment": "Doctor detail: collapsible header for the raw brew doctor text",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "原始输出"
+          }
+        }
+      }
     },
-    "Run Fix" : {
-      "comment" : "Doctor detail: run the suggested fix button\nVoiceOver: run-fix button"
+    "Re-checking": {
+      "comment": "VoiceOver: Doctor re-check spinner",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在重新检查"
+          }
+        }
+      }
     },
-    "Run diagnostics, then choose an issue to see details and fixes." : {
-      "comment" : "Doctor detail placeholder body when nothing is selected"
+    "Re-checking…": {
+      "comment": "Doctor subtitle while a re-check runs",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在重新检查…"
+          }
+        }
+      }
     },
-    "Running brew doctor…" : {
-      "comment" : "Doctor subtitle during the first check"
+    "Run Again": {
+      "comment": "Doctor header: re-run brew doctor",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新运行"
+          }
+        }
+      }
     },
-    "Severity: %@" : {
-      "comment" : "VoiceOver: Doctor severity badge; %@ is the severity name"
+    "Run Fix": {
+      "comment": "Doctor detail: run the suggested fix button\nVoiceOver: run-fix button",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "执行修复"
+          }
+        }
+      }
     },
-    "The check could not be completed" : {
-      "comment" : "Doctor subtitle when brew doctor failed to run"
+    "Run diagnostics, then choose an issue to see details and fixes.": {
+      "comment": "Doctor detail placeholder body when nothing is selected",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行诊断后，选择问题以查看详情和修复方法。"
+          }
+        }
+      }
     },
-    "Unsupported" : {
-      "comment" : "Doctor severity name: unsupported configuration"
+    "Running brew doctor…": {
+      "comment": "Doctor subtitle during the first check",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在运行 brew 诊断…"
+          }
+        }
+      }
     },
-    "Warning" : {
-      "comment" : "Doctor severity name"
+    "Severity: %@": {
+      "comment": "VoiceOver: Doctor severity badge; %@ is the severity name",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "严重程度：%@"
+          }
+        }
+      }
     },
-    "Warnings found" : {
-      "comment" : "Doctor subtitle, issues listed"
+    "The check could not be completed": {
+      "comment": "Doctor subtitle when brew doctor failed to run",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法完成检查"
+          }
+        }
+      }
     },
-    "Your system is ready to brew" : {
-      "comment" : "Doctor healthy state title"
+    "Unsupported": {
+      "comment": "Doctor severity name: unsupported configuration",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不受支持"
+          }
+        }
+      }
     },
-    "brew doctor found no problems." : {
-      "comment" : "Doctor healthy state body"
+    "Warning": {
+      "comment": "Doctor severity name",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "警告"
+          }
+        }
+      }
+    },
+    "Warnings found": {
+      "comment": "Doctor subtitle, issues listed",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现警告"
+          }
+        }
+      }
+    },
+    "Your system is ready to brew": {
+      "comment": "Doctor healthy state title",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "系统已准备就绪"
+          }
+        }
+      }
+    },
+    "brew doctor found no problems.": {
+      "comment": "Doctor healthy state body",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "brew 诊断未发现问题。"
+          }
+        }
+      }
+    },
+    "Please note that these warnings are just used to help the Homebrew maintainers with debugging if you file an issue. If everything you use Homebrew for is working fine: please don't worry or file an issue; just ignore this. Thanks!": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些警告用于帮助 Homebrew 维护者排查你提交的问题。如果你使用 Homebrew 时一切正常，可以忽略这些提示，无需担心或提交问题。谢谢！"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Some installed formulae are deprecated or disabled.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的命令行工具已弃用或被禁用。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Some installed formulae are deprecated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的命令行工具已弃用。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Some installed casks are deprecated or disabled.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的应用程序已弃用或被禁用。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "You should find replacements for the following formulae:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请为以下命令行工具寻找替代项："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "You should find replacements for the following casks:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请为以下应用程序寻找替代项："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "You have unlinked kegs in your Cellar.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cellar 中有尚未链接的软件包。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Leaving kegs unlinked can lead to build-trouble and cause formulae that depend on those kegs to fail to run properly once built.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未链接的软件包可能导致构建问题，并使依赖它们的命令行工具在构建后无法正常运行。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Run `brew link` on these:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对以下软件包运行 `brew link`："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "You can solve this by running:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以运行以下命令解决此问题："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "To fix, run:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请运行以下命令修复："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "To fix this, run:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请运行以下命令修复："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Affects:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "受影响的项目："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "More information:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多信息："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your Command Line Tools are too outdated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令行工具版本过旧。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your Command Line Tools are outdated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "命令行工具已过时。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your Xcode is outdated.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode 已过时。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Update them from Software Update in System Settings.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在系统设置的“软件更新”中更新。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Update them from Software Update in System Preferences.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请在系统偏好设置的“软件更新”中更新。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "If that doesn't show you any updates, run:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如果没有显示可用更新，请运行："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Alternatively, manually download them from:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "也可以从以下地址手动下载："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The following directories are not writable by your user:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前用户没有以下目录的写入权限："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The following directories do not exist:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下目录不存在："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "You should create these directories and change their ownership to your user.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请创建这些目录，并将其所有者改为当前用户。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "You should change the ownership of these directories to your user, and make sure that you have write permission.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请将这些目录的所有者改为当前用户，并确保你拥有写入权限。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "And make sure that your user has write permission.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "并确保当前用户拥有写入权限。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The following tools exist at both paths:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以下工具同时存在于这两个路径中："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Broken symlinks were found:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现失效的符号链接："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Broken symlinks were found. Remove them with `brew cleanup`:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "发现失效的符号链接。请使用 `brew cleanup` 清理："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Remove them with `brew cleanup`": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请使用 `brew cleanup` 清理"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Remove them with `brew cleanup`:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请使用 `brew cleanup` 清理："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Uncommitted git changes.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "存在尚未提交的 Git 更改。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your homebrew git repo has uncommitted changes.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 的 Git 仓库存在尚未提交的更改。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Uncommitted files:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未提交的文件："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Homebrew's bin was not found in your PATH.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PATH 中未找到 Homebrew 的 bin 目录。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Homebrew's \"bin\" was not found in your PATH.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PATH 中未找到 Homebrew 的 bin 目录。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Homebrew's origin is not set.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Homebrew 尚未设置 origin 远程仓库。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Consider setting your PATH for example like so:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "可以参考以下示例设置 PATH："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Another `brew` shadows this Homebrew installation in your PATH:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PATH 中的另一个 `brew` 优先于当前 Homebrew 安装："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This may be a helper, wrapper or another Homebrew installation.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "它可能是辅助程序、包装脚本或另一个 Homebrew 安装。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This means that system-provided programs will be used instead of those provided by Homebrew.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这意味着系统提供的程序会优先于 Homebrew 提供的程序运行。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Your Cellar is symlinked.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cellar 是一个符号链接。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Symlinked Cellars can cause problems.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通过符号链接访问 Cellar 可能引发问题。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Some installed formulae or casks are missing dependencies.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "部分已安装的命令行工具或应用程序缺少依赖项。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Run `brew missing` for more details.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "运行 `brew missing` 查看详情。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Some of Homebrew's bottles (binary packages) cannot be used with this prefix.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此安装路径无法使用部分 Homebrew 预编译软件包。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "The detected git configuration values are:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "检测到的 Git 配置值如下："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Update guidance:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新指引："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This is a Tier 2 configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这是二级支持配置："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This is a Tier 3 configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这是三级支持配置："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This is an unsupported configuration.": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此配置不受支持。"
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "This is an Unsupported configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此配置不受支持："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "Unsupported configuration:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不受支持的配置："
+          }
+        }
+      },
+      "generatesSymbol": false
+    },
+    "To set it, run the following command:": {
+      "extractionState": "manual",
+      "comment": "Known Homebrew diagnostic prose; commands, paths and raw output remain verbatim.",
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请运行以下命令进行设置："
+          }
+        }
+      },
+      "generatesSymbol": false
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

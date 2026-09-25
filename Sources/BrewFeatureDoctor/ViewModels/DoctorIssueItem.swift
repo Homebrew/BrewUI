@@ -20,11 +20,25 @@ struct DoctorIssueItem: Identifiable, Equatable {
     let blocks: [DoctorBlock]
     let rawText: String
 
-    init(issue: DoctorIssue) {
+    init(issue: DoctorIssue, bundle: Bundle? = nil) {
+        // Resolve here: a default-argument macro can expand in the caller's resource-free module.
+        let bundle = bundle ?? #bundle
         id = Self.contentID(for: issue)
-        title = issue.title
+        title = DoctorText.localized(issue.title, bundle: bundle)
         severity = issue.severity
-        blocks = issue.blocks
+        blocks = issue.blocks.map { block in
+            let content: DoctorBlock.Content = if case let .prose(lines) = block.content {
+                .prose(DoctorText.prose(lines, bundle: bundle))
+            } else {
+                block.content
+            }
+            return DoctorBlock(
+                id: block.id,
+                precededByBlankLine: block.precededByBlankLine,
+                caption: block.caption.map { DoctorText.localized($0, bundle: bundle) },
+                content: content,
+            )
+        }
         rawText = issue.rawText
     }
 
@@ -60,7 +74,7 @@ struct DoctorIssueItem: Identifiable, Equatable {
         primaryRunnableStep?.displayCommand
     }
 
-    /// `title` is `brew doctor`'s own wording, so only the annotation is localised.
+    /// Combines the presented issue title with a localised fix annotation.
     var accessibilityLabel: String {
         guard hasRunnableFix else {
             return title

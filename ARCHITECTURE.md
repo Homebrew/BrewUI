@@ -150,3 +150,8 @@ height and preserves whether the final line actually ended in a newline.
 - One String Catalog per UI target, with English copy as the key. The app follows the macOS language
   and falls back to English for each untranslated string. Non-UI layers carry no copy.
   See [localisation](AGENTS.md#localisation).
+
+Simplified Chinese translations live in each owning UI target's catalog. `DoctorText` translates
+known diagnostic prose at the presentation boundary, including wrapped paragraphs; unknown text,
+raw output, issue identity, commands and configuration keys/values remain unchanged. The Chinese
+Doctor page is named “诊断”; the console task is named “brew 诊断”.

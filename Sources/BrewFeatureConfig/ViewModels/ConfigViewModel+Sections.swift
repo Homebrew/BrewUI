@@ -65,7 +65,10 @@ extension ConfigViewModel {
     }
 
     private func sectionReport(for section: ConfigSectionItem) -> String {
-        let title = String(localized: section.title)
+        // Reports are shared with upstream maintainers, independently of the app's display language.
+        var reportTitle = section.title
+        reportTitle.locale = Locale(identifier: "en")
+        let title = String(localized: reportTitle)
         let body = section.rows
             .map { "\($0.label): \($0.value)" }
             .joined(separator: "\n")
