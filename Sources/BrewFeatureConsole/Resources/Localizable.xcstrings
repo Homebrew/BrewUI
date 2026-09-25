@@ -2,73 +2,395 @@
   "sourceLanguage" : "en",
   "strings" : {
     "Clear" : {
-      "comment" : "Console toolbar: remove finished jobs"
+      "comment" : "Console toolbar: remove finished jobs",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除"
+          }
+        }
+      }
     },
     "Clear completed jobs" : {
-      "comment" : "Tooltip: console clear button"
+      "comment" : "Tooltip: console clear button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除已完成的任务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除已完成的工作"
+          }
+        }
+      }
     },
     "Cleared" : {
-      "comment" : "Console toolbar: shown briefly after clearing"
+      "comment" : "Console toolbar: shown briefly after clearing",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已清除"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已清除"
+          }
+        }
+      }
     },
     "Copied" : {
-      "comment" : "Console toolbar: shown briefly after copying"
+      "comment" : "Console toolbar: shown briefly after copying",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已复制"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已拷貝"
+          }
+        }
+      }
     },
     "Copy" : {
-      "comment" : "Console toolbar: copy output"
+      "comment" : "Console toolbar: copy output",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷貝"
+          }
+        }
+      }
     },
     "Copy output to clipboard" : {
-      "comment" : "Tooltip: console copy button"
+      "comment" : "Tooltip: console copy button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将输出复制到剪贴板"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將輸出拷貝到剪貼簿"
+          }
+        }
+      }
     },
     "Dismiss" : {
-      "comment" : "Tooltip: close a finished job tab"
+      "comment" : "Tooltip: close a finished job tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉"
+          }
+        }
+      }
     },
     "Expand Console Panel Automatically" : {
-      "comment" : "View menu: open the console when a command starts"
+      "comment" : "View menu: open the console when a command starts",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动展开控制台面板"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動展開主控台面板"
+          }
+        }
+      }
     },
     "Hide Console" : {
-      "comment" : "View menu: collapse the console panel (⌘`)"
+      "comment" : "View menu: collapse the console panel (⌘`)",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏控制台"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏主控台"
+          }
+        }
+      }
     },
     "Hide console" : {
-      "comment" : "Console status bar: collapse button\nConsole toolbar: collapse button"
+      "comment" : "Console status bar: collapse button\nConsole toolbar: collapse button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐藏控制台"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隱藏主控台"
+          }
+        }
+      }
     },
     "No activity" : {
-      "comment" : "Console empty state title\nConsole toolbar title when nothing has run"
+      "comment" : "Console empty state title\nConsole toolbar title when nothing has run",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无活动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚無活動"
+          }
+        }
+      }
     },
     "Ready" : {
-      "comment" : "Console status bar when nothing has run"
+      "comment" : "Console status bar when nothing has run",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "就绪"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "就緒"
+          }
+        }
+      }
     },
     "Run a brew command to see output here." : {
-      "comment" : "Console empty state body"
+      "comment" : "Console empty state body",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "运行 brew 命令后，可在此处查看输出。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "執行 brew 指令後，輸出會顯示在這裡。"
+          }
+        }
+      }
     },
     "Save" : {
-      "comment" : "Console toolbar: save output to a file"
+      "comment" : "Console toolbar: save output to a file",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存"
+          }
+        }
+      }
     },
     "Save output to file" : {
-      "comment" : "Tooltip: console save button"
+      "comment" : "Tooltip: console save button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将输出保存到文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將輸出儲存為檔案"
+          }
+        }
+      }
     },
     "Show Console" : {
-      "comment" : "View menu: expand the console panel (⌘`)"
+      "comment" : "View menu: expand the console panel (⌘`)",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示控制台"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示主控台"
+          }
+        }
+      }
     },
     "Show console" : {
-      "comment" : "Console status bar: expand button"
+      "comment" : "Console status bar: expand button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示控制台"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示主控台"
+          }
+        }
+      }
     },
     "done" : {
-      "comment" : "Console status bar: operation finished"
+      "comment" : "Console status bar: operation finished",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已完成"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已完成"
+          }
+        }
+      }
     },
     "failed" : {
-      "comment" : "Console status bar: operation failed"
+      "comment" : "Console status bar: operation failed",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "失败"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "失敗"
+          }
+        }
+      }
     },
     "running" : {
-      "comment" : "Console status bar: operation in progress"
+      "comment" : "Console status bar: operation in progress",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在运行"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "執行中"
+          }
+        }
+      }
     },
     "— %@" : {
-      "comment" : "Console status bar suffix while a command runs; %@ is the phase label"
+      "comment" : "Console status bar suffix while a command runs; %@ is the phase label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        }
+      }
     },
     "— done" : {
-      "comment" : "Console status bar suffix after a command succeeded"
+      "comment" : "Console status bar suffix after a command succeeded",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 已完成"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 已完成"
+          }
+        }
+      }
     },
     "— failed · exit %d" : {
-      "comment" : "Console status bar suffix after a command failed; %d is the exit code"
+      "comment" : "Console status bar suffix after a command failed; %d is the exit code",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 失败 · 退出码 %d"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 失敗 · 結束代碼 %d"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -74,12 +74,24 @@ final class InstalledListRowViewModel {
         }
         parts.append(installedVersionLabel)
         if showsUpgradeAvailable, let latest = availableVersionLabel {
-            parts.append("Upgrade available to \(latest)")
+            parts.append(String(
+                localized: "Upgrade available to \(latest)",
+                bundle: #bundle,
+                comment: "VoiceOver: installed row with an available upgrade; the value is the latest version",
+            ))
         } else if !isDeprecated {
-            parts.append("Installed and up to date")
+            parts.append(String(
+                localized: "Installed and up to date",
+                bundle: #bundle,
+                comment: "Installed list: tooltip on the up-to-date tick",
+            ))
         }
         if isDeprecated {
-            parts.append("Deprecated")
+            parts.append(String(
+                localized: "Deprecated",
+                bundle: #bundle,
+                comment: "Installed deprecated status badge accessibility label",
+            ))
         }
         return parts.joined(separator: ", ")
     }

@@ -9,62 +9,362 @@
             "state" : "new",
             "value" : "%1$@ %2$@"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
         }
       }
     },
     "%lld days ago" : {
-      "comment" : "Relative time, %lld ≥ 2"
+      "comment" : "Relative time, %lld ≥ 2",
+      "localizations" : {
+        "zh-Hans" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 天前"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 天前"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld hours ago" : {
-      "comment" : "Relative time, %lld ≥ 2"
+      "comment" : "Relative time, %lld ≥ 2",
+      "localizations" : {
+        "zh-Hans" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 小时前"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 小時前"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "%lld minutes ago" : {
-      "comment" : "Relative time, %lld ≥ 2"
+      "comment" : "Relative time, %lld ≥ 2",
+      "localizations" : {
+        "zh-Hans" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 分钟前"
+                }
+              }
+            }
+          }
+        },
+        "zh-Hant" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 分鐘前"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "1 day ago" : {
-      "comment" : "Relative time"
+      "comment" : "Relative time",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 天前"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 天前"
+          }
+        }
+      }
     },
     "1 hour ago" : {
-      "comment" : "Relative time"
+      "comment" : "Relative time",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 小时前"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 小時前"
+          }
+        }
+      }
     },
     "1 minute ago" : {
-      "comment" : "Relative time"
+      "comment" : "Relative time",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 分钟前"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 分鐘前"
+          }
+        }
+      }
     },
     "Copied" : {
-      "comment" : "Command block: shown briefly after copying"
+      "comment" : "Command block: shown briefly after copying",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已复制"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已拷貝"
+          }
+        }
+      }
     },
     "Copy" : {
-      "comment" : "Command block: copy the command"
+      "comment" : "Command block: copy the command",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷貝"
+          }
+        }
+      }
     },
     "Copy all" : {
-      "comment" : "Command block: copy every command"
+      "comment" : "Command block: copy every command",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部复制"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部拷貝"
+          }
+        }
+      }
     },
     "Could not find Homebrew. Install it or ensure brew is in the default location." : {
-      "comment" : "Error when the brew executable is not in either default prefix"
+      "comment" : "Error when the brew executable is not in either default prefix",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到 Homebrew。请安装 Homebrew，或确认 brew 位于默认位置。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到 Homebrew。請安裝 Homebrew，或確認 brew 位於預設位置。"
+          }
+        }
+      }
     },
     "Find" : {
-      "comment" : "Edit menu: focus the search field (⌘F)"
+      "comment" : "Edit menu: focus the search field (⌘F)",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查找"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尋找"
+          }
+        }
+      }
     },
     "Homebrew command failed." : {
-      "comment" : "Error when brew exits non-zero without printing anything to stderr"
+      "comment" : "Error when brew exits non-zero without printing anything to stderr",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 命令执行失败。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 指令執行失敗。"
+          }
+        }
+      }
     },
     "Homebrew returned output the app couldn’t read." : {
-      "comment" : "Error when brew succeeded but its JSON output failed to decode"
+      "comment" : "Error when brew succeeded but its JSON output failed to decode",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 返回了应用无法读取的输出。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 傳回了 App 無法讀取的輸出。"
+          }
+        }
+      }
     },
     "Refresh" : {
-      "comment" : "View menu: refresh every surface (⌘R)"
+      "comment" : "View menu: refresh every surface (⌘R)",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新整理"
+          }
+        }
+      }
     },
     "Retry" : {
-      "comment" : "Error state: retry the failed load"
+      "comment" : "Error state: retry the failed load",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重試"
+          }
+        }
+      }
     },
     "Terminal command" : {
-      "comment" : "Command block header, one command"
+      "comment" : "Command block header, one command",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端命令"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機指令"
+          }
+        }
+      }
     },
     "Terminal commands" : {
-      "comment" : "Command block header, several commands"
+      "comment" : "Command block header, several commands",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端命令"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機指令"
+          }
+        }
+      }
     },
     "just now" : {
-      "comment" : "Relative time: under a minute ago"
+      "comment" : "Relative time: under a minute ago",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刚刚"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剛剛"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

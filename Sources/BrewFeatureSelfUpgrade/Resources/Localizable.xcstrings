@@ -2,34 +2,174 @@
   "sourceLanguage" : "en",
   "strings" : {
     "A new version of the Homebrew app is available" : {
-      "comment" : "Self-upgrade banner title"
+      "comment" : "Self-upgrade banner title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 应用有新版本可用"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew App 有新版本可用"
+          }
+        }
+      }
     },
     "Later" : {
-      "comment" : "Self-upgrade banner: dismiss for now"
+      "comment" : "Self-upgrade banner: dismiss for now",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "稍后"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "稍後"
+          }
+        }
+      }
     },
     "The Homebrew app has been upgraded to the latest version." : {
-      "comment" : "Alert body on the launch after a successful self-upgrade"
+      "comment" : "Alert body on the launch after a successful self-upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 应用已升级至最新版本。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew App 已升級至最新版本。"
+          }
+        }
+      }
     },
     "The Homebrew app is up to date" : {
-      "comment" : "Alert title on the launch after a successful self-upgrade"
+      "comment" : "Alert title on the launch after a successful self-upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 应用已是最新版本"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew App 已是最新版本"
+          }
+        }
+      }
     },
     "The Homebrew app wasn’t upgraded" : {
-      "comment" : "Alert title on the launch after a self-upgrade that failed"
+      "comment" : "Alert title on the launch after a self-upgrade that failed",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 应用未能升级"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew App 未完成升級"
+          }
+        }
+      }
     },
     "The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages." : {
-      "comment" : "Alert body on the launch after a self-upgrade that failed"
+      "comment" : "Alert body on the launch after a self-upgrade that failed",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级未完成，当前仍为旧版本。你可以通过软件包列表上方的横幅重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升級未完成，目前仍是先前的版本。你可以從套件列表上方的橫幅再次嘗試。"
+          }
+        }
+      }
     },
     "Upgrade Homebrew app" : {
-      "comment" : "Self-upgrade banner eyebrow"
+      "comment" : "Self-upgrade banner eyebrow",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级 Homebrew 应用"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升級 Homebrew App"
+          }
+        }
+      }
     },
     "Upgrade failed: %@" : {
-      "comment" : "VoiceOver: self-upgrade error; %@ is the error text"
+      "comment" : "VoiceOver: self-upgrade error; %@ is the error text",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级失败：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升級失敗：%@"
+          }
+        }
+      }
     },
     "Upgrade the Homebrew app" : {
-      "comment" : "Self-upgrade banner button when brew reports no version for the upgrade"
+      "comment" : "Self-upgrade banner button when brew reports no version for the upgrade",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级 Homebrew 应用"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升級 Homebrew App"
+          }
+        }
+      }
     },
     "Upgrade to %@" : {
-      "comment" : "Self-upgrade banner button, e.g. \"Upgrade to v1.5.0\""
+      "comment" : "Self-upgrade banner button, e.g. \"Upgrade to v1.5.0\"",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升级至 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "升級至 %@"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
