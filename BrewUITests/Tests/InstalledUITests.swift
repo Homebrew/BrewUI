@@ -18,7 +18,7 @@ final class InstalledUITests: BrewUITestCase {
     }
 
     @MainActor
-    func testHeaderOffersSavingTheEnvironmentAsABrewfile() {
+    func testHeaderEnablesSavingTheEnvironmentAsABrewfile() {
         launch(.installedBasic)
             .assertShowsSaveBrewfileButton()
     }

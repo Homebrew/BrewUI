@@ -68,4 +68,9 @@ struct BrewCommandsTests {
         let command = BrewCommands.bundleDump(fileURL: URL(fileURLWithPath: "/tmp/Brewfile"))
         #expect(command.displayCommand == "brew bundle dump --file=/tmp/Brewfile --force")
     }
+
+    @Test func `displayCommand quotes arguments containing spaces`() {
+        let command = BrewCommands.bundleDump(fileURL: URL(fileURLWithPath: "/Users/me/My Brewfile"))
+        #expect(command.displayCommand == "brew bundle dump '--file=/Users/me/My Brewfile' --force")
+    }
 }

@@ -24,13 +24,17 @@ struct InstalledScreen: Screen {
     }
 
     /// The header's "Save Brewfile…" action, which needs a loaded inventory to be enabled.
+    var saveBrewfileButton: BrewUIButton {
+        BrewUIButton(app, .installedSaveBrewfileButton)
+    }
+
     @discardableResult
     func assertShowsSaveBrewfileButton(
         timeout: TimeInterval = BrewUITestTimeout.default,
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
-        BrewUIElement(app, .installedSaveBrewfileButton).waitToExist(timeout: timeout, file: file, line: line)
+        saveBrewfileButton.assertIsEnabled(timeout: timeout, file: file, line: line)
         return self
     }
 
