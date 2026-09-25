@@ -211,9 +211,43 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.stableVersionLabel == "4.0.0")
         #expect(viewModel.homepageURL?.absoluteString == "https://docker.com")
     }
+
+    @Test @MainActor func `releaseLatchedOperationState clears the install bridge once the install has ended`() async {
+        let center = InstallPhaseSequenceCommandCenter(phases: [.running(.installFormula), .idle])
+        let viewModel = makeDetailViewModel(center: center)
+        await viewModel.observeInstallUpdates()
+        #expect(viewModel.isInstalling)
+
+        viewModel.releaseLatchedOperationState()
+
+        #expect(!viewModel.isInstalling)
+    }
+
+    @Test @MainActor func `releaseLatchedOperationState keeps live busy state while the install runs`() async {
+        let center = InstallPhaseSequenceCommandCenter(phases: [.running(.installFormula)])
+        let viewModel = makeDetailViewModel(center: center)
+        await viewModel.observeInstallUpdates()
+        #expect(viewModel.isInstalling)
+
+        viewModel.releaseLatchedOperationState()
+
+        #expect(viewModel.isInstalling)
+    }
 }
 
 @MainActor
 private func installedRepo(_ packages: [InstalledBrewPackage] = []) -> StubInstalledPackagesRepository {
     StubInstalledPackagesRepository(packages: packages)
+}
+
+@MainActor
+private func makeDetailViewModel(
+    center: InstallPhaseSequenceCommandCenter,
+) -> DiscoverPackageDetailViewModel {
+    DiscoverPackageDetailViewModel(
+        package: DiscoveryBrewPackage(package: .fixture(name: "wget"), thirtyDayInstallCount: 0),
+        installedRepository: installedRepo(),
+        brewCommandCenter: center,
+        commandFactory: StubMutatingCommandFactory(),
+    )
 }

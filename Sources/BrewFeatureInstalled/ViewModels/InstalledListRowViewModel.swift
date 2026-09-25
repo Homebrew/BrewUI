@@ -117,6 +117,18 @@ final class InstalledListRowViewModel {
         showsUninstallBusy = false
     }
 
+    /// Releases the post-operation busy latch without new package data: the release path for a
+    /// reconcile fetch that settled without changing this package (e.g. the refresh failed),
+    /// where ``update(package:)`` never fires. A running operation is left alone — its busy
+    /// state is live progress, not a latch.
+    func releaseLatchedOperationState() {
+        guard !operationPhase.isRunning else {
+            return
+        }
+        showsUpgradeBusy = false
+        showsUninstallBusy = false
+    }
+
     func observeRowUpdates() async {
         for await phase in operationObserver.phases(for: operationSubject) {
             let oldPhase = operationPhase

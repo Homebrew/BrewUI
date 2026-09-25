@@ -218,50 +218,32 @@ struct InstalledListRowViewModelTests {
         viewModel.update(package: outdated)
         #expect(viewModel.showsUpgradeAvailable)
     }
-}
 
-private actor PhaseSequenceCommandCenter: BrewCommandCenter {
-    private let phases: [BrewOperationPhase]
-    private let operationID: BrewOperationID
+    @Test func `releaseLatchedOperationState clears the latch once the operation has ended`() async {
+        var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        package.outdated = true
+        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .idle])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsUpgradeBusy)
 
-    init(phases: [BrewOperationPhase], id: BrewOperationID = .package(.formula(name: "git"))) {
-        self.phases = phases
-        operationID = id
+        viewModel.releaseLatchedOperationState()
+
+        #expect(!viewModel.showsUpgradeBusy)
+        #expect(!viewModel.showsOperationBusy)
+        #expect(!viewModel.rowAccessibilityLabel.contains("Upgrading"))
     }
 
-    func phase(for id: BrewOperationID) async -> BrewOperationPhase {
-        id == operationID ? (phases.last ?? .idle) : .idle
-    }
+    @Test func `releaseLatchedOperationState keeps live busy state while the operation runs`() async {
+        let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        let center = PhaseSequenceCommandCenter(phases: [.running(.uninstallFormula)])
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsUninstallBusy)
 
-    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
+        viewModel.releaseLatchedOperationState()
 
-    @discardableResult
-    func capture(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
-        _ = id
-        _ = command
-        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
-    }
-
-    func perform(_ command: BrewCommand, id: BrewOperationID) async throws {
-        _ = try await capture(command, id: id)
-    }
-
-    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
-        AsyncStream { $0.finish() }
-    }
-
-    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
-        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            for phase in phases {
-                continuation.yield((operationID, phase))
-            }
-            continuation.finish()
-        }
-    }
-
-    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
-        AsyncStream { $0.finish() }
+        #expect(viewModel.showsUninstallBusy)
+        #expect(viewModel.showsOperationBusy)
     }
 }

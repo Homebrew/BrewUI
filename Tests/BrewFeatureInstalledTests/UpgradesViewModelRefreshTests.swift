@@ -76,6 +76,7 @@ struct UpgradesViewModelRefreshTests {
 private final class GatedInstalledPackagesRepository: InstalledPackagesRepository {
     private(set) var state: LoadState<[InstalledBrewPackage], any Error>
     private(set) var refreshFailure: (any Error)?
+    private(set) var fetchRevision = 0
     private(set) var forceRefreshCalls: [Bool] = []
     private(set) var didStartLoad = false
     private var isGated = true

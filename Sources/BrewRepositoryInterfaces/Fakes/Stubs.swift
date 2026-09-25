@@ -13,6 +13,7 @@ import Observation
 public final class StubInstalledPackagesRepository: InstalledPackagesRepository {
     public private(set) var state: LoadState<[InstalledBrewPackage], any Error>
     public private(set) var refreshFailure: (any Error)?
+    public private(set) var fetchRevision: Int = 0
     private var lookup: [HomebrewPackageID: InstalledBrewPackage]
 
     public init(packages: [InstalledBrewPackage], refreshFailure: (any Error)? = nil) {

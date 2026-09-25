@@ -105,6 +105,44 @@ struct DiscoverListRowViewModelTests {
         #expect(viewModel.installs30DayLabel == "99")
         #expect(viewModel.installedVersionLabel == "v3.4.0")
     }
+
+    @Test @MainActor func `releaseLatchedOperationState clears the install bridge once the install has ended`() async {
+        let center = InstallPhaseSequenceCommandCenter(phases: [.running(.installFormula), .idle])
+        let viewModel = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(name: "wget"),
+                thirtyDayInstallCount: 0,
+            ),
+            installedRepository: installedRepo(),
+            brewCommandCenter: center,
+        )
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsInstallBusy)
+
+        viewModel.releaseLatchedOperationState()
+
+        #expect(!viewModel.showsInstallBusy)
+        #expect(!viewModel.rowAccessibilityLabel.contains("Installing"))
+    }
+
+    @Test @MainActor func `releaseLatchedOperationState keeps live busy state while the install runs`() async {
+        let center = InstallPhaseSequenceCommandCenter(phases: [.running(.installFormula)])
+        let viewModel = DiscoverListRowViewModel(
+            discoveryPackage: DiscoveryBrewPackage(
+                package: .fixture(name: "wget"),
+                thirtyDayInstallCount: 0,
+            ),
+            installedRepository: installedRepo(),
+            brewCommandCenter: center,
+        )
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.showsInstallBusy)
+
+        viewModel.releaseLatchedOperationState()
+
+        #expect(viewModel.showsInstallBusy)
+        #expect(viewModel.rowAccessibilityLabel.contains("Installing"))
+    }
 }
 
 @MainActor

@@ -20,6 +20,7 @@ struct DiscoverPackageDetailRoot: View {
             installedRepository: installedPackagesRepository,
             brewCommandCenter: brewCommandCenter,
             mutatingCommandFactory: mutatingCommandFactory,
+            fetchRevision: installedPackagesRepository.fetchRevision,
         )
     }
 }
@@ -27,6 +28,10 @@ struct DiscoverPackageDetailRoot: View {
 /// Right-hand column: detail for the selected discovery package.
 struct DiscoverPackageDetailView: View {
     let package: DiscoveryBrewPackage
+    /// Settled inventory fetches, fed from the environment by ``DiscoverPackageDetailRoot``
+    /// (`0` in previews). A change releases the install busy bridge when the reconcile settled
+    /// without the package becoming installed.
+    let fetchRevision: Int
     @State private var viewModel: DiscoverPackageDetailViewModel
 
     init(
@@ -34,8 +39,10 @@ struct DiscoverPackageDetailView: View {
         installedRepository: any InstalledPackageStatusReading,
         brewCommandCenter: any BrewCommandCenter,
         mutatingCommandFactory: any BrewMutatingCommandFactory,
+        fetchRevision: Int = 0,
     ) {
         self.package = package
+        self.fetchRevision = fetchRevision
         _viewModel = State(
             initialValue: DiscoverPackageDetailViewModel(
                 package: package,
@@ -70,6 +77,9 @@ struct DiscoverPackageDetailView: View {
         }
         .onChange(of: package) { _, newPackage in
             viewModel.update(package: newPackage)
+        }
+        .onChange(of: fetchRevision) {
+            viewModel.releaseLatchedOperationState()
         }
     }
 }

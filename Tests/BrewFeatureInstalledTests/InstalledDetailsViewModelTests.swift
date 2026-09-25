@@ -572,4 +572,40 @@ extension InstalledDetailsViewModelTests {
         #expect(!viewModel.showUninstallBlockedCallout)
         #expect(!viewModel.showUninstallConfirmation)
     }
+
+    @Test @MainActor func `releaseLatchedOperationState clears the latch once the operation has ended`() async {
+        let center = PhaseSequenceCommandCenter(
+            phases: [.running(.uninstallFormula), .idle],
+            id: .package(.formula(name: "wget")),
+        )
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.isUninstalling)
+
+        viewModel.releaseLatchedOperationState()
+
+        #expect(!viewModel.isUninstalling)
+        #expect(!viewModel.isMutatingPackage)
+    }
+
+    @Test @MainActor func `releaseLatchedOperationState keeps live busy state while the operation runs`() async {
+        let center = PhaseSequenceCommandCenter(
+            phases: [.running(.upgradeFormula)],
+            id: .package(.formula(name: "wget")),
+        )
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: center,
+        )
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.isUpgrading)
+
+        viewModel.releaseLatchedOperationState()
+
+        #expect(viewModel.isUpgrading)
+        #expect(viewModel.isMutatingPackage)
+    }
 }

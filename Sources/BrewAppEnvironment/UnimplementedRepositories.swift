@@ -23,6 +23,10 @@ final class UnimplementedInstalledPackagesRepository: InstalledPackagesRepositor
         unimplemented()
     }
 
+    var fetchRevision: Int {
+        unimplemented()
+    }
+
     func load(forceRefresh _: Bool) async {
         unimplemented()
     }

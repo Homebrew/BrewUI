@@ -147,4 +147,14 @@ final class DiscoverListRowViewModel: Identifiable {
         operationPhase = .idle
         awaitingInstallResolution = false
     }
+
+    /// `DiscoverPackageDetailViewModel/releaseLatchedOperationState()` counterpart for the list
+    /// row: releases the install busy bridge when the reconcile fetch settled without the package
+    /// becoming installed. A running install is left alone.
+    func releaseLatchedOperationState() {
+        guard !operationPhase.isRunning else {
+            return
+        }
+        awaitingInstallResolution = false
+    }
 }
