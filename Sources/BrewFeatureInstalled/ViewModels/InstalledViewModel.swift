@@ -9,6 +9,14 @@ import BrewUIComponents
 import Foundation
 import Observation
 
+/// What the Installed header renders after a "Save Brewfile…" submission.
+enum BrewfileSaveOutcome: Equatable {
+    /// The dump finished; `url` is the file `brew` wrote.
+    case saved(url: URL)
+    /// The dump failed; `message` is user-facing copy. The technical detail stays in the console.
+    case failed(message: String)
+}
+
 struct InstalledPackagesContent: Equatable {
     /// Formulae and casks interleaved into a single list, ordered as the repository sorted them
     /// (by name across both kinds). The per-row kind badge keeps casks and formulae distinguishable.
@@ -50,6 +58,15 @@ struct InstalledPackagesContent: Equatable {
 final class InstalledViewModel {
     @ObservationIgnored private let repository: any InstalledInventoryObserving
     @ObservationIgnored private let preferences: any InstalledPreferences
+    @ObservationIgnored let brewCommandCenter: any BrewCommandCenter
+    @ObservationIgnored let commandFactory: any BrewMutatingCommandFactory
+    @ObservationIgnored var brewfileSaveTask: Task<Void, Never>?
+
+    /// Outcome of the most recent "Save Brewfile…" submission — one property for the header's
+    /// confirmation/error note, cleared when a new dump is submitted.
+    var brewfileOutcome: BrewfileSaveOutcome?
+    /// `true` while a dump runs: the header disables its button and the console streams the command.
+    var isSavingBrewfile = false
 
     private var preSearchSelectedPackageID: InstalledBrewPackage.ID?
     private var searchPreviewSelectedPackageID: InstalledBrewPackage.ID?
@@ -148,10 +165,14 @@ final class InstalledViewModel {
     init(
         repository: any InstalledInventoryObserving,
         preferences: any InstalledPreferences,
+        brewCommandCenter: any BrewCommandCenter,
+        commandFactory: any BrewMutatingCommandFactory,
         initialSelection: InstalledBrewPackage.ID? = nil,
     ) {
         self.repository = repository
         self.preferences = preferences
+        self.brewCommandCenter = brewCommandCenter
+        self.commandFactory = commandFactory
         selectedPackageID = initialSelection
     }
 
