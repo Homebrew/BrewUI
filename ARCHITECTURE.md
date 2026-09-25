@@ -119,6 +119,13 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
   `~/Library/Caches`; pending crash reports belong in `~/Library/Application Support`; transcripts
   belong in `~/Library/Logs`. Keep these roots separate by recoverability.
 
+## Services
+
+`BrewServicesRepository` caches `brew services info --all --json` for the app lifetime. Initial load and
+explicit refresh are the only reads; refresh failures retain data and remain visible across navigation.
+The read-only tab filters by the running flag and displays Homebrew status text unchanged. Its resizable
+detail pane includes PID, exit code, owner, login registration, schedulability and copyable service/log paths.
+
 ## Self-upgrades and console
 
 The app's `homebrew-app` cask is excluded from package lists, counts and bulk upgrades, while the raw

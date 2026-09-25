@@ -78,6 +78,9 @@
     "Review and upgrade outdated packages" : {
       "comment" : "Window subtitle, Upgrades"
     },
+    "Services" : {
+      "comment" : "Sidebar: read-only Homebrew service inventory"
+    },
     "The Homebrew app quit unexpectedly" : {
       "comment" : "Crash report dialog title"
     },
@@ -94,6 +97,9 @@
           }
         }
       }
+    },
+    "View your Homebrew services" : {
+      "comment" : "Window subtitle, read-only Services tab"
     },
     "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
       "comment" : "Shown when the self-upgrade is attempted while another brew command is still running"

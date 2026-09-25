@@ -11,6 +11,7 @@ import SwiftUI
 /// Primary navigation items for the main window sidebar.
 enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     case installed
+    case services
     case upgrades
     case discover
     case doctor
@@ -23,6 +24,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     var title: String {
         switch self {
         case .installed: String(localized: "Installed", bundle: #bundle, comment: "Sidebar: installed packages")
+        case .services: String(localized: "Services", bundle: #bundle, comment: "Sidebar: read-only Homebrew service inventory")
         case .upgrades: String(localized: "Upgrades", bundle: #bundle, comment: "Sidebar: outdated packages")
         case .discover: String(localized: "Discover", bundle: #bundle, comment: "Sidebar: browse and search the catalog")
         case .doctor: String(localized: "Doctor", bundle: #bundle, comment: "Sidebar: brew doctor diagnostics")
@@ -33,7 +35,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     var refreshesDoctorReport: Bool {
         switch self {
         case .doctor: true
-        case .installed, .upgrades, .discover, .configuration: false
+        case .installed, .services, .upgrades, .discover, .configuration: false
         }
     }
 
@@ -42,6 +44,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     var axDestination: AXID.SidebarDestination {
         switch self {
         case .installed: .installed
+        case .services: .services
         case .upgrades: .upgrades
         case .discover: .discover
         case .doctor: .doctor
@@ -54,7 +57,7 @@ extension FocusedValues {
     @Entry var sidebarSelection: Binding<SidebarItem>?
 }
 
-/// View menu commands for navigating the main window sidebar (⌘1–⌘5).
+/// View menu commands for navigating the main window sidebar (⌘1–⌘6).
 public struct SidebarCommands: Commands {
     @FocusedValue(\.sidebarSelection) private var selection
 

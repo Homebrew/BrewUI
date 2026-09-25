@@ -20,8 +20,8 @@ enum ScenarioFixtures {
 
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
-        case .empty, .brewNotFound:
-            emptyFixtures()
+        case .empty, .brewNotFound, .servicesBasic:
+            emptyInstalledFixtures(for: scenario)
         case .installedBasic:
             installedBasicFixtures()
         case .installedLarge:
@@ -295,11 +295,25 @@ enum ScenarioFixtures {
 
     // MARK: - Builders
 
+    private static func emptyInstalledFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
+        var set = emptyFixtures()
+        guard scenario == .servicesBasic else { return set }
+        let key = "services_info_--all_--json"
+        set.brewFiles["\(key).stdout"] = json([
+            ["name": "redis", "status": "started", "running": true, "pid": 43210, "user": "test", "registered": true, "schedulable": false,
+             "file": "/fixtures/redis.plist", "log_path": "/fixtures/redis.log", "error_log_path": "/fixtures/redis-error.log"],
+            ["name": "postgresql@17", "status": "none", "running": false, "registered": false, "schedulable": true],
+            ["name": "unbound", "status": "error", "running": false, "exit_code": 78],
+        ])
+        return set
+    }
+
     /// The read-only commands every scenario must answer.
     private static func baseBrewFiles(installed: [FixturePackage]) -> [String: Data] {
         [
             "\(installedInfoKey).stdout": infoJSON(for: installed),
             "config.stdout": configOutput,
+            "services_info_--all_--json.stdout": json([]),
             "doctor.stdout": text("Your system is ready to brew.\n"),
             "doctor_--json.stdout": json(["tier": 1, "findings": []]),
         ]

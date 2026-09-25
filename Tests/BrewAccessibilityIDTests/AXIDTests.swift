@@ -48,6 +48,7 @@ struct AXIDTests {
 
         #expect(identifiers == [
             "sidebar.item.installed",
+            "sidebar.item.services",
             "sidebar.item.upgrades",
             "sidebar.item.discover",
             "sidebar.item.doctor",
@@ -55,14 +56,19 @@ struct AXIDTests {
         ])
     }
 
+    @Test func `service identifiers keep their wire format`() {
+        #expect([AXID.servicesScreen.rawValue, AXID.servicesRefreshButton.rawValue] == ["services.screen", "services.refresh"])
+    }
+
     @Test func `row identifiers embed the package token`() {
         let identifiers = [
             AXID.installedRow(token: "git").rawValue,
             AXID.upgradesRow(token: "wget").rawValue,
             AXID.discoverRow(token: "iterm2").rawValue,
+            AXID.serviceRow(name: "redis").rawValue,
         ]
 
-        #expect(identifiers == ["installed.row.git", "upgrades.row.wget", "discover.row.iterm2"])
+        #expect(identifiers == ["installed.row.git", "upgrades.row.wget", "discover.row.iterm2", "services.row.redis"])
     }
 
     /// The three lists can hold the same package token at once — an outdated installed package
