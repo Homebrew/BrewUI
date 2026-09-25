@@ -52,9 +52,14 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
     private var phaseListenersByID: [BrewOperationID: [PhaseStreamListener]] = [:]
     private var allPhaseListeners: [AllPhaseStreamListener] = []
     private var allOutputListeners: [AllOutputStreamListener] = []
+    private let reconciler: any BrewOperationReconciling
 
-    public init(executionContext: BrewCommandExecutionContext) {
+    public init(
+        executionContext: BrewCommandExecutionContext,
+        reconciler: any BrewOperationReconciling,
+    ) {
         self.executionContext = executionContext
+        self.reconciler = reconciler
     }
 
     public func phase(for id: BrewOperationID) async -> BrewOperationPhase {
@@ -113,6 +118,7 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
     /// The single run algorithm: serialise, broadcast output lines to listeners, force colour (all scheduled
     /// work is shown to the user), track phase, and — in `.display` mode — treat a non-zero exit as a failure.
     /// Returns the faithful ``CommandOutput``; capture callers that parse it strip ANSI at their boundary.
+    /// The id stays in flight across the reconcile too, so a repeat call joins rather than races it.
     private func run(
         _ command: BrewCommand,
         id: BrewOperationID,
@@ -154,16 +160,30 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
             let output = try await task.value
             lineContinuation.finish()
             await drainTask.value
-            trackedPhasesByID[id] = nil
-            notifyPhaseListeners(for: id)
+            await settle(id: id, kind: kind, failure: nil)
             return output
         } catch {
             lineContinuation.finish()
             await drainTask.value
-            trackedPhasesByID[id] = .failed(reason: OperationFailure(catching: error))
-            notifyPhaseListeners(for: id)
+            await settle(id: id, kind: kind, failure: error)
             throw error
         }
+    }
+
+    /// Reconciles mutating work before publishing the terminal phase. A failed command reconciles too:
+    /// a batch `brew upgrade a b` can exit non-zero having upgraded `a`.
+    private func settle(id: BrewOperationID, kind: BrewOperationKind, failure: (any Error)?) async {
+        if kind.isMutating {
+            trackedPhasesByID[id] = .reconciling(kind)
+            notifyPhaseListeners(for: id)
+            await reconciler.reconcile()
+        }
+        if let failure {
+            trackedPhasesByID[id] = .failed(reason: OperationFailure(catching: failure))
+        } else {
+            trackedPhasesByID[id] = nil
+        }
+        notifyPhaseListeners(for: id)
     }
 
     /// Builds the serialised subprocess task: resolve `brew`, run it, and — in `.display` mode — turn a

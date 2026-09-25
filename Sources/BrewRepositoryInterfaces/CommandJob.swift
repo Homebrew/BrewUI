@@ -25,7 +25,8 @@ public struct CommandJobID: Hashable, Sendable {
 /// Carries its own per-run ``CommandJobID`` (the tab identity) plus the ``BrewOperationID`` it was routed by
 /// (the command center's key — see ``CommandJobID`` for why they differ).
 /// Derives ``exitCode`` from phase transitions because ``BrewOperationPhase`` does not itself carry one:
-/// `.running → .idle` ⇒ exit 0; `.failed(.brewCommand(exitCode, _))` ⇒ that exit code; other failure cases ⇒ `-1`.
+/// reaching `.idle` from any in-flight phase ⇒ exit 0; `.failed(.brewCommand(exitCode, _))` ⇒ that exit code;
+/// other failure cases ⇒ `-1`.
 ///
 /// This type holds only stored data and its mutation; display-flavoured helpers (status-dot state, export
 /// formatting) live as extensions in `BrewFeatureConsole`.
@@ -70,16 +71,17 @@ public final class CommandJob: Identifiable {
     }
 
     public func updatePhase(_ newPhase: BrewOperationPhase) {
-        let wasRunning = if case .running = phase { true } else { false }
+        // `.reconciling` counts as in flight: the job earns an exit code only once the phase settles.
+        let wasInFlight = !phase.isSettled
         phase = newPhase
         switch newPhase {
         case .idle:
-            if wasRunning {
+            if wasInFlight {
                 exitCode = 0
             }
         case let .failed(reason):
             exitCode = Self.exitCodeFromFailure(reason) ?? -1
-        case .running:
+        case .running, .reconciling:
             break
         }
     }

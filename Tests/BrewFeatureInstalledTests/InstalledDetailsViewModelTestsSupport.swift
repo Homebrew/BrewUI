@@ -21,7 +21,8 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
     }
 
     func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
-        fixedPhase.isRunning ? [operationID: fixedPhase] : [:]
+        // Mirrors the real center, which tracks a reconciling operation as in flight too.
+        fixedPhase.isSettled ? [:] : [operationID: fixedPhase]
     }
 
     @discardableResult

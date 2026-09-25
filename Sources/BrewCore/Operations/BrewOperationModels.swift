@@ -74,15 +74,42 @@ public enum BrewOperationID: Hashable, Identifiable, Sendable {
 
 /// Visibility for UI and tests — mutually exclusive with “absent” represented by ``BrewCommandCenter/phase(for:)``
 /// returning ``BrewOperationPhase/idle`` when the center has no record for that id.
+///
+/// A mutating operation runs `.running → .reconciling → .idle | .failed`, where ``reconciling`` spans the
+/// gap between `brew` exiting and the installed inventory catching up, so busy chrome is a pure function of
+/// the phase. Read-only work has nothing to reconcile and settles directly.
 public enum BrewOperationPhase: Equatable, Sendable {
     case idle
     case running(BrewOperationKind)
+    case reconciling(BrewOperationKind)
     case failed(reason: OperationFailure)
 
+    /// `true` only while the subprocess is in flight, so deliberately false for ``reconciling``.
+    /// Surfaces asking whether the operation has finished want ``isSettled``.
     public var isRunning: Bool {
         if case .running = self {
             return true
         }
         return false
+    }
+
+    /// `true` once the operation has finished and the inventory has caught up.
+    public var isSettled: Bool {
+        switch self {
+        case .idle, .failed:
+            true
+        case .running, .reconciling:
+            false
+        }
+    }
+
+    /// The work this phase represents, for the phases that carry it; `nil` once settled.
+    public var activeKind: BrewOperationKind? {
+        switch self {
+        case let .running(kind), let .reconciling(kind):
+            kind
+        case .idle, .failed:
+            nil
+        }
     }
 }

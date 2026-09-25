@@ -13,8 +13,11 @@ public actor RecordingSerialBrewCommandCenter: BrewCommandCenter {
     private let inner: SerialBrewCommandCenter
     public private(set) var recordedSubmitEntries: [(id: BrewOperationID, kind: BrewOperationKind)] = []
 
-    public init(executionContext: BrewCommandExecutionContext) {
-        inner = SerialBrewCommandCenter(executionContext: executionContext)
+    public init(
+        executionContext: BrewCommandExecutionContext,
+        reconciler: any BrewOperationReconciling = NoopBrewOperationReconciler(),
+    ) {
+        inner = SerialBrewCommandCenter(executionContext: executionContext, reconciler: reconciler)
     }
 
     public func phase(for id: BrewOperationID) async -> BrewOperationPhase {

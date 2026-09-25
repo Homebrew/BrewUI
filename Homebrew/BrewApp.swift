@@ -64,7 +64,9 @@ struct BrewApp: App {
         let discoverAnalytics = Self.makeDiscoverAnalyticsCache(fixtures: fixtures)
         // One context for every brew invocation: command center, installed inventory and `brew config`.
         let executionContext = Self.executionContext(uiTesting: uiTesting, fixtures: fixtures)
-        let center = SerialBrewCommandCenter(executionContext: executionContext)
+        let installedPackages = BrewInstalledPackagesRepository(executionContext: executionContext, cache: inventoryCache)
+        // The centre settles a mutating operation only once `installedPackages` has refetched.
+        let center = SerialBrewCommandCenter(executionContext: executionContext, reconciler: installedPackages)
         let apiClient = Self.makeAPIClient(uiTesting: uiTesting)
         let catalogueRepo = BrewCatalogueRepository(apiClient: apiClient, cache: catalogue)
 
@@ -73,7 +75,7 @@ struct BrewApp: App {
         discoverAnalyticsCache = discoverAnalytics
         commandCenter = center
         commandFactory = LiveBrewMutatingCommandFactory()
-        installedPackagesRepository = BrewInstalledPackagesRepository(executionContext: executionContext, cache: inventoryCache, commandCenter: center)
+        installedPackagesRepository = installedPackages
         installedPreferences = UserDefaultsInstalledPreferences(
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "installed", fixtures: fixtures),
         )

@@ -85,7 +85,7 @@ struct PackageOperationObserverTests {
     @Test func `ignores operations for other packages`() async {
         let center = FakeCommandCenter(events: [(.package(Self.wgetFormula), .running(.upgradeFormula))])
         let phases = await Self.collect(PackageOperationObserver(commandCenter: center), Self.subject(Self.gitFormula))
-        #expect(phases.isEmpty)
+        #expect(phases == [.idle])
     }
 
     @Test func `yields a covering bulk upgrade in order`() async {
@@ -97,7 +97,7 @@ struct PackageOperationObserverTests {
             PackageOperationObserver(commandCenter: center),
             Self.subject(Self.gitFormula, outdated: true),
         )
-        #expect(phases == [.running(.upgradeAll), .idle])
+        #expect(phases == [.idle, .running(.upgradeAll), .idle])
     }
 
     @Test func `ignores a bulk upgrade that does not cover the package`() async {
@@ -106,7 +106,21 @@ struct PackageOperationObserverTests {
             PackageOperationObserver(commandCenter: center),
             Self.subject(Self.figmaCask, outdated: true),
         )
-        #expect(phases.isEmpty)
+        #expect(phases == [.idle])
+    }
+
+    @Test func `seeds a reconcile already in flight`() async {
+        // A row scrolled into view while the inventory is catching up still has to look busy.
+        let center = FakeCommandCenter(running: [.package(Self.gitFormula): .reconciling(.uninstallFormula)])
+        let phases = await Self.collect(PackageOperationObserver(commandCenter: center), Self.subject(Self.gitFormula))
+        #expect(phases == [.reconciling(.uninstallFormula)])
+    }
+
+    @Test func `seeds idle for a subject with nothing in flight`() async {
+        // Otherwise a detail pane following the selection keeps the previous package's busy chrome.
+        let center = FakeCommandCenter(running: [.package(Self.wgetFormula): .running(.uninstallFormula)])
+        let phases = await Self.collect(PackageOperationObserver(commandCenter: center), Self.subject(Self.gitFormula))
+        #expect(phases == [.idle])
     }
 }
 

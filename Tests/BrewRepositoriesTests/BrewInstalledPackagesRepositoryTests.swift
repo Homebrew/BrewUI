@@ -403,35 +403,28 @@ struct BrewInstalledPackagesRepositoryTests {
         #expect(repo.refreshFailure != nil)
     }
 
-    @Test @MainActor func `command center running to idle triggers a reconcile fetch`() async {
-        let commandCenter = ControllableAllPhasesCommandCenter()
+    @Test @MainActor func `reconciling forces a fresh fetch`() async {
         let runner = CountingInfoRunner()
-        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner, commandCenter: commandCenter)
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
         await repo.load(forceRefresh: true)
         #expect(await runner.callCount == 1)
-        await waitForPhaseSubscriber(commandCenter: commandCenter)
 
-        let opID = BrewOperationID(kind: .formula, name: "git")
-        await commandCenter.emitPhase(id: opID, phase: .running(.upgradeFormula))
-        await commandCenter.emitPhase(id: opID, phase: .idle)
+        await repo.reconcile()
 
-        await expectCallCount(atLeast: 2, runner: runner)
+        #expect(await runner.callCount == 2)
     }
 
-    @Test @MainActor func `command center running to failed does not trigger a reconcile fetch`() async {
-        let commandCenter = ControllableAllPhasesCommandCenter()
-        let runner = CountingInfoRunner()
-        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner, commandCenter: commandCenter)
-        await repo.load(forceRefresh: true)
-        #expect(await runner.callCount == 1)
-        await waitForPhaseSubscriber(commandCenter: commandCenter)
+    @Test @MainActor func `overlapping fetches run one after another`() async {
+        // Two fetches in flight at once could apply out of order and leave the older snapshot on screen.
+        let runner = ConcurrencyTrackingInfoRunner()
+        let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
 
-        let opID = BrewOperationID(kind: .formula, name: "git")
-        await commandCenter.emitPhase(id: opID, phase: .running(.upgradeFormula))
-        await commandCenter.emitPhase(id: opID, phase: .failed(reason: .brewExecutableNotFound))
-        await settleAsync()
+        async let first: Void = repo.load(forceRefresh: true)
+        async let second: Void = repo.reconcile()
+        _ = await (first, second)
 
-        #expect(await runner.callCount == 1)
+        #expect(await runner.maxConcurrent == 1)
+        #expect(await runner.callCount == 2)
     }
 }
 
@@ -471,34 +464,24 @@ extension BrewInstalledPackagesRepositoryTests {
     }
 }
 
-// MARK: - Reconcile helpers
+/// Reports the high-water mark of concurrent `brew info` runs.
+private actor ConcurrencyTrackingInfoRunner: BrewCommandRunning {
+    private(set) var callCount = 0
+    private(set) var maxConcurrent = 0
+    private var current = 0
 
-@MainActor
-private func waitForPhaseSubscriber(commandCenter: ControllableAllPhasesCommandCenter) async {
-    for _ in 0 ..< 200 {
-        if await commandCenter.hasPhaseSubscriber() {
-            return
-        }
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        callCount += 1
+        current += 1
+        maxConcurrent = max(maxConcurrent, current)
         await Task.yield()
+        current -= 1
+        return CommandOutput(
+            standardOutput: #"{ "formulae": [], "casks": [] }"#,
+            standardError: "",
+            terminationStatus: 0,
+        )
     }
-}
-
-@MainActor
-private func settleAsync() async {
-    for _ in 0 ..< 20 {
-        await Task.yield()
-    }
-}
-
-@MainActor
-private func expectCallCount(atLeast target: Int, runner: CountingInfoRunner) async {
-    for _ in 0 ..< 200 {
-        if await runner.callCount >= target {
-            return
-        }
-        await Task.yield()
-    }
-    #expect(await runner.callCount >= target)
 }
 
 /// Throws once, then succeeds — for asserting that recovery clears recorded failure state.
@@ -534,78 +517,5 @@ private actor CountingInfoRunner: BrewCommandRunning {
             standardError: "",
             terminationStatus: 0,
         )
-    }
-}
-
-private actor ControllableAllPhasesCommandCenter: BrewCommandCenter {
-    private typealias AllPhaseTermination =
-        AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation.Termination
-
-    private struct AllPhaseStreamListener {
-        let token: UUID
-        let continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation
-    }
-
-    private var allPhaseListeners: [AllPhaseStreamListener] = []
-
-    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
-        .idle
-    }
-
-    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
-        [:]
-    }
-
-    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
-        AsyncStream<BrewOperationPhase>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
-        AsyncStream<(BrewOperationID, BrewOperationPhase)>(bufferingPolicy: .unbounded) { continuation in
-            let token = UUID()
-            continuation.onTermination = { @Sendable (_: AllPhaseTermination) in
-                Task {
-                    await self.removeAllPhaseListener(token: token)
-                }
-            }
-            registerAllPhaseListener(token: token, continuation: continuation)
-        }
-    }
-
-    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
-        AsyncStream<(BrewOperationID, BrewCommandOutputLine)>(bufferingPolicy: .unbounded) { continuation in
-            continuation.finish()
-        }
-    }
-
-    @discardableResult
-    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
-        CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
-    }
-
-    func perform(_: BrewCommand, id _: BrewOperationID) async throws {}
-
-    func emitPhase(id: BrewOperationID, phase: BrewOperationPhase) {
-        for listener in allPhaseListeners {
-            listener.continuation.yield((id, phase))
-        }
-    }
-
-    func hasPhaseSubscriber() async -> Bool {
-        !allPhaseListeners.isEmpty
-    }
-
-    private func registerAllPhaseListener(
-        token: UUID,
-        continuation: AsyncStream<(BrewOperationID, BrewOperationPhase)>.Continuation,
-    ) {
-        let listener = AllPhaseStreamListener(token: token, continuation: continuation)
-        allPhaseListeners.append(listener)
-    }
-
-    private func removeAllPhaseListener(token: UUID) {
-        allPhaseListeners.removeAll { $0.token == token }
     }
 }
