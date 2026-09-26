@@ -5,6 +5,7 @@
 
 import BrewCLI
 import BrewCore
+import BrewCrashReporting
 import BrewFeatureSelfUpgrade
 import BrewNetworking
 import BrewSelfUpgradeContract
@@ -78,6 +79,24 @@ extension BrewApp {
                 isDirectory: true,
             ),
             defaultsKeyPrefix: defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
+        )
+    }
+
+    /// Under `-uiTesting` the app reads an empty directory, so a real crash on the host never opens the sheet mid-test.
+    static func makeCrashReportController(
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> CrashReportController {
+        guard let fixtures else {
+            return CrashReportController()
+        }
+        return CrashReportController(
+            directory: DiagnosticReportDirectory(
+                directoryURL: fixtures.containerURL.appendingPathComponent(
+                    "DiagnosticReports",
+                    isDirectory: true,
+                ),
+            ),
+            defaultsKeyPrefix: defaultsKeyPrefix(base: "CrashReports", fixtures: fixtures),
         )
     }
 

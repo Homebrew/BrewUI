@@ -1,0 +1,1712 @@
+{"app_name":"Homebrew","timestamp":"2026-09-20 22:30:07.00 +1000","app_version":"0.0.0","slice_uuid":"6e8518fd-f485-37cc-a5a5-01d9c0b2e6d2","build_version":"0","platform":1,"bundleID":"sh.brew.app","share_with_app_devs":1,"is_first_party":0,"bug_type":"309","os_version":"macOS 26.5 (25F71)","roots_installed":0,"name":"Homebrew","incident_id":"00000000-0000-0000-0000-000000000000"}
+{
+  "uptime": 240000,
+  "procRole": "Background",
+  "version": 2,
+  "userID": 501,
+  "deployVersion": 210,
+  "modelCode": "Mac16,5",
+  "coalitionID": 25520,
+  "osVersion": {
+    "train": "macOS 26.5",
+    "build": "25F71",
+    "releaseType": "User"
+  },
+  "captureTime": "2026-09-20 22:30:03.8907 +1000",
+  "codeSigningMonitor": 2,
+  "incident": "00000000-0000-0000-0000-000000000000",
+  "pid": 62148,
+  "translated": false,
+  "cpuType": "ARM-64",
+  "procLaunch": "2026-09-20 22:29:15.6928 +1000",
+  "procStartAbsTime": 5907080995391,
+  "procExitAbsTime": 5908237733076,
+  "procName": "Homebrew",
+  "procPath": "/Users/USER/Library/Developer/Xcode/DerivedData/Homebrew-aauuaobijzabjvhcywonlfanadzx/Build/Products/Debug/Homebrew.app/Contents/MacOS/Homebrew",
+  "bundleInfo": {
+    "CFBundleShortVersionString": "0.0.0",
+    "CFBundleVersion": "0",
+    "CFBundleIdentifier": "sh.brew.app"
+  },
+  "storeInfo": {
+    "deviceIdentifierForVendor": "26F836E0-D08F-542D-84EE-F62B68CF6A5B",
+    "thirdParty": true
+  },
+  "parentProc": "launchd",
+  "parentPid": 1,
+  "coalitionName": "sh.brew.app",
+  "crashReporterKey": "00000000-0000-0000-0000-000000000000",
+  "lowPowerMode": 1,
+  "appleIntelligenceStatus": {
+    "reasons": [
+      "selectedLanguageDoesNotMatchSelectedSiriLanguage",
+      "selectedLanguageDoesNotMatchSelectedSiriLanguageInfo(system: en-AU, siri: en-GB)"
+    ],
+    "state": "unavailable"
+  },
+  "developerMode": 1,
+  "codeSigningID": "sh.brew.app",
+  "codeSigningTeamID": "7P5KY6H48B",
+  "codeSigningFlags": 1644245781,
+  "codeSigningValidationCategory": 3,
+  "codeSigningTrustLevel": 4294967295,
+  "codeSigningAuxiliaryInfo": 0,
+  "instructionByteStream": {
+    "beforePC": "/YMBkf9DBtH1Aweq/AMFqvgDBKr5AwOq+gMCqvcDAar2AwCqqAtA+Q==",
+    "atPC": "6AsA+agjAtG/ozepSAQA0AgxQf2ogxj8vwMZOAgEQPkbuUD5fwMA8Q=="
+  },
+  "bootSessionUUID": "00000000-0000-0000-0000-000000000000",
+  "wakeTime": 1284,
+  "sleepWakeUUID": "00000000-0000-0000-0000-000000000000",
+  "sip": "enabled",
+  "vmRegionInfo": "0x16f50bec0 is in 0x16bd08000-0x16f50c000;  bytes after start: 58736320  bytes before end: 319\n      REGION TYPE                    START - END         [ VSIZE] PRT/MAX SHRMOD  REGION DETAIL\n      MALLOC metadata             12b600000-12b604000    [   16K] rw-/rwx SM=PRV  \n      GAP OF 0x40704000 BYTES\n--->  Stack Guard                 16bd08000-16f50c000    [ 56.0M] ---/rwx SM=PRV  \n      Stack                       16f50c000-16fd08000    [ 8176K] rw-/rwx SM=SHM  ",
+  "exception": {
+    "codes": "0x0000000000000002, 0x000000016f50bec0",
+    "message": "Could not determine thread index for stack guard region",
+    "rawCodes": [
+      2,
+      6162529984
+    ],
+    "type": "EXC_BAD_ACCESS",
+    "signal": "SIGSEGV",
+    "subtype": "KERN_PROTECTION_FAILURE at 0x000000016f50bec0"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 11,
+    "namespace": "SIGNAL",
+    "indicator": "Segmentation fault: 11",
+    "byProc": "exc handler",
+    "byPid": 62148
+  },
+  "vmregioninfo": "0x16f50bec0 is in 0x16bd08000-0x16f50c000;  bytes after start: 58736320  bytes before end: 319\n      REGION TYPE                    START - END         [ VSIZE] PRT/MAX SHRMOD  REGION DETAIL\n      MALLOC metadata             12b600000-12b604000    [   16K] rw-/rwx SM=PRV  \n      GAP OF 0x40704000 BYTES\n--->  Stack Guard                 16bd08000-16f50c000    [ 56.0M] ---/rwx SM=PRV  \n      Stack                       16f50c000-16fd08000    [ 8176K] rw-/rwx SM=SHM  ",
+  "extMods": {
+    "caller": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "system": {
+      "thread_create": 0,
+      "thread_set_state": 1824,
+      "task_for_pid": 66
+    },
+    "targeted": {
+      "thread_create": 0,
+      "thread_set_state": 0,
+      "task_for_pid": 0
+    },
+    "warnings": 0
+  },
+  "faultingThread": 0,
+  "threads": [
+    {
+      "frames": [
+        {
+          "imageOffset": 40944,
+          "symbol": "dyld4::APIs::findImageMappedAt(void const*, dyld3::MachOLoaded const**, bool*, char const**, void const**, unsigned long long*, unsigned char*, dyld4::Loader const**)",
+          "symbolLocation": 72,
+          "imageIndex": 4
+        },
+        {
+          "imageOffset": 43424,
+          "symbol": "dyld4::APIs::dladdr(void const*, dl_info*)",
+          "symbolLocation": 192,
+          "imageIndex": 4
+        },
+        {
+          "imageOffset": 224824,
+          "symbol": "backtrace_symbols_fd",
+          "symbolLocation": 112,
+          "imageIndex": 5
+        },
+        {
+          "imageOffset": 4090228,
+          "sourceLine": 126,
+          "sourceFile": "CrashReportInstaller.swift",
+          "symbol": "writeBacktrace(to:)",
+          "imageIndex": 1,
+          "symbolLocation": 168
+        },
+        {
+          "imageOffset": 4088576,
+          "sourceLine": 93,
+          "sourceFile": "CrashReportInstaller.swift",
+          "symbol": "closure #1 in variable initialization expression of handleFatalSignal",
+          "imageIndex": 1,
+          "symbolLocation": 412
+        },
+        {
+          "imageOffset": 4090280,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc closure #1 in variable initialization expression of handleFatalSignal",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 14148,
+          "symbol": "_sigtramp",
+          "symbolLocation": 56,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 26840,
+          "symbol": "pthread_kill",
+          "symbolLocation": 296,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 266260,
+          "symbol": "raise",
+          "symbolLocation": 32,
+          "imageIndex": 5
+        },
+        {
+          "imageOffset": 4088604,
+          "sourceLine": 100,
+          "sourceFile": "CrashReportInstaller.swift",
+          "symbol": "closure #1 in variable initialization expression of handleFatalSignal",
+          "imageIndex": 1,
+          "symbolLocation": 440
+        },
+        {
+          "imageOffset": 4090280,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc closure #1 in variable initialization expression of handleFatalSignal",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 14148,
+          "symbol": "_sigtramp",
+          "symbolLocation": 56,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 26840,
+          "symbol": "pthread_kill",
+          "symbolLocation": 296,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 266260,
+          "symbol": "raise",
+          "symbolLocation": 32,
+          "imageIndex": 5
+        },
+        {
+          "imageOffset": 4088604,
+          "sourceLine": 100,
+          "sourceFile": "CrashReportInstaller.swift",
+          "symbol": "closure #1 in variable initialization expression of handleFatalSignal",
+          "imageIndex": 1,
+          "symbolLocation": 440
+        },
+        {
+          "imageOffset": 4090280,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc closure #1 in variable initialization expression of handleFatalSignal",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 14148,
+          "symbol": "_sigtramp",
+          "symbolLocation": 56,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 26840,
+          "symbol": "pthread_kill",
+          "symbolLocation": 296,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 266260,
+          "symbol": "raise",
+          "symbolLocation": 32,
+          "imageIndex": 5
+        },
+        {
+          "imageOffset": 4088604,
+          "sourceLine": 100,
+          "sourceFile": "CrashReportInstaller.swift",
+          "symbol": "closure #1 in variable initialization expression of handleFatalSignal",
+          "imageIndex": 1,
+          "symbolLocation": 440
+        },
+        {
+          "imageOffset": 4090280,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc closure #1 in variable initialization expression of handleFatalSignal",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 14148,
+          "symbol": "_sigtramp",
+          "symbolLocation": 56,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 26840,
+          "symbol": "pthread_kill",
+          "symbolLocation": 296,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 266260,
+          "symbol": "raise",
+          "symbolLocation": 32,
+          "imageIndex": 5
+        },
+        {
+          "imageOffset": 4088604,
+          "sourceLine": 100,
+          "sourceFile": "CrashReportInstaller.swift",
+          "symbol": "closure #1 in variable initialization expression of handleFatalSignal",
+          "imageIndex": 1,
+          "symbolLocation": 440
+        },
+        {
+          "imageOffset": 4090280,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc closure #1 in variable initialization expression of handleFatalSignal",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 14148,
+          "symbol": "_sigtramp",
+          "symbolLocation": 56,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 26840,
+          "symbol": "pthread_kill",
+          "symbolLocation": 296,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 266260,
+          "symbol": "raise",
+          "symbolLocation": 32,
+          "imageIndex": 5
+        },
+        {
+          "imageOffset": 4088604,
+          "sourceLine": 100,
+          "sourceFile": "CrashReportInstaller.swift",
+          "symbol": "closure #1 in variable initialization expression of handleFatalSignal",
+          "imageIndex": 1,
+          "symbolLocation": 440
+        },
+        {
+          "imageOffset": 4090280,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc closure #1 in variable initialization expression of handleFatalSignal",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 14148,
+          "symbol": "_sigtramp",
+          "symbolLocation": 56,
+          "imageIndex": 6
+        },
+        {
+          "imageOffset": 79220,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 516312,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 9
+        },
+        {
+          "imageOffset": 510404,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 9
+        },
+        {
+          "imageOffset": 1372612,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 9
+        },
+        {
+          "imageOffset": 775520,
+          "symbol": "RunCurrentEventLoopInMode",
+          "symbolLocation": 320,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 788668,
+          "symbol": "ReceiveNextEventCommon",
+          "symbolLocation": 488,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 2400588,
+          "symbol": "_BlockUntilNextEventMatchingListInMode",
+          "symbolLocation": 48,
+          "imageIndex": 10
+        },
+        {
+          "imageOffset": 7230300,
+          "symbol": "_DPSBlockUntilNextEventMatchingListInMode",
+          "symbolLocation": 228,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 233604,
+          "symbol": "_DPSNextEvent",
+          "symbolLocation": 576,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 12380336,
+          "symbol": "-[NSApplication(NSEventRouting) _nextEventMatchingEventMask:untilDate:inMode:dequeue:]",
+          "symbolLocation": 688,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 12379580,
+          "symbol": "-[NSApplication(NSEventRouting) nextEventMatchingMask:untilDate:inMode:dequeue:]",
+          "symbolLocation": 72,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 180540,
+          "symbol": "-[NSApplication run]",
+          "symbolLocation": 368,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 18352,
+          "symbol": "NSApplicationMain",
+          "symbolLocation": 880,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 1094780,
+          "symbol": "specialized runApp(_:)",
+          "symbolLocation": 140,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 4986020,
+          "symbol": "runApp<A>(_:)",
+          "symbolLocation": 104,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 7918404,
+          "symbol": "static App.main()",
+          "symbolLocation": 224,
+          "imageIndex": 12
+        },
+        {
+          "imageOffset": 241816,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "static BrewApp.$main()",
+          "symbolLocation": 40,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 243324,
+          "sourceFile": "BrewApp.swift",
+          "symbol": "__debug_main_executable_dylib_entry_point",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 130560,
+          "symbol": "start",
+          "symbolLocation": 6992,
+          "imageIndex": 4
+        }
+      ],
+      "id": 16699188,
+      "recursionInfoArray": [
+        {
+          "hottestElided": 17,
+          "coldestElided": 28066,
+          "depth": 5616,
+          "keyFrame": {
+            "imageOffset": 14148,
+            "symbol": "_sigtramp",
+            "symbolLocation": 56,
+            "imageIndex": 6
+          }
+        }
+      ],
+      "originalLength": 28104,
+      "triggered": true,
+      "threadState": {
+        "x": [
+          {
+            "value": 8457655264,
+            "symbolLocation": 4768,
+            "symbol": "lsl::sPoolBytes"
+          },
+          {
+            "sourceLine": 125,
+            "value": 4318488928,
+            "sourceFile": "CrashReportInstaller.swift",
+            "symbol": "writeBacktrace(to:)",
+            "symbolLocation": 148
+          },
+          {
+            "value": 6162530640
+          },
+          {
+            "value": 6162530655
+          },
+          {
+            "value": 6162530624
+          },
+          {
+            "value": 6162530616
+          },
+          {
+            "value": 6162530608
+          },
+          {
+            "value": 6162530607
+          },
+          {
+            "value": 6162530632
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 6645975673
+          },
+          {
+            "value": 16384
+          },
+          {
+            "value": 6162530944
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 16
+          },
+          {
+            "value": 4086152
+          },
+          {
+            "value": 4449837915302715008
+          },
+          {
+            "value": 11075547720
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6162530832
+          },
+          {
+            "sourceLine": 125,
+            "value": 4318488928,
+            "sourceFile": "CrashReportInstaller.swift",
+            "symbol": "writeBacktrace(to:)",
+            "symbolLocation": 148
+          },
+          {
+            "value": 6162530607
+          },
+          {
+            "value": 8457655264,
+            "symbolLocation": 4768,
+            "symbol": "lsl::sPoolBytes"
+          },
+          {
+            "sourceLine": 125,
+            "value": 4318488928,
+            "sourceFile": "CrashReportInstaller.swift",
+            "symbol": "writeBacktrace(to:)",
+            "symbolLocation": 148
+          },
+          {
+            "value": 6162530624
+          },
+          {
+            "value": 6162530655
+          },
+          {
+            "value": 6162530640
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 6162530616
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6642968992
+        },
+        "cpsr": {
+          "value": 2147483648
+        },
+        "fp": {
+          "value": 6162530464
+        },
+        "sp": {
+          "value": 6162529968
+        },
+        "esr": {
+          "value": 2449473607,
+          "description": "(Data Abort) byte write Translation fault"
+        },
+        "pc": {
+          "value": 6642966512,
+          "matchesCrashFrame": 1
+        },
+        "far": {
+          "value": 6162529984
+        }
+      },
+      "queue": "com.apple.main-thread"
+    },
+    {
+      "id": 16700051,
+      "name": "com.apple.NSEventThread",
+      "threadState": {
+        "x": [
+          {
+            "value": 268451845
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 8589934592
+          },
+          {
+            "value": 100068443029504
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 100068443029504
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 17179869184
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 23299
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 18446744073709551569
+          },
+          {
+            "value": 8483813136
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 100068443029504
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 100068443029504
+          },
+          {
+            "value": 21592279046
+          },
+          {
+            "value": 6173171848
+          },
+          {
+            "value": 8589934592
+          },
+          {
+            "value": 18446744073709550527
+          },
+          {
+            "value": 4412409862
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6646777204
+        },
+        "cpsr": {
+          "value": 0
+        },
+        "fp": {
+          "value": 6173171696
+        },
+        "sp": {
+          "value": 6173171616
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6646701108
+        },
+        "far": {
+          "value": 0
+        }
+      },
+      "frames": [
+        {
+          "imageOffset": 3124,
+          "symbol": "mach_msg2_trap",
+          "symbolLocation": 8,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 79220,
+          "symbol": "mach_msg2_internal",
+          "symbolLocation": 76,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 39360,
+          "symbol": "mach_msg_overwrite",
+          "symbolLocation": 480,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 4032,
+          "symbol": "mach_msg",
+          "symbolLocation": 24,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 516312,
+          "symbol": "__CFRunLoopServiceMachPort",
+          "symbolLocation": 160,
+          "imageIndex": 9
+        },
+        {
+          "imageOffset": 510404,
+          "symbol": "__CFRunLoopRun",
+          "symbolLocation": 1188,
+          "imageIndex": 9
+        },
+        {
+          "imageOffset": 1372612,
+          "symbol": "_CFRunLoopRunSpecificWithOptions",
+          "symbolLocation": 532,
+          "imageIndex": 9
+        },
+        {
+          "imageOffset": 1420412,
+          "symbol": "_NSEventThread",
+          "symbolLocation": 184,
+          "imageIndex": 11
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 7
+        }
+      ]
+    },
+    {
+      "id": 16701255,
+      "frames": [
+        {
+          "imageOffset": 28612,
+          "symbol": "kevent",
+          "symbolLocation": 8,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 1339128,
+          "sourceLine": 246,
+          "sourceFile": "Subprocess+BSD.swift",
+          "symbol": "monitorThreadFunc(context:)",
+          "imageIndex": 1,
+          "symbolLocation": 1204
+        },
+        {
+          "imageOffset": 1346116,
+          "sourceLine": 375,
+          "sourceFile": "Subprocess+BSD.swift",
+          "symbol": "closure #1 in closure #1 in closure #1 in variable initialization expression of setup",
+          "imageIndex": 1,
+          "symbolLocation": 68
+        },
+        {
+          "imageOffset": 1595396,
+          "sourceLine": 335,
+          "sourceFile": "Thread.swift",
+          "symbol": "proc #1 (_:) in pthread_create(_:)",
+          "imageIndex": 1,
+          "symbolLocation": 304
+        },
+        {
+          "imageOffset": 1595436,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc proc #1 (_:) in pthread_create(_:)",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 7
+        }
+      ],
+      "threadState": {
+        "x": [
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 53743900704
+          },
+          {
+            "value": 256
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 53743900672
+          },
+          {
+            "value": 32
+          },
+          {
+            "value": 35
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 8508734496,
+            "symbolLocation": 32,
+            "symbol": "value witness table for ()"
+          },
+          {
+            "value": 431685767065505996
+          },
+          {
+            "value": 530432
+          },
+          {
+            "value": 17
+          },
+          {
+            "value": 363
+          },
+          {
+            "value": 8589934592
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6173748000
+          },
+          {
+            "value": 6173748912
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 4315737848
+        },
+        "cpsr": {
+          "value": 1610612736
+        },
+        "fp": {
+          "value": 6173748976
+        },
+        "sp": {
+          "value": 6173747968
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6646726596
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 16701257,
+      "frames": [
+        {
+          "imageOffset": 17676,
+          "symbol": "__psynch_cvwait",
+          "symbolLocation": 8,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 28968,
+          "symbol": "_pthread_cond_wait",
+          "symbolLocation": 980,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 1590188,
+          "sourceLine": 141,
+          "sourceFile": "Thread.swift",
+          "symbol": "WorkQueue.withUnsafeUnderlyingLock<A>(condition:body:)",
+          "imageIndex": 1,
+          "symbolLocation": 232
+        },
+        {
+          "imageOffset": 1590488,
+          "sourceLine": 149,
+          "sourceFile": "Thread.swift",
+          "symbol": "WorkQueue.dequeue()",
+          "imageIndex": 1,
+          "symbolLocation": 108
+        },
+        {
+          "imageOffset": 1593420,
+          "sourceLine": 209,
+          "sourceFile": "Thread.swift",
+          "symbol": "closure #1 in closure #1 in variable initialization expression of _setupWorkerThread",
+          "imageIndex": 1,
+          "symbolLocation": 88
+        },
+        {
+          "imageOffset": 1595396,
+          "sourceLine": 335,
+          "sourceFile": "Thread.swift",
+          "symbol": "proc #1 (_:) in pthread_create(_:)",
+          "imageIndex": 1,
+          "symbolLocation": 304
+        },
+        {
+          "imageOffset": 1595436,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc proc #1 (_:) in pthread_create(_:)",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 7
+        }
+      ],
+      "threadState": {
+        "x": [
+          {
+            "value": 260
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 512
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 160
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6176042296
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 305
+          },
+          {
+            "value": 8483811256
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 53704659776
+          },
+          {
+            "value": 53704660288
+          },
+          {
+            "value": 6176043232
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 512
+          },
+          {
+            "value": 513
+          },
+          {
+            "value": 768
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 6646980904
+        },
+        "cpsr": {
+          "value": 1610612736
+        },
+        "fp": {
+          "value": 6176042416
+        },
+        "sp": {
+          "value": 6176042272
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6646715660
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 16701281,
+      "frames": [
+        {
+          "imageOffset": 28612,
+          "symbol": "kevent",
+          "symbolLocation": 8,
+          "imageIndex": 8
+        },
+        {
+          "imageOffset": 1229464,
+          "sourceLine": 140,
+          "sourceFile": "AsyncIO+KQueue.swift",
+          "symbol": "closure #1 in AsyncIO.init()",
+          "imageIndex": 1,
+          "symbolLocation": 1244
+        },
+        {
+          "imageOffset": 1595396,
+          "sourceLine": 335,
+          "sourceFile": "Thread.swift",
+          "symbol": "proc #1 (_:) in pthread_create(_:)",
+          "imageIndex": 1,
+          "symbolLocation": 304
+        },
+        {
+          "imageOffset": 1595436,
+          "sourceFile": "/<compiler-generated>",
+          "symbol": "@objc proc #1 (_:) in pthread_create(_:)",
+          "symbolLocation": 12,
+          "imageIndex": 1
+        },
+        {
+          "imageOffset": 27736,
+          "symbol": "_pthread_start",
+          "symbolLocation": 136,
+          "imageIndex": 7
+        },
+        {
+          "imageOffset": 7196,
+          "symbol": "thread_start",
+          "symbolLocation": 8,
+          "imageIndex": 7
+        }
+      ],
+      "threadState": {
+        "x": [
+          {
+            "value": 4
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 53743869984
+          },
+          {
+            "value": 256
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6972942480,
+            "symbolLocation": 0,
+            "symbol": "storeMultiPayloadExtraInhabitantTag(swift::OpaqueValue*, unsigned int, unsigned int, swift::TargetMetadata<swift::InProcess> const*)"
+          },
+          {
+            "value": 3344
+          },
+          {
+            "value": 6646726588,
+            "symbolLocation": 0,
+            "symbol": "kevent"
+          },
+          {
+            "value": 53743869952
+          },
+          {
+            "value": 35
+          },
+          {
+            "value": 4294967040
+          },
+          {
+            "value": 4294967295
+          },
+          {
+            "value": 65535
+          },
+          {
+            "value": 8508786104,
+            "symbolLocation": 0,
+            "symbol": "type metadata for Int"
+          },
+          {
+            "value": 15
+          },
+          {
+            "value": 363
+          },
+          {
+            "value": 8589934592
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6176615264
+          },
+          {
+            "value": 6176616160
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 4315628184
+        },
+        "cpsr": {
+          "value": 1610612736
+        },
+        "fp": {
+          "value": 6176616224
+        },
+        "sp": {
+          "value": 6176615216
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6646726596
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 16701285,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6178336768
+          },
+          {
+            "value": 56355
+          },
+          {
+            "value": 6177800192
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 409604
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 0
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6178336768
+        },
+        "esr": {
+          "value": 1442840704,
+          "description": "(Syscall)"
+        },
+        "pc": {
+          "value": 6646959112
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": 16705889,
+      "frames": [],
+      "threadState": {
+        "x": [
+          {
+            "value": 6171455488
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 6170918912
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 278532
+          },
+          {
+            "value": 18446744073709551615
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          },
+          {
+            "value": 0
+          }
+        ],
+        "flavor": "ARM_THREAD_STATE64",
+        "lr": {
+          "value": 0
+        },
+        "cpsr": {
+          "value": 0
+        },
+        "fp": {
+          "value": 0
+        },
+        "sp": {
+          "value": 6171455488
+        },
+        "esr": {
+          "value": 0
+        },
+        "pc": {
+          "value": 6646959112
+        },
+        "far": {
+          "value": 0
+        }
+      }
+    }
+  ],
+  "usedImages": [
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4295983104,
+      "CFBundleShortVersionString": "0.0.0",
+      "CFBundleIdentifier": "sh.brew.app",
+      "size": 16384,
+      "uuid": "6e8518fd-f485-37cc-a5a5-01d9c0b2e6d2",
+      "path": "/Users/USER/Library/Developer/Xcode/DerivedData/Homebrew-aauuaobijzabjvhcywonlfanadzx/Build/Products/Debug/Homebrew.app/Contents/MacOS/Homebrew",
+      "name": "Homebrew",
+      "CFBundleVersion": "0"
+    },
+    {
+      "source": "P",
+      "arch": "arm64",
+      "base": 4314398720,
+      "size": 4833280,
+      "uuid": "a6252283-c8fd-31dc-abc5-de20bdeb466c",
+      "path": "/Users/USER/Library/Developer/Xcode/DerivedData/Homebrew-aauuaobijzabjvhcywonlfanadzx/Build/Products/Debug/Homebrew.app/Contents/MacOS/Homebrew.debug.dylib",
+      "name": "Homebrew.debug.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 4298080256,
+      "size": 49152,
+      "uuid": "ca58aa96-b997-3a6d-9132-19d49be4b3e9",
+      "path": "/usr/lib/libobjc-trampolines.dylib",
+      "name": "libobjc-trampolines.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 4658135040,
+      "CFBundleShortVersionString": "351.2",
+      "CFBundleIdentifier": "com.apple.AGXMetalG16X",
+      "size": 8880128,
+      "uuid": "7499d423-c36d-31c5-9c15-3f5b0ad94779",
+      "path": "/System/Library/Extensions/AGXMetalG16X.bundle/Contents/MacOS/AGXMetalG16X",
+      "name": "AGXMetalG16X",
+      "CFBundleVersion": "351.2"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6642925568,
+      "size": 680472,
+      "uuid": "a237ef81-b68b-37ba-a165-92c965529534",
+      "path": "/usr/lib/dyld",
+      "name": "dyld"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6645465088,
+      "size": 527776,
+      "uuid": "694b7881-1bf3-3d0f-8f19-b50ae4e8ef8a",
+      "path": "/usr/lib/system/libsystem_c.dylib",
+      "name": "libsystem_c.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6647005184,
+      "size": 35172,
+      "uuid": "160fd864-8d15-36fc-9e97-9725388cfafe",
+      "path": "/usr/lib/system/libsystem_platform.dylib",
+      "name": "libsystem_platform.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6646951936,
+      "size": 52028,
+      "uuid": "4f33683c-18c8-39a1-800b-2e3bd43bcc13",
+      "path": "/usr/lib/system/libsystem_pthread.dylib",
+      "name": "libsystem_pthread.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6646697984,
+      "size": 250544,
+      "uuid": "cc1cf985-bc65-3725-809f-4c1e36b8f4ba",
+      "path": "/usr/lib/system/libsystem_kernel.dylib",
+      "name": "libsystem_kernel.dylib"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6647238656,
+      "CFBundleShortVersionString": "6.9",
+      "CFBundleIdentifier": "com.apple.CoreFoundation",
+      "size": 5628704,
+      "uuid": "04e3598b-f226-3250-b3b2-ce938dd4db7e",
+      "path": "/System/Library/Frameworks/CoreFoundation.framework/Versions/A/CoreFoundation",
+      "name": "CoreFoundation",
+      "CFBundleVersion": "5026.5.4"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6862872576,
+      "CFBundleShortVersionString": "2.1.1",
+      "CFBundleIdentifier": "com.apple.HIToolbox",
+      "size": 3125536,
+      "uuid": "8716490e-acc2-3688-8c2f-5ca42b4c9da9",
+      "path": "/System/Library/Frameworks/Carbon.framework/Versions/A/Frameworks/HIToolbox.framework/Versions/A/HIToolbox",
+      "name": "HIToolbox"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6719008768,
+      "CFBundleShortVersionString": "6.9",
+      "CFBundleIdentifier": "com.apple.AppKit",
+      "size": 24260512,
+      "uuid": "cf57a4fc-4be3-3d95-b543-d744e8718b26",
+      "path": "/System/Library/Frameworks/AppKit.framework/Versions/C/AppKit",
+      "name": "AppKit",
+      "CFBundleVersion": "2685.60.104"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 7533146112,
+      "CFBundleShortVersionString": "7.5.3",
+      "CFBundleIdentifier": "com.apple.SwiftUI",
+      "size": 24418176,
+      "uuid": "90f7fa24-a280-3e8a-a62d-148b11bfc28d",
+      "path": "/System/Library/Frameworks/SwiftUI.framework/Versions/A/SwiftUI",
+      "name": "SwiftUI",
+      "CFBundleVersion": "7.5.3"
+    },
+    {
+      "size": 0,
+      "source": "A",
+      "base": 0,
+      "uuid": "00000000-0000-0000-0000-000000000000"
+    },
+    {
+      "source": "P",
+      "arch": "arm64e",
+      "base": 6972817408,
+      "size": 5904320,
+      "uuid": "7669d858-d332-36c7-9c6c-4564ffbea8d2",
+      "path": "/usr/lib/swift/libswiftCore.dylib",
+      "name": "libswiftCore.dylib"
+    }
+  ],
+  "sharedCache": {
+    "base": 6641795072,
+    "size": 5990596608,
+    "uuid": "46e0097f-f385-36c8-84a9-a40d315a32d1"
+  },
+  "vmSummary": "ReadOnly portion of Libraries: Total=1.8G resident=0K(0%) swapped_out_or_unallocated=1.8G(100%)\nWritable regions: Total=241.8M written=673K(0%) resident=673K(0%) swapped_out=0K(0%) unallocated=241.2M(100%)\n\n                                VIRTUAL   REGION \nREGION TYPE                        SIZE    COUNT (non-coalesced) \n===========                     =======  ======= \nAccelerate framework               128K        1 \nActivity Tracing                   256K        1 \nAttributeGraph Data               1024K        1 \nCG image                            64K        3 \nColorSync                           16K        1 \nCoreAnimation                     2704K      152 \nCoreGraphics                        32K        2 \nCoreUI image data                  272K        2 \nFoundation                          16K        1 \nKernel Alloc Once                   32K        1 \nMALLOC                           158.2M       49 \nMALLOC guard page                 3776K        4 \nMemory Tag 22                     64.0M        1 \nSQLite page cache                  256K        2 \nSTACK GUARD                         96K        6 \nStack                             11.2M        7 \nStack Guard                       56.0M        1 \nVM_ALLOCATE                       3136K        5 \n__AUTH                            5978K      628 \n__AUTH_CONST                      88.8M     1013 \n__CTF                               824        1 \n__DATA                            34.8M      964 \n__DATA_CONST                      34.5M     1021 \n__DATA_DIRTY                      8356K      870 \n__FONT_DATA                        2352        1 \n__LINKEDIT                       585.1M        5 \n__LLVM_COV                         224K        1 \n__OBJC_RO                         79.1M        1 \n__OBJC_RW                         2599K        1 \n__TEXT                             1.2G     1044 \n__TPRO_CONST                       128K        2 \nmapped file                      300.3M       45 \npage table in kernel               673K        1 \nshared memory                     1904K       14 \n===========                     =======  ======= \nTOTAL                              2.6G     5852 \n",
+  "legacyInfo": {
+    "threadTriggered": {
+      "queue": "com.apple.main-thread"
+    }
+  },
+  "logWritingSignature": "scrubbed",
+  "bug_type": "309",
+  "roots_installed": 0,
+  "trmStatus": 1,
+  "trialInfo": {
+    "rollouts": [
+      {
+        "rolloutId": "5ffde50ce2aacd000d47a95f",
+        "factorPackIds": [],
+        "deploymentId": 240000557
+      },
+      {
+        "rolloutId": "61675b89201f677a9a4cbd65",
+        "factorPackIds": [
+          "65a855f5f087695cfac03d1f"
+        ],
+        "deploymentId": 240000281
+      }
+    ],
+    "experiments": []
+  }
+}
