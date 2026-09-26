@@ -17,6 +17,7 @@ public protocol InstalledInventoryObserving: Observable, Sendable {
     /// revalidation, so without this a surface cannot tell "nothing outdated" from "never found out".
     var refreshFailure: (any Error)? { get }
 
+    /// `forceRefresh` is the user's explicit refresh, so it also runs a full `brew update`.
     func load(forceRefresh: Bool) async
 }
 

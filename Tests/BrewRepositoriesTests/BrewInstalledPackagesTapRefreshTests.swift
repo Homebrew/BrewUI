@@ -11,26 +11,15 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-/// `brew info` never auto-updates, so `brew outdated` runs first to let brew refresh its data.
+/// `brew info` never auto-updates, so brew is updated first: fully when the user asks, otherwise
+/// through `brew outdated` so brew's own auto-update settings apply.
 struct BrewInstalledPackagesTapRefreshTests {
     private static let emptyInfoJSON = #"{ "formulae": [], "casks": [] }"#
+    private static let update = ["update", "--quiet"]
+    private static let outdated = ["outdated", "--quiet"]
+    private static let info = ["info", "--installed", "--json=v2"]
 
-    @Test @MainActor func `brew auto-updates before the outdated check`() async {
-        let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
-        let repo = InstalledPackagesTestSupport.repository(
-            commandRunner: runner,
-        )
-
-        await repo.load(forceRefresh: true)
-
-        #expect(await runner.invocations == [
-            ["outdated", "--quiet"],
-            ["info", "--installed", "--json=v2"],
-        ])
-        #expect(repo.state.isLoaded)
-    }
-
-    @Test @MainActor func `the tap update runs on an interval rather than before every fetch`() async {
+    @Test @MainActor func `a user refresh runs a full brew update every time`() async {
         let clock = MutableClock(now: Date(timeIntervalSince1970: 0))
         let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
         let repo = InstalledPackagesTestSupport.repository(
@@ -39,16 +28,80 @@ struct BrewInstalledPackagesTapRefreshTests {
         )
 
         await repo.load(forceRefresh: true)
-        clock.now = Date(timeIntervalSince1970: 120)
+        clock.now = Date(timeIntervalSince1970: 60)
         await repo.load(forceRefresh: true)
 
-        #expect(await runner.count(of: ["outdated", "--quiet"]) == 1)
+        #expect(await runner.invocations == [Self.update, Self.info, Self.update, Self.info])
+        #expect(repo.state.isLoaded)
+    }
+
+    @Test @MainActor func `a first load lets brew decide whether to update`() async {
+        let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
+        let repo = InstalledPackagesTestSupport.repository(
+            commandRunner: runner,
+        )
+
+        await repo.load()
+
+        #expect(await runner.invocations == [Self.outdated, Self.info])
+    }
+
+    @Test @MainActor func `the reconcile after an operation lets brew decide whether to update`() async {
+        let commandCenter = ControllableJobsCommandCenter()
+        let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
+        let repo = InstalledPackagesTestSupport.repository(
+            commandRunner: runner,
+            commandCenter: commandCenter,
+        )
+        await waitUntil { await commandCenter.hasPhaseSubscriber() }
+
+        let opID = BrewOperationID(kind: .formula, name: "git")
+        await commandCenter.emitPhase(id: opID, phase: .running(.upgradeFormula))
+        await commandCenter.emitPhase(id: opID, phase: .idle)
+        await waitUntil { await runner.invocations.contains(Self.info) }
+
+        #expect(await runner.invocations == [Self.outdated, Self.info])
+        #expect(repo.state.isLoaded)
+    }
+
+    @Test @MainActor func `automatic update checks run on an interval rather than before every fetch`() async {
+        let clock = MutableClock(now: Date(timeIntervalSince1970: 0))
+        let cache = InstalledInventoryCache()
+        let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
+        let repo = InstalledPackagesTestSupport.repository(
+            commandRunner: runner,
+            cache: cache,
+            now: clock.dateProvider,
+        )
+
+        await Self.automaticFetch(repo, cache: cache)
+        clock.now = Date(timeIntervalSince1970: 120)
+        await Self.automaticFetch(repo, cache: cache)
+
+        #expect(await runner.count(of: Self.outdated) == 1)
 
         // Past Homebrew's 5-minute interval for this mode.
         clock.now = Date(timeIntervalSince1970: 400)
-        await repo.load(forceRefresh: true)
+        await Self.automaticFetch(repo, cache: cache)
 
-        #expect(await runner.count(of: ["outdated", "--quiet"]) == 2)
+        #expect(await runner.count(of: Self.outdated) == 2)
+    }
+
+    @Test @MainActor func `a user refresh restarts the automatic interval`() async {
+        let clock = MutableClock(now: Date(timeIntervalSince1970: 0))
+        let cache = InstalledInventoryCache()
+        let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
+        let repo = InstalledPackagesTestSupport.repository(
+            commandRunner: runner,
+            cache: cache,
+            now: clock.dateProvider,
+        )
+
+        await repo.load(forceRefresh: true)
+        clock.now = Date(timeIntervalSince1970: 60)
+        await Self.automaticFetch(repo, cache: cache)
+
+        #expect(await runner.count(of: Self.outdated) == 0)
     }
 
     @Test @MainActor func `a failed tap update still lets the outdated check answer`() async {
@@ -68,23 +121,25 @@ struct BrewInstalledPackagesTapRefreshTests {
         #expect(await runner.invocations.contains(["info", "--installed", "--json=v2"]))
     }
 
-    @Test @MainActor func `a persistently failing tap update does not stall every fetch`() async {
+    @Test @MainActor func `a persistently failing tap update does not stall every automatic fetch`() async {
         let clock = MutableClock(now: Date(timeIntervalSince1970: 0))
+        let cache = InstalledInventoryCache()
         let runner = RecordingCommandRunner(
             infoJSON: Self.emptyInfoJSON,
             updateBehavior: .throwing,
         )
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
+            cache: cache,
             now: clock.dateProvider,
         )
 
-        await repo.load(forceRefresh: true)
+        await Self.automaticFetch(repo, cache: cache)
         clock.now = Date(timeIntervalSince1970: 60)
-        await repo.load(forceRefresh: true)
+        await Self.automaticFetch(repo, cache: cache)
 
         // The attempt is timestamped even when it fails, so the interval still applies.
-        #expect(await runner.count(of: ["outdated", "--quiet"]) == 1)
+        #expect(await runner.count(of: Self.outdated) == 1)
     }
 
     @Test @MainActor func `a cache-first load that skips the fetch also skips the tap update`() async {
@@ -102,9 +157,27 @@ struct BrewInstalledPackagesTapRefreshTests {
 
         #expect(await runner.invocations.isEmpty)
     }
+
+    /// A stale cache is what launch and tab loads find, so `load()` refetches without the user asking.
+    @MainActor
+    private static func automaticFetch(_ repo: BrewInstalledPackagesRepository, cache: InstalledInventoryCache) async {
+        await cache.replace(InstalledInventorySnapshot(fetchedAt: .distantPast, packages: []))
+        await repo.load()
+    }
 }
 
 // MARK: - Doubles
+
+/// Yields until `condition` holds, bounded so a regression fails an expectation instead of hanging.
+@MainActor
+private func waitUntil(_ condition: () async -> Bool) async {
+    for _ in 0 ..< 500 {
+        if await condition() {
+            return
+        }
+        await Task.yield()
+    }
+}
 
 /// Mutable time source, so interval behaviour is asserted without waiting.
 @MainActor
@@ -145,7 +218,7 @@ private actor RecordingCommandRunner: BrewCommandRunning {
 
     func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         invocations.append(arguments)
-        guard arguments.first == "outdated" else {
+        guard arguments.first == "outdated" || arguments.first == "update" else {
             return CommandOutput(standardOutput: infoJSON, standardError: "", terminationStatus: 0)
         }
         switch updateBehavior {
