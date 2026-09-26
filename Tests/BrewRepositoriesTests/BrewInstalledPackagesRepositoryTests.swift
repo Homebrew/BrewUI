@@ -510,7 +510,10 @@ private actor FlakyInfoRunner: BrewCommandRunning {
         self.firstError = firstError
     }
 
-    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        guard arguments.first == "info" else {
+            return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+        }
         guard didThrow else {
             didThrow = true
             throw firstError
@@ -527,7 +530,10 @@ private actor FlakyInfoRunner: BrewCommandRunning {
 private actor CountingInfoRunner: BrewCommandRunning {
     private(set) var callCount = 0
 
-    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        guard arguments.first == "info" else {
+            return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+        }
         callCount += 1
         return CommandOutput(
             standardOutput: #"{ "formulae": [], "casks": [] }"#,

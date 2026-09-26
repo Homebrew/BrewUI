@@ -37,7 +37,6 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     @ObservationIgnored private let locator: any BrewExecutableLocating
     @ObservationIgnored private let cache: InstalledInventoryCache
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
-    @ObservationIgnored private let environment: any HomebrewEnvironmentReading
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
 
@@ -52,14 +51,12 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         locator: any BrewExecutableLocating,
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
-        environment: any HomebrewEnvironmentReading,
         now: @escaping @Sendable () -> Date = Date.init,
     ) {
         self.commandRunner = commandRunner
         self.locator = locator
         self.cache = cache
         self.commandCenter = commandCenter
-        self.environment = environment
         self.now = now
         completionObserverTask = Task { @MainActor [weak self] in
             await self?.observeOperationCompletions()
@@ -78,7 +75,6 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             locator: executionContext.locator,
             cache: cache,
             commandCenter: commandCenter,
-            environment: BrewConfigEnvironmentReader(executionContext: executionContext),
         )
     }
 
@@ -115,7 +111,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     /// (Call `load()` — the no-arg convenience — via ``InstalledInventoryObserving``.)
     public func load(forceRefresh: Bool) async {
         guard !forceRefresh else {
-            await fetchAndStore()
+            await fetchAndStore(userRequested: true)
             return
         }
 
@@ -124,9 +120,9 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             apply(packages)
         case let .stale(packages):
             apply(packages)
-            await fetchAndStore()
+            await fetchAndStore(userRequested: false)
         case .empty:
-            await fetchAndStore()
+            await fetchAndStore(userRequested: false)
         }
     }
 
@@ -141,16 +137,16 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             let previous = lastPhase[id] ?? .idle
             lastPhase[id] = phase
             if case .running = previous, case .idle = phase {
-                await load(forceRefresh: true)
+                await fetchAndStore(userRequested: false)
             }
         }
     }
 
     // MARK: - Fetch / state plumbing
 
-    private func fetchAndStore() async {
+    private func fetchAndStore(userRequested: Bool) async {
         do {
-            let packages = try await fetchInstalledPackages()
+            let packages = try await fetchInstalledPackages(userRequested: userRequested)
             // Only a completed fetch clears this; repainting a cached snapshot answers nothing.
             refreshFailure = nil
             apply(packages)
@@ -175,9 +171,9 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         lookup = Dictionary(packages.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
-    private func fetchInstalledPackages() async throws -> [InstalledBrewPackage] {
+    private func fetchInstalledPackages(userRequested: Bool) async throws -> [InstalledBrewPackage] {
         let brew = try locator.findBrewExecutable()
-        await updateTapsIfNeeded(executable: brew)
+        await updateBrew(executable: brew, userRequested: userRequested)
         let output = try await runInstalledInfoJSON(executable: brew)
         let payload = try decodeInfoJSON(from: output)
         let packages = payload.installedPackages()
@@ -186,20 +182,20 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         return packages
     }
 
-    /// `brew info` is not auto-updated by brew, and with the API off its data comes from tap clones —
-    /// so without this the outdated check answers from the user's last manual `brew update`, forever.
-    private func updateTapsIfNeeded(executable: URL) async {
-        guard await environment.isInstallFromAPIDisabled() else {
-            return
-        }
-        if let lastTapUpdateAttempt, now().timeIntervalSince(lastTapUpdateAttempt) < Self.tapRefreshInterval {
+    /// `brew info` never triggers brew's auto-update, so its API data can be 7 days old and tap clones
+    /// never refresh. A user's refresh runs `brew update`; automatic fetches run `brew outdated`, which
+    /// updates only under the user's own auto-update settings.
+    private func updateBrew(executable: URL, userRequested: Bool) async {
+        if !userRequested, let lastTapUpdateAttempt,
+           now().timeIntervalSince(lastTapUpdateAttempt) < Self.tapRefreshInterval
+        {
             return
         }
         lastTapUpdateAttempt = now()
         do {
             let output = try await commandRunner.run(
                 executableURL: executable,
-                arguments: ["update", "--auto-update", "--quiet"],
+                arguments: userRequested ? ["update", "--quiet"] : ["outdated", "--quiet"],
             )
             guard output.terminationStatus == 0 else {
                 throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
