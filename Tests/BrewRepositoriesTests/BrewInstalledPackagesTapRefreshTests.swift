@@ -11,37 +11,23 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-/// With the API off, package data comes from tap clones that only `brew update` refreshes.
+/// `brew info` never auto-updates, so `brew outdated` runs first to let brew refresh its data.
 struct BrewInstalledPackagesTapRefreshTests {
     private static let emptyInfoJSON = #"{ "formulae": [], "casks": [] }"#
 
-    @Test @MainActor func `taps are updated before the outdated check when the API is disabled`() async {
+    @Test @MainActor func `brew auto-updates before the outdated check`() async {
         let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
         )
 
         await repo.load(forceRefresh: true)
 
         #expect(await runner.invocations == [
-            ["update", "--auto-update", "--quiet"],
+            ["outdated", "--quiet"],
             ["info", "--installed", "--json=v2"],
         ])
         #expect(repo.state.isLoaded)
-    }
-
-    @Test @MainActor func `taps are left alone when brew reads from the API`() async {
-        let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
-        let repo = InstalledPackagesTestSupport.repository(
-            commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: false),
-        )
-
-        await repo.load(forceRefresh: true)
-
-        // brew refreshes the API files on its own TTL, so an update here is pure cost.
-        #expect(await runner.invocations == [["info", "--installed", "--json=v2"]])
     }
 
     @Test @MainActor func `the tap update runs on an interval rather than before every fetch`() async {
@@ -49,7 +35,6 @@ struct BrewInstalledPackagesTapRefreshTests {
         let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
             now: clock.dateProvider,
         )
 
@@ -57,13 +42,13 @@ struct BrewInstalledPackagesTapRefreshTests {
         clock.now = Date(timeIntervalSince1970: 120)
         await repo.load(forceRefresh: true)
 
-        #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 1)
+        #expect(await runner.count(of: ["outdated", "--quiet"]) == 1)
 
         // Past Homebrew's 5-minute interval for this mode.
         clock.now = Date(timeIntervalSince1970: 400)
         await repo.load(forceRefresh: true)
 
-        #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 2)
+        #expect(await runner.count(of: ["outdated", "--quiet"]) == 2)
     }
 
     @Test @MainActor func `a failed tap update still lets the outdated check answer`() async {
@@ -74,7 +59,6 @@ struct BrewInstalledPackagesTapRefreshTests {
         )
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
         )
 
         await repo.load(forceRefresh: true)
@@ -92,7 +76,6 @@ struct BrewInstalledPackagesTapRefreshTests {
         )
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
             now: clock.dateProvider,
         )
 
@@ -101,7 +84,7 @@ struct BrewInstalledPackagesTapRefreshTests {
         await repo.load(forceRefresh: true)
 
         // The attempt is timestamped even when it fails, so the interval still applies.
-        #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 1)
+        #expect(await runner.count(of: ["outdated", "--quiet"]) == 1)
     }
 
     @Test @MainActor func `a cache-first load that skips the fetch also skips the tap update`() async {
@@ -113,7 +96,6 @@ struct BrewInstalledPackagesTapRefreshTests {
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
             cache: cache,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
         )
 
         await repo.load()
@@ -163,7 +145,7 @@ private actor RecordingCommandRunner: BrewCommandRunning {
 
     func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         invocations.append(arguments)
-        guard arguments.first == "update" else {
+        guard arguments.first == "outdated" else {
             return CommandOutput(standardOutput: infoJSON, standardError: "", terminationStatus: 0)
         }
         switch updateBehavior {

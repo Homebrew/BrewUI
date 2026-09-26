@@ -37,7 +37,6 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     @ObservationIgnored private let locator: any BrewExecutableLocating
     @ObservationIgnored private let cache: InstalledInventoryCache
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
-    @ObservationIgnored private let environment: any HomebrewEnvironmentReading
     @ObservationIgnored private let now: @Sendable () -> Date
     @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
 
@@ -52,14 +51,12 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         locator: any BrewExecutableLocating,
         cache: InstalledInventoryCache,
         commandCenter: any BrewCommandCenter,
-        environment: any HomebrewEnvironmentReading,
         now: @escaping @Sendable () -> Date = Date.init,
     ) {
         self.commandRunner = commandRunner
         self.locator = locator
         self.cache = cache
         self.commandCenter = commandCenter
-        self.environment = environment
         self.now = now
         completionObserverTask = Task { @MainActor [weak self] in
             await self?.observeOperationCompletions()
@@ -78,7 +75,6 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             locator: executionContext.locator,
             cache: cache,
             commandCenter: commandCenter,
-            environment: BrewConfigEnvironmentReader(executionContext: executionContext),
         )
     }
 
@@ -186,12 +182,9 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         return packages
     }
 
-    /// `brew info` is not auto-updated by brew, and with the API off its data comes from tap clones —
-    /// so without this the outdated check answers from the user's last manual `brew update`, forever.
+    /// `brew info` never triggers brew's auto-update, so its API data can be 7 days old and tap clones
+    /// never refresh. `brew outdated` does, under the user's own auto-update settings.
     private func updateTapsIfNeeded(executable: URL) async {
-        guard await environment.isInstallFromAPIDisabled() else {
-            return
-        }
         if let lastTapUpdateAttempt, now().timeIntervalSince(lastTapUpdateAttempt) < Self.tapRefreshInterval {
             return
         }
@@ -199,7 +192,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         do {
             let output = try await commandRunner.run(
                 executableURL: executable,
-                arguments: ["update", "--auto-update", "--quiet"],
+                arguments: ["outdated", "--quiet"],
             )
             guard output.terminationStatus == 0 else {
                 throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
