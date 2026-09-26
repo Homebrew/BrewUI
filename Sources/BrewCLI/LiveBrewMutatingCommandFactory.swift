@@ -11,11 +11,11 @@ public struct LiveBrewMutatingCommandFactory: BrewMutatingCommandFactory {
     public init() {}
 
     public func installCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
-        BrewCommands.install(name, kind: kind)
+        BrewCommands.install(name, kind: kind, forceBottle: forceBottleEnabled)
     }
 
     public func upgradeCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
-        BrewCommands.upgrade(name, kind: kind)
+        BrewCommands.upgrade(name, kind: kind, forceBottle: forceBottleEnabled)
     }
 
     public func uninstallCommand(kind: HomebrewPackageKind, name: String) -> BrewCommand {
@@ -23,10 +23,14 @@ public struct LiveBrewMutatingCommandFactory: BrewMutatingCommandFactory {
     }
 
     public func bulkUpgradeCommand(selection: BrewUpgradeSelection) -> BrewCommand {
-        BrewCommands.bulkUpgrade(selection)
+        BrewCommands.bulkUpgrade(selection, forceBottle: forceBottleEnabled)
     }
 
     public func doctorFixCommand(arguments: [String]) -> BrewCommand {
         BrewCommands.doctorFix(arguments: arguments)
+    }
+
+    private var forceBottleEnabled: Bool {
+        UserDefaults.standard.bool(forKey: BrewCommands.forceBottlePreferenceKey)
     }
 }

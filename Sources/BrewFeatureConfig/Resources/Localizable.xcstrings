@@ -22,8 +22,14 @@
     "Homebrew settings are read from brew.env files. Shell profiles and exported variables are ignored. Put user settings in ~/.homebrew/brew.env, then relaunch BrewUI." : {
       "comment" : "Configuration tab: where Homebrew reads its settings from"
     },
+    "If a formula or dependency has no bottle, Homebrew stops instead of building it from source." : {
+      "comment" : "Configuration setting: explanation"
+    },
     "Refresh" : {
       "comment" : "Configuration header: re-run brew config"
+    },
+    "Require prebuilt packages for formulae" : {
+      "comment" : "Configuration setting: title"
     },
     "System" : {
       "comment" : "Configuration card title: macOS, CPU, Xcode"

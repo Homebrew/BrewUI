@@ -13,6 +13,7 @@ import SwiftUI
 /// Single scrolling pane presenting `brew config` output, with copy/refresh.
 struct ConfigView: View {
     @State private var viewModel: ConfigViewModel
+    @AppStorage(BrewCommands.forceBottlePreferenceKey) private var forceBottleForFormulae = false
 
     init(repository: any ConfigRepository) {
         _viewModel = State(initialValue: ConfigViewModel(repository: repository))
@@ -73,6 +74,7 @@ struct ConfigView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
                 NoteCallout(settingsNote, tone: .info)
+                formulaInstallSettings
                 ForEach(viewModel.sections(for: snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }
@@ -80,6 +82,25 @@ struct ConfigView: View {
             .padding(BrewSpacing.lg)
             .brewPaneContentWidth()
         }
+    }
+
+    private var formulaInstallSettings: some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            Toggle(isOn: $forceBottleForFormulae) {
+                VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                    Text("Require prebuilt packages for formulae", bundle: #bundle, comment: "Configuration setting: title")
+                        .font(.brewCallout.weight(.semibold))
+                    Text("If a formula or dependency has no bottle, Homebrew stops instead of building it from source.", bundle: #bundle, comment: "Configuration setting: explanation")
+                        .font(.brewCaption)
+                        .foregroundStyle(Color.brewTextSecondary)
+                }
+            }
+            .toggleStyle(.switch)
+            .axid(.forceBottleFormulaeSwitch)
+        }
+        .padding(BrewSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.brewSurface, in: RoundedRectangle(cornerRadius: BrewRadius.md))
     }
 
     private var brewNotFoundState: some View {

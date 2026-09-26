@@ -14,6 +14,12 @@ struct BrewCommandsTests {
         #expect(command.operationKind == .installFormula)
     }
 
+    @Test func `install requires a bottle for formulae when requested`() {
+        #expect(BrewCommands.install("git", kind: .formula, forceBottle: true).arguments == [
+            "install", "--formula", "--force-bottle", "git",
+        ])
+    }
+
     @Test func `install builds cask argv and kind`() {
         let command = BrewCommands.install("docker", kind: .cask)
         #expect(command.arguments == ["install", "--cask", "docker"])
@@ -24,6 +30,15 @@ struct BrewCommandsTests {
         #expect(BrewCommands.upgrade("git", kind: .formula).arguments == ["upgrade", "--formula", "git"])
         #expect(BrewCommands.upgrade("git", kind: .formula).operationKind == .upgradeFormula)
         #expect(BrewCommands.upgrade("docker", kind: .cask).operationKind == .upgradeCask)
+    }
+
+    @Test func `upgrade requires bottles for formulae but not casks`() {
+        #expect(BrewCommands.upgrade("git", kind: .formula, forceBottle: true).arguments == [
+            "upgrade", "--formula", "--force-bottle", "git",
+        ])
+        #expect(BrewCommands.upgrade("docker", kind: .cask, forceBottle: true).arguments == [
+            "upgrade", "--cask", "docker",
+        ])
     }
 
     @Test func `uninstall builds argv and kind per kind`() {
@@ -37,6 +52,14 @@ struct BrewCommandsTests {
         let command = BrewCommands.bulkUpgrade(selection)
         #expect(command.arguments == selection.arguments)
         #expect(command.operationKind == .upgradeAll)
+    }
+
+    @Test func `bulkUpgrade requires bottles for formulae but not casks`() {
+        #expect(BrewCommands.bulkUpgrade(.formulae, forceBottle: true).arguments == [
+            "upgrade", "--formula", "--force-bottle",
+        ])
+        #expect(BrewCommands.bulkUpgrade(.casks, forceBottle: true).arguments == ["upgrade", "--cask"])
+        #expect(BrewCommands.bulkUpgrade(.all, forceBottle: true).arguments == ["upgrade", "--force-bottle"])
     }
 
     @Test func `selfUpgrade upgrades the app's own cask under upgradeApp`() {

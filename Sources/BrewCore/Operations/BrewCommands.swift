@@ -9,17 +9,19 @@ import Foundation
 /// in per-command types) means "what runs" and "what phase/console kind it shows as" are defined together, in
 /// one place, as data.
 public enum BrewCommands {
-    public static func install(_ name: String, kind: HomebrewPackageKind) -> BrewCommand {
+    public static let forceBottlePreferenceKey = "forceBottleForFormulae"
+
+    public static func install(_ name: String, kind: HomebrewPackageKind, forceBottle: Bool = false) -> BrewCommand {
         BrewCommand(
             operationKind: kind == .formula ? .installFormula : .installCask,
-            arguments: ["install", flag(for: kind), name],
+            arguments: ["install", flag(for: kind)] + bottleArguments(kind: kind, forceBottle: forceBottle) + [name],
         )
     }
 
-    public static func upgrade(_ name: String, kind: HomebrewPackageKind) -> BrewCommand {
+    public static func upgrade(_ name: String, kind: HomebrewPackageKind, forceBottle: Bool = false) -> BrewCommand {
         BrewCommand(
             operationKind: kind == .formula ? .upgradeFormula : .upgradeCask,
-            arguments: ["upgrade", flag(for: kind), name],
+            arguments: ["upgrade", flag(for: kind)] + bottleArguments(kind: kind, forceBottle: forceBottle) + [name],
         )
     }
 
@@ -31,8 +33,11 @@ public enum BrewCommands {
     }
 
     /// Batch `brew upgrade` for the given selection — everything outdated, a single kind, or an explicit list.
-    public static func bulkUpgrade(_ selection: BrewUpgradeSelection) -> BrewCommand {
-        BrewCommand(operationKind: .upgradeAll, arguments: selection.arguments)
+    public static func bulkUpgrade(_ selection: BrewUpgradeSelection, forceBottle: Bool = false) -> BrewCommand {
+        let arguments = selection.arguments
+        let includesFormulae = selection != .casks
+        let bottleArguments = includesFormulae ? bottleArguments(kind: .formula, forceBottle: forceBottle) : []
+        return BrewCommand(operationKind: .upgradeAll, arguments: arguments + bottleArguments)
     }
 
     /// The quit → replace → relaunch handoff that makes this safe to run lives above this layer.
@@ -55,5 +60,9 @@ public enum BrewCommands {
 
     private static func flag(for kind: HomebrewPackageKind) -> String {
         kind == .formula ? "--formula" : "--cask"
+    }
+
+    private static func bottleArguments(kind: HomebrewPackageKind, forceBottle: Bool) -> [String] {
+        kind == .formula && forceBottle ? ["--force-bottle"] : []
     }
 }
