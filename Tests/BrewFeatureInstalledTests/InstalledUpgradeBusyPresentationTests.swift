@@ -9,107 +9,33 @@ import Foundation
 import Testing
 
 struct InstalledUpgradeBusyPresentationTests {
-    @Test func `running phase shows busy regardless of outdated flag`() {
-        #expect(
-            InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .idle,
-                newPhase: .running(.upgradeFormula),
-                isPackageOutdated: false,
-            ),
-        )
-        #expect(
-            InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .idle,
-                newPhase: .running(.upgradeFormula),
-                isPackageOutdated: true,
-            ),
-        )
+    @Test func `running upgrade shows busy`() {
+        #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .running(.upgradeFormula)))
+        #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .running(.upgradeCask)))
     }
 
-    @Test func `running to idle stays busy while snapshot still outdated`() {
-        #expect(
-            InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .running(.upgradeCask),
-                newPhase: .idle,
-                isPackageOutdated: true,
-            ),
-        )
+    @Test func `reconciling upgrade still shows busy`() {
+        // The row would otherwise flash back to "upgrade available" before the snapshot lands.
+        #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .reconciling(.upgradeFormula)))
     }
 
-    @Test func `running to idle clears busy once snapshot is up to date`() {
-        #expect(
-            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .running(.upgradeFormula),
-                newPhase: .idle,
-                isPackageOutdated: false,
-            ),
-        )
+    @Test func `idle clears busy`() {
+        #expect(!InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .idle))
     }
 
-    @Test func `idle transition without prior running does not imply busy`() {
-        #expect(
-            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .idle,
-                newPhase: .idle,
-                isPackageOutdated: true,
-            ),
-        )
-    }
-
-    @Test func `running to failed clears busy`() {
+    @Test func `failed clears busy`() {
         let failure = OperationFailure(description: "upgrade failed")
-        #expect(
-            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .running(.upgradeFormula),
-                newPhase: .failed(reason: failure),
-                isPackageOutdated: true,
-            ),
-        )
+        #expect(!InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .failed(reason: failure)))
     }
 
-    @Test func `running bulk upgrade shows busy like an individual upgrade`() {
-        // A package swept up in an "Upgrade All" runs under `.upgradeAll`; the tracker only feeds this
-        // method bulk phases that actually cover the package.
-        #expect(
-            InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .idle,
-                newPhase: .running(.upgradeAll),
-                isPackageOutdated: true,
-            ),
-        )
+    @Test func `bulk upgrade shows busy like an individual upgrade`() {
+        // The observer only feeds this method bulk phases that actually cover the package.
+        #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .running(.upgradeAll)))
+        #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .reconciling(.upgradeAll)))
     }
 
-    @Test func `bulk upgrade running to idle stays busy while snapshot still outdated`() {
-        #expect(
-            InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .running(.upgradeAll),
-                newPhase: .idle,
-                isPackageOutdated: true,
-            ),
-        )
-        #expect(
-            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .running(.upgradeAll),
-                newPhase: .idle,
-                isPackageOutdated: false,
-            ),
-        )
-    }
-
-    @Test func `running uninstall phase does not show upgrade busy`() {
-        #expect(
-            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .idle,
-                newPhase: .running(.uninstallFormula),
-                isPackageOutdated: true,
-            ),
-        )
-        #expect(
-            !InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: .running(.uninstallCask),
-                newPhase: .idle,
-                isPackageOutdated: true,
-            ),
-        )
+    @Test func `uninstall phases do not show upgrade busy`() {
+        #expect(!InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .running(.uninstallFormula)))
+        #expect(!InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .reconciling(.uninstallCask)))
     }
 }

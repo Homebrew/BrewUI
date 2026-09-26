@@ -5,6 +5,7 @@
 
 @testable import BrewCLI
 import BrewCore
+import BrewServicesTestSupport
 import Foundation
 import Testing
 
@@ -65,7 +66,7 @@ private func makeCenter(_ recorder: RunOptionsRecorder) -> SerialBrewCommandCent
         commandRunner: RecordingRunner(recorder: recorder),
         locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
     )
-    return SerialBrewCommandCenter(executionContext: context)
+    return SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler())
 }
 
 /// Captures the options the center hands down, without spawning anything.

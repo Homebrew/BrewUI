@@ -94,15 +94,39 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsUpgradeBusy)
     }
 
-    @Test func `observeRowUpdates ends on last phased stream emission`() async {
+    @Test func `upgrade busy is held through the reconcile`() async {
         var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         package.outdated = true
-        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .idle])
+        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .reconciling(.upgradeFormula)])
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
         await viewModel.observeRowUpdates()
         #expect(viewModel.showsUpgradeBusy)
         #expect(viewModel.showsOperationBusy)
         #expect(viewModel.rowAccessibilityLabel.contains("Upgrading"))
+    }
+
+    @Test func `upgrade busy releases once the operation settles`() async {
+        var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        package.outdated = true
+        let center = PhaseSequenceCommandCenter(
+            phases: [.running(.upgradeFormula), .reconciling(.upgradeFormula), .idle],
+        )
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(!viewModel.showsOperationBusy)
+    }
+
+    @Test func `upgrade busy releases when the reconcile itself fails`() async {
+        // The row would otherwise spin forever: nothing else tells it the world stopped moving.
+        var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        package.outdated = true
+        let failure = OperationFailure(description: "refresh failed")
+        let center = PhaseSequenceCommandCenter(
+            phases: [.running(.upgradeFormula), .reconciling(.upgradeFormula), .failed(reason: failure)],
+        )
+        let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
+        await viewModel.observeRowUpdates()
+        #expect(!viewModel.showsOperationBusy)
     }
 
     @Test func `covering bulk upgrade shows busy on the row`() async {
@@ -131,9 +155,11 @@ struct InstalledListRowViewModelTests {
         #expect(!viewModel.showsOperationBusy)
     }
 
-    @Test func `observeRowUpdates latches uninstall busy after running to idle`() async {
+    @Test func `uninstall busy is held through the reconcile`() async {
         let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
-        let center = PhaseSequenceCommandCenter(phases: [.running(.uninstallFormula), .idle])
+        let center = PhaseSequenceCommandCenter(
+            phases: [.running(.uninstallFormula), .reconciling(.uninstallFormula)],
+        )
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
         await viewModel.observeRowUpdates()
         #expect(!viewModel.showsUpgradeBusy)
@@ -142,39 +168,35 @@ struct InstalledListRowViewModelTests {
         #expect(viewModel.rowAccessibilityLabel.contains("Uninstalling"))
     }
 
-    @Test func `update package clears upgrade busy latch and operation busy`() async {
-        var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
-        package.outdated = true
-        let center = PhaseSequenceCommandCenter(phases: [.running(.upgradeFormula), .idle])
+    @Test func `uninstall busy releases when the reconcile itself fails`() async {
+        let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
+        let failure = OperationFailure(description: "refresh failed")
+        let center = PhaseSequenceCommandCenter(
+            phases: [.running(.uninstallFormula), .reconciling(.uninstallFormula), .failed(reason: failure)],
+        )
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
         await viewModel.observeRowUpdates()
-        #expect(viewModel.showsUpgradeBusy)
-        #expect(viewModel.showsOperationBusy)
-
-        let refreshedPackage = InstalledBrewPackage.fixture(name: "git", kind: .formula)
-        viewModel.update(package: refreshedPackage)
-
-        #expect(!viewModel.showsUpgradeBusy)
         #expect(!viewModel.showsUninstallBusy)
         #expect(!viewModel.showsOperationBusy)
-        #expect(!viewModel.rowAccessibilityLabel.contains("Upgrading"))
     }
 
-    @Test func `update package clears uninstall busy latch and operation busy`() async {
+    @Test func `a refreshed snapshot mid-reconcile does not drop busy`() async {
+        // Busy belongs to the phase, so a mid-reconcile snapshot cannot release it early.
         let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
-        let center = PhaseSequenceCommandCenter(phases: [.running(.uninstallFormula), .idle])
+        let center = PhaseSequenceCommandCenter(
+            phases: [.running(.uninstallFormula), .reconciling(.uninstallFormula)],
+        )
         let viewModel = InstalledListRowViewModel(package: package, brewCommandCenter: center)
         await viewModel.observeRowUpdates()
         #expect(viewModel.showsUninstallBusy)
-        #expect(viewModel.showsOperationBusy)
 
         let refreshedPackage = InstalledBrewPackage.fixture(name: "git", kind: .formula, description: "Updated")
         viewModel.update(package: refreshedPackage)
 
         #expect(!viewModel.showsUpgradeBusy)
-        #expect(!viewModel.showsUninstallBusy)
-        #expect(!viewModel.showsOperationBusy)
-        #expect(!viewModel.rowAccessibilityLabel.contains("Uninstalling"))
+        #expect(viewModel.showsUninstallBusy)
+        #expect(viewModel.showsOperationBusy)
+        #expect(viewModel.rowAccessibilityLabel.contains("Uninstalling"))
     }
 
     @Test func `update package flips row version presentation when outdated changes`() {

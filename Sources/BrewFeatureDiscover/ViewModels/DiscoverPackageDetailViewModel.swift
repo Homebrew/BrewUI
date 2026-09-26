@@ -22,19 +22,12 @@ final class DiscoverPackageDetailViewModel {
 
     /// Latest phase from the command center stream (see ``observeInstallUpdates()``); drives install chrome.
     private var operationPhase: BrewOperationPhase = .idle
-    /// Keeps the button spinner up after the install finishes until the installed badge resolves (bridges
-    /// the gap before ``installedRepository`` re-reads). See ``DiscoverInstallBusyPresentation``.
-    private var awaitingInstallResolution = false
     /// Inline message when an install fails; cleared when a new install starts.
     private(set) var installErrorMessage: String?
 
-    /// True while an install for this package is in flight (and bridging until the installed badge appears).
+    /// True while an install is in flight, including the reconcile that lands the badge.
     var isInstalling: Bool {
-        DiscoverInstallBusyPresentation.showsInstallBusy(
-            phase: operationPhase,
-            awaitingResolution: awaitingInstallResolution,
-            isInstalled: installedPackage != nil,
-        )
+        DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
     }
 
     init(
@@ -165,8 +158,6 @@ final class DiscoverPackageDetailViewModel {
 
     func update(package: DiscoveryBrewPackage) {
         discoveryPackage = package
-        operationPhase = .idle
-        awaitingInstallResolution = false
         installErrorMessage = nil
     }
 
@@ -197,15 +188,7 @@ final class DiscoverPackageDetailViewModel {
         let operationID = BrewOperationID(kind: packageKind, name: discoveryPackage.name)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
         for await phase in stream {
-            let wasRunningInstall = operationPhase.isRunningInstall
             operationPhase = phase
-            if phase.isRunningInstall {
-                awaitingInstallResolution = true
-            } else if case .idle = phase, wasRunningInstall {
-                awaitingInstallResolution = true
-            } else if case .failed = phase {
-                awaitingInstallResolution = false
-            }
         }
     }
 

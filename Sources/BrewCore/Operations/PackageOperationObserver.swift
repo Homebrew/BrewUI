@@ -38,26 +38,28 @@ public struct PackageOperationObserver: Sendable {
         self.commandCenter = commandCenter
     }
 
-    /// Phases of operations concerning `subject`. `allPhaseChanges()` has no replay, so the current running
-    /// phase (if any) is yielded first from ``BrewCommandCenter/runningPhases()`` to catch work already in
+    /// Phases of operations concerning `subject`. `allPhaseChanges()` has no replay, so the subject's
+    /// current phase is yielded first from ``BrewCommandCenter/runningPhases()`` to catch work already in
     /// flight; subscribing before that snapshot means an event landing between the two is buffered, not lost.
+    /// A subject with nothing in flight seeds `.idle`, so a consumer re-subscribing for a *different*
+    /// subject is not left showing the previous one's chrome.
     public func phases(for subject: PackageOperationSubject) -> AsyncStream<BrewOperationPhase> {
         AsyncStream { continuation in
             let task = Task {
                 let stream = await commandCenter.allPhaseChanges()
-                let running = await commandCenter.runningPhases()
-                // Prefer the package's own operation over any covering bulk upgrade when both are tracked
-                // as running: `runningPhases()` is an unordered dictionary, so seeding an arbitrary covering
+                let tracked = await commandCenter.runningPhases()
+                // Prefer the package's own operation over any covering bulk upgrade when both are in
+                // flight: `runningPhases()` is an unordered dictionary, so seeding an arbitrary covering
                 // entry could represent the wrong operation type (and miss the package op's initial `.running`,
                 // which the replay-less stream never re-delivers) until the next transition.
-                let seeded: BrewOperationPhase? = if let packagePhase = running[.package(subject.packageID)], packagePhase.isRunning {
+                let seeded: BrewOperationPhase = if let packagePhase = tracked[.package(subject.packageID)], !packagePhase.isSettled {
                     packagePhase
+                } else if let covering = tracked.first(where: { subject.includes($0.key) && !$0.value.isSettled })?.value {
+                    covering
                 } else {
-                    running.first(where: { subject.includes($0.key) && $0.value.isRunning })?.value
+                    .idle
                 }
-                if let seeded {
-                    continuation.yield(seeded)
-                }
+                continuation.yield(seeded)
                 for await (id, phase) in stream where subject.includes(id) {
                     continuation.yield(phase)
                 }

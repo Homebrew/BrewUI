@@ -282,6 +282,33 @@ struct InstalledDetailsViewModelTests {
         #expect(viewModel.dependentRelationships.isEmpty)
     }
 
+    @Test @MainActor func `uninstall chrome is held while the inventory reconciles`() async {
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ConstantPhaseCommandCenter(phase: .reconciling(.uninstallFormula)),
+        )
+
+        await viewModel.observeRowUpdates()
+
+        #expect(viewModel.isUninstalling)
+        #expect(viewModel.isMutatingPackage)
+    }
+
+    @Test @MainActor func `following the selection to another package drops the old busy chrome`() async {
+        // One view model serves the whole detail pane, across every selection.
+        let viewModel = makeInstalledDetailsViewModel(
+            package: details(name: "wget"),
+            brewCommandCenter: ConstantPhaseCommandCenter(phase: .reconciling(.uninstallFormula)),
+        )
+        await viewModel.observeRowUpdates()
+        #expect(viewModel.isUninstalling)
+
+        viewModel.update(package: details(name: "git"))
+
+        #expect(!viewModel.isUninstalling)
+        #expect(!viewModel.isMutatingPackage)
+    }
+
     @Test @MainActor func `detail row is not uninstalling before observeRowUpdates runs`() {
         let viewModel = makeInstalledDetailsViewModel(
             package: details(name: "wget"),

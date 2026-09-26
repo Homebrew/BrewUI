@@ -18,8 +18,14 @@ final class InstalledListRowViewModel {
     private(set) var package: InstalledBrewPackage
     @ObservationIgnored private let operationObserver: PackageOperationObserver
     private var operationPhase: BrewOperationPhase = .idle
-    private(set) var showsUpgradeBusy: Bool = false
-    private(set) var showsUninstallBusy: Bool = false
+
+    var showsUpgradeBusy: Bool {
+        InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: operationPhase)
+    }
+
+    var showsUninstallBusy: Bool {
+        InstalledUninstallBusyPresentation.showsUninstallBusy(phase: operationPhase)
+    }
 
     var operationSubject: PackageOperationSubject {
         PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
@@ -112,24 +118,11 @@ final class InstalledListRowViewModel {
             return
         }
         package = newPackage
-        operationPhase = .idle
-        showsUpgradeBusy = false
-        showsUninstallBusy = false
     }
 
     func observeRowUpdates() async {
         for await phase in operationObserver.phases(for: operationSubject) {
-            let oldPhase = operationPhase
             operationPhase = phase
-            showsUpgradeBusy = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: oldPhase,
-                newPhase: phase,
-                isPackageOutdated: package.outdated,
-            )
-            showsUninstallBusy = InstalledUninstallBusyPresentation.showsUninstallBusy(
-                oldPhase: oldPhase,
-                newPhase: phase,
-            )
         }
     }
 }

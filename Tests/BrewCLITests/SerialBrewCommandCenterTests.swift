@@ -35,7 +35,7 @@ private func makeCenter(runner: any BrewCommandRunning) -> SerialBrewCommandCent
         commandRunner: runner,
         locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
     )
-    return SerialBrewCommandCenter(executionContext: ctx)
+    return SerialBrewCommandCenter(executionContext: ctx, reconciler: NoopBrewOperationReconciler())
 }
 
 private func makeSucceedingCenter() -> SerialBrewCommandCenter {
@@ -165,7 +165,10 @@ struct SerialBrewCommandCenterTests {
         defer { collect.cancel() }
 
         try await center.perform(noopCommand, id: id)
-        try await waitUntil { await collector.phases.count >= 3 }
+        try await waitUntil {
+            let phases = await collector.phases
+            return phases.contains { $0.isRunning } && phases.last == .idle
+        }
         let values = await collector.phases
         #expect(values.count >= 3)
         #expect(values.first == .idle)
@@ -255,7 +258,10 @@ struct SerialBrewAllPhaseStreamTests {
 
         try await center.perform(noopCommand, id: idA)
         try await center.perform(noopCommand, id: idB)
-        try await waitUntil { await collector.events.count >= 4 }
+        try await waitUntil {
+            let events = await collector.events
+            return events.last { $0.0 == idA }?.1 == .idle && events.last { $0.0 == idB }?.1 == .idle
+        }
         let events = await collector.events
         let eventsForA = events.filter { $0.0 == idA }.map(\.1)
         let eventsForB = events.filter { $0.0 == idB }.map(\.1)
@@ -295,9 +301,9 @@ struct SerialBrewAllPhaseStreamTests {
 
         try await center.perform(noopCommand, id: id)
         try await waitUntil {
-            let countA = await collectorA.events.count
-            let countB = await collectorB.events.count
-            return countA >= 2 && countB >= 2
+            let lastA = await collectorA.events.last?.1
+            let lastB = await collectorB.events.last?.1
+            return lastA == .idle && lastB == .idle
         }
         let eventsA = await collectorA.events
         let eventsB = await collectorB.events

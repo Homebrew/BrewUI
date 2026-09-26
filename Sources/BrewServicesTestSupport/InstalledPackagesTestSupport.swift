@@ -20,7 +20,6 @@ public enum InstalledPackagesTestSupport {
         commandRunner: BrewCommandRunning,
         locator: (any BrewExecutableLocating)? = nil,
         cache: InstalledInventoryCache? = nil,
-        commandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
         environment: any HomebrewEnvironmentReading = StubHomebrewEnvironment(installFromAPIDisabled: false),
         now: @escaping @Sendable () -> Date = Date.init,
     ) -> BrewInstalledPackagesRepository {
@@ -30,7 +29,6 @@ public enum InstalledPackagesTestSupport {
             commandRunner: commandRunner,
             locator: resolvedLocator,
             cache: resolvedCache,
-            commandCenter: commandCenter,
             environment: environment,
             now: now,
         )

@@ -5,6 +5,7 @@
 
 @testable import BrewCLI
 import BrewCore
+import BrewServicesTestSupport
 import Foundation
 import Testing
 
@@ -64,6 +65,7 @@ private func makeCenter(_ runner: FixedOutputRunner) -> SerialBrewCommandCenter 
             commandRunner: runner,
             locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
         ),
+        reconciler: NoopBrewOperationReconciler(),
     )
 }
 
