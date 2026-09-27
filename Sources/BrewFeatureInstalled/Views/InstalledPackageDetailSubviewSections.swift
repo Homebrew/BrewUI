@@ -25,26 +25,17 @@ struct InstalledPackageDetailHeroSection: View {
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                HStack(spacing: BrewSpacing.sm) {
-                    Text(viewModel.packageName)
-                        .font(.brewTitle1)
-                        .foregroundStyle(Color.brewTextPrimary)
-
-                    Text(chrome.badgeLabel)
-                        .font(.brewCaption2)
-                        .foregroundStyle(accentColor(chrome.accent))
-                        .padding(.horizontal, BrewSpacing.sm)
-                        .padding(.vertical, BrewSpacing.xs)
-                        .background {
-                            Capsule()
-                                .fill(Color.brewSurfaceElevated)
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: BrewSpacing.sm) {
+                        packageName(singleLine: true)
+                        packageBadges(chrome: chrome)
+                    }
+                    VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                        packageName(singleLine: false)
+                        HStack(spacing: BrewSpacing.sm) {
+                            packageBadges(chrome: chrome)
                         }
-                        .overlay {
-                            Capsule()
-                                .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
-                        }
-
-                    statusBadge
+                    }
                 }
 
                 if let subtitle = heroSubtitle {
@@ -53,6 +44,33 @@ struct InstalledPackageDetailHeroSection: View {
                         .foregroundStyle(Color.brewTextSecondary)
                 }
             }
+        }
+    }
+
+    private func packageName(singleLine: Bool) -> some View {
+        Text(viewModel.packageName)
+            .font(.brewTitle1)
+            .foregroundStyle(Color.brewTextPrimary)
+            .lineLimit(singleLine ? 1 : nil)
+            .fixedSize(horizontal: singleLine, vertical: false)
+    }
+
+    private func packageBadges(chrome: PackageKindChrome) -> some View {
+        Group {
+            Text(chrome.badgeLabel)
+                .font(.brewCaption2)
+                .foregroundStyle(accentColor(chrome.accent))
+                .padding(.horizontal, BrewSpacing.sm)
+                .padding(.vertical, BrewSpacing.xs)
+                .background {
+                    Capsule()
+                        .fill(Color.brewSurfaceElevated)
+                }
+                .overlay {
+                    Capsule()
+                        .strokeBorder(Color.brewBorderDefault, lineWidth: 1)
+                }
+            statusBadge
         }
     }
 
