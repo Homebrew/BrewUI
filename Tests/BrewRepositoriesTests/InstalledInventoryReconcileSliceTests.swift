@@ -71,8 +71,6 @@ private func makeCenter(
 
 struct InstalledInventoryReconcileSliceTests {
     @Test @MainActor func `a batch upgrade that fails overall still clears the badge it did fix`() async {
-        // Reported bug: `brew upgrade hello world` exits non-zero having upgraded `hello`, and the
-        // inventory refreshed only on success, so `hello` stayed marked outdated until a manual refresh.
         let runner = SequencedInventoryRunner(
             mutationArgv: ["upgrade", "hello", "world"],
             mutationOutput: CommandOutput(
@@ -99,8 +97,6 @@ struct InstalledInventoryReconcileSliceTests {
     }
 
     @Test @MainActor func `an inventory refresh that fails still settles the operation`() async throws {
-        // Reported bug: busy chrome waited for new package data, so a refresh that itself failed left
-        // Installed rows spinning "Uninstalling..." with nothing left to release them.
         let runner = SequencedInventoryRunner(
             mutationArgv: ["uninstall", "hello"],
             mutationOutput: CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0),
@@ -118,7 +114,6 @@ struct InstalledInventoryReconcileSliceTests {
 
         let phase = await center.phase(for: id)
         #expect(repository.refreshFailure != nil)
-        // Busy chrome is a pure function of these two, so a settled phase is the row spinner stopping.
         #expect(phase.isSettled)
         #expect(phase.activeKind == nil)
     }

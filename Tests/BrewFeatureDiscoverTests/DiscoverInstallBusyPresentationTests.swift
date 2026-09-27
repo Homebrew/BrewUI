@@ -15,7 +15,6 @@ struct DiscoverInstallBusyPresentationTests {
     }
 
     @Test func `reconciling install still shows busy`() {
-        // Discover never reloads its list, so this is the window the installed badge appears in.
         #expect(DiscoverInstallBusyPresentation.showsInstallBusy(phase: .reconciling(.installFormula)))
     }
 

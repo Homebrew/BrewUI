@@ -15,7 +15,6 @@ struct InstalledUpgradeBusyPresentationTests {
     }
 
     @Test func `reconciling upgrade still shows busy`() {
-        // The row would otherwise flash back to "upgrade available" before the snapshot lands.
         #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .reconciling(.upgradeFormula)))
     }
 
@@ -29,7 +28,6 @@ struct InstalledUpgradeBusyPresentationTests {
     }
 
     @Test func `bulk upgrade shows busy like an individual upgrade`() {
-        // The observer only feeds this method bulk phases that actually cover the package.
         #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .running(.upgradeAll)))
         #expect(InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: .reconciling(.upgradeAll)))
     }

@@ -86,8 +86,6 @@ struct SerialBrewCommandCenterReconcileTests {
     }
 
     @Test func `a failed mutating command still reconciles`() async throws {
-        // A batch `brew upgrade a b` can exit non-zero having upgraded `a`, so the inventory is stale
-        // exactly when the command failed.
         let reconciler = RecordingReconciler()
         let center = makeCenter(runner: ReconcileClosureRunner { _ in failureOutput }, reconciler: reconciler)
         let id = BrewOperationID.bulkUpgrade(.all)
@@ -99,7 +97,6 @@ struct SerialBrewCommandCenterReconcileTests {
         }
         try await waitUntil { await collector.phases.count >= 4 }
 
-        // Index-free: `waitUntil` records a timeout and returns, so subscripting would trap on regression.
         let phases: [BrewOperationPhase] = await collector.phases
         #expect(await reconciler.callCount == 1)
         #expect(Array(phases.dropLast()) == [.idle, .running(.upgradeAll), .reconciling(.upgradeAll)])
@@ -121,6 +118,39 @@ struct SerialBrewCommandCenterReconcileTests {
         let phases: [BrewOperationPhase] = await collector.phases
         #expect(await reconciler.callCount == 0)
         #expect(phases == [.idle, .running(.doctorRead), .idle])
+    }
+
+    @Test func `a repeat submit during the reconcile does not start a second command`() async throws {
+        let runs = InvocationCounter()
+        let gate = TestGate()
+        let reconciler = RecordingReconciler { await gate.wait() }
+        let center = makeCenter(
+            runner: ReconcileClosureRunner { _ in
+                await runs.increment()
+                return successOutput
+            },
+            reconciler: reconciler,
+        )
+        let id = BrewOperationID(kind: .formula, name: "git")
+        let command = BrewCommand(operationKind: .upgradeFormula, arguments: ["upgrade", "git"])
+
+        let first = Task { try await center.perform(command, id: id) }
+        try await waitUntil { await center.phase(for: id) == .reconciling(.upgradeFormula) }
+
+        let joined = InvocationCounter()
+        let second = Task {
+            try await center.perform(command, id: id)
+            await joined.increment()
+        }
+        try await waitUntil("the repeat submit should join the run already reconciling") {
+            await joined.value == 1
+        }
+        #expect(await runs.value == 1)
+
+        await gate.open()
+        try await first.value
+        try await second.value
+        #expect(await reconciler.callCount == 1)
     }
 
     @Test func `the terminal phase is withheld until the reconcile finishes`() async throws {

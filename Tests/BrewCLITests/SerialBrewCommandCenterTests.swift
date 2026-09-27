@@ -383,11 +383,3 @@ private actor OrderCollector {
         order
     }
 }
-
-private actor InvocationCounter {
-    private(set) var value = 0
-
-    func increment() {
-        value += 1
-    }
-}

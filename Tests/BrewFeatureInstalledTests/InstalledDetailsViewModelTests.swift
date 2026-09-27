@@ -295,7 +295,6 @@ struct InstalledDetailsViewModelTests {
     }
 
     @Test @MainActor func `following the selection to another package drops the old busy chrome`() async {
-        // One view model serves the whole detail pane, across every selection.
         let viewModel = makeInstalledDetailsViewModel(
             package: details(name: "wget"),
             brewCommandCenter: ConstantPhaseCommandCenter(phase: .reconciling(.uninstallFormula)),

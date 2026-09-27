@@ -415,7 +415,6 @@ struct BrewInstalledPackagesRepositoryTests {
     }
 
     @Test @MainActor func `overlapping fetches run one after another`() async {
-        // Two fetches in flight at once could apply out of order and leave the older snapshot on screen.
         let runner = ConcurrencyTrackingInfoRunner()
         let repo = InstalledPackagesTestSupport.repository(commandRunner: runner)
 

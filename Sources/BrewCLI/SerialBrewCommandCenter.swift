@@ -118,7 +118,9 @@ public actor SerialBrewCommandCenter: BrewCommandCenter {
     /// The single run algorithm: serialise, broadcast output lines to listeners, force colour (all scheduled
     /// work is shown to the user), track phase, and — in `.display` mode — treat a non-zero exit as a failure.
     /// Returns the faithful ``CommandOutput``; capture callers that parse it strip ANSI at their boundary.
-    /// The id stays in flight across the reconcile too, so a repeat call joins rather than races it.
+    /// The id stays in flight across the reconcile, so a repeat submit cannot start a second `brew`
+    /// while the inventory is still catching up. It joins the subprocess result, which by then has
+    /// already arrived; the phase stays non-terminal until the first caller's reconcile finishes.
     private func run(
         _ command: BrewCommand,
         id: BrewOperationID,

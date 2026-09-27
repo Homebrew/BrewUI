@@ -117,7 +117,6 @@ struct InstalledListRowViewModelTests {
     }
 
     @Test func `upgrade busy releases when the reconcile itself fails`() async {
-        // The row would otherwise spin forever: nothing else tells it the world stopped moving.
         var package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         package.outdated = true
         let failure = OperationFailure(description: "refresh failed")
@@ -181,7 +180,6 @@ struct InstalledListRowViewModelTests {
     }
 
     @Test func `a refreshed snapshot mid-reconcile does not drop busy`() async {
-        // Busy belongs to the phase, so a mid-reconcile snapshot cannot release it early.
         let package = InstalledBrewPackage.fixture(name: "git", kind: .formula)
         let center = PhaseSequenceCommandCenter(
             phases: [.running(.uninstallFormula), .reconciling(.uninstallFormula)],

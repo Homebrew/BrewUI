@@ -110,14 +110,12 @@ struct PackageOperationObserverTests {
     }
 
     @Test func `seeds a reconcile already in flight`() async {
-        // A row scrolled into view while the inventory is catching up still has to look busy.
         let center = FakeCommandCenter(running: [.package(Self.gitFormula): .reconciling(.uninstallFormula)])
         let phases = await Self.collect(PackageOperationObserver(commandCenter: center), Self.subject(Self.gitFormula))
         #expect(phases == [.reconciling(.uninstallFormula)])
     }
 
     @Test func `seeds idle for a subject with nothing in flight`() async {
-        // Otherwise a detail pane following the selection keeps the previous package's busy chrome.
         let center = FakeCommandCenter(running: [.package(Self.wgetFormula): .running(.uninstallFormula)])
         let phases = await Self.collect(PackageOperationObserver(commandCenter: center), Self.subject(Self.gitFormula))
         #expect(phases == [.idle])

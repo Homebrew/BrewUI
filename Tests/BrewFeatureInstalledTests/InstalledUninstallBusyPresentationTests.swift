@@ -15,7 +15,6 @@ struct InstalledUninstallBusyPresentationTests {
     }
 
     @Test func `reconciling uninstall still shows busy`() {
-        // The row is still in the list until the refreshed inventory drops it.
         #expect(InstalledUninstallBusyPresentation.showsUninstallBusy(phase: .reconciling(.uninstallFormula)))
     }
 
