@@ -20,15 +20,8 @@ import SwiftUI
 
                 // Exercises the crash-reporting flow: the report appears on next launch.
                 Menu {
-                    debugButton("Fatal Error (signal)") {
-                        fatalError("Debug menu: forced fatalError")
-                    }
-                    debugButton("Uncaught Exception") {
-                        NSException(
-                            name: .genericException,
-                            reason: "Debug menu: forced NSException",
-                            userInfo: nil,
-                        ).raise()
+                    ForEach(DebugCrash.allCases, id: \.self) { crash in
+                        debugButton(crash.title) { crash.crash() }
                     }
                 } label: {
                     Text(verbatim: "Force Crash")

@@ -51,6 +51,6 @@ struct CrashReportIssueTests {
         let url = CrashReportIssue.url(for: makeReport(text: longText))
 
         let body = try? #require(queryItems(of: url)["body"])
-        #expect(body?.contains("~/Library/Application Support/sh.brew.app/CrashReports") == true)
+        #expect(body?.contains("~/Library/Logs/DiagnosticReports") == true)
     }
 }
