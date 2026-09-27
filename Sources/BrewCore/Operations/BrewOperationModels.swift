@@ -103,6 +103,11 @@ public enum BrewOperationPhase: Equatable, Sendable {
         }
     }
 
+    /// `true` while a mutating operation is unfinished, ``reconciling(_:)`` included.
+    public var isUnfinishedMutation: Bool {
+        activeKind?.isMutating == true
+    }
+
     /// The work this phase represents, for the phases that carry it; `nil` once settled.
     public var activeKind: BrewOperationKind? {
         switch self {
