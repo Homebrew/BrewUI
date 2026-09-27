@@ -37,6 +37,12 @@ extension BrewOperationPhase {
             String(localized: "done", bundle: #bundle, comment: "Console status bar: operation finished")
         case .running:
             String(localized: "running", bundle: #bundle, comment: "Console status bar: operation in progress")
+        case .reconciling:
+            String(
+                localized: "refreshing",
+                bundle: #bundle,
+                comment: "Console status bar: command finished, refreshing the installed package list",
+            )
         case .failed:
             String(localized: "failed", bundle: #bundle, comment: "Console status bar: operation failed")
         }

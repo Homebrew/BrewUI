@@ -38,7 +38,7 @@ private func makeOutputTestCenter(
         commandRunner: LineEmittingRunner(linesFor: linesFor),
         locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/fake/brew")),
     )
-    return SerialBrewCommandCenter(executionContext: ctx)
+    return SerialBrewCommandCenter(executionContext: ctx, reconciler: NoopBrewOperationReconciler())
 }
 
 private func command(_ argv: String) -> BrewCommand {

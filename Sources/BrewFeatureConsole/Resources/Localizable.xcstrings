@@ -58,6 +58,9 @@
     "failed" : {
       "comment" : "Console status bar: operation failed"
     },
+    "refreshing" : {
+      "comment" : "Console status bar: command finished, refreshing the installed package list"
+    },
     "running" : {
       "comment" : "Console status bar: operation in progress"
     },

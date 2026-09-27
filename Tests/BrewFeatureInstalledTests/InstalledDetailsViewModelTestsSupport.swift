@@ -21,7 +21,7 @@ actor ConstantPhaseCommandCenter: BrewCommandCenter {
     }
 
     func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
-        fixedPhase.isRunning ? [operationID: fixedPhase] : [:]
+        fixedPhase.isSettled ? [:] : [operationID: fixedPhase]
     }
 
     @discardableResult
