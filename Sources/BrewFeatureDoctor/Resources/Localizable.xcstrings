@@ -2,79 +2,429 @@
   "sourceLanguage" : "en",
   "strings" : {
     "%@, Fix available" : {
-      "comment" : "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title"
+      "comment" : "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@，有可用的修复方法"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@，可修復"
+          }
+        }
+      }
     },
     "Copy brew doctor output" : {
-      "comment" : "VoiceOver: Doctor copy-output button"
+      "comment" : "VoiceOver: Doctor copy-output button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制 brew doctor 输出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷貝 brew doctor 輸出"
+          }
+        }
+      }
     },
     "Copy output" : {
-      "comment" : "Doctor header: copy raw brew doctor output"
+      "comment" : "Doctor header: copy raw brew doctor output",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制输出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷貝輸出"
+          }
+        }
+      }
     },
     "Danger" : {
-      "comment" : "Doctor severity name"
+      "comment" : "Doctor severity name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "危险"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "危險"
+          }
+        }
+      }
     },
     "Doctor" : {
-      "comment" : "Doctor tab heading"
+      "comment" : "Doctor tab heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "诊断"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "診斷"
+          }
+        }
+      }
     },
     "Doctor issues" : {
-      "comment" : "VoiceOver: the Doctor issues list"
+      "comment" : "VoiceOver: the Doctor issues list",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "诊断问题"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "診斷問題"
+          }
+        }
+      }
     },
     "Fix available" : {
-      "comment" : "Doctor issue row badge"
+      "comment" : "Doctor issue row badge",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有可用的修复方法"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可修復"
+          }
+        }
+      }
     },
     "Last checked" : {
-      "comment" : "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”"
+      "comment" : "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次检查"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次檢查"
+          }
+        }
+      }
     },
     "Needs admin · runs in Terminal" : {
-      "comment" : "Doctor fix note: the command needs sudo so it opens in Terminal"
+      "comment" : "Doctor fix note: the command needs sudo so it opens in Terminal",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要管理员权限 · 在终端中运行"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要管理者權限 · 在「終端機」中執行"
+          }
+        }
+      }
     },
     "No problems found" : {
-      "comment" : "Doctor subtitle, healthy"
+      "comment" : "Doctor subtitle, healthy",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未发现问题"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未發現問題"
+          }
+        }
+      }
     },
     "No selection" : {
-      "comment" : "Doctor detail placeholder title when nothing is selected"
+      "comment" : "Doctor detail placeholder title when nothing is selected",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未选择"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未選取"
+          }
+        }
+      }
     },
     "Raw output" : {
-      "comment" : "Doctor detail: collapsible header for the raw brew doctor text"
+      "comment" : "Doctor detail: collapsible header for the raw brew doctor text",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原始输出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "原始輸出"
+          }
+        }
+      }
     },
     "Re-checking" : {
-      "comment" : "VoiceOver: Doctor re-check spinner"
+      "comment" : "VoiceOver: Doctor re-check spinner",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在重新检查"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在重新檢查"
+          }
+        }
+      }
     },
     "Re-checking…" : {
-      "comment" : "Doctor subtitle while a re-check runs"
+      "comment" : "Doctor subtitle while a re-check runs",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在重新检查…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在重新檢查…"
+          }
+        }
+      }
     },
     "Run Again" : {
-      "comment" : "Doctor header: re-run brew doctor"
+      "comment" : "Doctor header: re-run brew doctor",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新运行"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再次執行"
+          }
+        }
+      }
     },
     "Run Fix" : {
-      "comment" : "Doctor detail: run the suggested fix button\nVoiceOver: run-fix button"
+      "comment" : "Doctor detail: run the suggested fix button\nVoiceOver: run-fix button",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "执行修复"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "執行修復"
+          }
+        }
+      }
     },
     "Run diagnostics, then choose an issue to see details and fixes." : {
-      "comment" : "Doctor detail placeholder body when nothing is selected"
+      "comment" : "Doctor detail placeholder body when nothing is selected",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "运行诊断后，选择一个问题以查看详情和修复方法。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "執行診斷後，選擇問題以查看詳細資訊與修復方式。"
+          }
+        }
+      }
     },
     "Running brew doctor…" : {
-      "comment" : "Doctor subtitle during the first check"
+      "comment" : "Doctor subtitle during the first check",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在运行 brew doctor…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在執行 brew doctor…"
+          }
+        }
+      }
     },
     "Severity: %@" : {
-      "comment" : "VoiceOver: Doctor severity badge; %@ is the severity name"
+      "comment" : "VoiceOver: Doctor severity badge; %@ is the severity name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "严重程度：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "嚴重程度：%@"
+          }
+        }
+      }
     },
     "The check could not be completed" : {
-      "comment" : "Doctor subtitle when brew doctor failed to run"
+      "comment" : "Doctor subtitle when brew doctor failed to run",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未能完成检查"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法完成檢查"
+          }
+        }
+      }
     },
     "Unsupported" : {
-      "comment" : "Doctor severity name: unsupported configuration"
+      "comment" : "Doctor severity name: unsupported configuration",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不受支持"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不支援"
+          }
+        }
+      }
     },
     "Warning" : {
-      "comment" : "Doctor severity name"
+      "comment" : "Doctor severity name",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "警告"
+          }
+        }
+      }
     },
     "Warnings found" : {
-      "comment" : "Doctor subtitle, issues listed"
+      "comment" : "Doctor subtitle, issues listed",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "发现警告"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "發現警告"
+          }
+        }
+      }
     },
     "Your system is ready to brew" : {
-      "comment" : "Doctor healthy state title"
+      "comment" : "Doctor healthy state title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系统已就绪，可以使用 Homebrew"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "系統已準備好使用 Homebrew"
+          }
+        }
+      }
     },
     "brew doctor found no problems." : {
-      "comment" : "Doctor healthy state body"
+      "comment" : "Doctor healthy state body",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor 未发现问题。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor 未發現問題。"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
