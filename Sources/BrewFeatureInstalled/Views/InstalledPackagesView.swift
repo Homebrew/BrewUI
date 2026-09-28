@@ -21,18 +21,30 @@ struct InstalledPackagesView: View {
         VStack(alignment: .leading, spacing: 0) {
             packageListBanner()
 
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageCountSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
+            HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.md) {
+                VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                    Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
+                        .font(.brewTitle2)
+                        .foregroundStyle(Color.brewTextPrimary)
+                    Text(viewModel.packageCountSubtitle)
+                        .font(.brewSubheadline)
+                        .foregroundStyle(Color.brewTextSecondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityElement(children: .combine)
+                .accessibilityHeading(.h1)
+
+                Button(saveBrewfileLabel, systemImage: "square.and.arrow.down") {
+                    saveBrewfile()
+                }
+                .disabled(!viewModel.canSaveBrewfile || viewModel.isSavingBrewfile)
+                .axid(.installedSaveBrewfileButton)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BrewSpacing.lg)
-            .accessibilityElement(children: .combine)
-            .accessibilityHeading(.h1)
+
+            if let outcome = viewModel.brewfileOutcome {
+                brewfileOutcomeNote(outcome)
+            }
 
             scopePicker
             hideDependenciesToggle
@@ -52,6 +64,56 @@ struct InstalledPackagesView: View {
         .task {
             await viewModel.load()
         }
+    }
+
+    /// Inline result of the last dump. `brew` writes the file itself, so the confirmation names where it
+    /// landed; a failure keeps the technical detail in the console and shows the message here.
+    @ViewBuilder
+    private func brewfileOutcomeNote(_ outcome: BrewfileSaveOutcome) -> some View {
+        switch outcome {
+        case let .saved(url):
+            NoteCallout(
+                verbatim: String(
+                    localized: "Saved a Brewfile to \(url.path)",
+                    bundle: #bundle,
+                    comment: "Installed tab: confirmation after saving a Brewfile; %@ is the file path",
+                ),
+                tone: .brand,
+            )
+            .padding(.horizontal, BrewSpacing.lg)
+        case let .failed(message):
+            Text(message)
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewStatusError)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, BrewSpacing.lg)
+        }
+    }
+
+    /// While a dump runs the action says so, so the disabled state has a reason on screen.
+    private var saveBrewfileLabel: String {
+        if viewModel.isSavingBrewfile {
+            return String(
+                localized: "Saving Brewfile…",
+                bundle: #bundle,
+                comment: "Installed header: a Brewfile dump is running",
+            )
+        }
+        return String(
+            localized: "Save Brewfile…",
+            bundle: #bundle,
+            comment: "Installed header: save the installed environment as a Brewfile",
+        )
+    }
+
+    /// Asks for a destination, then lets `brew bundle dump` write it. Cancelling the panel is not a
+    /// failure and leaves any earlier outcome on screen untouched.
+    private func saveBrewfile() {
+        guard let destination = BrewfileSavePanel.chooseDestination() else {
+            return
+        }
+        viewModel.saveBrewfile(to: destination)
     }
 
     /// Persistent kind filter, always visible. Filters the loaded inventory client-side; never refetches.
@@ -154,6 +216,8 @@ struct InstalledPackagesView: View {
         let viewModel = InstalledViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(),
             preferences: StubInstalledPreferences(),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            commandFactory: PreviewSupport.mutatingCommandFactory,
         )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)
@@ -169,6 +233,8 @@ struct InstalledPackagesView: View {
         let viewModel = InstalledViewModel(
             repository: PreviewSupport.makeInstalledPackagesRepository(packages: PreviewSupport.emptyPackages),
             preferences: StubInstalledPreferences(),
+            brewCommandCenter: PreviewSupport.commandCenter,
+            commandFactory: PreviewSupport.mutatingCommandFactory,
         )
         SearchFocusPreviewHost { focus in
             InstalledPackagesView(viewModel: viewModel, focus: focus)
