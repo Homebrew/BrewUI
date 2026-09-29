@@ -1380,7 +1380,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "升级所有有新版本的配方"
+            "value" : "升级所有可升级的配方"
           }
         },
         "zh-Hant" : {

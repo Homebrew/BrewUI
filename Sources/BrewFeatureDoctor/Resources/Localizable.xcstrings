@@ -217,7 +217,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未連結的 keg 可能導致建置問題，並使依賴這些 keg 的配方在建置後無法正常執行。"
+            "value" : "未連結的 keg 可能導致建置問題，並使依賴這些 keg 的配方在建置後無法正常運作。"
           }
         }
       }
@@ -302,7 +302,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請注意：這些警告只是為了在你提交問題時協助 Homebrew 維護者排查故障。如果你使用的 Homebrew 功能一切正常，無須擔心或提交問題，忽略即可。謝謝！"
+            "value" : "請注意：這些警告只是為了在你回報問題時協助 Homebrew 維護者除錯。如果你使用的 Homebrew 功能一切正常，無須擔心或回報問題，忽略即可。謝謝！"
           }
         }
       }
@@ -602,13 +602,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现了未经 Homebrew 安装的 '.la' 文件。"
+            "value" : "在 %@ 中发现了非 Homebrew 管理的“.la”文件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現了未經 Homebrew 安裝的 '.la' 檔案。"
+            "value" : "在 %@ 中發現了非 Homebrew 管理的「.la」檔案。"
           }
         }
       }
@@ -619,13 +619,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现了未经 Homebrew 安装的 '.pc' 文件。"
+            "value" : "在 %@ 中发现了非 Homebrew 管理的“.pc”文件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現了未經 Homebrew 安裝的 '.pc' 檔案。"
+            "value" : "在 %@ 中發現了非 Homebrew 管理的「.pc」檔案。"
           }
         }
       }
@@ -636,13 +636,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现了未经 Homebrew 安装的动态库。"
+            "value" : "在 %@ 中发现了非 Homebrew 管理的动态链接库。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現了未經 Homebrew 安裝的動態函式庫。"
+            "value" : "在 %@ 中發現了非 Homebrew 管理的動態連結程式庫。"
           }
         }
       }
@@ -693,7 +693,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "意外的 '.la' 檔案："
+            "value" : "非預期的「.la」檔案："
           }
         }
       }

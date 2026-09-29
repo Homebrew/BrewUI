@@ -325,7 +325,21 @@
       }
     },
     "refreshing" : {
-      "comment" : "Console status bar: command finished, refreshing the installed package list"
+      "comment" : "Console status bar: command finished, refreshing the installed package list",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在刷新"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新整理中"
+          }
+        }
+      }
     },
     "running" : {
       "comment" : "Console status bar: operation in progress",
