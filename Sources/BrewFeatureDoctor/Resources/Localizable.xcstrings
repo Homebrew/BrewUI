@@ -602,13 +602,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现了非 Homebrew 管理的 .la 文件。"
+            "value" : "在 %@ 中发现了未经 Homebrew 安装的 '.la' 文件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現非 Homebrew 管理的 .la 檔案。"
+            "value" : "在 %@ 中發現了未經 Homebrew 安裝的 '.la' 檔案。"
           }
         }
       }
@@ -619,13 +619,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现未由 Homebrew 管理的 '.pc' 文件。"
+            "value" : "在 %@ 中发现了未经 Homebrew 安装的 '.pc' 文件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現未由 Homebrew 管理的 '.pc' 檔案。"
+            "value" : "在 %@ 中發現了未經 Homebrew 安裝的 '.pc' 檔案。"
           }
         }
       }
@@ -636,13 +636,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现未由 Homebrew 管理的动态库。"
+            "value" : "在 %@ 中发现了未经 Homebrew 安装的动态库。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現未由 Homebrew 管理的動態函式庫。"
+            "value" : "在 %@ 中發現了未經 Homebrew 安裝的動態函式庫。"
           }
         }
       }
@@ -653,13 +653,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现了非 Homebrew 管理的头文件。"
+            "value" : "在 %@ 中发现了未经 Homebrew 安装的头文件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現非 Homebrew 管理的標頭檔。"
+            "value" : "在 %@ 中發現了未經 Homebrew 安裝的標頭檔。"
           }
         }
       }
@@ -670,13 +670,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中发现未由 Homebrew 管理的静态库。"
+            "value" : "在 %@ 中发现了未经 Homebrew 安装的静态库。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在 %@ 中發現未由 Homebrew 管理的靜態函式庫。"
+            "value" : "在 %@ 中發現了未經 Homebrew 安裝的靜態函式庫。"
           }
         }
       }
@@ -687,13 +687,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "非预期的 .la 文件："
+            "value" : "意外的 '.la' 文件："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "非預期的 .la 檔案："
+            "value" : "意外的 '.la' 檔案："
           }
         }
       }
@@ -704,13 +704,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "意外发现的 '.pc' 文件："
+            "value" : "意外的 '.pc' 文件："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "意外發現的 '.pc' 檔案："
+            "value" : "意外的 '.pc' 檔案："
           }
         }
       }
@@ -721,13 +721,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "意外发现的动态库："
+            "value" : "意外的动态库："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "意外發現的動態函式庫："
+            "value" : "意外的動態函式庫："
           }
         }
       }
@@ -738,13 +738,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "非预期的头文件："
+            "value" : "意外的头文件："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "非預期的標頭檔："
+            "value" : "意外的標頭檔："
           }
         }
       }
@@ -755,13 +755,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "意外发现的静态库："
+            "value" : "意外的静态库："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "意外發現的靜態函式庫："
+            "value" : "意外的靜態函式庫："
           }
         }
       }
