@@ -12,8 +12,8 @@ import SwiftUI
 /// Walks the parsed blocks in **document order** with no section headings. Prose paragraphs render as
 /// plain text; a non-prose block's colon caption (e.g. `If that doesn't show you any updates, run:`)
 /// renders as a prose line right above its UI element (a ``CommandBlockView``, an items list, or link
-/// rows). The reading flow matches what brew printed. Raw output stays at the bottom as the
-/// never-wrong fallback.
+/// rows). The block order matches what brew printed; recognised prose may be translated. Raw output
+/// stays at the bottom as the never-wrong fallback.
 struct DoctorIssueDetailView: View {
     @Bindable var viewModel: DoctorViewModel
     let item: DoctorIssueItem
@@ -52,7 +52,7 @@ struct DoctorIssueDetailView: View {
     private var heroSection: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             DoctorSeverityBadge(severity: item.severity)
-            Text(item.title)
+            Text(verbatim: DoctorMessageCopy.title(item.title))
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
                 .textSelection(.enabled)
@@ -78,7 +78,7 @@ struct DoctorIssueDetailView: View {
     // MARK: - Prose
 
     private func proseView(lines: [String]) -> some View {
-        Text(lines.joined(separator: "\n"))
+        Text(verbatim: DoctorMessageCopy.prose(lines))
             .font(.brewBody)
             .foregroundStyle(Color.brewTextSecondary)
             .textSelection(.enabled)
@@ -89,7 +89,7 @@ struct DoctorIssueDetailView: View {
     @ViewBuilder
     private func captionText(_ caption: String?) -> some View {
         if let caption {
-            Text(caption)
+            Text(verbatim: DoctorMessageCopy.caption(caption))
                 .font(.brewBody)
                 .foregroundStyle(Color.brewTextSecondary)
                 .textSelection(.enabled)

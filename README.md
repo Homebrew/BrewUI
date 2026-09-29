@@ -53,6 +53,9 @@ for the window, sidebar and menus, and `Resources/` in `BrewUIComponents` and ea
 package. Edit a catalog in Xcode. See [localisation](AGENTS.md#localisation) for the reasoning
 behind the steps below.
 
+Homebrew's console output is not translated. Doctor can show translations for recognised explanations
+in its structured view; its raw output and copied report stay in Homebrew's original wording.
+
 ### Adding a language
 
 1. Open `Homebrew/Localizable.xcstrings`, press `+`, pick the language and translate at least one

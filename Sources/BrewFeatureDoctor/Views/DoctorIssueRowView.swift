@@ -16,7 +16,7 @@ struct DoctorIssueRowView: View {
             DoctorSeverityStyle.glyphImage(item.severity)
                 .imageScale(.medium)
             VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
-                Text(item.title)
+                Text(verbatim: DoctorMessageCopy.title(item.title))
                     .font(.brewBody)
                     .foregroundStyle(Color.brewTextPrimary)
                     .lineLimit(2)

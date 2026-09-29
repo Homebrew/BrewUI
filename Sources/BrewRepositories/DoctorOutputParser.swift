@@ -234,8 +234,11 @@ private struct WarningBlockParser {
     private mutating func processUnindented(_ trimmed: String) {
         if trimmed.isEmpty {
             flushCurrent()
-            pendingCaption = nil
-            specialUnindentedActive = false
+            // A remediation may put a blank line between its caption and the following list.
+            // Keep that caption for the next block instead of silently dropping brew's guidance.
+            if pendingCaption == nil {
+                specialUnindentedActive = false
+            }
             nextBlockFollowsBlankLine = true
             return
         }

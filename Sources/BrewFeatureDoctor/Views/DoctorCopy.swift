@@ -3,7 +3,7 @@
 //  BrewFeatureDoctor
 //
 
-/// Doctor copy that must match `brew doctor` word for word, so it is deliberately not localised.
+/// Canonical `brew doctor` wording used to recognise the reassurance note without altering raw output.
 enum DoctorCopy {
     static let warningPreamble = """
     Please note that these warnings are just used to help the Homebrew maintainers with debugging \
