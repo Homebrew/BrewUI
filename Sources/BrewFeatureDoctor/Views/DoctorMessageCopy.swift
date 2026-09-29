@@ -39,7 +39,22 @@ enum DoctorMessageCopy {
         case "The following taps are not trusted:":
             return String(localized: "The following taps are not trusted:", bundle: #bundle,
                           comment: "Doctor finding: untrusted Homebrew taps are listed below")
+        case "You have unlinked kegs in your Cellar.":
+            return String(localized: "You have unlinked kegs in your Cellar.", bundle: #bundle,
+                          comment: "Doctor finding: installed kegs are not linked into the Homebrew prefix")
         default:
+            if let path = value(in: source, prefix: "Unbrewed dylibs were found in ", suffix: ".") {
+                return String(localized: "Unbrewed dylibs were found in \(path).", bundle: #bundle,
+                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged dynamic libraries")
+            }
+            if let path = value(in: source, prefix: "Unbrewed static libraries were found in ", suffix: ".") {
+                return String(localized: "Unbrewed static libraries were found in \(path).", bundle: #bundle,
+                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged static libraries")
+            }
+            if let path = value(in: source, prefix: "Unbrewed '.pc' files were found in ", suffix: ".") {
+                return String(localized: "Unbrewed '.pc' files were found in \(path).", bundle: #bundle,
+                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged pkg-config files")
+            }
             if let path = value(in: source, prefix: "Unbrewed header files were found in ", suffix: ".") {
                 return String(localized: "Unbrewed header files were found in \(path).", bundle: #bundle,
                               comment: "Doctor finding: %@ is a filesystem path containing unmanaged headers")
@@ -87,6 +102,10 @@ enum DoctorMessageCopy {
                    casks and commands from the listed taps. Trust whole taps with:
                    """, bundle: #bundle,
                    comment: "Doctor warning: whole-tap trust covers future content too")
+        case ("Leaving kegs unlinked can lead to build-trouble and cause formulae that depend on",
+              "those kegs to fail to run properly once built."):
+            String(localized: "Leaving kegs unlinked can lead to build-trouble and cause formulae that depend on those kegs to fail to run properly once built.", bundle: #bundle,
+                   comment: "Doctor explanation: unlinked kegs can break builds and dependent formulae")
         default:
             nil
         }
@@ -113,6 +132,15 @@ enum DoctorMessageCopy {
         case "Unexpected header files:":
             String(localized: "Unexpected header files:", bundle: #bundle,
                    comment: "Doctor heading: unmanaged header paths follow")
+        case "Unexpected dylibs:":
+            String(localized: "Unexpected dylibs:", bundle: #bundle,
+                   comment: "Doctor heading: unmanaged dynamic library paths follow")
+        case "Unexpected static libraries:":
+            String(localized: "Unexpected static libraries:", bundle: #bundle,
+                   comment: "Doctor heading: unmanaged static library paths follow")
+        case "Unexpected '.pc' files:":
+            String(localized: "Unexpected '.pc' files:", bundle: #bundle,
+                   comment: "Doctor heading: unmanaged pkg-config file paths follow")
         case "Unexpected '.la' files:":
             String(localized: "Unexpected '.la' files:", bundle: #bundle,
                    comment: "Doctor heading: unmanaged .la file paths follow")
@@ -144,6 +172,12 @@ enum DoctorMessageCopy {
         case "More information:":
             String(localized: "More information:", bundle: #bundle,
                    comment: "Doctor heading: reference links follow")
+        case "Run `brew link` on these:":
+            String(localized: "Run `brew link` on these:", bundle: #bundle,
+                   comment: "Doctor heading: packages to link with the literal brew link command follow")
+        case "You can solve this by running:":
+            String(localized: "You can solve this by running:", bundle: #bundle,
+                   comment: "Doctor heading: suggested Homebrew commands follow")
         default:
             title(source)
         }

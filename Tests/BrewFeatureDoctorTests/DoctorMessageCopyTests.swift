@@ -29,6 +29,26 @@ struct DoctorMessageCopyTests {
         #expect(DoctorMessageCopy.title(other) == other)
     }
 
+    @Test func `unmanaged file families retain their paths`() {
+        let titles = [
+            "Unbrewed dylibs were found in /usr/local/lib.",
+            "Unbrewed static libraries were found in /usr/local/lib.",
+            "Unbrewed '.pc' files were found in /usr/local/lib/pkgconfig.",
+        ]
+        #expect(titles.map(DoctorMessageCopy.title) == titles)
+    }
+
+    @Test func `unlinked keg guidance preserves Homebrew terminology`() {
+        let title = "You have unlinked kegs in your Cellar."
+        let explanation = [
+            "Leaving kegs unlinked can lead to build-trouble and cause formulae that depend on",
+            "those kegs to fail to run properly once built.",
+        ]
+        #expect(DoctorMessageCopy.title(title) == title)
+        #expect(DoctorMessageCopy.prose(explanation) == explanation.joined(separator: " "))
+        #expect(DoctorMessageCopy.caption("Run `brew link` on these:") == "Run `brew link` on these:")
+    }
+
     @Test func `commands and data are outside the localisation boundary`() {
         let paragraph = [
             "Homebrew is currently ignoring formulae, casks and commands",

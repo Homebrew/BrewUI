@@ -160,13 +160,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "由于需要信任这些 tap，Homebrew 目前会忽略其中的配方、软件包和命令。"
+            "value" : "由于需要信任这些 tap，Homebrew 目前会忽略其中的配方、Cask 和命令。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "由於需要信任這些 tap，Homebrew 目前會忽略其中的配方、軟體套件和命令。"
+            "value" : "由於需要信任這些 tap，Homebrew 目前會忽略其中的配方、Cask 和命令。"
           }
         }
       }
@@ -201,6 +201,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上次檢查"
+          }
+        }
+      }
+    },
+    "Leaving kegs unlinked can lead to build-trouble and cause formulae that depend on those kegs to fail to run properly once built." : {
+      "comment" : "Doctor explanation: unlinked kegs can break builds and dependent formulae",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未链接的 keg 可能导致构建问题，并使依赖这些 keg 的配方在构建后无法正常运行。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未連結的 keg 可能導致建置問題，並使依賴這些 keg 的配方在建置後無法正常執行。"
           }
         }
       }
@@ -296,13 +313,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "建议只信任你需要的具体配方、软件包或命令。"
+            "value" : "建议只信任你需要的特定配方、Cask 或命令。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "建議只信任你需要的特定配方、軟體套件或命令。"
+            "value" : "建議只信任你需要的特定配方、Cask 或命令。"
           }
         }
       }
@@ -392,6 +409,23 @@
         }
       }
     },
+    "Run `brew link` on these:" : {
+      "comment" : "Doctor heading: packages to link with the literal brew link command follow",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对以下 keg 运行 `brew link`："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "對以下 keg 執行 `brew link`："
+          }
+        }
+      }
+    },
     "Run diagnostics, then choose an issue to see details and fixes." : {
       "comment" : "Doctor detail placeholder body when nothing is selected",
       "localizations" : {
@@ -449,13 +483,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "部分已安装的软件包已弃用或停用。"
+            "value" : "部分已安装的 Cask 已弃用或停用。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "部分已安裝的軟體套件已棄用或停用。"
+            "value" : "部分已安裝的 Cask 已棄用或停用。"
           }
         }
       }
@@ -517,13 +551,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可用以下命令信任这些 tap 中已安装的软件包："
+            "value" : "可用以下命令信任这些 tap 中已安装的 Cask："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可用以下命令信任這些 tap 中已安裝的軟體套件："
+            "value" : "可用以下命令信任這些 tap 中已安裝的 Cask："
           }
         }
       }
@@ -551,13 +585,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可用以下命令信任其他具体的软件包和命令："
+            "value" : "可用以下命令信任其他具体的 Cask 和命令："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可用以下命令信任其他特定的軟體套件和命令："
+            "value" : "可用以下命令信任其他特定的 Cask 和命令："
           }
         }
       }
@@ -579,6 +613,40 @@
         }
       }
     },
+    "Unbrewed '.pc' files were found in %@." : {
+      "comment" : "Doctor finding: %@ is a filesystem path containing unmanaged pkg-config files",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %@ 中发现未由 Homebrew 管理的 '.pc' 文件。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %@ 中發現未由 Homebrew 管理的 '.pc' 檔案。"
+          }
+        }
+      }
+    },
+    "Unbrewed dylibs were found in %@." : {
+      "comment" : "Doctor finding: %@ is a filesystem path containing unmanaged dynamic libraries",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %@ 中发现未由 Homebrew 管理的动态库。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %@ 中發現未由 Homebrew 管理的動態函式庫。"
+          }
+        }
+      }
+    },
     "Unbrewed header files were found in %@." : {
       "comment" : "Doctor finding: %@ is a filesystem path containing unmanaged headers",
       "localizations" : {
@@ -592,6 +660,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在 %@ 中發現非 Homebrew 管理的標頭檔。"
+          }
+        }
+      }
+    },
+    "Unbrewed static libraries were found in %@." : {
+      "comment" : "Doctor finding: %@ is a filesystem path containing unmanaged static libraries",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %@ 中发现未由 Homebrew 管理的静态库。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在 %@ 中發現未由 Homebrew 管理的靜態函式庫。"
           }
         }
       }
@@ -613,6 +698,40 @@
         }
       }
     },
+    "Unexpected '.pc' files:" : {
+      "comment" : "Doctor heading: unmanaged pkg-config file paths follow",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意外发现的 '.pc' 文件："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意外發現的 '.pc' 檔案："
+          }
+        }
+      }
+    },
+    "Unexpected dylibs:" : {
+      "comment" : "Doctor heading: unmanaged dynamic library paths follow",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意外发现的动态库："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意外發現的動態函式庫："
+          }
+        }
+      }
+    },
     "Unexpected header files:" : {
       "comment" : "Doctor heading: unmanaged header paths follow",
       "localizations" : {
@@ -626,6 +745,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "非預期的標頭檔："
+          }
+        }
+      }
+    },
+    "Unexpected static libraries:" : {
+      "comment" : "Doctor heading: unmanaged static library paths follow",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意外发现的静态库："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "意外發現的靜態函式庫："
           }
         }
       }
@@ -704,13 +840,47 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "信任整个 tap 的范围更广，包括上述 tap 现有及将来的所有配方、软件包和命令。可用以下命令信任整个 tap："
+            "value" : "信任整个 tap 的范围更广，包括上述 tap 现有及将来的所有配方、Cask 和命令。可用以下命令信任整个 tap："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "信任整個 tap 的範圍更廣，包括上述 tap 現有及將來的所有配方、軟體套件和命令。可用以下命令信任整個 tap："
+            "value" : "信任整個 tap 的範圍更廣，包括上述 tap 現有及將來的所有配方、Cask 和命令。可用以下命令信任整個 tap："
+          }
+        }
+      }
+    },
+    "You can solve this by running:" : {
+      "comment" : "Doctor heading: suggested Homebrew commands follow",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可以运行以下命令解决："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可執行以下命令解決："
+          }
+        }
+      }
+    },
+    "You have unlinked kegs in your Cellar." : {
+      "comment" : "Doctor finding: installed kegs are not linked into the Homebrew prefix",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cellar 中有尚未链接的 keg。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cellar 中有尚未連結的 keg。"
           }
         }
       }
@@ -721,13 +891,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请为以下软件包寻找替代品："
+            "value" : "请为以下 Cask 寻找替代品："
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請為以下軟體套件尋找替代品："
+            "value" : "請為以下 Cask 尋找替代品："
           }
         }
       }
