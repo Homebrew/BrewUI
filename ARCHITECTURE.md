@@ -93,6 +93,18 @@ Relaunch BrewUI after changing configuration, then check the Configuration tab. 
 Doctor describe Homebrew's environment in the app and may differ from Terminal. BrewUI still
 sets output controls for its console and self-upgrade log.
 
+The Configuration tab can edit user proxy settings in `~/.homebrew/brew.env`. It writes Homebrew's
+lowercase `http_proxy`, `https_proxy`, `all_proxy` and `no_proxy` keys and URL-encodes credentials.
+Manual settings take effect on the next Homebrew command, including self-upgrades and Terminal
+commands that read the same user file. Unused proxy keys are written empty to override installation
+and system defaults, unless the system file has priority. Credentials are stored in plain text.
+Removing user proxy settings deletes these keys and allows installation and system settings to apply;
+it does not force a direct connection. Other user settings and comments are preserved.
+
+The editor does not configure the app's catalogue or Discover analytics HTTP requests: these use
+`URLSession` with the macOS system proxy settings. Automatic proxy configuration (PAC) is not
+supported by the Homebrew proxy editor.
+
 System zsh always reads `/etc/zshenv`, if present; its execution cannot be disabled.
 BrewUI clears the environment again afterwards and discards startup output so banners do not
 reach Homebrew's reports or the console. If startup fails before Homebrew runs, its diagnostics are retained.

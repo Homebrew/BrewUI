@@ -47,4 +47,33 @@ struct ConfigScreen: Screen {
         BrewUIElement(app, .brewNotFoundState).waitToExist(timeout: timeout, file: file, line: line)
         return self
     }
+
+    @discardableResult
+    func assertProxyAuthenticationUsesSecureField(
+        file: StaticString = #filePath,
+        line: UInt = #line,
+    ) -> Self {
+        let picker = BrewUIElement(app, .proxySettingsModePicker).waitToExist(file: file, line: line)
+        let manual = picker.element.radioButtons["Manual proxy configuration"]
+        for _ in 0 ..< 5 where !manual.isHittable {
+            root.element.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: -300)
+        }
+        XCTAssertTrue(manual.isHittable, file: file, line: line)
+        manual.click()
+
+        let authentication = BrewUIButton(app, .proxySettingsAuthenticationToggle)
+        for _ in 0 ..< 5 where !authentication.element.isHittable {
+            root.element.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: -300)
+        }
+        authentication.tap(file: file, line: line)
+        BrewUIElement(app, .proxySettingsField(.password), type: .secureTextField)
+            .assertExists(file: file, line: line)
+        XCTAssertFalse(
+            app.textFields[AXID.proxySettingsField(.password).rawValue].exists,
+            "Proxy passwords must not be exposed in a plain text field",
+            file: file,
+            line: line,
+        )
+        return self
+    }
 }

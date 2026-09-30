@@ -8,6 +8,7 @@ import BrewCore
 import BrewCrashReporting
 import BrewFeatureSelfUpgrade
 import BrewNetworking
+import BrewRepositories
 import BrewSelfUpgradeContract
 import BrewUITestContract
 import Foundation
@@ -177,5 +178,18 @@ extension BrewApp {
             return .live()
         }
         return .uiTesting(brewURL: fixtures?.fakeBrewURL)
+    }
+
+    /// User `brew.env` seam. Under `-uiTesting` the store lands in the run's container so a proxy save
+    /// never touches the host's real `~/.homebrew/brew.env`.
+    static func makeUserBrewEnvironmentStore(
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> UserBrewEnvironmentFileStore {
+        guard let fixtures else {
+            return .userDefault()
+        }
+        return UserBrewEnvironmentFileStore(
+            fileURL: fixtures.containerURL.appendingPathComponent("brew.env"),
+        )
     }
 }
