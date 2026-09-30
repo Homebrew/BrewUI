@@ -28,40 +28,40 @@ enum DoctorMessageCopy {
         }
     }
 
-    static func title(_ source: String) -> String {
+    static func title(_ source: String, bundle: Bundle = .module) -> String {
         switch source {
         case "Some installed formulae are deprecated or disabled.":
-            return String(localized: "Some installed formulae are deprecated or disabled.", bundle: #bundle,
-                          comment: "Doctor finding: installed formulae need replacements")
+            return resolve(LocalizedStringResource("Some installed formulae are deprecated or disabled.", bundle: #bundle,
+                                                   comment: "Doctor finding: installed formulae need replacements"), bundle: bundle)
         case "Some installed casks are deprecated or disabled.":
-            return String(localized: "Some installed casks are deprecated or disabled.", bundle: #bundle,
-                          comment: "Doctor finding: installed casks need replacements")
+            return resolve(LocalizedStringResource("Some installed casks are deprecated or disabled.", bundle: #bundle,
+                                                   comment: "Doctor finding: installed casks need replacements"), bundle: bundle)
         case "The following taps are not trusted:":
-            return String(localized: "The following taps are not trusted:", bundle: #bundle,
-                          comment: "Doctor finding: untrusted Homebrew taps are listed below")
+            return resolve(LocalizedStringResource("The following taps are not trusted:", bundle: #bundle,
+                                                   comment: "Doctor finding: untrusted Homebrew taps are listed below"), bundle: bundle)
         case "You have unlinked kegs in your Cellar.":
-            return String(localized: "You have unlinked kegs in your Cellar.", bundle: #bundle,
-                          comment: "Doctor finding: installed kegs are not linked into the Homebrew prefix")
+            return resolve(LocalizedStringResource("You have unlinked kegs in your Cellar.", bundle: #bundle,
+                                                   comment: "Doctor finding: installed kegs are not linked into the Homebrew prefix"), bundle: bundle)
         default:
             if let path = value(in: source, prefix: "Unbrewed dylibs were found in ", suffix: ".") {
-                return String(localized: "Unbrewed dylibs were found in \(path).", bundle: #bundle,
-                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged dynamic libraries")
+                return resolve(LocalizedStringResource("Unbrewed dylibs were found in \(path).", bundle: #bundle,
+                                                       comment: "Doctor finding: %@ is a filesystem path containing unmanaged dynamic libraries"), bundle: bundle)
             }
             if let path = value(in: source, prefix: "Unbrewed static libraries were found in ", suffix: ".") {
-                return String(localized: "Unbrewed static libraries were found in \(path).", bundle: #bundle,
-                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged static libraries")
+                return resolve(LocalizedStringResource("Unbrewed static libraries were found in \(path).", bundle: #bundle,
+                                                       comment: "Doctor finding: %@ is a filesystem path containing unmanaged static libraries"), bundle: bundle)
             }
             if let path = value(in: source, prefix: "Unbrewed '.pc' files were found in ", suffix: ".") {
-                return String(localized: "Unbrewed '.pc' files were found in \(path).", bundle: #bundle,
-                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged pkg-config files")
+                return resolve(LocalizedStringResource("Unbrewed '.pc' files were found in \(path).", bundle: #bundle,
+                                                       comment: "Doctor finding: %@ is a filesystem path containing unmanaged pkg-config files"), bundle: bundle)
             }
             if let path = value(in: source, prefix: "Unbrewed header files were found in ", suffix: ".") {
-                return String(localized: "Unbrewed header files were found in \(path).", bundle: #bundle,
-                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged headers")
+                return resolve(LocalizedStringResource("Unbrewed header files were found in \(path).", bundle: #bundle,
+                                                       comment: "Doctor finding: %@ is a filesystem path containing unmanaged headers"), bundle: bundle)
             }
             if let path = value(in: source, prefix: "Unbrewed '.la' files were found in ", suffix: ".") {
-                return String(localized: "Unbrewed '.la' files were found in \(path).", bundle: #bundle,
-                              comment: "Doctor finding: %@ is a filesystem path containing unmanaged .la files")
+                return resolve(LocalizedStringResource("Unbrewed '.la' files were found in \(path).", bundle: #bundle,
+                                                       comment: "Doctor finding: %@ is a filesystem path containing unmanaged .la files"), bundle: bundle)
             }
             return source
         }
@@ -121,66 +121,72 @@ enum DoctorMessageCopy {
         }
     }
 
-    static func caption(_ source: String) -> String {
+    static func caption(_ source: String, bundle: Bundle = .module) -> String {
         switch source {
         case "You should find replacements for the following formulae:":
-            String(localized: "You should find replacements for the following formulae:", bundle: #bundle,
-                   comment: "Doctor heading: deprecated formulae list follows")
+            resolve(LocalizedStringResource("You should find replacements for the following formulae:", bundle: #bundle,
+                                            comment: "Doctor heading: deprecated formulae list follows"), bundle: bundle)
         case "You should find replacements for the following casks:":
-            String(localized: "You should find replacements for the following casks:", bundle: #bundle,
-                   comment: "Doctor heading: deprecated casks list follows")
+            resolve(LocalizedStringResource("You should find replacements for the following casks:", bundle: #bundle,
+                                            comment: "Doctor heading: deprecated casks list follows"), bundle: bundle)
         case "Unexpected header files:":
-            String(localized: "Unexpected header files:", bundle: #bundle,
-                   comment: "Doctor heading: unmanaged header paths follow")
+            resolve(LocalizedStringResource("Unexpected header files:", bundle: #bundle,
+                                            comment: "Doctor heading: unmanaged header paths follow"), bundle: bundle)
         case "Unexpected dylibs:":
-            String(localized: "Unexpected dylibs:", bundle: #bundle,
-                   comment: "Doctor heading: unmanaged dynamic library paths follow")
+            resolve(LocalizedStringResource("Unexpected dylibs:", bundle: #bundle,
+                                            comment: "Doctor heading: unmanaged dynamic library paths follow"), bundle: bundle)
         case "Unexpected static libraries:":
-            String(localized: "Unexpected static libraries:", bundle: #bundle,
-                   comment: "Doctor heading: unmanaged static library paths follow")
+            resolve(LocalizedStringResource("Unexpected static libraries:", bundle: #bundle,
+                                            comment: "Doctor heading: unmanaged static library paths follow"), bundle: bundle)
         case "Unexpected '.pc' files:":
-            String(localized: "Unexpected '.pc' files:", bundle: #bundle,
-                   comment: "Doctor heading: unmanaged pkg-config file paths follow")
+            resolve(LocalizedStringResource("Unexpected '.pc' files:", bundle: #bundle,
+                                            comment: "Doctor heading: unmanaged pkg-config file paths follow"), bundle: bundle)
         case "Unexpected '.la' files:":
-            String(localized: "Unexpected '.la' files:", bundle: #bundle,
-                   comment: "Doctor heading: unmanaged .la file paths follow")
+            resolve(LocalizedStringResource("Unexpected '.la' files:", bundle: #bundle,
+                                            comment: "Doctor heading: unmanaged .la file paths follow"), bundle: bundle)
         default:
-            otherCaption(source)
+            otherCaption(source, bundle: bundle)
         }
     }
 
-    private static func otherCaption(_ source: String) -> String {
+    private static func otherCaption(_ source: String, bundle: Bundle) -> String {
         switch source {
         case "Trust installed formulae from these taps with:":
-            String(localized: "Trust installed formulae from these taps with:", bundle: #bundle,
-                   comment: "Doctor heading: narrow trust command for installed formulae follows")
+            resolve(LocalizedStringResource("Trust installed formulae from these taps with:", bundle: #bundle,
+                                            comment: "Doctor heading: narrow trust command for installed formulae follows"), bundle: bundle)
         case "Trust installed casks from these taps with:":
-            String(localized: "Trust installed casks from these taps with:", bundle: #bundle,
-                   comment: "Doctor heading: narrow trust command for installed casks follows")
+            resolve(LocalizedStringResource("Trust installed casks from these taps with:", bundle: #bundle,
+                                            comment: "Doctor heading: narrow trust command for installed casks follows"), bundle: bundle)
         case "Trust other specific casks and commands with:":
-            String(localized: "Trust other specific casks and commands with:", bundle: #bundle,
-                   comment: "Doctor heading: narrow trust commands for casks and commands follow")
+            resolve(LocalizedStringResource("Trust other specific casks and commands with:", bundle: #bundle,
+                                            comment: "Doctor heading: narrow trust commands for casks and commands follow"), bundle: bundle)
         case "Untap them with:":
-            String(localized: "Untap them with:", bundle: #bundle,
-                   comment: "Doctor heading: commands to remove untrusted taps follow")
+            resolve(LocalizedStringResource("Untap them with:", bundle: #bundle,
+                                            comment: "Doctor heading: commands to remove untrusted taps follow"), bundle: bundle)
         case "For more information, see:":
-            String(localized: "For more information, see:", bundle: #bundle,
-                   comment: "Doctor heading: reference URL follows")
+            resolve(LocalizedStringResource("For more information, see:", bundle: #bundle,
+                                            comment: "Doctor heading: reference URL follows"), bundle: bundle)
         case "Affects:":
-            String(localized: "Affects:", bundle: #bundle,
-                   comment: "Doctor heading: affected packages follow")
+            resolve(LocalizedStringResource("Affects:", bundle: #bundle,
+                                            comment: "Doctor heading: affected packages follow"), bundle: bundle)
         case "More information:":
-            String(localized: "More information:", bundle: #bundle,
-                   comment: "Doctor heading: reference links follow")
+            resolve(LocalizedStringResource("More information:", bundle: #bundle,
+                                            comment: "Doctor heading: reference links follow"), bundle: bundle)
         case "Run `brew link` on these:":
-            String(localized: "Run `brew link` on these:", bundle: #bundle,
-                   comment: "Doctor heading: packages to link with the literal brew link command follow")
+            resolve(LocalizedStringResource("Run `brew link` on these:", bundle: #bundle,
+                                            comment: "Doctor heading: packages to link with the literal brew link command follow"), bundle: bundle)
         case "You can solve this by running:":
-            String(localized: "You can solve this by running:", bundle: #bundle,
-                   comment: "Doctor heading: suggested Homebrew commands follow")
+            resolve(LocalizedStringResource("You can solve this by running:", bundle: #bundle,
+                                            comment: "Doctor heading: suggested Homebrew commands follow"), bundle: bundle)
         default:
-            title(source)
+            title(source, bundle: bundle)
         }
+    }
+
+    /// Catalogue keys are the English defaults. Keep extraction metadata at the call site while
+    /// resolving the interpolated value in the selected bundle, without changing global language.
+    private static func resolve(_ resource: LocalizedStringResource, bundle: Bundle) -> String {
+        String(localized: resource.defaultValue, table: resource.table, bundle: bundle)
     }
 
     private static func value(in source: String, prefix: String, suffix: String) -> String? {

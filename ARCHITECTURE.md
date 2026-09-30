@@ -60,9 +60,10 @@ cancellation and launch failure. Closing it when the child exits can discard unr
 
 Show copyable Terminal commands to users and preserve execution output. User-facing command text
 omits parsing-only flags such as `--json=v2`. Treat CLI text as unstable: tolerate unknown keys and
-format changes rather than assuming a fixed transcript. Doctor keeps its findings and raw transcript
-in Homebrew's wording; only recognised explanations in the structured feature view are translated.
-Unknown findings fall back to the original text, while the console and copied report remain unchanged.
+format changes rather than assuming a fixed transcript. Doctor's repository model and raw transcript
+keep Homebrew's wording. The structured feature view translates recognised titles, explanations and
+captions. Unknown wording falls back to the original text, while the console and copied report remain
+unchanged.
 
 ## Homebrew configuration
 
