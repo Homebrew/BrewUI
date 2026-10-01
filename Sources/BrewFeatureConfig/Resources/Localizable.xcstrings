@@ -76,7 +76,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo leer la configuración de Homebrew"
+            "value" : "No se pudo leer la configuración de Homebrew."
           }
         },
         "zh-Hans" : {
@@ -145,7 +145,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los ajustes de Homebrew se leen de los archivos brew.env. Se ignoran los perfiles de shell y las variables exportadas. Pon tus ajustes de usuario en ~/.homebrew/brew.env y vuelve a abrir BrewUI"
+            "value" : "Los ajustes de Homebrew se leen de los archivos brew.env. Se ignoran los perfiles de shell y las variables exportadas. Pon tus ajustes de usuario en ~/.homebrew/brew.env y vuelve a abrir BrewUI."
           }
         },
         "zh-Hans" : {

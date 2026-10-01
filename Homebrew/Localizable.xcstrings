@@ -7,7 +7,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se guardó un reporte después de que la app se cerró de forma inesperada. Puedes enviarlo al equipo de Homebrew en GitHub o descartarlo"
+            "value" : "Se guardó un reporte después de que la app se cerró de forma inesperada. Puedes enviarlo al equipo de Homebrew en GitHub para ayudar a solucionar el problema, o descartarlo."
           }
         },
         "zh-Hans" : {
