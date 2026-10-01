@@ -68,6 +68,16 @@ struct ConfigScreen: Screen {
         authentication.tap(file: file, line: line)
         BrewUIElement(app, .proxySettingsField(.password), type: .secureTextField)
             .assertExists(file: file, line: line)
+        let fields: [(AXID.BrewProxySettingsField, String)] = [
+            (.host, "Host name"), (.port, "Port number"), (.noProxy, "No proxy for"),
+            (.username, "Login"), (.password, "Password"),
+        ]
+        for (field, label) in fields {
+            let control = field == .password
+                ? app.secureTextFields[AXID.proxySettingsField(field).rawValue]
+                : app.textFields[AXID.proxySettingsField(field).rawValue]
+            XCTAssertEqual(control.label, label, file: file, line: line)
+        }
         XCTAssertFalse(
             app.textFields[AXID.proxySettingsField(.password).rawValue].exists,
             "Proxy passwords must not be exposed in a plain text field",

@@ -78,6 +78,9 @@ final class ProxySettingsViewModel {
 
     /// Field-level copy for a draft value, or nil when the field is empty or valid.
     func validationMessage(for field: BrewProxySettings.Field) -> String? {
+        guard draft.mode == .manual else {
+            return nil
+        }
         let value = draft[field]
         if value.contains("\n") || value.contains("\r") {
             return String(
@@ -85,9 +88,6 @@ final class ProxySettingsViewModel {
                 bundle: #bundle,
                 comment: "Proxy settings: field contains a newline",
             )
-        }
-        guard draft.mode == .manual else {
-            return nil
         }
         switch field {
         case .host:

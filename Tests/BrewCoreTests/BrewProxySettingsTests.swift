@@ -91,6 +91,14 @@ struct BrewProxySettingsTests {
         #expect(settings.validate().contains(.newlineInValue(field: .host)))
     }
 
+    @Test(arguments: BrewProxySettings.Field.allCases)
+    func `removing proxy settings ignores hidden field contents`(field: BrewProxySettings.Field) {
+        var settings = BrewProxySettings(mode: .none)
+        settings[field] = "invalid\nvalue"
+
+        #expect(settings.validate().isEmpty)
+    }
+
     @Test func `none mode does not require host or port`() {
         let settings = BrewProxySettings(mode: .none, host: "", port: "")
         #expect(settings.validate().isEmpty)

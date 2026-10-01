@@ -8,7 +8,7 @@ import Foundation
 /// User-facing proxy configuration persisted as `brew.env` keys for Homebrew's own download stack.
 ///
 /// Shaped like a manual IDE proxy form: one mode, one type, host + port, an exclusion list and
-/// optional credentials. The store maps that shape onto `http_proxy` / `https_proxy` / `all_proxy` /
+/// optional credentials. The store maps that shape onto `http_proxy` / `https_proxy` / `ftp_proxy` / `all_proxy` /
 /// `no_proxy`. Automatic PAC discovery is not modelled — `brew.env` and curl do not consume it.
 public struct BrewProxySettings: Equatable, Sendable {
     /// `none` removes user proxy keys, allowing installation and system configuration to apply. `manual` writes the composed URL from ``type``/``host``/``port``.
@@ -19,7 +19,7 @@ public struct BrewProxySettings: Equatable, Sendable {
 
     /// Which proxy protocol the manual entry speaks.
     public enum ProxyType: String, CaseIterable, Sendable {
-        /// HTTP proxy: `http_proxy` and `https_proxy` share one `http://` URL.
+        /// HTTP proxy: `http_proxy`, `https_proxy` and `ftp_proxy` share one `http://` URL.
         case http
         /// SOCKS proxy: `all_proxy` gets a `socks5://` URL.
         case socks
@@ -77,15 +77,15 @@ public struct BrewProxySettings: Equatable, Sendable {
     }
 
     public func validate() -> [ValidationError] {
+        guard mode == .manual else {
+            return []
+        }
         var failures: [ValidationError] = []
         for field in Field.allCases {
             let value = self[field]
             if value.contains("\n") || value.contains("\r") {
                 failures.append(.newlineInValue(field: field))
             }
-        }
-        guard mode == .manual else {
-            return failures
         }
         if host.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             failures.append(.missingHost)

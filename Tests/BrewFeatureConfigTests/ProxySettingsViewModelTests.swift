@@ -78,6 +78,32 @@ struct ProxySettingsViewModelTests {
         #expect(viewModel.validationMessage(for: .host) == nil)
     }
 
+    @Test func `removal saves despite an invalid hidden draft`() async {
+        let store = StubUserBrewEnvironmentStore(settings: Self.manualHTTP)
+        let viewModel = ProxySettingsViewModel(
+            store: store,
+            configRepository: StubConfigRepository(snapshot: BrewConfigSnapshot(entries: [])),
+        )
+        viewModel.load()
+        viewModel.draft.host = "invalid\nvalue"
+        viewModel.draft.mode = .none
+
+        await viewModel.save()
+
+        #expect(store.savedSettings == [viewModel.draft])
+    }
+
+    @Test(arguments: BrewProxySettings.Field.allCases)
+    func `removal hides validation messages`(field: BrewProxySettings.Field) {
+        let viewModel = ProxySettingsViewModel(
+            store: StubUserBrewEnvironmentStore(),
+            configRepository: StubConfigRepository(snapshot: BrewConfigSnapshot(entries: [])),
+        )
+        viewModel.draft[field] = "invalid\nvalue"
+
+        #expect(viewModel.validationMessage(for: field) == nil)
+    }
+
     @Test func `discard restores the saved values`() {
         let store = StubUserBrewEnvironmentStore(settings: Self.manualHTTP)
         let viewModel = ProxySettingsViewModel(

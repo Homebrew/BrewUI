@@ -232,6 +232,7 @@ struct ProxySettingsCard: View {
                     TextField(placeholder, text: binding(for: field), prompt: Text(placeholder))
                 }
             }
+            .accessibilityLabel(Text(label))
             .textFieldStyle(.roundedBorder)
             .font(.brewCode)
             .autocorrectionDisabled()

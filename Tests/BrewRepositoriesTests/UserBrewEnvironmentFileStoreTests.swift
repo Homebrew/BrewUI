@@ -76,6 +76,40 @@ struct UserBrewEnvironmentFileStoreTests {
         #expect(settings.port == "1")
     }
 
+    @Test(arguments: ["ftp_proxy", "FTP_PROXY", "HOMEBREW_FTP_PROXY"])
+    func `FTP-only settings can be loaded and removed`(key: String) throws {
+        let (store, fileURL) = try makeStore()
+        try "\(key)=http://ftp.example:8080\n".write(to: fileURL, atomically: true, encoding: .utf8)
+        var settings = try store.loadProxySettings()
+        #expect(settings.mode == .manual)
+        settings.mode = .none
+
+        try store.saveProxySettings(settings)
+
+        #expect(try read(fileURL).isEmpty)
+    }
+
+    @Test(arguments: [BrewProxySettings.ProxyType.http, .socks])
+    func `manual settings replace existing FTP overrides`(type: BrewProxySettings.ProxyType) throws {
+        let (store, fileURL) = try makeStore()
+        try "ftp_proxy=http://old:1\nFTP_PROXY=http://old:2\nHOMEBREW_FTP_PROXY=http://old:3\n"
+            .write(to: fileURL, atomically: true, encoding: .utf8)
+
+        try store.saveProxySettings(BrewProxySettings(mode: .manual, type: type, host: "new", port: "9"))
+
+        let ftpLines = try read(fileURL).components(separatedBy: .newlines).filter { $0.lowercased().contains("ftp_proxy=") }
+        #expect(ftpLines == [type == .http ? "ftp_proxy=http://new:9" : "ftp_proxy="])
+    }
+
+    @Test func `removal ignores invalid fields and preserves unrelated settings`() throws {
+        let (store, fileURL) = try makeStore()
+        try "https_proxy=http://old:1\nHOMEBREW_NO_ANALYTICS=1\n".write(to: fileURL, atomically: true, encoding: .utf8)
+
+        try store.saveProxySettings(BrewProxySettings(mode: .none, host: "invalid\nvalue"))
+
+        #expect(try read(fileURL) == "HOMEBREW_NO_ANALYTICS=1\n")
+    }
+
     // MARK: - Writing
 
     @Test func `manual http save writes both scheme keys and keeps unrelated lines`() throws {
@@ -293,20 +327,21 @@ struct UserBrewEnvironmentFileStoreTests {
         // Run only the loader against a temporary file, never a real Homebrew executable.
         let script = #"""
         export http_proxy=http://inherited:1 https_proxy=http://inherited:2
+        export ftp_proxy=http://inherited:4
         export all_proxy=socks5://inherited:3 no_proxy=inherited
         while read -r line; do
             [[ "${line}" =~ ^(HOMEBREW_|SUDO_ASKPASS=|(all|no|ftp|https?)_proxy=) ]] || continue
             export "${line}"
         done <"$1"
-        printf '%s\n' "${http_proxy-}" "${https_proxy-}" "${all_proxy-}" "${no_proxy-}"
+        printf '%s\n' "${http_proxy-}" "${https_proxy-}" "${ftp_proxy-}" "${all_proxy-}" "${no_proxy-}"
         """#
         let output = try await BrewCommandService().run(
             executableURL: URL(fileURLWithPath: "/bin/bash"),
             arguments: ["-c", script, "proxy-contract", fileURL.path],
         )
         let expected = type == .http
-            ? "http://127.0.0.1:7890\nhttp://127.0.0.1:7890\n\nlocalhost\n"
-            : "\n\nsocks5://127.0.0.1:7890\nlocalhost\n"
+            ? "http://127.0.0.1:7890\nhttp://127.0.0.1:7890\nhttp://127.0.0.1:7890\n\nlocalhost\n"
+            : "\n\n\nsocks5://127.0.0.1:7890\nlocalhost\n"
 
         #expect(output.terminationStatus == 0)
         #expect(output.standardOutput == expected)
@@ -316,6 +351,6 @@ struct UserBrewEnvironmentFileStoreTests {
         let (store, fileURL) = try makeStore()
         try store.saveProxySettings(BrewProxySettings(mode: .manual, type: .socks, host: "localhost", port: "1080"))
 
-        #expect(try read(fileURL) == "http_proxy=\nhttps_proxy=\nall_proxy=socks5://localhost:1080\nno_proxy=\n")
+        #expect(try read(fileURL) == "http_proxy=\nhttps_proxy=\nftp_proxy=\nall_proxy=socks5://localhost:1080\nno_proxy=\n")
     }
 }

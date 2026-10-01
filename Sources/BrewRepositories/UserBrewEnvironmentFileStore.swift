@@ -32,6 +32,7 @@ public struct UserBrewEnvironmentFileStore: UserBrewEnvironmentStoring, Sendable
     static let managedKeys: Set<String> = [
         "http_proxy", "HTTP_PROXY", "HOMEBREW_HTTP_PROXY",
         "https_proxy", "HTTPS_PROXY", "HOMEBREW_HTTPS_PROXY",
+        "ftp_proxy", "FTP_PROXY", "HOMEBREW_FTP_PROXY",
         "all_proxy", "ALL_PROXY", "HOMEBREW_ALL_PROXY",
         "no_proxy", "NO_PROXY", "HOMEBREW_NO_PROXY",
     ]
@@ -85,6 +86,7 @@ public struct UserBrewEnvironmentFileStore: UserBrewEnvironmentStoring, Sendable
             values["https_proxy"] ?? values["HTTPS_PROXY"] ?? values["HOMEBREW_HTTPS_PROXY"],
             values["http_proxy"] ?? values["HTTP_PROXY"] ?? values["HOMEBREW_HTTP_PROXY"],
             values["all_proxy"] ?? values["ALL_PROXY"] ?? values["HOMEBREW_ALL_PROXY"],
+            values["ftp_proxy"] ?? values["FTP_PROXY"] ?? values["HOMEBREW_FTP_PROXY"],
         ]
         .compactMap(\.self)
         .filter { !$0.isEmpty }
@@ -129,7 +131,7 @@ public struct UserBrewEnvironmentFileStore: UserBrewEnvironmentStoring, Sendable
             result.append("\(standardKey)=\(replacement)")
         }
 
-        for key in ["http_proxy", "https_proxy", "all_proxy", "no_proxy"] {
+        for key in ["http_proxy", "https_proxy", "ftp_proxy", "all_proxy", "no_proxy"] {
             guard let value = targetValues.removeValue(forKey: key) else { continue }
             result.append("\(key)=\(value)")
         }
@@ -141,7 +143,7 @@ public struct UserBrewEnvironmentFileStore: UserBrewEnvironmentStoring, Sendable
         guard let url = settings.composedURL else {
             return [:]
         }
-        var values = ["http_proxy": "", "https_proxy": "", "all_proxy": "", "no_proxy": ""]
+        var values = ["http_proxy": "", "https_proxy": "", "ftp_proxy": "", "all_proxy": "", "no_proxy": ""]
         values["no_proxy"] = settings.noProxy.trimmingCharacters(in: .whitespacesAndNewlines)
         // Clear inherited protocol-specific proxies before choosing SOCKS, and clear inherited
         // exclusions so the manual form describes every proxy key it writes.
@@ -149,6 +151,7 @@ public struct UserBrewEnvironmentFileStore: UserBrewEnvironmentStoring, Sendable
         case .http:
             values["http_proxy"] = url
             values["https_proxy"] = url
+            values["ftp_proxy"] = url
         case .socks:
             values["all_proxy"] = url
         }

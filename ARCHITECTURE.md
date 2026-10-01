@@ -94,8 +94,10 @@ Doctor describe Homebrew's environment in the app and may differ from Terminal. 
 sets output controls for its console and self-upgrade log.
 
 The Configuration tab can edit user proxy settings in `~/.homebrew/brew.env`. It writes Homebrew's
-lowercase `http_proxy`, `https_proxy`, `all_proxy` and `no_proxy` keys and URL-encodes credentials.
+lowercase `http_proxy`, `https_proxy`, `ftp_proxy`, `all_proxy` and `no_proxy` keys and URL-encodes credentials.
 Host fields accept host names and IP addresses rather than URLs, with IPv6 authorities bracketed.
+HTTP mode uses the same proxy for HTTP, HTTPS and FTP; SOCKS mode clears protocol-specific overrides.
+An existing FTP-only proxy is also loaded so it can be edited or removed.
 Editing existing settings preserves HTTPS and SOCKS protocol variants, including remote DNS semantics.
 Manual settings take effect on the next Homebrew command, including self-upgrades and Terminal
 commands that read the same user file. Unused proxy keys are written empty to override installation
