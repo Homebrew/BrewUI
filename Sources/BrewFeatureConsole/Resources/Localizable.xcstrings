@@ -4,6 +4,12 @@
     "Clear" : {
       "comment" : "Console toolbar: remove finished jobs",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,6 +27,12 @@
     "Clear completed jobs" : {
       "comment" : "Tooltip: console clear button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar tareas completadas"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38,6 +50,12 @@
     "Cleared" : {
       "comment" : "Console toolbar: shown briefly after clearing",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,6 +73,12 @@
     "Copied" : {
       "comment" : "Console toolbar: shown briefly after copying",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -72,6 +96,12 @@
     "Copy" : {
       "comment" : "Console toolbar: copy output",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -89,6 +119,12 @@
     "Copy output to clipboard" : {
       "comment" : "Tooltip: console copy button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar salida al portapapeles"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -106,6 +142,12 @@
     "Dismiss" : {
       "comment" : "Tooltip: close a finished job tab",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -123,6 +165,12 @@
     "Expand Console Panel Automatically" : {
       "comment" : "View menu: open the console when a command starts",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expandir el panel de la consola automáticamente"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -140,6 +188,12 @@
     "Hide Console" : {
       "comment" : "View menu: collapse the console panel (⌘`)",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar consola"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -157,6 +211,12 @@
     "Hide console" : {
       "comment" : "Console status bar: collapse button\nConsole toolbar: collapse button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar consola"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -174,6 +234,12 @@
     "No activity" : {
       "comment" : "Console empty state title\nConsole toolbar title when nothing has run",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin actividad"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -191,6 +257,12 @@
     "Ready" : {
       "comment" : "Console status bar when nothing has run",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -208,6 +280,12 @@
     "Run a brew command to see output here." : {
       "comment" : "Console empty state body",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ejecuta un comando de brew para ver su salida aquí."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -225,6 +303,12 @@
     "Save" : {
       "comment" : "Console toolbar: save output to a file",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -242,6 +326,12 @@
     "Save output to file" : {
       "comment" : "Tooltip: console save button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar salida en un archivo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -259,6 +349,12 @@
     "Show Console" : {
       "comment" : "View menu: expand the console panel (⌘`)",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar consola"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -276,6 +372,12 @@
     "Show console" : {
       "comment" : "Console status bar: expand button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar consola"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -293,6 +395,12 @@
     "done" : {
       "comment" : "Console status bar: operation finished",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "completado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -310,6 +418,12 @@
     "failed" : {
       "comment" : "Console status bar: operation failed",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "falló"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -325,11 +439,25 @@
       }
     },
     "refreshing" : {
-      "comment" : "Console status bar: command finished, refreshing the installed package list"
+      "comment" : "Console status bar: command finished, refreshing the installed package list",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "recargando"
+          }
+        }
+      }
     },
     "running" : {
       "comment" : "Console status bar: operation in progress",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en ejecución"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -347,6 +475,12 @@
     "— %@" : {
       "comment" : "Console status bar suffix while a command runs; %@ is the phase label",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -364,6 +498,12 @@
     "— done" : {
       "comment" : "Console status bar suffix after a command succeeded",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— completado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -381,6 +521,12 @@
     "— failed · exit %d" : {
       "comment" : "Console status bar suffix after a command failed; %d is the exit code",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— falló · código de salida %d"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",

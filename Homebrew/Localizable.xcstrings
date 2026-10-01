@@ -4,6 +4,12 @@
     "A report was saved after the app quit unexpectedly. You can send it to the Homebrew team on GitHub to help fix the problem, or discard it." : {
       "comment" : "Crash report dialog body",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se guardó un reporte después de que la app se cerró de forma inesperada. Puedes enviarlo al equipo de Homebrew en GitHub o descartarlo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,6 +27,12 @@
     "Browse and search %lld+ packages" : {
       "comment" : "Window subtitle, Discover; %lld is the approximate catalog size",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explora y busca %lld+ paquetes"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38,6 +50,12 @@
     "Browse or search your installed packages" : {
       "comment" : "Window subtitle, Installed",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explora o busca tus paquetes instalados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,6 +73,12 @@
     "Check your Homebrew installation for problems" : {
       "comment" : "Window subtitle, Doctor",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Busca problemas en tu instalación de Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -78,6 +102,12 @@
             "value" : "Configuration"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuración"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -95,6 +125,12 @@
     "Discard" : {
       "comment" : "Crash report dialog: delete the report",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -116,6 +152,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Discover"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descubrir"
           }
         },
         "zh-Hans" : {
@@ -141,6 +183,12 @@
             "value" : "Doctor"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doctor"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -158,6 +206,12 @@
     "Homebrew Documentation" : {
       "comment" : "Help menu",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documentación de Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -175,6 +229,12 @@
     "Homebrew environment & diagnostics" : {
       "comment" : "Window subtitle, Configuration",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entorno y diagnóstico de Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -198,6 +258,12 @@
             "value" : "Installed"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -215,6 +281,12 @@
     "OK" : {
       "comment" : "Self-upgrade outcome alert: dismiss",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -232,6 +304,12 @@
     "Report an Issue…" : {
       "comment" : "Help menu: opens the GitHub issue form",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informar de un problema…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -249,6 +327,12 @@
     "Report on GitHub…" : {
       "comment" : "Crash report dialog: open a prefilled GitHub issue",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informar en GitHub…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -266,6 +350,12 @@
     "Review and upgrade outdated packages" : {
       "comment" : "Window subtitle, Upgrades",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisa y actualiza paquetes desactualizados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -283,6 +373,12 @@
     "The Homebrew app quit unexpectedly" : {
       "comment" : "Crash report dialog title",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app de Homebrew se cerró inesperadamente"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -300,6 +396,12 @@
     "The upgrade helper is missing from this build of the Homebrew app." : {
       "comment" : "Shown when the bundled self-upgrade helper executable cannot be found",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encuentra el asistente de actualización en esta compilación de la app de Homebrew."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -323,6 +425,12 @@
             "value" : "Upgrades"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizaciones"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -340,6 +448,12 @@
     "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
       "comment" : "Shown when the self-upgrade is attempted while another brew command is still running",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espera a que termine el comando de Homebrew en ejecución y luego actualiza la app de Homebrew."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",

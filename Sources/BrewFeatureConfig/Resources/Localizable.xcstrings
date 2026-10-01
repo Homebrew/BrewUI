@@ -4,6 +4,12 @@
     "Build settings" : {
       "comment" : "Configuration card title: HOMEBREW_* build options",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes de compilación"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,6 +27,12 @@
     "Copy report" : {
       "comment" : "Configuration header: copy the diagnostic report",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar reporte"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38,6 +50,12 @@
     "Couldn't locate the brew executable. Install Homebrew, then refresh." : {
       "comment" : "Configuration tab, brew-not-found message",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo localizar el ejecutable de brew. Instala Homebrew y luego refresca."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,6 +73,12 @@
     "Couldn't read the Homebrew configuration." : {
       "comment" : "Configuration tab, generic load failure",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo leer la configuración de Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -72,6 +96,12 @@
     "Homebrew" : {
       "comment" : "Configuration card title: brew version, prefix, taps",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -89,6 +119,12 @@
     "Homebrew not found" : {
       "comment" : "Configuration tab, brew-not-found title",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew no encontrado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -106,6 +142,12 @@
     "Homebrew settings are read from brew.env files. Shell profiles and exported variables are ignored. Put user settings in ~/.homebrew/brew.env, then relaunch BrewUI." : {
       "comment" : "Configuration tab: where Homebrew reads its settings from",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los ajustes de Homebrew se leen de los archivos brew.env. Se ignoran los perfiles de shell y las variables exportadas. Pon tus ajustes de usuario en ~/.homebrew/brew.env y vuelve a abrir BrewUI"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -123,6 +165,12 @@
     "Refresh" : {
       "comment" : "Configuration header: re-run brew config",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refrescar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -140,6 +188,12 @@
     "System" : {
       "comment" : "Configuration card title: macOS, CPU, Xcode",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistema"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
