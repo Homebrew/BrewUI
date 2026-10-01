@@ -82,14 +82,12 @@ public struct UserBrewEnvironmentFileStore: UserBrewEnvironmentStoring, Sendable
         }
 
         let noProxy = values["no_proxy"] ?? values["NO_PROXY"] ?? values["HOMEBREW_NO_PROXY"] ?? ""
-        let candidates: [String] = [
-            values["https_proxy"] ?? values["HTTPS_PROXY"] ?? values["HOMEBREW_HTTPS_PROXY"],
-            values["http_proxy"] ?? values["HTTP_PROXY"] ?? values["HOMEBREW_HTTP_PROXY"],
-            values["all_proxy"] ?? values["ALL_PROXY"] ?? values["HOMEBREW_ALL_PROXY"],
-            values["ftp_proxy"] ?? values["FTP_PROXY"] ?? values["HOMEBREW_FTP_PROXY"],
-        ]
-        .compactMap(\.self)
-        .filter { !$0.isEmpty }
+        let httpsProxy: String? = values["https_proxy"] ?? values["HTTPS_PROXY"] ?? values["HOMEBREW_HTTPS_PROXY"]
+        let httpProxy: String? = values["http_proxy"] ?? values["HTTP_PROXY"] ?? values["HOMEBREW_HTTP_PROXY"]
+        let allProxy: String? = values["all_proxy"] ?? values["ALL_PROXY"] ?? values["HOMEBREW_ALL_PROXY"]
+        let ftpProxy: String? = values["ftp_proxy"] ?? values["FTP_PROXY"] ?? values["HOMEBREW_FTP_PROXY"]
+        let proxyURLs: [String?] = [httpsProxy, httpProxy, allProxy, ftpProxy]
+        let candidates = proxyURLs.compactMap(\.self).filter { !$0.isEmpty }
 
         guard let primary = candidates.compactMap(BrewProxySettings.parsing(proxyURL:)).first else {
             return BrewProxySettings(mode: .none, noProxy: noProxy)
