@@ -50,7 +50,7 @@ public struct UserBrewEnvironmentFileStore: UserBrewEnvironmentStoring, Sendable
         switch failure {
         case let .newlineInValue(field):
             throw UserBrewEnvironmentError.rejectedValue(field: field)
-        case .missingHost:
+        case .missingHost, .invalidHost:
             throw UserBrewEnvironmentError.rejectedValue(field: .host)
         case .missingUsername:
             throw UserBrewEnvironmentError.rejectedValue(field: .username)

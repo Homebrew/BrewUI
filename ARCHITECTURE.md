@@ -95,6 +95,8 @@ sets output controls for its console and self-upgrade log.
 
 The Configuration tab can edit user proxy settings in `~/.homebrew/brew.env`. It writes Homebrew's
 lowercase `http_proxy`, `https_proxy`, `all_proxy` and `no_proxy` keys and URL-encodes credentials.
+Host fields accept host names and IP addresses rather than URLs, with IPv6 authorities bracketed.
+Editing existing settings preserves HTTPS and SOCKS protocol variants, including remote DNS semantics.
 Manual settings take effect on the next Homebrew command, including self-upgrades and Terminal
 commands that read the same user file. Unused proxy keys are written empty to override installation
 and system defaults, unless the system file has priority. Credentials are stored in plain text.

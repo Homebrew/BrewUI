@@ -232,6 +232,9 @@
     "That value can’t be saved to brew.env." : {
       "comment" : "Proxy settings: store refused the value"
     },
+    "Use a host name or IP address without a URL scheme or path." : {
+      "comment" : "Proxy settings: host contains invalid URL components"
+    },
     "Use a port from 1 to 65535." : {
       "comment" : "Proxy settings: port is not a valid TCP port"
     }

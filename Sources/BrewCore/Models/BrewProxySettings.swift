@@ -27,6 +27,8 @@ public struct BrewProxySettings: Equatable, Sendable {
 
     public var mode: Mode
     public var type: ProxyType
+    private var originalScheme: String?
+
     public var host: String
     public var port: String
     public var noProxy: String
@@ -68,6 +70,7 @@ public struct BrewProxySettings: Equatable, Sendable {
     /// Typed validation outcome. Copy lives in the presentation layer; this only says what is wrong.
     public enum ValidationError: Error, Equatable, Sendable {
         case newlineInValue(field: Field)
+        case invalidHost
         case missingHost
         case invalidPort
         case missingUsername
@@ -86,6 +89,8 @@ public struct BrewProxySettings: Equatable, Sendable {
         }
         if host.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             failures.append(.missingHost)
+        } else if !Self.isValidHost(host) {
+            failures.append(.invalidHost)
         }
         if !Self.isValidPort(port) {
             failures.append(.invalidPort)
@@ -98,7 +103,9 @@ public struct BrewProxySettings: Equatable, Sendable {
 
     public static func isValidPort(_ value: String) -> Bool {
         let trimmed = value.trimmingCharacters(in: .whitespaces)
-        guard let number = Int(trimmed) else {
+        guard trimmed.utf8.allSatisfy({ (48 ... 57).contains($0) }),
+              let number = Int(trimmed)
+        else {
             return false
         }
         return (1 ... 65535).contains(number)
@@ -109,16 +116,34 @@ public struct BrewProxySettings: Equatable, Sendable {
         guard mode == .manual else {
             return nil
         }
-        let scheme = type == .socks ? "socks5" : "http"
+        let defaultScheme = type == .socks ? "socks5" : "http"
+        let scheme = originalScheme.flatMap { Self.proxyType(forScheme: $0) == type ? $0 : nil } ?? defaultScheme
         var authority = ""
         if usesAuthentication {
             let user = Self.encodedCredential(username.trimmingCharacters(in: .whitespaces))
             let pass = Self.encodedCredential(password)
             authority = pass.isEmpty ? "\(user)@" : "\(user):\(pass)@"
         }
-        let hostname = host.trimmingCharacters(in: .whitespaces)
+        let hostname = Self.bracketedHost(host)
         let portValue = port.trimmingCharacters(in: .whitespaces)
         return "\(scheme)://\(authority)\(hostname):\(portValue)"
+    }
+
+    private static func bracketedHost(_ value: String) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespaces)
+        return trimmed.contains(":") && !trimmed.hasPrefix("[") ? "[\(trimmed)]" : trimmed
+    }
+
+    private static func isValidHost(_ value: String) -> Bool {
+        let host = value.trimmingCharacters(in: .whitespaces)
+        let forbidden = CharacterSet.whitespacesAndNewlines.union(CharacterSet(charactersIn: "/\\@?#%"))
+        guard host.rangeOfCharacter(from: forbidden) == nil,
+              let components = URLComponents(string: "http://\(bracketedHost(host)):1"),
+              components.host != nil, components.url != nil
+        else {
+            return false
+        }
+        return true
     }
 
     private static func encodedCredential(_ value: String) -> String {
@@ -175,6 +200,11 @@ public extension BrewProxySettings {
         }
 
         var settings = BrewProxySettings(mode: .manual, type: type, host: host, port: port)
+        let scheme = String(trimmed[trimmed.startIndex ..< schemeEnd.lowerBound]).lowercased()
+        // Keep TLS and SOCKS DNS semantics when editing an existing proxy's other fields.
+        if scheme != (type == .socks ? "socks5" : "http") {
+            settings.originalScheme = scheme
+        }
         if !credentials.isEmpty {
             settings.usesAuthentication = true
             if let colon = credentials.firstIndex(of: ":") {

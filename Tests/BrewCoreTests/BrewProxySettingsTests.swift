@@ -64,7 +64,7 @@ struct BrewProxySettingsTests {
         #expect(failures.contains(.invalidPort))
     }
 
-    @Test(arguments: ["0", "65536", "abc", "", "  "])
+    @Test(arguments: ["0", "65536", "abc", "", "  ", "+7890"])
     func `invalid ports fail validation`(port: String) {
         let settings = BrewProxySettings(mode: .manual, host: "127.0.0.1", port: port)
         #expect(settings.validate().contains(.invalidPort))
@@ -151,5 +151,23 @@ struct BrewProxySettingsTests {
         #expect(settings.composedURL == "http://user%3Aname%40company:a%23b%2Fc%2540d%5Ce%20@localhost:7890")
         let url = try #require(settings.composedURL)
         #expect(BrewProxySettings.parsing(proxyURL: url) == settings)
+    }
+
+    @Test(arguments: ["http://proxy.example", "proxy.example/path", "user@proxy.example", "proxy example"])
+    func `hosts cannot introduce URL components`(host: String) {
+        let settings = BrewProxySettings(mode: .manual, host: host, port: "7890")
+        #expect(!settings.validate().isEmpty)
+    }
+
+    @Test(arguments: ["https://proxy.example:8443", "socks4://proxy.example:1080", "socks4a://proxy.example:1080", "socks5h://proxy.example:1080"])
+    func `reading and saving preserves the proxy protocol`(value: String) throws {
+        let parsed = try #require(BrewProxySettings.parsing(proxyURL: value))
+        #expect(parsed.composedURL == value)
+    }
+
+    @Test func `IPv6 hosts compose a bracketed authority`() {
+        let settings = BrewProxySettings(mode: .manual, host: "::1", port: "7890")
+        #expect(settings.validate().isEmpty)
+        #expect(settings.composedURL == "http://[::1]:7890")
     }
 }

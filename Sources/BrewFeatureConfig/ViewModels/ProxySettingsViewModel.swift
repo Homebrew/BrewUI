@@ -98,6 +98,13 @@ final class ProxySettingsViewModel {
                     comment: "Proxy settings: host is empty in manual mode",
                 )
             }
+            if draft.validate().contains(.invalidHost) {
+                return String(
+                    localized: "Use a host name or IP address without a URL scheme or path.",
+                    bundle: #bundle,
+                    comment: "Proxy settings: host contains invalid URL components",
+                )
+            }
         case .port:
             if !BrewProxySettings.isValidPort(value) {
                 return String(
