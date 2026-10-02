@@ -8,6 +8,7 @@ import BrewCore
 import BrewCrashReporting
 import BrewFeatureSelfUpgrade
 import BrewNetworking
+import BrewRepositories
 import BrewSelfUpgradeContract
 import BrewUITestContract
 import Foundation
@@ -112,7 +113,18 @@ extension BrewApp {
         guard uiTesting != nil else {
             return []
         }
-        return [BrewUITestingEnvironmentKey.launchArgument, "YES"]
+        var arguments = [BrewUITestingEnvironmentKey.launchArgument, "YES"]
+        let launchArguments = ProcessInfo.processInfo.arguments
+        // XCTest's language overrides live in the argument domain and disappear on a helper relaunch.
+        for key in ["-AppleLanguages", "-AppleLocale"] {
+            guard let index = launchArguments.firstIndex(of: key),
+                  launchArguments.indices.contains(index + 1)
+            else {
+                continue
+            }
+            arguments += [key, launchArguments[index + 1]]
+        }
+        return arguments
     }
 
     /// `fixturesRoot` is omitted: the relaunched app reinstalls the fixture tree into its own temp directory.
@@ -177,5 +189,18 @@ extension BrewApp {
             return .live()
         }
         return .uiTesting(brewURL: fixtures?.fakeBrewURL)
+    }
+
+    /// User `brew.env` seam. Under `-uiTesting` the store lands in the run's container so a proxy save
+    /// never touches the host's real `~/.homebrew/brew.env`.
+    static func makeUserBrewEnvironmentStore(
+        fixtures: BrewUITestingFixtureInstaller.Installation?,
+    ) -> UserBrewEnvironmentFileStore {
+        guard let fixtures else {
+            return .userDefault()
+        }
+        return UserBrewEnvironmentFileStore(
+            fileURL: fixtures.containerURL.appendingPathComponent("brew.env"),
+        )
     }
 }
