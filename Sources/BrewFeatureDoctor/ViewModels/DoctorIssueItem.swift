@@ -60,13 +60,14 @@ struct DoctorIssueItem: Identifiable, Equatable {
         primaryRunnableStep?.displayCommand
     }
 
-    /// `title` is `brew doctor`'s own wording, so only the annotation is localised.
+    /// Keep the raw title for identity while presenting known diagnostic wording in the app language.
     var accessibilityLabel: String {
+        let displayTitle = DoctorMessageCopy.title(title)
         guard hasRunnableFix else {
-            return title
+            return displayTitle
         }
         return String(
-            localized: "\(title), Fix available",
+            localized: "\(displayTitle), Fix available",
             bundle: #bundle,
             comment: "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
         )

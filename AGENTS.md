@@ -211,7 +211,8 @@ between runs to avoid rebuilding SwiftSyntax.
 
 The app follows the macOS language, including the per-app language under *Applications* in System
 Settings, and falls back to English for each untranslated string, so a partially translated language
-is fine to ship. Homebrew's own console output is always English.
+is fine to ship. Homebrew's own console output is always English. The structured Doctor view may
+translate recognised diagnostic explanations, but its raw output and copied report remain verbatim.
 
 ### Translating
 
@@ -261,6 +262,10 @@ Text(verbatim: "v\(version)")   // not copy: versions, package names, commands
   stays a `String` built with `String(localized:)`, because a resource cannot hold runtime text.
   Components that show it take a `verbatim:` initialiser such as `NoteCallout(verbatim:)`. Text that
   must match `brew` word for word stays verbatim too.
+- Homebrew provides no stable identifier for Doctor findings. Translate only recognised fixed prose
+  or anchored templates with unchanged path placeholders in the Doctor presentation layer, leaving
+  unknown wording in English. Never localise package names, paths, commands, URLs, the raw transcript
+  or the copy-output action's contents.
 - `#Preview` sample copy goes through `previewCopy(_:)`. A literal in a `LocalizedStringResource`
   parameter is an extraction site and would otherwise be sent to translators.
 - Resolve a resource with `String(localized: resource)` where copy feeds a `String` API, and in
