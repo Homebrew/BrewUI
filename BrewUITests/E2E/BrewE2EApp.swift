@@ -5,12 +5,13 @@
 
 import XCTest
 
-/// Launches with **no** `-uiTesting` argument, so `BrewApp.init()` takes `.live()`: isolated system zsh,
-/// real `brew`, real network.
+/// Runs against real Homebrew and the network without `-uiTesting`. Pin the app to English so
+/// page-object button queries are independent of the host's per-app language preference.
 @MainActor
 enum BrewE2EApp {
     static func launch() -> XCUIApplication {
         let app = XCUIApplication()
+        app.launchArguments += ["-AppleLanguages", "(en)"]
         app.launch()
         BrewApp.activate(app)
         return app

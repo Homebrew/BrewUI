@@ -44,6 +44,20 @@ final class InstalledUITests: BrewUITestCase {
             .assertDoesNotHavePackage("wget")
     }
 
+    @MainActor
+    func testNarrowDetailKeepsPackageHeaderAndStatusBadgesRendered() {
+        let app = launch(.installedBasic)
+            .openDetail(for: "rectangle")
+            .app
+
+        let window = app.windows.firstMatch
+        _ = window.resizeWindow(by: CGVector(dx: -280, dy: 0))
+
+        XCTAssertTrue(app.staticTexts["Rectangle"].waitForExistence(timeout: BrewUITestTimeout.default))
+        XCTAssertTrue(app.staticTexts["CASK"].waitForExistence(timeout: BrewUITestTimeout.default))
+        XCTAssertTrue(app.staticTexts["Upgrade available"].waitForExistence(timeout: BrewUITestTimeout.default))
+    }
+
     /// Reading after `waitUntilExit` rather than draining concurrently would deadlock on this input.
     @MainActor
     func testRendersAnInventoryLargerThanOnePipeBuffer() {

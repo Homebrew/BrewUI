@@ -17,9 +17,6 @@ final class DiscoverListRowViewModel: Identifiable {
 
     /// Latest phase from the command center stream (see ``observeRowUpdates()``); drives the install spinner.
     private var operationPhase: BrewOperationPhase = .idle
-    /// Keeps the spinner up after the install finishes until the installed badge resolves (bridges the
-    /// gap before ``installedRepository`` re-reads). See ``DiscoverInstallBusyPresentation``.
-    private var awaitingInstallResolution = false
 
     init(
         discoveryPackage: DiscoveryBrewPackage,
@@ -89,13 +86,9 @@ final class DiscoverListRowViewModel: Identifiable {
         return String(localized: "Installed", bundle: #bundle, comment: "Discover list row installed status")
     }
 
-    /// True while an install for this package is in flight (and bridging until the installed badge appears).
+    /// True while an install is in flight, including the reconcile that lands the badge.
     var showsInstallBusy: Bool {
-        DiscoverInstallBusyPresentation.showsInstallBusy(
-            phase: operationPhase,
-            awaitingResolution: awaitingInstallResolution,
-            isInstalled: installedRepository.isInstalled(id),
-        )
+        DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
     }
 
     var rowAccessibilityLabel: String {
@@ -127,15 +120,7 @@ final class DiscoverListRowViewModel: Identifiable {
         let operationID = BrewOperationID(kind: packageKind, name: discoveryPackage.name)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
         for await phase in stream {
-            let wasRunningInstall = operationPhase.isRunningInstall
             operationPhase = phase
-            if phase.isRunningInstall {
-                awaitingInstallResolution = true
-            } else if case .idle = phase, wasRunningInstall {
-                awaitingInstallResolution = true
-            } else if case .failed = phase {
-                awaitingInstallResolution = false
-            }
         }
     }
 
@@ -144,7 +129,5 @@ final class DiscoverListRowViewModel: Identifiable {
             return
         }
         discoveryPackage = newDiscoveryPackage
-        operationPhase = .idle
-        awaitingInstallResolution = false
     }
 }

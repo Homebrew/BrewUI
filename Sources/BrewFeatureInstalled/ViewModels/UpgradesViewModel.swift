@@ -291,7 +291,7 @@ final class UpgradesViewModel {
                 continue
             }
             switch phase {
-            case .running:
+            case .running, .reconciling:
                 runningIDs.insert(id)
             case .idle, .failed:
                 runningIDs.remove(id)

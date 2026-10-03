@@ -11,59 +11,62 @@ import BrewServicesTestSupport
 import Foundation
 import Testing
 
-/// With the API off, package data comes from tap clones that only `brew update` refreshes.
+/// `brew info` never auto-updates, so brew is updated first: fully when the user asks, otherwise
+/// through `brew update-if-needed` so brew's own auto-update settings apply.
 struct BrewInstalledPackagesTapRefreshTests {
     private static let emptyInfoJSON = #"{ "formulae": [], "casks": [] }"#
+    private static let update = ["update", "--quiet"]
+    private static let updateIfNeeded = ["update-if-needed"]
+    private static let info = ["info", "--installed", "--json=v2"]
 
-    @Test @MainActor func `taps are updated before the outdated check when the API is disabled`() async {
+    @Test @MainActor func `a user refresh runs a full brew update every time`() async {
         let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
         )
 
         await repo.load(forceRefresh: true)
+        await repo.load(forceRefresh: true)
 
-        #expect(await runner.invocations == [
-            ["update", "--auto-update", "--quiet"],
-            ["info", "--installed", "--json=v2"],
-        ])
+        #expect(await runner.invocations == [Self.update, Self.info, Self.update, Self.info])
         #expect(repo.state.isLoaded)
     }
 
-    @Test @MainActor func `taps are left alone when brew reads from the API`() async {
+    @Test @MainActor func `a first load lets brew decide whether to update`() async {
         let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: false),
         )
 
-        await repo.load(forceRefresh: true)
+        await repo.load()
 
-        // brew refreshes the API files on its own TTL, so an update here is pure cost.
-        #expect(await runner.invocations == [["info", "--installed", "--json=v2"]])
+        #expect(await runner.invocations == [Self.updateIfNeeded, Self.info])
     }
 
-    @Test @MainActor func `the tap update runs on an interval rather than before every fetch`() async {
-        let clock = MutableClock(now: Date(timeIntervalSince1970: 0))
+    @Test @MainActor func `the reconcile after an operation lets brew decide whether to update`() async {
         let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
-            now: clock.dateProvider,
         )
 
-        await repo.load(forceRefresh: true)
-        clock.now = Date(timeIntervalSince1970: 120)
-        await repo.load(forceRefresh: true)
+        await repo.reconcile()
 
-        #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 1)
+        #expect(await runner.invocations == [Self.updateIfNeeded, Self.info])
+        #expect(repo.state.isLoaded)
+    }
 
-        // Past Homebrew's 5-minute interval for this mode.
-        clock.now = Date(timeIntervalSince1970: 400)
-        await repo.load(forceRefresh: true)
+    @Test @MainActor func `every automatic fetch leaves the update interval to brew`() async {
+        let cache = InstalledInventoryCache()
+        let runner = RecordingCommandRunner(infoJSON: Self.emptyInfoJSON)
+        let repo = InstalledPackagesTestSupport.repository(
+            commandRunner: runner,
+            cache: cache,
+        )
 
-        #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 2)
+        await Self.automaticFetch(repo, cache: cache)
+        await Self.automaticFetch(repo, cache: cache)
+
+        #expect(await runner.count(of: Self.updateIfNeeded) == 2)
     }
 
     @Test @MainActor func `a failed tap update still lets the outdated check answer`() async {
@@ -74,7 +77,6 @@ struct BrewInstalledPackagesTapRefreshTests {
         )
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
         )
 
         await repo.load(forceRefresh: true)
@@ -82,26 +84,6 @@ struct BrewInstalledPackagesTapRefreshTests {
         #expect(repo.state.isLoaded)
         #expect(repo.refreshFailure == nil)
         #expect(await runner.invocations.contains(["info", "--installed", "--json=v2"]))
-    }
-
-    @Test @MainActor func `a persistently failing tap update does not stall every fetch`() async {
-        let clock = MutableClock(now: Date(timeIntervalSince1970: 0))
-        let runner = RecordingCommandRunner(
-            infoJSON: Self.emptyInfoJSON,
-            updateBehavior: .throwing,
-        )
-        let repo = InstalledPackagesTestSupport.repository(
-            commandRunner: runner,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
-            now: clock.dateProvider,
-        )
-
-        await repo.load(forceRefresh: true)
-        clock.now = Date(timeIntervalSince1970: 60)
-        await repo.load(forceRefresh: true)
-
-        // The attempt is timestamped even when it fails, so the interval still applies.
-        #expect(await runner.count(of: ["update", "--auto-update", "--quiet"]) == 1)
     }
 
     @Test @MainActor func `a cache-first load that skips the fetch also skips the tap update`() async {
@@ -113,39 +95,28 @@ struct BrewInstalledPackagesTapRefreshTests {
         let repo = InstalledPackagesTestSupport.repository(
             commandRunner: runner,
             cache: cache,
-            environment: StubHomebrewEnvironment(installFromAPIDisabled: true),
         )
 
         await repo.load()
 
         #expect(await runner.invocations.isEmpty)
     }
+
+    /// A stale cache is what launch and tab loads find, so `load()` refetches without the user asking.
+    @MainActor
+    private static func automaticFetch(_ repo: BrewInstalledPackagesRepository, cache: InstalledInventoryCache) async {
+        await cache.replace(InstalledInventorySnapshot(fetchedAt: .distantPast, packages: []))
+        await repo.load()
+    }
 }
 
 // MARK: - Doubles
-
-/// Mutable time source, so interval behaviour is asserted without waiting.
-@MainActor
-private final class MutableClock {
-    var now: Date
-
-    init(now: Date) {
-        self.now = now
-    }
-
-    nonisolated var dateProvider: @Sendable () -> Date {
-        // The repository is @MainActor; the synchronous @Sendable closure type can't say so.
-        // swiftlint:disable:next assume_isolated
-        { MainActor.assumeIsolated { self.now } }
-    }
-}
 
 /// Records the `brew` argument lists it was asked to run.
 private actor RecordingCommandRunner: BrewCommandRunning {
     enum UpdateBehavior {
         case success
         case failure(exitCode: Int32, stderr: String)
-        case throwing
     }
 
     private let infoJSON: String
@@ -163,7 +134,7 @@ private actor RecordingCommandRunner: BrewCommandRunning {
 
     func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         invocations.append(arguments)
-        guard arguments.first == "update" else {
+        guard arguments.first == "update-if-needed" || arguments.first == "update" else {
             return CommandOutput(standardOutput: infoJSON, standardError: "", terminationStatus: 0)
         }
         switch updateBehavior {
@@ -171,8 +142,6 @@ private actor RecordingCommandRunner: BrewCommandRunning {
             return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
         case let .failure(exitCode, stderr):
             return CommandOutput(standardOutput: "", standardError: stderr, terminationStatus: exitCode)
-        case .throwing:
-            throw BrewCommandError.launchFailed(underlying: "could not spawn brew")
         }
     }
 }

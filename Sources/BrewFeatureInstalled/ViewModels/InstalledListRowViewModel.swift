@@ -18,8 +18,14 @@ final class InstalledListRowViewModel {
     private(set) var package: InstalledBrewPackage
     @ObservationIgnored private let operationObserver: PackageOperationObserver
     private var operationPhase: BrewOperationPhase = .idle
-    private(set) var showsUpgradeBusy: Bool = false
-    private(set) var showsUninstallBusy: Bool = false
+
+    var showsUpgradeBusy: Bool {
+        InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: operationPhase)
+    }
+
+    var showsUninstallBusy: Bool {
+        InstalledUninstallBusyPresentation.showsUninstallBusy(phase: operationPhase)
+    }
 
     var operationSubject: PackageOperationSubject {
         PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
@@ -74,12 +80,24 @@ final class InstalledListRowViewModel {
         }
         parts.append(installedVersionLabel)
         if showsUpgradeAvailable, let latest = availableVersionLabel {
-            parts.append("Upgrade available to \(latest)")
+            parts.append(String(
+                localized: "Upgrade available to \(latest)",
+                bundle: #bundle,
+                comment: "VoiceOver: installed row with an available upgrade; the value is the latest version",
+            ))
         } else if !isDeprecated {
-            parts.append("Installed and up to date")
+            parts.append(String(
+                localized: "Installed and up to date",
+                bundle: #bundle,
+                comment: "Installed list: tooltip on the up-to-date tick",
+            ))
         }
         if isDeprecated {
-            parts.append("Deprecated")
+            parts.append(String(
+                localized: "Deprecated",
+                bundle: #bundle,
+                comment: "Installed deprecated status badge accessibility label",
+            ))
         }
         return parts.joined(separator: ", ")
     }
@@ -112,24 +130,11 @@ final class InstalledListRowViewModel {
             return
         }
         package = newPackage
-        operationPhase = .idle
-        showsUpgradeBusy = false
-        showsUninstallBusy = false
     }
 
     func observeRowUpdates() async {
         for await phase in operationObserver.phases(for: operationSubject) {
-            let oldPhase = operationPhase
             operationPhase = phase
-            showsUpgradeBusy = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: oldPhase,
-                newPhase: phase,
-                isPackageOutdated: package.outdated,
-            )
-            showsUninstallBusy = InstalledUninstallBusyPresentation.showsUninstallBusy(
-                oldPhase: oldPhase,
-                newPhase: phase,
-            )
         }
     }
 }

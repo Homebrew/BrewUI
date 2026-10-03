@@ -1,0 +1,35 @@
+{
+  "fill" : {
+    "automatic-gradient" : "display-p3:0.99561,0.97559,0.94678,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name" : "Mark.svg",
+          "name" : "Mark",
+          "position" : {
+            "scale" : 2.75,
+            "translation-in-points" : [
+              0.8066671249998763,
+              4.422080000000051
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.3
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : [
+      "macOS"
+    ]
+  }
+}

@@ -26,9 +26,17 @@ final class InstalledPackageDetailViewModel {
     /// Inline message when uninstall fails; cleared when a new uninstall starts.
     private(set) var uninstallErrorMessage: String?
 
-    private(set) var isUpgrading: Bool = false
-    private(set) var isUninstalling: Bool = false
-    private(set) var isMutatingPackage: Bool = false
+    var isUpgrading: Bool {
+        InstalledUpgradeBusyPresentation.showsUpgradeBusy(phase: operationPhase)
+    }
+
+    var isUninstalling: Bool {
+        InstalledUninstallBusyPresentation.showsUninstallBusy(phase: operationPhase)
+    }
+
+    var isMutatingPackage: Bool {
+        isUpgrading || isUninstalling
+    }
 
     var operationSubject: PackageOperationSubject {
         PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
@@ -142,11 +150,11 @@ final class InstalledPackageDetailViewModel {
         guard newPackage != package else {
             return
         }
+        // One view model serves every selection, so drop the old subject's chrome before the reseed.
+        if newPackage.id != package.id {
+            operationPhase = .idle
+        }
         package = newPackage
-        operationPhase = .idle
-        isUpgrading = false
-        isUninstalling = false
-        isMutatingPackage = false
         showUninstallConfirmation = false
         showUninstallBlockedCallout = false
         clearMutationErrors()
@@ -174,18 +182,7 @@ final class InstalledPackageDetailViewModel {
 
     func observeRowUpdates() async {
         for await phase in operationObserver.phases(for: operationSubject) {
-            let oldPhase = operationPhase
             operationPhase = phase
-            isUpgrading = InstalledUpgradeBusyPresentation.showsUpgradeBusy(
-                oldPhase: oldPhase,
-                newPhase: phase,
-                isPackageOutdated: package.outdated,
-            )
-            isUninstalling = InstalledUninstallBusyPresentation.showsUninstallBusy(
-                oldPhase: oldPhase,
-                newPhase: phase,
-            )
-            isMutatingPackage = isUpgrading || isUninstalling
             if isUninstalling {
                 showUninstallBlockedCallout = false
             }
