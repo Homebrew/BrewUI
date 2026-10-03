@@ -5,55 +5,54 @@ import SwiftUI
 
 struct ServiceDetailView: View {
     let service: BrewService
+    private let labelWidth: CGFloat = 100
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.lg) {
-            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-                Text(verbatim: service.name).font(.brewTitle2).textSelection(.enabled)
+        VStack(alignment: .leading, spacing: BrewSpacing.xl) {
+            HStack(spacing: BrewSpacing.sm) {
+                Text(verbatim: service.name)
+                    .font(.brewTitle1)
+                    .foregroundStyle(Color.brewTextPrimary)
+                    .textSelection(.enabled)
                 ServiceStatusView(service: service)
                     .padding(.horizontal, BrewSpacing.sm).padding(.vertical, BrewSpacing.xs)
-                    .background(Color.brewSurfaceRecessed, in: RoundedRectangle(cornerRadius: BrewRadius.sm))
+                    .background(Color.brewSurfaceElevated, in: Capsule())
+                    .overlay { Capsule().strokeBorder(Color.brewBorderDefault, lineWidth: 1) }
             }
-            Divider()
-            Text("Details", bundle: #bundle, comment: "Service details: section containing ownership and login registration")
-                .font(.brewTitle3)
-            metadata(LocalizedStringResource("User", bundle: #bundle, comment: "Service details: service owner reported by Homebrew"), service.user ?? "—")
-            metadata(
-                LocalizedStringResource("Process ID (PID)", bundle: #bundle, comment: "Service details: process identifier reported by Homebrew"),
-                service.pid.map(String.init) ?? "—",
-            )
-            metadata(
-                LocalizedStringResource("Exit code", bundle: #bundle, comment: "Service details: last process exit code reported by Homebrew"),
-                service.exitCode.map(String.init) ?? "—",
-            )
-            if service.status == "error" {
-                Text(errorGuidance)
-                    .font(.brewCaption).foregroundStyle(Color.brewStatusError)
+            PackageDetailSectionDivider()
+            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+                PackageDetailSectionHeading(title: LocalizedStringResource(
+                    "Details", bundle: #bundle, comment: "Service details: section containing ownership and login registration",
+                ))
+                metadata(LocalizedStringResource("User", bundle: #bundle, comment: "Service details: service owner reported by Homebrew"), service.user ?? "—")
+                metadata(LocalizedStringResource("Process ID (PID)", bundle: #bundle, comment: "Service details: process identifier reported by Homebrew"),
+                         service.pid.map(String.init) ?? "—")
+                metadata(LocalizedStringResource("Exit code", bundle: #bundle, comment: "Service details: last process exit code reported by Homebrew"),
+                         service.exitCode.map(String.init) ?? "—")
+                if service.status == "error" {
+                    Text(errorGuidance)
+                        .font(.brewCallout).foregroundStyle(Color.brewStatusError)
+                }
+                metadata(LocalizedStringResource("Starts at login", bundle: #bundle, comment: "Service details: whether Homebrew registered this service for login"),
+                         String(localized: booleanStatus(service.registered)))
+                metadata(LocalizedStringResource("Schedulable", bundle: #bundle, comment: "Service details: whether the service defines a cron schedule or fixed interval"),
+                         String(localized: booleanStatus(service.schedulable)))
             }
-            metadata(
-                LocalizedStringResource("Starts at login", bundle: #bundle, comment: "Service details: whether Homebrew registered this service for login"),
-                String(localized: booleanStatus(service.registered)),
-            )
-            metadata(
-                LocalizedStringResource("Schedulable", bundle: #bundle, comment: "Service details: whether the service defines a cron schedule or fixed interval"),
-                String(localized: booleanStatus(service.schedulable)),
-            )
-            Divider()
-            Text("Files", bundle: #bundle, comment: "Service details: section containing configuration and log paths")
-                .font(.brewTitle3)
-            path(LocalizedStringResource("Configuration file", bundle: #bundle, comment: "Service details: launchd service file path"), service.file)
-            path(LocalizedStringResource("Standard log", bundle: #bundle, comment: "Service details: standard output log path"), service.logPath)
-            path(LocalizedStringResource("Error log", bundle: #bundle, comment: "Service details: standard error log path"), service.errorLogPath)
+            PackageDetailSectionDivider()
+            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+                PackageDetailSectionHeading(title: LocalizedStringResource("Files", bundle: #bundle, comment: "Service details: section containing configuration and log paths"))
+                path(LocalizedStringResource("Configuration file", bundle: #bundle, comment: "Service details: launchd service file path"), service.file)
+                path(LocalizedStringResource("Standard log", bundle: #bundle, comment: "Service details: standard output log path"), service.logPath)
+                path(LocalizedStringResource("Error log", bundle: #bundle, comment: "Service details: standard error log path"), service.errorLogPath)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var errorGuidance: LocalizedStringResource {
-        if service.errorLogPath?.isEmpty == false {
-            LocalizedStringResource("Check the error log for details.", bundle: #bundle, comment: "Service details: error status guidance")
-        } else {
-            LocalizedStringResource("No error log path reported.", bundle: #bundle, comment: "Service details: Homebrew returned an error without an error log path")
-        }
+        service.errorLogPath?.isEmpty == false
+            ? LocalizedStringResource("Check the error log for details.", bundle: #bundle, comment: "Service details: error status guidance")
+            : LocalizedStringResource("No error log path reported.", bundle: #bundle, comment: "Service details: Homebrew returned an error without an error log path")
     }
 
     private func booleanStatus(_ value: Bool?) -> LocalizedStringResource {
@@ -65,17 +64,21 @@ struct ServiceDetailView: View {
     }
 
     private func metadata(_ title: LocalizedStringResource, _ value: String) -> some View {
-        HStack {
+        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
             Text(title).foregroundStyle(Color.brewTextSecondary)
-            Spacer(minLength: BrewSpacing.md)
+                .frame(width: labelWidth, alignment: .leading)
             Text(verbatim: value)
+                .fontWeight(.medium)
+                .foregroundStyle(Color.brewTextPrimary)
+                .textSelection(.enabled)
+            Spacer(minLength: 0)
         }
         .font(.brewCallout)
     }
 
     private func path(_ title: LocalizedStringResource, _ value: String?) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            Text(title).font(.brewCaption).foregroundStyle(Color.brewTextSecondary)
+            Text(title).font(.brewCallout).foregroundStyle(Color.brewTextSecondary)
             HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
                 Text(verbatim: value.flatMap { $0.isEmpty ? nil : $0 } ?? "—").font(.brewCode).textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -28,8 +28,9 @@ struct ServicesRepositoryTests {
         ])
     }
 
-    @Test func `empty inventory is cached until forced`() async throws {
-        let runner = SequenceRunner([.success(Self.output("[]")), .success(Self.output("[]"))])
+    @Test(arguments: ["", "[]"])
+    func `empty inventory is cached until forced`(output: String) async throws {
+        let runner = SequenceRunner([.success(Self.output(output)), .success(Self.output(output))])
         let repository = makeRepository(runner)
         await repository.load(forceRefresh: false)
         await repository.load(forceRefresh: false)
@@ -52,7 +53,7 @@ struct ServicesRepositoryTests {
     }
 
     @Test(arguments: [("not json", Int32(0), ""), ("[{\"name\":\"redis\",\"status\":\"started\"}]", Int32(0), ""),
-                      ("not json", Int32(2), "permission denied")])
+                      ("not json", Int32(2), "permission denied"), ("", Int32(2), "permission denied")])
     func `malformed and failed commands preserve errors`(output: String, status: Int32, stderr: String) async {
         let repository = makeRepository(MockBrewCommandRunner(responses: [Self.arguments: CommandOutput(standardOutput: output, standardError: stderr, terminationStatus: status)]))
         await repository.load(forceRefresh: false)

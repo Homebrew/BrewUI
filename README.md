@@ -100,9 +100,8 @@ The key is the English text, so rewording a string makes a new entry rather than
 
 Stable and under active development.
 
-The read-only Services tab shows installed formula services, their status and owner. Filter by All,
-Running or Stopped and inspect login registration and service/log paths. Starting, stopping and configuring
-services remain in Terminal.
+The read-only Services tab shows installed formula services, their status, owner, login registration and
+service/log paths. Filter by All, Running or Stopped; start, stop and configure services in Terminal.
 
 ## 📄 Licence
 

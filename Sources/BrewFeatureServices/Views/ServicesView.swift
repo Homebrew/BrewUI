@@ -40,19 +40,15 @@ struct ServicesView: View {
             }
             .frame(minWidth: BrewLayout.installedListColumnMinWidth, idealWidth: BrewLayout.installedListColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            VStack(alignment: .leading, spacing: 0) {
-                ScrollView {
-                    if let service = viewModel.selectedService {
-                        ServiceDetailView(service: service).padding(BrewSpacing.xl)
-                    } else {
-                        Text("Select a service to view details.", bundle: #bundle, comment: "Services: no row selected or selected service hidden by the filter")
-                            .foregroundStyle(Color.brewTextSecondary)
-                            .padding(BrewSpacing.xl)
-                    }
+            ScrollView {
+                if let service = viewModel.selectedService {
+                    ServiceDetailView(service: service)
+                        .padding(BrewSpacing.xl)
+                        .brewPaneContentWidth()
                 }
-                .id(viewModel.selectedService?.id)
-                .axid(.serviceDetail)
             }
+            .id(viewModel.selectedService?.id)
+            .axid(.serviceDetail)
             .frame(minWidth: BrewLayout.inspectorWidth, idealWidth: BrewLayout.installedDetailColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -63,9 +59,16 @@ struct ServicesView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            Text("Services", bundle: #bundle, comment: "Services list heading")
-                .font(.brewTitle2)
-                .accessibilityHeading(.h1)
+            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                Text("Services", bundle: #bundle, comment: "Services list heading")
+                    .font(.brewTitle2)
+                    .foregroundStyle(Color.brewTextPrimary)
+                if let subtitle = viewModel.runningServiceSubtitle {
+                    Text(subtitle).font(.brewSubheadline).foregroundStyle(Color.brewTextSecondary)
+                }
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityHeading(.h1)
             CommandBlockView(
                 command: "brew services info --all --json",
                 summaryText: LocalizedStringResource("Shows services for the current user", bundle: #bundle, comment: "Services command: reads the current user inventory"),
@@ -83,7 +86,6 @@ struct ServicesView: View {
                 }
                 .controlSize(.regular)
                 .disabled(viewModel.isRefreshing)
-                .accessibilityLabel(String(localized: "Refresh", bundle: #bundle, comment: "Services: read the current service inventory"))
                 .axid(.servicesRefreshButton)
             }
             .frame(height: BrewLayout.headerActionHeight)
@@ -106,23 +108,48 @@ struct ServicesView: View {
                 .axid(.errorState)
         case .loaded:
             if viewModel.visibleServices.isEmpty {
-                Text("No services in this view.", bundle: #bundle, comment: "Services: empty inventory or no services matching the status filter")
-                    .foregroundStyle(Color.brewTextSecondary)
-                    .padding(BrewSpacing.lg)
-            } else {
-                List(viewModel.visibleServices, selection: $viewModel.selectedServiceID) { service in
-                    VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                        Text(verbatim: service.name).font(.brewBodyEmphasized)
-                        ServiceStatusView(service: service)
+                if viewModel.state.value?.isEmpty == true {
+                    VStack(spacing: BrewSpacing.md) {
+                        Text("No services", bundle: #bundle, comment: "Services: empty inventory title")
+                            .font(.brewTitle2).foregroundStyle(Color.brewTextPrimary)
+                        Text("Services from installed formulae will appear here.", bundle: #bundle, comment: "Services: empty inventory explanation")
+                            .font(.brewCallout).foregroundStyle(Color.brewTextSecondary)
+                            .multilineTextAlignment(.center)
                     }
-                    .padding(.vertical, BrewSpacing.xs)
-                    .tag(service.id)
-                    .accessibilityElement(children: .combine)
-                    .axid(.serviceRow(name: service.name))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(BrewSpacing.xl)
+                } else {
+                    Text("No services in this view.", bundle: #bundle, comment: "Services: no services matching the status filter")
+                        .foregroundStyle(Color.brewTextSecondary)
+                        .padding(BrewSpacing.lg)
                 }
-                .listStyle(.inset)
-                .focused($listIsFocused)
-                .onChange(of: viewModel.selectedServiceID) { _, _ in listIsFocused = true }
+            } else {
+                ScrollViewReader { proxy in
+                    List(viewModel.visibleServices) { service in
+                        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                            Text(verbatim: service.name).font(.brewBodyEmphasized)
+                            ServiceStatusView(service: service)
+                        }
+                        .padding(.vertical, BrewSpacing.xs)
+                        .contentShape(Rectangle())
+                        .listRowBackground(
+                            RoundedRectangle(cornerRadius: BrewRadius.lg, style: .continuous)
+                                .fill(viewModel.activeSelectedServiceID == service.id ? Color.brewBrandTint : Color.clear)
+                                .padding(.horizontal, BrewSpacing.sm),
+                        )
+                        .onTapGesture { viewModel.selectedServiceID = service.id; listIsFocused = true }
+                        .id(service.id)
+                        .accessibilityElement(children: .combine)
+                        .axid(.serviceRow(name: service.name))
+                    }
+                    .listStyle(.inset)
+                    .focused($listIsFocused)
+                    .onChange(of: viewModel.activeSelectedServiceID) { _, id in
+                        if let id { withAnimation(.brewFast) { proxy.scrollTo(id, anchor: .center) } }
+                    }
+                    .onKeyPress(.upArrow) { viewModel.moveSelection(by: -1); return .handled }
+                    .onKeyPress(.downArrow) { viewModel.moveSelection(by: 1); return .handled }
+                }
             }
         }
     }

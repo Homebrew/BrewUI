@@ -121,10 +121,10 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
 
 ## Services
 
-`BrewServicesRepository` caches `brew services info --all --json` for the app lifetime. Initial load and
-explicit refresh are the only reads; refresh failures retain data and remain visible across navigation.
-The read-only tab filters by the running flag and displays Homebrew status text unchanged. Its resizable
-detail pane includes PID, exit code, owner, login registration, schedulability and copyable service/log paths.
+`BrewServicesRepository` caches `brew services info --all --json` for the app lifetime and treats a successful
+empty output as no services. Only initial load and explicit refresh read again; refresh failures retain data.
+The read-only tab filters by running state and shows Homebrew status, PID, exit code, owner, login registration,
+schedulability and copyable service/log paths in a resizable detail pane.
 
 ## Self-upgrades and console
 

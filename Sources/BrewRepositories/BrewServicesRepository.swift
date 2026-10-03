@@ -56,6 +56,8 @@ public final class BrewServicesRepository: ServicesRepository {
         guard output.terminationStatus == 0 else {
             throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
         }
+        // Homebrew exits successfully without printing JSON when --all finds no services.
+        if output.standardOutput.isEmpty { return [] }
         do {
             let decoder = JSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase

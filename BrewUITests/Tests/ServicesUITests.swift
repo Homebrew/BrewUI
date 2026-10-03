@@ -3,6 +3,14 @@ import XCTest
 
 final class ServicesUITests: BrewUITestCase {
     @MainActor
+    func testEmptyInventoryShowsAQuietState() {
+        let app = launch(.empty).app
+        BrewUIButton(app, .sidebarItem(.services)).tap()
+        XCTAssertTrue(app.staticTexts["No services"].waitForExistence(timeout: BrewUITestTimeout.default))
+        BrewUIElement(app, .errorState).assertDoesNotExist()
+    }
+
+    @MainActor
     func testReadOnlyInventoryAndStatusFilters() {
         let app = launch(.servicesBasic).app
         app.typeKey("2", modifierFlags: .command)

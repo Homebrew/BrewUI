@@ -313,7 +313,7 @@ enum ScenarioFixtures {
         [
             "\(installedInfoKey).stdout": infoJSON(for: installed),
             "config.stdout": configOutput,
-            "services_info_--all_--json.stdout": json([]),
+            "services_info_--all_--json.stdout": text(""),
             "doctor.stdout": text("Your system is ready to brew.\n"),
             "doctor_--json.stdout": json(["tier": 1, "findings": []]),
         ]

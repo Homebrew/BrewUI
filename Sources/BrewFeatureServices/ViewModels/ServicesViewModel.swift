@@ -35,6 +35,15 @@ final class ServicesViewModel {
         repository.refreshFailure.map(Self.message)
     }
 
+    var runningServiceSubtitle: LocalizedStringResource? {
+        guard let services = state.value else { return nil }
+        let count = services.filter(\.running).count
+        if count == 1 {
+            return LocalizedStringResource("1 running service", bundle: #bundle, comment: "Services subtitle: one running service")
+        }
+        return LocalizedStringResource("\(count) running services", bundle: #bundle, comment: "Services subtitle: running service count, never one")
+    }
+
     var scope: ServiceScope = .all
     var selectedServiceID: String?
     @ObservationIgnored private let repository: any ServicesRepository
@@ -53,8 +62,21 @@ final class ServicesViewModel {
         }
     }
 
+    var activeSelectedServiceID: String? {
+        let services = visibleServices
+        return services.first(where: { $0.id == selectedServiceID })?.id ?? services.first?.id
+    }
+
     var selectedService: BrewService? {
-        visibleServices.first { $0.id == selectedServiceID }
+        visibleServices.first { $0.id == activeSelectedServiceID }
+    }
+
+    func moveSelection(by offset: Int) {
+        let services = visibleServices
+        guard let index = services.firstIndex(where: { $0.id == activeSelectedServiceID }),
+              services.indices.contains(index + offset)
+        else { return }
+        selectedServiceID = services[index + offset].id
     }
 
     func load(forceRefresh: Bool = false) async {

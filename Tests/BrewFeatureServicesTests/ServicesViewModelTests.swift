@@ -1,6 +1,7 @@
 import BrewCore
 @testable import BrewFeatureServices
 import BrewRepositoryInterfaces
+import Foundation
 import Observation
 import Testing
 
@@ -24,9 +25,18 @@ struct ServicesViewModelTests {
         case .stopped: ["unbound", "postgresql@17"]
         }
         #expect(viewModel.visibleServices.map(\.name) == expected)
-        #expect(viewModel.selectedService?.name == (scope == .stopped ? nil : "redis"))
+        #expect(viewModel.selectedService?.name == (scope == .stopped ? "unbound" : "redis"))
         repository.state = .loaded([])
         #expect(viewModel.selectedService == nil)
+    }
+
+    @Test(arguments: [0, 1, 2])
+    func `running subtitle counts the full inventory regardless of filter`(count: Int) {
+        let services = (0 ..< count).map { BrewService(name: "service\($0)", status: "started", running: true) }
+        let viewModel = ServicesViewModel(repository: StubServices(state: .loaded(services)))
+        viewModel.scope = .stopped
+        let expected = count == 1 ? "1 running service" : "\(count) running services"
+        #expect(viewModel.runningServiceSubtitle.map { String(localized: $0) } == expected)
     }
 }
 
