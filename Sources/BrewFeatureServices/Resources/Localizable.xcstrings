@@ -9,6 +9,12 @@
             "state" : "translated",
             "value" : "%lld 个服务正在运行"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 個服務正在執行"
+          }
         }
       }
     },
@@ -20,6 +26,12 @@
             "state" : "translated",
             "value" : "1 个服务正在运行"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 個服務正在執行"
+          }
         }
       }
     },
@@ -27,6 +39,12 @@
       "comment" : "Services filter: every service",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部"
@@ -42,6 +60,12 @@
             "state" : "translated",
             "value" : "请查看错误日志以了解详情。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請查看錯誤日誌以瞭解詳細資訊。"
+          }
         }
       }
     },
@@ -52,6 +76,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "配置文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置檔案"
           }
         }
       }
@@ -64,6 +94,12 @@
             "state" : "translated",
             "value" : "已复制"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已拷貝"
+          }
         }
       }
     },
@@ -74,6 +110,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "复制"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷貝"
           }
         }
       }
@@ -86,6 +128,12 @@
             "state" : "translated",
             "value" : "复制路径：%@"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷貝路徑：%@"
+          }
         }
       }
     },
@@ -96,6 +144,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "无法读取 Homebrew 服务。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法讀取 Homebrew 服務。"
           }
         }
       }
@@ -108,6 +162,12 @@
             "state" : "translated",
             "value" : "详情"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細資訊"
+          }
         }
       }
     },
@@ -118,6 +178,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "错误日志"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "錯誤日誌"
           }
         }
       }
@@ -130,6 +196,12 @@
             "state" : "translated",
             "value" : "退出码"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結束代碼"
+          }
         }
       }
     },
@@ -140,6 +212,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "文件"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "檔案"
           }
         }
       }
@@ -152,6 +230,12 @@
             "state" : "translated",
             "value" : "正在加载服务…"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在載入服務…"
+          }
         }
       }
     },
@@ -159,6 +243,12 @@
       "comment" : "Service details: reported boolean is false",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "否"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "否"
@@ -174,6 +264,12 @@
             "state" : "translated",
             "value" : "未提供错误日志路径。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未提供錯誤日誌路徑。"
+          }
         }
       }
     },
@@ -184,6 +280,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "暂无服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚無服務"
           }
         }
       }
@@ -196,6 +298,12 @@
             "state" : "translated",
             "value" : "当前筛选条件下没有服务。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前的篩選條件下沒有服務。"
+          }
         }
       }
     },
@@ -206,6 +314,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "进程 ID（PID）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程 ID（PID）"
           }
         }
       }
@@ -218,6 +332,12 @@
             "state" : "translated",
             "value" : "刷新"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新整理"
+          }
         }
       }
     },
@@ -228,6 +348,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "运行中"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "執行中"
           }
         }
       }
@@ -240,6 +366,12 @@
             "state" : "translated",
             "value" : "支持定时运行"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支援定時執行"
+          }
         }
       }
     },
@@ -250,6 +382,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服務"
           }
         }
       }
@@ -262,6 +400,12 @@
             "state" : "translated",
             "value" : "已安装 Formula 的服务将显示在这里。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安裝 Formula 的服務會顯示在這裡。"
+          }
         }
       }
     },
@@ -272,6 +416,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "显示当前用户的服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示目前使用者的服務"
           }
         }
       }
@@ -284,6 +434,12 @@
             "state" : "translated",
             "value" : "标准输出日志"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "標準輸出日誌"
+          }
         }
       }
     },
@@ -294,6 +450,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "登录时启动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登入時啟動"
           }
         }
       }
@@ -306,6 +468,12 @@
             "state" : "translated",
             "value" : "状态"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "狀態"
+          }
         }
       }
     },
@@ -313,6 +481,12 @@
       "comment" : "Services filter: services without a running process",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已停止"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "已停止"
@@ -328,6 +502,12 @@
             "state" : "translated",
             "value" : "未知"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知"
+          }
         }
       }
     },
@@ -339,6 +519,12 @@
             "state" : "translated",
             "value" : "用户"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用者"
+          }
         }
       }
     },
@@ -346,6 +532,12 @@
       "comment" : "Service details: reported boolean is true",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "是"

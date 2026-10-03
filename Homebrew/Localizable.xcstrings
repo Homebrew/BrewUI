@@ -288,6 +288,12 @@
             "state" : "translated",
             "value" : "服务"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服務"
+          }
         }
       }
     },
@@ -355,6 +361,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "查看你的 Homebrew 服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "檢視你的 Homebrew 服務"
           }
         }
       }
