@@ -40,18 +40,21 @@ struct ServicesView: View {
             }
             .frame(minWidth: BrewLayout.installedListColumnMinWidth, idealWidth: BrewLayout.installedListColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            ScrollView {
-                if let service = viewModel.selectedService {
-                    ServiceDetailView(service: service)
-                        .padding(BrewSpacing.xl)
-                        .brewPaneContentWidth()
+            VStack(alignment: .leading, spacing: 0) {
+                ScrollView {
+                    if let service = viewModel.selectedService {
+                        ServiceDetailView(service: service)
+                            .padding(BrewSpacing.xl)
+                            .brewPaneContentWidth()
+                    }
                 }
+                .id(viewModel.selectedService?.id)
+                .axid(.serviceDetail)
             }
-            .id(viewModel.selectedService?.id)
-            .axid(.serviceDetail)
             .frame(minWidth: BrewLayout.inspectorWidth, idealWidth: BrewLayout.installedDetailColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.servicesScreen)
         .task { await viewModel.load() }
