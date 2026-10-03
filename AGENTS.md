@@ -365,9 +365,7 @@ Environment and accessibility issues encountered while running `BrewUITests` on 
    `CODE_SIGN_IDENTITY=-` fixes it: the runner is ad-hoc signed as `sh.brew.BrewUITests.xctrunner`
    with a valid seal, and ad-hoc needs no identity, team or profile, so it works on CI too.
 
-   **Watch for:** `scripts/test-ui` and the `ui-test` CI job still pass `CODE_SIGNING_ALLOWED=NO`.
-   That is the same latent defect – if the deterministic suite ever starts failing this way, drop
-   the flag there as well rather than hunting the hang.
+   **Watch for:** `scripts/test-ui` now signs the runner ad hoc; verify its seal before attributing any remaining launch hang to signing.
 
 ### Debugging gotcha specific to this environment
 

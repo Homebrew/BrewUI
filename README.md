@@ -100,6 +100,9 @@ The key is the English text, so rewording a string makes a new entry rather than
 
 Stable and under active development.
 
+The read-only Services tab shows installed formula services, their status, owner, login registration and
+service/log paths. Filter by All, Running or Stopped; start, stop and configure services in Terminal.
+
 ## 📄 Licence
 
 [AGPL-3.0](LICENSE). If you reuse or adapt the source the AGPL terms apply, including the network-use clause.

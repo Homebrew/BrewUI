@@ -280,6 +280,23 @@
         }
       }
     },
+    "Services" : {
+      "comment" : "Sidebar: read-only Homebrew service inventory",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服務"
+          }
+        }
+      }
+    },
     "The Homebrew app quit unexpectedly" : {
       "comment" : "Crash report dialog title",
       "localizations" : {
@@ -333,6 +350,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級"
+          }
+        }
+      }
+    },
+    "View your Homebrew services" : {
+      "comment" : "Window subtitle, read-only Services tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看你的 Homebrew 服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "檢視你的 Homebrew 服務"
           }
         }
       }

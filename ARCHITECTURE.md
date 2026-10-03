@@ -120,6 +120,13 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
   recoverability. Crash reports are not written by the app: it reads the ones macOS writes to
   `~/Library/Logs/DiagnosticReports` on the next launch and remembers the last one acknowledged.
 
+## Services
+
+`BrewServicesRepository` caches `brew services info --all --json` for the app lifetime and treats a successful
+empty output as no services. Only initial load and explicit refresh read again; refresh failures retain data.
+The read-only tab filters by running state and shows Homebrew status, PID, exit code, owner, login registration,
+schedulability and copyable service/log paths in a resizable detail pane.
+
 ## Self-upgrades and console
 
 The app's `homebrew-app` cask is excluded from package lists, counts and bulk upgrades, while the raw
