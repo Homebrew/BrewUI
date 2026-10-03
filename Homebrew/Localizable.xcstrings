@@ -281,7 +281,15 @@
       }
     },
     "Services" : {
-      "comment" : "Sidebar: read-only Homebrew service inventory"
+      "comment" : "Sidebar: read-only Homebrew service inventory",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务"
+          }
+        }
+      }
     },
     "The Homebrew app quit unexpectedly" : {
       "comment" : "Crash report dialog title",
@@ -341,7 +349,15 @@
       }
     },
     "View your Homebrew services" : {
-      "comment" : "Window subtitle, read-only Services tab"
+      "comment" : "Window subtitle, read-only Services tab",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看你的 Homebrew 服务"
+          }
+        }
+      }
     },
     "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
       "comment" : "Shown when the self-upgrade is attempted while another brew command is still running",

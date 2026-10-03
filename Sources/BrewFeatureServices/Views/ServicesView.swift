@@ -134,6 +134,7 @@ struct ServicesView: View {
                             ServiceStatusView(service: service)
                         }
                         .padding(.vertical, BrewSpacing.xs)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                         .listRowBackground(
                             RoundedRectangle(cornerRadius: BrewRadius.lg, style: .continuous)

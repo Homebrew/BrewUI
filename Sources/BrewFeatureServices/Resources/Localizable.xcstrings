@@ -2,100 +2,356 @@
   "sourceLanguage" : "en",
   "strings" : {
     "%lld running services" : {
-      "comment" : "Services subtitle: running service count, never one"
+      "comment" : "Services subtitle: running service count, never one",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个服务正在运行"
+          }
+        }
+      }
     },
     "1 running service" : {
-      "comment" : "Services subtitle: one running service"
+      "comment" : "Services subtitle: one running service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 个服务正在运行"
+          }
+        }
+      }
     },
     "All" : {
-      "comment" : "Services filter: every service"
+      "comment" : "Services filter: every service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全部"
+          }
+        }
+      }
     },
     "Check the error log for details." : {
-      "comment" : "Service details: error status guidance"
+      "comment" : "Service details: error status guidance",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请查看错误日志以了解详情。"
+          }
+        }
+      }
     },
     "Configuration file" : {
-      "comment" : "Service details: launchd service file path"
+      "comment" : "Service details: launchd service file path",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配置文件"
+          }
+        }
+      }
     },
     "Copied" : {
-      "comment" : "Service files: confirms the path was copied"
+      "comment" : "Service files: confirms the path was copied",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已复制"
+          }
+        }
+      }
     },
     "Copy" : {
-      "comment" : "Service files: copy a file path"
+      "comment" : "Service files: copy a file path",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制"
+          }
+        }
+      }
     },
     "Copy path: %@" : {
-      "comment" : "Service files: copy button; %@ is the configuration or log path label"
+      "comment" : "Service files: copy button; %@ is the configuration or log path label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "复制路径：%@"
+          }
+        }
+      }
     },
     "Couldn't read Homebrew services." : {
-      "comment" : "Services: fallback message when reading the service inventory fails"
+      "comment" : "Services: fallback message when reading the service inventory fails",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法读取 Homebrew 服务。"
+          }
+        }
+      }
     },
     "Details" : {
-      "comment" : "Service details: section containing ownership and login registration"
+      "comment" : "Service details: section containing ownership and login registration",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "详情"
+          }
+        }
+      }
     },
     "Error log" : {
-      "comment" : "Service details: standard error log path"
+      "comment" : "Service details: standard error log path",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "错误日志"
+          }
+        }
+      }
     },
     "Exit code" : {
-      "comment" : "Service details: last process exit code reported by Homebrew"
+      "comment" : "Service details: last process exit code reported by Homebrew",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出码"
+          }
+        }
+      }
     },
     "Files" : {
-      "comment" : "Service details: section containing configuration and log paths"
+      "comment" : "Service details: section containing configuration and log paths",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文件"
+          }
+        }
+      }
     },
     "Loading services…" : {
-      "comment" : "Services: initial loading indicator"
+      "comment" : "Services: initial loading indicator",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在加载服务…"
+          }
+        }
+      }
     },
     "No" : {
-      "comment" : "Service details: reported boolean is false"
+      "comment" : "Service details: reported boolean is false",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "否"
+          }
+        }
+      }
     },
     "No error log path reported." : {
-      "comment" : "Service details: Homebrew returned an error without an error log path"
+      "comment" : "Service details: Homebrew returned an error without an error log path",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未提供错误日志路径。"
+          }
+        }
+      }
     },
     "No services" : {
-      "comment" : "Services: empty inventory title"
+      "comment" : "Services: empty inventory title",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无服务"
+          }
+        }
+      }
     },
     "No services in this view." : {
-      "comment" : "Services: no services matching the status filter"
+      "comment" : "Services: no services matching the status filter",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前筛选条件下没有服务。"
+          }
+        }
+      }
     },
     "Process ID (PID)" : {
-      "comment" : "Service details: process identifier reported by Homebrew"
+      "comment" : "Service details: process identifier reported by Homebrew",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "进程 ID（PID）"
+          }
+        }
+      }
     },
     "Refresh" : {
-      "comment" : "Services: read the current service inventory"
+      "comment" : "Services: read the current service inventory",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        }
+      }
     },
     "Running" : {
-      "comment" : "Services filter: running processes"
+      "comment" : "Services filter: running processes",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "运行中"
+          }
+        }
+      }
     },
     "Schedulable" : {
-      "comment" : "Service details: whether the service defines a cron schedule or fixed interval"
+      "comment" : "Service details: whether the service defines a cron schedule or fixed interval",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支持定时运行"
+          }
+        }
+      }
     },
     "Services" : {
-      "comment" : "Services list heading"
+      "comment" : "Services list heading",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服务"
+          }
+        }
+      }
     },
     "Services from installed formulae will appear here." : {
-      "comment" : "Services: empty inventory explanation"
+      "comment" : "Services: empty inventory explanation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已安装 Formula 的服务将显示在这里。"
+          }
+        }
+      }
     },
     "Shows services for the current user" : {
-      "comment" : "Services command: reads the current user inventory"
+      "comment" : "Services command: reads the current user inventory",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示当前用户的服务"
+          }
+        }
+      }
     },
     "Standard log" : {
-      "comment" : "Service details: standard output log path"
+      "comment" : "Service details: standard output log path",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "标准输出日志"
+          }
+        }
+      }
     },
     "Starts at login" : {
-      "comment" : "Service details: whether Homebrew registered this service for login"
+      "comment" : "Service details: whether Homebrew registered this service for login",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录时启动"
+          }
+        }
+      }
     },
     "Status" : {
-      "comment" : "Services: status filter label"
+      "comment" : "Services: status filter label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "状态"
+          }
+        }
+      }
     },
     "Stopped" : {
-      "comment" : "Services filter: services without a running process"
+      "comment" : "Services filter: services without a running process",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已停止"
+          }
+        }
+      }
     },
     "Unknown" : {
-      "comment" : "Service details: Homebrew did not report this value"
+      "comment" : "Service details: Homebrew did not report this value",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未知"
+          }
+        }
+      }
     },
     "User" : {
-      "comment" : "Service details: service owner reported by Homebrew"
+      "comment" : "Service details: service owner reported by Homebrew",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用户"
+          }
+        }
+      }
     },
     "Yes" : {
-      "comment" : "Service details: reported boolean is true"
+      "comment" : "Service details: reported boolean is true",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "是"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

@@ -34,6 +34,21 @@ final class ServicesUITests: BrewUITestCase {
     }
 
     @MainActor
+    func testClickingTrailingRowSpaceSelectsTheService() {
+        let app = launch(.servicesBasic).app
+        BrewUIButton(app, .sidebarItem(.services)).tap()
+        BrewUIElement(app, .serviceRow(name: "unbound")).waitToExist().element.click()
+        let redis = BrewUIElement(app, .serviceRow(name: "redis")).waitToExist().element
+        let detail = BrewUIElement(app, .serviceDetail).waitToExist().element
+        let window = app.windows.firstMatch
+        window.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(
+            dx: detail.frame.minX - window.frame.minX - 24,
+            dy: redis.frame.midY - window.frame.minY,
+        )).click()
+        XCTAssertTrue(app.staticTexts["43210"].waitForExistence(timeout: BrewUITestTimeout.default))
+    }
+
+    @MainActor
     func testFilteringPreservesTheDetailPaneWidth() throws {
         let app = launch(.servicesBasic).app
         BrewUIButton(app, .sidebarItem(.services)).tap()
