@@ -10,6 +10,12 @@
             "value" : "%1$@ %2$@"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -27,6 +33,12 @@
     "%lld days ago" : {
       "comment" : "Relative time, %lld ≥ 2",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace %lld días"
+          }
+        },
         "zh-Hans" : {
           "variations" : {
             "plural" : {
@@ -56,6 +68,12 @@
     "%lld hours ago" : {
       "comment" : "Relative time, %lld ≥ 2",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace %lld horas"
+          }
+        },
         "zh-Hans" : {
           "variations" : {
             "plural" : {
@@ -85,6 +103,12 @@
     "%lld minutes ago" : {
       "comment" : "Relative time, %lld ≥ 2",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace %lld minutos"
+          }
+        },
         "zh-Hans" : {
           "variations" : {
             "plural" : {
@@ -114,6 +138,12 @@
     "1 day ago" : {
       "comment" : "Relative time",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace un día"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -131,6 +161,12 @@
     "1 hour ago" : {
       "comment" : "Relative time",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace una hora"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -148,6 +184,12 @@
     "1 minute ago" : {
       "comment" : "Relative time",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hace un minuto"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -165,6 +207,12 @@
     "Copied" : {
       "comment" : "Command block: shown briefly after copying",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -182,6 +230,12 @@
     "Copy" : {
       "comment" : "Command block: copy the command",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -199,6 +253,12 @@
     "Copy all" : {
       "comment" : "Command block: copy every command",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar todo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -216,6 +276,12 @@
     "Could not find Homebrew. Install it or ensure brew is in the default location." : {
       "comment" : "Error when the brew executable is not in either default prefix",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró Homebrew. Instálalo o asegúrate de que brew se encuentra en la ubicación predeterminada."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -233,6 +299,12 @@
     "Find" : {
       "comment" : "Edit menu: focus the search field (⌘F)",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -250,6 +322,12 @@
     "Homebrew command failed." : {
       "comment" : "Error when brew exits non-zero without printing anything to stderr",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falló el comando de Homebrew."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -267,6 +345,12 @@
     "Homebrew returned output the app couldn’t read." : {
       "comment" : "Error when brew succeeded but its JSON output failed to decode",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew devolvió una respuesta que la app no pudo leer."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -284,6 +368,12 @@
     "Refresh" : {
       "comment" : "View menu: refresh every surface (⌘R)",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refrescar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -301,6 +391,12 @@
     "Retry" : {
       "comment" : "Error state: retry the failed load",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -318,6 +414,12 @@
     "Terminal command" : {
       "comment" : "Command block header, one command",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comando de la terminal"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -335,6 +437,12 @@
     "Terminal commands" : {
       "comment" : "Command block header, several commands",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comandos de la terminal"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -352,6 +460,12 @@
     "just now" : {
       "comment" : "Relative time: under a minute ago",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "justo ahora"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",

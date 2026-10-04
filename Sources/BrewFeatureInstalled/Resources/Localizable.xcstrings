@@ -4,6 +4,12 @@
     "%@\n\nUntil this succeeds the app can't tell whether anything needs upgrading." : {
       "comment" : "Upgrades empty state under a failed check: brew's error, then why the list is empty",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@\n\nHasta que esto funcione, la app no puede saber si hay algo que actualizar."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,6 +27,12 @@
     "%@ (linked)" : {
       "comment" : "Installed versions row; %@ is the version list, annotated when one keg is linked",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (enlazado)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38,6 +50,12 @@
     "%@ — last check failed" : {
       "comment" : "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — la última revisión falló"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,6 +73,12 @@
     "%@, not installed" : {
       "comment" : "VoiceOver: dependency row for a package that is not installed; %@ is its name",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, no instalado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -72,6 +96,12 @@
     "%lld outdated packages are hidden by the current filters." : {
       "comment" : "Upgrades filter-empty state with multiple hidden outdated packages",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los filtros actuales ocultan %lld paquetes desactualizados."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -89,6 +119,12 @@
     "%lld packages" : {
       "comment" : "Installed tab subtitle; %lld is the package count (never 1)",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paquetes"
+          }
+        },
         "zh-Hans" : {
           "variations" : {
             "plural" : {
@@ -124,6 +160,12 @@
             "value" : "%1$lld packages above depend on %2$@. Uninstall them first."
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los %1$lld paquetes de arriba dependen de %2$@. Desinstálalos primero."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -141,6 +183,12 @@
     "%lld packages can be upgraded" : {
       "comment" : "Upgrades tab subtitle when multiple packages are outdated",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paquetes se pueden actualizar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -158,6 +206,12 @@
     "%lld upgrades available" : {
       "comment" : "VoiceOver: sidebar badge; %lld is the outdated count",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld actualizaciones disponibles"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -175,6 +229,12 @@
     "1 outdated package is hidden by the current filters." : {
       "comment" : "Upgrades filter-empty state with a single hidden outdated package",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los filtros actuales ocultan 1 paquete desactualizado."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -192,6 +252,12 @@
     "1 package" : {
       "comment" : "Installed tab subtitle, exactly one package",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paquete"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -209,6 +275,12 @@
     "1 package above depends on %@. Uninstall it first." : {
       "comment" : "Installed detail uninstall blocked callout body for one dependent",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El paquete de arriba depende de %@. Desinstálalo primero."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -226,6 +298,12 @@
     "1 package can be upgraded" : {
       "comment" : "Upgrades tab subtitle for a single outdated package",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paquete se puede actualizar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -243,6 +321,12 @@
     "All" : {
       "comment" : "Scope picker: every package kind",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -260,6 +344,12 @@
     "All %lld installed packages are up to date." : {
       "comment" : "Upgrades empty state with total installed count",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los %lld paquetes instalados están actualizados."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -277,6 +367,12 @@
     "As dependency" : {
       "comment" : "Install reason row: installed only because another package needed it",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como dependencia"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -294,6 +390,12 @@
     "Available upgrades" : {
       "comment" : "Upgrades tab heading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizaciones disponibles"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -311,6 +413,12 @@
     "Blocked by installed dependents. Activate to see why." : {
       "comment" : "Installed detail uninstall button accessibility hint when blocked",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloqueado por paquetes instalados que lo usan. Actívalo para ver por qué."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -328,6 +436,12 @@
     "Can't uninstall yet." : {
       "comment" : "Installed detail uninstall blocked callout lead sentence",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no se puede desinstalar."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -345,6 +459,12 @@
     "Cancel" : {
       "comment" : "Uninstall confirmation: keep the package",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -362,6 +482,12 @@
     "Casks" : {
       "comment" : "Scope picker: casks only",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casks"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -379,6 +505,12 @@
     "Check for upgrades again" : {
       "comment" : "VoiceOver: upgrades refresh button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar actualizaciones de nuevo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -396,6 +528,12 @@
     "Choose a package from the list to see details." : {
       "comment" : "Package detail placeholder body when nothing is selected",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecciona un paquete de la lista para ver los detalles."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -413,6 +551,12 @@
     "Couldn't check for upgrades" : {
       "comment" : "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron buscar actualizaciones"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -430,6 +574,12 @@
     "DEPRECATED" : {
       "comment" : "Installed deprecated status badge label",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OBSOLETO"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -447,6 +597,12 @@
     "Dependencies" : {
       "comment" : "Package detail section heading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dependencias"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -464,6 +620,12 @@
     "Dependents" : {
       "comment" : "Package detail section heading: packages that depend on this one",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usado por"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -481,6 +643,12 @@
     "Deprecated" : {
       "comment" : "Installed deprecated status badge accessibility label",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obsoleto"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -498,6 +666,12 @@
     "Details" : {
       "comment" : "Package detail section heading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -515,6 +689,12 @@
     "Everything is up to date" : {
       "comment" : "Upgrades tab: canonical phrase for having no upgrades available",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo está actualizado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -532,6 +712,12 @@
     "Formulae" : {
       "comment" : "Scope picker: formulae only",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fórmulas"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -549,6 +735,12 @@
     "Hide dependencies" : {
       "comment" : "Installed tab: hide dependency-only packages",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar dependencias"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -566,6 +758,12 @@
     "Homepage" : {
       "comment" : "Package detail row: homepage link",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitio web"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -583,6 +781,12 @@
     "Install reason" : {
       "comment" : "Package detail row: on request or as a dependency",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motivo de instalación"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -600,6 +804,12 @@
     "Installed" : {
       "comment" : "Package detail row: installed version(s)\nVoiceOver: package is installed",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -617,6 +827,12 @@
     "Installed and up to date" : {
       "comment" : "Installed list: tooltip on the up-to-date tick",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado y actualizado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -634,6 +850,12 @@
     "Installed on" : {
       "comment" : "Package detail row: install date",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha de instalación"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -651,6 +873,12 @@
     "Installed packages" : {
       "comment" : "VoiceOver: the installed packages list",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paquetes instalados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -668,6 +896,12 @@
     "Keg-only" : {
       "comment" : "Package detail row: formula is keg-only",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keg-only"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -685,6 +919,12 @@
     "Latest version" : {
       "comment" : "Package detail row",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última versión"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -708,6 +948,12 @@
             "value" : "Licence"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licencia"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -725,6 +971,12 @@
     "Loading packages…" : {
       "comment" : "Installed tab subtitle while fetching\nUpgrades tab subtitle while fetching",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando paquetes…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -742,6 +994,12 @@
     "No dependencies." : {
       "comment" : "Package detail: empty dependency list",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin dependencias."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -759,6 +1017,12 @@
     "No dependents." : {
       "comment" : "Package detail: nothing depends on this package",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ningún paquete lo usa."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -776,6 +1040,12 @@
     "No installed packages to check." : {
       "comment" : "Upgrades empty state when nothing is installed",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay paquetes instalados para revisar."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -793,6 +1063,12 @@
     "No matches in %lld outdated packages" : {
       "comment" : "Upgrades tab subtitle when filters hide every available upgrade",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin coincidencias en %lld paquetes desactualizados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -810,6 +1086,12 @@
     "No matches in 1 outdated package" : {
       "comment" : "Upgrades tab subtitle when filters hide the single available upgrade",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin coincidencias en 1 paquete desactualizado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -827,6 +1109,12 @@
     "No matching upgrades" : {
       "comment" : "Upgrades filter-empty state title",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguna actualización coincide"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -844,6 +1132,12 @@
     "No selection" : {
       "comment" : "Package detail placeholder title when nothing is selected",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin selección"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -861,6 +1155,12 @@
     "None." : {
       "comment" : "Package detail: empty relationship list",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguno."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -878,6 +1178,12 @@
     "Nothing to upgrade here" : {
       "comment" : "Upgrades header stand-in when filters hide every available upgrade",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada que actualizar aquí"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -895,6 +1201,12 @@
     "OUTDATED" : {
       "comment" : "Installed outdated status badge label",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DESACTUALIZADO"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -912,6 +1224,12 @@
     "Open installed package %@" : {
       "comment" : "VoiceOver: dependency row that jumps to that package; %@ is its name",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir paquete instalado %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -929,6 +1247,12 @@
     "Outdated packages" : {
       "comment" : "VoiceOver: the outdated packages list",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paquetes desactualizados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -946,6 +1270,12 @@
     "Pinned" : {
       "comment" : "Package detail row: brew pin",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fijado"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -963,6 +1293,12 @@
     "Poured from bottle — %@" : {
       "comment" : "Install date row; %@ is the formatted date",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado desde binario precompilado — %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -980,6 +1316,12 @@
     "Refresh" : {
       "comment" : "Upgrades tab: re-check for upgrades button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refrescar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -997,6 +1339,12 @@
     "Scope" : {
       "comment" : "Installed tab: formula/cask scope picker label\nUpgrades tab: formula/cask scope picker label",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tipo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1014,6 +1362,12 @@
     "Search Installed Packages" : {
       "comment" : "Search field placeholder, Installed tab",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar paquetes instalados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1031,6 +1385,12 @@
     "Search Upgrades" : {
       "comment" : "Search field placeholder, Upgrades tab",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar actualizaciones"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1048,6 +1408,12 @@
     "Show all upgrades" : {
       "comment" : "Upgrades tab: clear the scope and search filters",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas las actualizaciones"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1071,6 +1437,12 @@
             "value" : "Showing %1$lld of %2$lld upgrades"
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrando %1$lld de %2$lld actualizaciones"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1088,6 +1460,12 @@
     "Something went wrong loading packages." : {
       "comment" : "Installed tab generic error\nUpgrades tab generic error",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo salió mal al cargar los paquetes."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1105,6 +1483,12 @@
     "Something went wrong while uninstalling this package." : {
       "comment" : "Installed detail generic uninstall error",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo salió mal al desinstalar este paquete."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1122,6 +1506,12 @@
     "Something went wrong while upgrading this package." : {
       "comment" : "Installed detail generic upgrade error",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo salió mal al actualizar este paquete."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1139,6 +1529,12 @@
     "Source" : {
       "comment" : "Package detail row: source tap",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Origen"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1156,6 +1552,12 @@
     "This will remove %@ from this Mac using Homebrew." : {
       "comment" : "Installed detail uninstall confirmation message; interpolated package name",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esto desinstalará %@ de esta Mac con Homebrew."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1173,6 +1575,12 @@
     "Try Again" : {
       "comment" : "Upgrades tab: re-run the failed upgrade check",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1190,6 +1598,12 @@
     "Uninstall" : {
       "comment" : "Installed detail uninstall button title\nPackage detail section heading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desinstalar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1207,6 +1621,12 @@
     "Uninstall %@?" : {
       "comment" : "Installed detail uninstall confirmation title; interpolated package name",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Desinstalar %@?"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1224,6 +1644,12 @@
     "Uninstalling" : {
       "comment" : "VoiceOver: package uninstalling",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desinstalando"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1241,6 +1667,12 @@
     "Uninstalls this package from this Mac" : {
       "comment" : "Command block summary above brew uninstall",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desinstala este paquete de esta Mac"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1258,6 +1690,12 @@
     "Upgrade" : {
       "comment" : "Package detail section heading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1275,6 +1713,12 @@
     "Upgrade All (%lld)" : {
       "comment" : "Upgrades tab button; %lld is the outdated count",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar todo (%lld)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1292,6 +1736,12 @@
     "Upgrade all %lld packages" : {
       "comment" : "VoiceOver: upgrade-all button; %lld is the outdated count",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar los %lld paquetes"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1309,6 +1759,12 @@
     "Upgrade available" : {
       "comment" : "Installed outdated status badge accessibility label",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualización disponible"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1326,6 +1782,12 @@
     "Upgrade available to %@" : {
       "comment" : "VoiceOver: installed row with an available upgrade; the value is the latest version",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualización a %@ disponible"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1343,6 +1805,12 @@
     "Upgrade to %@" : {
       "comment" : "Installed detail upgrade button; interpolated label shows target tap version.",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar a %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1360,6 +1828,12 @@
     "Upgrades every outdated cask" : {
       "comment" : "Upgrades header command summary scoped to casks",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza todos los casks desactualizados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1377,6 +1851,12 @@
     "Upgrades every outdated formula" : {
       "comment" : "Upgrades header command summary scoped to formulae",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza todas las fórmulas desactualizadas"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1394,6 +1874,12 @@
     "Upgrades every outdated package" : {
       "comment" : "Upgrades header command summary for an unfiltered batch",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza todos los paquetes desactualizados"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1411,6 +1897,12 @@
     "Upgrades the %lld packages matching your search" : {
       "comment" : "Upgrades header command summary for multiple searched packages",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza los %lld paquetes que coinciden con tu búsqueda"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1428,6 +1920,12 @@
     "Upgrades the 1 package matching your search" : {
       "comment" : "Upgrades header command summary for a single searched package",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza el paquete que coincide con tu búsqueda"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1445,6 +1943,12 @@
     "Upgrades this package to the latest available version" : {
       "comment" : "Command block summary above brew upgrade",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualiza este paquete a la última versión disponible"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1462,6 +1966,12 @@
     "Upgrading" : {
       "comment" : "VoiceOver: package upgrading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizando"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1479,6 +1989,12 @@
     "Yes" : {
       "comment" : "Package detail value for a true flag",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sí"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1496,6 +2012,12 @@
     "Your installed package is up to date." : {
       "comment" : "Upgrades empty state for a single installed package",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu paquete instalado está actualizado."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1513,6 +2035,12 @@
     "Your packages" : {
       "comment" : "Installed tab heading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus paquetes"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1530,6 +2058,12 @@
     "blocking uninstall" : {
       "comment" : "Installed detail Used by badge when dependents block uninstall",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "impide desinstalar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",

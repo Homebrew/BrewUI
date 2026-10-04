@@ -4,6 +4,12 @@
     "%@, Fix available" : {
       "comment" : "VoiceOver label for a Doctor issue with a runnable fix; %@ is the issue title",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, solución disponible"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,6 +27,12 @@
     "Copy brew doctor output" : {
       "comment" : "VoiceOver: Doctor copy-output button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar salida de brew doctor"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38,6 +50,12 @@
     "Copy output" : {
       "comment" : "Doctor header: copy raw brew doctor output",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar salida"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,6 +73,12 @@
     "Danger" : {
       "comment" : "Doctor severity name",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peligro"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -72,6 +96,12 @@
     "Doctor" : {
       "comment" : "Doctor tab heading",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Doctor"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -89,6 +119,12 @@
     "Doctor issues" : {
       "comment" : "VoiceOver: the Doctor issues list",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problemas de Doctor"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -106,6 +142,12 @@
     "Fix available" : {
       "comment" : "Doctor issue row badge",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solución disponible"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -123,6 +165,12 @@
     "Last checked" : {
       "comment" : "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última revisión"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -140,6 +188,12 @@
     "Needs admin · runs in Terminal" : {
       "comment" : "Doctor fix note: the command needs sudo so it opens in Terminal",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requiere permisos de administrador · se ejecuta en Terminal"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -157,6 +211,12 @@
     "No problems found" : {
       "comment" : "Doctor subtitle, healthy",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron problemas"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -174,6 +234,12 @@
     "No selection" : {
       "comment" : "Doctor detail placeholder title when nothing is selected",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin selección"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -191,6 +257,12 @@
     "Raw output" : {
       "comment" : "Doctor detail: collapsible header for the raw brew doctor text",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salida sin formato"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -208,6 +280,12 @@
     "Re-checking" : {
       "comment" : "VoiceOver: Doctor re-check spinner",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisando de nuevo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -225,6 +303,12 @@
     "Re-checking…" : {
       "comment" : "Doctor subtitle while a re-check runs",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisando de nuevo…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -242,6 +326,12 @@
     "Run Again" : {
       "comment" : "Doctor header: re-run brew doctor",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ejecutar de nuevo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -259,6 +349,12 @@
     "Run Fix" : {
       "comment" : "Doctor detail: run the suggested fix button\nVoiceOver: run-fix button",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplicar solución"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -276,6 +372,12 @@
     "Run diagnostics, then choose an issue to see details and fixes." : {
       "comment" : "Doctor detail placeholder body when nothing is selected",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ejecuta el diagnóstico y luego elige un problema para ver los detalles y las soluciones."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -293,6 +395,12 @@
     "Running brew doctor…" : {
       "comment" : "Doctor subtitle during the first check",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ejecutando brew doctor…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -310,6 +418,12 @@
     "Severity: %@" : {
       "comment" : "VoiceOver: Doctor severity badge; %@ is the severity name",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravedad: %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -327,6 +441,12 @@
     "The check could not be completed" : {
       "comment" : "Doctor subtitle when brew doctor failed to run",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo completar la revisión"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -344,6 +464,12 @@
     "Unsupported" : {
       "comment" : "Doctor severity name: unsupported configuration",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No compatible"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -361,6 +487,12 @@
     "Warning" : {
       "comment" : "Doctor severity name",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advertencia"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -378,6 +510,12 @@
     "Warnings found" : {
       "comment" : "Doctor subtitle, issues listed",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se encontraron advertencias"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -395,6 +533,12 @@
     "Your system is ready to brew" : {
       "comment" : "Doctor healthy state title",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu sistema está listo para usar Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -412,6 +556,12 @@
     "brew doctor found no problems." : {
       "comment" : "Doctor healthy state body",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor no encontró problemas."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",

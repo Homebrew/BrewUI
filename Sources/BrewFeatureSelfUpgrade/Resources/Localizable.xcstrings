@@ -4,6 +4,12 @@
     "A new version of the Homebrew app is available" : {
       "comment" : "Self-upgrade banner title",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hay una nueva versión de la app de Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,6 +27,12 @@
     "Later" : {
       "comment" : "Self-upgrade banner: dismiss for now",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más tarde"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -38,6 +50,12 @@
     "The Homebrew app has been upgraded to the latest version." : {
       "comment" : "Alert body on the launch after a successful self-upgrade",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app de Homebrew se actualizó a la última versión."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,6 +73,12 @@
     "The Homebrew app is up to date" : {
       "comment" : "Alert title on the launch after a successful self-upgrade",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app de Homebrew está actualizada"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -72,6 +96,12 @@
     "The Homebrew app wasn’t upgraded" : {
       "comment" : "Alert title on the launch after a self-upgrade that failed",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La app de Homebrew no se actualizó"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -89,6 +119,12 @@
     "The upgrade didn’t finish, so this is still the previous version. You can try again from the banner above your packages." : {
       "comment" : "Alert body on the launch after a self-upgrade that failed",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La actualización no terminó, así que sigues en la versión anterior. Puedes volver a intentarlo desde el banner que está arriba de tus paquetes."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -106,6 +142,12 @@
     "Upgrade Homebrew app" : {
       "comment" : "Self-upgrade banner eyebrow",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar app de Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -123,6 +165,12 @@
     "Upgrade failed: %@" : {
       "comment" : "VoiceOver: self-upgrade error; %@ is the error text",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La actualización falló: %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -140,6 +188,12 @@
     "Upgrade the Homebrew app" : {
       "comment" : "Self-upgrade banner button when brew reports no version for the upgrade",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar la app de Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -157,6 +211,12 @@
     "Upgrade to %@" : {
       "comment" : "Self-upgrade banner button, e.g. \"Upgrade to v1.5.0\"",
       "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizar a %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
