@@ -296,6 +296,23 @@
         }
       }
     },
+    "FORMULA" : {
+      "comment" : "Package type badge: Homebrew formula",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配方"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配方"
+          }
+        }
+      }
+    },
     "Find" : {
       "comment" : "Edit menu: focus the search field (⌘F)",
       "localizations" : {

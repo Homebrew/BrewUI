@@ -364,13 +364,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formula"
+            "value" : "配方"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Formula"
+            "value" : "配方"
           }
         }
       }
@@ -715,13 +715,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "没有匹配的 Formula"
+            "value" : "没有匹配的配方"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "沒有符合條件的 Formula"
+            "value" : "沒有符合條件的配方"
           }
         }
       }
@@ -830,13 +830,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "热门 Formula"
+            "value" : "热门配方"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "熱門 Formula"
+            "value" : "熱門配方"
           }
         }
       }
