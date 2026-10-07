@@ -53,9 +53,7 @@ public enum BrewCommands {
         BrewCommand(operationKind: .doctorRead, arguments: ["doctor"])
     }
 
-    /// `brew bundle dump` — snapshots the installed formulae, casks and taps as a Brewfile at `fileURL`.
-    /// `--force` because the save panel has already asked the user to confirm replacing an existing file;
-    /// without it `brew` refuses to write over one.
+    /// `--force` because the save panel has already confirmed replacing an existing file.
     public static func bundleDump(fileURL: URL) -> BrewCommand {
         BrewCommand(
             operationKind: .bundleDump,

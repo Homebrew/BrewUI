@@ -18,6 +18,8 @@ struct MainWindowView: View {
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
     @Environment(\.doctorRepository) private var doctorRepository
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
+    @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
 
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
@@ -47,6 +49,10 @@ struct MainWindowView: View {
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         .focusedSceneValue(\.sidebarSelection, $selectedSidebarItem)
         .focusedSceneValue(\.refreshAll, RefreshAllAction { refreshAll() })
+        .focusedSceneValue(
+            \.saveBrewfile,
+            SaveBrewfileAction(commandCenter: brewCommandCenter, commandFactory: mutatingCommandFactory),
+        )
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
             selectedSidebarItem = .installed

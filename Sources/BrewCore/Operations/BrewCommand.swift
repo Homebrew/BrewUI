@@ -22,9 +22,7 @@ public struct BrewCommand: Sendable, Equatable {
 }
 
 public extension BrewCommand {
-    /// The literal a person would type — `"brew "` followed by shell-quoted ``arguments``. Maintenance
-    /// operations carry this into their ``BrewOperationID``, so the console renders a command that can be
-    /// pasted back into a shell without changing the argv boundaries.
+    /// `brew` and the shell-quoted ``arguments``, so the console shows a command that pastes back intact.
     var displayCommand: String {
         "brew " + arguments.map(Self.shellQuoted).joined(separator: " ")
     }

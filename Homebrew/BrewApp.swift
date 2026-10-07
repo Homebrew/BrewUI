@@ -154,6 +154,7 @@ struct BrewApp: App {
             SidebarCommands()
             RefreshCommands()
             ConsoleCommands()
+            BrewfileCommands()
 
             // Replace the default "Homebrew Help" item (which points at a
             // non-existent help book) with a link to the online documentation.

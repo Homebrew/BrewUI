@@ -21,12 +21,7 @@ enum InstalledFeatureTestSupport {
             commandRunner: MockBrewCommandRunner(responses: [:]),
             cache: cache,
         )
-        let viewModel = InstalledViewModel(
-            repository: repository,
-            preferences: preferences,
-            brewCommandCenter: StubBrewCommandCenter(),
-            commandFactory: StubMutatingCommandFactory(),
-        )
+        let viewModel = InstalledViewModel(repository: repository, preferences: preferences)
         await viewModel.load()
         return viewModel
     }

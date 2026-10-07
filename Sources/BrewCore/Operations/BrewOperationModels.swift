@@ -22,8 +22,6 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case uninstallCask
     case doctorFix
     case doctorRead
-    /// `brew bundle dump` — writes the installed formulae, casks and taps to a Brewfile at a path the
-    /// user picked in a save panel.
     case bundleDump
 
     /// `true` when the command's ordinary output arrives on stderr, as `brew doctor`'s does — the
@@ -32,9 +30,8 @@ public enum BrewOperationKind: String, Hashable, Sendable {
         self == .doctorRead
     }
 
-    /// `true` when interrupting the command would leave Homebrew half-changed. ``bundleDump`` writes
-    /// outside Homebrew, but it belongs on this side of the line anyway: the self-upgrade handoff must
-    /// not terminate the app part way through a dump.
+    /// `true` when interrupting the command would leave Homebrew half-changed. ``bundleDump`` counts too,
+    /// so the self-upgrade handoff never quits the app part way through writing a Brewfile.
     public var isMutating: Bool {
         self != .doctorRead
     }

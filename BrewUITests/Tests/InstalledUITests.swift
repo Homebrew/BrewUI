@@ -18,12 +18,6 @@ final class InstalledUITests: BrewUITestCase {
     }
 
     @MainActor
-    func testHeaderEnablesSavingTheEnvironmentAsABrewfile() {
-        launch(.installedBasic)
-            .assertShowsSaveBrewfileButton()
-    }
-
-    @MainActor
     func testSearchFiltersTheList() {
         launch(.installedBasic)
             .search(for: "wget")

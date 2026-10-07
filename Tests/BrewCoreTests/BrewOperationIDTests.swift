@@ -43,8 +43,6 @@ struct BrewOperationIDTests {
 
     /// `brew doctor` is the one kind the center schedules that changes nothing, and it runs long enough
     /// that treating it as mutating would block the self-upgrade for as long as the Doctor tab is loading.
-    /// `bundleDump` changes nothing in Homebrew either, but it stays mutating: the handoff must not quit
-    /// the app part way through writing a Brewfile.
     @Test func `every kind but the doctor read is mutating`() {
         let kinds: [BrewOperationKind] = [
             .installFormula, .installCask,

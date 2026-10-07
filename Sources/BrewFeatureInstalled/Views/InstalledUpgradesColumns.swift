@@ -66,8 +66,6 @@ struct InstalledUpgradesContainer: View {
             initialValue: InstalledViewModel(
                 repository: installedPackagesRepository,
                 preferences: installedPreferences,
-                brewCommandCenter: brewCommandCenter,
-                commandFactory: mutatingCommandFactory,
                 initialSelection: deepLinkSelection.wrappedValue,
             ),
         )
