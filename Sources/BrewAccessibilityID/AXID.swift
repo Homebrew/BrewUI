@@ -44,6 +44,12 @@ public enum AXID: Hashable, Sendable {
     case doctorScreen
     case brewNotFoundState
 
+    // Services
+    case servicesScreen
+    case serviceDetail
+    case servicesRefreshButton
+    case serviceRow(name: String)
+
     // Detail / Console
     case packageDetail
     case installButton
@@ -61,7 +67,7 @@ public enum AXID: Hashable, Sendable {
 
     /// Mirrors the app's `SidebarItem`, so the test target can name a destination without linking it.
     public enum SidebarDestination: String, CaseIterable, Sendable {
-        case installed, upgrades, discover, doctor, configuration
+        case installed, services, upgrades, discover, doctor, configuration
     }
 
     /// The string handed to `accessibilityIdentifier` and read back by `XCUIElement`.
@@ -88,6 +94,10 @@ public enum AXID: Hashable, Sendable {
         case let .discoverRow(token): "discover.row.\(token)"
         case .configScreen: "config.screen"
         case .doctorScreen: "doctor.screen"
+        case .servicesScreen: "services.screen"
+        case .serviceDetail: "services.detail"
+        case .servicesRefreshButton: "services.refresh"
+        case let .serviceRow(name): "services.row.\(name)"
         case .brewNotFoundState: "brew.not.found"
         case .packageDetail: "package.detail"
         case .installButton: "detail.install"

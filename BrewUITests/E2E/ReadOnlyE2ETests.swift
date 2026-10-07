@@ -3,6 +3,7 @@
 //  BrewUITests
 //
 
+import BrewAccessibilityID
 import XCTest
 
 /// The canaries that mutate nothing. Doctor is absent and Upgrades goes unasserted because neither
@@ -12,6 +13,8 @@ final class ReadOnlyE2ETests: BrewE2ETestCase {
     func testVisitsEverySidebarDestinationAgainstRealData() {
         let installed = launchLive()
 
+        BrewUIButton(installed.app, .sidebarItem(.services)).tap()
+        BrewUIElement(installed.app, .servicesScreen).assertExists()
         installed.sidebar.goToUpgrades()
         installed.sidebar.goToDiscover()
         installed.sidebar.goToConfiguration()
