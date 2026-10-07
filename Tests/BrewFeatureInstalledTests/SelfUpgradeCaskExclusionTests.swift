@@ -65,6 +65,8 @@ struct SelfUpgradeCaskExclusionTests {
         let viewModel = InstalledViewModel(
             repository: StubInstalledPackagesRepository(packages: Self.packagesIncludingTheApp),
             preferences: StubInstalledPreferences(),
+            brewCommandCenter: StubBrewCommandCenter(),
+            commandFactory: StubMutatingCommandFactory(),
         )
 
         guard case let .loaded(content) = viewModel.state else {

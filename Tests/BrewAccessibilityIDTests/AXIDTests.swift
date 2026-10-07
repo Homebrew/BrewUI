@@ -16,6 +16,7 @@ struct AXIDTests {
         (.installedList, "installed.list"),
         (.installedSearchField, "installed.search"),
         (.installedHideDependenciesSwitch, "installed.hideDependencies"),
+        (.installedSaveBrewfileButton, "installed.saveBrewfile"),
         (.upgradesScreen, "upgrades.screen"),
         (.upgradesList, "upgrades.list"),
         (.upgradesRefreshButton, "upgrades.refresh"),
