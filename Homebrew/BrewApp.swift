@@ -39,6 +39,7 @@ struct BrewApp: App {
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
+    private let userBrewEnvironmentStore: UserBrewEnvironmentFileStore
     private let crashReportController: CrashReportController
     private let selfUpgradeCoordinator: SelfUpgradeCoordinator
     #if DEBUG
@@ -86,6 +87,7 @@ struct BrewApp: App {
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
+        userBrewEnvironmentStore = Self.makeUserBrewEnvironmentStore(fixtures: fixtures)
 
         let selfUpgradeContext = SelfUpgradeLaunchContext(
             installedPackagesRepository: installedPackagesRepository,
@@ -118,6 +120,7 @@ struct BrewApp: App {
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
+                .environment(\.userBrewEnvironmentStore, userBrewEnvironmentStore)
                 .environment(\.selfUpgradeCoordinator, selfUpgradeCoordinator)
                 .task {
                     async let catalogue: Void = catalogueCache.prepare()

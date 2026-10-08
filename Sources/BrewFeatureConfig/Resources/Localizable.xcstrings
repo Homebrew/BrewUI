@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Applies to future Homebrew commands, including those run in Terminal. System-wide Homebrew settings may take priority. App browsing uses the macOS system proxy. PAC is not supported here." : {
+      "comment" : "Configuration proxy card: where the values are stored and what they affect"
+    },
     "Build settings" : {
       "comment" : "Configuration card title: HOMEBREW_* build options",
       "localizations" : {
@@ -93,6 +96,24 @@
         }
       }
     },
+    "Couldn’t read ~/.homebrew/brew.env." : {
+      "comment" : "Proxy settings: user brew.env could not be read"
+    },
+    "Couldn’t save the proxy settings." : {
+      "comment" : "Proxy settings: generic save failure"
+    },
+    "Couldn’t write ~/.homebrew/brew.env." : {
+      "comment" : "Proxy settings: user brew.env could not be written"
+    },
+    "Credentials are saved in plain text inside brew.env." : {
+      "comment" : "Proxy settings: credentials are not stored in the keychain"
+    },
+    "Discard changes" : {
+      "comment" : "Proxy settings: discard button"
+    },
+    "HTTP" : {
+      "comment" : "Proxy type: HTTP"
+    },
     "Homebrew" : {
       "comment" : "Configuration card title: brew version, prefix, taps",
       "localizations" : {
@@ -162,6 +183,42 @@
         }
       }
     },
+    "Host name" : {
+      "comment" : "Proxy settings field label"
+    },
+    "Host name is required." : {
+      "comment" : "Proxy settings: host is empty in manual mode"
+    },
+    "Login" : {
+      "comment" : "Proxy settings field label"
+    },
+    "Login is required when proxy authentication is on." : {
+      "comment" : "Proxy settings: username empty while authentication is enabled"
+    },
+    "Manual proxy configuration" : {
+      "comment" : "Proxy settings mode: manual host and port"
+    },
+    "Network proxy" : {
+      "comment" : "Configuration card title: Homebrew proxy settings written to brew.env"
+    },
+    "No proxy for" : {
+      "comment" : "Proxy settings field label for no_proxy"
+    },
+    "Password" : {
+      "comment" : "Proxy settings field label"
+    },
+    "Port number" : {
+      "comment" : "Proxy settings field label"
+    },
+    "Proxy authentication" : {
+      "comment" : "Proxy settings: enable login and password"
+    },
+    "Proxy mode" : {
+      "comment" : "Proxy settings: mode picker label"
+    },
+    "Proxy type" : {
+      "comment" : "Proxy settings: HTTP or SOCKS picker label"
+    },
     "Refresh" : {
       "comment" : "Configuration header: re-run brew config",
       "localizations" : {
@@ -185,6 +242,24 @@
         }
       }
     },
+    "Remove line breaks from this value." : {
+      "comment" : "Proxy settings: field contains a newline"
+    },
+    "Remove user proxy settings" : {
+      "comment" : "Proxy settings mode: remove user keys and inherit installation or system settings"
+    },
+    "SOCKS" : {
+      "comment" : "Proxy type: SOCKS"
+    },
+    "Save proxy settings" : {
+      "comment" : "Proxy settings: save button"
+    },
+    "Saved. Homebrew will read the user configuration on its next command." : {
+      "comment" : "Proxy settings: save success confirmation"
+    },
+    "Saving removes proxy settings from ~/.homebrew/brew.env. Installation and system settings still apply." : {
+      "comment" : "Proxy settings: removing user settings does not force a direct connection"
+    },
     "System" : {
       "comment" : "Configuration card title: macOS, CPU, Xcode",
       "localizations" : {
@@ -207,6 +282,15 @@
           }
         }
       }
+    },
+    "That value can’t be saved to brew.env." : {
+      "comment" : "Proxy settings: store refused the value"
+    },
+    "Use a host name or IP address without a URL scheme or path." : {
+      "comment" : "Proxy settings: host contains invalid URL components"
+    },
+    "Use a port from 1 to 65535." : {
+      "comment" : "Proxy settings: port is not a valid TCP port"
     }
   },
   "version" : "1.0"
