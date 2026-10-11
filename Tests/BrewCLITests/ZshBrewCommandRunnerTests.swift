@@ -5,11 +5,100 @@
 
 @testable import BrewCLI
 import BrewCore
+import Darwin
 import Foundation
 import Synchronization
 import Testing
 
 struct ZshBrewCommandRunnerTests {
+    @Test(arguments: [0, 1, 2])
+    func `askpass path survives clean environments and output modes`(mode: Int) async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("askpass ' $; \(UUID())")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let helper = directory.appendingPathComponent("helper")
+        try FileManager.default.createSymbolicLink(at: helper, withDestinationURL: URL(fileURLWithPath: "/usr/bin/printf"))
+        let output = try await ZshBrewCommandRunner(
+            underlying: PollutedEnvironmentRunner(
+                startupScript: "export SUDO_ASKPASS=/unexpected; ",
+                service: mode == 2 ? BrewCommandService(makeTerminal: { throw CocoaError(.fileWriteUnknown) }) : BrewCommandService(),
+            ),
+            askpassExecutableURL: helper,
+        ).run(
+            executableURL: URL(fileURLWithPath: "/bin/sh"),
+            arguments: ["-c", "printf '%s' \"$SUDO_ASKPASS\""],
+            options: BrewRunOptions(output: mode == 0 ? .pipes(forceColor: false) : .pseudoTerminal),
+        )
+        #expect(output.standardOutput == helper.path)
+    }
+
+    @Test func `explicit askpass overrides the bundled default and missing helpers are omitted`() async throws {
+        let executable = URL(fileURLWithPath: "/usr/bin/env")
+        let overridden = try await ZshBrewCommandRunner(askpassExecutableURL: executable).run(
+            executableURL: executable, arguments: [],
+            options: BrewRunOptions(environment: ["SUDO_ASKPASS": "/custom/helper"]),
+        )
+        #expect(overridden.standardOutput.contains("SUDO_ASKPASS=/custom/helper\n"))
+        let missing = try await ZshBrewCommandRunner(askpassExecutableURL: URL(fileURLWithPath: "/nonexistent/askpass")).run(
+            executableURL: executable, arguments: [],
+        )
+        #expect(!missing.standardOutput.contains("SUDO_ASKPASS"))
+    }
+
+    @Test(arguments: [false, true])
+    func `fake brew consumes askpass privately and preserves rejection diagnostics`(reject: Bool) async throws {
+        let helper = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: helper) }
+        try (reject ? "#!/bin/sh\nexit 1\n" : "#!/bin/sh\nprintf 'dummy-response\\n'\n").write(to: helper, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
+        let lines = Mutex<[String]>([])
+        let output = try await ZshBrewCommandRunner(askpassExecutableURL: helper).run(
+            executableURL: URL(fileURLWithPath: "/bin/sh"),
+            arguments: ["-c", """
+            response=$("$SUDO_ASKPASS" 'synthetic prompt') || { printf 'authentication rejected\\n' >&2; exit 12; }
+            test "$response" = dummy-response && printf 'success\\n'
+            """],
+            options: BrewRunOptions(lineObserver: { line in lines.withLock { $0.append(line.text) } }),
+        )
+        #expect(output == CommandOutput(
+            standardOutput: reject ? "" : "success\n",
+            standardError: reject ? "authentication rejected\n" : "",
+            terminationStatus: reject ? 12 : 0,
+        ))
+        #expect(lines.withLock { $0 } == [reject ? "authentication rejected" : "success"])
+    }
+
+    @Test(arguments: [BrewRunOptions.OutputChannel.pipes(forceColor: false), .pseudoTerminal])
+    func `cancellation stops a waiting askpass and its caller`(channel: BrewRunOptions.OutputChannel) async throws {
+        let helper = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: helper) }
+        try "#!/bin/sh\nprintf '%s\\n' $$ >&2\nexec /bin/sleep 30\n".write(to: helper, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
+        let processes = Mutex<[Int32]>([])
+        let runner = ZshBrewCommandRunner(askpassExecutableURL: helper)
+        let task = Task {
+            try await runner.run(
+                executableURL: URL(fileURLWithPath: "/bin/sh"),
+                arguments: ["-c", "printf '%s\\n' $$; response=$(\"$SUDO_ASKPASS\" 'synthetic prompt')"],
+                options: BrewRunOptions(lineObserver: { line in
+                    if line.isComplete, let pid = Int32(line.text) {
+                        processes.withLock { $0.append(pid) }
+                    }
+                }, output: channel),
+            )
+        }
+        defer { task.cancel() }
+        try await waitUntil("askpass did not become ready", timeout: .seconds(30)) { processes.withLock { $0.count == 2 } }
+        try #require(processes.withLock { $0.count == 2 })
+        task.cancel()
+        _ = await task.result
+        try await waitUntil("askpass or its caller survived cancellation") {
+            processes.withLock { $0.allSatisfy { kill($0, 0) == -1 && errno == ESRCH } }
+        }
+        let next = try await runner.run(executableURL: URL(fileURLWithPath: "/usr/bin/printf"), arguments: ["next"])
+        #expect(next.standardOutput == "next")
+    }
+
     @Test func `brew receives only the explicit environment`() async throws {
         let output = try await ZshBrewCommandRunner(underlying: PollutedEnvironmentRunner()).run(
             executableURL: URL(fileURLWithPath: "/usr/bin/env"),
@@ -192,6 +281,7 @@ private struct PollutedEnvironmentRunner: BrewCommandRunning {
         "SHELL": "/nonexistent/shell",
         "XDG_CONFIG_HOME": "/unexpected/config",
         "BASH_ENV": "/unexpected/bashenv",
+        "SUDO_ASKPASS": "/unexpected/askpass",
     ]
     var startupScript = ""
     var service = BrewCommandService()

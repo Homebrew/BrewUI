@@ -204,6 +204,18 @@
         }
       }
     },
+    "Administrator password" : {
+      "comment" : "Askpass: secure password field label"
+    },
+    "Authenticate" : {
+      "comment" : "Askpass: submit the password to sudo"
+    },
+    "BrewUI administrator authentication" : {
+      "comment" : "Askpass: title identifying BrewUI as the requester"
+    },
+    "Cancel" : {
+      "comment" : "Askpass: cancel administrator authentication"
+    },
     "Copied" : {
       "comment" : "Command block: shown briefly after copying",
       "localizations" : {
@@ -341,6 +353,9 @@
           }
         }
       }
+    },
+    "Homebrew needs administrator permission to continue. Enter your password for sudo." : {
+      "comment" : "Askpass: explains why Homebrew requests an administrator password"
     },
     "Homebrew returned output the app couldn’t read." : {
       "comment" : "Error when brew succeeded but its JSON output failed to decode",

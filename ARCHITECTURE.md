@@ -62,6 +62,26 @@ Show copyable Terminal commands to users and preserve execution output. User-fac
 omits parsing-only flags such as `--json=v2`. Treat CLI text as unstable: tolerate unknown keys and
 format changes rather than assuming a fixed transcript.
 
+## Administrator authentication
+
+The running app supplies `Contents/Helpers/HomebrewAskpassHelper` as `SUDO_ASKPASS` when
+that file is executable. The path travels literally through both clean environments; explicit
+command environment overrides still take precedence. Standalone runners, deterministic UI fixtures
+and the self-upgrade handoff keep their existing behaviour. Homebrew continues to load `brew.env`.
+
+When Homebrew requests sudo authentication, sudo starts the unprivileged helper. Its AppKit prompt
+in `BrewUIComponents` identifies BrewUI and uses a labelled secure text field, Return to submit and
+Escape to cancel. The helper writes only a submitted password and newline to stdout. Empty input
+and cancellation return non-zero without a response. Passwords are not logged or persisted; the
+field is cleared after use, without promising Swift String memory zeroisation.
+
+Sudo owns validation, retries and privileged execution. The helper never invokes sudo or detaches
+from the command process group, so command cancellation also terminates an open prompt. Stdin
+remains non-interactive and failures retain Homebrew's diagnostic and rollback output. BrewUI never
+automatically retries the mutation. Packaging validation must check the signed executable and its
+localised resource bundle and exercise the bundled helper with dummy data, separately from UI tests
+whose fake execution context bypasses live authentication.
+
 ## Homebrew configuration
 
 BrewUI always launches Homebrew through `/bin/zsh`, including app self-upgrades. It disables

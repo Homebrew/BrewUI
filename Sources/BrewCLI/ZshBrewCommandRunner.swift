@@ -10,9 +10,11 @@ import Synchronization
 /// Runs brew through system zsh with an explicit environment. Homebrew loads user settings from `brew.env`.
 public struct ZshBrewCommandRunner: BrewCommandRunning {
     private let underlying: any BrewCommandRunning
+    private let askpassExecutableURL: URL?
 
-    public init(underlying: any BrewCommandRunning = BrewCommandService()) {
+    public init(underlying: any BrewCommandRunning = BrewCommandService(), askpassExecutableURL: URL? = nil) {
         self.underlying = underlying
+        self.askpassExecutableURL = askpassExecutableURL
     }
 
     public func run(
@@ -38,6 +40,9 @@ public struct ZshBrewCommandRunner: BrewCommandRunning {
         case .pipes(forceColor: false):
             break
         }
+        if let askpassExecutableURL, FileManager.default.isExecutableFile(atPath: askpassExecutableURL.path) {
+            environment["SUDO_ASKPASS"] = askpassExecutableURL.path
+        }
         environment.merge(options.environment) { _, override in override }
         environment["SHELL"] = "/bin/zsh"
         let binDirectory = executableURL.deletingLastPathComponent()
@@ -48,7 +53,9 @@ public struct ZshBrewCommandRunner: BrewCommandRunning {
         var wrappedOptions = options
         if let observer = options.lineObserver {
             wrappedOptions.lineObserver = { line in
-                if startup.admit(line) { observer(line) }
+                if startup.admit(line) {
+                    observer(line)
+                }
             }
         }
         defer { startup.pendingLines.forEach { options.lineObserver?($0) } }

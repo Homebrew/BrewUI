@@ -28,9 +28,12 @@
 		EEAA111100000000000000C1 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101100000000000000D1 /* BrewUITestContract */; };
 		EEBB110100000000000000E1 /* BrewSelfUpgradeContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100100000000000000F1 /* BrewSelfUpgradeContract */; };
 		EEBB110200000000000000E2 /* BrewSelfUpgradeContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100200000000000000F2 /* BrewSelfUpgradeContract */; };
+		EEBC110200000000000000E2 /* BrewUIComponents in Frameworks */ = {isa = PBXBuildFile; productRef = EEBC100200000000000000F2 /* BrewUIComponents */; };
 		EEBB110300000000000000E3 /* HomebrewUpgradeHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBB120100000000000000A1 /* HomebrewUpgradeHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		EEBC110300000000000000E3 /* HomebrewAskpassHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBC120100000000000000A1 /* HomebrewAskpassHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		EEBB110400000000000000E4 /* BrewSelfUpgradeHelperCore in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100300000000000000F3 /* BrewSelfUpgradeHelperCore */; };
 		EEBB110500000000000000E5 /* BrewFeatureSelfUpgrade in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100400000000000000F4 /* BrewFeatureSelfUpgrade */; };
+		EEBC110600000000000000E6 /* BrewKit_BrewUIComponents.bundle in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBC120600000000000000A6 /* BrewKit_BrewUIComponents.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +43,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = EEBB140100000000000000C1;
 			remoteInfo = HomebrewUpgradeHelper;
+		};
+		EEBC130100000000000000B1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EEC39EB72F5AB4B900269514 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EEBC140100000000000000C1;
+			remoteInfo = HomebrewAskpassHelper;
 		};
 		EEC39ECD2F5AB4B900269514 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +75,8 @@
 			dstSubfolderSpec = 1;
 			files = (
 				EEBB110300000000000000E3 /* HomebrewUpgradeHelper in Copy Helpers */,
+				EEBC110300000000000000E3 /* HomebrewAskpassHelper in Copy Helpers */,
+				EEBC110600000000000000E6 /* BrewKit_BrewUIComponents.bundle in Copy Helpers */,
 			);
 			name = "Copy Helpers";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -79,15 +91,22 @@
 		EE2FB0352F653F89004AE92A /* Brew-Unit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-Unit.xctestplan"; sourceTree = "<group>"; };
 		EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Brew-UI.xctestplan"; sourceTree = "<group>"; };
 		EEBB120100000000000000A1 /* HomebrewUpgradeHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HomebrewUpgradeHelper; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEBC120100000000000000A1 /* HomebrewAskpassHelper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HomebrewAskpassHelper; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39EBF2F5AB4B900269514 /* Homebrew.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Homebrew.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ECC2F5AB4B900269514 /* BrewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BrewUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EEBC120600000000000000A6 /* BrewKit_BrewUIComponents.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = BrewKit_BrewUIComponents.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EEBB150100000000000000D1 /* HomebrewUpgradeHelper */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = HomebrewUpgradeHelper;
+			sourceTree = "<group>";
+		};
+		EEBC150100000000000000D1 /* HomebrewAskpassHelper */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HomebrewAskpassHelper;
 			sourceTree = "<group>";
 		};
 		EEC39EC12F5AB4B900269514 /* Homebrew */ = {
@@ -114,6 +133,14 @@
 			files = (
 				EEBB110200000000000000E2 /* BrewSelfUpgradeContract in Frameworks */,
 				EEBB110400000000000000E4 /* BrewSelfUpgradeHelperCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EEBC160100000000000000E1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EEBC110200000000000000E2 /* BrewUIComponents in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,6 +205,7 @@
 				EE2FB0372F654024004AE92A /* Brew-UI.xctestplan */,
 				EEC39EC12F5AB4B900269514 /* Homebrew */,
 				EEBB150100000000000000D1 /* HomebrewUpgradeHelper */,
+				EEBC150100000000000000D1 /* HomebrewAskpassHelper */,
 				EEC39ECF2F5AB4B900269514 /* BrewTests */,
 				EEC39ED92F5AB4B900269514 /* BrewUITests */,
 				EEC39EC02F5AB4B900269514 /* Products */,
@@ -190,6 +218,8 @@
 			children = (
 				EEC39EBF2F5AB4B900269514 /* Homebrew.app */,
 				EEBB120100000000000000A1 /* HomebrewUpgradeHelper */,
+				EEBC120100000000000000A1 /* HomebrewAskpassHelper */,
+				EEBC120600000000000000A6 /* BrewKit_BrewUIComponents.bundle */,
 				EEC39ECC2F5AB4B900269514 /* BrewTests.xctest */,
 				EEC39ED62F5AB4B900269514 /* BrewUITests.xctest */,
 			);
@@ -222,6 +252,28 @@
 			productReference = EEBB120100000000000000A1 /* HomebrewUpgradeHelper */;
 			productType = "com.apple.product-type.tool";
 		};
+		EEBC140100000000000000C1 /* HomebrewAskpassHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EEBC190100000000000000B1 /* Build configuration list for PBXNativeTarget "HomebrewAskpassHelper" */;
+			buildPhases = (
+				EEBC1A0100000000000000C1 /* Sources */,
+				EEBC160100000000000000E1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EEBC150100000000000000D1 /* HomebrewAskpassHelper */,
+			);
+			name = HomebrewAskpassHelper;
+			packageProductDependencies = (
+				EEBC100200000000000000F2 /* BrewUIComponents */,
+			);
+			productName = HomebrewAskpassHelper;
+			productReference = EEBC120100000000000000A1 /* HomebrewAskpassHelper */;
+			productType = "com.apple.product-type.tool";
+		};
 		EEC39EBE2F5AB4B900269514 /* Homebrew */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = EEC39EE02F5AB4B900269514 /* Build configuration list for PBXNativeTarget "Homebrew" */;
@@ -230,6 +282,7 @@
 				EEC39EBC2F5AB4B900269514 /* Frameworks */,
 				EEC39EBD2F5AB4B900269514 /* Resources */,
 				EEBB170100000000000000F1 /* Copy Helpers */,
+				EEBC170200000000000000F2 /* Validate askpass packaging */,
 				EEDDAA0100000000000000F1 /* Stamp app version */,
 			);
 			buildRules = (
@@ -237,6 +290,7 @@
 			dependencies = (
 				EEAA00012F70000000000003 /* PBXTargetDependency */,
 				EEBB180100000000000000A1 /* PBXTargetDependency */,
+				EEBC180100000000000000A1 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EEC39EC12F5AB4B900269514 /* Homebrew */,
@@ -363,6 +417,7 @@
 			targets = (
 				EEC39EBE2F5AB4B900269514 /* Homebrew */,
 				EEBB140100000000000000C1 /* HomebrewUpgradeHelper */,
+				EEBC140100000000000000C1 /* HomebrewAskpassHelper */,
 				EEC39ECB2F5AB4B900269514 /* BrewTests */,
 				EEC39ED52F5AB4B900269514 /* BrewUITests */,
 			);
@@ -415,10 +470,29 @@
 			shellPath = /bin/bash;
 			shellScript = "\"${SRCROOT}/scripts/stamp-app-version\"\n";
 		};
+		EEBC170200000000000000F2 /* Validate askpass packaging */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			outputPaths = ();
+			name = "Validate askpass packaging";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\nhelper_dir=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\ntest -x \"$helper_dir/HomebrewAskpassHelper\"\ntest -d \"$helper_dir/BrewKit_BrewUIComponents.bundle\"\ntest -f \"$helper_dir/BrewKit_BrewUIComponents.bundle/Contents/Info.plist\"\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		EEBB1A0100000000000000C1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EEBC1A0100000000000000C1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -458,6 +532,11 @@
 			target = EEBB140100000000000000C1 /* HomebrewUpgradeHelper */;
 			targetProxy = EEBB130100000000000000B1 /* PBXContainerItemProxy */;
 		};
+		EEBC180100000000000000A1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EEBC140100000000000000C1 /* HomebrewAskpassHelper */;
+			targetProxy = EEBC130100000000000000B1 /* PBXContainerItemProxy */;
+		};
 		EEC39ECE2F5AB4B900269514 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EEC39EBE2F5AB4B900269514 /* Homebrew */;
@@ -489,6 +568,24 @@
 			};
 			name = Debug;
 		};
+		EEBC1B0100000000000000D1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.askpasshelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
 		EEBB1B0200000000000000D2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
@@ -497,6 +594,24 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.upgradehelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		EEBC1B0200000000000000D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.askpasshelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -773,6 +888,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		EEBC190100000000000000B1 /* Build configuration list for PBXNativeTarget "HomebrewAskpassHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EEBC1B0100000000000000D1 /* Debug */,
+				EEBC1B0200000000000000D2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		EEC39EBA2F5AB4B900269514 /* Build configuration list for PBXProject "Homebrew" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -922,6 +1046,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewSelfUpgradeContract;
+		};
+		EEBC100200000000000000F2 /* BrewUIComponents */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewUIComponents;
 		};
 		EEBB100300000000000000F3 /* BrewSelfUpgradeHelperCore */ = {
 			isa = XCSwiftPackageProductDependency;
