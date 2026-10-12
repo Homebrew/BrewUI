@@ -16,13 +16,27 @@ enum ServiceScope: CaseIterable, Hashable {
     }
 }
 
+struct ServicesContent: Equatable, Placeholdable {
+    var services: [BrewService]
+    var isInventoryEmpty: Bool
+
+    static var placeholder: ServicesContent {
+        ServicesContent(
+            services: ["placeholder-a", "placeholder-b", "placeholder-c"].map {
+                BrewService(name: $0, status: "started", running: true)
+            },
+            isInventoryEmpty: false,
+        )
+    }
+}
+
 @Observable
 @MainActor
 final class ServicesViewModel {
-    var state: LoadState<[BrewService], String> {
+    var state: LoadState<ServicesContent, String> {
         switch repository.state {
         case .loading: .loading
-        case let .loaded(services): .loaded(services)
+        case let .loaded(services): .loaded(ServicesContent(services: visibleServices, isInventoryEmpty: services.isEmpty))
         case let .failed(error): .failed(Self.message(for: error))
         }
     }
@@ -36,7 +50,7 @@ final class ServicesViewModel {
     }
 
     var runningServiceSubtitle: LocalizedStringResource? {
-        guard let services = state.value else { return nil }
+        guard let services = repository.state.value else { return nil }
         let count = services.filter(\.running).count
         if count == 1 {
             return LocalizedStringResource("1 running service", bundle: #bundle, comment: "Services subtitle: one running service")
@@ -53,7 +67,7 @@ final class ServicesViewModel {
     }
 
     var visibleServices: [BrewService] {
-        (state.value ?? []).filter { service in
+        (repository.state.value ?? []).filter { service in
             switch scope {
             case .all: true
             case .running: service.running
@@ -79,8 +93,16 @@ final class ServicesViewModel {
         selectedServiceID = services[index + offset].id
     }
 
-    func load(forceRefresh: Bool = false) async {
-        await repository.load(forceRefresh: forceRefresh)
+    func clearSelection() {
+        selectedServiceID = nil
+    }
+
+    func load() async {
+        await repository.load(forceRefresh: repository.state.value != nil)
+    }
+
+    func refresh() async {
+        await repository.load(forceRefresh: true)
     }
 
     private static func message(for error: any Error) -> String {
@@ -88,5 +110,17 @@ final class ServicesViewModel {
             localized: "Couldn't read Homebrew services.", bundle: #bundle,
             comment: "Services: fallback message when reading the service inventory fails",
         ))
+    }
+}
+
+enum ServiceStatusTone: Equatable {
+    case running, failed, inactive
+
+    init(_ service: BrewService) {
+        if service.status == "error" {
+            self = .failed
+        } else {
+            self = service.running ? .running : .inactive
+        }
     }
 }

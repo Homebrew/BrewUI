@@ -69,6 +69,12 @@
         }
       }
     },
+    "Choose All to see every service." : {
+      "comment" : "Services: filter-empty state hint; All is the status filter option"
+    },
+    "Choose a service from the list to see details." : {
+      "comment" : "Service detail placeholder body when nothing is selected"
+    },
     "Configuration file" : {
       "comment" : "Service details: launchd service file path",
       "localizations" : {
@@ -222,23 +228,6 @@
         }
       }
     },
-    "Loading services…" : {
-      "comment" : "Services: initial loading indicator",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在加载服务…"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在載入服務…"
-          }
-        }
-      }
-    },
     "No" : {
       "comment" : "Service details: reported boolean is false",
       "localizations" : {
@@ -273,6 +262,12 @@
         }
       }
     },
+    "No matching services" : {
+      "comment" : "Services: filter-empty state title"
+    },
+    "No selection" : {
+      "comment" : "Service detail placeholder title when nothing is selected"
+    },
     "No services" : {
       "comment" : "Services: empty inventory title",
       "localizations" : {
@@ -286,23 +281,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚無服務"
-          }
-        }
-      }
-    },
-    "No services in this view." : {
-      "comment" : "Services: no services matching the status filter",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当前筛选条件下没有服务。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "目前的篩選條件下沒有服務。"
           }
         }
       }
@@ -376,7 +354,7 @@
       }
     },
     "Services" : {
-      "comment" : "Services list heading",
+      "comment" : "Services list heading\nVoiceOver: the services list",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {

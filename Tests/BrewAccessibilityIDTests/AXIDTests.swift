@@ -60,6 +60,10 @@ struct AXIDTests {
         #expect([AXID.servicesScreen.rawValue, AXID.servicesRefreshButton.rawValue] == ["services.screen", "services.refresh"])
     }
 
+    @Test func `service detail values are namespaced by field`() {
+        #expect(AXID.serviceDetailValue(.startsAtLogin).rawValue == "services.detail.startsAtLogin")
+    }
+
     @Test func `row identifiers embed the package token`() {
         let identifiers = [
             AXID.installedRow(token: "git").rawValue,

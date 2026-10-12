@@ -1,5 +1,7 @@
+import AppKit
 import BrewAccessibilityID
 import BrewAppEnvironment
+import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
@@ -35,22 +37,33 @@ struct ServicesView: View {
                 .labelsHidden()
                 .padding(.horizontal, BrewSpacing.lg)
                 .padding(.vertical, BrewSpacing.md)
+                .axid(.servicesScopePicker)
                 Divider()
-                content
+                AsyncContentView(
+                    state: viewModel.state,
+                    onRetry: { Task { await viewModel.refresh() } },
+                    loaded: { content in
+                        servicesContent(content)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    },
+                )
             }
             .frame(minWidth: BrewLayout.installedListColumnMinWidth, idealWidth: BrewLayout.installedListColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            // HSplitView resets its divider when a pane's identity changes, so `.id` stays inside.
             VStack(alignment: .leading, spacing: 0) {
-                ScrollView {
-                    if let service = viewModel.selectedService {
+                if let service = viewModel.selectedService {
+                    ScrollView {
                         ServiceDetailView(service: service)
                             .padding(BrewSpacing.xl)
                             .brewPaneContentWidth()
                     }
+                    .id(service.id)
+                } else {
+                    ServiceDetailPlaceholder()
                 }
-                .id(viewModel.selectedService?.id)
-                .axid(.serviceDetail)
             }
+            .axid(.serviceDetail)
             .frame(minWidth: BrewLayout.inspectorWidth, idealWidth: BrewLayout.installedDetailColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
@@ -58,6 +71,12 @@ struct ServicesView: View {
         .accessibilityElement(children: .contain)
         .axid(.servicesScreen)
         .task { await viewModel.load() }
+        // Services start and stop outside the app.
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: NSApplication.didBecomeActiveNotification) {
+                await viewModel.refresh()
+            }
+        }
     }
 
     private var header: some View {
@@ -79,7 +98,7 @@ struct ServicesView: View {
             HStack(spacing: BrewSpacing.sm) {
                 Spacer(minLength: 0)
                 Button {
-                    Task { await viewModel.load(forceRefresh: true) }
+                    Task { await viewModel.refresh() }
                 } label: {
                     Label(String(localized: "Refresh", bundle: #bundle, comment: "Services: read the current service inventory"), systemImage: "arrow.clockwise")
                         .opacity(viewModel.isRefreshing ? 0 : 1)
@@ -100,61 +119,71 @@ struct ServicesView: View {
     }
 
     @ViewBuilder
-    private var content: some View {
-        switch viewModel.state {
-        case .loading:
-            ProgressView(String(localized: "Loading services…", bundle: #bundle, comment: "Services: initial loading indicator"))
-                .padding(BrewSpacing.lg)
-        case let .failed(message):
-            Text(message).foregroundStyle(Color.brewStatusError).textSelection(.enabled)
-                .padding(BrewSpacing.lg)
-                .axid(.errorState)
-        case .loaded:
-            if viewModel.visibleServices.isEmpty {
-                if viewModel.state.value?.isEmpty == true {
-                    VStack(spacing: BrewSpacing.md) {
-                        Text("No services", bundle: #bundle, comment: "Services: empty inventory title")
-                            .font(.brewTitle2).foregroundStyle(Color.brewTextPrimary)
-                        Text("Services from installed formulae will appear here.", bundle: #bundle, comment: "Services: empty inventory explanation")
-                            .font(.brewCallout).foregroundStyle(Color.brewTextSecondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .padding(BrewSpacing.xl)
-                } else {
-                    Text("No services in this view.", bundle: #bundle, comment: "Services: no services matching the status filter")
-                        .foregroundStyle(Color.brewTextSecondary)
-                        .padding(BrewSpacing.lg)
-                }
+    private func servicesContent(_ content: ServicesContent) -> some View {
+        if content.services.isEmpty {
+            if content.isInventoryEmpty {
+                emptyState(
+                    title: LocalizedStringResource("No services", bundle: #bundle, comment: "Services: empty inventory title"),
+                    detail: LocalizedStringResource("Services from installed formulae will appear here.", bundle: #bundle, comment: "Services: empty inventory explanation"),
+                )
             } else {
-                ScrollViewReader { proxy in
-                    List(viewModel.visibleServices) { service in
-                        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                            Text(verbatim: service.name).font(.brewBodyEmphasized)
-                            ServiceStatusView(service: service)
-                        }
-                        .padding(.vertical, BrewSpacing.xs)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                        .listRowBackground(
-                            RoundedRectangle(cornerRadius: BrewRadius.lg, style: .continuous)
-                                .fill(viewModel.activeSelectedServiceID == service.id ? Color.brewBrandTint : Color.clear)
-                                .padding(.horizontal, BrewSpacing.sm),
-                        )
-                        .onTapGesture { viewModel.selectedServiceID = service.id; listIsFocused = true }
-                        .id(service.id)
-                        .accessibilityElement(children: .combine)
-                        .axid(.serviceRow(name: service.name))
-                    }
-                    .listStyle(.inset)
-                    .focused($listIsFocused)
-                    .onChange(of: viewModel.activeSelectedServiceID) { _, id in
-                        if let id { withAnimation(.brewFast) { proxy.scrollTo(id, anchor: .center) } }
-                    }
-                    .onKeyPress(.upArrow) { viewModel.moveSelection(by: -1); return .handled }
-                    .onKeyPress(.downArrow) { viewModel.moveSelection(by: 1); return .handled }
-                }
+                emptyState(
+                    title: LocalizedStringResource("No matching services", bundle: #bundle, comment: "Services: filter-empty state title"),
+                    detail: LocalizedStringResource(
+                        "Choose All to see every service.", bundle: #bundle,
+                        comment: "Services: filter-empty state hint; All is the status filter option",
+                    ),
+                )
             }
+        } else {
+            servicesList(content.services)
+        }
+    }
+
+    private func emptyState(title: LocalizedStringResource, detail: LocalizedStringResource) -> some View {
+        VStack(spacing: BrewSpacing.md) {
+            Text(title)
+                .font(.brewTitle2).foregroundStyle(Color.brewTextPrimary)
+            Text(detail)
+                .font(.brewCallout).foregroundStyle(Color.brewTextSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(BrewSpacing.xl)
+        .accessibilityElement(children: .combine)
+        .axid(.servicesEmptyState)
+    }
+
+    private func servicesList(_ services: [BrewService]) -> some View {
+        ScrollViewReader { proxy in
+            List(services) { service in
+                VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                    Text(verbatim: service.name).font(.brewBodyEmphasized)
+                    ServiceStatusView(service: service)
+                }
+                .padding(.vertical, BrewSpacing.xs)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+                .listRowBackground(
+                    RoundedRectangle(cornerRadius: BrewRadius.lg, style: .continuous)
+                        .fill(viewModel.activeSelectedServiceID == service.id ? Color.brewBrandTint : Color.clear)
+                        .padding(.horizontal, BrewSpacing.sm),
+                )
+                .onTapGesture { viewModel.selectedServiceID = service.id; listIsFocused = true }
+                .id(service.id)
+                .accessibilityElement(children: .combine)
+                .axid(.serviceRow(name: service.name))
+            }
+            .listStyle(.inset)
+            .accessibilityLabel(String(localized: "Services", bundle: #bundle, comment: "VoiceOver: the services list"))
+            .axid(.servicesList)
+            .focused($listIsFocused)
+            .onChange(of: viewModel.activeSelectedServiceID) { _, id in
+                if let id { withAnimation(.brewFast) { proxy.scrollTo(id, anchor: .center) } }
+            }
+            .onKeyPress(.upArrow) { viewModel.moveSelection(by: -1); return .handled }
+            .onKeyPress(.downArrow) { viewModel.moveSelection(by: 1); return .handled }
+            .onExitCommand { viewModel.clearSelection() }
         }
     }
 }

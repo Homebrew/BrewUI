@@ -119,13 +119,9 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
   `~/Library/Caches`; transcripts belong in `~/Library/Logs`. Keep these roots separate by
   recoverability. Crash reports are not written by the app: it reads the ones macOS writes to
   `~/Library/Logs/DiagnosticReports` on the next launch and remembers the last one acknowledged.
-
-## Services
-
-`BrewServicesRepository` caches `brew services info --all --json` for the app lifetime and treats a successful
-empty output as no services. Only initial load and explicit refresh read again; refresh failures retain data.
-The read-only tab filters by running state and shows Homebrew status, PID, exit code, owner, login registration,
-schedulability and copyable service/log paths in a resizable detail pane.
+- The services repository caches the service inventory for the app lifetime. Services change outside
+  the app, so the cache is shown immediately and re-read on each visit and app activation; a failed
+  refresh keeps the cached data.
 
 ## Self-upgrades and console
 
