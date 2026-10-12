@@ -22,14 +22,6 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.sm)
 
             sidebarRow(
-                title: SidebarItem.services.title,
-                systemImage: "server.rack",
-                item: .services,
-            )
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.top, BrewSpacing.xs)
-
-            sidebarRow(
                 title: SidebarItem.upgrades.title,
                 systemImage: "arrow.up.circle",
                 item: .upgrades,
@@ -42,6 +34,14 @@ struct MainSidebarView: View {
                 title: SidebarItem.discover.title,
                 systemImage: "magnifyingglass",
                 item: .discover,
+            )
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.top, BrewSpacing.xs)
+
+            sidebarRow(
+                title: SidebarItem.services.title,
+                systemImage: "server.rack",
+                item: .services,
             )
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.top, BrewSpacing.xs)

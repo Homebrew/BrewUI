@@ -48,9 +48,9 @@ struct AXIDTests {
 
         #expect(identifiers == [
             "sidebar.item.installed",
-            "sidebar.item.services",
             "sidebar.item.upgrades",
             "sidebar.item.discover",
+            "sidebar.item.services",
             "sidebar.item.doctor",
             "sidebar.item.configuration",
         ])

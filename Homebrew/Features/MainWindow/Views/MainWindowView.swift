@@ -135,10 +135,6 @@ struct MainWindowView: View {
                     ? String(localized: "Review and upgrade outdated packages", bundle: #bundle, comment: "Window subtitle, Upgrades")
                     : String(localized: "Browse or search your installed packages", bundle: #bundle, comment: "Window subtitle, Installed"),
             )
-        case .services:
-            ServicesRoot()
-                .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "View your Homebrew services", bundle: #bundle, comment: "Window subtitle, read-only Services tab"))
         case .discover:
             DiscoverColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
@@ -147,6 +143,10 @@ struct MainWindowView: View {
                     bundle: #bundle,
                     comment: "Window subtitle, Discover; %lld is the approximate catalog size",
                 ))
+        case .services:
+            ServicesRoot()
+                .navigationTitle(selectedSidebarItem.title)
+                .navigationSubtitle(String(localized: "View your Homebrew services", bundle: #bundle, comment: "Window subtitle, read-only Services tab"))
         case .doctor:
             DoctorColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)

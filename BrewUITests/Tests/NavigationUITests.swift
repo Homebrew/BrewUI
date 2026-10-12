@@ -24,7 +24,7 @@ final class NavigationUITests: BrewUITestCase {
     @MainActor
     func testCommandNumbersFollowSidebarOrder() {
         let app = launch(.installedBasic).app
-        let destinations: [AXID] = [.installedScreen, .servicesScreen, .upgradesScreen, .discoverScreen, .doctorScreen, .configScreen]
+        let destinations: [AXID] = [.installedScreen, .upgradesScreen, .discoverScreen, .servicesScreen, .doctorScreen, .configScreen]
         for (index, destination) in destinations.enumerated() {
             app.typeKey(XCUIKeyboardKey(rawValue: "\(index + 1)"), modifierFlags: .command)
             BrewUIElement(app, destination).assertExists()

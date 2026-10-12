@@ -71,7 +71,7 @@ public enum AXID: Hashable, Sendable {
 
     /// Mirrors the app's `SidebarItem`, so the test target can name a destination without linking it.
     public enum SidebarDestination: String, CaseIterable, Sendable {
-        case installed, services, upgrades, discover, doctor, configuration
+        case installed, upgrades, discover, services, doctor, configuration
     }
 
     /// A value in the service detail pane, so tests read one field rather than matching its text anywhere.
