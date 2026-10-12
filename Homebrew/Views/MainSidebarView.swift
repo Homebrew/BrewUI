@@ -86,7 +86,8 @@ struct MainSidebarView: View {
                 Spacer(minLength: 0)
                 trailingAccessory()
             }
-            .padding(.horizontal, BrewSpacing.md)
+            .padding(.leading, BrewSpacing.sm)
+            .padding(.trailing, BrewSpacing.md)
             .padding(.vertical, BrewSpacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
