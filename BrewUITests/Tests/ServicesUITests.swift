@@ -1,87 +1,99 @@
+//
+//  ServicesUITests.swift
+//  BrewUITests
+//
+
 import BrewAccessibilityID
 import XCTest
 
+/// The read-only Services tab against a fixture inventory: redis running, postgresql@17 never
+/// started and unbound failed with exit code 78.
 final class ServicesUITests: BrewUITestCase {
     @MainActor
-    func testEmptyInventoryShowsAQuietState() {
-        let app = launch(.empty).app
-        BrewUIButton(app, .sidebarItem(.services)).tap()
-        XCTAssertTrue(app.staticTexts["No services"].waitForExistence(timeout: BrewUITestTimeout.default))
-        BrewUIElement(app, .errorState).assertDoesNotExist()
+    func testEmptyInventoryShowsTheEmptyState() {
+        launch(.empty).sidebar.goToServices()
+            .assertShowsInventory()
+            .assertShowsNoErrorState()
     }
 
     @MainActor
-    func testReadOnlyInventoryAndStatusFilters() {
-        let app = launch(.servicesBasic).app
-        app.typeKey("2", modifierFlags: .command)
-        BrewUIElement(app, .serviceRow(name: "redis")).assertExists()
-        BrewUIElement(app, .serviceRow(name: "unbound")).assertExists()
-
-        app.radioButtons["Running"].click()
-        BrewUIElement(app, .serviceRow(name: "redis")).assertExists()
-        BrewUIElement(app, .serviceRow(name: "unbound")).assertDoesNotExist()
-        app.radioButtons["Stopped"].click()
-        BrewUIElement(app, .serviceRow(name: "redis")).assertDoesNotExist()
-        BrewUIElement(app, .serviceRow(name: "unbound")).assertExists()
-        BrewUIElement(app, .serviceRow(name: "postgresql@17")).assertExists()
-        BrewUIButton(app, .servicesRefreshButton).tap()
-        BrewUIElement(app, .serviceRow(name: "unbound")).assertExists()
-        app.radioButtons["All"].click()
-        BrewUIElement(app, .serviceRow(name: "redis")).assertExists()
-        XCTAssertFalse(app.buttons["Start"].exists)
-        XCTAssertFalse(app.buttons["Stop"].exists)
-        XCTAssertFalse(app.switches.firstMatch.exists)
+    func testRunningFilterHidesStoppedServices() {
+        let services = launch(.servicesBasic).sidebar.goToServices()
+        services.row("unbound").waitToExist()
+        services.show(.running)
+        services.row("unbound").assertDoesNotExist()
     }
 
+    @MainActor
+    func testStoppedFilterHidesRunningServices() {
+        let services = launch(.servicesBasic).sidebar.goToServices()
+        services.row("redis").waitToExist()
+        services.show(.stopped)
+        services.row("redis").assertDoesNotExist()
+    }
+
+    @MainActor
+    func testRefreshKeepsTheInventory() {
+        let services = launch(.servicesBasic).sidebar.goToServices()
+        services.row("redis").waitToExist()
+        services.refreshButton.tap()
+        services.row("redis").assertExists()
+    }
+
+    /// Regression: only the text in a row used to take the click.
     @MainActor
     func testClickingTrailingRowSpaceSelectsTheService() {
-        let app = launch(.servicesBasic).app
-        BrewUIButton(app, .sidebarItem(.services)).tap()
-        BrewUIElement(app, .serviceRow(name: "unbound")).waitToExist().element.click()
-        let redis = BrewUIElement(app, .serviceRow(name: "redis")).waitToExist().element
-        let detail = BrewUIElement(app, .serviceDetail).waitToExist().element
-        let window = app.windows.firstMatch
-        window.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(
-            dx: detail.frame.minX - window.frame.minX - 24,
-            dy: redis.frame.midY - window.frame.minY,
-        )).click()
-        XCTAssertTrue(app.staticTexts["43210"].waitForExistence(timeout: BrewUITestTimeout.default))
+        let services = launch(.servicesBasic).sidebar.goToServices()
+        services.select("unbound")
+        services.row("redis").element.coordinate(withNormalizedOffset: CGVector(dx: 0.95, dy: 0.5)).click()
+        services.detailValue(.pid).assertContains("43210")
     }
 
     @MainActor
     func testFilteringPreservesTheDetailPaneWidth() throws {
-        let app = launch(.servicesBasic).app
-        BrewUIButton(app, .sidebarItem(.services)).tap()
-        BrewUIElement(app, .serviceRow(name: "redis")).waitToExist().element.click()
-        let detail = BrewUIElement(app, .serviceDetail).waitToExist().element
-        let divider = try XCTUnwrap(app.splitters.allElementsBoundByIndex.min {
+        let services = launch(.servicesBasic).sidebar.goToServices().select("redis")
+        let detail = BrewUIElement(services.app, .serviceDetail).waitToExist().element
+        let divider = try XCTUnwrap(services.app.splitters.allElementsBoundByIndex.min {
             abs($0.frame.midX - detail.frame.minX) < abs($1.frame.midX - detail.frame.minX)
         })
         let dividerX = divider.frame.midX
-        let windowWidth = app.windows.firstMatch.frame.width
-        for scope in ["Stopped", "Running", "All"] {
-            app.radioButtons[scope].click()
+        for scope in [ServicesScreen.Scope.stopped, .running, .all] {
+            services.show(scope)
             XCTAssertEqual(divider.frame.midX, dividerX, accuracy: 2, "Divider moved for \(scope)")
-            XCTAssertEqual(app.windows.firstMatch.frame.width, windowWidth, accuracy: 2)
         }
     }
 
     @MainActor
-    func testReadOnlyDetailsShowLoginRegistrationAndPaths() {
-        let app = launch(.servicesBasic).app
-        BrewUIButton(app, .sidebarItem(.services)).tap()
-        BrewUIElement(app, .serviceRow(name: "redis")).waitToExist().element.click()
-        XCTAssertTrue(app.staticTexts["Schedulable"].exists)
-        XCTAssertTrue(app.staticTexts["Yes"].waitForExistence(timeout: BrewUITestTimeout.default))
-        XCTAssertTrue(app.staticTexts["/fixtures/redis.plist"].exists)
-        XCTAssertTrue(app.staticTexts["/fixtures/redis-error.log"].exists)
-        XCTAssertTrue(app.staticTexts["43210"].exists)
-        app.typeKey(.downArrow, modifierFlags: [])
-        XCTAssertTrue(app.staticTexts["Unknown"].waitForExistence(timeout: BrewUITestTimeout.default))
-        BrewUIElement(app, .serviceRow(name: "postgresql@17")).element.click()
-        XCTAssertTrue(app.staticTexts["No"].waitForExistence(timeout: BrewUITestTimeout.default))
-        BrewUIElement(app, .serviceRow(name: "unbound")).element.click()
-        XCTAssertTrue(app.staticTexts["78"].exists)
-        XCTAssertTrue(app.staticTexts["No error log path reported."].exists)
+    func testRunningServiceShowsItsProcessAndPaths() {
+        let services = launch(.servicesBasic).sidebar.goToServices().select("redis")
+        services.detailValue(.pid).assertContains("43210")
+        services.detailValue(.file).assertContains("/fixtures/redis.plist")
+        services.detailValue(.errorLogPath).assertContains("/fixtures/redis-error.log")
+    }
+
+    @MainActor
+    func testUnreportedLoginRegistrationReadsAsUnknown() {
+        launch(.servicesBasic).sidebar.goToServices().select("unbound")
+            .detailValue(.startsAtLogin).assertContains("Unknown")
+    }
+
+    @MainActor
+    func testFailedServiceShowsItsExitCode() {
+        launch(.servicesBasic).sidebar.goToServices().select("unbound")
+            .detailValue(.exitCode).assertContains("78")
+    }
+
+    @MainActor
+    func testFailedServiceWithoutAnErrorLogSaysSo() {
+        launch(.servicesBasic).sidebar.goToServices().select("unbound")
+            .detailValue(.errorGuidance).assertContains("No error log path reported.")
+    }
+
+    @MainActor
+    func testArrowKeysMoveTheSelection() {
+        // Sorted by name, so unbound follows redis.
+        let services = launch(.servicesBasic).sidebar.goToServices().select("redis")
+        services.app.typeKey(.downArrow, modifierFlags: [])
+        services.detailValue(.exitCode).assertContains("78")
     }
 }

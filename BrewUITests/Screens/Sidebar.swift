@@ -34,6 +34,12 @@ struct Sidebar: Screen {
     }
 
     @discardableResult
+    func goToServices(file: StaticString = #filePath, line: UInt = #line) -> ServicesScreen {
+        item(.services).tap(file: file, line: line)
+        return ServicesScreen(app: app).waitUntilLoaded(file: file, line: line)
+    }
+
+    @discardableResult
     func goToDoctor(file: StaticString = #filePath, line: UInt = #line) -> DoctorScreen {
         item(.doctor).tap(file: file, line: line)
         return DoctorScreen(app: app).waitUntilLoaded(file: file, line: line)

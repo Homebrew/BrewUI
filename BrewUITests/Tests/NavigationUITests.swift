@@ -12,18 +12,22 @@ final class NavigationUITests: BrewUITestCase {
     func testVisitsEverySidebarDestination() {
         let installed = launch(.installedBasic)
 
-        BrewUIButton(installed.app, .sidebarItem(.services)).tap()
-        BrewUIElement(installed.app, .servicesScreen).assertExists()
-
         installed.sidebar.goToUpgrades()
         installed.sidebar.goToDiscover()
+        installed.sidebar.goToServices()
         installed.sidebar.goToDoctor()
         installed.sidebar.goToConfiguration()
         installed.sidebar.goToInstalled()
+    }
+
+    /// ⌘1–⌘6 follow sidebar order.
+    @MainActor
+    func testCommandNumbersFollowSidebarOrder() {
+        let app = launch(.installedBasic).app
         let destinations: [AXID] = [.installedScreen, .servicesScreen, .upgradesScreen, .discoverScreen, .doctorScreen, .configScreen]
         for (index, destination) in destinations.enumerated() {
-            installed.app.typeKey(XCUIKeyboardKey(rawValue: "\(index + 1)"), modifierFlags: .command)
-            BrewUIElement(installed.app, destination).assertExists()
+            app.typeKey(XCUIKeyboardKey(rawValue: "\(index + 1)"), modifierFlags: .command)
+            BrewUIElement(app, destination).assertExists()
         }
     }
 
