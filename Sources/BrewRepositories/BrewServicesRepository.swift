@@ -6,7 +6,8 @@ import OSLog
 
 private let servicesRepositoryLogger = Logger(subsystem: "Homebrew.BrewUI", category: "BrewServicesRepository")
 
-/// App-scoped service inventory. A read survives tab changes and only runs again when forced.
+/// App-scoped service inventory. A loaded read survives tab changes and only runs again when forced;
+/// a failed first read runs again on the next load.
 @Observable
 @MainActor
 public final class BrewServicesRepository: ServicesRepository {
@@ -23,8 +24,9 @@ public final class BrewServicesRepository: ServicesRepository {
 
     public func load(forceRefresh: Bool) async {
         if inFlight == nil {
-            if !forceRefresh {
-                guard case .loading = state else { return }
+            guard forceRefresh || state.value == nil else { return }
+            if state.value == nil {
+                state = .loading
             }
             inFlight = Task { @MainActor in
                 isRefreshing = true
@@ -35,8 +37,6 @@ public final class BrewServicesRepository: ServicesRepository {
                 do {
                     state = try await .loaded(fetch())
                     refreshFailure = nil
-                } catch is CancellationError {
-                    return
                 } catch {
                     if state.isLoaded {
                         refreshFailure = error

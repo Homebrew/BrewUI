@@ -9,6 +9,7 @@ import Testing
 @MainActor
 struct ServicesRepositoryTests {
     private static let arguments = ["services", "info", "--all", "--json"]
+    private static let failure = BrewCommandError.failed(exitCode: 1, stderr: "permission denied")
 
     @Test func `services map all fields and sort by name`() async throws {
         let repository = makeRepository(MockBrewCommandRunner(responses: [Self.arguments: Self.output("""
@@ -29,39 +30,69 @@ struct ServicesRepositoryTests {
     }
 
     @Test(arguments: ["", "[]"])
-    func `empty inventory is cached until forced`(output: String) async throws {
-        let runner = SequenceRunner([.success(Self.output(output)), .success(Self.output(output))])
+    func `empty output is an empty inventory`(output: String) async throws {
+        let repository = makeRepository(SequenceRunner([.success(Self.output(output))]))
+        await repository.load(forceRefresh: false)
+        #expect(try #require(repository.state.value).isEmpty)
+    }
+
+    @Test func `a loaded inventory is cached until forced`() async {
+        let runner = SequenceRunner([.success(Self.output("[]")), .success(Self.output("[]"))])
         let repository = makeRepository(runner)
         await repository.load(forceRefresh: false)
         await repository.load(forceRefresh: false)
-        #expect(try #require(repository.state.value).isEmpty)
         #expect(await runner.callCount == 1)
     }
 
-    @Test func `failures persist until forced retry and stale data stays visible`() async {
-        let failure = BrewCommandError.failed(exitCode: 1, stderr: "permission denied")
-        let runner = SequenceRunner([.failure(failure), .success(Self.output("[]")), .failure(failure)])
+    @Test func `a failed first read runs again on the next load`() async {
+        let runner = SequenceRunner([.failure(Self.failure), .success(Self.output("[]"))])
         let repository = makeRepository(runner)
         await repository.load(forceRefresh: false)
-        #expect(Self.error(in: repository.state) as? BrewCommandError == failure)
-        await repository.load(forceRefresh: true)
-        await repository.load(forceRefresh: true)
-        #expect(repository.state.value == [])
-        #expect(repository.refreshFailure as? BrewCommandError == failure)
         await repository.load(forceRefresh: false)
-        #expect(await runner.callCount == 3)
+        #expect(repository.state.value == [])
     }
 
-    @Test(arguments: [("not json", Int32(0), ""), ("[{\"name\":\"redis\",\"status\":\"started\"}]", Int32(0), ""),
-                      ("not json", Int32(2), "permission denied"), ("", Int32(2), "permission denied")])
-    func `malformed and failed commands preserve errors`(output: String, status: Int32, stderr: String) async {
-        let repository = makeRepository(MockBrewCommandRunner(responses: [Self.arguments: CommandOutput(standardOutput: output, standardError: stderr, terminationStatus: status)]))
+    @Test func `a failed refresh keeps the loaded inventory`() async {
+        let runner = SequenceRunner([.success(Self.output("[]")), .failure(Self.failure)])
+        let repository = makeRepository(runner)
         await repository.load(forceRefresh: false)
-        if status == 0 {
-            #expect(Self.error(in: repository.state) as? BrewRepositoryError == .malformedBrewOutput(command: "services info --all --json"))
-        } else {
-            #expect(Self.error(in: repository.state) as? BrewCommandError == .failed(exitCode: 2, stderr: "permission denied"))
-        }
+        await repository.load(forceRefresh: true)
+        #expect(repository.state.value == [])
+    }
+
+    @Test func `a failed refresh reports its error`() async {
+        let runner = SequenceRunner([.success(Self.output("[]")), .failure(Self.failure)])
+        let repository = makeRepository(runner)
+        await repository.load(forceRefresh: false)
+        await repository.load(forceRefresh: true)
+        #expect(repository.refreshFailure as? BrewCommandError == Self.failure)
+    }
+
+    @Test func `a load during a read shares that read`() async {
+        let runner = GatedRunner()
+        let repository = makeRepository(runner)
+        async let first: Void = repository.load(forceRefresh: false)
+        await runner.waitUntilCalled()
+        async let second: Void = repository.load(forceRefresh: true)
+        await runner.release(with: Self.output("[]"))
+        _ = await (first, second)
+        #expect(await runner.callCount == 1)
+    }
+
+    @Test(arguments: ["not json", "[{\"name\":\"redis\",\"status\":\"started\"}]"])
+    func `malformed output is reported as malformed`(output: String) async {
+        let repository = makeRepository(MockBrewCommandRunner(responses: [Self.arguments: Self.output(output)]))
+        await repository.load(forceRefresh: false)
+        #expect(Self.error(in: repository.state) as? BrewRepositoryError == .malformedBrewOutput(command: "services info --all --json"))
+    }
+
+    @Test(arguments: ["not json", ""])
+    func `a failing command keeps Homebrew's error`(output: String) async {
+        let repository = makeRepository(MockBrewCommandRunner(responses: [
+            Self.arguments: CommandOutput(standardOutput: output, standardError: "permission denied", terminationStatus: 2),
+        ]))
+        await repository.load(forceRefresh: false)
+        #expect(Self.error(in: repository.state) as? BrewCommandError == .failed(exitCode: 2, stderr: "permission denied"))
     }
 
     private static func output(_ text: String) -> CommandOutput {
@@ -90,5 +121,33 @@ private actor SequenceRunner: BrewCommandRunning {
     func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
         callCount += 1
         return try results.removeFirst().get()
+    }
+}
+
+/// Holds the first read open until released, so a test can start a second load while it runs.
+/// Later reads answer at once, so a second read fails the count rather than hanging the test.
+private actor GatedRunner: BrewCommandRunning {
+    private(set) var callCount = 0
+    private var pending: [CheckedContinuation<CommandOutput, Never>] = []
+    private var calledWaiters: [CheckedContinuation<Void, Never>] = []
+
+    func run(executableURL _: URL, arguments _: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        callCount += 1
+        guard callCount == 1 else {
+            return CommandOutput(standardOutput: "[]", standardError: "", terminationStatus: 0)
+        }
+        calledWaiters.forEach { $0.resume() }
+        calledWaiters.removeAll()
+        return await withCheckedContinuation { pending.append($0) }
+    }
+
+    func waitUntilCalled() async {
+        guard callCount == 0 else { return }
+        await withCheckedContinuation { calledWaiters.append($0) }
+    }
+
+    func release(with output: CommandOutput) {
+        pending.forEach { $0.resume(returning: output) }
+        pending.removeAll()
     }
 }
