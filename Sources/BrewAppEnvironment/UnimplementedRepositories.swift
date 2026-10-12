@@ -104,6 +104,16 @@ final class UnimplementedConfigRepository: ConfigRepository {
     }
 }
 
+struct UnimplementedUserBrewEnvironmentStore: UserBrewEnvironmentStoring {
+    func loadProxySettings() throws -> BrewProxySettings {
+        unimplemented()
+    }
+
+    func saveProxySettings(_: BrewProxySettings) throws {
+        unimplemented()
+    }
+}
+
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> BrewCommand {
         unimplemented()

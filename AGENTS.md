@@ -186,6 +186,11 @@ the app's own temporary directory. Cache roots and all new defaults-backed state
 per-run isolation. Missing fixtures must never fall through to real Homebrew. Activate the app and
 wait for a foreground window before querying accessibility elements.
 
+The UI plan sets an English language and region. UI-test self-upgrade relaunches retain those
+launch arguments so outcome assertions do not switch to the host's language. Keep an English
+keyboard input source active while running keyboard tests: an input method can compose different
+text from the keystrokes XCTest sends.
+
 The separate [live canaries](#live-end-to-end-canaries) use real Homebrew and mutate `hello`.
 They must be requested explicitly when run by an agent.
 
@@ -365,9 +370,8 @@ Environment and accessibility issues encountered while running `BrewUITests` on 
    `CODE_SIGN_IDENTITY=-` fixes it: the runner is ad-hoc signed as `sh.brew.BrewUITests.xctrunner`
    with a valid seal, and ad-hoc needs no identity, team or profile, so it works on CI too.
 
-   **Watch for:** `scripts/test-ui` and the `ui-test` CI job still pass `CODE_SIGNING_ALLOWED=NO`.
-   That is the same latent defect – if the deterministic suite ever starts failing this way, drop
-   the flag there as well rather than hunting the hang.
+   **Watch for:** `scripts/test-ui` keeps signing enabled with the ad-hoc identity above, and the
+   `ui-test` CI job uses that script. Do not add `CODE_SIGNING_ALLOWED=NO` to the UI runner build.
 
 ### Debugging gotcha specific to this environment
 

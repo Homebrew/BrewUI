@@ -23,7 +23,8 @@ brew install --cask homebrew-app
 ## Homebrew configuration
 
 Put Homebrew options in `brew.env` and relaunch BrewUI after changing them. Shell aliases and
-exported variables do not configure the app. See [Homebrew configuration](ARCHITECTURE.md#homebrew-configuration).
+exported variables do not configure the app. The Configuration tab can save user proxy settings
+for subsequent Homebrew commands; app browsing continues to use the macOS system proxy. See [Homebrew configuration](ARCHITECTURE.md#homebrew-configuration).
 
 ## 🛠️ Development
 

@@ -10,12 +10,16 @@ import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Single scrolling pane presenting `brew config` output, with copy/refresh.
+/// Single scrolling pane presenting `brew config` output and the brew.env proxy editor, with copy/refresh.
 struct ConfigView: View {
     @State private var viewModel: ConfigViewModel
+    @State private var proxyViewModel: ProxySettingsViewModel
 
-    init(repository: any ConfigRepository) {
+    init(repository: any ConfigRepository, proxyStore: any UserBrewEnvironmentStoring) {
         _viewModel = State(initialValue: ConfigViewModel(repository: repository))
+        _proxyViewModel = State(
+            initialValue: ProxySettingsViewModel(store: proxyStore, configRepository: repository),
+        )
     }
 
     var body: some View {
@@ -76,6 +80,7 @@ struct ConfigView: View {
                 ForEach(viewModel.sections(for: snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }
+                ProxySettingsCard(viewModel: proxyViewModel)
             }
             .padding(BrewSpacing.lg)
             .brewPaneContentWidth()
@@ -130,7 +135,10 @@ struct ConfigView: View {
 
 #if DEBUG
     #Preview("Loaded") {
-        ConfigView(repository: PreviewSupport.makeConfigRepository())
-            .frame(width: 720, height: 600)
+        ConfigView(
+            repository: PreviewSupport.makeConfigRepository(),
+            proxyStore: StubUserBrewEnvironmentStore(),
+        )
+        .frame(width: 720, height: 600)
     }
 #endif

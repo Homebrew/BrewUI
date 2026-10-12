@@ -43,6 +43,11 @@ public enum AXID: Hashable, Sendable {
     case configScreen
     case doctorScreen
     case brewNotFoundState
+    case proxySettingsCard
+    case proxySettingsModePicker
+    case proxySettingsTypePicker
+    case proxySettingsAuthenticationToggle
+    case proxySettingsField(BrewProxySettingsField)
 
     // Detail / Console
     case packageDetail
@@ -62,6 +67,11 @@ public enum AXID: Hashable, Sendable {
     /// Mirrors the app's `SidebarItem`, so the test target can name a destination without linking it.
     public enum SidebarDestination: String, CaseIterable, Sendable {
         case installed, upgrades, discover, doctor, configuration
+    }
+
+    /// Mirrors `BrewProxySettings.Field` without importing BrewCore into this dependency-free target.
+    public enum BrewProxySettingsField: String, CaseIterable, Sendable {
+        case host, port, noProxy, username, password
     }
 
     /// The string handed to `accessibilityIdentifier` and read back by `XCUIElement`.
@@ -89,6 +99,11 @@ public enum AXID: Hashable, Sendable {
         case .configScreen: "config.screen"
         case .doctorScreen: "doctor.screen"
         case .brewNotFoundState: "brew.not.found"
+        case .proxySettingsCard: "config.proxy"
+        case .proxySettingsModePicker: "config.proxy.mode"
+        case .proxySettingsTypePicker: "config.proxy.type"
+        case .proxySettingsAuthenticationToggle: "config.proxy.auth"
+        case let .proxySettingsField(field): "config.proxy.\(field.rawValue)"
         case .packageDetail: "package.detail"
         case .installButton: "detail.install"
         case .uninstallButton: "detail.uninstall"

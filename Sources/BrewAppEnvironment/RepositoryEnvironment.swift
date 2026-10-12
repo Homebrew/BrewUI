@@ -38,4 +38,7 @@ public extension EnvironmentValues {
 
     /// One-shot `brew config` + `HOMEBREW_*` environment source, injected by the composition root.
     @Entry var configRepository: any ConfigRepository = UnimplementedConfigRepository()
+
+    /// User-scope `brew.env` proxy editor store, injected by the composition root.
+    @Entry var userBrewEnvironmentStore: any UserBrewEnvironmentStoring = UnimplementedUserBrewEnvironmentStore()
 }

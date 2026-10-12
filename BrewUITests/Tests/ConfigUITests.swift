@@ -16,4 +16,14 @@ final class ConfigUITests: BrewUITestCase {
             .assertShowsEntry("HOMEBREW_VERSION")
             .assertShowsEntry("HOMEBREW_PREFIX")
     }
+
+    @MainActor
+    func testProxyAuthenticationUsesSecurePasswordField() {
+        let installed = launch(.installedBasic)
+
+        installed.sidebar
+            .goToConfiguration()
+            .assertShowsEntry("HOMEBREW_VERSION")
+            .assertProxyAuthenticationUsesSecureField()
+    }
 }
