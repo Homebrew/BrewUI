@@ -69,9 +69,10 @@ that file is executable. The path travels literally through both clean environme
 command environment overrides still take precedence. Standalone runners, deterministic UI fixtures
 and the self-upgrade handoff keep their existing behaviour. Homebrew continues to load `brew.env`.
 
-When Homebrew requests sudo authentication, sudo starts the unprivileged helper. Its AppKit prompt
-in `BrewUIComponents` identifies BrewUI and uses a labelled secure text field, Return to submit and
-Escape to cancel. The helper writes only a submitted password and newline to stdout. Empty input
+When Homebrew requests sudo authentication, sudo starts the unprivileged helper. Homebrew passes
+`-A` whenever `SUDO_ASKPASS` is set and displayed commands have no controlling terminal, so sudo never
+prompts on the pseudo-terminal. Its AppKit prompt in `BrewUIComponents` identifies BrewUI and uses
+a labelled secure text field, Return to submit and Escape to cancel. The helper writes only a submitted password and newline to stdout. Empty input
 and cancellation return non-zero without a response. Passwords are not logged or persisted; the
 field is cleared after use, without promising Swift String memory zeroisation.
 

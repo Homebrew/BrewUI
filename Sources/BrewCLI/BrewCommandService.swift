@@ -352,9 +352,9 @@ private extension BrewCommandService {
         sink(BrewCommandOutputLine(stream: stream, text: UTF8StreamDecoder.lossyString(buffer)))
     }
 
-    /// `createSession` is what makes the pty a *controlling* terminal rather than merely a terminal-shaped
-    /// descriptor, and puts the child and its descendants in one process group. Teardown then signals the
-    /// whole group, so cancelling an install stops the `curl` or `git` it is waiting on.
+    /// `createSession` puts the child and its descendants in one process group. Teardown then signals the
+    /// whole group, so cancelling an install stops the `curl` or `git` it is waiting on. Darwin needs
+    /// `TIOCSCTTY` to acquire a controlling terminal, so the pty never becomes one and sudo cannot prompt on it.
     static func platformOptions() -> PlatformOptions {
         var platformOptions = PlatformOptions()
         platformOptions.createSession = true

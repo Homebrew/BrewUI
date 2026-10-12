@@ -99,6 +99,31 @@ struct ZshBrewCommandRunnerTests {
         #expect(next.standardOutput == "next")
     }
 
+    /// Runs real sudo the way Homebrew's `SystemCommand#sudo_prefix` does once `SUDO_ASKPASS` is set.
+    /// The displayed path's pseudo-terminal is not a controlling terminal, so sudo cannot prompt on it.
+    /// The helper refuses, so nothing is authenticated or run as root.
+    @Test(.enabled(if: sudoRequiresPassword()), .timeLimit(.minutes(1)), arguments: [
+        BrewRunOptions.OutputChannel.pipes(forceColor: false), .pseudoTerminal,
+    ])
+    func `real sudo consults askpass instead of a terminal`(channel: BrewRunOptions.OutputChannel) async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let helper = directory.appendingPathComponent("helper")
+        try "#!/bin/sh\n: > \"${0%/*}/consulted\"\nexit 1\n".write(to: helper, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
+
+        let output = try await ZshBrewCommandRunner(askpassExecutableURL: helper).run(
+            executableURL: URL(fileURLWithPath: "/bin/sh"),
+            arguments: ["-c", "(: < /dev/tty) 2> /dev/null && echo controlling-terminal; exec /usr/bin/sudo -k -A /usr/bin/true"],
+            options: BrewRunOptions(output: channel),
+        )
+
+        #expect(!output.standardOutput.contains("controlling-terminal"))
+        #expect(output.terminationStatus != 0)
+        #expect(FileManager.default.fileExists(atPath: directory.appendingPathComponent("consulted").path))
+    }
+
     @Test func `brew receives only the explicit environment`() async throws {
         let output = try await ZshBrewCommandRunner(underlying: PollutedEnvironmentRunner()).run(
             executableURL: URL(fileURLWithPath: "/usr/bin/env"),
@@ -296,4 +321,21 @@ private struct PollutedEnvironmentRunner: BrewCommandRunning {
         options.environment.merge(environment) { _, polluted in polluted }
         return try await service.run(executableURL: executableURL, arguments: arguments, options: options)
     }
+}
+
+/// Passwordless sudo, as on CI runners, never consults askpass. `-k` ignores cached credentials.
+private func sudoRequiresPassword() -> Bool {
+    let sudo = Process()
+    sudo.executableURL = URL(fileURLWithPath: "/usr/bin/sudo")
+    sudo.arguments = ["-k", "-n", "/usr/bin/true"]
+    sudo.standardInput = FileHandle.nullDevice
+    sudo.standardOutput = FileHandle.nullDevice
+    sudo.standardError = FileHandle.nullDevice
+    do {
+        try sudo.run()
+    } catch {
+        return false
+    }
+    sudo.waitUntilExit()
+    return sudo.terminationStatus != 0
 }

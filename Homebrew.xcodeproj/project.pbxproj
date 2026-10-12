@@ -480,7 +480,7 @@
 			name = "Validate askpass packaging";
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -eu\nhelper_dir=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\ntest -x \"$helper_dir/HomebrewAskpassHelper\"\ntest -d \"$helper_dir/BrewKit_BrewUIComponents.bundle\"\ntest -f \"$helper_dir/BrewKit_BrewUIComponents.bundle/Contents/Info.plist\"\n";
+			shellScript = "set -eu\nhelper_dir=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\ntest -x \"$helper_dir/HomebrewAskpassHelper\"\ntest -d \"$helper_dir/BrewKit_BrewUIComponents.bundle\"\ntest -f \"$helper_dir/BrewKit_BrewUIComponents.bundle/Contents/Info.plist\"\nif [ \"${CODE_SIGNING_ALLOWED:-NO}\" = YES ]; then\n  codesign --verify --strict \"$helper_dir/HomebrewAskpassHelper\"\nfi\n\"$helper_dir/HomebrewAskpassHelper\" --validate-packaging < /dev/null > /dev/null\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

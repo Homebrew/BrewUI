@@ -15,4 +15,15 @@ private func respond() -> Int32 {
     }
 }
 
-exit(respond())
+/// Packaging smoke check: loads the prompt and its adjacent resource bundle without showing it.
+@MainActor
+private func validatePackaging() -> Int32 {
+    guard Bundle.main.url(forResource: "BrewKit_BrewUIComponents", withExtension: "bundle") != nil else {
+        FileHandle.standardError.write(Data("HomebrewAskpassHelper: resource bundle not found beside the helper\n".utf8))
+        return EXIT_FAILURE
+    }
+    _ = AdministratorPasswordPrompt()
+    return EXIT_SUCCESS
+}
+
+exit(CommandLine.arguments.dropFirst().elementsEqual(["--validate-packaging"]) ? validatePackaging() : respond())
