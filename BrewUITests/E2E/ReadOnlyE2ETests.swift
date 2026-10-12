@@ -14,6 +14,7 @@ final class ReadOnlyE2ETests: BrewE2ETestCase {
 
         installed.sidebar.goToUpgrades()
         installed.sidebar.goToDiscover()
+        installed.sidebar.goToServices()
         installed.sidebar.goToConfiguration()
         installed.sidebar.goToInstalled()
     }
@@ -26,6 +27,16 @@ final class ReadOnlyE2ETests: BrewE2ETestCase {
             .goToDiscover()
             .search(for: "wget")
             .assertHasPackage("wget", timeout: BrewE2ETimeout.catalogue)
+    }
+
+    /// A runner may have no services, so the list and the empty state both prove the JSON still decodes.
+    @MainActor
+    func testServicesReadsRealBrewServicesOutput() {
+        launchLive()
+            .sidebar
+            .goToServices()
+            .assertShowsInventory(timeout: BrewE2ETimeout.command)
+            .assertShowsNoErrorState()
     }
 
     /// Keys only: the values are machine-specific by definition.

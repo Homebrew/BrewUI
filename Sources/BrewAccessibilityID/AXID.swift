@@ -44,6 +44,16 @@ public enum AXID: Hashable, Sendable {
     case doctorScreen
     case brewNotFoundState
 
+    // Services
+    case servicesScreen
+    case servicesList
+    case servicesEmptyState
+    case servicesScopePicker
+    case serviceDetail
+    case servicesRefreshButton
+    case serviceRow(name: String)
+    case serviceDetailValue(ServiceDetailField)
+
     // Detail / Console
     case packageDetail
     case installButton
@@ -61,7 +71,12 @@ public enum AXID: Hashable, Sendable {
 
     /// Mirrors the app's `SidebarItem`, so the test target can name a destination without linking it.
     public enum SidebarDestination: String, CaseIterable, Sendable {
-        case installed, upgrades, discover, doctor, configuration
+        case installed, upgrades, discover, services, doctor, configuration
+    }
+
+    /// A value in the service detail pane, so tests read one field rather than matching its text anywhere.
+    public enum ServiceDetailField: String, Sendable {
+        case user, pid, exitCode, errorGuidance, startsAtLogin, schedulable, file, logPath, errorLogPath
     }
 
     /// The string handed to `accessibilityIdentifier` and read back by `XCUIElement`.
@@ -88,6 +103,14 @@ public enum AXID: Hashable, Sendable {
         case let .discoverRow(token): "discover.row.\(token)"
         case .configScreen: "config.screen"
         case .doctorScreen: "doctor.screen"
+        case .servicesScreen: "services.screen"
+        case .servicesList: "services.list"
+        case .servicesEmptyState: "services.empty"
+        case .servicesScopePicker: "services.scope"
+        case .serviceDetail: "services.detail"
+        case .servicesRefreshButton: "services.refresh"
+        case let .serviceRow(name): "services.row.\(name)"
+        case let .serviceDetailValue(field): "services.detail.\(field.rawValue)"
         case .brewNotFoundState: "brew.not.found"
         case .packageDetail: "package.detail"
         case .installButton: "detail.install"

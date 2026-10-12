@@ -8,6 +8,7 @@ import BrewFeatureDiscover
 import BrewFeatureDoctor
 import BrewFeatureInstalled
 import BrewFeatureSelfUpgrade
+import BrewFeatureServices
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
@@ -18,6 +19,7 @@ struct MainWindowView: View {
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
     @Environment(\.doctorRepository) private var doctorRepository
+    @Environment(\.servicesRepository) private var servicesRepository
 
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
@@ -100,6 +102,7 @@ struct MainWindowView: View {
             await installedPackagesRepository.load(forceRefresh: true)
             await discoverPackagesRepository.load(forceRefresh: true)
             await configRepository.load(forceRefresh: true)
+            await servicesRepository.load(forceRefresh: true)
         }
     }
 
@@ -140,6 +143,10 @@ struct MainWindowView: View {
                     bundle: #bundle,
                     comment: "Window subtitle, Discover; %lld is the approximate catalog size",
                 ))
+        case .services:
+            ServicesRoot()
+                .navigationTitle(selectedSidebarItem.title)
+                .navigationSubtitle(String(localized: "View your Homebrew services", bundle: #bundle, comment: "Window subtitle, read-only Services tab"))
         case .doctor:
             DoctorColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
@@ -162,5 +169,6 @@ struct MainWindowView: View {
             .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
             .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
             .environment(\.configRepository, PreviewSupport.makeConfigRepository())
+            .environment(\.servicesRepository, PreviewSupport.makeServicesRepository())
     }
 #endif
