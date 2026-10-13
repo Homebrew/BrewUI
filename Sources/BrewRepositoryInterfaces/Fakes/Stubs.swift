@@ -204,4 +204,8 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
     public func doctorFixCommand(arguments: [String]) -> BrewCommand {
         BrewCommands.doctorFix(arguments: arguments)
     }
+
+    public func bundleDumpCommand(fileURL: URL) -> BrewCommand {
+        BrewCommands.bundleDump(fileURL: fileURL)
+    }
 }

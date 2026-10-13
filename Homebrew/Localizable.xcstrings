@@ -387,6 +387,9 @@
         }
       }
     },
+    "Save Brewfile…" : {
+      "comment" : "File menu: save the installed packages as a Brewfile"
+    },
     "The Homebrew app quit unexpectedly" : {
       "comment" : "Crash report dialog title",
       "localizations" : {

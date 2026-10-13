@@ -22,6 +22,7 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case uninstallCask
     case doctorFix
     case doctorRead
+    case bundleDump
 
     /// `true` when the command's ordinary output arrives on stderr, as `brew doctor`'s does — the
     /// console would otherwise paint the whole run in the error role.
@@ -29,7 +30,8 @@ public enum BrewOperationKind: String, Hashable, Sendable {
         self == .doctorRead
     }
 
-    /// `true` when interrupting the command would leave Homebrew half-changed.
+    /// `true` when interrupting the command would leave Homebrew half-changed. ``bundleDump`` counts too,
+    /// so the self-upgrade handoff never quits the app part way through writing a Brewfile.
     public var isMutating: Bool {
         self != .doctorRead
     }

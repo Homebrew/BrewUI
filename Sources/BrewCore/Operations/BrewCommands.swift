@@ -53,6 +53,14 @@ public enum BrewCommands {
         BrewCommand(operationKind: .doctorRead, arguments: ["doctor"])
     }
 
+    /// `--force` because the save panel has already confirmed replacing an existing file.
+    public static func bundleDump(fileURL: URL) -> BrewCommand {
+        BrewCommand(
+            operationKind: .bundleDump,
+            arguments: ["bundle", "dump", "--file=\(fileURL.path)", "--force"],
+        )
+    }
+
     private static func flag(for kind: HomebrewPackageKind) -> String {
         kind == .formula ? "--formula" : "--cask"
     }
