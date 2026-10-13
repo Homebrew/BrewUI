@@ -39,6 +39,7 @@ struct BrewApp: App {
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
+    private let servicesRepository: BrewServicesRepository
     private let crashReportController: CrashReportController
     private let selfUpgradeCoordinator: SelfUpgradeCoordinator
     #if DEBUG
@@ -46,17 +47,13 @@ struct BrewApp: App {
     #endif
 
     init() {
-        // Install crash capture before any other launch work so startup crashes are recorded.
-        let crashReportStore = CrashReportStore()
-        CrashReportInstaller.install(store: crashReportStore, environment: .current())
-        crashReportController = CrashReportController(store: crashReportStore)
-
         let inventoryCache = InstalledInventoryCache()
         // nil in every production launch, so both process-boundary seams below fall through to the
         // live wiring untouched.
         let uiTesting = BrewUITestingLaunchConfiguration.current()
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
         let fixtures = Self.prepareUITestingProcess(uiTesting: uiTesting)
+        crashReportController = Self.makeCrashReportController(fixtures: fixtures)
         let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
         // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
         let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
@@ -64,7 +61,9 @@ struct BrewApp: App {
         let discoverAnalytics = Self.makeDiscoverAnalyticsCache(fixtures: fixtures)
         // One context for every brew invocation: command center, installed inventory and `brew config`.
         let executionContext = Self.executionContext(uiTesting: uiTesting, fixtures: fixtures)
-        let center = SerialBrewCommandCenter(executionContext: executionContext)
+        let installedPackages = BrewInstalledPackagesRepository(executionContext: executionContext, cache: inventoryCache)
+        // The centre settles a mutating operation only once `installedPackages` has refetched.
+        let center = SerialBrewCommandCenter(executionContext: executionContext, reconciler: installedPackages)
         let apiClient = Self.makeAPIClient(uiTesting: uiTesting)
         let catalogueRepo = BrewCatalogueRepository(apiClient: apiClient, cache: catalogue)
 
@@ -73,7 +72,7 @@ struct BrewApp: App {
         discoverAnalyticsCache = discoverAnalytics
         commandCenter = center
         commandFactory = LiveBrewMutatingCommandFactory()
-        installedPackagesRepository = BrewInstalledPackagesRepository(executionContext: executionContext, cache: inventoryCache, commandCenter: center)
+        installedPackagesRepository = installedPackages
         installedPreferences = UserDefaultsInstalledPreferences(
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "installed", fixtures: fixtures),
         )
@@ -88,6 +87,7 @@ struct BrewApp: App {
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
+        servicesRepository = BrewServicesRepository(executionContext: executionContext)
 
         let selfUpgradeContext = SelfUpgradeLaunchContext(
             installedPackagesRepository: installedPackagesRepository,
@@ -120,6 +120,7 @@ struct BrewApp: App {
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
                 .environment(\.configRepository, configRepository)
+                .environment(\.servicesRepository, servicesRepository)
                 .environment(\.selfUpgradeCoordinator, selfUpgradeCoordinator)
                 .task {
                     async let catalogue: Void = catalogueCache.prepare()

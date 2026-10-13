@@ -50,9 +50,18 @@ struct AXIDTests {
             "sidebar.item.installed",
             "sidebar.item.upgrades",
             "sidebar.item.discover",
+            "sidebar.item.services",
             "sidebar.item.doctor",
             "sidebar.item.configuration",
         ])
+    }
+
+    @Test func `service identifiers keep their wire format`() {
+        #expect([AXID.servicesScreen.rawValue, AXID.servicesRefreshButton.rawValue] == ["services.screen", "services.refresh"])
+    }
+
+    @Test func `service detail values are namespaced by field`() {
+        #expect(AXID.serviceDetailValue(.startsAtLogin).rawValue == "services.detail.startsAtLogin")
     }
 
     @Test func `row identifiers embed the package token`() {
@@ -60,9 +69,10 @@ struct AXIDTests {
             AXID.installedRow(token: "git").rawValue,
             AXID.upgradesRow(token: "wget").rawValue,
             AXID.discoverRow(token: "iterm2").rawValue,
+            AXID.serviceRow(name: "redis").rawValue,
         ]
 
-        #expect(identifiers == ["installed.row.git", "upgrades.row.wget", "discover.row.iterm2"])
+        #expect(identifiers == ["installed.row.git", "upgrades.row.wget", "discover.row.iterm2", "services.row.redis"])
     }
 
     /// The three lists can hold the same package token at once — an outdated installed package

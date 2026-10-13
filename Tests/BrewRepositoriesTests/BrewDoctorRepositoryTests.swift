@@ -21,7 +21,7 @@ struct BrewDoctorRepositoryTests {
         locator: any BrewExecutableLocating = BrewExecutableLocator(overrideURL: brewURL),
     ) -> BrewDoctorRepository {
         let context = BrewCommandExecutionContext(commandRunner: runner, locator: locator)
-        let center = SerialBrewCommandCenter(executionContext: context)
+        let center = SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler())
         return BrewDoctorRepository(commandCenter: center, executionContext: context)
     }
 
@@ -237,7 +237,7 @@ struct BrewDoctorRepositoryTests {
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
         return BrewDoctorRepository(
-            commandCenter: SerialBrewCommandCenter(executionContext: context),
+            commandCenter: SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler()),
             commandRunner: runner,
             locator: context.locator,
             refreshInterval: refreshInterval,

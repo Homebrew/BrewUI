@@ -13,6 +13,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     case installed
     case upgrades
     case discover
+    case services
     case doctor
     case configuration
 
@@ -25,6 +26,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
         case .installed: String(localized: "Installed", bundle: #bundle, comment: "Sidebar: installed packages")
         case .upgrades: String(localized: "Upgrades", bundle: #bundle, comment: "Sidebar: outdated packages")
         case .discover: String(localized: "Discover", bundle: #bundle, comment: "Sidebar: browse and search the catalog")
+        case .services: String(localized: "Services", bundle: #bundle, comment: "Sidebar: read-only Homebrew service inventory")
         case .doctor: String(localized: "Doctor", bundle: #bundle, comment: "Sidebar: brew doctor diagnostics")
         case .configuration: String(localized: "Configuration", bundle: #bundle, comment: "Sidebar: brew config and environment")
         }
@@ -33,7 +35,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
     var refreshesDoctorReport: Bool {
         switch self {
         case .doctor: true
-        case .installed, .upgrades, .discover, .configuration: false
+        case .installed, .upgrades, .discover, .services, .configuration: false
         }
     }
 
@@ -44,6 +46,7 @@ enum SidebarItem: String, CaseIterable, Hashable, Identifiable {
         case .installed: .installed
         case .upgrades: .upgrades
         case .discover: .discover
+        case .services: .services
         case .doctor: .doctor
         case .configuration: .configuration
         }
@@ -54,7 +57,7 @@ extension FocusedValues {
     @Entry var sidebarSelection: Binding<SidebarItem>?
 }
 
-/// View menu commands for navigating the main window sidebar (⌘1–⌘5).
+/// View menu commands for navigating the main window sidebar (⌘1–⌘6).
 public struct SidebarCommands: Commands {
     @FocusedValue(\.sidebarSelection) private var selection
 

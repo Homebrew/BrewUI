@@ -6,28 +6,42 @@
 import Foundation
 import Observation
 
-/// Drives the "you crashed last time" UI: loads reports left by a previous
-/// launch, exposes the one currently shown, and handles the user's response.
+/// Drives the "you crashed last time" UI: surfaces the crash reports macOS wrote since the user
+/// last acknowledged one, exposes the one currently shown, and handles the user's response.
 @MainActor
 @Observable
 public final class CrashReportController {
     public private(set) var pendingReports: [CrashReport] = []
 
-    private let store: CrashReportStore
+    private let directory: DiagnosticReportDirectory
+    private let defaults: UserDefaults
+    private let acknowledgedKey: String
 
-    public init(store: CrashReportStore) {
-        self.store = store
+    public init(
+        directory: DiagnosticReportDirectory = DiagnosticReportDirectory(),
+        defaults: UserDefaults = .standard,
+        defaultsKeyPrefix: String = "CrashReports",
+    ) {
+        self.directory = directory
+        self.defaults = defaults
+        acknowledgedKey = "\(defaultsKeyPrefix).acknowledgedThrough"
     }
 
     public var currentReport: CrashReport? {
         pendingReports.first
     }
 
-    /// Loads persisted reports off the main actor. Called once on launch.
     public func loadPendingReports() async {
-        let store = store
+        let directory = directory
+        let acknowledgedThrough = acknowledgedThrough
         pendingReports = await Task.detached(priority: .utility) {
-            store.pendingReports()
+            directory.reports(capturedAfter: acknowledgedThrough).map { fileName, report in
+                CrashReport(
+                    id: fileName,
+                    capturedAt: report.capturedAt,
+                    text: DiagnosticReportFormatter.makeReportText(report),
+                )
+            }
         }.value
     }
 
@@ -35,9 +49,19 @@ public final class CrashReportController {
         CrashReportIssue.url(for: report)
     }
 
-    /// Removes `report` from disk and the queue, advancing to the next pending one.
+    /// Acknowledges `report` and advances to the next pending one. The file stays on disk: it is
+    /// macOS's log, and the issue asks the user to attach it when the body was truncated.
     public func discard(_ report: CrashReport) {
-        store.remove(report)
+        if report.capturedAt > acknowledgedThrough {
+            defaults.set(report.capturedAt.timeIntervalSince1970, forKey: acknowledgedKey)
+        }
         pendingReports.removeAll { $0.id == report.id }
+    }
+
+    private var acknowledgedThrough: Date {
+        guard defaults.object(forKey: acknowledgedKey) != nil else {
+            return .distantPast
+        }
+        return Date(timeIntervalSince1970: defaults.double(forKey: acknowledgedKey))
     }
 }

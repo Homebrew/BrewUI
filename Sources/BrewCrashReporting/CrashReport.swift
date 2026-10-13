@@ -5,9 +5,8 @@
 
 import Foundation
 
-/// A single persisted crash report, read back on the launch after the crash.
-/// `text` is the verbatim report shown to the user and pasted into a GitHub
-/// issue; the on-disk artifact is plain text, so this is not `Codable`.
+/// One crash report macOS left behind, read on the launch after the crash.
+/// `text` is shown to the user verbatim and pasted into a GitHub issue.
 public struct CrashReport: Sendable, Equatable, Identifiable {
     /// The report's file name, unique per crash; also its presentation identity.
     public let id: String

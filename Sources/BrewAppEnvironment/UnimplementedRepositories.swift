@@ -104,6 +104,26 @@ final class UnimplementedConfigRepository: ConfigRepository {
     }
 }
 
+@Observable
+@MainActor
+final class UnimplementedServicesRepository: ServicesRepository {
+    var state: LoadState<[BrewService], any Error> {
+        unimplemented()
+    }
+
+    var refreshFailure: (any Error)? {
+        unimplemented()
+    }
+
+    var isRefreshing: Bool {
+        unimplemented()
+    }
+
+    func load(forceRefresh _: Bool) async {
+        unimplemented()
+    }
+}
+
 struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     func installCommand(kind _: HomebrewPackageKind, name _: String) -> BrewCommand {
         unimplemented()

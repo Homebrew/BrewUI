@@ -36,34 +36,17 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     @ObservationIgnored private let commandRunner: BrewCommandRunning
     @ObservationIgnored private let locator: any BrewExecutableLocating
     @ObservationIgnored private let cache: InstalledInventoryCache
-    @ObservationIgnored private let commandCenter: any BrewCommandCenter
-    @ObservationIgnored private let environment: any HomebrewEnvironmentReading
-    @ObservationIgnored private let now: @Sendable () -> Date
-    @ObservationIgnored private var completionObserverTask: Task<Void, Never>?
-
-    /// Every mutating operation forces a fetch, so the tap refresh runs on an interval instead.
-    @ObservationIgnored private var lastTapUpdateAttempt: Date?
-
-    /// Homebrew's own `HOMEBREW_AUTO_UPDATE_SECS` default for the no-API path.
-    private static let tapRefreshInterval: TimeInterval = 300
+    /// Newest fetch in flight; fetches chain onto it so two refreshes cannot apply out of order.
+    @ObservationIgnored private var fetchTask: Task<Void, Never>?
 
     public init(
         commandRunner: BrewCommandRunning,
         locator: any BrewExecutableLocating,
         cache: InstalledInventoryCache,
-        commandCenter: any BrewCommandCenter,
-        environment: any HomebrewEnvironmentReading,
-        now: @escaping @Sendable () -> Date = Date.init,
     ) {
         self.commandRunner = commandRunner
         self.locator = locator
         self.cache = cache
-        self.commandCenter = commandCenter
-        self.environment = environment
-        self.now = now
-        completionObserverTask = Task { @MainActor [weak self] in
-            await self?.observeOperationCompletions()
-        }
     }
 
     /// Takes the context rather than building its own runner, so the composition root points every
@@ -71,31 +54,17 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     public convenience init(
         executionContext: BrewCommandExecutionContext,
         cache: InstalledInventoryCache,
-        commandCenter: any BrewCommandCenter,
     ) {
         self.init(
             commandRunner: executionContext.commandRunner,
             locator: executionContext.locator,
             cache: cache,
-            commandCenter: commandCenter,
-            environment: BrewConfigEnvironmentReader(executionContext: executionContext),
         )
     }
 
-    isolated deinit {
-        completionObserverTask?.cancel()
-    }
-
-    /// Production wiring: the shared zsh execution policy, reconciled off `commandCenter`.
-    public static func live(
-        cache: InstalledInventoryCache,
-        commandCenter: any BrewCommandCenter,
-    ) -> BrewInstalledPackagesRepository {
-        BrewInstalledPackagesRepository(
-            executionContext: .live(),
-            cache: cache,
-            commandCenter: commandCenter,
-        )
+    /// Production wiring: the shared zsh execution policy.
+    public static func live(cache: InstalledInventoryCache) -> BrewInstalledPackagesRepository {
+        BrewInstalledPackagesRepository(executionContext: .live(), cache: cache)
     }
 
     // MARK: - Synchronous lookups (row rendering)
@@ -115,7 +84,7 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     /// (Call `load()` — the no-arg convenience — via ``InstalledInventoryObserving``.)
     public func load(forceRefresh: Bool) async {
         guard !forceRefresh else {
-            await fetchAndStore()
+            await fetchAndStore(userRequested: true)
             return
         }
 
@@ -124,33 +93,32 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             apply(packages)
         case let .stale(packages):
             apply(packages)
-            await fetchAndStore()
+            await fetchAndStore(userRequested: false)
         case .empty:
-            await fetchAndStore()
-        }
-    }
-
-    // MARK: - Reconcile on mutating-operation completion
-
-    /// Reconciles after a mutating `brew` operation completes by forcing a fresh fetch. Uses the
-    /// existing command-center phase stream (running → idle) rather than a bespoke callback.
-    private func observeOperationCompletions() async {
-        var lastPhase: [BrewOperationID: BrewOperationPhase] = [:]
-        let stream = await commandCenter.allPhaseChanges()
-        for await (id, phase) in stream {
-            let previous = lastPhase[id] ?? .idle
-            lastPhase[id] = phase
-            if case .running = previous, case .idle = phase {
-                await load(forceRefresh: true)
-            }
+            await fetchAndStore(userRequested: false)
         }
     }
 
     // MARK: - Fetch / state plumbing
 
-    private func fetchAndStore() async {
+    /// Waits for any fetch already in flight, then fetches. Joining it instead would answer a reconcile
+    /// with a snapshot taken before `brew` exited.
+    private func fetchAndStore(userRequested: Bool) async {
+        let previous = fetchTask
+        let task = Task { @MainActor [weak self] in
+            await previous?.value
+            await self?.performFetch(userRequested: userRequested)
+        }
+        fetchTask = task
+        await task.value
+        if fetchTask == task {
+            fetchTask = nil
+        }
+    }
+
+    private func performFetch(userRequested: Bool) async {
         do {
-            let packages = try await fetchInstalledPackages()
+            let packages = try await fetchInstalledPackages(userRequested: userRequested)
             // Only a completed fetch clears this; repainting a cached snapshot answers nothing.
             refreshFailure = nil
             apply(packages)
@@ -175,9 +143,9 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         lookup = Dictionary(packages.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
-    private func fetchInstalledPackages() async throws -> [InstalledBrewPackage] {
+    private func fetchInstalledPackages(userRequested: Bool) async throws -> [InstalledBrewPackage] {
         let brew = try locator.findBrewExecutable()
-        await updateTapsIfNeeded(executable: brew)
+        await updateBrew(executable: brew, userRequested: userRequested)
         let output = try await runInstalledInfoJSON(executable: brew)
         let payload = try decodeInfoJSON(from: output)
         let packages = payload.installedPackages()
@@ -186,20 +154,14 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
         return packages
     }
 
-    /// `brew info` is not auto-updated by brew, and with the API off its data comes from tap clones —
-    /// so without this the outdated check answers from the user's last manual `brew update`, forever.
-    private func updateTapsIfNeeded(executable: URL) async {
-        guard await environment.isInstallFromAPIDisabled() else {
-            return
-        }
-        if let lastTapUpdateAttempt, now().timeIntervalSince(lastTapUpdateAttempt) < Self.tapRefreshInterval {
-            return
-        }
-        lastTapUpdateAttempt = now()
+    /// `brew info` never triggers brew's auto-update, so its API data can be 7 days old and tap clones
+    /// never refresh. A user's refresh runs `brew update`; automatic fetches run
+    /// `brew update-if-needed`, which updates only under the user's own auto-update settings.
+    private func updateBrew(executable: URL, userRequested: Bool) async {
         do {
             let output = try await commandRunner.run(
                 executableURL: executable,
-                arguments: ["update", "--auto-update", "--quiet"],
+                arguments: userRequested ? ["update", "--quiet"] : ["update-if-needed"],
             )
             guard output.terminationStatus == 0 else {
                 throw BrewCommandError.failed(exitCode: output.terminationStatus, stderr: output.standardError)
@@ -230,6 +192,17 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
             installedRepositoryLogger.error("Failed to decode \(command, privacy: .public): \(error)")
             throw BrewRepositoryError.malformedBrewOutput(command: command)
         }
+    }
+}
+
+// MARK: - BrewOperationReconciling
+
+extension BrewInstalledPackagesRepository: BrewOperationReconciling {
+    /// Refetches the inventory before the command center publishes the terminal phase. Survives
+    /// cancellation of the submitting task, since ``fetchAndStore(userRequested:)`` works in an
+    /// unstructured task.
+    public func reconcile() async {
+        await fetchAndStore(userRequested: false)
     }
 }
 

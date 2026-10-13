@@ -23,12 +23,7 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
     let logFileURL: URL
 
     func performUpgrade() async throws {
-        let mutating = await commandCenter.runningPhases().values.contains { phase in
-            guard case let .running(kind) = phase else {
-                return false
-            }
-            return kind.isMutating
-        }
+        let mutating = await commandCenter.runningPhases().values.contains(where: \.isUnfinishedMutation)
         guard !mutating else {
             throw SelfUpgradeBlockedByRunningOperation()
         }

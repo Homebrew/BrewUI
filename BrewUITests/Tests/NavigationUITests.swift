@@ -3,6 +3,7 @@
 //  BrewUITests
 //
 
+import BrewAccessibilityID
 import XCTest
 
 /// Every sidebar destination renders. A root that never appears is a crash or a composition mistake.
@@ -13,9 +14,21 @@ final class NavigationUITests: BrewUITestCase {
 
         installed.sidebar.goToUpgrades()
         installed.sidebar.goToDiscover()
+        installed.sidebar.goToServices()
         installed.sidebar.goToDoctor()
         installed.sidebar.goToConfiguration()
         installed.sidebar.goToInstalled()
+    }
+
+    /// ⌘1–⌘6 follow sidebar order.
+    @MainActor
+    func testCommandNumbersFollowSidebarOrder() {
+        let app = launch(.installedBasic).app
+        let destinations: [AXID] = [.installedScreen, .upgradesScreen, .discoverScreen, .servicesScreen, .doctorScreen, .configScreen]
+        for (index, destination) in destinations.enumerated() {
+            app.typeKey(XCUIKeyboardKey(rawValue: "\(index + 1)"), modifierFlags: .command)
+            BrewUIElement(app, destination).assertExists()
+        }
     }
 
     @MainActor

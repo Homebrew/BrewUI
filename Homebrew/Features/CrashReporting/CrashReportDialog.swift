@@ -86,11 +86,11 @@ struct CrashReportDialog: View {
                 =========================
                 Date: 2026-07-10T09:41:00Z
                 App version: 1.0 (1)
-                macOS: Version 26.0 (Build 26A1)
-                Signal: SIGSEGV
+                macOS: macOS 26.0 (26A1)
+                Exception: EXC_BAD_ACCESS (SIGSEGV) – KERN_INVALID_ADDRESS at 0x10
 
-                Call stack:
-                0   Homebrew    0x0000000102a4c1b0 main + 42
+                Thread 0 (com.apple.main-thread) crashed:
+                0\tHomebrew\tmain + 42
                 """,
             ),
             issueURL: URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!,

@@ -116,8 +116,12 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
   and in-flight request coalescing. Cold-load failures surface; background failures can retain cached
   data. Discover repositories enrich analytics through catalogue lookups.
 - Storage is namespaced as `<root>/sh.brew.app/…`. Rebuildable catalogue and analytics data belong in
-  `~/Library/Caches`; pending crash reports belong in `~/Library/Application Support`; transcripts
-  belong in `~/Library/Logs`. Keep these roots separate by recoverability.
+  `~/Library/Caches`; transcripts belong in `~/Library/Logs`. Keep these roots separate by
+  recoverability. Crash reports are not written by the app: it reads the ones macOS writes to
+  `~/Library/Logs/DiagnosticReports` on the next launch and remembers the last one acknowledged.
+- The services repository caches the service inventory for the app lifetime. Services change outside
+  the app, so the cache is shown immediately and re-read on each visit and app activation; a failed
+  refresh keeps the cached data.
 
 ## Self-upgrades and console
 

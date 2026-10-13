@@ -24,6 +24,29 @@ env:
 permissions: {}
 
 jobs:
+  brew_ruby:
+    name: No brew ruby
+    if: github.repository_owner == 'Homebrew'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check for `brew ruby`
+        run: |
+          status=0
+          git grep --line-number --word-regexp --extended-regexp 'brew[[:space:]]+ruby' -- \
+            .github ':(glob)**/action.yml' ':(glob)**/action.yaml' ':!.github/workflows/actionlint.yml' || status=$?
+          if [[ "${status}" -eq 0 ]]
+          then
+            echo "::error::Use a dedicated brew command or Homebrew/actions/setup-ruby instead of \`brew ruby\`."
+            exit 1
+          fi
+          [[ "${status}" -eq 1 ]]
+
   workflow_syntax:
     if: github.repository_owner == 'Homebrew'
     runs-on: ubuntu-latest
@@ -34,7 +57,7 @@ jobs:
     steps:
       - name: Set up Homebrew
         id: setup-homebrew
-        uses: Homebrew/actions/setup-homebrew@1e34f2e2acaa766b7efacb8c26352e6abbb023f9 # 2026.09.13.1
+        uses: Homebrew/actions/setup-homebrew@e99025eb970cfa124b8284a35463d87426917478 # 2026.09.28.1
         with:
           core: false
           cask: false
@@ -92,7 +115,7 @@ jobs:
           path: results.sarif
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4.38.0
+        uses: github/codeql-action/upload-sarif@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2 # v4.38.2
         with:
           sarif_file: results.sarif
           category: zizmor

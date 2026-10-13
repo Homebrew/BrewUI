@@ -39,6 +39,14 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
+                title: SidebarItem.services.title,
+                systemImage: "server.rack",
+                item: .services,
+            )
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.top, BrewSpacing.xs)
+
+            sidebarRow(
                 title: SidebarItem.doctor.title,
                 systemImage: "stethoscope",
                 item: .doctor,
@@ -86,7 +94,8 @@ struct MainSidebarView: View {
                 Spacer(minLength: 0)
                 trailingAccessory()
             }
-            .padding(.horizontal, BrewSpacing.md)
+            .padding(.leading, BrewSpacing.sm)
+            .padding(.trailing, BrewSpacing.md)
             .padding(.vertical, BrewSpacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
