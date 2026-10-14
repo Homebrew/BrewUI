@@ -604,25 +604,25 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@"
+            "value" : "— %@"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@"
+            "value" : "— %@"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@"
+            "value" : "— %@"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@"
+            "value" : ": %@"
           }
         }
       }
@@ -651,7 +651,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "klar"
+            "value" : ": klar"
           }
         }
       }
@@ -680,7 +680,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "misslyckades · avslutningskod %d"
+            "value" : ": misslyckades · avslutningskod %d"
           }
         }
       }

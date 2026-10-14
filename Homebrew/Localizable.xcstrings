@@ -275,7 +275,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew dokumentation"
+            "value" : "Homebrew-dokumentation"
           }
         }
       }
@@ -304,7 +304,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew miljö och diagnostik"
+            "value" : "Homebrew-miljö och diagnostik"
           }
         }
       }
@@ -518,7 +518,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrewappen avslutades oväntat"
+            "value" : "Homebrew-appen avslutades oväntat"
           }
         }
       }
@@ -547,7 +547,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uppgraderingshjälparen saknas i den här versionen av Homebrewappen."
+            "value" : "Uppgraderingshjälparen saknas i den här versionen av Homebrew-appen."
           }
         }
       }
@@ -634,7 +634,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Vänta tills det pågående Homebrew kommandot är klart och uppgradera sedan Homebrewappen."
+            "value" : "Vänta tills det pågående Homebrew-kommandot är klart och uppgradera sedan Homebrew-appen."
           }
         }
       }

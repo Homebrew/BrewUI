@@ -536,7 +536,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Blockeras av installerade beroenden. Aktivera om du vill se varför."
+            "value" : "Blockeras av installerade paket som är beroende av detta paket. Aktivera om du vill se varför."
           }
         }
       }

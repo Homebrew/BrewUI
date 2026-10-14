@@ -25,7 +25,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En ny version av Homebrew appen finns tillgänglig"
+            "value" : "En ny version av Homebrew-appen finns tillgänglig"
           }
         }
       }
@@ -83,7 +83,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew appen har uppgraderats till den senaste versionen."
+            "value" : "Homebrew-appen har uppgraderats till den senaste versionen."
           }
         }
       }
@@ -112,7 +112,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew appen är uppdaterad"
+            "value" : "Homebrew-appen är uppdaterad"
           }
         }
       }
@@ -141,7 +141,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Homebrew appen uppgraderades inte"
+            "value" : "Homebrew-appen uppgraderades inte"
           }
         }
       }
@@ -199,7 +199,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uppgradera Homebrew appen"
+            "value" : "Uppgradera Homebrew-appen"
           }
         }
       }
@@ -257,7 +257,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Uppgradera Homebrew appen"
+            "value" : "Uppgradera Homebrew-appen"
           }
         }
       }
