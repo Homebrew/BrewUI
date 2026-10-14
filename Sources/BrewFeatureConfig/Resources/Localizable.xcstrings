@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "建置設定"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bygginställningar"
+          }
         }
       }
     },
@@ -43,6 +49,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷貝報告"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera rapport"
           }
         }
       }
@@ -67,6 +79,12 @@
             "state" : "translated",
             "value" : "找不到 brew 執行檔。請安裝 Homebrew，然後重新整理。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det gick inte att hitta det körbara programmet brew. Installera Homebrew och uppdatera sedan."
+          }
         }
       }
     },
@@ -90,6 +108,12 @@
             "state" : "translated",
             "value" : "無法讀取 Homebrew 配置。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det gick inte att läsa konfigurationen för Homebrew."
+          }
         }
       }
     },
@@ -109,6 +133,12 @@
           }
         },
         "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
+        "sv" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -136,6 +166,12 @@
             "state" : "translated",
             "value" : "找不到 Homebrew"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew hittades inte"
+          }
         }
       }
     },
@@ -158,6 +194,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew 設定從 brew.env 檔案讀取，不讀取 Shell 設定檔或匯出的環境變數。請將使用者設定寫入 ~/.homebrew/brew.env，然後重新開啟 BrewUI。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inställningar för Homebrew läses från filerna brew.env. Skalprofiler och exporterade variabler ignoreras. Lägg användarinställningar i ~/.homebrew/brew.env och starta sedan om BrewUI."
           }
         }
       }
@@ -182,6 +224,12 @@
             "state" : "translated",
             "value" : "重新整理"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppdatera"
+          }
         }
       }
     },
@@ -204,6 +252,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "系統"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
           }
         }
       }
