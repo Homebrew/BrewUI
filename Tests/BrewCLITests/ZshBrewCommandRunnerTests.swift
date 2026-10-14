@@ -32,17 +32,13 @@ struct ZshBrewCommandRunnerTests {
         #expect(output.standardOutput == helper.path)
     }
 
-    @Test func `explicit askpass overrides the bundled default and missing helpers are omitted`() async throws {
+    @Test func `explicit environment overrides the askpass path`() async throws {
         let executable = URL(fileURLWithPath: "/usr/bin/env")
         let overridden = try await ZshBrewCommandRunner(askpassExecutableURL: executable).run(
             executableURL: executable, arguments: [],
             options: BrewRunOptions(environment: ["SUDO_ASKPASS": "/custom/helper"]),
         )
         #expect(overridden.standardOutput.contains("SUDO_ASKPASS=/custom/helper\n"))
-        let missing = try await ZshBrewCommandRunner(askpassExecutableURL: URL(fileURLWithPath: "/nonexistent/askpass")).run(
-            executableURL: executable, arguments: [],
-        )
-        #expect(!missing.standardOutput.contains("SUDO_ASKPASS"))
     }
 
     @Test(arguments: [false, true])

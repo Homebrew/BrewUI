@@ -67,6 +67,19 @@ sync() {
         while IFS= read -r file; do stringsdata+=("$file"); done < <(
             find "$derived_data/Build/Intermediates.noindex" -path "*/${target}.build/Objects-normal/*" -name '*.stringsdata' 2>/dev/null | sort
         )
+        # The askpass helper has no catalog of its own. It reads the app bundle at runtime, so its
+        # prompt copy is extracted into the app catalog with the rest of the shell strings.
+        if [[ "$catalog" == "$APP_CATALOG" ]]; then
+            local helper_strings=()
+            while IFS= read -r file; do helper_strings+=("$file"); done < <(
+                find "$derived_data/Build/Intermediates.noindex" -path "*/HomebrewAskpassHelper.build/Objects-normal/*" -name '*.stringsdata' 2>/dev/null | sort
+            )
+            if [[ ${#helper_strings[@]} -eq 0 ]]; then
+                echo "error: no .stringsdata for HomebrewAskpassHelper under $derived_data — prompt copy is extracted into $APP_CATALOG" >&2
+                exit 1
+            fi
+            stringsdata+=("${helper_strings[@]}")
+        fi
         if [[ ${#stringsdata[@]} -eq 0 ]]; then
             echo "error: no .stringsdata for $target under $derived_data — build first or drop --skip-build" >&2
             exit 1

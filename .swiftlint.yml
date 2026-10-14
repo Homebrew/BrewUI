@@ -29,6 +29,7 @@ included:
   - BrewTests
   - BrewUITests
   - Homebrew
+  - HomebrewAskpassHelper
   - HomebrewUpgradeHelper
   - Sources
   - Tests

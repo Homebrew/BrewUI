@@ -50,8 +50,8 @@ public final class BrewConfigRepository: ConfigRepository {
     }
 
     /// Production wiring: `brew config` reports the environment used by every app command.
-    public static func live() -> BrewConfigRepository {
-        BrewConfigRepository(executionContext: .live())
+    public static func live(askpassURL: URL) -> BrewConfigRepository {
+        BrewConfigRepository(executionContext: .live(askpassURL: askpassURL))
     }
 
     public func load(forceRefresh: Bool) async {

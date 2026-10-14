@@ -26,6 +26,7 @@ current problem and extend it when real usage warrants it.
 | `Sources/BrewFeature*/` | Feature views, ViewModels and presentation items |
 | `Sources/BrewUIComponents/` | Shared UI, theme tokens and colour assets |
 | `Sources/BrewAccessibilityID/`, `Sources/BrewUITestContract/` | Dependency-free contracts shared by the app and UI tests |
+| `HomebrewAskpassHelper/` | Administrator password prompt for `SUDO_ASKPASS` |
 | `HomebrewUpgradeHelper/`, `Sources/BrewSelfUpgrade*/` | Self-upgrade executable, contract and testable helper core |
 | `Tests/`, `BrewTests/`, `BrewUITests/` | Package, hosted and UI tests |
 | `Tools/BrewUILint/` | Project-specific Swift lint rules |
@@ -64,24 +65,14 @@ format changes rather than assuming a fixed transcript.
 
 ## Administrator authentication
 
-The running app supplies `Contents/Helpers/HomebrewAskpassHelper` as `SUDO_ASKPASS` when
-that file is executable. The path travels literally through both clean environments; explicit
-command environment overrides still take precedence. Standalone runners, deterministic UI fixtures
-and the self-upgrade handoff keep their existing behaviour. Homebrew continues to load `brew.env`.
-
-When Homebrew requests sudo authentication, sudo starts the unprivileged helper. Homebrew passes
-`-A` whenever `SUDO_ASKPASS` is set and displayed commands have no controlling terminal, so sudo never
-prompts on the pseudo-terminal. Its AppKit prompt in `BrewUIComponents` identifies BrewUI and uses
-a labelled secure text field, Return to submit and Escape to cancel. The helper writes only a submitted password and newline to stdout. Empty input
-and cancellation return non-zero without a response. Passwords are not logged or persisted; the
-field is cleared after use, without promising Swift String memory zeroisation.
-
-Sudo owns validation, retries and privileged execution. The helper never invokes sudo or detaches
-from the command process group, so command cancellation also terminates an open prompt. Stdin
-remains non-interactive and failures retain Homebrew's diagnostic and rollback output. BrewUI never
-automatically retries the mutation. Packaging validation must check the signed executable and its
-localised resource bundle and exercise the bundled helper with dummy data, separately from UI tests
-whose fake execution context bypasses live authentication.
+Live brew commands receive `Contents/Helpers/HomebrewAskpassHelper` as `SUDO_ASKPASS`. Homebrew runs
+`sudo -A`, and the helper shows an unprivileged prompt: "Homebrew wants to make changes. Enter your
+password to allow this." It writes a submitted password to stdout or returns non-zero on cancel. The
+prompt lives in the helper and its copy lives in the app string catalog. Sudo validates the password.
+Cancelling the brew command also ends an open prompt. The self-upgrade runner sets no askpass,
+because it runs only after the app has quit and brew is replacing the bundle that contains the helper.
+The app build checks that the helper is present, verifies its signature when signing is enabled and
+confirms it can load that copy.
 
 ## Homebrew configuration
 

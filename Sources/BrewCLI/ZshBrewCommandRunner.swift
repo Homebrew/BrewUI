@@ -40,7 +40,7 @@ public struct ZshBrewCommandRunner: BrewCommandRunning {
         case .pipes(forceColor: false):
             break
         }
-        if let askpassExecutableURL, FileManager.default.isExecutableFile(atPath: askpassExecutableURL.path) {
+        if let askpassExecutableURL {
             environment["SUDO_ASKPASS"] = askpassExecutableURL.path
         }
         environment.merge(options.environment) { _, override in override }
