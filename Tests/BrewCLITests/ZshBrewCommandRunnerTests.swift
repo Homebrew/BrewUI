@@ -24,6 +24,7 @@ struct ZshBrewCommandRunnerTests {
                 service: mode == 2 ? BrewCommandService(makeTerminal: { throw CocoaError(.fileWriteUnknown) }) : BrewCommandService(),
             ),
             askpassExecutableURL: helper,
+            sudoUsesTouchID: false,
         ).run(
             executableURL: URL(fileURLWithPath: "/bin/sh"),
             arguments: ["-c", "printf '%s' \"$SUDO_ASKPASS\""],
@@ -34,11 +35,22 @@ struct ZshBrewCommandRunnerTests {
 
     @Test func `explicit environment overrides the askpass path`() async throws {
         let executable = URL(fileURLWithPath: "/usr/bin/env")
-        let overridden = try await ZshBrewCommandRunner(askpassExecutableURL: executable).run(
+        let overridden = try await ZshBrewCommandRunner(askpassExecutableURL: executable, sudoUsesTouchID: false).run(
             executableURL: executable, arguments: [],
             options: BrewRunOptions(environment: ["SUDO_ASKPASS": "/custom/helper"]),
         )
         #expect(overridden.standardOutput.contains("SUDO_ASKPASS=/custom/helper\n"))
+    }
+
+    @Test func `touch id leaves askpass unset`() async throws {
+        let output = try await ZshBrewCommandRunner(
+            askpassExecutableURL: URL(fileURLWithPath: "/usr/bin/true"),
+            sudoUsesTouchID: true,
+        ).run(
+            executableURL: URL(fileURLWithPath: "/bin/sh"),
+            arguments: ["-c", "printf '%s' \"${SUDO_ASKPASS-unset}\""],
+        )
+        #expect(output.standardOutput == "unset")
     }
 
     @Test(arguments: [false, true])
@@ -48,7 +60,7 @@ struct ZshBrewCommandRunnerTests {
         try (reject ? "#!/bin/sh\nexit 1\n" : "#!/bin/sh\nprintf 'dummy-response\\n'\n").write(to: helper, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
         let lines = Mutex<[String]>([])
-        let output = try await ZshBrewCommandRunner(askpassExecutableURL: helper).run(
+        let output = try await ZshBrewCommandRunner(askpassExecutableURL: helper, sudoUsesTouchID: false).run(
             executableURL: URL(fileURLWithPath: "/bin/sh"),
             arguments: ["-c", """
             response=$("$SUDO_ASKPASS" 'synthetic prompt') || { printf 'authentication rejected\\n' >&2; exit 12; }
@@ -71,7 +83,7 @@ struct ZshBrewCommandRunnerTests {
         try "#!/bin/sh\nprintf '%s\\n' $$ >&2\nexec /bin/sleep 30\n".write(to: helper, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
         let processes = Mutex<[Int32]>([])
-        let runner = ZshBrewCommandRunner(askpassExecutableURL: helper)
+        let runner = ZshBrewCommandRunner(askpassExecutableURL: helper, sudoUsesTouchID: false)
         let task = Task {
             try await runner.run(
                 executableURL: URL(fileURLWithPath: "/bin/sh"),
@@ -109,7 +121,7 @@ struct ZshBrewCommandRunnerTests {
         try "#!/bin/sh\n: > \"${0%/*}/consulted\"\nexit 1\n".write(to: helper, atomically: true, encoding: .utf8)
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: helper.path)
 
-        let output = try await ZshBrewCommandRunner(askpassExecutableURL: helper).run(
+        let output = try await ZshBrewCommandRunner(askpassExecutableURL: helper, sudoUsesTouchID: false).run(
             executableURL: URL(fileURLWithPath: "/bin/sh"),
             arguments: ["-c", "(: < /dev/tty) 2> /dev/null && echo controlling-terminal; exec /usr/bin/sudo -k -A /usr/bin/true"],
             options: BrewRunOptions(output: channel),
