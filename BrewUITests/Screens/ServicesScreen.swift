@@ -80,11 +80,16 @@ struct ServicesScreen: Screen {
     }
 
     private func assertCommandContains(_ substring: String, id: AXID, file: StaticString, line: UInt) -> Self {
-        let container = BrewUIElement(app, id, in: root.element).waitToExist(file: file, line: line).element
+        let elements = root.element.descendants(matching: .any).matching(identifier: id.rawValue)
         let predicate = NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)
-        let match = container.descendants(matching: .any).matching(predicate).firstMatch
-        XCTAssertTrue(
-            match.waitForExistence(timeout: BrewUITestTimeout.default),
+        // SwiftUI can expose the card as a container or pass its identifier to flattened children.
+        let directMatch = elements.matching(predicate).firstMatch
+        let descendantMatch = elements.descendants(matching: .any).matching(predicate).firstMatch
+        let shown = NSPredicate { _, _ in directMatch.exists || descendantMatch.exists }
+        let expectation = XCTNSPredicateExpectation(predicate: shown, object: nil)
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [expectation], timeout: BrewUITestTimeout.default),
+            .completed,
             "Expected \(id.rawValue) to contain “\(substring)”",
             file: file,
             line: line,
