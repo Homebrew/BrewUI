@@ -26,6 +26,7 @@ current problem and extend it when real usage warrants it.
 | `Sources/BrewFeature*/` | Feature views, ViewModels and presentation items |
 | `Sources/BrewUIComponents/` | Shared UI, theme tokens and colour assets |
 | `Sources/BrewAccessibilityID/`, `Sources/BrewUITestContract/` | Dependency-free contracts shared by the app and UI tests |
+| `HomebrewAskpassHelper/` | Administrator password prompt for `SUDO_ASKPASS` |
 | `HomebrewUpgradeHelper/`, `Sources/BrewSelfUpgrade*/` | Self-upgrade executable, contract and testable helper core |
 | `Tests/`, `BrewTests/`, `BrewUITests/` | Package, hosted and UI tests |
 | `Tools/BrewUILint/` | Project-specific Swift lint rules |
@@ -61,6 +62,20 @@ cancellation and launch failure. Closing it when the child exits can discard unr
 Show copyable Terminal commands to users and preserve execution output. User-facing command text
 omits parsing-only flags such as `--json=v2`. Treat CLI text as unstable: tolerate unknown keys and
 format changes rather than assuming a fixed transcript.
+
+## Administrator authentication
+
+Live brew commands receive `Contents/Helpers/HomebrewAskpassHelper` as `SUDO_ASKPASS`. Homebrew runs
+`sudo -A`, and the helper shows an unprivileged prompt: "Homebrew wants to make changes. Enter your
+password to allow this." It writes a submitted password to stdout or returns non-zero on cancel. The
+prompt lives in the helper and its copy lives in the app string catalog. Sudo validates the password.
+Cancelling the brew command also ends an open prompt. When `/etc/pam.d/sudo_local` or
+`/etc/pam.d/sudo` has an uncommented `auth sufficient pam_tid.so` line, the runner leaves
+`SUDO_ASKPASS` unset so sudo can use Touch ID, because `pam_tid` skips its UI in askpass mode. The
+self-upgrade runner sets no askpass, because it runs only after the app has quit and brew is
+replacing the bundle that contains the helper.
+The app build checks that the helper is present, verifies its signature when signing is enabled and
+confirms it can load that copy.
 
 ## Homebrew configuration
 

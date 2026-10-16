@@ -27,8 +27,7 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
         guard !mutating else {
             throw SelfUpgradeBlockedByRunningOperation()
         }
-        let helperURL = Bundle.main.bundleURL
-            .appendingPathComponent("Contents/Helpers/HomebrewUpgradeHelper")
+        let helperURL = BundledHelper.url(named: "HomebrewUpgradeHelper")
         guard FileManager.default.isExecutableFile(atPath: helperURL.path) else {
             throw SelfUpgradeHelperUnavailable()
         }

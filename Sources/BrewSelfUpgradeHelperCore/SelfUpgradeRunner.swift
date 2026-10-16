@@ -25,6 +25,7 @@ public struct SelfUpgradeRunner: Sendable {
     private let sleep: @Sendable (TimeInterval) async throws -> Void
 
     public init(
+        // No askpass: this runs after the app quits, while brew replaces the bundle that contains the helper.
         commandRunner: any BrewCommandRunning = ZshBrewCommandRunner(),
         transcriptSink: @escaping @Sendable (String) -> Void = { _ in },
         sleep: @escaping @Sendable (TimeInterval) async throws -> Void = { try await Task.sleep(for: .seconds($0)) },

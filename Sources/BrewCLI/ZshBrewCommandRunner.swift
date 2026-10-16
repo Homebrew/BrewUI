@@ -10,9 +10,22 @@ import Synchronization
 /// Runs brew through system zsh with an explicit environment. Homebrew loads user settings from `brew.env`.
 public struct ZshBrewCommandRunner: BrewCommandRunning {
     private let underlying: any BrewCommandRunning
+    private let askpassExecutableURL: URL?
+    /// `nil` reads the sudo PAM configuration. Tests pass a fixed value.
+    private let sudoUsesTouchID: Bool?
 
-    public init(underlying: any BrewCommandRunning = BrewCommandService()) {
+    public init(underlying: any BrewCommandRunning = BrewCommandService(), askpassExecutableURL: URL? = nil) {
+        self.init(underlying: underlying, askpassExecutableURL: askpassExecutableURL, sudoUsesTouchID: nil)
+    }
+
+    init(
+        underlying: any BrewCommandRunning = BrewCommandService(),
+        askpassExecutableURL: URL? = nil,
+        sudoUsesTouchID: Bool?,
+    ) {
         self.underlying = underlying
+        self.askpassExecutableURL = askpassExecutableURL
+        self.sudoUsesTouchID = sudoUsesTouchID
     }
 
     public func run(
@@ -38,6 +51,13 @@ public struct ZshBrewCommandRunner: BrewCommandRunning {
         case .pipes(forceColor: false):
             break
         }
+        // pam_tid skips Touch ID when sudo is started with -A, and Homebrew adds -A whenever
+        // SUDO_ASKPASS is set. Leave the variable unset so Touch ID can run. A cancelled Touch ID
+        // cannot block on a password prompt: this process has no controlling terminal, so sudo
+        // exits instead of reading /dev/tty.
+        if let askpassExecutableURL, !(sudoUsesTouchID ?? SudoPAMTouchID.isEnabled()) {
+            environment["SUDO_ASKPASS"] = askpassExecutableURL.path
+        }
         environment.merge(options.environment) { _, override in override }
         environment["SHELL"] = "/bin/zsh"
         let binDirectory = executableURL.deletingLastPathComponent()
@@ -48,7 +68,9 @@ public struct ZshBrewCommandRunner: BrewCommandRunning {
         var wrappedOptions = options
         if let observer = options.lineObserver {
             wrappedOptions.lineObserver = { line in
-                if startup.admit(line) { observer(line) }
+                if startup.admit(line) {
+                    observer(line)
+                }
             }
         }
         defer { startup.pendingLines.forEach { options.lineObserver?($0) } }
