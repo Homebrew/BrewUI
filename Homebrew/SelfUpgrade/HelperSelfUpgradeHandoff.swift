@@ -15,6 +15,7 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
     let brewExecutableURL: @MainActor () throws -> URL
     /// Asked before quitting: terminating would kill the `brew` an install is streaming through.
     let commandCenter: any BrewCommandCenter
+    let servicesRepository: any ServicesRepository
     let defaultsKeyPrefix: String
     /// Carried across the relaunch so a UI-test run comes back still pointed at its fixtures.
     let relaunchArguments: [String]
@@ -24,7 +25,8 @@ struct HelperSelfUpgradeHandoff: SelfUpgradeHandoff {
 
     func performUpgrade() async throws {
         let mutating = await commandCenter.runningPhases().values.contains(where: \.isUnfinishedMutation)
-        guard !mutating else {
+        // Service actions stay busy between commands while their inventory is verified.
+        guard !mutating, servicesRepository.operation?.phase.isUnfinishedMutation != true else {
             throw SelfUpgradeBlockedByRunningOperation()
         }
         let helperURL = Bundle.main.bundleURL

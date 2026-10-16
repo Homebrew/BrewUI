@@ -61,9 +61,12 @@ final class ServicesViewModel {
     var scope: ServiceScope = .all
     var selectedServiceID: String?
     @ObservationIgnored private let repository: any ServicesRepository
+    @ObservationIgnored private let currentUser: String
+    private var mutationTask: Task<Void, Never>?
 
-    init(repository: any ServicesRepository) {
+    init(repository: any ServicesRepository, currentUser: String = NSUserName()) {
         self.repository = repository
+        self.currentUser = currentUser
     }
 
     var visibleServices: [BrewService] {
@@ -83,6 +86,30 @@ final class ServicesViewModel {
 
     var selectedService: BrewService? {
         visibleServices.first { $0.id == activeSelectedServiceID }
+    }
+
+    var actionsItem: ServiceActionsItem? {
+        selectedService.map { ServiceActionsItem(service: $0, currentUser: currentUser) }
+    }
+
+    var isMutatingService: Bool {
+        mutationTask != nil || repository.operation?.phase.isSettled == false
+    }
+
+    var actionFailure: String? {
+        guard let operation = repository.operation,
+              case let .failed(reason) = operation.phase else { return nil }
+        return String(localized: "\(operation.serviceID): \(BrewErrorCopy.message(for: reason))", bundle: #bundle,
+                      comment: "Services: action failure; %1$@ is the service name, %2$@ is the error detail")
+    }
+
+    func perform(_ action: BrewServiceAction) {
+        guard !isMutatingService, let item = actionsItem, item.restriction == nil,
+              action != .restart || item.canRestart else { return }
+        mutationTask = Task { @MainActor [self] in
+            defer { mutationTask = nil }
+            await repository.perform(action, serviceID: item.service.id)
+        }
     }
 
     func moveSelection(by offset: Int) {

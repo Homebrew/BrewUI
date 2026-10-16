@@ -61,6 +61,20 @@ public enum BrewCommands {
         )
     }
 
+    /// Uses native restart when a running process can be verified by PID. Other loaded jobs are
+    /// unloaded separately so callers can verify the stop before starting them again.
+    public static func service(_ action: BrewServiceAction, for service: BrewService) -> [BrewCommand] {
+        let stop = BrewCommand(operationKind: .serviceControl, arguments: ["services", "stop", "--keep", service.name])
+        if action == .stop { return [stop] }
+        guard let registered = service.registered else { return [] }
+        if action == .restart, service.loaded == true, service.running, service.schedulable == false, (service.pid ?? 0) > 0 {
+            return [BrewCommand(operationKind: .serviceControl, arguments: ["services", "restart", service.name])]
+        }
+        let start = BrewCommand(operationKind: .serviceControl, arguments: ["services", registered ? "start" : "run", service.name])
+        if action == .restart || service.loaded == true || service.running { return [stop, start] }
+        return [start]
+    }
+
     private static func flag(for kind: HomebrewPackageKind) -> String {
         kind == .formula ? "--formula" : "--cask"
     }

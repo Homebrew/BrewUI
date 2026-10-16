@@ -112,7 +112,15 @@ extension BrewApp {
         guard uiTesting != nil else {
             return []
         }
-        return [BrewUITestingEnvironmentKey.launchArgument, "YES"]
+        var arguments = [BrewUITestingEnvironmentKey.launchArgument, "YES"]
+        let launchArguments = ProcessInfo.processInfo.arguments
+        // The helper relaunches outside XCTest, so its language overrides must travel too.
+        for key in ["-AppleLanguages", "-AppleLocale"] {
+            if let index = launchArguments.firstIndex(of: key), launchArguments.indices.contains(index + 1) {
+                arguments += [key, launchArguments[index + 1]]
+            }
+        }
+        return arguments
     }
 
     /// `fixturesRoot` is omitted: the relaunched app reinstalls the fixture tree into its own temp directory.

@@ -108,10 +108,11 @@ final class SelfUpgradeUITests: BrewUITestCase {
         let installed = InstalledScreen(app: app).waitUntilLoaded(timeout: BrewUITestTimeout.launch)
         installed.assertShowsSelfUpgradeBanner()
 
-        let originalProcessIdentifier = try XCTUnwrap(
-            Self.runningAppUnderTest()?.processIdentifier,
+        let originalApplication = try XCTUnwrap(
+            Self.runningAppUnderTest(),
             "Could not identify the app process before starting the upgrade",
         )
+        let originalBundleURL = try XCTUnwrap(originalApplication.bundleURL)
 
         installed.startSelfUpgrade()
 
@@ -120,7 +121,7 @@ final class SelfUpgradeUITests: BrewUITestCase {
             "The app did not quit — the handoff never reached the helper",
         )
 
-        return try Self.waitForRelaunch(replacing: originalProcessIdentifier)
+        return try Self.waitForRelaunch(replacing: originalApplication.processIdentifier, bundleURL: originalBundleURL)
     }
 
     // MARK: Relaunch
@@ -138,13 +139,16 @@ final class SelfUpgradeUITests: BrewUITestCase {
     /// A *different* pid, so a slow quit isn't mistaken for a completed relaunch.
     private static func waitForRelaunch(
         replacing originalProcessIdentifier: pid_t,
+        bundleURL: URL,
         timeout: TimeInterval = BrewUITestTimeout.launch,
     ) throws -> XCUIApplication {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
-            if let running = runningAppUnderTest(), running.processIdentifier != originalProcessIdentifier {
-                let relaunched = XCUIApplication(bundleIdentifier: appBundleIdentifier)
-                _ = relaunched.wait(for: .runningForeground, timeout: BrewUITestTimeout.launch)
+            if let running = runningAppUnderTest(), running.bundleURL == bundleURL,
+               running.processIdentifier != originalProcessIdentifier
+            {
+                let relaunched = XCUIApplication(url: bundleURL)
+                BrewApp.activate(relaunched)
                 return relaunched
             }
             RunLoop.current.run(until: Date().addingTimeInterval(0.25))
