@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "清除"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rensa"
+          }
         }
       }
     },
@@ -43,6 +49,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "清除已完成的工作"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rensa slutförda jobb"
           }
         }
       }
@@ -67,6 +79,12 @@
             "state" : "translated",
             "value" : "已清除"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rensat"
+          }
         }
       }
     },
@@ -89,6 +107,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已拷貝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopierat"
           }
         }
       }
@@ -113,6 +137,12 @@
             "state" : "translated",
             "value" : "拷貝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera"
+          }
         }
       }
     },
@@ -135,6 +165,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "將輸出拷貝到剪貼簿"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera utdata till urklipp"
           }
         }
       }
@@ -159,6 +195,12 @@
             "state" : "translated",
             "value" : "關閉"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stäng"
+          }
         }
       }
     },
@@ -181,6 +223,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自動展開主控台面板"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expandera konsolpanelen automatiskt"
           }
         }
       }
@@ -205,6 +253,12 @@
             "state" : "translated",
             "value" : "隱藏主控台"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj konsol"
+          }
         }
       }
     },
@@ -227,6 +281,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隱藏主控台"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj konsol"
           }
         }
       }
@@ -251,6 +311,12 @@
             "state" : "translated",
             "value" : "尚無活動"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen aktivitet"
+          }
         }
       }
     },
@@ -273,6 +339,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "就緒"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redo"
           }
         }
       }
@@ -297,6 +369,12 @@
             "state" : "translated",
             "value" : "執行 brew 指令後，輸出會顯示在這裡。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör kommandot brew för att se utdata här."
+          }
         }
       }
     },
@@ -319,6 +397,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "儲存"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spara"
           }
         }
       }
@@ -343,6 +427,12 @@
             "state" : "translated",
             "value" : "將輸出儲存為檔案"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spara utdata till fil"
+          }
         }
       }
     },
@@ -365,6 +455,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示主控台"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa konsol"
           }
         }
       }
@@ -389,6 +485,12 @@
             "state" : "translated",
             "value" : "顯示主控台"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa konsol"
+          }
         }
       }
     },
@@ -411,6 +513,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已完成"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klar"
           }
         }
       }
@@ -435,6 +543,12 @@
             "state" : "translated",
             "value" : "失敗"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misslyckades"
+          }
         }
       }
     },
@@ -445,6 +559,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "recargando"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uppdaterar"
           }
         }
       }
@@ -469,6 +589,12 @@
             "state" : "translated",
             "value" : "執行中"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "körs"
+          }
         }
       }
     },
@@ -488,6 +614,12 @@
           }
         },
         "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "sv" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "— %@"
@@ -515,6 +647,12 @@
             "state" : "translated",
             "value" : "— 已完成"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": klar"
+          }
         }
       }
     },
@@ -537,6 +675,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "— 失敗 · 結束代碼 %d"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": misslyckades · avslutningskod %d"
           }
         }
       }
