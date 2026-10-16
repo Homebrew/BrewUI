@@ -797,7 +797,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Beroendepaket"
+            "value" : "Används av"
           }
         }
       }
