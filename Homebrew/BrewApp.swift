@@ -87,7 +87,7 @@ struct BrewApp: App {
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
-        servicesRepository = BrewServicesRepository(executionContext: executionContext)
+        servicesRepository = BrewServicesRepository(executionContext: executionContext, commandCenter: center)
 
         let selfUpgradeContext = SelfUpgradeLaunchContext(
             installedPackagesRepository: installedPackagesRepository,

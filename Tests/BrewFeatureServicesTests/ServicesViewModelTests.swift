@@ -94,6 +94,15 @@ struct ServicesViewModelTests {
         #expect(viewModel.refreshFailure?.contains("permission denied") == true)
     }
 
+    @Test func `action errors remain visible when a filter hides the failed service`() {
+        let repository = StubServices(state: .loaded(Self.inventory))
+        repository.operation = BrewServiceOperation(serviceID: "redis", action: .restart,
+                                                    phase: .failed(reason: .brewCommand(exitCode: 1, stderr: "permission denied")))
+        let viewModel = ServicesViewModel(repository: repository)
+        viewModel.scope = .stopped
+        #expect(viewModel.actionFailure == "redis: permission denied")
+    }
+
     @Test func `the first visit reads without forcing`() async {
         let repository = StubServices(state: .loading)
         await ServicesViewModel(repository: repository).load()
@@ -124,6 +133,7 @@ struct ServicesViewModelTests {
 @Observable
 @MainActor
 private final class StubServices: ServicesRepository {
+    var operation: BrewServiceOperation?
     var state: LoadState<[BrewService], any Error>
     var refreshFailure: (any Error)?
     var isRefreshing = false
@@ -136,4 +146,6 @@ private final class StubServices: ServicesRepository {
     func load(forceRefresh: Bool) async {
         loads.append(forceRefresh)
     }
+
+    func perform(_: BrewServiceAction, serviceID _: String) async {}
 }

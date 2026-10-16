@@ -122,6 +122,14 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
 - The services repository caches the service inventory for the app lifetime. Services change outside
   the app, so the cache is shown immediately and re-read on each visit and app activation; a failed
   refresh keeps the cached data.
+  Single-service actions go through the shared command centre and refresh the inventory afterwards,
+  including on failure. The repository keeps the whole action busy across command sequences and refresh.
+  It reads current ownership and registration before acting. Running, non-scheduled services with a
+  known PID use native `restart` and must report a new PID afterwards. Other restarts verify a stop
+  before starting again, so scheduled jobs do not need a running process to confirm success.
+  Successful actions preserve login registration: unregistered services use `run`, registered services
+  use `start` and stopping uses `stop --keep`. Commands are not transactional; failures refresh the
+  actual state and report the error without attempting a rollback. System and other-user services remain read-only.
 
 ## Self-upgrades and console
 

@@ -17,10 +17,11 @@ struct FixtureSet {
 enum ScenarioFixtures {
     /// Both a fixture file name and the key a mutating command rewrites, so it is spelled once.
     static let installedInfoKey = "info_--installed_--json=v2"
+    static let servicesInfoKey = "services_info_--all_--json"
 
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
-        case .empty, .brewNotFound, .servicesBasic:
+        case .empty, .brewNotFound, .servicesBasic, .servicesControls, .servicesControlFailure:
             emptyInstalledFixtures(for: scenario)
         case .installedBasic:
             installedBasicFixtures()
@@ -293,13 +294,70 @@ enum ScenarioFixtures {
         return set
     }
 
+    private static func servicesControlsFixtures(startSucceeds: Bool) -> FixtureSet {
+        var set = emptyFixtures()
+        let inventory: [[String: Any]] = [
+            ["name": "redis", "status": "started", "running": true, "loaded": true, "pid": 43210,
+             "user": NSUserName(), "registered": true, "schedulable": false],
+            ["name": "postgresql@17", "status": "none", "running": false, "loaded": false,
+             "user": NSUserName(), "registered": false, "schedulable": false],
+            ["name": "mysql", "status": "started", "running": true, "loaded": true, "pid": 55670,
+             "user": "root", "registered": true, "schedulable": false],
+            ["name": "nginx", "status": "started", "running": true, "loaded": true, "pid": 55671,
+             "user": NSUserName() + "-other-user", "registered": true, "schedulable": false],
+        ]
+        set.brewFiles["\(servicesInfoKey).stdout"] = json(inventory)
+        let started = serviceInventory(inventory, name: "postgresql@17", running: true, pid: 43212)
+        let runKey = "services_run_postgresql@17"
+        set.brewFiles["\(runKey).next-services"] = json(started)
+        if startSucceeds {
+            set.brewFiles["\(runKey).stdout"] = text("==> Successfully ran `postgresql@17` (label: homebrew.mxcl.postgresql@17)")
+        } else {
+            set.brewFiles["\(runKey).stderr"] = text("Error: Could not bootstrap postgresql@17: permission denied")
+            set.brewFiles["\(runKey).exitcode"] = text("1")
+            // Even a supplied next inventory must be ignored after a failed command.
+        }
+        set.brewFiles["services_stop_--keep_redis.stdout"] = text("==> Successfully stopped `redis` (label: homebrew.mxcl.redis)")
+        set.brewFiles["services_stop_--keep_redis.next-services"] = json(
+            serviceInventory(inventory, name: "redis", running: false),
+        )
+        set.brewFiles["services_start_redis.stdout"] = text("==> Successfully started `redis` (label: homebrew.mxcl.redis)")
+        set.brewFiles["services_start_redis.next-services"] = json(
+            serviceInventory(inventory, name: "redis", running: true, pid: 43211),
+        )
+        set.brewFiles["services_restart_redis.stdout"] = text("""
+        ==> Successfully stopped `redis` (label: homebrew.mxcl.redis)
+        ==> Successfully started `redis` (label: homebrew.mxcl.redis)
+        """)
+        set.brewFiles["services_restart_redis.next-services"] = json(
+            serviceInventory(inventory, name: "redis", running: true, pid: 43211),
+        )
+        return set
+    }
+
+    private static func serviceInventory(
+        _ inventory: [[String: Any]], name: String, running: Bool, pid: Int? = nil,
+    ) -> [[String: Any]] {
+        inventory.map { service in
+            guard service["name"] as? String == name else { return service }
+            var updated = service
+            updated["running"] = running
+            updated["loaded"] = running
+            updated["status"] = running ? "started" : "none"
+            updated["pid"] = pid
+            return updated
+        }
+    }
+
     // MARK: - Builders
 
     private static func emptyInstalledFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
+        if scenario == .servicesControls || scenario == .servicesControlFailure {
+            return servicesControlsFixtures(startSucceeds: scenario == .servicesControls)
+        }
         var set = emptyFixtures()
         guard scenario == .servicesBasic else { return set }
-        let key = "services_info_--all_--json"
-        set.brewFiles["\(key).stdout"] = json([
+        set.brewFiles["\(servicesInfoKey).stdout"] = json([
             ["name": "redis", "status": "started", "running": true, "pid": 43210, "user": "test", "registered": true, "schedulable": false,
              "file": "/fixtures/redis.plist", "log_path": "/fixtures/redis.log", "error_log_path": "/fixtures/redis-error.log"],
             ["name": "postgresql@17", "status": "none", "running": false, "registered": false, "schedulable": true],
@@ -313,7 +371,7 @@ enum ScenarioFixtures {
         [
             "\(installedInfoKey).stdout": infoJSON(for: installed),
             "config.stdout": configOutput,
-            "services_info_--all_--json.stdout": text(""),
+            "\(servicesInfoKey).stdout": text(""),
             "doctor.stdout": text("Your system is ready to brew.\n"),
             "doctor_--json.stdout": json(["tier": 1, "findings": []]),
         ]
