@@ -90,6 +90,26 @@ final class UnimplementedDoctorRepository: DoctorRepository {
 
 @Observable
 @MainActor
+final class UnimplementedSecurityAdvisoryRepository: SecurityAdvisoryRepository {
+    var state: LoadState<SecurityAdvisoryReport, any Error> {
+        unimplemented()
+    }
+
+    var scannedAt: Date? {
+        unimplemented()
+    }
+
+    var isRefreshing: Bool {
+        unimplemented()
+    }
+
+    func load(forceRefresh _: Bool) async {
+        unimplemented()
+    }
+}
+
+@Observable
+@MainActor
 final class UnimplementedConfigRepository: ConfigRepository {
     var state: LoadState<BrewConfigSnapshot, any Error> {
         unimplemented()

@@ -44,6 +44,14 @@ public enum AXID: Hashable, Sendable {
     case doctorScreen
     case brewNotFoundState
 
+    // Security
+    case securityScreen
+    case securityList
+    case securityRescanButton
+    case securityCleanState
+    case securityRow(token: String)
+    case securityAdvisory(id: String)
+
     // Services
     case servicesScreen
     case servicesList
@@ -71,7 +79,7 @@ public enum AXID: Hashable, Sendable {
 
     /// Mirrors the app's `SidebarItem`, so the test target can name a destination without linking it.
     public enum SidebarDestination: String, CaseIterable, Sendable {
-        case installed, upgrades, discover, services, doctor, configuration
+        case installed, upgrades, discover, services, doctor, security, configuration
     }
 
     /// A value in the service detail pane, so tests read one field rather than matching its text anywhere.
@@ -103,6 +111,12 @@ public enum AXID: Hashable, Sendable {
         case let .discoverRow(token): "discover.row.\(token)"
         case .configScreen: "config.screen"
         case .doctorScreen: "doctor.screen"
+        case .securityScreen: "security.screen"
+        case .securityList: "security.list"
+        case .securityRescanButton: "security.rescan"
+        case .securityCleanState: "security.clean"
+        case let .securityRow(token): "security.row.\(token)"
+        case let .securityAdvisory(id): "security.advisory.\(id)"
         case .servicesScreen: "services.screen"
         case .servicesList: "services.list"
         case .servicesEmptyState: "services.empty"

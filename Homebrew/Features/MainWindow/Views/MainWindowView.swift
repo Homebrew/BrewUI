@@ -7,6 +7,7 @@ import BrewFeatureConsole
 import BrewFeatureDiscover
 import BrewFeatureDoctor
 import BrewFeatureInstalled
+import BrewFeatureSecurity
 import BrewFeatureSelfUpgrade
 import BrewFeatureServices
 import BrewRepositoryInterfaces
@@ -19,6 +20,7 @@ struct MainWindowView: View {
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.configRepository) private var configRepository
     @Environment(\.doctorRepository) private var doctorRepository
+    @Environment(\.securityAdvisoryRepository) private var securityAdvisoryRepository
     @Environment(\.servicesRepository) private var servicesRepository
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
@@ -96,13 +98,17 @@ struct MainWindowView: View {
         )
     }
 
-    /// ⌘R refetches every cached surface except the Doctor report, whichever tab is showing, since the
-    /// sidebar counts and the other tabs go stale just as readily as the visible one. Re-running
-    /// `brew doctor` is a full diagnostic run rather than a refetch, so it only happens from Doctor.
+    /// ⌘R refetches every cached surface except the Doctor and Security reports, whichever tab is showing,
+    /// since the sidebar counts and the other tabs go stale just as readily as the visible one. Re-running
+    /// `brew doctor` or `brew vulns` is a full run rather than a refetch, so each only happens from its tab.
     private func refreshAll() {
         Task {
             guard !selectedSidebarItem.refreshesDoctorReport else {
                 await doctorRepository.load(forceRefresh: true)
+                return
+            }
+            guard selectedSidebarItem != .security else {
+                await securityAdvisoryRepository.load(forceRefresh: true)
                 return
             }
             await installedPackagesRepository.load(forceRefresh: true)
@@ -157,6 +163,10 @@ struct MainWindowView: View {
             DoctorColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
                 .navigationSubtitle(String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor"))
+        case .security:
+            SecurityColumnsRoot()
+                .navigationTitle(selectedSidebarItem.title)
+                .navigationSubtitle(String(localized: "Check installed formulae for known vulnerabilities", bundle: #bundle, comment: "Window subtitle, Security"))
         case .configuration:
             ConfigColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
@@ -174,6 +184,7 @@ struct MainWindowView: View {
             .environment(\.catalogueRepository, PreviewSupport.makeDiscoverCatalogueRepository())
             .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
             .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
+            .environment(\.securityAdvisoryRepository, PreviewSupport.makeSecurityAdvisoryRepository())
             .environment(\.configRepository, PreviewSupport.makeConfigRepository())
             .environment(\.servicesRepository, PreviewSupport.makeServicesRepository())
     }

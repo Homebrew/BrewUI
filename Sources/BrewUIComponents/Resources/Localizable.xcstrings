@@ -457,6 +457,9 @@
         }
       }
     },
+    "This version of Homebrew doesn’t support %@. Run brew update to upgrade Homebrew." : {
+      "comment" : "Error when the installed Homebrew is too old for a command; %@ is the command, e.g. brew vulns"
+    },
     "just now" : {
       "comment" : "Relative time: under a minute ago",
       "localizations" : {

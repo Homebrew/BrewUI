@@ -26,8 +26,8 @@ enum ScenarioFixtures {
             installedBasicFixtures()
         case .installedLarge:
             installedLargeFixtures()
-        case .doctorHasIssues:
-            doctorHasIssuesFixtures()
+        case .doctorHasIssues, .securityHasAdvisories:
+            findingsFixtures(for: scenario)
         case .discoverSearch:
             discoverSearchFixtures()
         case .catalogueServerError:
@@ -182,6 +182,11 @@ enum ScenarioFixtures {
         return set
     }
 
+    /// Read-only reports that exit non-zero because they found something, which is data rather than failure.
+    private static func findingsFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
+        scenario == .securityHasAdvisories ? securityHasAdvisoriesFixtures() : doctorHasIssuesFixtures()
+    }
+
     private static func doctorHasIssuesFixtures() -> FixtureSet {
         var set = emptyFixtures()
         set.brewFiles["doctor.stdout"] = text(
@@ -228,6 +233,35 @@ enum ScenarioFixtures {
             ],
         ])
         set.brewFiles["doctor_--json.exitcode"] = text("1")
+        return set
+    }
+
+    /// Shaped like a real Homebrew 7.0.9 run: a commit-only fix, an unscored advisory and a patched one.
+    private static func securityHasAdvisoriesFixtures() -> FixtureSet {
+        var set = emptyFixtures()
+        set.brewFiles["vulns_--json.stdout"] = json([
+            "findings": [
+                [
+                    "formula": "openjpeg",
+                    "version": "2.5.4",
+                    "tag": "v2.5.4",
+                    "repo_url": "https://github.com/uclouvain/openjpeg",
+                    "vulnerabilities": [
+                        [
+                            "id": "OSV-2025-219",
+                            "severity": "HIGH",
+                            "summary": "Heap-buffer-overflow in opj_j2k_read_tile_header",
+                            "aliases": [],
+                            "fixed_versions": ["d33cbecc148d3affcdf403211fddc2cc5d442379"],
+                        ],
+                    ],
+                    "patched": [],
+                ],
+            ],
+            "skipped_formulae": [],
+        ])
+        // `brew vulns` exits non-zero whenever an advisory is open, so the fixture reproduces that.
+        set.brewFiles["vulns_--json.exitcode"] = text("1")
         return set
     }
 
@@ -316,6 +350,7 @@ enum ScenarioFixtures {
             "services_info_--all_--json.stdout": text(""),
             "doctor.stdout": text("Your system is ready to brew.\n"),
             "doctor_--json.stdout": json(["tier": 1, "findings": []]),
+            "vulns_--json.stdout": json(["findings": [], "skipped_formulae": []]),
         ]
     }
 

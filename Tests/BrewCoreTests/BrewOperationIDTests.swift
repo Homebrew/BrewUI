@@ -54,4 +54,9 @@ struct BrewOperationIDTests {
         #expect(kinds.filter { !$0.isMutating }.isEmpty)
         #expect(!BrewOperationKind.doctorRead.isMutating)
     }
+
+    /// A scan must never block the self-upgrade handoff or make the console treat it as a change.
+    @Test func `the vulns read is not mutating`() {
+        #expect(!BrewOperationKind.vulnsRead.isMutating)
+    }
 }

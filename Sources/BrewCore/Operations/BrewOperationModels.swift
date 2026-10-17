@@ -7,9 +7,10 @@ import Foundation
 
 /// Homebrew subprocess work the command center may schedule (extend as features grow).
 ///
-/// The read-only ``doctorRead`` case is the small loosening of the original "mutating only" framing —
-/// `brew doctor` is read-only but routing it through the center is what makes its output appear in the
-/// bottom console alongside everything else (one source of progress visibility, same plumbing).
+/// The read-only ``doctorRead`` and ``vulnsRead`` cases are the small loosening of the original "mutating
+/// only" framing — `brew doctor` and `brew vulns` are read-only but routing them through the center is what
+/// makes their output appear in the bottom console alongside everything else (one source of progress
+/// visibility, same plumbing).
 public enum BrewOperationKind: String, Hashable, Sendable {
     case installFormula
     case installCask
@@ -22,6 +23,7 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case uninstallCask
     case doctorFix
     case doctorRead
+    case vulnsRead
     case bundleDump
 
     /// `true` when the command's ordinary output arrives on stderr, as `brew doctor`'s does — the
@@ -33,7 +35,7 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     /// `true` when interrupting the command would leave Homebrew half-changed. ``bundleDump`` counts too,
     /// so the self-upgrade handoff never quits the app part way through writing a Brewfile.
     public var isMutating: Bool {
-        self != .doctorRead
+        self != .doctorRead && self != .vulnsRead
     }
 }
 

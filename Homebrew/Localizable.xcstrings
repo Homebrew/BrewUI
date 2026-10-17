@@ -70,6 +70,9 @@
         }
       }
     },
+    "Check installed formulae for known vulnerabilities" : {
+      "comment" : "Window subtitle, Security"
+    },
     "Check your Homebrew installation for problems" : {
       "comment" : "Window subtitle, Doctor",
       "localizations" : {
@@ -369,6 +372,9 @@
           }
         }
       }
+    },
+    "Security" : {
+      "comment" : "Sidebar: brew vulns security advisories"
     },
     "Services" : {
       "comment" : "Sidebar: read-only Homebrew service inventory",

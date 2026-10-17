@@ -55,6 +55,14 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
+                title: SidebarItem.security.title,
+                systemImage: "checkmark.shield",
+                item: .security,
+            )
+            .padding(.horizontal, BrewSpacing.sm)
+            .padding(.top, BrewSpacing.xs)
+
+            sidebarRow(
                 title: SidebarItem.configuration.title,
                 systemImage: "gearshape",
                 item: .configuration,
