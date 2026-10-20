@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "%@（已連結）"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (länkad)"
+          }
         }
       }
     },
@@ -44,6 +50,12 @@
             "state" : "translated",
             "value" : "%@ 次安裝（30 天）"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ installationer (30 dagar)"
+          }
         }
       }
     },
@@ -66,6 +78,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "30 天內安裝 %@ 次"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ installationer de senaste 30 dagarna"
           }
         }
       }
@@ -96,6 +114,12 @@
             "state" : "translated",
             "value" : "%lld 個套件符合「%@」"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paket matchar ”%@”"
+          }
         }
       }
     },
@@ -118,6 +142,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 個套件符合「%@」"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket matchar ”%@”"
           }
         }
       }
@@ -142,6 +172,12 @@
             "state" : "translated",
             "value" : "30 天內安裝次數"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installationer de senaste 30 dagarna"
+          }
         }
       }
     },
@@ -164,6 +200,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla"
           }
         }
       }
@@ -188,6 +230,12 @@
             "state" : "translated",
             "value" : "作為相依套件安裝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Som beroende"
+          }
         }
       }
     },
@@ -210,6 +258,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cask"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caskar"
           }
         }
       }
@@ -234,6 +288,12 @@
             "state" : "translated",
             "value" : "從「探索」選擇套件以查看詳細資訊。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj ett paket i Upptäck för att se information."
+          }
         }
       }
     },
@@ -256,6 +316,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法載入套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunde inte läsa in paket"
           }
         }
       }
@@ -280,6 +346,12 @@
             "state" : "translated",
             "value" : "無法搜尋套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunde inte söka efter paket"
+          }
         }
       }
     },
@@ -302,6 +374,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "相依套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beroenden"
           }
         }
       }
@@ -326,6 +404,12 @@
             "state" : "translated",
             "value" : "詳細資訊"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Information"
+          }
         }
       }
     },
@@ -348,6 +432,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "探索套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upptäck paket"
           }
         }
       }
@@ -372,6 +462,12 @@
             "state" : "translated",
             "value" : "Formula"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formler"
+          }
         }
       }
     },
@@ -394,6 +490,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "首頁"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hemsida"
           }
         }
       }
@@ -418,6 +520,12 @@
             "state" : "translated",
             "value" : "已安裝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INSTALLERAD"
+          }
         }
       }
     },
@@ -440,6 +548,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安裝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installera"
           }
         }
       }
@@ -464,6 +578,12 @@
             "state" : "translated",
             "value" : "安裝原因"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installationsorsak"
+          }
         }
       }
     },
@@ -486,6 +606,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad"
           }
         }
       }
@@ -510,6 +636,12 @@
             "state" : "translated",
             "value" : "安裝日期"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad den"
+          }
         }
       }
     },
@@ -532,6 +664,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在安裝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerar"
           }
         }
       }
@@ -556,6 +694,12 @@
             "state" : "translated",
             "value" : "在這部 Mac 上安裝此套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerar paketet på din Mac"
+          }
         }
       }
     },
@@ -578,6 +722,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最新版本"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senaste versionen"
           }
         }
       }
@@ -608,6 +758,12 @@
             "state" : "translated",
             "value" : "授權條款"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licens"
+          }
         }
       }
     },
@@ -630,6 +786,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在載入套件…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läser in paket…"
           }
         }
       }
@@ -654,6 +816,12 @@
             "state" : "translated",
             "value" : "過去 30 天內安裝次數最多的套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mest installerade paket de senaste 30 dagarna"
+          }
         }
       }
     },
@@ -676,6 +844,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有符合條件的 Cask"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga caskar matchar"
           }
         }
       }
@@ -700,6 +874,12 @@
             "state" : "translated",
             "value" : "沒有相依套件。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga beroenden."
+          }
         }
       }
     },
@@ -722,6 +902,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有符合條件的 Formula"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga formler matchar"
           }
         }
       }
@@ -746,6 +932,12 @@
             "state" : "translated",
             "value" : "沒有符合項目"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga träffar"
+          }
         }
       }
     },
@@ -768,6 +960,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚未選取"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget valt"
           }
         }
       }
@@ -792,6 +990,12 @@
             "state" : "translated",
             "value" : "找不到符合「%@」的項目"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget hittades för ”%@”"
+          }
         }
       }
     },
@@ -814,6 +1018,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "熱門 Cask"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Populära caskar"
           }
         }
       }
@@ -838,6 +1048,12 @@
             "state" : "translated",
             "value" : "熱門 Formula"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Populära formler"
+          }
         }
       }
     },
@@ -860,6 +1076,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "以 bottle 安裝 — %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerades från binärpaket: %@"
           }
         }
       }
@@ -884,6 +1106,12 @@
             "state" : "translated",
             "value" : "結果"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultat"
+          }
         }
       }
     },
@@ -906,6 +1134,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "範圍"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omfattning"
           }
         }
       }
@@ -930,6 +1164,12 @@
             "state" : "translated",
             "value" : "搜尋 Homebrew 套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök bland paketen i Homebrew"
+          }
         }
       }
     },
@@ -953,6 +1193,12 @@
             "state" : "translated",
             "value" : "正在搜尋…"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Söker…"
+          }
         }
       }
     },
@@ -975,6 +1221,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "載入探索套件時發生錯誤。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paket lästes in i Upptäck."
           }
         }
       }
@@ -1005,6 +1257,12 @@
             "state" : "translated",
             "value" : "搜尋套件目錄時發生錯誤。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när katalogen söktes igenom."
+          }
         }
       }
     },
@@ -1027,6 +1285,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安裝此套件時發生錯誤。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paketet installerades."
           }
         }
       }
@@ -1051,6 +1315,12 @@
             "state" : "translated",
             "value" : "來源"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Källa"
+          }
         }
       }
     },
@@ -1073,6 +1343,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "熱門趨勢"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Populärt"
           }
         }
       }

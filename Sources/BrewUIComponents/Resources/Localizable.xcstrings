@@ -27,6 +27,12 @@
             "state" : "translated",
             "value" : "%@ %@"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
         }
       }
     },
@@ -61,6 +67,12 @@
                 }
               }
             }
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "för %lld dagar sedan"
           }
         }
       }
@@ -97,6 +109,12 @@
               }
             }
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "för %lld timmar sedan"
+          }
         }
       }
     },
@@ -132,6 +150,12 @@
               }
             }
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "för %lld minuter sedan"
+          }
         }
       }
     },
@@ -154,6 +178,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 天前"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "för en dag sedan"
           }
         }
       }
@@ -178,6 +208,12 @@
             "state" : "translated",
             "value" : "1 小時前"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "för en timme sedan"
+          }
         }
       }
     },
@@ -200,6 +236,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 分鐘前"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "för en minut sedan"
           }
         }
       }
@@ -224,6 +266,12 @@
             "state" : "translated",
             "value" : "已拷貝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopierat"
+          }
         }
       }
     },
@@ -246,6 +294,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷貝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera"
           }
         }
       }
@@ -270,6 +324,12 @@
             "state" : "translated",
             "value" : "全部拷貝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera alla"
+          }
         }
       }
     },
@@ -292,6 +352,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "找不到 Homebrew。請安裝 Homebrew，或確認 brew 位於預設位置。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew hittades inte. Installera det eller kontrollera att brew finns på standardplatsen."
           }
         }
       }
@@ -316,6 +382,12 @@
             "state" : "translated",
             "value" : "尋找"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök"
+          }
         }
       }
     },
@@ -338,6 +410,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew 指令執行失敗。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew kommandot misslyckades."
           }
         }
       }
@@ -362,6 +440,12 @@
             "state" : "translated",
             "value" : "Homebrew 傳回了 App 無法讀取的輸出。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew returnerade utdata som programmet inte kunde läsa."
+          }
         }
       }
     },
@@ -384,6 +468,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新整理"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppdatera"
           }
         }
       }
@@ -408,6 +498,12 @@
             "state" : "translated",
             "value" : "重試"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Försök igen"
+          }
         }
       }
     },
@@ -430,6 +526,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終端機指令"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminalkommando"
           }
         }
       }
@@ -454,6 +556,12 @@
             "state" : "translated",
             "value" : "終端機指令"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminalkommandon"
+          }
         }
       }
     },
@@ -476,6 +584,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "剛剛"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "just nu"
           }
         }
       }

@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "%@，可修復"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, åtgärd finns"
+          }
         }
       }
     },
@@ -43,6 +49,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷貝 brew doctor 輸出"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera utdata från brew doctor"
           }
         }
       }
@@ -67,6 +79,12 @@
             "state" : "translated",
             "value" : "拷貝輸出"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera utdata"
+          }
         }
       }
     },
@@ -89,6 +107,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "危險"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fara"
           }
         }
       }
@@ -113,6 +137,12 @@
             "state" : "translated",
             "value" : "診斷"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnostik"
+          }
         }
       }
     },
@@ -135,6 +165,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "診斷問題"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnostikproblem"
           }
         }
       }
@@ -159,6 +195,12 @@
             "state" : "translated",
             "value" : "可修復"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åtgärd finns"
+          }
         }
       }
     },
@@ -181,6 +223,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上次檢查"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senast kontrollerad"
           }
         }
       }
@@ -205,6 +253,12 @@
             "state" : "translated",
             "value" : "需要管理者權限 · 在「終端機」中執行"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kräver administratörsbehörighet · körs i Terminal"
+          }
         }
       }
     },
@@ -227,6 +281,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未發現問題"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga problem hittades"
           }
         }
       }
@@ -251,6 +311,12 @@
             "state" : "translated",
             "value" : "尚未選取"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget valt"
+          }
         }
       }
     },
@@ -273,6 +339,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "原始輸出"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rå utdata"
           }
         }
       }
@@ -297,6 +369,12 @@
             "state" : "translated",
             "value" : "正在重新檢查"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollerar igen"
+          }
         }
       }
     },
@@ -319,6 +397,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在重新檢查…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollerar igen…"
           }
         }
       }
@@ -343,6 +427,12 @@
             "state" : "translated",
             "value" : "再次執行"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör igen"
+          }
         }
       }
     },
@@ -365,6 +455,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "執行修復"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör åtgärd"
           }
         }
       }
@@ -389,6 +485,12 @@
             "state" : "translated",
             "value" : "執行診斷後，選擇問題以查看詳細資訊與修復方式。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör diagnostik och välj sedan ett problem för att se information och åtgärder."
+          }
         }
       }
     },
@@ -411,6 +513,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在執行 brew doctor…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör brew doctor…"
           }
         }
       }
@@ -435,6 +543,12 @@
             "state" : "translated",
             "value" : "嚴重程度：%@"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allvarlighetsgrad: %@"
+          }
         }
       }
     },
@@ -457,6 +571,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法完成檢查"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollen kunde inte slutföras"
           }
         }
       }
@@ -481,6 +601,12 @@
             "state" : "translated",
             "value" : "不支援"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stöds inte"
+          }
         }
       }
     },
@@ -503,6 +629,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "警告"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varning"
           }
         }
       }
@@ -527,6 +659,12 @@
             "state" : "translated",
             "value" : "發現警告"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varningar hittades"
+          }
         }
       }
     },
@@ -550,6 +688,12 @@
             "state" : "translated",
             "value" : "系統已準備好使用 Homebrew"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ditt system är redo för Homebrew"
+          }
         }
       }
     },
@@ -572,6 +716,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "brew doctor 未發現問題。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor hittade inga problem."
           }
         }
       }

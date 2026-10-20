@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "Homebrew App 有新版本可用"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En ny version av Homebrew-appen finns tillgänglig"
+          }
         }
       }
     },
@@ -43,6 +49,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "稍後"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senare"
           }
         }
       }
@@ -67,6 +79,12 @@
             "state" : "translated",
             "value" : "Homebrew App 已升級至最新版本。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew-appen har uppgraderats till den senaste versionen."
+          }
         }
       }
     },
@@ -89,6 +107,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew App 已是最新版本"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew-appen är uppdaterad"
           }
         }
       }
@@ -113,6 +137,12 @@
             "state" : "translated",
             "value" : "Homebrew App 未完成升級"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew-appen uppgraderades inte"
+          }
         }
       }
     },
@@ -135,6 +165,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級未完成，目前仍是先前的版本。你可以從套件列表上方的橫幅再次嘗試。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderingen slutfördes inte, så det här är fortfarande den tidigare versionen. Du kan försöka igen via banderollen ovanför dina paket."
           }
         }
       }
@@ -159,6 +195,12 @@
             "state" : "translated",
             "value" : "升級 Homebrew App"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera Homebrew-appen"
+          }
         }
       }
     },
@@ -181,6 +223,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級失敗：%@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderingen misslyckades: %@"
           }
         }
       }
@@ -205,6 +253,12 @@
             "state" : "translated",
             "value" : "升級 Homebrew App"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera Homebrew-appen"
+          }
         }
       }
     },
@@ -227,6 +281,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級至 %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera till %@"
           }
         }
       }

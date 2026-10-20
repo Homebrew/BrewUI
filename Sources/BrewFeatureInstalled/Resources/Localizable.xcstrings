@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "%@\n\n這項檢查成功完成後，App 才能判斷是否有套件需要升級。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@\n\nInnan detta lyckas kan appen inte avgöra om något behöver uppgraderas."
+          }
         }
       }
     },
@@ -43,6 +49,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@（已連結）"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (länkad)"
           }
         }
       }
@@ -67,6 +79,12 @@
             "state" : "translated",
             "value" : "%@ — 上次檢查失敗"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: senaste kontrollen misslyckades"
+          }
         }
       }
     },
@@ -90,6 +108,12 @@
             "state" : "translated",
             "value" : "%@，尚未安裝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, inte installerad"
+          }
         }
       }
     },
@@ -112,6 +136,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目前的篩選條件隱藏了 %lld 個可升級套件。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld inaktuella paket döljs av aktuella filter."
           }
         }
       }
@@ -148,6 +178,12 @@
               }
             }
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paket"
+          }
         }
       }
     },
@@ -177,6 +213,12 @@
             "state" : "translated",
             "value" : "上方 %lld 個套件依賴 %@。請先解除安裝這些套件。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paket ovan är beroende av %@. Avinstallera dem först."
+          }
         }
       }
     },
@@ -199,6 +241,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 個套件可升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paket kan uppgraderas"
           }
         }
       }
@@ -223,6 +271,12 @@
             "state" : "translated",
             "value" : "%lld 項升級可用"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld uppgraderingar tillgängliga"
+          }
         }
       }
     },
@@ -245,6 +299,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目前的篩選條件隱藏了 1 個可升級套件。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 inaktuellt paket döljs av aktuella filter."
           }
         }
       }
@@ -269,6 +329,12 @@
             "state" : "translated",
             "value" : "1 個套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket"
+          }
         }
       }
     },
@@ -291,6 +357,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上方 1 個套件依賴 %@。請先解除安裝該套件。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket ovan är beroende av %@. Avinstallera det först."
           }
         }
       }
@@ -315,6 +387,12 @@
             "state" : "translated",
             "value" : "1 個套件可升級"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket kan uppgraderas"
+          }
         }
       }
     },
@@ -337,6 +415,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla"
           }
         }
       }
@@ -361,6 +445,12 @@
             "state" : "translated",
             "value" : "已安裝的 %lld 個套件皆為最新版本。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla %lld installerade paket är uppdaterade."
+          }
         }
       }
     },
@@ -383,6 +473,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "作為相依套件安裝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Som beroende"
           }
         }
       }
@@ -407,6 +503,12 @@
             "state" : "translated",
             "value" : "可用升級"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillgängliga uppgraderingar"
+          }
         }
       }
     },
@@ -429,6 +531,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "其他已安裝套件依賴此套件，無法解除安裝。啟用以查看原因。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blockeras av installerade paket som är beroende av detta paket. Aktivera om du vill se varför."
           }
         }
       }
@@ -453,6 +561,12 @@
             "state" : "translated",
             "value" : "目前無法解除安裝。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan inte avinstalleras ännu."
+          }
         }
       }
     },
@@ -475,6 +589,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avbryt"
           }
         }
       }
@@ -499,6 +619,12 @@
             "state" : "translated",
             "value" : "Cask"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caskar"
+          }
         }
       }
     },
@@ -521,6 +647,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再次檢查可用升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök efter uppgraderingar igen"
           }
         }
       }
@@ -545,6 +677,12 @@
             "state" : "translated",
             "value" : "從列表中選擇套件以查看詳細資訊。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj ett paket i listan för att se information."
+          }
         }
       }
     },
@@ -567,6 +705,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法檢查可用升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunde inte söka efter uppgraderingar"
           }
         }
       }
@@ -591,6 +735,12 @@
             "state" : "translated",
             "value" : "已棄用"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FÖRÅLDRAD"
+          }
         }
       }
     },
@@ -613,6 +763,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "相依套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beroenden"
           }
         }
       }
@@ -637,6 +793,12 @@
             "state" : "translated",
             "value" : "依賴此套件的套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Används av"
+          }
         }
       }
     },
@@ -659,6 +821,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已棄用"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Föråldrad"
           }
         }
       }
@@ -683,6 +851,12 @@
             "state" : "translated",
             "value" : "詳細資訊"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Information"
+          }
         }
       }
     },
@@ -705,6 +879,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "所有套件皆為最新版本"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allt är uppdaterat"
           }
         }
       }
@@ -729,6 +909,12 @@
             "state" : "translated",
             "value" : "Formula"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formler"
+          }
         }
       }
     },
@@ -751,6 +937,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隱藏依賴套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj beroenden"
           }
         }
       }
@@ -775,6 +967,12 @@
             "state" : "translated",
             "value" : "首頁"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hemsida"
+          }
         }
       }
     },
@@ -797,6 +995,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安裝原因"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installationsorsak"
           }
         }
       }
@@ -821,6 +1025,12 @@
             "state" : "translated",
             "value" : "已安裝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad"
+          }
         }
       }
     },
@@ -843,6 +1053,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝且為最新版本"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad och uppdaterad"
           }
         }
       }
@@ -867,6 +1083,12 @@
             "state" : "translated",
             "value" : "安裝日期"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad den"
+          }
         }
       }
     },
@@ -889,6 +1111,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝的套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerade paket"
           }
         }
       }
@@ -913,6 +1141,12 @@
             "state" : "translated",
             "value" : "Keg-only"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endast keg"
+          }
         }
       }
     },
@@ -935,6 +1169,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最新版本"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senaste versionen"
           }
         }
       }
@@ -965,6 +1205,12 @@
             "state" : "translated",
             "value" : "授權條款"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licens"
+          }
         }
       }
     },
@@ -987,6 +1233,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在載入套件…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läser in paket…"
           }
         }
       }
@@ -1011,6 +1263,12 @@
             "state" : "translated",
             "value" : "沒有相依套件。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga beroenden."
+          }
         }
       }
     },
@@ -1033,6 +1291,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有套件依賴此套件。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga paket är beroende av detta."
           }
         }
       }
@@ -1057,6 +1321,12 @@
             "state" : "translated",
             "value" : "沒有已安裝的套件可供檢查。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga installerade paket att kontrollera."
+          }
         }
       }
     },
@@ -1079,6 +1349,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 個可升級套件中沒有符合項目"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga träffar bland %lld inaktuella paket"
           }
         }
       }
@@ -1103,6 +1379,12 @@
             "state" : "translated",
             "value" : "1 個可升級套件中沒有符合項目"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga träffar bland 1 inaktuellt paket"
+          }
         }
       }
     },
@@ -1125,6 +1407,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有符合條件的升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga matchande uppgraderingar"
           }
         }
       }
@@ -1149,6 +1437,12 @@
             "state" : "translated",
             "value" : "尚未選取"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget valt"
+          }
         }
       }
     },
@@ -1171,6 +1465,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga."
           }
         }
       }
@@ -1195,6 +1495,12 @@
             "state" : "translated",
             "value" : "這裡沒有需要升級的套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget att uppgradera här"
+          }
         }
       }
     },
@@ -1217,6 +1523,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INAKTUELL"
           }
         }
       }
@@ -1241,6 +1553,12 @@
             "state" : "translated",
             "value" : "打開已安裝的套件 %@"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppna installerat paket %@"
+          }
         }
       }
     },
@@ -1263,6 +1581,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可升級套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktuella paket"
           }
         }
       }
@@ -1287,6 +1611,12 @@
             "state" : "translated",
             "value" : "已鎖定版本"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fäst"
+          }
         }
       }
     },
@@ -1309,6 +1639,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "以 bottle 安裝 — %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerades från binärpaket: %@"
           }
         }
       }
@@ -1333,6 +1669,12 @@
             "state" : "translated",
             "value" : "重新整理"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppdatera"
+          }
         }
       }
     },
@@ -1355,6 +1697,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "範圍"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omfattning"
           }
         }
       }
@@ -1379,6 +1727,12 @@
             "state" : "translated",
             "value" : "搜尋已安裝的套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök bland installerade paket"
+          }
         }
       }
     },
@@ -1402,6 +1756,12 @@
             "state" : "translated",
             "value" : "搜尋可用升級"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök bland uppgraderingar"
+          }
         }
       }
     },
@@ -1424,6 +1784,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示所有升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa alla uppgraderingar"
           }
         }
       }
@@ -1454,6 +1820,12 @@
             "state" : "translated",
             "value" : "顯示 %lld 項升級（共 %lld 項）"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visar %lld av %lld uppgraderingar"
+          }
         }
       }
     },
@@ -1476,6 +1848,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "載入套件時發生錯誤。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paket lästes in."
           }
         }
       }
@@ -1500,6 +1878,12 @@
             "state" : "translated",
             "value" : "解除安裝此套件時發生錯誤。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paketet avinstallerades."
+          }
         }
       }
     },
@@ -1522,6 +1906,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級此套件時發生錯誤。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paketet uppgraderades."
           }
         }
       }
@@ -1546,6 +1936,12 @@
             "state" : "translated",
             "value" : "來源"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Källa"
+          }
         }
       }
     },
@@ -1568,6 +1964,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這會透過 Homebrew 從這部 Mac 解除安裝 %@。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detta tar bort %@ från den här Macen med Homebrew."
           }
         }
       }
@@ -1592,6 +1994,12 @@
             "state" : "translated",
             "value" : "再試一次"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Försök igen"
+          }
         }
       }
     },
@@ -1614,6 +2022,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "解除安裝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallera"
           }
         }
       }
@@ -1638,6 +2052,12 @@
             "state" : "translated",
             "value" : "要解除安裝 %@ 嗎？"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallera %@?"
+          }
         }
       }
     },
@@ -1660,6 +2080,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在解除安裝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallerar"
           }
         }
       }
@@ -1684,6 +2110,12 @@
             "state" : "translated",
             "value" : "從這部 Mac 解除安裝此套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallerar paketet från den här Macen"
+          }
         }
       }
     },
@@ -1706,6 +2138,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera"
           }
         }
       }
@@ -1730,6 +2168,12 @@
             "state" : "translated",
             "value" : "全部升級（%lld）"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera alla (%lld)"
+          }
         }
       }
     },
@@ -1752,6 +2196,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級全部 %lld 個套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera alla %lld paket"
           }
         }
       }
@@ -1776,6 +2226,12 @@
             "state" : "translated",
             "value" : "有升級可用"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradering tillgänglig"
+          }
         }
       }
     },
@@ -1798,6 +2254,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可升級至 %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradering till %@ är tillgänglig"
           }
         }
       }
@@ -1822,6 +2284,12 @@
             "state" : "translated",
             "value" : "升級至 %@"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera till %@"
+          }
         }
       }
     },
@@ -1844,6 +2312,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級所有可升級的 Cask"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar alla inaktuella caskar"
           }
         }
       }
@@ -1868,6 +2342,12 @@
             "state" : "translated",
             "value" : "升級所有可升級的 Formula"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar alla inaktuella formler"
+          }
         }
       }
     },
@@ -1890,6 +2370,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級所有可升級的套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar alla inaktuella paket"
           }
         }
       }
@@ -1914,6 +2400,12 @@
             "state" : "translated",
             "value" : "升級符合搜尋條件的 %lld 個套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar de %lld paket som matchar din sökning"
+          }
         }
       }
     },
@@ -1936,6 +2428,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級符合搜尋條件的 1 個套件"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar det paket som matchar din sökning"
           }
         }
       }
@@ -1960,6 +2458,12 @@
             "state" : "translated",
             "value" : "將此套件升級至最新可用版本"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar paketet till den senaste tillgängliga versionen"
+          }
         }
       }
     },
@@ -1982,6 +2486,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar"
           }
         }
       }
@@ -2006,6 +2516,12 @@
             "state" : "translated",
             "value" : "是"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja"
+          }
         }
       }
     },
@@ -2028,6 +2544,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝的套件為最新版本。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det installerade paketet är uppdaterat."
           }
         }
       }
@@ -2052,6 +2574,12 @@
             "state" : "translated",
             "value" : "你的套件"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dina paket"
+          }
         }
       }
     },
@@ -2074,6 +2602,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "導致無法解除安裝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "blockerar avinstallation"
           }
         }
       }

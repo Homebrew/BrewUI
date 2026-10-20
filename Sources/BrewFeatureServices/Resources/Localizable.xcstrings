@@ -15,6 +15,12 @@
             "state" : "translated",
             "value" : "%lld 個服務正在執行"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld tjänster körs"
+          }
         }
       }
     },
@@ -31,6 +37,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 個服務正在執行"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 tjänst körs"
           }
         }
       }
@@ -49,6 +61,12 @@
             "state" : "translated",
             "value" : "全部"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla"
+          }
         }
       }
     },
@@ -66,14 +84,36 @@
             "state" : "translated",
             "value" : "請查看錯誤日誌以瞭解詳細資訊。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollera felloggen för mer information."
+          }
         }
       }
     },
     "Choose All to see every service." : {
-      "comment" : "Services: filter-empty state hint; All is the status filter option"
+      "comment" : "Services: filter-empty state hint; All is the status filter option",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj Alla för att se alla tjänster."
+          }
+        }
+      }
     },
     "Choose a service from the list to see details." : {
-      "comment" : "Service detail placeholder body when nothing is selected"
+      "comment" : "Service detail placeholder body when nothing is selected",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj en tjänst i listan för att se information."
+          }
+        }
+      }
     },
     "Configuration file" : {
       "comment" : "Service details: launchd service file path",
@@ -88,6 +128,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "配置檔案"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konfigurationsfil"
           }
         }
       }
@@ -106,6 +152,12 @@
             "state" : "translated",
             "value" : "已拷貝"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopierat"
+          }
         }
       }
     },
@@ -122,6 +174,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷貝"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera"
           }
         }
       }
@@ -140,6 +198,12 @@
             "state" : "translated",
             "value" : "拷貝路徑：%@"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera sökväg: %@"
+          }
         }
       }
     },
@@ -156,6 +220,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法讀取 Homebrew 服務。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det gick inte att läsa tjänster från Homebrew."
           }
         }
       }
@@ -174,6 +244,12 @@
             "state" : "translated",
             "value" : "詳細資訊"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Information"
+          }
         }
       }
     },
@@ -190,6 +266,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "錯誤日誌"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fellogg"
           }
         }
       }
@@ -208,6 +290,12 @@
             "state" : "translated",
             "value" : "結束代碼"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avslutningskod"
+          }
         }
       }
     },
@@ -224,6 +312,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "檔案"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filer"
           }
         }
       }
@@ -242,6 +336,12 @@
             "state" : "translated",
             "value" : "否"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nej"
+          }
         }
       }
     },
@@ -259,14 +359,36 @@
             "state" : "translated",
             "value" : "未提供錯誤日誌路徑。"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen sökväg till fellogg rapporterades."
+          }
         }
       }
     },
     "No matching services" : {
-      "comment" : "Services: filter-empty state title"
+      "comment" : "Services: filter-empty state title",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga matchande tjänster"
+          }
+        }
+      }
     },
     "No selection" : {
-      "comment" : "Service detail placeholder title when nothing is selected"
+      "comment" : "Service detail placeholder title when nothing is selected",
+      "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget valt"
+          }
+        }
+      }
     },
     "No services" : {
       "comment" : "Services: empty inventory title",
@@ -281,6 +403,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚無服務"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga tjänster"
           }
         }
       }
@@ -299,6 +427,12 @@
             "state" : "translated",
             "value" : "行程 ID（PID）"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Process ID (PID)"
+          }
         }
       }
     },
@@ -315,6 +449,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新整理"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppdatera"
           }
         }
       }
@@ -333,6 +473,12 @@
             "state" : "translated",
             "value" : "執行中"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Körs"
+          }
         }
       }
     },
@@ -349,6 +495,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "支援定時執行"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan schemaläggas"
           }
         }
       }
@@ -367,6 +519,12 @@
             "state" : "translated",
             "value" : "服務"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tjänster"
+          }
         }
       }
     },
@@ -383,6 +541,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝 Formula 的服務會顯示在這裡。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tjänster från installerade formler visas här."
           }
         }
       }
@@ -401,6 +565,12 @@
             "state" : "translated",
             "value" : "顯示目前使用者的服務"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visar tjänster för den aktuella användaren"
+          }
         }
       }
     },
@@ -417,6 +587,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "標準輸出日誌"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standardlogg"
           }
         }
       }
@@ -435,6 +611,12 @@
             "state" : "translated",
             "value" : "登入時啟動"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startar vid inloggning"
+          }
         }
       }
     },
@@ -451,6 +633,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "狀態"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status"
           }
         }
       }
@@ -469,6 +657,12 @@
             "state" : "translated",
             "value" : "已停止"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppad"
+          }
         }
       }
     },
@@ -485,6 +679,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未知"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okänd"
           }
         }
       }
@@ -503,6 +703,12 @@
             "state" : "translated",
             "value" : "使用者"
           }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Användare"
+          }
         }
       }
     },
@@ -519,6 +725,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "是"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja"
           }
         }
       }
