@@ -15,6 +15,11 @@ enum CatalogueRepositoryError: Error, Equatable {
 public actor BrewCatalogueRepository: CatalogueRepository {
     public static let defaultTTL: TimeInterval = 3600
 
+    private struct IndexedPackages {
+        let ordered: [BrewPackage]
+        let byID: [HomebrewPackageID: BrewPackage]
+    }
+
     private let apiClient: any BrewAPIClient
     private let cache: any CatalogueCaching
     private let defaultsKeyPrefix: String
@@ -22,6 +27,7 @@ public actor BrewCatalogueRepository: CatalogueRepository {
     private let ttl: TimeInterval
 
     private var refreshTasks: [HomebrewPackageKind: Task<[BrewPackage], Error>] = [:]
+    private var indexedPackages: [HomebrewPackageKind: IndexedPackages] = [:]
 
     /// `defaultsKeyPrefix` is the test seam for `UserDefaults.standard`; tests pass a unique prefix
     /// to isolate their lastRefresh timestamps from each other and from production data.
@@ -44,8 +50,8 @@ public actor BrewCatalogueRepository: CatalogueRepository {
     }
 
     public func package(for reference: HomebrewPackageID) async throws -> BrewPackage? {
-        let packages = try await packages(for: reference.kind)
-        return packages.first { $0.id == reference }
+        _ = try await packages(for: reference.kind)
+        return indexedPackages[reference.kind]?.byID[reference]
     }
 
     public func searchPackages(matching query: String, limit: Int) async throws -> [BrewPackage] {
@@ -80,12 +86,18 @@ public actor BrewCatalogueRepository: CatalogueRepository {
         if !isStale(kind: kind.catalogueKind) {
             switch kind {
             case .formula:
+                if let indexed = indexedPackages[kind] {
+                    return indexed.ordered
+                }
                 if let catalogue = await cache.formulaCatalogue() {
-                    return mapFormulaPackages(from: catalogue)
+                    return cachePackages(mapFormulaPackages(from: catalogue), for: kind)
                 }
             case .cask:
+                if let indexed = indexedPackages[kind] {
+                    return indexed.ordered
+                }
                 if let catalogue = await cache.caskCatalogue() {
-                    return mapCaskPackages(from: catalogue)
+                    return cachePackages(mapCaskPackages(from: catalogue), for: kind)
                 }
             }
         }
@@ -120,11 +132,11 @@ public actor BrewCatalogueRepository: CatalogueRepository {
                 guard let cached = await cache.formulaCatalogue() else {
                     throw CatalogueRepositoryError.cacheMissingAfterNotModified(kind: .formula)
                 }
-                return mapFormulaPackages(from: cached)
+                return cachePackages(mapFormulaPackages(from: cached), for: kind)
             case let .updated(data: data, etag: nextETag):
                 try await cache.updateFormulaCatalogue(with: JSONEncoder().encode(data.items), etag: nextETag)
                 updateLastRefresh(kind: catalogueKind)
-                return mapFormulaPackages(from: data)
+                return cachePackages(mapFormulaPackages(from: data), for: kind)
             }
         case .cask:
             let response = try await apiClient.fetchCaskCatalogue(etag: etag)
@@ -134,13 +146,19 @@ public actor BrewCatalogueRepository: CatalogueRepository {
                 guard let cached = await cache.caskCatalogue() else {
                     throw CatalogueRepositoryError.cacheMissingAfterNotModified(kind: .cask)
                 }
-                return mapCaskPackages(from: cached)
+                return cachePackages(mapCaskPackages(from: cached), for: kind)
             case let .updated(data: data, etag: nextETag):
                 try await cache.updateCaskCatalogue(with: JSONEncoder().encode(data.items), etag: nextETag)
                 updateLastRefresh(kind: catalogueKind)
-                return mapCaskPackages(from: data)
+                return cachePackages(mapCaskPackages(from: data), for: kind)
             }
         }
+    }
+
+    private func cachePackages(_ packages: [BrewPackage], for kind: HomebrewPackageKind) -> [BrewPackage] {
+        let byID = Dictionary(packages.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        indexedPackages[kind] = IndexedPackages(ordered: packages, byID: byID)
+        return packages
     }
 
     private func updateLastRefresh(kind: CatalogueCache.CatalogueKind) {

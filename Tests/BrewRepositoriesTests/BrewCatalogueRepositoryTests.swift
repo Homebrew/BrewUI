@@ -236,6 +236,46 @@ struct BrewCatalogueRepositoryTests {
         #expect(await apiClient.formulaCallCount() == 0)
     }
 
+    @Test @MainActor func `package lookups are kind-qualified across repeated reads`() async throws {
+        let fixture = TestFixture()
+        defer { fixture.cleanup() }
+
+        let cache = CatalogueCache(
+            cacheDirectoryURL: fixture.cacheDirectoryURL,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
+        )
+        try await cache.updateFormulaCatalogue(
+            with: fixture.formulaCacheJSON(names: ["shared"]),
+            etag: #""etag-formula""#,
+        )
+        try await cache.updateCaskCatalogue(
+            with: fixture.caskCacheJSON(tokens: ["shared"]),
+            etag: #""etag-cask""#,
+        )
+        UserDefaults.standard.set(Date(), forKey: fixture.formulaLastRefreshKey)
+        UserDefaults.standard.set(Date(), forKey: fixture.caskLastRefreshKey)
+
+        let apiClient = StubCatalogueAPIClient(
+            formulaHandler: { _ in .notModified },
+            caskHandler: { _ in .notModified },
+        )
+        let repository = BrewCatalogueRepository(
+            apiClient: apiClient,
+            cache: cache,
+            defaultsKeyPrefix: fixture.defaultsKeyPrefix,
+            now: Date.init,
+        )
+
+        let formula = try await repository.package(for: .formula(name: "shared"))
+        let cask = try await repository.package(for: .cask(token: "shared"))
+        let repeatedFormula = try await repository.package(for: .formula(name: "shared"))
+
+        #expect(formula?.kind == .formula)
+        #expect(cask?.kind == .cask)
+        #expect(repeatedFormula == formula)
+        #expect(await apiClient.formulaCallCount() == 0)
+    }
+
     @Test @MainActor func `searchPackages ranks prefix matches across formulae and casks`() async throws {
         let fixture = TestFixture()
         defer { fixture.cleanup() }
