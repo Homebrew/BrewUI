@@ -53,6 +53,12 @@ public enum BrewCommands {
         BrewCommand(operationKind: .doctorRead, arguments: ["doctor"])
     }
 
+    /// `brew vulns --json` — read-only; captured so the repository can decode the findings. Without formula
+    /// arguments it scans every installed formula.
+    public static func vulnsRead() -> BrewCommand {
+        BrewCommand(operationKind: .vulnsRead, arguments: ["vulns", "--json"])
+    }
+
     /// `--force` because the save panel has already confirmed replacing an existing file.
     public static func bundleDump(fileURL: URL) -> BrewCommand {
         BrewCommand(

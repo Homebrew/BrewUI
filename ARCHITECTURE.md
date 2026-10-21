@@ -123,6 +123,19 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
   the app, so the cache is shown immediately and re-read on each visit and app activation; a failed
   refresh keeps the cached data.
 
+## Security advisories
+
+The Security tab wraps `brew vulns --json`, added in Homebrew 7.0, rather than querying OSV.dev itself:
+Homebrew owns the formula-to-upstream mapping, install-time SBOMs, formula patches that resolve an
+advisory and the `brew trust` model. `brew vulns` checks formulae only, so the tab says casks are not
+scanned and never presents an incomplete scan as a clean one.
+
+`brew vulns` exits non-zero whenever an advisory is open or a keg is skipped, so only stdout that does
+not decode is a failure; stderr warnings are shown verbatim. Older Homebrew answers
+`Unknown command: vulns`, which surfaces as an unsupported-version error. A scan sends each formula's
+upstream repository and version to OSV.dev, so it runs when the tab is opened or on request, never at
+launch. The report is reused for six hours or until the installed formulae change.
+
 ## Self-upgrades and console
 
 The app's `homebrew-app` cask is excluded from package lists, counts and bulk upgrades, while the raw

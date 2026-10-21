@@ -24,6 +24,10 @@ struct AXIDTests {
         (.discoverList, "discover.list"),
         (.configScreen, "config.screen"),
         (.doctorScreen, "doctor.screen"),
+        (.securityScreen, "security.screen"),
+        (.securityList, "security.list"),
+        (.securityRescanButton, "security.rescan"),
+        (.securityCleanState, "security.clean"),
         (.brewNotFoundState, "brew.not.found"),
         (.packageDetail, "package.detail"),
         (.installButton, "detail.install"),
@@ -52,6 +56,7 @@ struct AXIDTests {
             "sidebar.item.discover",
             "sidebar.item.services",
             "sidebar.item.doctor",
+            "sidebar.item.security",
             "sidebar.item.configuration",
         ])
     }

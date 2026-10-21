@@ -23,6 +23,12 @@ public nonisolated enum BrewErrorCopy {
                 bundle: #bundle,
                 comment: "Error when brew succeeded but its JSON output failed to decode",
             )
+        case let BrewRepositoryError.unsupportedBrewCommand(command):
+            String(
+                localized: "This version of Homebrew doesn’t support \(command). Run brew update to upgrade Homebrew.",
+                bundle: #bundle,
+                comment: "Error when the installed Homebrew is too old for a command; %@ is the command, e.g. brew vulns",
+            )
         default:
             fallback
         }

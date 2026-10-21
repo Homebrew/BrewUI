@@ -30,6 +30,9 @@ public extension EnvironmentValues {
     /// Read-only `brew doctor` diagnostics source, injected by the composition root.
     @Entry var doctorRepository: any DoctorRepository = UnimplementedDoctorRepository()
 
+    /// Read-only `brew vulns` security advisory source, injected by the composition root.
+    @Entry var securityAdvisoryRepository: any SecurityAdvisoryRepository = UnimplementedSecurityAdvisoryRepository()
+
     /// Mutating `brew` coordinator, injected by the composition root.
     @Entry var brewCommandCenter: any BrewCommandCenter = UnimplementedBrewCommandCenter()
 

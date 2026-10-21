@@ -819,6 +819,7 @@ macOS uses vibrancy and material layers rather than heavy shadows. Use `.ultraTh
 | Outdated | `exclamationmark.triangle` |
 | Tap | `externaldrive.connected.to.line.below` |
 | Info | `info.circle` |
+| Security | `checkmark.shield` |
 
 ---
 

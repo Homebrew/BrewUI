@@ -1,0 +1,131 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@, %@, highest severity %@" : {
+      "comment" : "VoiceOver: Security row; %1$@ is the package, %2$@ the advisory count, %3$@ the severity",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@, highest severity %3$@"
+          }
+        }
+      }
+    },
+    "%lld advisories" : {
+      "comment" : "Security row: count of open advisories; %lld is the count"
+    },
+    "%lld advisories already patched by Homebrew" : {
+      "comment" : "Security coverage: advisories formula patches resolve; %lld is the count"
+    },
+    "%lld formulae checked" : {
+      "comment" : "Security coverage: formulae scanned; %lld is the count"
+    },
+    "%lld formulae weren’t scanned." : {
+      "comment" : "Security note: formulae that could not be scanned; %lld is the count"
+    },
+    "1 advisory" : {
+      "comment" : "Security row: count of open advisories for one package"
+    },
+    "1 advisory already patched by Homebrew" : {
+      "comment" : "Security coverage: one advisory a formula patch resolves"
+    },
+    "1 formula checked" : {
+      "comment" : "Security coverage: one formula scanned"
+    },
+    "1 formula wasn’t scanned." : {
+      "comment" : "Security note: one formula could not be scanned"
+    },
+    "Already patched by Homebrew" : {
+      "comment" : "Security detail heading: advisories a formula patch resolves"
+    },
+    "Casks are not scanned" : {
+      "comment" : "Security coverage: brew vulns checks formulae only"
+    },
+    "Choose a formula to see its advisories and fixes." : {
+      "comment" : "Security detail placeholder body when nothing is selected"
+    },
+    "Critical" : {
+      "comment" : "Security advisory severity name"
+    },
+    "Fixed upstream in %@" : {
+      "comment" : "Security advisory: released fix; %@ is one or more version numbers"
+    },
+    "Fixed upstream in a commit that is not yet in a release" : {
+      "comment" : "Security advisory: fix exists only as an unreleased commit"
+    },
+    "Formulae with advisories" : {
+      "comment" : "VoiceOver: the Security list"
+    },
+    "High" : {
+      "comment" : "Security advisory severity name"
+    },
+    "Homebrew reported warnings; see the console for details." : {
+      "comment" : "Security note: brew vulns printed warnings, shown in full in the console"
+    },
+    "Last scanned" : {
+      "comment" : "Security header: lead-in before a relative time, e.g. “Last scanned 5 minutes ago”"
+    },
+    "Low" : {
+      "comment" : "Security advisory severity name"
+    },
+    "Medium" : {
+      "comment" : "Security advisory severity name"
+    },
+    "No known vulnerabilities" : {
+      "comment" : "Security clean state title\nSecurity subtitle when no open advisories matched"
+    },
+    "No selection" : {
+      "comment" : "Security detail placeholder title when nothing is selected"
+    },
+    "No upstream fix is known yet" : {
+      "comment" : "Security advisory: no fix recorded"
+    },
+    "Open advisories found" : {
+      "comment" : "Security subtitle when open advisories are listed"
+    },
+    "Re-scanning" : {
+      "comment" : "VoiceOver: Security re-scan spinner"
+    },
+    "Re-scanning…" : {
+      "comment" : "Security subtitle while a re-scan runs"
+    },
+    "Results for %@ reflect the current formula, not the installed version." : {
+      "comment" : "Security note: brew vulns could not tell which source was installed; %@ is a list of formula names"
+    },
+    "Scan Again" : {
+      "comment" : "Security header: re-run brew vulns"
+    },
+    "Scanned version %@" : {
+      "comment" : "Security detail: the version brew vulns checked; %@ is the version"
+    },
+    "Scanning installed formulae…" : {
+      "comment" : "Security subtitle during the first scan"
+    },
+    "Scans send each formula’s source repository and version to OSV.dev." : {
+      "comment" : "Security footer: what a brew vulns scan shares with the OSV service"
+    },
+    "Security" : {
+      "comment" : "Security tab heading"
+    },
+    "Severity: %@" : {
+      "comment" : "VoiceOver: security advisory severity badge; %@ is the severity name"
+    },
+    "Show in Installed" : {
+      "comment" : "Security detail: open the formula in the Installed tab, where it can be upgraded"
+    },
+    "The scan could not be completed" : {
+      "comment" : "Security subtitle when brew vulns failed"
+    },
+    "These match the upstream version, but the formula applies a patch that fixes them." : {
+      "comment" : "Security detail: explains advisories resolved by a formula patch"
+    },
+    "Unscored" : {
+      "comment" : "Security advisory severity name when OSV gives no score"
+    },
+    "brew vulns found no open advisories for your installed formulae. A scan can only find advisories that have been published." : {
+      "comment" : "Security clean state body"
+    }
+  },
+  "version" : "1.0"
+}

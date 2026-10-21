@@ -46,6 +46,12 @@ struct Sidebar: Screen {
     }
 
     @discardableResult
+    func goToSecurity(file: StaticString = #filePath, line: UInt = #line) -> SecurityScreen {
+        item(.security).tap(file: file, line: line)
+        return SecurityScreen(app: app).waitUntilLoaded(file: file, line: line)
+    }
+
+    @discardableResult
     func goToConfiguration(file: StaticString = #filePath, line: UInt = #line) -> ConfigScreen {
         item(.configuration).tap(file: file, line: line)
         return ConfigScreen(app: app).waitUntilLoaded(file: file, line: line)
