@@ -174,7 +174,7 @@ extension BrewApp {
         fixtures: BrewUITestingFixtureInstaller.Installation?,
     ) -> BrewCommandExecutionContext {
         guard uiTesting != nil else {
-            return .live()
+            return .live(askpassURL: BundledHelper.url(named: "HomebrewAskpassHelper"))
         }
         return .uiTesting(brewURL: fixtures?.fakeBrewURL)
     }

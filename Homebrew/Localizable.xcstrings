@@ -30,6 +30,12 @@
         }
       }
     },
+    "Administrator password" : {
+      "comment" : "Askpass: secure password field label"
+    },
+    "Authenticate" : {
+      "comment" : "Askpass: submit the administrator password"
+    },
     "Browse and search %lld+ packages" : {
       "comment" : "Window subtitle, Discover; %lld is the approximate catalog size",
       "localizations" : {
@@ -87,6 +93,9 @@
           }
         }
       }
+    },
+    "Cancel" : {
+      "comment" : "Askpass: cancel administrator authentication"
     },
     "Check your Homebrew installation for problems" : {
       "comment" : "Window subtitle, Doctor",
@@ -251,6 +260,9 @@
         }
       }
     },
+    "Enter your password to allow this." : {
+      "comment" : "Askpass: explains that the password allows the change"
+    },
     "Homebrew Documentation" : {
       "comment" : "Help menu",
       "localizations" : {
@@ -308,6 +320,9 @@
           }
         }
       }
+    },
+    "Homebrew wants to make changes." : {
+      "comment" : "Askpass: primary message, standard macOS authorization wording"
     },
     "Installed" : {
       "comment" : "Sidebar: installed packages",

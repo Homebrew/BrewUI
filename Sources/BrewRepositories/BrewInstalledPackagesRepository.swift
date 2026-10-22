@@ -63,8 +63,8 @@ public final class BrewInstalledPackagesRepository: InstalledPackagesRepository 
     }
 
     /// Production wiring: the shared zsh execution policy.
-    public static func live(cache: InstalledInventoryCache) -> BrewInstalledPackagesRepository {
-        BrewInstalledPackagesRepository(executionContext: .live(), cache: cache)
+    public static func live(cache: InstalledInventoryCache, askpassURL: URL) -> BrewInstalledPackagesRepository {
+        BrewInstalledPackagesRepository(executionContext: .live(askpassURL: askpassURL), cache: cache)
     }
 
     // MARK: - Synchronous lookups (row rendering)
