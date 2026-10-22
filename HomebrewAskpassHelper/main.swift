@@ -1,7 +1,22 @@
 import Foundation
 
+/// Sudo runs askpass as its direct child and keeps the response to itself. Refusing any other parent stops
+/// a local process from launching the prompt just to read the password from stdout.
+private func isLaunchedBySudo() -> Bool {
+    var path = [UInt8](repeating: 0, count: Int(MAXPATHLEN))
+    let length = proc_pidpath(getppid(), &path, UInt32(path.count))
+    guard length > 0 else {
+        return false
+    }
+    return String(bytes: path.prefix(Int(length)), encoding: .utf8) == "/usr/bin/sudo"
+}
+
 @MainActor
 private func respond() -> Int32 {
+    guard isLaunchedBySudo() else {
+        FileHandle.standardError.write(Data("HomebrewAskpassHelper: refusing to prompt outside sudo\n".utf8))
+        return EXIT_FAILURE
+    }
     guard let password = AdministratorPasswordPrompt().run() else {
         return EXIT_FAILURE
     }

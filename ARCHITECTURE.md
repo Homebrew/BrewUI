@@ -69,8 +69,9 @@ Live brew commands receive `Contents/Helpers/HomebrewAskpassHelper` as `SUDO_ASK
 `sudo -A`, and the helper shows an unprivileged prompt: "Homebrew wants to make changes. Enter your
 password to allow this." It writes a submitted password to stdout or returns non-zero on cancel. The
 prompt lives in the helper and its copy lives in the app string catalog. Sudo validates the password.
-Cancelling the brew command also ends an open prompt. When `/etc/pam.d/sudo_local` or
-`/etc/pam.d/sudo` has an uncommented `auth sufficient pam_tid.so` line, the runner leaves
+The helper refuses to prompt unless its parent is `/usr/bin/sudo`, so another process cannot launch it
+to read a password from stdout. Cancelling the brew command also ends an open prompt. When
+`/etc/pam.d/sudo_local` or `/etc/pam.d/sudo` has an uncommented `auth sufficient pam_tid.so` line, the runner leaves
 `SUDO_ASKPASS` unset so sudo can use Touch ID, because `pam_tid` skips its UI in askpass mode. The
 self-upgrade runner sets no askpass, because it runs only after the app has quit and brew is
 replacing the bundle that contains the helper.
