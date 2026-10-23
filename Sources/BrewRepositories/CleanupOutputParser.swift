@@ -10,8 +10,7 @@ import Foundation
 /// directly.
 ///
 /// Homebrew has no JSON form of this output, so the parser reads only the line shapes `cleanup.rb` prints
-/// and ignores everything else: an unfamiliar line is left to the raw output and the console rather than
-/// guessed at.
+/// and ignores everything else: an unfamiliar line is left to the console rather than guessed at.
 public enum CleanupOutputParser {
     public static func parse(_ output: String, pruneAll: Bool) -> CleanupReport {
         var unneededFormulae: [String] = []
@@ -43,7 +42,6 @@ public enum CleanupOutputParser {
             unneededFormulae: unneededFormulae,
             removals: removals,
             reclaimableSpace: reclaimableSpace,
-            rawOutput: output,
         )
     }
 

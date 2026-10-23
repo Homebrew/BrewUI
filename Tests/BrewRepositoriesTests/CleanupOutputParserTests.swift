@@ -74,6 +74,6 @@ struct CleanupOutputParserTests {
         Some future line Homebrew might print
         """
         let report = CleanupOutputParser.parse(output, pruneAll: false)
-        #expect(report == CleanupReport(pruneAll: false, unneededFormulae: ["libyaml"], removals: [], reclaimableSpace: nil, rawOutput: output))
+        #expect(report == CleanupReport(pruneAll: false, unneededFormulae: ["libyaml"], removals: [], reclaimableSpace: nil))
     }
 }

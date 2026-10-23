@@ -18,20 +18,17 @@ public struct CleanupReport: Equatable, Sendable {
     public var removals: [CleanupRemoval]
     /// Homebrew's own total, e.g. `67.5MB`; `nil` when it printed none, as it does when nothing would be freed.
     public var reclaimableSpace: String?
-    public var rawOutput: String
 
     public init(
         pruneAll: Bool,
         unneededFormulae: [String],
         removals: [CleanupRemoval],
         reclaimableSpace: String?,
-        rawOutput: String = "",
     ) {
         self.pruneAll = pruneAll
         self.unneededFormulae = unneededFormulae
         self.removals = removals
         self.reclaimableSpace = reclaimableSpace
-        self.rawOutput = rawOutput
     }
 
     /// `true` when a real `brew cleanup` would change nothing.

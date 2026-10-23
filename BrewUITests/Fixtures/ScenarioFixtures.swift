@@ -18,9 +18,11 @@ enum ScenarioFixtures {
     /// Both a fixture file name and the key a mutating command rewrites, so it is spelled once.
     static let installedInfoKey = "info_--installed_--json=v2"
 
+    // One flat arm per scenario, so the branch count grows with the enum rather than with logic.
+    // swiftlint:disable:next cyclomatic_complexity
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
-        case .empty, .brewNotFound, .servicesBasic, .cleanupHasItems:
+        case .empty, .brewNotFound, .servicesBasic:
             emptyInstalledFixtures(for: scenario)
         case .installedBasic:
             installedBasicFixtures()
@@ -28,6 +30,8 @@ enum ScenarioFixtures {
             installedLargeFixtures()
         case .doctorHasIssues:
             doctorHasIssuesFixtures()
+        case .cleanupHasItems:
+            cleanupHasItemsFixtures()
         case .discoverSearch:
             discoverSearchFixtures()
         case .catalogueServerError:
@@ -310,9 +314,6 @@ enum ScenarioFixtures {
     // MARK: - Builders
 
     private static func emptyInstalledFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
-        if scenario == .cleanupHasItems {
-            return cleanupHasItemsFixtures()
-        }
         var set = emptyFixtures()
         guard scenario == .servicesBasic else { return set }
         let key = "services_info_--all_--json"

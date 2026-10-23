@@ -8,13 +8,15 @@ import Foundation
 
 /// One row in the Cleanup list: the path Homebrew would remove and what it said about it.
 struct CleanupRemovalItem: Identifiable, Equatable {
-    let id: String
     let path: String
     /// Homebrew's size text, or why a sizeless path is going.
     let detail: String?
 
+    var id: String {
+        path
+    }
+
     init(removal: CleanupRemoval) {
-        id = removal.id
         path = removal.path
         detail = switch removal.kind {
         case .file:

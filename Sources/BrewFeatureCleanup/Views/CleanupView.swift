@@ -65,40 +65,36 @@ struct CleanupView: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityHeading(.h1)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                headerControls
+                if viewModel.showsHeaderControls {
+                    headerControls
+                }
             }
             if viewModel.showsHeaderControls {
                 pruneAllToggle
             }
             if let message = viewModel.refreshFailureMessage {
-                Text(verbatim: message)
-                    .font(.brewCallout)
-                    .foregroundStyle(Color.brewStatusError)
-                    .textSelection(.enabled)
+                CleanupErrorText(message: message)
             }
         }
         .padding(BrewSpacing.lg)
         .brewPaneContentWidth()
     }
 
-    @ViewBuilder
     private var headerControls: some View {
-        if viewModel.showsHeaderControls {
-            HStack(spacing: BrewSpacing.sm) {
-                if viewModel.isRefreshing {
-                    ProgressView()
-                        .controlSize(.small)
-                        .accessibilityLabel(String(localized: "Checking again", bundle: #bundle, comment: "VoiceOver: Cleanup re-check spinner"))
-                }
-                Button(String(localized: "Check Again", bundle: #bundle, comment: "Cleanup header: run the dry run again")) {
-                    Task { await viewModel.load() }
-                }
-                .controlSize(.small)
-                .disabled(viewModel.isRefreshing || viewModel.isCleaningUp)
-                .axid(.cleanupCheckAgainButton)
+        HStack(spacing: BrewSpacing.sm) {
+            if viewModel.isRefreshing {
+                ProgressView()
+                    .controlSize(.small)
+                    .accessibilityLabel(String(localized: "Checking again", bundle: #bundle, comment: "VoiceOver: Cleanup re-check spinner"))
             }
-            .fixedSize(horizontal: true, vertical: false)
+            Button(String(localized: "Check Again", bundle: #bundle, comment: "Cleanup header: run the dry run again")) {
+                Task { await viewModel.load() }
+            }
+            .controlSize(.small)
+            .disabled(viewModel.isRefreshing || viewModel.isCleaningUp)
+            .axid(.cleanupCheckAgainButton)
         }
+        .fixedSize(horizontal: true, vertical: false)
     }
 
     private var pruneAllToggle: some View {
@@ -222,20 +218,10 @@ struct CleanupView: View {
                 Spacer(minLength: 0)
             }
             if let message = viewModel.cleanupErrorMessage {
-                Text(verbatim: message)
-                    .font(.brewCallout)
-                    .foregroundStyle(Color.brewStatusError)
-                    .textSelection(.enabled)
+                CleanupErrorText(message: message)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BrewSpacing.lg)
-        .background(Color.brewSurface)
-        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
-        .overlay(
-            RoundedRectangle(cornerRadius: BrewRadius.lg)
-                .stroke(Color.brewBorderDefault, lineWidth: 1),
-        )
+        .cleanupCard()
     }
 }
 
@@ -260,14 +246,33 @@ private struct CleanupSectionCard<Rows: View>: View {
             }
             rows()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BrewSpacing.lg)
-        .background(Color.brewSurface)
-        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
-        .overlay(
-            RoundedRectangle(cornerRadius: BrewRadius.lg)
-                .stroke(Color.brewBorderDefault, lineWidth: 1),
-        )
+        .cleanupCard()
+    }
+}
+
+/// Homebrew's error text, selectable so it can be copied into a report.
+private struct CleanupErrorText: View {
+    let message: String
+
+    var body: some View {
+        Text(verbatim: message)
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewStatusError)
+            .textSelection(.enabled)
+    }
+}
+
+private extension View {
+    /// The Configuration tab's card chrome.
+    func cleanupCard() -> some View {
+        frame(maxWidth: .infinity, alignment: .leading)
+            .padding(BrewSpacing.lg)
+            .background(Color.brewSurface)
+            .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
+            .overlay(
+                RoundedRectangle(cornerRadius: BrewRadius.lg)
+                    .stroke(Color.brewBorderDefault, lineWidth: 1),
+            )
     }
 }
 
