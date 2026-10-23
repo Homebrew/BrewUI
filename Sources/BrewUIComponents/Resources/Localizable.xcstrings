@@ -420,6 +420,23 @@
         }
       }
     },
+    "Homebrew finished, but the service hasn't reached the requested state. Check the console and refresh." : {
+      "comment" : "Service action error: reported state does not match the completed command",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 命令已结束，但服务尚未达到请求的状态。请查看控制台并刷新。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 指令已結束，但服務尚未達到要求的狀態。請查看主控台並重新整理。"
+          }
+        }
+      }
+    },
     "Homebrew returned output the app couldn’t read." : {
       "comment" : "Error when brew succeeded but its JSON output failed to decode",
       "localizations" : {
@@ -561,6 +578,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminalkommandon"
+          }
+        }
+      }
+    },
+    "This service can't be managed here. Refresh its status or use Terminal." : {
+      "comment" : "Service action error: ownership or state prevents a safe operation",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法在这里操作此服务。请刷新状态或使用终端。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法在這裡操作此服務。請重新整理狀態或使用終端機。"
           }
         }
       }

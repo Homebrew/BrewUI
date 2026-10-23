@@ -2,6 +2,7 @@
 public struct BrewService: Identifiable, Equatable, Sendable {
     public let name: String, status: String
     public let running: Bool
+    public let loaded: Bool?
     public let pid: Int?, exitCode: Int?
     public let user: String?
     public let registered: Bool?, schedulable: Bool?
@@ -12,14 +13,24 @@ public struct BrewService: Identifiable, Equatable, Sendable {
         name
     }
 
+    /// User-domain services can be controlled without elevating privileges.
+    public func isControllable(by user: String) -> Bool {
+        guard self.user != "root",
+              file?.hasPrefix("/Library/LaunchDaemons/") != true,
+              file?.hasPrefix("/System/Library/LaunchDaemons/") != true else { return false }
+        return self.user == user || (self.user == nil && registered == false)
+    }
+
     public init(
         name: String, status: String, running: Bool,
         pid: Int? = nil, exitCode: Int? = nil, user: String? = nil, registered: Bool? = nil, schedulable: Bool? = nil,
         file: String? = nil, logPath: String? = nil, errorLogPath: String? = nil,
+        loaded: Bool? = nil,
     ) {
         self.name = name
         self.status = status
         self.running = running
+        self.loaded = loaded
         self.pid = pid
         self.exitCode = exitCode
         self.user = user
