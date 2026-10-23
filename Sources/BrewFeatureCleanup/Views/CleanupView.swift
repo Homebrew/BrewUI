@@ -91,7 +91,7 @@ struct CleanupView: View {
                 Task { await viewModel.load() }
             }
             .controlSize(.small)
-            .disabled(viewModel.isRefreshing || viewModel.isCleaningUp)
+            .disabled(viewModel.areHeaderControlsDisabled)
             .axid(.cleanupCheckAgainButton)
         }
         .fixedSize(horizontal: true, vertical: false)
@@ -107,7 +107,7 @@ struct CleanupView: View {
                     .font(.brewCallout)
             }
             .toggleStyle(.checkbox)
-            .disabled(viewModel.isRefreshing || viewModel.isCleaningUp)
+            .disabled(viewModel.areHeaderControlsDisabled)
             .axid(.cleanupPruneAllToggle)
             Text(
                 "Adds --prune=all. Without it, Homebrew keeps recent downloads so reinstalling is quicker.",

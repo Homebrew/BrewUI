@@ -110,6 +110,23 @@ struct BrewCleanupRepositoryTests {
         #expect(repository.state.value == nil)
     }
 
+    @Test func `switching option clears the other option's refresh failure`() async {
+        let runner = SequencedRunner([
+            .output(CommandOutput(standardOutput: "Would remove: /cache/a.tar.gz (1MB)\n", standardError: "", terminationStatus: 0)),
+            .throw(BrewCommandError.launchFailed(underlying: "spawn failed")),
+        ])
+        let context = BrewCommandExecutionContext(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: Self.brewURL))
+        let repository = BrewCleanupRepository(
+            commandCenter: SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler()),
+        )
+
+        await repository.load(pruneAll: false)
+        await repository.load(pruneAll: false)
+        await repository.load(pruneAll: true)
+
+        #expect(repository.state.value == nil && repository.refreshFailure == nil)
+    }
+
     @Test func `the preview runs in the console as a read-only maintenance job`() async {
         let context = BrewCommandExecutionContext(
             commandRunner: MockBrewCommandRunner(behaviors: [Self.preview: Self.output("")]),

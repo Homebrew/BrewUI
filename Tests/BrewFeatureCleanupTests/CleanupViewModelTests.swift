@@ -154,11 +154,13 @@ private func waitUntil(
     _ condition: @MainActor () -> Bool,
     _ description: String,
 ) async {
-    for _ in 0 ..< 500 {
+    // A deadline rather than a yield count: cleanup awaits the command centre and a reload before it finishes.
+    let deadline = ContinuousClock.now + .seconds(5)
+    while ContinuousClock.now < deadline {
         if condition() {
             return
         }
-        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(10))
     }
     Issue.record("timed out waiting for \(description)")
 }

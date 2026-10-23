@@ -51,6 +51,8 @@ public final class BrewCleanupRepository: CleanupRepository {
             isRefreshing = true
         } else {
             state = .loading
+            // A failed refresh belongs to the report being dropped.
+            refreshFailure = nil
         }
         defer { isRefreshing = false }
 

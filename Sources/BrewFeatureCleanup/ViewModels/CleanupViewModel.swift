@@ -70,6 +70,11 @@ final class CleanupViewModel {
         repository.isRefreshing
     }
 
+    /// Check Again and the prune toggle wait while a preview or a cleanup run is in progress.
+    var areHeaderControlsDisabled: Bool {
+        isRefreshing || isCleaningUp
+    }
+
     var refreshFailureMessage: String? {
         repository.refreshFailure.map(Self.message(for:))
     }
