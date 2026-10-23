@@ -139,6 +139,29 @@ public final class StubDoctorRepository: DoctorRepository {
     public func load(forceRefresh _: Bool) async {}
 }
 
+/// Observable cleanup repository preloaded with a fixed ``CleanupReport`` (or error) — for previews/tests.
+/// `load(pruneAll:)` records the option it was asked for and otherwise leaves the preset state alone.
+@Observable
+@MainActor
+public final class StubCleanupRepository: CleanupRepository {
+    public private(set) var state: LoadState<CleanupReport, any Error>
+    public private(set) var refreshFailure: (any Error)?
+    public private(set) var isRefreshing = false
+    public private(set) var loadedOptions: [Bool] = []
+
+    public init(report: CleanupReport) {
+        state = .loaded(report)
+    }
+
+    public init(error: any Error) {
+        state = .failed(error)
+    }
+
+    public func load(pruneAll: Bool) async {
+        loadedOptions.append(pruneAll)
+    }
+}
+
 /// No-op command center for previews/tests: immediate, with no phase bookkeeping. Uses only BrewCore.
 public actor StubBrewCommandCenter: BrewCommandCenter {
     public init() {}
@@ -207,5 +230,9 @@ public struct StubMutatingCommandFactory: BrewMutatingCommandFactory {
 
     public func bundleDumpCommand(fileURL: URL) -> BrewCommand {
         BrewCommands.bundleDump(fileURL: fileURL)
+    }
+
+    public func cleanupCommand(pruneAll: Bool) -> BrewCommand {
+        BrewCommands.cleanup(pruneAll: pruneAll)
     }
 }

@@ -61,6 +61,21 @@ public enum BrewCommands {
         )
     }
 
+    /// `brew cleanup --dry-run`, captured so the Cleanup tab can list what a real run would remove.
+    /// `pruneAll` adds `--prune=all`, which removes every cached download regardless of age.
+    public static func cleanupPreview(pruneAll: Bool) -> BrewCommand {
+        BrewCommand(operationKind: .cleanupPreview, arguments: cleanupArguments(dryRun: true, pruneAll: pruneAll))
+    }
+
+    /// `brew cleanup`, matching the ``cleanupPreview(pruneAll:)`` the user reviewed.
+    public static func cleanup(pruneAll: Bool) -> BrewCommand {
+        BrewCommand(operationKind: .cleanup, arguments: cleanupArguments(dryRun: false, pruneAll: pruneAll))
+    }
+
+    private static func cleanupArguments(dryRun: Bool, pruneAll: Bool) -> [String] {
+        ["cleanup"] + (dryRun ? ["--dry-run"] : []) + (pruneAll ? ["--prune=all"] : [])
+    }
+
     private static func flag(for kind: HomebrewPackageKind) -> String {
         kind == .formula ? "--formula" : "--cask"
     }

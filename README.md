@@ -103,6 +103,10 @@ Stable and under active development.
 The read-only Services tab shows installed formula services, their status, owner, login registration and
 service/log paths. Filter by All, Running or Stopped; start, stop and configure services in Terminal.
 
+The Cleanup tab previews `brew cleanup` with a dry run: old versions, stale downloads and unneeded
+dependencies, with Homebrew's estimate of the space it frees. Clean Up runs `brew cleanup` after a
+confirmation, optionally with `--prune=all` to remove every cached download.
+
 ## 📄 Licence
 
 [AGPL-3.0](LICENSE). If you reuse or adapt the source the AGPL terms apply, including the network-use clause.
