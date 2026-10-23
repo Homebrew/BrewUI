@@ -128,7 +128,7 @@ jobs:
           xcrun swift test --package-path Tools/BrewUILint | tee swift-test-brewuilint.log
 
       - name: Cache Homebrew prefix
-        uses: Homebrew/actions/cache-homebrew-prefix@eb02c69dbabdb66ff183c614f4ce7ab3c077592c # 2026.10.12.1
+        uses: Homebrew/actions/cache-homebrew-prefix@4790763c0a3ba4036f72634dc079c4a7dfcd4878 # 2026.10.19.1
         with:
           brewfile: true
           uninstall: true
