@@ -38,6 +38,7 @@ struct BrewApp: App {
     private let catalogueRepository: BrewCatalogueRepository
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
+    private let cleanupRepository: BrewCleanupRepository
     private let configRepository: BrewConfigRepository
     private let servicesRepository: BrewServicesRepository
     private let crashReportController: CrashReportController
@@ -86,6 +87,7 @@ struct BrewApp: App {
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
+        cleanupRepository = BrewCleanupRepository(commandCenter: center)
         configRepository = BrewConfigRepository(executionContext: executionContext)
         servicesRepository = BrewServicesRepository(executionContext: executionContext)
 
@@ -119,6 +121,7 @@ struct BrewApp: App {
                 .environment(\.catalogueRepository, catalogueRepository)
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
+                .environment(\.cleanupRepository, cleanupRepository)
                 .environment(\.configRepository, configRepository)
                 .environment(\.servicesRepository, servicesRepository)
                 .environment(\.selfUpgradeCoordinator, selfUpgradeCoordinator)
