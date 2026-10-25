@@ -25,7 +25,13 @@ final class WindowFrameUITests: BrewUITestCase {
 
         first.quit()
 
-        let restoredWindow = launch(.empty).app.windows.firstMatch
+        // The second launch must restore the frame, not clear it again.
+        first.launchEnvironment.removeValue(forKey: BrewUITestingEnvironmentKey.resetWindowState)
+        first.launch()
+        BrewApp.activate(first)
+        InstalledScreen(app: first).waitUntilLoaded(timeout: BrewUITestTimeout.launch)
+
+        let restoredWindow = first.windows.firstMatch
         // Content readiness and window restoration can complete at different times.
         let restoredSize = NSPredicate { _, _ in
             let frame = restoredWindow.frame
