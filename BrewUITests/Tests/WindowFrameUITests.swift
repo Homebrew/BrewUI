@@ -25,8 +25,17 @@ final class WindowFrameUITests: BrewUITestCase {
 
         first.quit()
 
-        let restored = launch(.empty).app.windows.firstMatch.frame
-        XCTAssertEqual(restored.width, resized.width, accuracy: 1, "Width was not restored")
-        XCTAssertEqual(restored.height, resized.height, accuracy: 1, "Height was not restored")
+        let restoredWindow = launch(.empty).app.windows.firstMatch
+        // Content readiness and window restoration can complete at different times.
+        let restoredSize = NSPredicate { _, _ in
+            let frame = restoredWindow.frame
+            return abs(frame.width - resized.width) <= 1 && abs(frame.height - resized.height) <= 1
+        }
+        let expectation = XCTNSPredicateExpectation(predicate: restoredSize, object: nil)
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [expectation], timeout: BrewUITestTimeout.default),
+            .completed,
+            "Expected the saved size \(resized.size), got \(restoredWindow.frame.size)",
+        )
     }
 }
