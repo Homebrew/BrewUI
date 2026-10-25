@@ -36,6 +36,14 @@ public struct InstalledBrewPackage: Identifiable, Hashable, Sendable {
         package.name
     }
 
+    /// Upgrade argument that preserves third-party cask resolution when an official token collides.
+    public var upgradeName: String {
+        guard kind == .cask, let tap, !tap.isEmpty, tap != "homebrew/cask", !name.contains("/") else {
+            return name
+        }
+        return "\(tap)/\(name)"
+    }
+
     public var displayName: String {
         package.displayName
     }

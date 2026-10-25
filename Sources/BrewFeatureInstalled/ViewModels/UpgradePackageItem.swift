@@ -23,9 +23,9 @@ struct UpgradePackageItem {
     var displayCommand: String {
         switch package.kind {
         case .formula:
-            "brew upgrade --formula \(package.name)"
+            "brew upgrade --formula \(package.upgradeName)"
         case .cask:
-            "brew upgrade --cask \(package.name)"
+            "brew upgrade --cask \(package.upgradeName)"
         }
     }
 

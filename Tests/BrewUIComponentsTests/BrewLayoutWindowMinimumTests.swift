@@ -18,6 +18,12 @@ struct BrewLayoutWindowMinimumTests {
         chrome: chrome,
     )
 
+    @Test func `the main pane accommodates the reported macOS 27 chrome and two rows`() {
+        let chrome: CGFloat = 123 + 233 + 49
+        let row: CGFloat = 58
+        #expect(BrewLayout.mainPaneMinHeight >= chrome + 2 * row)
+    }
+
     /// What the console actually opens at in a window of `total`, having yielded whatever it must.
     private static func consoleOpensAt(windowHeight total: CGFloat) -> CGFloat {
         fittedSplitBottomHeight(
