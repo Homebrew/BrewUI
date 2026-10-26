@@ -12,6 +12,7 @@ import Foundation
 import Testing
 
 @MainActor
+@Suite(.timeLimit(.minutes(1)))
 struct CleanupViewModelTests {
     private static let brewURL = URL(fileURLWithPath: "/opt/homebrew/bin/brew")
 
@@ -118,8 +119,7 @@ struct CleanupViewModelTests {
         let repository = StubCleanupRepository(report: Self.report)
         let viewModel = Self.viewModel(repository: repository, commandCenter: center)
 
-        viewModel.cleanUp()
-        await waitUntil({ !viewModel.isCleaningUp }, "cleanup finished")
+        await cleanUp(viewModel, reloading: repository)
 
         let entries = await center.recordedSubmitEntries
         #expect(entries.map(\.kind) == [.cleanup])
@@ -130,37 +130,30 @@ struct CleanupViewModelTests {
         let repository = StubCleanupRepository(report: Self.report)
         let viewModel = Self.viewModel(repository: repository, commandCenter: Self.recordingCenter(exitCode: 0))
 
-        viewModel.cleanUp()
-        await waitUntil({ !viewModel.isCleaningUp }, "cleanup finished")
+        await cleanUp(viewModel, reloading: repository)
 
         #expect(repository.loadedOptions == [false])
     }
 
     @Test func `a failed cleanup shows Homebrew's stderr`() async {
+        let repository = StubCleanupRepository(report: Self.report)
         let viewModel = Self.viewModel(
-            repository: StubCleanupRepository(report: Self.report),
+            repository: repository,
             commandCenter: Self.recordingCenter(exitCode: 1, stderr: "Error: Permission denied"),
         )
 
-        viewModel.cleanUp()
-        await waitUntil({ !viewModel.isCleaningUp }, "cleanup finished")
+        await cleanUp(viewModel, reloading: repository)
 
         #expect(viewModel.cleanupErrorMessage == "Error: Permission denied")
     }
 }
 
+/// Runs a cleanup and returns once it has finished. Every run ends by previewing again, and the stub's
+/// load never suspends, so the run completes on the main actor before this resumes.
 @MainActor
-private func waitUntil(
-    _ condition: @MainActor () -> Bool,
-    _ description: String,
-) async {
-    // A deadline rather than a yield count: cleanup awaits the command centre and a reload before it finishes.
-    let deadline = ContinuousClock.now + .seconds(5)
-    while ContinuousClock.now < deadline {
-        if condition() {
-            return
-        }
-        try? await Task.sleep(for: .milliseconds(10))
-    }
-    Issue.record("timed out waiting for \(description)")
+private func cleanUp(_ viewModel: CleanupViewModel, reloading repository: StubCleanupRepository) async {
+    var loads = repository.loads.makeAsyncIterator()
+    viewModel.cleanUp()
+    _ = await loads.next()
+    #expect(!viewModel.isCleaningUp)
 }
