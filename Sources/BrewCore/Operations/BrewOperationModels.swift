@@ -23,6 +23,7 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case doctorFix
     case doctorRead
     case bundleDump
+    case serviceControl
 
     /// `true` when the command's ordinary output arrives on stderr, as `brew doctor`'s does — the
     /// console would otherwise paint the whole run in the error role.

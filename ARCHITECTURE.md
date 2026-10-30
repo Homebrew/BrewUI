@@ -138,6 +138,11 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
 - The services repository caches the service inventory for the app lifetime. Services change outside
   the app, so the cache is shown immediately and re-read on each visit and app activation; a failed
   refresh keeps the cached data.
+  Single-service actions use the shared command centre. The repository checks current ownership and
+  registration before acting and keeps each action busy through the final inventory refresh.
+  Success requires the expected service state and unchanged login registration when known. Failures
+  refresh the actual state and report diagnostics without rollback. System and other-user services
+  remain read-only.
 
 ## Self-upgrades and console
 
