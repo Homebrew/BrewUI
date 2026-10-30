@@ -2,6 +2,7 @@ import AppKit
 import BrewAccessibilityID
 import BrewAppEnvironment
 import BrewCore
+import BrewFeatureCleanup
 import BrewFeatureConfig
 import BrewFeatureConsole
 import BrewFeatureDiscover
@@ -157,6 +158,10 @@ struct MainWindowView: View {
             DoctorColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
                 .navigationSubtitle(String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor"))
+        case .cleanup:
+            CleanupRoot()
+                .navigationTitle(selectedSidebarItem.title)
+                .navigationSubtitle(String(localized: "Remove old versions, stale downloads and unneeded dependencies", bundle: #bundle, comment: "Window subtitle, Cleanup"))
         case .configuration:
             ConfigColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
@@ -174,6 +179,7 @@ struct MainWindowView: View {
             .environment(\.catalogueRepository, PreviewSupport.makeDiscoverCatalogueRepository())
             .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
             .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
+            .environment(\.cleanupRepository, PreviewSupport.makeCleanupRepository())
             .environment(\.configRepository, PreviewSupport.makeConfigRepository())
             .environment(\.servicesRepository, PreviewSupport.makeServicesRepository())
     }

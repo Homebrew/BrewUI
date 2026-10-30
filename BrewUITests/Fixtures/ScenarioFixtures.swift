@@ -18,6 +18,8 @@ enum ScenarioFixtures {
     /// Both a fixture file name and the key a mutating command rewrites, so it is spelled once.
     static let installedInfoKey = "info_--installed_--json=v2"
 
+    // One flat arm per scenario, so the branch count grows with the enum rather than with logic.
+    // swiftlint:disable:next cyclomatic_complexity
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
         case .empty, .brewNotFound, .servicesBasic:
@@ -28,6 +30,8 @@ enum ScenarioFixtures {
             installedLargeFixtures()
         case .doctorHasIssues:
             doctorHasIssuesFixtures()
+        case .cleanupHasItems:
+            cleanupHasItemsFixtures()
         case .discoverSearch:
             discoverSearchFixtures()
         case .catalogueServerError:
@@ -231,6 +235,20 @@ enum ScenarioFixtures {
         return set
     }
 
+    private static func cleanupHasItemsFixtures() -> FixtureSet {
+        var set = emptyFixtures()
+        set.brewFiles["cleanup_--dry-run.stdout"] = text(
+            """
+            ==> Would autoremove 1 unneeded formula:
+            libyaml
+            Would remove: /fixtures/Caches/Homebrew/wget--1.24.5.arm64_sequoia.bottle.tar.gz (1.6MB)
+            Would remove: /fixtures/Cellar/wget/1.24.5 (91 files, 4.1MB)
+            ==> This operation would free approximately 5.7MB of disk space.
+            """,
+        )
+        return set
+    }
+
     private static func discoverSearchFixtures() -> FixtureSet {
         let catalogue = [uninstalledRipgrep, fd, iterm2]
         var set = FixtureSet()
@@ -316,6 +334,7 @@ enum ScenarioFixtures {
             "services_info_--all_--json.stdout": text(""),
             "doctor.stdout": text("Your system is ready to brew.\n"),
             "doctor_--json.stdout": json(["tier": 1, "findings": []]),
+            "cleanup_--dry-run.stdout": text(""),
         ]
     }
 

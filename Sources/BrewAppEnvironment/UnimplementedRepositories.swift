@@ -90,6 +90,26 @@ final class UnimplementedDoctorRepository: DoctorRepository {
 
 @Observable
 @MainActor
+final class UnimplementedCleanupRepository: CleanupRepository {
+    var state: LoadState<CleanupReport, any Error> {
+        unimplemented()
+    }
+
+    var refreshFailure: (any Error)? {
+        unimplemented()
+    }
+
+    var isRefreshing: Bool {
+        unimplemented()
+    }
+
+    func load(pruneAll _: Bool) async {
+        unimplemented()
+    }
+}
+
+@Observable
+@MainActor
 final class UnimplementedConfigRepository: ConfigRepository {
     var state: LoadState<BrewConfigSnapshot, any Error> {
         unimplemented()
@@ -146,6 +166,10 @@ struct UnimplementedMutatingCommandFactory: BrewMutatingCommandFactory {
     }
 
     func bundleDumpCommand(fileURL _: URL) -> BrewCommand {
+        unimplemented()
+    }
+
+    func cleanupCommand(pruneAll _: Bool) -> BrewCommand {
         unimplemented()
     }
 }

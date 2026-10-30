@@ -27,6 +27,7 @@ let package = Package(
         .library(name: "BrewFeatureSelfUpgrade", targets: ["BrewFeatureSelfUpgrade"]),
         .library(name: "BrewFeatureDiscover", targets: ["BrewFeatureDiscover"]),
         .library(name: "BrewFeatureDoctor", targets: ["BrewFeatureDoctor"]),
+        .library(name: "BrewFeatureCleanup", targets: ["BrewFeatureCleanup"]),
         .library(name: "BrewFeatureConfig", targets: ["BrewFeatureConfig"]),
         .library(name: "BrewFeatureServices", targets: ["BrewFeatureServices"]),
     ],
@@ -249,6 +250,23 @@ let package = Package(
             ],
         ),
         .target(
+            name: "BrewFeatureCleanup",
+            dependencies: [
+                "BrewAccessibilityID",
+                "BrewCore",
+                "BrewUIComponents",
+                "BrewRepositoryInterfaces",
+                "BrewAppEnvironment",
+            ],
+            resources: [
+                .process("Resources/Localizable.xcstrings"),
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .target(
             name: "BrewFeatureConfig",
             dependencies: [
                 "BrewAccessibilityID",
@@ -437,6 +455,21 @@ let package = Package(
                 "BrewUIComponents",
                 "BrewRepositoryInterfaces",
                 "BrewRepositories",
+                "BrewCoreTestSupport",
+                "BrewServicesTestSupport",
+            ],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+                .swiftLanguageMode(.v6),
+            ],
+        ),
+        .testTarget(
+            name: "BrewFeatureCleanupTests",
+            dependencies: [
+                "BrewFeatureCleanup",
+                "BrewCLI",
+                "BrewCore",
+                "BrewRepositoryInterfaces",
                 "BrewCoreTestSupport",
                 "BrewServicesTestSupport",
             ],

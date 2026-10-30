@@ -18,6 +18,8 @@ enum BrewUITestScenario: String, CaseIterable {
     case installedLarge
     /// `brew doctor` reports warnings and exits non-zero, which is data rather than failure.
     case doctorHasIssues
+    /// `brew cleanup --dry-run` reports an unneeded formula and stale files.
+    case cleanupHasItems
     /// Empty inventory with a populated catalogue, so Discover search has something to find.
     case discoverSearch
     /// The catalogue endpoint answers 500.
