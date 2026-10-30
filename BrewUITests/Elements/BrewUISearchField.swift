@@ -26,12 +26,26 @@ final class BrewUISearchField {
         file: StaticString = #filePath,
         line: UInt = #line,
     ) -> Self {
+        XCTAssertTrue(
+            app.wait(for: .runningForeground, timeout: timeout),
+            "The app did not reach the foreground within \(timeout)s",
+            file: file,
+            line: line,
+        )
         if !element.exists {
             app.typeKey("f", modifierFlags: .command)
         }
         XCTAssertTrue(
             element.waitForExistence(timeout: timeout),
             "Search field did not appear within \(timeout)s",
+            file: file,
+            line: line,
+        )
+        let ready = NSPredicate(format: "isEnabled == true AND isHittable == true")
+        XCTAssertEqual(
+            XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: ready, object: element)], timeout: timeout),
+            .completed,
+            "Search field did not become enabled and hittable within \(timeout)s",
             file: file,
             line: line,
         )

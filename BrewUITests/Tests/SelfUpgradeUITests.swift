@@ -108,8 +108,16 @@ final class SelfUpgradeUITests: BrewUITestCase {
         let installed = InstalledScreen(app: app).waitUntilLoaded(timeout: BrewUITestTimeout.launch)
         installed.assertShowsSelfUpgradeBanner()
 
+        app.activate()
+        XCTAssertTrue(
+            app.wait(for: .runningForeground, timeout: BrewUITestTimeout.launch),
+            "The original app did not reach the foreground before the upgrade",
+        )
         let originalApplication = try XCTUnwrap(
-            Self.runningAppUnderTest(),
+            NSWorkspace.shared.runningApplications.first {
+                $0.isActive && $0.bundleIdentifier == Self.appBundleIdentifier
+                    && $0.executableURL?.path.contains("/DerivedData/") == true
+            },
             "Could not identify the app process before starting the upgrade",
         )
         let originalBundleURL = try XCTUnwrap(originalApplication.bundleURL)
@@ -129,10 +137,12 @@ final class SelfUpgradeUITests: BrewUITestCase {
     private static let appBundleIdentifier = "sh.brew.app"
 
     /// `/DerivedData/` narrows this to the build under test; a real install shares the identifier.
-    private static func runningAppUnderTest() -> NSRunningApplication? {
+    private static func runningAppUnderTest(bundleURL: URL, excludingProcessIdentifier: pid_t) -> NSRunningApplication? {
         NSWorkspace.shared.runningApplications
             .filter { $0.bundleIdentifier == appBundleIdentifier }
             .filter { $0.executableURL?.path.contains("/DerivedData/") == true }
+            .filter { $0.bundleURL == bundleURL }
+            .filter { $0.processIdentifier != excludingProcessIdentifier }
             .max(by: { ($0.launchDate ?? .distantPast) < ($1.launchDate ?? .distantPast) })
     }
 
@@ -144,11 +154,13 @@ final class SelfUpgradeUITests: BrewUITestCase {
     ) throws -> XCUIApplication {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
-            if let running = runningAppUnderTest(), running.bundleURL == bundleURL,
-               running.processIdentifier != originalProcessIdentifier
-            {
+            if let running = runningAppUnderTest(bundleURL: bundleURL, excludingProcessIdentifier: originalProcessIdentifier) {
                 let relaunched = XCUIApplication(url: bundleURL)
-                BrewApp.activate(relaunched)
+                // Activating before XCTest attaches can launch a second app without the fixtures.
+                guard relaunched.wait(for: .runningForeground, timeout: timeout) else {
+                    _ = running.terminate()
+                    throw RelaunchFailure(timeout: timeout)
+                }
                 return relaunched
             }
             RunLoop.current.run(until: Date().addingTimeInterval(0.25))
@@ -162,7 +174,7 @@ private struct RelaunchFailure: LocalizedError {
 
     var errorDescription: String? {
         """
-        The upgrade helper did not relaunch the app within \(timeout)s. Check `HomebrewUpgradeHelper` is present \
+        The upgrade helper did not relaunch the app in the foreground within \(timeout)s. Check `HomebrewUpgradeHelper` is present \
         in Contents/Helpers and that this build is signed — LaunchServices refuses to open an unsigned bundle, \
         which surfaces here as a relaunch that never arrives.
         """

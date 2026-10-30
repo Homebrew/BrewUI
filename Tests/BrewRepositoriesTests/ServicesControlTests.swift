@@ -18,11 +18,10 @@ struct ServicesControlTests {
     """)
     private static let success = output("")
 
-    @Test(arguments: [false, true])
-    func `native restart uses one command and keeps login registration`(registered: Bool) async {
-        let original = Self.process(pid: 43210, registered: registered)
+    @Test func `native restart uses one command and keeps login registration`() async {
+        let original = Self.process(pid: 43210, registered: true)
         let runner = ServicesControlRunner([
-            .success(original), .success(original), .success(Self.success), .success(Self.process(pid: 43211, registered: registered)),
+            .success(original), .success(original), .success(Self.success), .success(Self.process(pid: 43211, registered: true)),
         ])
         let (repository, _) = makeRepository(runner)
         await repository.load(forceRefresh: false)
@@ -31,10 +30,24 @@ struct ServicesControlTests {
         #expect(repository.operation?.phase == .idle)
     }
 
+    @Test(arguments: [false, true])
+    func `restarting an unregistered process verifies a stop and checks login registration`(registered: Bool) async {
+        let original = Self.process(pid: 43210)
+        let runner = ServicesControlRunner([
+            .success(original), .success(original), .success(Self.success), .success(Self.stopped),
+            .success(Self.success), .success(Self.process(pid: 43211, registered: registered)),
+        ])
+        let (repository, _) = makeRepository(runner)
+        await repository.load(forceRefresh: false)
+        await repository.perform(.restart, serviceID: "redis")
+        #expect(await runner.arguments == [Self.read, Self.read, Self.stop, Self.read, Self.run, Self.read])
+        #expect(repository.operation?.phase == (registered ? .failed(reason: .serviceControl(.stateNotReached)) : .idle))
+    }
+
     @Test(arguments: [Optional(43210), nil, 0])
     func `native restart requires a new positive PID`(pid: Int?) async {
-        let original = Self.process(pid: 43210)
-        let runner = ServicesControlRunner([.success(original), .success(original), .success(Self.success), .success(Self.process(pid: pid))])
+        let original = Self.process(pid: 43210, registered: true)
+        let runner = ServicesControlRunner([.success(original), .success(original), .success(Self.success), .success(Self.process(pid: pid, registered: true))])
         let (repository, _) = makeRepository(runner)
         await repository.load(forceRefresh: false)
         await repository.perform(.restart, serviceID: "redis")
@@ -42,9 +55,9 @@ struct ServicesControlTests {
     }
 
     @Test func `native restart rejects an unexpected login registration change`() async {
-        let original = Self.process(pid: 43210)
+        let original = Self.process(pid: 43210, registered: true)
         let runner = ServicesControlRunner([
-            .success(original), .success(original), .success(Self.success), .success(Self.process(pid: 43211, registered: true)),
+            .success(original), .success(original), .success(Self.success), .success(Self.process(pid: 43211)),
         ])
         let (repository, _) = makeRepository(runner)
         await repository.load(forceRefresh: false)
@@ -74,9 +87,10 @@ struct ServicesControlTests {
         #expect(repository.operation?.phase == .failed(reason: .brewCommand(exitCode: 3, stderr: "read failed")))
     }
 
-    @Test func `a running service with unknown loaded state can restart`() async {
+    @Test(arguments: [nil, false] as [Bool?])
+    func `a running service without a confirmed loaded job can restart`(loaded: Bool?) async {
         let running = Self.output("""
-        [{"name":"redis","status":"started","running":true,"registered":false,"user":"alex"}]
+        [{"name":"redis","status":"started","running":true,"loaded":\(loaded.map(String.init) ?? "null"),"registered":false,"user":"alex"}]
         """)
         let runner = ServicesControlRunner([
             .success(running), .success(running), .success(Self.success), .success(Self.stopped), .success(Self.success), .success(Self.running),

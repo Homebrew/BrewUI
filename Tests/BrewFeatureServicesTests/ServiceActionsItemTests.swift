@@ -28,10 +28,12 @@ struct ServiceActionsItemTests {
     }
 
     @Test(arguments: [false, true])
-    func `restarting a running process previews one native command`(registered: Bool) {
+    func `restarting a running process previews commands that preserve login registration`(registered: Bool) {
         let service = BrewService(name: "redis", status: "started", running: true, pid: 43210, user: "alex",
                                   registered: registered, schedulable: false, loaded: true)
-        #expect(ServiceActionsItem(service: service, currentUser: "alex").restartCommands == ["brew services restart redis"])
+        #expect(ServiceActionsItem(service: service, currentUser: "alex").restartCommands == (registered
+                ? ["brew services restart redis"]
+                : ["brew services stop --keep redis", "brew services run redis"]))
     }
 
     @Test func `restarting without a reported PID previews both real commands`() {

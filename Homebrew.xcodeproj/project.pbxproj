@@ -734,6 +734,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BrewUITests/BrewUITests.entitlements;
 				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUITests;
@@ -751,6 +752,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BrewUITests/BrewUITests.entitlements;
 				ENABLE_APP_SANDBOX = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewUITests;

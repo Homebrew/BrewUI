@@ -35,10 +35,10 @@ struct ServiceCommandsTests {
     }
 
     @Test(arguments: [false, true])
-    func `restarting a loaded process uses one native command`(registered: Bool) {
+    func `restarting a loaded process uses native restart only when registered`(registered: Bool) {
         let service = BrewService(name: "redis", status: "started", running: true, pid: 43210,
                                   registered: registered, schedulable: false, loaded: true)
-        #expect(BrewCommands.service(.restart, for: service) == [command("restart")])
+        #expect(BrewCommands.service(.restart, for: service) == (registered ? [command("restart")] : [stop, command("run")]))
     }
 
     @Test(arguments: [false, true])
