@@ -101,6 +101,18 @@
             "state" : "translated",
             "value" : "Välj Alla för att se alla tjänster."
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择“全部”以查看所有服务。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇「全部」以檢視所有服務。"
+          }
         }
       }
     },
@@ -111,6 +123,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Välj en tjänst i listan för att se information."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "从列表中选择一项服务以查看详情。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "從列表中選擇一項服務以檢視詳細資訊。"
           }
         }
       }
@@ -376,6 +400,18 @@
             "state" : "translated",
             "value" : "Inga matchande tjänster"
           }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有匹配的服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有符合條件的服務"
+          }
         }
       }
     },
@@ -386,6 +422,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inget valt"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未选择服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未選取服務"
           }
         }
       }
