@@ -6,14 +6,16 @@
 import Foundation
 
 /// The operations that concern a single package: its own install/upgrade/uninstall, and any batch
-/// `brew upgrade` that includes it. ``isOutdated`` feeds the bulk-coverage rule (see ``BrewUpgradeSelection/covers(packageID:isOutdated:)``).
+/// `brew upgrade` that includes it. ``isOutdated`` feeds the bulk-coverage rule (see ``BrewUpgradeSelection/covers(packageID:isOutdated:upgradeName:)``).
 public struct PackageOperationSubject: Hashable, Sendable {
     public let packageID: HomebrewPackageID
     public let isOutdated: Bool
+    private let upgradeName: String?
 
-    public init(packageID: HomebrewPackageID, isOutdated: Bool) {
+    public init(packageID: HomebrewPackageID, isOutdated: Bool, upgradeName: String? = nil) {
         self.packageID = packageID
         self.isOutdated = isOutdated
+        self.upgradeName = upgradeName
     }
 
     public func includes(_ id: BrewOperationID) -> Bool {
@@ -21,7 +23,7 @@ public struct PackageOperationSubject: Hashable, Sendable {
         case let .package(packageID):
             packageID == self.packageID
         case let .bulkUpgrade(selection):
-            selection.covers(packageID: packageID, isOutdated: isOutdated)
+            selection.covers(packageID: packageID, isOutdated: isOutdated, upgradeName: upgradeName)
         case .maintenance:
             false
         }
