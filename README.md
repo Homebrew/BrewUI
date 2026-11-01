@@ -1,6 +1,6 @@
 # 🧑‍💻 BrewUI
 
-<img width="1336" height="844" alt="BrewUI user interface" src="https://github.com/user-attachments/assets/3969e6b2-3054-4127-be5c-847aa1d98c01" />
+<img width="1476" height="975" alt="BrewUI user interface" src="docs/images/brewui.png" />
 
 Homebrew's official macOS GUI: making package management approachable for users who prefer graphical interfaces over Terminal, while maintaining complete transparency about underlying Homebrew operations.
 
