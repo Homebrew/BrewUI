@@ -22,7 +22,7 @@ import SwiftUI
 @main
 struct BrewApp: App {
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
-    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!
+    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new/choose")!
 
     @Environment(\.scenePhase) private var scenePhase
 

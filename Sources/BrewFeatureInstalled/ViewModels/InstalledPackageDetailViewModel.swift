@@ -39,7 +39,7 @@ final class InstalledPackageDetailViewModel {
     }
 
     var operationSubject: PackageOperationSubject {
-        PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
+        PackageOperationSubject(packageID: package.id, isOutdated: package.outdated, upgradeName: package.upgradeName)
     }
 
     /// Drives the uninstall confirmation dialog.
@@ -162,7 +162,7 @@ final class InstalledPackageDetailViewModel {
 
     func upgradeSelectedPackage() {
         let operationID = BrewOperationID(kind: package.kind, name: package.name)
-        let command = commandFactory.upgradeCommand(kind: package.kind, name: package.name)
+        let command = commandFactory.upgradeCommand(kind: package.kind, name: package.upgradeName)
         submitMutation(
             action: .upgrade,
             operationID: operationID,

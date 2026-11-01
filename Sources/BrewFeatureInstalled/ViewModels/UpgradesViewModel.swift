@@ -422,7 +422,7 @@ extension UpgradesViewModel {
     /// - Otherwise the scope picker maps to everything / `--formula` / `--cask`.
     var upgradeSelection: BrewUpgradeSelection {
         if isSearchActive, !allRows.isEmpty {
-            return .explicit(allRows.map(\.name))
+            return .explicit(allRows.map(\.upgradeName))
         }
         let scoped: BrewUpgradeSelection = switch scope {
         case .all: .all
@@ -432,7 +432,7 @@ extension UpgradesViewModel {
         guard wouldSweepInTheAppsOwnCask(scoped) else {
             return scoped
         }
-        return .explicit(allRows.map(\.name))
+        return .explicit(allRows.map(\.upgradeName))
     }
 
     /// `brew upgrade` and `brew upgrade --cask` name no packages, so they take the app's own cask with

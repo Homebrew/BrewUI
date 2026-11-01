@@ -22,7 +22,8 @@ struct CrashReportIssueTests {
     @Test func `issue url targets the new-issue page on the app repository`() {
         let url = CrashReportIssue.url(for: makeReport(text: "Homebrew.app crash report"))
 
-        #expect(url.absoluteString.hasPrefix("https://github.com/Homebrew/BrewUI/issues/new"))
+        #expect(url.host == "github.com")
+        #expect(url.path == "/Homebrew/BrewUI/issues/new")
     }
 
     @Test func `issue title carries the report summary`() {
