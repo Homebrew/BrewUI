@@ -53,6 +53,12 @@ public enum AXID: Hashable, Sendable {
     case servicesRefreshButton
     case serviceRow(name: String)
     case serviceDetailValue(ServiceDetailField)
+    case serviceRuntimeButton
+    case serviceRestartButton
+    case serviceActionError
+    case serviceActionRestriction
+    case serviceRuntimeCommand
+    case serviceRestartCommand
 
     // Detail / Console
     case packageDetail
@@ -111,6 +117,12 @@ public enum AXID: Hashable, Sendable {
         case .servicesRefreshButton: "services.refresh"
         case let .serviceRow(name): "services.row.\(name)"
         case let .serviceDetailValue(field): "services.detail.\(field.rawValue)"
+        case .serviceRuntimeButton: "services.runtime"
+        case .serviceRestartButton: "services.restart"
+        case .serviceActionError: "services.action.error"
+        case .serviceActionRestriction: "services.action.restriction"
+        case .serviceRuntimeCommand: "services.command.runtime"
+        case .serviceRestartCommand: "services.command.restart"
         case .brewNotFoundState: "brew.not.found"
         case .packageDetail: "package.detail"
         case .installButton: "detail.install"

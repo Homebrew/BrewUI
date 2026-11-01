@@ -36,6 +36,12 @@ public nonisolated enum BrewErrorCopy {
             diagnostic
         case .brewExecutableNotFound:
             brewNotFound
+        case .serviceControl(.unavailable):
+            String(localized: "This service can't be managed here. Refresh its status or use Terminal.", bundle: #bundle,
+                   comment: "Service action error: ownership or state prevents a safe operation")
+        case .serviceControl(.stateNotReached):
+            String(localized: "Homebrew finished, but the service hasn't reached the requested state. Check the console and refresh.", bundle: #bundle,
+                   comment: "Service action error: reported state does not match the completed command")
         case let .other(description, _):
             description
         }

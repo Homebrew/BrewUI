@@ -455,6 +455,10 @@ your configuration and restore it afterwards. The test harness does not edit you
 - The same Accessibility/Automation permissions the deterministic UI suite needs – see
   [troubleshooting UI tests](#test-troubleshooting).
 
+The UI test runner uses explicit [entitlements](BrewUITests/BrewUITests.entitlements) to stay
+unsandboxed so fixture subprocesses can write to Homebrew's prefix and cache. `ENABLE_APP_SANDBOX=NO`
+alone can leave Xcode's generated runner sandboxed.
+
 ### When it runs
 
 - **On every pull request** via `.github/workflows/e2e.yml`, plus manual dispatch.

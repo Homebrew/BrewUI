@@ -17,6 +17,8 @@ private final class PreviewServicesRepository: ServicesRepository {
     ])
     let refreshFailure: (any Error)? = nil
     let isRefreshing = false
+    let operation: BrewServiceOperation? = nil
 
     func load(forceRefresh _: Bool) async {}
+    func perform(_: BrewServiceAction, serviceID _: String) async {}
 }

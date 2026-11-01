@@ -107,6 +107,10 @@ final class UnimplementedConfigRepository: ConfigRepository {
 @Observable
 @MainActor
 final class UnimplementedServicesRepository: ServicesRepository {
+    var operation: BrewServiceOperation? {
+        unimplemented()
+    }
+
     var state: LoadState<[BrewService], any Error> {
         unimplemented()
     }
@@ -120,6 +124,10 @@ final class UnimplementedServicesRepository: ServicesRepository {
     }
 
     func load(forceRefresh _: Bool) async {
+        unimplemented()
+    }
+
+    func perform(_: BrewServiceAction, serviceID _: String) async {
         unimplemented()
     }
 }

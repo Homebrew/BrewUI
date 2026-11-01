@@ -6,6 +6,7 @@ import SwiftUI
 
 struct ServiceDetailView: View {
     let service: BrewService
+    let viewModel: ServicesViewModel
     private let labelWidth: CGFloat = 100
 
     var body: some View {
@@ -37,6 +38,10 @@ struct ServiceDetailView: View {
                 path(LocalizedStringResource("Configuration file", bundle: #bundle, comment: "Service details: launchd service file path"), service.file, field: .file)
                 path(LocalizedStringResource("Standard log", bundle: #bundle, comment: "Service details: standard output log path"), service.logPath, field: .logPath)
                 path(LocalizedStringResource("Error log", bundle: #bundle, comment: "Service details: standard error log path"), service.errorLogPath, field: .errorLogPath)
+            }
+            if let item = viewModel.actionsItem {
+                PackageDetailSectionDivider()
+                ServiceActionsView(item: item, isBusy: viewModel.isMutatingService, onPerform: viewModel.perform)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -101,6 +106,8 @@ struct ServiceDetailView: View {
                 .foregroundStyle(Color.brewTextPrimary)
                 .textSelection(.enabled)
                 .axid(.serviceDetailValue(field))
+                // Reused selectable text can retain its old accessibility value.
+                .id(value)
             Spacer(minLength: 0)
         }
     }

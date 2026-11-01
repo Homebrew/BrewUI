@@ -87,10 +87,11 @@ struct BrewApp: App {
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
-        servicesRepository = BrewServicesRepository(executionContext: executionContext)
+        servicesRepository = BrewServicesRepository(executionContext: executionContext, commandCenter: center)
 
         let selfUpgradeContext = SelfUpgradeLaunchContext(
             installedPackagesRepository: installedPackagesRepository,
+            servicesRepository: servicesRepository,
             executionContext: executionContext,
             commandCenter: center,
             selfUpgradeKeyPrefix: selfUpgradeKeyPrefix,
@@ -175,6 +176,7 @@ struct BrewApp: App {
 /// Bundled so the two `makeSelfUpgradeCoordinator` overloads don't each carry seven parameters.
 private struct SelfUpgradeLaunchContext {
     let installedPackagesRepository: BrewInstalledPackagesRepository
+    let servicesRepository: any ServicesRepository
     let executionContext: BrewCommandExecutionContext
     let commandCenter: any BrewCommandCenter
     let selfUpgradeKeyPrefix: String
@@ -219,6 +221,7 @@ extension BrewApp {
         HelperSelfUpgradeHandoff(
             brewExecutableURL: { try context.executionContext.brewExecutableURL() },
             commandCenter: context.commandCenter,
+            servicesRepository: context.servicesRepository,
             defaultsKeyPrefix: context.selfUpgradeKeyPrefix,
             relaunchArguments: relaunchArguments(uiTesting: context.uiTesting),
             relaunchEnvironment: relaunchEnvironment(uiTesting: context.uiTesting),

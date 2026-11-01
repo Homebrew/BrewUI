@@ -1,6 +1,29 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@: %@" : {
+      "comment" : "Services: action failure; %1$@ is the service name, %2$@ is the error detail",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
     "%lld running services" : {
       "comment" : "Services subtitle: running service count, never one",
       "localizations" : {
@@ -322,6 +345,23 @@
         }
       }
     },
+    "Homebrew hasn't reported enough information to manage this service." : {
+      "comment" : "Services: actions are unavailable when registration or load state is unknown",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 提供的服务信息不足，暂时无法操作。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 提供的服務資訊不足，暫時無法操作。"
+          }
+        }
+      }
+    },
     "No" : {
       "comment" : "Service details: reported boolean is false",
       "localizations" : {
@@ -413,6 +453,23 @@
         }
       }
     },
+    "Only services owned by the current user can be managed here." : {
+      "comment" : "Services: other-user and system services remain read-only",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这里只能管理当前用户的服务。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這裡只能管理目前使用者的服務。"
+          }
+        }
+      }
+    },
     "Process ID (PID)" : {
       "comment" : "Service details: process identifier reported by Homebrew",
       "localizations" : {
@@ -455,6 +512,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uppdatera"
+          }
+        }
+      }
+    },
+    "Restart" : {
+      "comment" : "Service action: restart the selected service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重启"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新啟動"
+          }
+        }
+      }
+    },
+    "Restarts this service" : {
+      "comment" : "Service restart command summary",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重启此服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新啟動此服務"
           }
         }
       }
@@ -597,6 +688,23 @@
         }
       }
     },
+    "Start" : {
+      "comment" : "Service action: start the selected service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟動"
+          }
+        }
+      }
+    },
     "Starts at login" : {
       "comment" : "Service details: whether Homebrew registered this service for login",
       "localizations" : {
@@ -616,6 +724,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Startar vid inloggning"
+          }
+        }
+      }
+    },
+    "Starts this service" : {
+      "comment" : "Service start command summary",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动此服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟動此服務"
           }
         }
       }
@@ -643,6 +768,23 @@
         }
       }
     },
+    "Stop" : {
+      "comment" : "Service action: stop the selected service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止"
+          }
+        }
+      }
+    },
     "Stopped" : {
       "comment" : "Services filter: services without a running process",
       "localizations" : {
@@ -662,6 +804,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stoppad"
+          }
+        }
+      }
+    },
+    "Stops this service" : {
+      "comment" : "Service stop command summary",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止此服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止此服務"
           }
         }
       }

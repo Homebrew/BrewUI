@@ -61,7 +61,40 @@ public enum BrewCommands {
         )
     }
 
+    /// Uses native restart only for loaded, running jobs with no schedule, a positive PID and login
+    /// registration enabled. Other restarts stop separately so callers can verify the stop before using
+    /// `run` or `start` to preserve the original login registration.
+    public static func service(_ action: BrewServiceAction, for service: BrewService) -> [BrewCommand] {
+        func command(_ arguments: String...) -> BrewCommand {
+            BrewCommand(operationKind: .serviceControl, arguments: ["services"] + arguments + [service.name])
+        }
+        func start(registered: Bool) -> BrewCommand {
+            command(registered ? "start" : "run")
+        }
+        let stop = command("stop", "--keep")
+
+        switch (action, service.registered) {
+        case (.stop, _):
+            return [stop]
+        case (_, nil):
+            return []
+        case (.restart, true) where service.canRestartNatively:
+            return [command("restart")]
+        case let (.restart, registered?):
+            return [stop, start(registered: registered)]
+        case let (.start, registered?):
+            let start = start(registered: registered)
+            return service.loaded == true || service.running ? [stop, start] : [start]
+        }
+    }
+
     private static func flag(for kind: HomebrewPackageKind) -> String {
         kind == .formula ? "--formula" : "--cask"
+    }
+}
+
+private extension BrewService {
+    var canRestartNatively: Bool {
+        loaded == true && running && schedulable == false && (pid ?? 0) > 0
     }
 }
