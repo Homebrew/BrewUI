@@ -31,10 +31,38 @@
       }
     },
     "Administrator password" : {
-      "comment" : "Askpass: secure password field label"
+      "comment" : "Askpass: secure password field label",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理员密码"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理員密碼"
+          }
+        }
+      }
     },
     "Authenticate" : {
-      "comment" : "Askpass: submit the administrator password"
+      "comment" : "Askpass: submit the administrator password",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "认证"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "認證"
+          }
+        }
+      }
     },
     "Browse and search %lld+ packages" : {
       "comment" : "Window subtitle, Discover; %lld is the approximate catalog size",
@@ -95,7 +123,21 @@
       }
     },
     "Cancel" : {
-      "comment" : "Askpass: cancel administrator authentication"
+      "comment" : "Askpass: cancel administrator authentication",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消"
+          }
+        }
+      }
     },
     "Check your Homebrew installation for problems" : {
       "comment" : "Window subtitle, Doctor",
@@ -261,7 +303,21 @@
       }
     },
     "Enter your password to allow this." : {
-      "comment" : "Askpass: explains that the password allows the change"
+      "comment" : "Askpass: explains that the password allows the change",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入密码以允许此操作。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請輸入密碼以允許此操作。"
+          }
+        }
+      }
     },
     "Homebrew Documentation" : {
       "comment" : "Help menu",
@@ -322,7 +378,21 @@
       }
     },
     "Homebrew wants to make changes." : {
-      "comment" : "Askpass: primary message, standard macOS authorization wording"
+      "comment" : "Askpass: primary message, standard macOS authorization wording",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 想要进行更改。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 想要進行更改。"
+          }
+        }
+      }
     },
     "Installed" : {
       "comment" : "Sidebar: installed packages",
@@ -505,6 +575,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spara Brewfile…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存 Brewfile…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "儲存 Brewfile…"
           }
         }
       }
