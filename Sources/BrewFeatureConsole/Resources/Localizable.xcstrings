@@ -27,6 +27,12 @@
             "state" : "translated",
             "value" : "Rensa"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지우기"
+          }
         }
       }
     },
@@ -55,6 +61,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rensa slutförda jobb"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료된 작업 지우기"
           }
         }
       }
@@ -85,6 +97,12 @@
             "state" : "translated",
             "value" : "Rensat"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지워짐"
+          }
         }
       }
     },
@@ -113,6 +131,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopierat"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사됨"
           }
         }
       }
@@ -143,6 +167,12 @@
             "state" : "translated",
             "value" : "Kopiera"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사"
+          }
         }
       }
     },
@@ -171,6 +201,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopiera utdata till urklipp"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출력을 클립보드에 복사"
           }
         }
       }
@@ -201,6 +237,12 @@
             "state" : "translated",
             "value" : "Stäng"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "닫기"
+          }
         }
       }
     },
@@ -229,6 +271,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Expandera konsolpanelen automatiskt"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 패널 자동으로 펼치기"
           }
         }
       }
@@ -259,6 +307,12 @@
             "state" : "translated",
             "value" : "Dölj konsol"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 가리기"
+          }
         }
       }
     },
@@ -287,6 +341,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dölj konsol"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 가리기"
           }
         }
       }
@@ -317,6 +377,12 @@
             "state" : "translated",
             "value" : "Ingen aktivitet"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활동 없음"
+          }
         }
       }
     },
@@ -345,6 +411,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Redo"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "준비됨"
           }
         }
       }
@@ -375,6 +447,12 @@
             "state" : "translated",
             "value" : "Kör kommandot brew för att se utdata här."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew 명령을 실행하면 여기에 출력이 표시됩니다."
+          }
         }
       }
     },
@@ -403,6 +481,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spara"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장"
           }
         }
       }
@@ -433,6 +517,12 @@
             "state" : "translated",
             "value" : "Spara utdata till fil"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출력을 파일로 저장"
+          }
         }
       }
     },
@@ -461,6 +551,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Visa konsol"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 보기"
           }
         }
       }
@@ -491,6 +587,12 @@
             "state" : "translated",
             "value" : "Visa konsol"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 보기"
+          }
         }
       }
     },
@@ -519,6 +621,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "klar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
           }
         }
       }
@@ -549,6 +657,12 @@
             "state" : "translated",
             "value" : "misslyckades"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실패"
+          }
         }
       }
     },
@@ -565,6 +679,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "uppdaterar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로 고치는 중"
           }
         }
       }
@@ -595,6 +715,12 @@
             "state" : "translated",
             "value" : "körs"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중"
+          }
         }
       }
     },
@@ -620,6 +746,12 @@
           }
         },
         "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "— %@"
@@ -653,6 +785,12 @@
             "state" : "translated",
             "value" : ": klar"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 완료"
+          }
         }
       }
     },
@@ -681,6 +819,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : ": misslyckades · avslutningskod %d"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 실패 · 종료 코드 %d"
           }
         }
       }

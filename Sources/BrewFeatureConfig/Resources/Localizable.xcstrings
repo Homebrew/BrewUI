@@ -27,6 +27,12 @@
             "state" : "translated",
             "value" : "Bygginställningar"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빌드 설정"
+          }
         }
       }
     },
@@ -55,6 +61,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopiera rapport"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보고서 복사"
           }
         }
       }
@@ -85,6 +97,12 @@
             "state" : "translated",
             "value" : "Det gick inte att hitta det körbara programmet brew. Installera Homebrew och uppdatera sedan."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew 실행 파일을 찾을 수 없습니다. Homebrew를 설치한 후 새로 고치세요."
+          }
         }
       }
     },
@@ -114,6 +132,12 @@
             "state" : "translated",
             "value" : "Det gick inte att läsa konfigurationen för Homebrew."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 구성을 읽을 수 없습니다."
+          }
         }
       }
     },
@@ -139,6 +163,12 @@
           }
         },
         "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -172,6 +202,12 @@
             "state" : "translated",
             "value" : "Homebrew hittades inte"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew를 찾을 수 없음"
+          }
         }
       }
     },
@@ -200,6 +236,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inställningar för Homebrew läses från filerna brew.env. Skalprofiler och exporterade variabler ignoreras. Lägg användarinställningar i ~/.homebrew/brew.env och starta sedan om BrewUI."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 설정은 brew.env 파일에서 읽습니다. 셸 프로파일과 내보낸 변수는 무시됩니다. 사용자 설정을 ~/.homebrew/brew.env에 넣은 다음 BrewUI를 다시 실행하세요."
           }
         }
       }
@@ -230,6 +272,12 @@
             "state" : "translated",
             "value" : "Uppdatera"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로 고침"
+          }
         }
       }
     },
@@ -258,6 +306,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "System"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시스템"
           }
         }
       }

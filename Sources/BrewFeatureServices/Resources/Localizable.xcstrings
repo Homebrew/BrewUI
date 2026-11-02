@@ -21,6 +21,12 @@
             "state" : "translated",
             "value" : "%1$@: %2$@"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
         }
       }
     },
@@ -43,6 +49,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld tjänster körs"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중인 서비스 %lld개"
           }
         }
       }
@@ -67,6 +79,12 @@
             "state" : "translated",
             "value" : "1 tjänst körs"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중인 서비스 1개"
+          }
         }
       }
     },
@@ -89,6 +107,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alla"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체"
           }
         }
       }
@@ -113,6 +137,12 @@
             "state" : "translated",
             "value" : "Kontrollera felloggen för mer information."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자세한 내용은 오류 로그를 확인하세요."
+          }
         }
       }
     },
@@ -124,6 +154,12 @@
             "state" : "translated",
             "value" : "Välj Alla för att se alla tjänster."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 서비스를 보려면 전체를 선택하세요."
+          }
         }
       }
     },
@@ -134,6 +170,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Välj en tjänst i listan för att se information."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목록에서 서비스를 선택하면 세부사항이 표시됩니다."
           }
         }
       }
@@ -158,6 +200,12 @@
             "state" : "translated",
             "value" : "Konfigurationsfil"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구성 파일"
+          }
         }
       }
     },
@@ -180,6 +228,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopierat"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사됨"
           }
         }
       }
@@ -204,6 +258,12 @@
             "state" : "translated",
             "value" : "Kopiera"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사"
+          }
         }
       }
     },
@@ -226,6 +286,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopiera sökväg: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경로 복사: %@"
           }
         }
       }
@@ -250,6 +316,12 @@
             "state" : "translated",
             "value" : "Det gick inte att läsa tjänster från Homebrew."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 서비스를 읽을 수 없습니다."
+          }
         }
       }
     },
@@ -272,6 +344,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Information"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세부사항"
           }
         }
       }
@@ -296,6 +374,12 @@
             "state" : "translated",
             "value" : "Fellogg"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오류 로그"
+          }
         }
       }
     },
@@ -318,6 +402,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avslutningskod"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종료 코드"
           }
         }
       }
@@ -342,6 +432,12 @@
             "state" : "translated",
             "value" : "Filer"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "파일"
+          }
         }
       }
     },
@@ -358,6 +454,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew 提供的服務資訊不足，暫時無法操作。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew에서 이 서비스를 관리하는 데 필요한 정보를 충분히 제공하지 않았습니다."
           }
         }
       }
@@ -382,6 +484,12 @@
             "state" : "translated",
             "value" : "Nej"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아니요"
+          }
         }
       }
     },
@@ -405,6 +513,12 @@
             "state" : "translated",
             "value" : "Ingen sökväg till fellogg rapporterades."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보고된 오류 로그 경로가 없습니다."
+          }
         }
       }
     },
@@ -416,6 +530,12 @@
             "state" : "translated",
             "value" : "Inga matchande tjänster"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일치하는 서비스 없음"
+          }
         }
       }
     },
@@ -426,6 +546,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inget valt"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택 항목 없음"
           }
         }
       }
@@ -450,6 +576,12 @@
             "state" : "translated",
             "value" : "Inga tjänster"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서비스 없음"
+          }
         }
       }
     },
@@ -466,6 +598,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這裡只能管理目前使用者的服務。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 사용자가 소유한 서비스만 여기에서 관리할 수 있습니다."
           }
         }
       }
@@ -490,6 +628,12 @@
             "state" : "translated",
             "value" : "Process ID (PID)"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로세스 ID(PID)"
+          }
         }
       }
     },
@@ -513,6 +657,12 @@
             "state" : "translated",
             "value" : "Uppdatera"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로 고침"
+          }
         }
       }
     },
@@ -530,6 +680,12 @@
             "state" : "translated",
             "value" : "重新啟動"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재시작"
+          }
         }
       }
     },
@@ -546,6 +702,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新啟動此服務"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 서비스를 재시작합니다"
           }
         }
       }
@@ -570,6 +732,12 @@
             "state" : "translated",
             "value" : "Körs"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중"
+          }
         }
       }
     },
@@ -592,6 +760,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kan schemaläggas"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예약 가능"
           }
         }
       }
@@ -616,6 +790,12 @@
             "state" : "translated",
             "value" : "Tjänster"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서비스"
+          }
         }
       }
     },
@@ -638,6 +818,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tjänster från installerade formler visas här."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 Formula의 서비스가 여기에 표시됩니다."
           }
         }
       }
@@ -662,6 +848,12 @@
             "state" : "translated",
             "value" : "Visar tjänster för den aktuella användaren"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 사용자의 서비스를 표시합니다"
+          }
         }
       }
     },
@@ -685,6 +877,12 @@
             "state" : "translated",
             "value" : "Standardlogg"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "표준 로그"
+          }
         }
       }
     },
@@ -701,6 +899,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "啟動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시작"
           }
         }
       }
@@ -725,6 +929,12 @@
             "state" : "translated",
             "value" : "Startar vid inloggning"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인 시 시작"
+          }
         }
       }
     },
@@ -741,6 +951,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "啟動此服務"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 서비스를 시작합니다"
           }
         }
       }
@@ -765,6 +981,12 @@
             "state" : "translated",
             "value" : "Status"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상태"
+          }
         }
       }
     },
@@ -781,6 +1003,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "停止"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중지"
           }
         }
       }
@@ -805,6 +1033,12 @@
             "state" : "translated",
             "value" : "Stoppad"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중지됨"
+          }
         }
       }
     },
@@ -821,6 +1055,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "停止此服務"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 서비스를 중지합니다"
           }
         }
       }
@@ -845,6 +1085,12 @@
             "state" : "translated",
             "value" : "Okänd"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알 수 없음"
+          }
         }
       }
     },
@@ -868,6 +1114,12 @@
             "state" : "translated",
             "value" : "Användare"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용자"
+          }
         }
       }
     },
@@ -890,6 +1142,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ja"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예"
           }
         }
       }

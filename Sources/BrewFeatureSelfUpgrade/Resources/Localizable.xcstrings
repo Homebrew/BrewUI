@@ -27,6 +27,12 @@
             "state" : "translated",
             "value" : "En ny version av Homebrew-appen finns tillgänglig"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로운 버전의 Homebrew 앱을 사용할 수 있습니다"
+          }
         }
       }
     },
@@ -55,6 +61,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Senare"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나중에"
           }
         }
       }
@@ -85,6 +97,12 @@
             "state" : "translated",
             "value" : "Homebrew-appen har uppgraderats till den senaste versionen."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 앱이 최신 버전으로 업그레이드되었습니다."
+          }
         }
       }
     },
@@ -113,6 +131,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew-appen är uppdaterad"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 앱이 최신 버전입니다"
           }
         }
       }
@@ -143,6 +167,12 @@
             "state" : "translated",
             "value" : "Homebrew-appen uppgraderades inte"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 앱이 업그레이드되지 않았습니다"
+          }
         }
       }
     },
@@ -171,6 +201,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uppgraderingen slutfördes inte, så det här är fortfarande den tidigare versionen. Du kan försöka igen via banderollen ovanför dina paket."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드가 완료되지 않아 아직 이전 버전입니다. 패키지 목록 위의 배너에서 다시 시도할 수 있습니다."
           }
         }
       }
@@ -201,6 +237,12 @@
             "state" : "translated",
             "value" : "Uppgradera Homebrew-appen"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 앱 업그레이드"
+          }
         }
       }
     },
@@ -229,6 +271,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uppgraderingen misslyckades: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 실패: %@"
           }
         }
       }
@@ -259,6 +307,12 @@
             "state" : "translated",
             "value" : "Uppgradera Homebrew-appen"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 앱 업그레이드"
+          }
         }
       }
     },
@@ -287,6 +341,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uppgradera till %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@(으)로 업그레이드"
           }
         }
       }

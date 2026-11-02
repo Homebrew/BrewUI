@@ -27,6 +27,12 @@
             "state" : "translated",
             "value" : "%@ (länkad)"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (링크됨)"
+          }
         }
       }
     },
@@ -56,6 +62,12 @@
             "state" : "translated",
             "value" : "%@ installationer (30 dagar)"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@회 설치 (30일)"
+          }
         }
       }
     },
@@ -84,6 +96,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ installationer de senaste 30 dagarna"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30일간 %@회 설치"
           }
         }
       }
@@ -120,6 +138,12 @@
             "state" : "translated",
             "value" : "%lld paket matchar ”%@”"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%2$@” 검색 결과 패키지 %1$lld개"
+          }
         }
       }
     },
@@ -148,6 +172,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 paket matchar ”%@”"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” 검색 결과 패키지 1개"
           }
         }
       }
@@ -178,6 +208,12 @@
             "state" : "translated",
             "value" : "Installationer de senaste 30 dagarna"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30일간 설치 수"
+          }
         }
       }
     },
@@ -206,6 +242,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alla"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체"
           }
         }
       }
@@ -236,6 +278,12 @@
             "state" : "translated",
             "value" : "Som beroende"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존성으로 설치"
+          }
         }
       }
     },
@@ -264,6 +312,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Caskar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask"
           }
         }
       }
@@ -294,6 +348,12 @@
             "state" : "translated",
             "value" : "Välj ett paket i Upptäck för att se information."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "둘러보기에서 패키지를 선택하면 세부사항이 표시됩니다."
+          }
         }
       }
     },
@@ -322,6 +382,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kunde inte läsa in paket"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지를 불러올 수 없음"
           }
         }
       }
@@ -352,6 +418,12 @@
             "state" : "translated",
             "value" : "Kunde inte söka efter paket"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지를 검색할 수 없음"
+          }
         }
       }
     },
@@ -380,6 +452,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beroenden"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존성"
           }
         }
       }
@@ -410,6 +488,12 @@
             "state" : "translated",
             "value" : "Information"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세부사항"
+          }
         }
       }
     },
@@ -438,6 +522,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Upptäck paket"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 둘러보기"
           }
         }
       }
@@ -468,6 +558,12 @@
             "state" : "translated",
             "value" : "Formler"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formula"
+          }
         }
       }
     },
@@ -496,6 +592,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hemsida"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈페이지"
           }
         }
       }
@@ -526,6 +628,12 @@
             "state" : "translated",
             "value" : "INSTALLERAD"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치됨"
+          }
         }
       }
     },
@@ -554,6 +662,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installera"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치"
           }
         }
       }
@@ -584,6 +698,12 @@
             "state" : "translated",
             "value" : "Installationsorsak"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치 이유"
+          }
         }
       }
     },
@@ -612,6 +732,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installerad"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치됨"
           }
         }
       }
@@ -642,6 +768,12 @@
             "state" : "translated",
             "value" : "Installerad den"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치 날짜"
+          }
         }
       }
     },
@@ -670,6 +802,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installerar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치 중"
           }
         }
       }
@@ -700,6 +838,12 @@
             "state" : "translated",
             "value" : "Installerar paketet på din Mac"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Mac에 패키지를 설치합니다"
+          }
         }
       }
     },
@@ -728,6 +872,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Senaste versionen"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최신 버전"
           }
         }
       }
@@ -764,6 +914,12 @@
             "state" : "translated",
             "value" : "Licens"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이선스"
+          }
         }
       }
     },
@@ -792,6 +948,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Läser in paket…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 불러오는 중…"
           }
         }
       }
@@ -822,6 +984,12 @@
             "state" : "translated",
             "value" : "Mest installerade paket de senaste 30 dagarna"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최근 30일간 가장 많이 설치된 패키지"
+          }
         }
       }
     },
@@ -850,6 +1018,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inga caskar matchar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일치하는 Cask 없음"
           }
         }
       }
@@ -880,6 +1054,12 @@
             "state" : "translated",
             "value" : "Inga beroenden."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존성이 없습니다."
+          }
         }
       }
     },
@@ -908,6 +1088,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inga formler matchar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일치하는 Formula 없음"
           }
         }
       }
@@ -938,6 +1124,12 @@
             "state" : "translated",
             "value" : "Inga träffar"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일치 항목 없음"
+          }
         }
       }
     },
@@ -966,6 +1158,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inget valt"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택 항목 없음"
           }
         }
       }
@@ -996,6 +1194,12 @@
             "state" : "translated",
             "value" : "Inget hittades för ”%@”"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” 검색 결과 없음"
+          }
         }
       }
     },
@@ -1024,6 +1228,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Populära caskar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인기 Cask"
           }
         }
       }
@@ -1054,6 +1264,12 @@
             "state" : "translated",
             "value" : "Populära formler"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인기 Formula"
+          }
         }
       }
     },
@@ -1082,6 +1298,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Installerades från binärpaket: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottle에서 설치 — %@"
           }
         }
       }
@@ -1112,6 +1334,12 @@
             "state" : "translated",
             "value" : "Resultat"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "결과"
+          }
         }
       }
     },
@@ -1140,6 +1368,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Omfattning"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "범위"
           }
         }
       }
@@ -1170,6 +1404,12 @@
             "state" : "translated",
             "value" : "Sök bland paketen i Homebrew"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 패키지 검색"
+          }
         }
       }
     },
@@ -1199,6 +1439,12 @@
             "state" : "translated",
             "value" : "Söker…"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "검색 중…"
+          }
         }
       }
     },
@@ -1227,6 +1473,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Något gick fel när paket lästes in i Upptäck."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "둘러보기 패키지를 불러오는 중 문제가 발생했습니다."
           }
         }
       }
@@ -1263,6 +1515,12 @@
             "state" : "translated",
             "value" : "Något gick fel när katalogen söktes igenom."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "카탈로그를 검색하는 중 문제가 발생했습니다."
+          }
         }
       }
     },
@@ -1291,6 +1549,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Något gick fel när paketet installerades."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 패키지를 설치하는 중 문제가 발생했습니다."
           }
         }
       }
@@ -1321,6 +1585,12 @@
             "state" : "translated",
             "value" : "Källa"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출처"
+          }
         }
       }
     },
@@ -1349,6 +1619,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Populärt"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인기"
           }
         }
       }
