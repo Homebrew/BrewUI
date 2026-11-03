@@ -102,6 +102,17 @@ struct CleanupViewModelTests {
         #expect(viewModel.uninstallMessage == "This also uninstalls libyaml, m4.")
     }
 
+    @Test func `the confirmation is absent when no formulae are uninstalled`() {
+        let report = CleanupReport(
+            pruneAll: false,
+            unneededFormulae: [],
+            removals: [CleanupRemoval(path: "/cache/a.tar.gz", kind: .file, size: "12.7MB")],
+            reclaimableSpace: "12.7MB",
+        )
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: report))
+        #expect(viewModel.uninstallMessage == nil)
+    }
+
     @Test func `prune all changes the command shown and re-previews with it`() async {
         let repository = StubCleanupRepository(report: Self.report)
         let viewModel = Self.viewModel(repository: repository)
