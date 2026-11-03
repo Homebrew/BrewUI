@@ -144,10 +144,6 @@ struct CleanupSheet: View {
                     comment: "Command block summary below the Clean Up list",
                 ),
             )
-            Text(verbatim: viewModel.confirmationMessage)
-                .font(.brewCallout)
-                .foregroundStyle(Color.brewTextSecondary)
-                .fixedSize(horizontal: false, vertical: true)
             if let message = viewModel.refreshFailureMessage {
                 Text(verbatim: message)
                     .font(.brewCallout)
@@ -183,6 +179,11 @@ struct CleanupSheet: View {
                         }
                     }
                 }
+                // Inside the scroll region: the message names every unneeded formula, so it can outgrow the sheet.
+                Text(verbatim: viewModel.confirmationMessage)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(BrewSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -35,10 +35,14 @@ struct CleanupViewModelTests {
         CleanupViewModel(repository: repository, commandCenter: commandCenter, commandFactory: StubMutatingCommandFactory())
     }
 
-    private static func recordingCenter(exitCode: Int32, stderr: String = "") -> RecordingSerialBrewCommandCenter {
+    private static func recordingCenter(
+        exitCode: Int32,
+        stderr: String = "",
+        arguments: [String] = ["cleanup"],
+    ) -> RecordingSerialBrewCommandCenter {
         let context = BrewCommandExecutionContext(
             commandRunner: MockBrewCommandRunner(responses: [
-                ["cleanup"]: CommandOutput(standardOutput: "", standardError: stderr, terminationStatus: exitCode),
+                arguments: CommandOutput(standardOutput: "", standardError: stderr, terminationStatus: exitCode),
             ]),
             locator: BrewExecutableLocator(overrideURL: brewURL),
         )
@@ -113,6 +117,38 @@ struct CleanupViewModelTests {
         repository.isRefreshing = true
         let viewModel = Self.viewModel(repository: repository)
         #expect(!viewModel.canCleanUp)
+    }
+
+    @Test func `clean up stays disabled after a failed refresh`() {
+        let repository = StubCleanupRepository(report: Self.report)
+        repository.refreshFailure = BrewLookupError.executableNotFound
+        let viewModel = Self.viewModel(repository: repository)
+        #expect(!viewModel.canCleanUp)
+    }
+
+    @Test func `clean up waits for a preview made with prune all`() async {
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.report))
+
+        await viewModel.setPruneAll(true)
+
+        #expect(!viewModel.canCleanUp)
+    }
+
+    @Test func `prune all runs brew cleanup with --prune=all when the preview matches`() async throws {
+        let report = CleanupReport(
+            pruneAll: true,
+            unneededFormulae: Self.report.unneededFormulae,
+            removals: Self.report.removals,
+            reclaimableSpace: Self.report.reclaimableSpace,
+        )
+        let center = Self.recordingCenter(exitCode: 0, arguments: ["cleanup", "--prune=all"])
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: report), commandCenter: center)
+        await viewModel.setPruneAll(true)
+
+        try await #require(viewModel.cleanUp()).value
+
+        let entries = await center.recordedSubmitEntries
+        #expect(entries.first?.id == .maintenance(token: "cleanup", displayCommand: "brew cleanup --prune=all"))
     }
 
     @Test func `an empty report offers only Done`() {

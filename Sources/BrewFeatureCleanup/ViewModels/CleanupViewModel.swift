@@ -80,9 +80,13 @@ final class CleanupViewModel {
         commandFactory.cleanupCommand(pruneAll: pruneAll).displayCommand
     }
 
-    /// Clean Up waits for a fresh, non-empty preview, so the run never removes more than the sheet shows.
+    /// Clean Up waits for a fresh, non-empty preview made with the same option, so the run never removes
+    /// more than the sheet shows. A failed refresh leaves a stale report on screen, so it blocks too.
     var canCleanUp: Bool {
-        presentation == .removable && !isRefreshing
+        presentation == .removable
+            && !isRefreshing
+            && repository.refreshFailure == nil
+            && state.value?.pruneAll == pruneAll
     }
 
     /// With nothing to remove the sheet offers only Done, rather than Cancel beside a dead Clean Up.

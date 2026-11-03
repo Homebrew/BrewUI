@@ -145,7 +145,8 @@ public final class StubDoctorRepository: DoctorRepository {
 @MainActor
 public final class StubCleanupRepository: CleanupRepository {
     public private(set) var state: LoadState<CleanupReport, any Error>
-    public private(set) var refreshFailure: (any Error)?
+    /// Settable so a test can leave a stale report on screen after a failed refresh.
+    public var refreshFailure: (any Error)?
     /// Settable so a test can hold the report mid-refresh.
     public var isRefreshing = false
     public private(set) var loadedOptions: [Bool] = []
