@@ -62,7 +62,7 @@ extension Screen {
     /// Tools › Clean Up…, which every main-window screen offers.
     @discardableResult
     func openCleanup(file: StaticString = #filePath, line: UInt = #line) -> CleanupScreen {
-        BrewUIMenuItem(app, .toolsCleanupMenuItem).choose(file: file, line: line)
+        BrewUIMenuItem(app: app, menu: "Tools", item: "Clean Up…").choose(file: file, line: line)
         return CleanupScreen(app: app).waitUntilLoaded(file: file, line: line)
     }
 }

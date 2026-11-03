@@ -24,7 +24,6 @@ struct AXIDTests {
         (.discoverList, "discover.list"),
         (.configScreen, "config.screen"),
         (.doctorScreen, "doctor.screen"),
-        (.toolsCleanupMenuItem, "menu.tools.cleanup"),
         (.cleanupSheet, "cleanup.sheet"),
         (.cleanupEmptyState, "cleanup.empty"),
         (.cleanupButton, "cleanup.run"),

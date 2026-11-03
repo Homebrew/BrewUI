@@ -61,7 +61,6 @@ public enum AXID: Hashable, Sendable {
     case serviceRestartCommand
 
     // Cleanup
-    case toolsCleanupMenuItem
     case cleanupSheet
     case cleanupEmptyState
     case cleanupButton
@@ -134,7 +133,6 @@ public enum AXID: Hashable, Sendable {
         case .serviceActionRestriction: "services.action.restriction"
         case .serviceRuntimeCommand: "services.command.runtime"
         case .serviceRestartCommand: "services.command.restart"
-        case .toolsCleanupMenuItem: "menu.tools.cleanup"
         case .cleanupSheet: "cleanup.sheet"
         case .cleanupEmptyState: "cleanup.empty"
         case .cleanupButton: "cleanup.run"
