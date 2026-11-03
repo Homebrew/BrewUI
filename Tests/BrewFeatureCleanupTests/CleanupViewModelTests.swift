@@ -108,52 +108,31 @@ struct CleanupViewModelTests {
         #expect(repository.loadedOptions == [true])
     }
 
-    @Test func `requesting a cleanup asks for confirmation first`() {
-        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.report))
-        viewModel.requestCleanup()
-        #expect(viewModel.showsCleanupConfirmation)
+    @Test func `clean up waits for a refresh to finish`() {
+        let repository = StubCleanupRepository(report: Self.report)
+        repository.isRefreshing = true
+        let viewModel = Self.viewModel(repository: repository)
+        #expect(!viewModel.canCleanUp)
     }
 
-    @Test func `cleaning up runs brew cleanup as a mutating maintenance operation`() async {
-        let center = Self.recordingCenter(exitCode: 0)
-        let repository = StubCleanupRepository(report: Self.report)
-        let viewModel = Self.viewModel(repository: repository, commandCenter: center)
+    @Test func `an empty report offers only Done`() {
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.emptyReport))
+        #expect(viewModel.showsDoneButton)
+    }
 
-        await cleanUp(viewModel, reloading: repository)
+    @Test func `cleaning up runs brew cleanup as a mutating maintenance operation`() async throws {
+        let center = Self.recordingCenter(exitCode: 0)
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.report), commandCenter: center)
+
+        try await #require(viewModel.cleanUp()).value
 
         let entries = await center.recordedSubmitEntries
         #expect(entries.map(\.kind) == [.cleanup])
         #expect(entries.first?.id == .maintenance(token: "cleanup", displayCommand: "brew cleanup"))
     }
 
-    @Test func `a finished cleanup previews again`() async {
-        let repository = StubCleanupRepository(report: Self.report)
-        let viewModel = Self.viewModel(repository: repository, commandCenter: Self.recordingCenter(exitCode: 0))
-
-        await cleanUp(viewModel, reloading: repository)
-
-        #expect(repository.loadedOptions == [false])
+    @Test func `an empty report never runs brew cleanup`() {
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.emptyReport))
+        #expect(viewModel.cleanUp() == nil)
     }
-
-    @Test func `a failed cleanup shows Homebrew's stderr`() async {
-        let repository = StubCleanupRepository(report: Self.report)
-        let viewModel = Self.viewModel(
-            repository: repository,
-            commandCenter: Self.recordingCenter(exitCode: 1, stderr: "Error: Permission denied"),
-        )
-
-        await cleanUp(viewModel, reloading: repository)
-
-        #expect(viewModel.cleanupErrorMessage == "Error: Permission denied")
-    }
-}
-
-/// Runs a cleanup and returns once it has finished. Every run ends by previewing again, and the stub's
-/// load never suspends, so the run completes on the main actor before this resumes.
-@MainActor
-private func cleanUp(_ viewModel: CleanupViewModel, reloading repository: StubCleanupRepository) async {
-    var loads = repository.loads.makeAsyncIterator()
-    viewModel.cleanUp()
-    _ = await loads.next()
-    #expect(!viewModel.isCleaningUp)
 }

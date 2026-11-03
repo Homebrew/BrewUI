@@ -42,7 +42,7 @@ struct BrewOperationIDTests {
     }
 
     /// `brew doctor` and `brew cleanup --dry-run` are the kinds the center schedules that change nothing.
-    /// Treating them as mutating would block the self-upgrade for as long as either tab is loading.
+    /// Treating them as mutating would block the self-upgrade for as long as either check is running.
     @Test func `every kind but the doctor and cleanup reads is mutating`() {
         let kinds: [BrewOperationKind] = [
             .installFormula, .installCask,

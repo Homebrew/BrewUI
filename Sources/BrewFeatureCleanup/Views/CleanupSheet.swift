@@ -1,18 +1,39 @@
 //
-//  CleanupView.swift
+//  CleanupSheet.swift
 //  BrewFeatureCleanup
 //
 
 import BrewAccessibilityID
+import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
 import SwiftUI
 
-/// Single scrolling pane previewing `brew cleanup`: what a run would remove, the command it would run and
-/// a button that runs it. Every arrival previews again, since installs and upgrades elsewhere change the list.
-struct CleanupView: View {
+/// Dependency-composition boundary for the Clean Up sheet: reads app-level dependencies from the
+/// environment and hands them to the sheet, which owns the view model (`ARCHITECTURE.md` — root-view ownership).
+public struct CleanupSheetRoot: View {
+    @Environment(\.cleanupRepository) private var cleanupRepository
+    @Environment(\.brewCommandCenter) private var brewCommandCenter
+    @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
+
+    public init() {}
+
+    public var body: some View {
+        CleanupSheet(
+            repository: cleanupRepository,
+            commandCenter: brewCommandCenter,
+            commandFactory: mutatingCommandFactory,
+        )
+    }
+}
+
+/// Confirms `brew cleanup`: previews it with a dry run when it opens, lists what a run would remove and
+/// runs it only when the user chooses Clean Up. Every opening previews again, since installs and upgrades
+/// change the list.
+struct CleanupSheet: View {
     @State private var viewModel: CleanupViewModel
+    @Environment(\.dismiss) private var dismiss
 
     init(
         repository: any CleanupRepository,
@@ -27,74 +48,23 @@ struct CleanupView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            header
+        VStack(alignment: .leading, spacing: BrewSpacing.lg) {
+            Text("Clean Up Homebrew", bundle: #bundle, comment: "Clean Up sheet title")
+                .font(.brewTitle2)
+                .foregroundStyle(Color.brewTextPrimary)
+                .accessibilityAddTraits(.isHeader)
+            pruneAllToggle
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            footer
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(BrewSpacing.xl)
+        .frame(width: BrewLayout.listSheetWidth, height: BrewLayout.listSheetHeight)
         .accessibilityElement(children: .contain)
-        .axid(.cleanupScreen)
+        .axid(.cleanupSheet)
         .task {
             await viewModel.load()
         }
-        .confirmationDialog(
-            String(localized: "Clean up Homebrew?", bundle: #bundle, comment: "Cleanup confirmation title"),
-            isPresented: $viewModel.showsCleanupConfirmation,
-        ) {
-            Button(String(localized: "Clean Up", bundle: #bundle, comment: "Cleanup: run brew cleanup"), role: .destructive) {
-                viewModel.cleanUp()
-            }
-            Button(String(localized: "Cancel", bundle: #bundle, comment: "Cleanup confirmation: keep everything"), role: .cancel) {}
-        } message: {
-            Text(verbatim: viewModel.confirmationMessage)
-        }
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
-                VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                    Text("Cleanup", bundle: #bundle, comment: "Cleanup tab heading")
-                        .font(.brewTitle2)
-                        .foregroundStyle(Color.brewTextPrimary)
-                    Text(viewModel.subtitle)
-                        .font(.brewSubheadline)
-                        .foregroundStyle(Color.brewTextSecondary)
-                }
-                .accessibilityElement(children: .combine)
-                .accessibilityHeading(.h1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                if viewModel.showsHeaderControls {
-                    headerControls
-                }
-            }
-            if viewModel.showsHeaderControls {
-                pruneAllToggle
-            }
-            if let message = viewModel.refreshFailureMessage {
-                CleanupErrorText(message: message)
-            }
-        }
-        .padding(BrewSpacing.lg)
-        .brewPaneContentWidth()
-    }
-
-    private var headerControls: some View {
-        HStack(spacing: BrewSpacing.sm) {
-            if viewModel.isRefreshing {
-                ProgressView()
-                    .controlSize(.small)
-                    .accessibilityLabel(String(localized: "Checking again", bundle: #bundle, comment: "VoiceOver: Cleanup re-check spinner"))
-            }
-            Button(String(localized: "Check Again", bundle: #bundle, comment: "Cleanup header: run the dry run again")) {
-                Task { await viewModel.load() }
-            }
-            .controlSize(.small)
-            .disabled(viewModel.areHeaderControlsDisabled)
-            .axid(.cleanupCheckAgainButton)
-        }
-        .fixedSize(horizontal: true, vertical: false)
     }
 
     private var pruneAllToggle: some View {
@@ -107,7 +77,7 @@ struct CleanupView: View {
                     .font(.brewCallout)
             }
             .toggleStyle(.checkbox)
-            .disabled(viewModel.areHeaderControlsDisabled)
+            .disabled(viewModel.isPruneAllToggleDisabled)
             .axid(.cleanupPruneAllToggle)
             Text(
                 "Adds --prune=all. Without it, Homebrew keeps recent downloads so reinstalling is quicker.",
@@ -128,7 +98,7 @@ struct CleanupView: View {
                 if report.isEmpty {
                     cleanState
                 } else {
-                    removableList(report: report)
+                    removablePreview(report: report)
                 }
             },
         )
@@ -149,17 +119,49 @@ struct CleanupView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(BrewSpacing.xl)
         .accessibilityElement(children: .combine)
         .axid(.cleanupEmptyState)
     }
 
-    private func removableList(report: CleanupReport) -> some View {
+    private func removablePreview(report: CleanupReport) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.md) {
+            HStack(spacing: BrewSpacing.sm) {
+                Text(verbatim: viewModel.headline(for: report))
+                    .font(.brewTitle3)
+                    .foregroundStyle(Color.brewTextPrimary)
+                if viewModel.isRefreshing {
+                    ProgressView()
+                        .controlSize(.small)
+                        .accessibilityLabel(String(localized: "Checking again", bundle: #bundle, comment: "VoiceOver: Clean Up re-check spinner"))
+                }
+            }
+            removalList(report: report)
+            CommandBlockView(
+                command: viewModel.cleanupDisplayCommand,
+                summaryText: LocalizedStringResource(
+                    "Removes everything listed above",
+                    bundle: #bundle,
+                    comment: "Command block summary below the Clean Up list",
+                ),
+            )
+            Text(verbatim: viewModel.confirmationMessage)
+                .font(.brewCallout)
+                .foregroundStyle(Color.brewTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+            if let message = viewModel.refreshFailureMessage {
+                Text(verbatim: message)
+                    .font(.brewCallout)
+                    .foregroundStyle(Color.brewStatusError)
+                    .textSelection(.enabled)
+            }
+        }
+    }
+
+    private func removalList(report: CleanupReport) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
-                summaryCard(report: report)
                 if !report.unneededFormulae.isEmpty {
-                    CleanupSectionCard(
+                    CleanupSection(
                         title: viewModel.unneededFormulaeTitle(for: report),
                         caption: LocalizedStringResource(
                             "Installed only as dependencies of formulae that no longer need them.",
@@ -174,7 +176,7 @@ struct CleanupView: View {
                     }
                 }
                 if !report.removals.isEmpty {
-                    CleanupSectionCard(title: viewModel.removalsTitle(for: report), caption: nil) {
+                    CleanupSection(title: viewModel.removalsTitle(for: report), caption: nil) {
                         ForEach(viewModel.removalItems(for: report)) { item in
                             CleanupRow(primary: item.path, detail: item.detail)
                                 .axid(.cleanupRow(name: item.path))
@@ -182,51 +184,46 @@ struct CleanupView: View {
                     }
                 }
             }
-            .padding([.horizontal, .bottom], BrewSpacing.lg)
-            .brewPaneContentWidth()
+            .padding(BrewSpacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .background(Color.brewSurface)
+        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
+        .overlay(
+            RoundedRectangle(cornerRadius: BrewRadius.md)
+                .stroke(Color.brewBorderDefault, lineWidth: 1),
+        )
     }
 
-    private func summaryCard(report: CleanupReport) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            Text(verbatim: viewModel.headline(for: report))
-                .font(.brewTitle3)
-                .foregroundStyle(Color.brewTextPrimary)
-            CommandBlockView(
-                command: viewModel.cleanupDisplayCommand,
-                summaryText: LocalizedStringResource(
-                    "Removes everything listed below",
-                    bundle: #bundle,
-                    comment: "Command block summary above brew cleanup",
-                ),
-            )
-            HStack(spacing: BrewSpacing.sm) {
-                Button {
-                    viewModel.requestCleanup()
-                } label: {
-                    if viewModel.isCleaningUp {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Text("Clean Up", bundle: #bundle, comment: "Cleanup: run brew cleanup")
-                    }
+    private var footer: some View {
+        HStack(spacing: BrewSpacing.sm) {
+            Spacer(minLength: 0)
+            if viewModel.showsDoneButton {
+                Button(String(localized: "Done", bundle: #bundle, comment: "Clean Up sheet: close when there is nothing to remove")) {
+                    dismiss()
                 }
-                .buttonStyle(.borderedProminent)
+                .keyboardShortcut(.defaultAction)
+                .axid(.cleanupDoneButton)
+            } else {
+                Button(String(localized: "Cancel", bundle: #bundle, comment: "Clean Up sheet: close without removing anything"), role: .cancel) {
+                    dismiss()
+                }
+                .keyboardShortcut(.cancelAction)
+                .axid(.cleanupCancelButton)
+                // Destructive and never the default action, so Return cannot remove anything by accident.
+                Button(String(localized: "Clean Up", bundle: #bundle, comment: "Cleanup: run brew cleanup"), role: .destructive) {
+                    viewModel.cleanUp()
+                    dismiss()
+                }
                 .disabled(!viewModel.canCleanUp)
-                .accessibilityLabel(String(localized: "Clean Up", bundle: #bundle, comment: "Cleanup: run brew cleanup"))
                 .axid(.cleanupButton)
-                Spacer(minLength: 0)
-            }
-            if let message = viewModel.cleanupErrorMessage {
-                CleanupErrorText(message: message)
             }
         }
-        .cleanupCard()
     }
 }
 
-/// A titled card of rows, matching the Configuration tab's cards.
-private struct CleanupSectionCard<Rows: View>: View {
+/// A titled group of rows inside the Clean Up list.
+private struct CleanupSection<Rows: View>: View {
     let title: String
     let caption: LocalizedStringResource?
     @ViewBuilder let rows: () -> Rows
@@ -246,33 +243,6 @@ private struct CleanupSectionCard<Rows: View>: View {
             }
             rows()
         }
-        .cleanupCard()
-    }
-}
-
-/// Homebrew's error text, selectable so it can be copied into a report.
-private struct CleanupErrorText: View {
-    let message: String
-
-    var body: some View {
-        Text(verbatim: message)
-            .font(.brewCallout)
-            .foregroundStyle(Color.brewStatusError)
-            .textSelection(.enabled)
-    }
-}
-
-private extension View {
-    /// The Configuration tab's card chrome.
-    func cleanupCard() -> some View {
-        frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BrewSpacing.lg)
-            .background(Color.brewSurface)
-            .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
-            .overlay(
-                RoundedRectangle(cornerRadius: BrewRadius.lg)
-                    .stroke(Color.brewBorderDefault, lineWidth: 1),
-            )
     }
 }
 
@@ -301,21 +271,19 @@ private struct CleanupRow: View {
 }
 
 #if DEBUG
-    #Preview("Cleanup - removable") {
-        CleanupView(
+    #Preview("Clean Up - removable") {
+        CleanupSheet(
             repository: PreviewSupport.makeCleanupRepository(),
             commandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
         )
-        .frame(width: 720, height: 600)
     }
 
-    #Preview("Cleanup - clean") {
-        CleanupView(
+    #Preview("Clean Up - clean") {
+        CleanupSheet(
             repository: PreviewSupport.makeCleanupRepository(report: PreviewSupport.emptyCleanupReport),
             commandCenter: PreviewSupport.commandCenter,
             commandFactory: PreviewSupport.mutatingCommandFactory,
         )
-        .frame(width: 720, height: 600)
     }
 #endif

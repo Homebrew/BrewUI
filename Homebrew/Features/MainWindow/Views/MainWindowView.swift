@@ -26,6 +26,7 @@ struct MainWindowView: View {
 
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
+    @State private var showsCleanup = false
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
@@ -56,6 +57,10 @@ struct MainWindowView: View {
             \.saveBrewfile,
             SaveBrewfileAction(commandCenter: brewCommandCenter, commandFactory: mutatingCommandFactory),
         )
+        .focusedSceneValue(\.showCleanup, ShowCleanupAction(isPresented: $showsCleanup))
+        .sheet(isPresented: $showsCleanup) {
+            CleanupSheetRoot()
+        }
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
@@ -158,10 +163,6 @@ struct MainWindowView: View {
             DoctorColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
                 .navigationSubtitle(String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor"))
-        case .cleanup:
-            CleanupRoot()
-                .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "Remove old versions, stale downloads and unneeded dependencies", bundle: #bundle, comment: "Window subtitle, Cleanup"))
         case .configuration:
             ConfigColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)

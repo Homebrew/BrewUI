@@ -24,10 +24,12 @@ struct AXIDTests {
         (.discoverList, "discover.list"),
         (.configScreen, "config.screen"),
         (.doctorScreen, "doctor.screen"),
-        (.cleanupScreen, "cleanup.screen"),
+        (.toolsCleanupMenuItem, "menu.tools.cleanup"),
+        (.cleanupSheet, "cleanup.sheet"),
         (.cleanupEmptyState, "cleanup.empty"),
         (.cleanupButton, "cleanup.run"),
-        (.cleanupCheckAgainButton, "cleanup.checkAgain"),
+        (.cleanupCancelButton, "cleanup.cancel"),
+        (.cleanupDoneButton, "cleanup.done"),
         (.cleanupPruneAllToggle, "cleanup.pruneAll"),
         (.brewNotFoundState, "brew.not.found"),
         (.packageDetail, "package.detail"),
@@ -57,7 +59,6 @@ struct AXIDTests {
             "sidebar.item.discover",
             "sidebar.item.services",
             "sidebar.item.doctor",
-            "sidebar.item.cleanup",
             "sidebar.item.configuration",
         ])
     }

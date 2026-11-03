@@ -24,13 +24,9 @@ final class CleanupViewModel {
     @ObservationIgnored private let repository: any CleanupRepository
     @ObservationIgnored private let commandCenter: any BrewCommandCenter
     @ObservationIgnored private let commandFactory: any BrewMutatingCommandFactory
-    @ObservationIgnored private var cleanupTask: Task<Void, Never>?
 
     /// Adds `--prune=all` to both the preview and the run, so what runs is what was reviewed.
     private(set) var pruneAll = false
-    private(set) var isCleaningUp = false
-    private(set) var cleanupErrorMessage: String?
-    var showsCleanupConfirmation = false
 
     init(
         repository: any CleanupRepository,
@@ -70,29 +66,13 @@ final class CleanupViewModel {
         repository.isRefreshing
     }
 
-    /// Check Again and the prune toggle wait while a preview or a cleanup run is in progress.
-    var areHeaderControlsDisabled: Bool {
-        isRefreshing || isCleaningUp
+    /// The prune toggle waits for the preview it would replace, so two dry runs never race.
+    var isPruneAllToggleDisabled: Bool {
+        presentation == .loading || isRefreshing
     }
 
     var refreshFailureMessage: String? {
         repository.refreshFailure.map(Self.message(for:))
-    }
-
-    var subtitle: LocalizedStringResource {
-        if isCleaningUp {
-            return LocalizedStringResource("Cleaning up…", bundle: #bundle, comment: "Cleanup subtitle while brew cleanup runs")
-        }
-        switch presentation {
-        case .loading:
-            return LocalizedStringResource("Checking what can be removed…", bundle: #bundle, comment: "Cleanup subtitle during the first dry run")
-        case .clean:
-            return LocalizedStringResource("Nothing to remove", bundle: #bundle, comment: "Cleanup subtitle when the dry run found nothing")
-        case .removable:
-            return LocalizedStringResource("Review what Homebrew would remove", bundle: #bundle, comment: "Cleanup subtitle when the dry run found items")
-        case .failed:
-            return LocalizedStringResource("The check could not be completed", bundle: #bundle, comment: "Cleanup subtitle when the dry run failed")
-        }
     }
 
     /// The literal `brew cleanup` the button runs, shown so it can be copied to Terminal.
@@ -100,18 +80,14 @@ final class CleanupViewModel {
         commandFactory.cleanupCommand(pruneAll: pruneAll).displayCommand
     }
 
+    /// Clean Up waits for a fresh, non-empty preview, so the run never removes more than the sheet shows.
     var canCleanUp: Bool {
-        presentation == .removable && !isCleaningUp && !isRefreshing
+        presentation == .removable && !isRefreshing
     }
 
-    /// Header controls act on a loaded preview, so they wait for one rather than racing the first run.
-    var showsHeaderControls: Bool {
-        switch presentation {
-        case .clean, .removable:
-            true
-        case .loading, .failed:
-            false
-        }
+    /// With nothing to remove the sheet offers only Done, rather than Cancel beside a dead Clean Up.
+    var showsDoneButton: Bool {
+        presentation == .clean
     }
 
     func headline(for report: CleanupReport) -> String {
@@ -174,45 +150,19 @@ final class CleanupViewModel {
         await load()
     }
 
-    func requestCleanup() {
-        guard canCleanUp else {
-            return
-        }
-        showsCleanupConfirmation = true
-    }
-
     /// Runs `brew cleanup` as a maintenance operation, so it streams in the console and reconciles the
-    /// installed inventory like any other mutation, then previews again so the list shows what is left.
-    func cleanUp() {
+    /// installed inventory like any other mutation. The sheet closes as soon as it starts, so the console
+    /// reports the outcome, including Homebrew's stderr when it fails.
+    @discardableResult
+    func cleanUp() -> Task<Void, Never>? {
         guard canCleanUp else {
-            return
+            return nil
         }
         let command = commandFactory.cleanupCommand(pruneAll: pruneAll)
         let operationID = BrewOperationID(maintenanceToken: "cleanup", displayCommand: command.displayCommand)
-        cleanupErrorMessage = nil
-        isCleaningUp = true
-        cleanupTask = Task { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            defer {
-                isCleaningUp = false
-                cleanupTask = nil
-            }
-            do {
-                try await commandCenter.perform(command, id: operationID)
-            } catch is CancellationError {
-                return
-            } catch {
-                let latestPhase = await commandCenter.phase(for: operationID)
-                cleanupErrorMessage = if case let .failed(reason) = latestPhase {
-                    BrewErrorCopy.message(for: reason)
-                } else {
-                    BrewErrorCopy.message(for: OperationFailure(catching: error))
-                }
-            }
-            // A failed run can still have removed some of the list, so preview again either way.
-            await load()
+        let commandCenter = commandCenter
+        return Task {
+            try? await commandCenter.perform(command, id: operationID)
         }
     }
 
@@ -222,7 +172,7 @@ final class CleanupViewModel {
             fallback: String(
                 localized: "Couldn't check what Homebrew can clean up.",
                 bundle: #bundle,
-                comment: "Cleanup tab, generic dry-run failure",
+                comment: "Clean Up sheet, generic dry-run failure",
             ),
         )
     }

@@ -146,14 +146,9 @@ public final class StubDoctorRepository: DoctorRepository {
 public final class StubCleanupRepository: CleanupRepository {
     public private(set) var state: LoadState<CleanupReport, any Error>
     public private(set) var refreshFailure: (any Error)?
-    public private(set) var isRefreshing = false
+    /// Settable so a test can hold the report mid-refresh.
+    public var isRefreshing = false
     public private(set) var loadedOptions: [Bool] = []
-    @ObservationIgnored private let loadEvents = AsyncStream<Bool>.makeStream()
-
-    /// Yields each option `load(pruneAll:)` is called with, so a test can await a reload instead of polling.
-    public var loads: AsyncStream<Bool> {
-        loadEvents.stream
-    }
 
     public init(report: CleanupReport) {
         state = .loaded(report)
@@ -165,7 +160,6 @@ public final class StubCleanupRepository: CleanupRepository {
 
     public func load(pruneAll: Bool) async {
         loadedOptions.append(pruneAll)
-        loadEvents.continuation.yield(pruneAll)
     }
 }
 

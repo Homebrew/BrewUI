@@ -61,10 +61,12 @@ public enum AXID: Hashable, Sendable {
     case serviceRestartCommand
 
     // Cleanup
-    case cleanupScreen
+    case toolsCleanupMenuItem
+    case cleanupSheet
     case cleanupEmptyState
     case cleanupButton
-    case cleanupCheckAgainButton
+    case cleanupCancelButton
+    case cleanupDoneButton
     case cleanupPruneAllToggle
     /// A formula name or a path, whichever the row shows.
     case cleanupRow(name: String)
@@ -86,7 +88,7 @@ public enum AXID: Hashable, Sendable {
 
     /// Mirrors the app's `SidebarItem`, so the test target can name a destination without linking it.
     public enum SidebarDestination: String, CaseIterable, Sendable {
-        case installed, upgrades, discover, services, doctor, cleanup, configuration
+        case installed, upgrades, discover, services, doctor, configuration
     }
 
     /// A value in the service detail pane, so tests read one field rather than matching its text anywhere.
@@ -132,10 +134,12 @@ public enum AXID: Hashable, Sendable {
         case .serviceActionRestriction: "services.action.restriction"
         case .serviceRuntimeCommand: "services.command.runtime"
         case .serviceRestartCommand: "services.command.restart"
-        case .cleanupScreen: "cleanup.screen"
+        case .toolsCleanupMenuItem: "menu.tools.cleanup"
+        case .cleanupSheet: "cleanup.sheet"
         case .cleanupEmptyState: "cleanup.empty"
         case .cleanupButton: "cleanup.run"
-        case .cleanupCheckAgainButton: "cleanup.checkAgain"
+        case .cleanupCancelButton: "cleanup.cancel"
+        case .cleanupDoneButton: "cleanup.done"
         case .cleanupPruneAllToggle: "cleanup.pruneAll"
         case let .cleanupRow(name): "cleanup.row.\(name)"
         case .brewNotFoundState: "brew.not.found"

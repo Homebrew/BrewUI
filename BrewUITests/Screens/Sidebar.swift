@@ -46,12 +46,6 @@ struct Sidebar: Screen {
     }
 
     @discardableResult
-    func goToCleanup(file: StaticString = #filePath, line: UInt = #line) -> CleanupScreen {
-        item(.cleanup).tap(file: file, line: line)
-        return CleanupScreen(app: app).waitUntilLoaded(file: file, line: line)
-    }
-
-    @discardableResult
     func goToConfiguration(file: StaticString = #filePath, line: UInt = #line) -> ConfigScreen {
         item(.configuration).tap(file: file, line: line)
         return ConfigScreen(app: app).waitUntilLoaded(file: file, line: line)

@@ -23,31 +23,22 @@
       "comment" : "Cleanup row: the path is a symlink whose target is gone"
     },
     "Cancel" : {
-      "comment" : "Cleanup confirmation: keep everything"
-    },
-    "Check Again" : {
-      "comment" : "Cleanup header: run the dry run again"
+      "comment" : "Clean Up sheet: close without removing anything"
     },
     "Checking again" : {
-      "comment" : "VoiceOver: Cleanup re-check spinner"
-    },
-    "Checking what can be removed…" : {
-      "comment" : "Cleanup subtitle during the first dry run"
+      "comment" : "VoiceOver: Clean Up re-check spinner"
     },
     "Clean Up" : {
       "comment" : "Cleanup: run brew cleanup"
     },
-    "Clean up Homebrew?" : {
-      "comment" : "Cleanup confirmation title"
-    },
-    "Cleaning up…" : {
-      "comment" : "Cleanup subtitle while brew cleanup runs"
-    },
-    "Cleanup" : {
-      "comment" : "Cleanup tab heading"
+    "Clean Up Homebrew" : {
+      "comment" : "Clean Up sheet title"
     },
     "Couldn't check what Homebrew can clean up." : {
-      "comment" : "Cleanup tab, generic dry-run failure"
+      "comment" : "Clean Up sheet, generic dry-run failure"
+    },
+    "Done" : {
+      "comment" : "Clean Up sheet: close when there is nothing to remove"
     },
     "Empty folder" : {
       "comment" : "Cleanup row: the path is an empty directory"
@@ -58,9 +49,6 @@
     "Nothing to clean up" : {
       "comment" : "Cleanup empty state title"
     },
-    "Nothing to remove" : {
-      "comment" : "Cleanup subtitle when the dry run found nothing"
-    },
     "Old versions and cached downloads are deleted and cannot be restored." : {
       "comment" : "Cleanup confirmation message when no formulae will be uninstalled"
     },
@@ -70,14 +58,8 @@
     "Remove all cached downloads" : {
       "comment" : "Cleanup option: add --prune=all"
     },
-    "Removes everything listed below" : {
-      "comment" : "Command block summary above brew cleanup"
-    },
-    "Review what Homebrew would remove" : {
-      "comment" : "Cleanup subtitle when the dry run found items"
-    },
-    "The check could not be completed" : {
-      "comment" : "Cleanup subtitle when the dry run failed"
+    "Removes everything listed above" : {
+      "comment" : "Command block summary below the Clean Up list"
     },
     "This also uninstalls %@. Old versions and cached downloads are deleted and cannot be restored." : {
       "comment" : "Cleanup confirmation message; %@ is a comma-separated list of formula names"

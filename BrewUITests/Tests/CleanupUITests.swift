@@ -5,24 +5,28 @@
 
 import XCTest
 
-/// The Cleanup tab lists what `brew cleanup --dry-run` reports, before anything is removed.
+/// Tools › Clean Up… lists what `brew cleanup --dry-run` reports, before anything is removed.
 final class CleanupUITests: BrewUITestCase {
     @MainActor
-    func testListsWhatADryRunWouldRemove() {
+    func testListsWhatADryRunWouldRemoveAndCancels() {
         let installed = launch(.cleanupHasItems)
 
-        installed.sidebar
-            .goToCleanup()
+        installed
+            .openCleanup()
             .assertListsItem("libyaml")
             .assertListsItem("/fixtures/Caches/Homebrew/wget--1.24.5.arm64_sequoia.bottle.tar.gz")
+            .cancel()
+            .assertIsClosed()
     }
 
     @MainActor
     func testShowsCleanStateWhenThereIsNothingToRemove() {
         let installed = launch(.empty)
 
-        installed.sidebar
-            .goToCleanup()
+        installed
+            .openCleanup()
             .assertIsClean()
+            .done()
+            .assertIsClosed()
     }
 }

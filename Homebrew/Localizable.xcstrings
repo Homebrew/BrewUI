@@ -174,8 +174,8 @@
         }
       }
     },
-    "Cleanup" : {
-      "comment" : "Sidebar: brew cleanup of old versions and caches"
+    "Clean Up…" : {
+      "comment" : "Tools menu: preview and run brew cleanup"
     },
     "Configuration" : {
       "comment" : "Sidebar: brew config and environment",
@@ -503,9 +503,6 @@
         }
       }
     },
-    "Remove old versions, stale downloads and unneeded dependencies" : {
-      "comment" : "Window subtitle, Cleanup"
-    },
     "Report an Issue…" : {
       "comment" : "Help menu: opens the GitHub issue form",
       "localizations" : {
@@ -726,6 +723,9 @@
           }
         }
       }
+    },
+    "Tools" : {
+      "comment" : "Menu bar: occasional Homebrew maintenance commands"
     },
     "Upgrades" : {
       "comment" : "Sidebar: outdated packages",

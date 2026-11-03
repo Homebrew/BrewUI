@@ -55,14 +55,6 @@ struct MainSidebarView: View {
             .padding(.top, BrewSpacing.xs)
 
             sidebarRow(
-                title: SidebarItem.cleanup.title,
-                systemImage: "sparkles",
-                item: .cleanup,
-            )
-            .padding(.horizontal, BrewSpacing.sm)
-            .padding(.top, BrewSpacing.xs)
-
-            sidebarRow(
                 title: SidebarItem.configuration.title,
                 systemImage: "gearshape",
                 item: .configuration,
