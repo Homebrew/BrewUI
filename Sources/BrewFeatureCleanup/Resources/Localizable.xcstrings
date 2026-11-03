@@ -50,7 +50,7 @@
       "comment" : "Cleanup empty state title"
     },
     "Old versions and cached downloads are deleted and cannot be restored." : {
-      "comment" : "Cleanup confirmation message when no formulae will be uninstalled"
+      "comment" : "Clean Up sheet warning above the list of what will be removed"
     },
     "Ready to clean up" : {
       "comment" : "Cleanup summary when Homebrew printed no disk-space total"
@@ -61,7 +61,7 @@
     "Removes everything listed above" : {
       "comment" : "Command block summary below the Clean Up list"
     },
-    "This also uninstalls %@. Old versions and cached downloads are deleted and cannot be restored." : {
+    "This also uninstalls %@." : {
       "comment" : "Cleanup confirmation message; %@ is a comma-separated list of formula names"
     },
     "brew cleanup found no old versions, stale downloads or unneeded dependencies." : {

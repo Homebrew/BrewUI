@@ -123,18 +123,14 @@ final class CleanupViewModel {
         report.removals.map(CleanupRemovalItem.init(removal:))
     }
 
-    /// Says what cannot be undone: autoremove uninstalls, and removed old versions are gone for good.
-    var confirmationMessage: String {
+    /// Names the formulae autoremove uninstalls, or `nil` when there are none.
+    var uninstallMessage: String? {
         guard let report = state.value, !report.unneededFormulae.isEmpty else {
-            return String(
-                localized: "Old versions and cached downloads are deleted and cannot be restored.",
-                bundle: #bundle,
-                comment: "Cleanup confirmation message when no formulae will be uninstalled",
-            )
+            return nil
         }
         let formulae = report.unneededFormulae.joined(separator: ", ")
         return String(
-            localized: "This also uninstalls \(formulae). Old versions and cached downloads are deleted and cannot be restored.",
+            localized: "This also uninstalls \(formulae).",
             bundle: #bundle,
             comment: "Cleanup confirmation message; %@ is a comma-separated list of formula names",
         )

@@ -135,6 +135,15 @@ struct CleanupSheet: View {
                         .accessibilityLabel(String(localized: "Checking again", bundle: #bundle, comment: "VoiceOver: Clean Up re-check spinner"))
                 }
             }
+            // Outside the scroll region and short, so it is always visible however long the list grows.
+            Text(
+                "Old versions and cached downloads are deleted and cannot be restored.",
+                bundle: #bundle,
+                comment: "Clean Up sheet warning above the list of what will be removed",
+            )
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewTextSecondary)
+            .fixedSize(horizontal: false, vertical: true)
             removalList(report: report)
             CommandBlockView(
                 command: viewModel.cleanupDisplayCommand,
@@ -180,10 +189,12 @@ struct CleanupSheet: View {
                     }
                 }
                 // Inside the scroll region: the message names every unneeded formula, so it can outgrow the sheet.
-                Text(verbatim: viewModel.confirmationMessage)
-                    .font(.brewCallout)
-                    .foregroundStyle(Color.brewTextSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                if let message = viewModel.uninstallMessage {
+                    Text(verbatim: message)
+                        .font(.brewCallout)
+                        .foregroundStyle(Color.brewTextSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(BrewSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)

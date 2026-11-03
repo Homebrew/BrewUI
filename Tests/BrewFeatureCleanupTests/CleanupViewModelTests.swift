@@ -99,7 +99,7 @@ struct CleanupViewModelTests {
 
     @Test func `the confirmation names the formulae it will uninstall`() {
         let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.report))
-        #expect(viewModel.confirmationMessage.contains("libyaml, m4"))
+        #expect(viewModel.uninstallMessage == "This also uninstalls libyaml, m4.")
     }
 
     @Test func `prune all changes the command shown and re-previews with it`() async {
