@@ -43,8 +43,9 @@ public enum BrewUpgradeSelection: Hashable, Sendable {
     }
 
     /// Whether a running batch `brew upgrade` for this selection includes the given package. `explicit`
-    /// matches by name regardless of `isOutdated`; the kind-scoped cases require it.
-    public func covers(packageID: HomebrewPackageID, isOutdated: Bool) -> Bool {
+    /// matches the upgrade argument (including a third-party cask's tap) regardless of `isOutdated`;
+    /// the kind-scoped cases require it.
+    public func covers(packageID: HomebrewPackageID, isOutdated: Bool, upgradeName: String? = nil) -> Bool {
         switch self {
         case .all:
             isOutdated
@@ -53,7 +54,7 @@ public enum BrewUpgradeSelection: Hashable, Sendable {
         case .casks:
             isOutdated && packageID.kind == .cask
         case let .explicit(names):
-            names.contains(packageID.name)
+            names.contains(upgradeName ?? packageID.name)
         }
     }
 }

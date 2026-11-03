@@ -163,6 +163,8 @@ actor RunningSubmitCountingCommandCenter: BrewCommandCenter {
 }
 
 actor SubmitRecordingCommandCenter: BrewCommandCenter {
+    private(set) var recordedCommands: [BrewCommand] = []
+    private var submitWaiters: [(Int, CheckedContinuation<Void, Never>)] = []
     private(set) var recordedSubmitEntries: [(id: BrewOperationID, kind: BrewOperationKind)] = []
 
     func phase(for _: BrewOperationID) async -> BrewOperationPhase {
@@ -175,7 +177,13 @@ actor SubmitRecordingCommandCenter: BrewCommandCenter {
 
     @discardableResult
     func capture(_ command: BrewCommand, id: BrewOperationID) async throws -> CommandOutput {
+        recordedCommands.append(command)
         recordedSubmitEntries.append((id, command.operationKind))
+        let ready = submitWaiters.filter { recordedSubmitEntries.count >= $0.0 }
+        submitWaiters.removeAll { recordedSubmitEntries.count >= $0.0 }
+        for (_, waiter) in ready {
+            waiter.resume()
+        }
         return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
     }
 
@@ -184,10 +192,8 @@ actor SubmitRecordingCommandCenter: BrewCommandCenter {
     }
 
     func waitForSubmitCallCount(_ expected: Int) async {
-        for _ in 0 ..< 1000 {
-            if recordedSubmitEntries.count >= expected { return }
-            await Task.yield()
-        }
+        if recordedSubmitEntries.count >= expected { return }
+        await withCheckedContinuation { submitWaiters.append((expected, $0)) }
     }
 
     func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {

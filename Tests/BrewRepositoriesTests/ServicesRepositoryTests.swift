@@ -14,18 +14,18 @@ struct ServicesRepositoryTests {
     @Test func `services map all fields and sort by name`() async throws {
         let repository = makeRepository(MockBrewCommandRunner(responses: [Self.arguments: Self.output("""
         [
-          {"name":"postgresql@16","status":"started","running":true,"pid":43210,"user":"alex","registered":true,"schedulable":false,
+          {"name":"postgresql@16","status":"started","running":true,"loaded":true,"pid":43210,"user":"alex","registered":true,"schedulable":false,
            "file":"~/Library/LaunchAgents/homebrew.mxcl.postgresql@16.plist","log_path":"/tmp/postgresql.log","error_log_path":"/tmp/postgresql.err"},
-          {"name":"dnsmasq","status":"error","running":false,"exit_code":78,"registered":false,"schedulable":true,"unknown":true},
+          {"name":"dnsmasq","status":"error","running":false,"loaded":true,"exit_code":78,"registered":false,"schedulable":true,"unknown":true},
           {"name":"nginx","status":"none","running":false}
         ]
         """)]))
         await repository.load(forceRefresh: false)
         #expect(try #require(repository.state.value) == [
-            BrewService(name: "dnsmasq", status: "error", running: false, exitCode: 78, registered: false, schedulable: true),
+            BrewService(name: "dnsmasq", status: "error", running: false, exitCode: 78, registered: false, schedulable: true, loaded: true),
             BrewService(name: "nginx", status: "none", running: false),
             BrewService(name: "postgresql@16", status: "started", running: true, pid: 43210, user: "alex", registered: true, schedulable: false,
-                        file: "~/Library/LaunchAgents/homebrew.mxcl.postgresql@16.plist", logPath: "/tmp/postgresql.log", errorLogPath: "/tmp/postgresql.err"),
+                        file: "~/Library/LaunchAgents/homebrew.mxcl.postgresql@16.plist", logPath: "/tmp/postgresql.log", errorLogPath: "/tmp/postgresql.err", loaded: true),
         ])
     }
 
@@ -107,7 +107,7 @@ struct ServicesRepositoryTests {
     private func makeRepository(_ runner: any BrewCommandRunning) -> BrewServicesRepository {
         BrewServicesRepository(executionContext: BrewCommandExecutionContext(
             commandRunner: runner, locator: BrewExecutableLocator(overrideURL: URL(fileURLWithPath: "/opt/homebrew/bin/brew")),
-        ))
+        ), commandCenter: NoopBrewCommandCenter.forTesting())
     }
 }
 

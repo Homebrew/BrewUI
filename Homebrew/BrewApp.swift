@@ -22,12 +22,12 @@ import SwiftUI
 @main
 struct BrewApp: App {
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
-    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new")!
+    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new/choose")!
 
     @Environment(\.scenePhase) private var scenePhase
 
     private let commandCenter: SerialBrewCommandCenter
-    private let commandFactory: LiveBrewMutatingCommandFactory
+    private let commandFactory = LiveBrewMutatingCommandFactory()
     private let installedInventoryCache: InstalledInventoryCache
     private let catalogueCache: CatalogueCache
     private let discoverAnalyticsCache: DiscoverAnalyticsCache
@@ -72,7 +72,6 @@ struct BrewApp: App {
         catalogueCache = catalogue
         discoverAnalyticsCache = discoverAnalytics
         commandCenter = center
-        commandFactory = LiveBrewMutatingCommandFactory()
         installedPackagesRepository = installedPackages
         installedPreferences = UserDefaultsInstalledPreferences(
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "installed", fixtures: fixtures),
@@ -89,10 +88,11 @@ struct BrewApp: App {
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
         cleanupRepository = BrewCleanupRepository(commandCenter: center)
         configRepository = BrewConfigRepository(executionContext: executionContext)
-        servicesRepository = BrewServicesRepository(executionContext: executionContext)
+        servicesRepository = BrewServicesRepository(executionContext: executionContext, commandCenter: center)
 
         let selfUpgradeContext = SelfUpgradeLaunchContext(
             installedPackagesRepository: installedPackagesRepository,
+            servicesRepository: servicesRepository,
             executionContext: executionContext,
             commandCenter: center,
             selfUpgradeKeyPrefix: selfUpgradeKeyPrefix,
@@ -178,6 +178,7 @@ struct BrewApp: App {
 /// Bundled so the two `makeSelfUpgradeCoordinator` overloads don't each carry seven parameters.
 private struct SelfUpgradeLaunchContext {
     let installedPackagesRepository: BrewInstalledPackagesRepository
+    let servicesRepository: any ServicesRepository
     let executionContext: BrewCommandExecutionContext
     let commandCenter: any BrewCommandCenter
     let selfUpgradeKeyPrefix: String
@@ -222,6 +223,7 @@ extension BrewApp {
         HelperSelfUpgradeHandoff(
             brewExecutableURL: { try context.executionContext.brewExecutableURL() },
             commandCenter: context.commandCenter,
+            servicesRepository: context.servicesRepository,
             defaultsKeyPrefix: context.selfUpgradeKeyPrefix,
             relaunchArguments: relaunchArguments(uiTesting: context.uiTesting),
             relaunchEnvironment: relaunchEnvironment(uiTesting: context.uiTesting),

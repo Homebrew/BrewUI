@@ -54,7 +54,7 @@ struct ServicesView: View {
             VStack(alignment: .leading, spacing: 0) {
                 if let service = viewModel.selectedService {
                     ScrollView {
-                        ServiceDetailView(service: service)
+                        ServiceDetailView(service: service, viewModel: viewModel)
                             .padding(BrewSpacing.xl)
                             .brewPaneContentWidth()
                     }
@@ -113,6 +113,11 @@ struct ServicesView: View {
             .frame(height: BrewLayout.headerActionHeight)
             if let message = viewModel.refreshFailure {
                 Text(message).foregroundStyle(Color.brewStatusError).textSelection(.enabled)
+            }
+            if let message = viewModel.actionFailure {
+                Text(verbatim: message).font(.brewCallout).foregroundStyle(Color.brewStatusError)
+                    .textSelection(.enabled)
+                    .axid(.serviceActionError)
             }
         }
         .padding(BrewSpacing.lg)

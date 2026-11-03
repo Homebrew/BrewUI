@@ -16,6 +16,10 @@ public enum OperationFailure: Equatable, Sendable {
     /// Locator could not find `brew` in supported prefixes (`AGENTS.md`).
     case brewExecutableNotFound
 
+    /// A service action was refused after re-reading the inventory, or finished without reaching the
+    /// expected state. The refreshed inventory shows what actually happened.
+    case serviceControl(BrewServiceControlError)
+
     /// Any other error: its `localizedDescription` plus the full `String(describing:)` for logs.
     case other(description: String, diagnostic: String?)
 
@@ -35,6 +39,9 @@ public enum OperationFailure: Equatable, Sendable {
 
         case BrewLookupError.executableNotFound:
             self = .brewExecutableNotFound
+
+        case let error as BrewServiceControlError:
+            self = .serviceControl(error)
 
         default:
             let description = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription

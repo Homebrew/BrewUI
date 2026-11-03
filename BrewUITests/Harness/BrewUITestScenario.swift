@@ -12,6 +12,10 @@ enum BrewUITestScenario: String, CaseIterable {
     case empty
     /// Read-only service inventory, including a failed service without a running process.
     case servicesBasic
+    /// Current-user service controls alongside root and other-user services that remain read-only.
+    case servicesControls
+    /// Starting a stopped service fails without changing the service inventory.
+    case servicesControlFailure
     /// Two formulae and two casks installed; one formula is outdated.
     case installedBasic
     /// Enough formulae that `brew info` overruns a pipe buffer, which only a concurrent drain survives.

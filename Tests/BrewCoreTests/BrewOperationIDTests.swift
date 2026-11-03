@@ -48,7 +48,7 @@ struct BrewOperationIDTests {
             .installFormula, .installCask,
             .upgradeFormula, .upgradeCask, .upgradeAll, .upgradeApp,
             .uninstallFormula, .uninstallCask,
-            .doctorFix, .bundleDump, .cleanup,
+            .doctorFix, .bundleDump, .serviceControl, .cleanup,
         ]
 
         #expect(kinds.filter { !$0.isMutating }.isEmpty)

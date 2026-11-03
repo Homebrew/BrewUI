@@ -28,7 +28,7 @@ final class InstalledListRowViewModel {
     }
 
     var operationSubject: PackageOperationSubject {
-        PackageOperationSubject(packageID: package.id, isOutdated: package.outdated)
+        PackageOperationSubject(packageID: package.id, isOutdated: package.outdated, upgradeName: package.upgradeName)
     }
 
     var name: String {

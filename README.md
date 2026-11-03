@@ -1,6 +1,6 @@
 # 🧑‍💻 BrewUI
 
-<img width="1336" height="844" alt="BrewUI user interface" src="https://github.com/user-attachments/assets/3969e6b2-3054-4127-be5c-847aa1d98c01" />
+<img width="1476" height="975" alt="BrewUI user interface" src="docs/images/brewui.png" />
 
 Homebrew's official macOS GUI: making package management approachable for users who prefer graphical interfaces over Terminal, while maintaining complete transparency about underlying Homebrew operations.
 
@@ -99,13 +99,6 @@ The key is the English text, so rewording a string makes a new entry rather than
 ## 🚧 Status
 
 Stable and under active development.
-
-The read-only Services tab shows installed formula services, their status, owner, login registration and
-service/log paths. Filter by All, Running or Stopped; start, stop and configure services in Terminal.
-
-The Cleanup tab previews `brew cleanup` with a dry run: old versions, stale downloads and unneeded
-dependencies, with Homebrew's estimate of the space it frees. Clean Up runs `brew cleanup` after a
-confirmation, optionally with `--prune=all` to remove every cached download.
 
 ## 📄 Licence
 

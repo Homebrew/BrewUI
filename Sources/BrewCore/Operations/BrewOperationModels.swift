@@ -24,6 +24,7 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case doctorFix
     case doctorRead
     case bundleDump
+    case serviceControl
     /// `brew cleanup --dry-run`, which lists what ``cleanup`` would remove without removing anything.
     case cleanupPreview
     /// `brew cleanup`, which also autoremoves unneeded dependencies unless `HOMEBREW_NO_AUTOREMOVE` is set.
@@ -42,7 +43,7 @@ public enum BrewOperationKind: String, Hashable, Sendable {
         case .doctorRead, .cleanupPreview:
             false
         case .installFormula, .installCask, .upgradeFormula, .upgradeCask, .upgradeAll, .upgradeApp,
-             .uninstallFormula, .uninstallCask, .doctorFix, .bundleDump, .cleanup:
+             .uninstallFormula, .uninstallCask, .doctorFix, .bundleDump, .serviceControl, .cleanup:
             true
         }
     }

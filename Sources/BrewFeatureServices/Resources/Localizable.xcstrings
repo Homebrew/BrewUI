@@ -1,6 +1,35 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@: %@" : {
+      "comment" : "Services: action failure; %1$@ is the service name, %2$@ is the error detail",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        }
+      }
+    },
     "%lld running services" : {
       "comment" : "Services subtitle: running service count, never one",
       "localizations" : {
@@ -20,6 +49,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld tjänster körs"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중인 서비스 %lld개"
           }
         }
       }
@@ -44,6 +79,12 @@
             "state" : "translated",
             "value" : "1 tjänst körs"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중인 서비스 1개"
+          }
         }
       }
     },
@@ -66,6 +107,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alla"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체"
           }
         }
       }
@@ -90,6 +137,12 @@
             "state" : "translated",
             "value" : "Kontrollera felloggen för mer information."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자세한 내용은 오류 로그를 확인하세요."
+          }
         }
       }
     },
@@ -101,6 +154,12 @@
             "state" : "translated",
             "value" : "Välj Alla för att se alla tjänster."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 서비스를 보려면 전체를 선택하세요."
+          }
         }
       }
     },
@@ -111,6 +170,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Välj en tjänst i listan för att se information."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목록에서 서비스를 선택하면 세부사항이 표시됩니다."
           }
         }
       }
@@ -135,6 +200,12 @@
             "state" : "translated",
             "value" : "Konfigurationsfil"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구성 파일"
+          }
         }
       }
     },
@@ -157,6 +228,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopierat"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사됨"
           }
         }
       }
@@ -181,6 +258,12 @@
             "state" : "translated",
             "value" : "Kopiera"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사"
+          }
         }
       }
     },
@@ -203,6 +286,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Kopiera sökväg: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경로 복사: %@"
           }
         }
       }
@@ -227,6 +316,12 @@
             "state" : "translated",
             "value" : "Det gick inte att läsa tjänster från Homebrew."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 서비스를 읽을 수 없습니다."
+          }
         }
       }
     },
@@ -249,6 +344,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Information"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세부사항"
           }
         }
       }
@@ -273,6 +374,12 @@
             "state" : "translated",
             "value" : "Fellogg"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오류 로그"
+          }
         }
       }
     },
@@ -295,6 +402,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avslutningskod"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종료 코드"
           }
         }
       }
@@ -319,6 +432,35 @@
             "state" : "translated",
             "value" : "Filer"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "파일"
+          }
+        }
+      }
+    },
+    "Homebrew hasn't reported enough information to manage this service." : {
+      "comment" : "Services: actions are unavailable when registration or load state is unknown",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 提供的服务信息不足，暂时无法操作。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 提供的服務資訊不足，暫時無法操作。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew에서 이 서비스를 관리하는 데 필요한 정보를 충분히 제공하지 않았습니다."
+          }
         }
       }
     },
@@ -341,6 +483,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nej"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아니요"
           }
         }
       }
@@ -365,6 +513,12 @@
             "state" : "translated",
             "value" : "Ingen sökväg till fellogg rapporterades."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보고된 오류 로그 경로가 없습니다."
+          }
         }
       }
     },
@@ -376,6 +530,12 @@
             "state" : "translated",
             "value" : "Inga matchande tjänster"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일치하는 서비스 없음"
+          }
         }
       }
     },
@@ -386,6 +546,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inget valt"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택 항목 없음"
           }
         }
       }
@@ -410,6 +576,35 @@
             "state" : "translated",
             "value" : "Inga tjänster"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서비스 없음"
+          }
+        }
+      }
+    },
+    "Only services owned by the current user can be managed here." : {
+      "comment" : "Services: other-user and system services remain read-only",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这里只能管理当前用户的服务。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這裡只能管理目前使用者的服務。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 사용자가 소유한 서비스만 여기에서 관리할 수 있습니다."
+          }
         }
       }
     },
@@ -432,6 +627,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Process ID (PID)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로세스 ID(PID)"
           }
         }
       }
@@ -456,6 +657,58 @@
             "state" : "translated",
             "value" : "Uppdatera"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로 고침"
+          }
+        }
+      }
+    },
+    "Restart" : {
+      "comment" : "Service action: restart the selected service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重启"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新啟動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "재시작"
+          }
+        }
+      }
+    },
+    "Restarts this service" : {
+      "comment" : "Service restart command summary",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重启此服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新啟動此服務"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 서비스를 재시작합니다"
+          }
         }
       }
     },
@@ -478,6 +731,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Körs"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중"
           }
         }
       }
@@ -502,6 +761,12 @@
             "state" : "translated",
             "value" : "Kan schemaläggas"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예약 가능"
+          }
         }
       }
     },
@@ -524,6 +789,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tjänster"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서비스"
           }
         }
       }
@@ -548,6 +819,12 @@
             "state" : "translated",
             "value" : "Tjänster från installerade formler visas här."
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 Formula의 서비스가 여기에 표시됩니다."
+          }
         }
       }
     },
@@ -570,6 +847,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Visar tjänster för den aktuella användaren"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 사용자의 서비스를 표시합니다"
           }
         }
       }
@@ -594,6 +877,35 @@
             "state" : "translated",
             "value" : "Standardlogg"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "표준 로그"
+          }
+        }
+      }
+    },
+    "Start" : {
+      "comment" : "Service action: start the selected service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시작"
+          }
         }
       }
     },
@@ -616,6 +928,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Startar vid inloggning"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인 시 시작"
+          }
+        }
+      }
+    },
+    "Starts this service" : {
+      "comment" : "Service start command summary",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "启动此服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "啟動此服務"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 서비스를 시작합니다"
           }
         }
       }
@@ -640,6 +981,35 @@
             "state" : "translated",
             "value" : "Status"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상태"
+          }
+        }
+      }
+    },
+    "Stop" : {
+      "comment" : "Service action: stop the selected service",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중지"
+          }
         }
       }
     },
@@ -662,6 +1032,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Stoppad"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "중지됨"
+          }
+        }
+      }
+    },
+    "Stops this service" : {
+      "comment" : "Service stop command summary",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止此服务"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停止此服務"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 서비스를 중지합니다"
           }
         }
       }
@@ -686,6 +1085,12 @@
             "state" : "translated",
             "value" : "Okänd"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알 수 없음"
+          }
         }
       }
     },
@@ -709,6 +1114,12 @@
             "state" : "translated",
             "value" : "Användare"
           }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용자"
+          }
         }
       }
     },
@@ -731,6 +1142,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ja"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예"
           }
         }
       }
