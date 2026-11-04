@@ -184,6 +184,16 @@ struct CleanupViewModelTests {
         #expect(entries.first?.id == .maintenance(token: "cleanup", displayCommand: "brew cleanup"))
     }
 
+    @Test func `a cache-only preview runs brew cleanup`() async throws {
+        let center = Self.recordingCenter(exitCode: 0)
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.cacheOnlyReport), commandCenter: center)
+
+        try await #require(viewModel.cleanUp()).value
+
+        let entries = await center.recordedSubmitEntries
+        #expect(entries.map(\.kind) == [.cleanup])
+    }
+
     @Test func `an empty report never runs brew cleanup`() {
         let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.emptyReport))
         #expect(viewModel.cleanUp() == nil)
