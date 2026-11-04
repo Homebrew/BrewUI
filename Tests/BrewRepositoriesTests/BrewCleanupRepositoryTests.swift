@@ -100,7 +100,12 @@ struct BrewCleanupRepositoryTests {
             standardError: "",
             terminationStatus: 0,
         ))
-        let runner = SequencedRunner([success, .throw(BrewCommandError.launchFailed(underlying: "spawn failed")), success])
+        let recovered = MockBrewCommandRunnerBehavior.output(CommandOutput(
+            standardOutput: "Would remove: /cache/b.tar.gz (2MB)\n",
+            standardError: "",
+            terminationStatus: 0,
+        ))
+        let runner = SequencedRunner([success, .throw(BrewCommandError.launchFailed(underlying: "spawn failed")), recovered])
         let context = BrewCommandExecutionContext(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: Self.brewURL))
         let repository = BrewCleanupRepository(
             commandCenter: SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler()),
@@ -110,7 +115,7 @@ struct BrewCleanupRepositoryTests {
         await repository.load(pruneAll: false)
         await repository.load(pruneAll: false)
 
-        #expect(repository.state.value?.removals.count == 1 && repository.refreshFailure == nil)
+        #expect(repository.state.value?.removals.map(\.path) == ["/cache/b.tar.gz"] && repository.refreshFailure == nil)
     }
 
     @Test func `switching option does not show the other option's report`() async {

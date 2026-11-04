@@ -28,6 +28,13 @@ struct CleanupViewModelTests {
 
     private static let emptyReport = CleanupReport(pruneAll: false, unneededFormulae: [], removals: [], reclaimableSpace: nil)
 
+    private static let cacheOnlyReport = CleanupReport(
+        pruneAll: false,
+        unneededFormulae: [],
+        removals: [CleanupRemoval(path: "/cache/a.tar.gz", kind: .file, size: "12.7MB")],
+        reclaimableSpace: "12.7MB",
+    )
+
     private static func viewModel(
         repository: any CleanupRepository,
         commandCenter: any BrewCommandCenter = StubBrewCommandCenter(),
@@ -103,14 +110,13 @@ struct CleanupViewModelTests {
     }
 
     @Test func `the confirmation is absent when no formulae are uninstalled`() {
-        let report = CleanupReport(
-            pruneAll: false,
-            unneededFormulae: [],
-            removals: [CleanupRemoval(path: "/cache/a.tar.gz", kind: .file, size: "12.7MB")],
-            reclaimableSpace: "12.7MB",
-        )
-        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: report))
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.cacheOnlyReport))
         #expect(viewModel.uninstallMessage == nil)
+    }
+
+    @Test func `clean up is enabled for a cache-only preview`() {
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: Self.cacheOnlyReport))
+        #expect(viewModel.canCleanUp)
     }
 
     @Test func `prune all changes the command shown and re-previews with it`() async {
