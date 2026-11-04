@@ -20,7 +20,7 @@ GEM
       fiber-annotation
       fiber-local (~> 1.1)
       json
-    csv (3.3.6)
+    csv (3.3.7)
     em-websocket (0.5.3)
       eventmachine (>= 0.12.9)
       http_parser.rb (~> 0)
@@ -181,7 +181,7 @@ GEM
       google-protobuf (~> 4.31)
     sass-embedded (1.106.1-x86_64-linux-gnu)
       google-protobuf (~> 4.31)
-    sorbet-runtime (0.6.13591)
+    sorbet-runtime (0.6.13632)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)
     tomlrb (3.0.0)
@@ -234,7 +234,7 @@ CHECKSUMS
   colorator (1.1.0) sha256=e2f85daf57af47d740db2a32191d1bdfb0f6503a0dfbc8327d0c9154d5ddfc38
   concurrent-ruby (1.3.8) sha256=b2f1be836e968ccc78ccfce277ea79c72a88633f22306782c16ff23fb415d1e1
   console (1.38.0) sha256=35b82f59130e95e9be6b832d9e539c8b3988fc192e4a8e9a86ab4922f44ad5de
-  csv (3.3.6) sha256=aba61e7e507a66f03d45cb1f3c4b6359861c3504038b422962875dce099e4456
+  csv (3.3.7) sha256=15a3f16f6628da8664d455eb634e7f22031bcf53044923caf56975109e71b9f8
   em-websocket (0.5.3) sha256=f56a92bde4e6cb879256d58ee31f124181f68f8887bd14d53d5d9a292758c6a8
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   ethon (0.19.1) sha256=f309dec67cfdefaf96b3d1ee0ed4f186eac518f131340f607bb3df3b4e13ddc4
@@ -306,7 +306,7 @@ CHECKSUMS
   sass-embedded (1.106.1-arm64-darwin) sha256=16a8481233712d3050741aae7e46cd35f2ae65493a197967af0a9efef7324f9f
   sass-embedded (1.106.1-x86_64-darwin) sha256=e993d6803ae98c80e6fa71e2ceea8a5699517ee6dd6b1162cff456e5a0ccb4a6
   sass-embedded (1.106.1-x86_64-linux-gnu) sha256=2d0fb805f990a8328aa590cb201efbe21e26c98364107632e0ea5fc6b4a988c6
-  sorbet-runtime (0.6.13591) sha256=ef9d316efe9e63fd149b83c86d647891298124ff54c5783494c5990dde5445a6
+  sorbet-runtime (0.6.13632) sha256=378fd01103979bfaf6f94c5773bcf2d777b01f81fa0049c999ef98e024dea359
   terminal-table (3.0.2) sha256=f951b6af5f3e00203fb290a669e0a85c5dd5b051b3b023392ccfd67ba5abae91
   tomlrb (3.0.0) sha256=e7122820cbb9b940d1758eecb6d1d4ee97c582efa37f06e0100a97cb17a566f5
   tsort (0.2.0) sha256=9650a793f6859a43b6641671278f79cfead60ac714148aabe4e3f0060480089f
