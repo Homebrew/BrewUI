@@ -24,4 +24,8 @@ public protocol BrewMutatingCommandFactory: Sendable {
 
     /// Builds the `brew bundle dump` that snapshots the installed environment as a Brewfile at `fileURL`.
     func bundleDumpCommand(fileURL: URL) -> BrewCommand
+
+    /// Builds the `brew cleanup` that removes stale downloads, old versions and unneeded dependencies;
+    /// `pruneAll` adds `--prune=all`.
+    func cleanupCommand(pruneAll: Bool) -> BrewCommand
 }

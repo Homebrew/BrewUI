@@ -64,6 +64,23 @@ struct BrewCommandsTests {
         #expect(command.operationKind == .bundleDump)
     }
 
+    @Test func `cleanupPreview is a dry run under cleanupPreview`() {
+        let command = BrewCommands.cleanupPreview(pruneAll: false)
+        #expect(command.arguments == ["cleanup", "--dry-run"])
+        #expect(command.operationKind == .cleanupPreview)
+    }
+
+    @Test func `cleanup runs brew cleanup under cleanup`() {
+        let command = BrewCommands.cleanup(pruneAll: false)
+        #expect(command.arguments == ["cleanup"])
+        #expect(command.operationKind == .cleanup)
+    }
+
+    @Test func `prune all adds --prune=all to the preview and the run alike`() {
+        #expect(BrewCommands.cleanupPreview(pruneAll: true).arguments == ["cleanup", "--dry-run", "--prune=all"])
+        #expect(BrewCommands.cleanup(pruneAll: true).arguments == ["cleanup", "--prune=all"])
+    }
+
     @Test func `displayCommand renders the literal a person would type`() {
         let command = BrewCommands.bundleDump(fileURL: URL(fileURLWithPath: "/tmp/Brewfile"))
         #expect(command.displayCommand == "brew bundle dump --file=/tmp/Brewfile --force")

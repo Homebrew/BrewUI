@@ -24,6 +24,12 @@ struct AXIDTests {
         (.discoverList, "discover.list"),
         (.configScreen, "config.screen"),
         (.doctorScreen, "doctor.screen"),
+        (.cleanupSheet, "cleanup.sheet"),
+        (.cleanupEmptyState, "cleanup.empty"),
+        (.cleanupButton, "cleanup.run"),
+        (.cleanupCancelButton, "cleanup.cancel"),
+        (.cleanupDoneButton, "cleanup.done"),
+        (.cleanupPruneAllToggle, "cleanup.pruneAll"),
         (.brewNotFoundState, "brew.not.found"),
         (.packageDetail, "package.detail"),
         (.installButton, "detail.install"),
@@ -54,6 +60,10 @@ struct AXIDTests {
             "sidebar.item.doctor",
             "sidebar.item.configuration",
         ])
+    }
+
+    @Test func `cleanup rows are namespaced by what they show`() {
+        #expect(AXID.cleanupRow(name: "libyaml").rawValue == "cleanup.row.libyaml")
     }
 
     @Test func `service identifiers keep their wire format`() {

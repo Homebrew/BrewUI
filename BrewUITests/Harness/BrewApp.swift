@@ -24,6 +24,8 @@ enum BrewApp {
         let app = XCUIApplication()
         // The trailing "YES" stops the argument-domain parser swallowing the next argument as a value.
         app.launchArguments += [BrewUITestingEnvironmentKey.launchArgument, "YES"]
+        // English whatever the host's language, so menu commands can be found by title (`BrewUIMenuItem`).
+        app.launchArguments += ["-AppleLanguages", "(en)"]
         app.launchEnvironment[BrewUITestingEnvironmentKey.scenario] = scenario.rawValue
         app.launchEnvironment[BrewUITestingEnvironmentKey.payload] = encoded
         app.launchEnvironment.merge(environment) { _, extra in extra }
