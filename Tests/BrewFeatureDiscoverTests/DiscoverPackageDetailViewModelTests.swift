@@ -300,6 +300,70 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.comparisonResult == nil)
         #expect(viewModel.comparisonTarget == nil)
     }
+
+    @Test @MainActor func `update package resets busy state across package selection changes`() async {
+        let (stream, continuation) = AsyncStream<BrewOperationPhase>.makeStream()
+        let commandCenter = MockStreamingCommandCenter(stream: stream)
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "grep"), thirtyDayInstallCount: 0),
+            installedRepository: installedRepo(),
+            brewCommandCenter: commandCenter,
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        let task = Task {
+            await viewModel.observeInstallUpdates()
+        }
+        continuation.yield(.running(.installFormula))
+        for _ in 0 ..< 10 {
+            await Task.yield()
+        }
+
+        #expect(viewModel.isInstalling)
+
+        let curlPackage = DiscoveryBrewPackage(package: .fixture(name: "curl"), thirtyDayInstallCount: 0)
+        viewModel.update(package: curlPackage)
+
+        #expect(!viewModel.isInstalling)
+        #expect(!viewModel.isPackageInstalling(curlPackage.id))
+
+        continuation.finish()
+        await task.value
+    }
+}
+
+private actor MockStreamingCommandCenter: BrewCommandCenter {
+    let stream: AsyncStream<BrewOperationPhase>
+
+    init(stream: AsyncStream<BrewOperationPhase>) {
+        self.stream = stream
+    }
+
+    func phase(for _: BrewOperationID) async -> BrewOperationPhase {
+        .idle
+    }
+
+    func runningPhases() async -> [BrewOperationID: BrewOperationPhase] {
+        [:]
+    }
+
+    func perform(_: BrewCommand, id _: BrewOperationID) async throws {}
+
+    func capture(_: BrewCommand, id _: BrewOperationID) async throws -> CommandOutput {
+        CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func phaseChanges(for _: BrewOperationID) async -> AsyncStream<BrewOperationPhase> {
+        stream
+    }
+
+    func allPhaseChanges() async -> AsyncStream<(BrewOperationID, BrewOperationPhase)> {
+        AsyncStream { $0.finish() }
+    }
+
+    func allOutputChanges() async -> AsyncStream<(BrewOperationID, BrewCommandOutputLine)> {
+        AsyncStream { $0.finish() }
+    }
 }
 
 @MainActor

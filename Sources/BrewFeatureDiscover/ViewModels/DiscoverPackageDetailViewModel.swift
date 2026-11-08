@@ -22,6 +22,7 @@ final class DiscoverPackageDetailViewModel {
 
     /// Latest phase from the command center stream (see ``observeInstallUpdates()``); drives install chrome.
     private var operationPhase: BrewOperationPhase = .idle
+    private var operationPhasePackageID: HomebrewPackageID?
     /// Inline message when an install fails; cleared when a new install starts.
     private(set) var installErrorMessage: String?
 
@@ -34,7 +35,8 @@ final class DiscoverPackageDetailViewModel {
 
     /// True while an install is in flight, including the reconcile that lands the badge.
     var isInstalling: Bool {
-        DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase) || activeInstallingPackageID != nil
+        let isPhaseBusy = operationPhasePackageID == discoveryPackage.id && DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
+        return isPhaseBusy || activeInstallingPackageID != nil
     }
 
     init(
@@ -44,6 +46,7 @@ final class DiscoverPackageDetailViewModel {
         commandFactory: any BrewMutatingCommandFactory,
     ) {
         discoveryPackage = package
+        operationPhasePackageID = package.id
         self.installedRepository = installedRepository
         self.brewCommandCenter = brewCommandCenter
         self.commandFactory = commandFactory
@@ -171,7 +174,8 @@ final class DiscoverPackageDetailViewModel {
         if activeInstallingPackageID == packageID {
             return true
         }
-        return packageID == discoveryPackage.id && DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
+        let isPhaseBusy = operationPhasePackageID == discoveryPackage.id && DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
+        return packageID == discoveryPackage.id && isPhaseBusy
     }
 
     func update(package: DiscoveryBrewPackage) {
@@ -179,6 +183,8 @@ final class DiscoverPackageDetailViewModel {
         discoveryPackage = package
         installErrorMessage = nil
         if !samePackage {
+            operationPhase = .idle
+            operationPhasePackageID = nil
             alternatives = []
             comparisonResult = nil
             comparisonTarget = nil
@@ -240,10 +246,13 @@ final class DiscoverPackageDetailViewModel {
 
     /// Run while the detail pane shows this package to track install progress.
     func observeInstallUpdates() async {
+        let observedID = discoveryPackage.id
         let operationID = BrewOperationID(kind: packageKind, name: discoveryPackage.name)
         let stream = await brewCommandCenter.phaseChanges(for: operationID)
         for await phase in stream {
+            guard discoveryPackage.id == observedID else { return }
             operationPhase = phase
+            operationPhasePackageID = observedID
         }
     }
 

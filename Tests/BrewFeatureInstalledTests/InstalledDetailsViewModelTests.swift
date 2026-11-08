@@ -688,9 +688,10 @@ extension InstalledDetailsViewModelTests {
         #expect(!viewModel.isAnalyzingUpgradeImpact)
     }
 
-    @Test @MainActor func `runVerificationCommand rejects non-brew commands and shell metacharacters`() {
+    @Test @MainActor func `runVerificationCommand rejects non-brew commands and shell metacharacters`() async {
         let package = InstalledBrewPackage.fixture(name: "node")
-        let viewModel = makeInstalledDetailsViewModel(package: package)
+        let center = SubmitRecordingCommandCenter()
+        let viewModel = makeInstalledDetailsViewModel(package: package, brewCommandCenter: center)
 
         viewModel.runVerificationCommand("rm -rf /")
         viewModel.runVerificationCommand("echo test")
@@ -698,6 +699,17 @@ extension InstalledDetailsViewModelTests {
         viewModel.runVerificationCommand("brew test node && rm -rf /")
         viewModel.runVerificationCommand("brew test node | cat")
         viewModel.runVerificationCommand("brew test node > /dev/null")
+        viewModel.runVerificationCommand("brew test node < /dev/null")
+        viewModel.runVerificationCommand("sudo brew test node")
+
+        #expect(await center.recordedSubmitEntries.isEmpty)
+
+        viewModel.runVerificationCommand("brew test node")
+        await center.waitForSubmitCallCount(1)
+
+        let entries = await center.recordedSubmitEntries
+        #expect(entries.count == 1)
+        #expect(entries.first?.id == .maintenance(token: "brew test node", displayCommand: "brew test node"))
     }
 }
 

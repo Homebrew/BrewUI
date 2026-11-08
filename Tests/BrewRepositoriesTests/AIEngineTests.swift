@@ -323,8 +323,7 @@ struct AIEngineTests {
             rawOutput: doctorText,
         )
 
-        #expect(result.suggestedCommands.contains("brew link openssl@3"))
-        #expect(result.suggestedCommands.contains("brew link readline"))
+        #expect(result.suggestedCommands == ["brew link openssl@3", "brew link readline"])
     }
 
     @Test func `engine detects major version bumps with v prefix and versioned daemons`() async {
