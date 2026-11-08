@@ -429,10 +429,27 @@ extension DiscoverViewModel {
         results = .loading
         do {
             let limit = isSemanticSearch ? searchResultsLimit * 3 : searchResultsLimit
-            let matches = try await catalogueRepository.searchPackages(
+            var matches = try await catalogueRepository.searchPackages(
                 matching: normalizedQuery,
                 limit: limit,
             )
+            if isSemanticSearch, matches.isEmpty {
+                let tokens = normalizedQuery
+                    .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                    .filter { $0.count >= 2 }
+                var candidateSet = Set<BrewPackage.ID>()
+                var candidateMatches: [BrewPackage] = []
+                for token in tokens.prefix(3) {
+                    if let tokenMatches = try? await catalogueRepository.searchPackages(matching: token, limit: limit) {
+                        for pkg in tokenMatches where !candidateSet.contains(pkg.id) {
+                            candidateSet.insert(pkg.id)
+                            candidateMatches.append(pkg)
+                        }
+                    }
+                }
+                matches = candidateMatches
+            }
+
             if isSemanticSearch, let aiEngine {
                 let semanticResults = await aiEngine.semanticSearch(
                     query: normalizedQuery,

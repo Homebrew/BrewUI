@@ -244,6 +244,7 @@ public struct AIBrewfileGeneratorSheet: View {
     }
 
     private func generate() {
+        guard !isGenerating else { return }
         let trimmed = promptText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         isGenerating = true

@@ -85,11 +85,15 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
 
         let lower = output.lowercased()
 
+        let args = command.split(separator: " ").map(String.init)
+        let pkg = args.dropFirst(2).reversed().first(where: { !$0.hasPrefix("-") }) ?? ""
+
         if lower.contains("checksum mismatch") || lower.contains("sha256") {
+            let fetchCmd = pkg.isEmpty ? "brew update" : "brew fetch --force \(pkg)"
             return AIAnalysisResult(
                 summary: "The downloaded file does not match the cryptographic checksum recorded in the Homebrew formula.",
                 rootCause: "The upstream download was corrupted in transit, or the vendor released a silent patch with a new archive.",
-                suggestedCommands: ["brew cleanup --prune=all", "brew fetch --force \(command.split(separator: " ").last ?? "")"],
+                suggestedCommands: ["brew cleanup --prune=all", fetchCmd],
                 modelName: engineName
             )
         }
@@ -104,21 +108,22 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
         }
 
         if lower.contains("already installed") {
-            let pkg = command.split(separator: " ").last ?? ""
+            let subject = pkg.isEmpty ? "The package" : "The package \(pkg)"
+            let cmds = pkg.isEmpty ? ["brew doctor"] : ["brew reinstall \(pkg)", "brew upgrade \(pkg)"]
             return AIAnalysisResult(
-                summary: "The package \(pkg) is already present in your installed inventory.",
+                summary: "\(subject) is already present in your installed inventory.",
                 rootCause: "Attempted to install an already installed package without specifying upgrade or reinstall.",
-                suggestedCommands: ["brew reinstall \(pkg)", "brew upgrade \(pkg)"],
+                suggestedCommands: cmds,
                 modelName: engineName
             )
         }
 
         if lower.contains("no bottle available") || lower.contains("pour failed") {
-            let pkg = command.split(separator: " ").last ?? ""
+            let cmds = pkg.isEmpty ? ["brew doctor"] : ["brew install --build-from-source \(pkg)"]
             return AIAnalysisResult(
                 summary: "A pre-compiled binary bottle is unavailable for your specific macOS or CPU architecture.",
                 rootCause: "Homebrew requires building this formula from source code on your machine.",
-                suggestedCommands: ["brew install --build-from-source \(pkg)"],
+                suggestedCommands: cmds,
                 modelName: engineName
             )
         }
@@ -136,19 +141,33 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
         let lines = text.split(separator: "\n")
         var inList = false
         for line in lines {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            var trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed.hasPrefix("`") && trimmed.hasSuffix("`") && trimmed.count > 1 {
+                trimmed = String(trimmed.dropFirst().dropLast())
+            }
             let lower = trimmed.lowercased()
             if lower.contains("run `brew link` on these") || lower.contains("brew link on these") {
                 inList = true
                 continue
             }
             if inList {
-                if trimmed.isEmpty || trimmed.contains(" ") || trimmed.hasPrefix("Warning") {
+                if trimmed.isEmpty {
+                    if names.isEmpty {
+                        continue
+                    } else {
+                        break
+                    }
+                }
+                if trimmed.contains(" ") || trimmed.hasPrefix("Warning") || trimmed.hasPrefix("Error") {
                     break
                 }
-                names.append(trimmed)
+                if !names.contains(trimmed) {
+                    names.append(trimmed)
+                }
             } else if !trimmed.isEmpty && !trimmed.contains(" ") && !trimmed.hasPrefix("Warning") && !trimmed.hasPrefix("Run") && !trimmed.hasPrefix("Error") && !trimmed.contains(":") {
-                names.append(trimmed)
+                if !names.contains(trimmed) {
+                    names.append(trimmed)
+                }
             }
         }
         return names
@@ -297,7 +316,11 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
         }
 
         let daemonPackages = ["redis", "postgresql", "mysql", "nginx", "dnsmasq", "mongodb-community", "mariadb", "httpd"]
-        if daemonPackages.contains(package.name.lowercased()) {
+        let isDaemon = daemonPackages.contains(where: {
+            let pkgLower = package.name.lowercased()
+            return pkgLower == $0 || pkgLower.hasPrefix("\($0)@")
+        })
+        if isDaemon {
             serviceNotice = "This package runs background daemons. You should restart the service after upgrading."
             verifyCommands.append("brew services restart \(package.name)")
         }
@@ -317,8 +340,10 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
     }
 
     private func isMajorBump(current: String, target: String) -> Bool {
-        let curMajor = current.prefix(while: { $0.isNumber })
-        let tgtMajor = target.prefix(while: { $0.isNumber })
+        let curDigits = current.drop(while: { !$0.isNumber })
+        let tgtDigits = target.drop(while: { !$0.isNumber })
+        let curMajor = curDigits.prefix(while: { $0.isNumber })
+        let tgtMajor = tgtDigits.prefix(while: { $0.isNumber })
         guard !curMajor.isEmpty, !tgtMajor.isEmpty else { return false }
         return curMajor != tgtMajor
     }
@@ -331,7 +356,7 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
         var title = "Custom Development Stack"
         var formulae: [String] = ["git", "curl"]
         var casks: [String] = []
-        var taps: [String] = ["homebrew/core", "homebrew/cask"]
+        let taps: [String] = ["homebrew/core", "homebrew/cask"]
         var explanation = "Tailored Brewfile configuration generated for your workflow."
 
         if lower.contains("web") || lower.contains("node") || lower.contains("react") || lower.contains("typescript") {
@@ -365,9 +390,12 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
             casks.append(contentsOf: ["visual-studio-code"])
         }
 
-        // Deduplicate
+        // Deduplicate and resolve formula/cask conflicts
         formulae = Array(NSOrderedSet(array: formulae)).compactMap { $0 as? String }
         casks = Array(NSOrderedSet(array: casks)).compactMap { $0 as? String }
+        if casks.contains("docker") {
+            formulae.removeAll(where: { $0 == "docker" })
+        }
 
         var lines: [String] = []
         lines.append("# Generated by Homebrew AI Environment Architect")
@@ -945,7 +973,6 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
         if (nameA.contains("grep") && nameB.contains("ripgrep")) || (nameB.contains("grep") && nameA.contains("ripgrep")) {
             let isARipgrep = nameA.contains("ripgrep")
             let rgName = isARipgrep ? packageA.displayName : packageB.displayName
-            let grepName = isARipgrep ? packageB.displayName : packageA.displayName
 
             verdict = "\(rgName) is vastly superior for modern software development and interactive shell use, running up to 10x faster and automatically filtering non-code files."
             let rgStrengths = [
@@ -1004,9 +1031,11 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
             bestForA = "Users prioritising established stability and customisation within \(packageA.displayName)"
             bestForB = "Users looking for modern ergonomics and capabilities in \(packageB.displayName)"
 
+            let versionA = packageA.latestVersion.isEmpty ? "Unknown" : packageA.latestVersion
+            let versionB = packageB.latestVersion.isEmpty ? "Unknown" : packageB.latestVersion
             matrix = [
                 AIComparisonRow(feature: "Package Type", packageAValue: kindA, packageBValue: kindB),
-                AIComparisonRow(feature: "Latest Version", packageAValue: packageA.latestVersion, packageBValue: packageB.latestVersion),
+                AIComparisonRow(feature: "Latest Version", packageAValue: versionA, packageBValue: versionB),
                 AIComparisonRow(
                     feature: "Dependencies",
                     packageAValue: "\(packageA.dependencies.count) direct dependencies",

@@ -66,6 +66,7 @@ public struct AISystemHardwareProfile: Sendable, Equatable {
     }
 
     public func fit(for model: AIModelSpec) -> AISystemFit {
+        guard totalMemoryGB > 0 else { return .heavy }
         let memoryRatio = model.requiredMemoryGB / totalMemoryGB
         if memoryRatio <= 0.25 {
             return .optimal

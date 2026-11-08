@@ -132,6 +132,7 @@ final class InstalledPackageDetailViewModel {
     func analyzeUpgradeImpact() async {
         guard let aiEngine, showsUpgradeAvailable else { return }
         isAnalyzingUpgradeImpact = true
+        defer { isAnalyzingUpgradeImpact = false }
         let targetVersion = package.latestVersion.isEmpty ? "latest" : package.latestVersion
         let dependents = dependentRelationships.map(\.displayName)
         let impact = await aiEngine.assessUpgradeImpact(
@@ -140,12 +141,18 @@ final class InstalledPackageDetailViewModel {
             dependents: dependents
         )
         self.upgradeImpact = impact
-        self.isAnalyzingUpgradeImpact = false
     }
 
     func runVerificationCommand(_ command: String) {
         let parts = command.split(separator: " ").map(String.init)
-        guard parts.first == "brew" else { return }
+        guard parts.first == "brew",
+              !command.contains(";"),
+              !command.contains("&&"),
+              !command.contains("|"),
+              !command.contains(">"),
+              !command.contains("<"),
+              !command.contains("sudo")
+        else { return }
         let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
         guard !args.isEmpty else { return }
         let brewCommand = commandFactory.doctorFixCommand(arguments: args)
@@ -185,6 +192,8 @@ final class InstalledPackageDetailViewModel {
         // One view model serves every selection, so drop the old subject's chrome before the reseed.
         if newPackage.id != package.id {
             operationPhase = .idle
+            upgradeImpact = nil
+            isAnalyzingUpgradeImpact = false
         }
         package = newPackage
         showUninstallConfirmation = false

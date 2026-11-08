@@ -22,12 +22,14 @@ public final class BrewAIModelManager: AIModelManaging {
     public private(set) var downloadProgresses: [String: Double] = [:]
     private var downloadTasks: [String: Task<Void, Never>] = [:]
 
-    public init(defaults: UserDefaults = .standard) {
+    public init(modelsDirectory: URL? = nil, defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        self.modelsDirectory = appSupport.appendingPathComponent("sh.brew.app/Models", isDirectory: true)
+        let directory = modelsDirectory ?? (
+            FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first ?? URL(fileURLWithPath: NSTemporaryDirectory())
+        ).appendingPathComponent("sh.brew.app/Models", isDirectory: true)
+        self.modelsDirectory = directory
 
-        try? FileManager.default.createDirectory(at: modelsDirectory, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(at: self.modelsDirectory, withIntermediateDirectories: true)
         self.activeModelID = defaults.string(forKey: activeModelKey) ?? AIModelCatalog.qwenCoder15B.id
     }
 

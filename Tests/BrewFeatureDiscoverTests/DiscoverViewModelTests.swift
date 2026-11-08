@@ -643,6 +643,36 @@ struct DiscoverViewModelTests {
         #expect(viewModel.activeState.isLoaded)
         #expect(!viewModel.visiblePackages.isEmpty)
     }
+
+    @Test func `semantic search falls back to token matching for natural language queries`() async {
+        let ripgrepPkg = cataloguePackage(name: "ripgrep")
+        let catalogue = StubCatalogueRepository(searchHandler: { query in
+            if query == "fast rust grep" {
+                return []
+            }
+            if query == "grep" {
+                return [ripgrepPkg]
+            }
+            return []
+        })
+
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: [])
+            ),
+            catalogueRepository: catalogue,
+            installedRepository: installedRepo(),
+            aiEngine: PreviewSupport.aiEngine
+        )
+
+        viewModel.isSemanticSearch = true
+        viewModel.query = "fast rust grep"
+        await viewModel.search()
+
+        #expect(viewModel.isSearching)
+        #expect(viewModel.activeState.isLoaded)
+        #expect(viewModel.visiblePackages.contains(where: { $0.name == "ripgrep" }))
+    }
 }
 
 @Observable
@@ -680,15 +710,19 @@ private final class MutableDiscoverPackagesRepository: DiscoverPackagesRepositor
 @MainActor
 private struct StubCatalogueRepository: CatalogueRepository {
     var searchResults: [BrewPackage] = []
+    var searchHandler: ((String) -> [BrewPackage])?
     var searchError: Error?
 
     func package(for _: HomebrewPackageID) async throws -> BrewPackage? {
         nil
     }
 
-    func searchPackages(matching _: String, limit _: Int) async throws -> [BrewPackage] {
+    func searchPackages(matching query: String, limit _: Int) async throws -> [BrewPackage] {
         if let searchError {
             throw searchError
+        }
+        if let searchHandler {
+            return searchHandler(query)
         }
         return searchResults
     }

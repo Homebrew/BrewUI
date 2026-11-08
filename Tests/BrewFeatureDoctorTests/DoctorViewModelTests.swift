@@ -559,9 +559,17 @@ struct DoctorViewModelTests {
 
         viewModel.runAICommand("sudo rm -rf /")
         viewModel.runAICommand("xcode-select --install")
+        viewModel.runAICommand("brew cleanup; rm -rf /")
+        viewModel.runAICommand("brew cleanup && rm -rf /")
+        viewModel.runAICommand("brew cleanup | cat")
+        viewModel.runAICommand("brew cleanup > /dev/null")
 
         #expect(!viewModel.isAICommandRunning("sudo rm -rf /"))
         #expect(!viewModel.isAICommandRunning("xcode-select --install"))
+        #expect(!viewModel.isAICommandRunning("brew cleanup; rm -rf /"))
+        #expect(!viewModel.isAICommandRunning("brew cleanup && rm -rf /"))
+        #expect(!viewModel.isAICommandRunning("brew cleanup | cat"))
+        #expect(!viewModel.isAICommandRunning("brew cleanup > /dev/null"))
     }
 
     @Test func `runAICommand executes brew command and records running state`() async {

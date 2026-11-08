@@ -170,18 +170,25 @@ final class InstalledViewModel {
     func analyzeHousekeeping() async {
         guard let aiEngine else { return }
         isAnalyzingHousekeeping = true
-        let allPackages = allRows
-        let candidateLeaves = allPackages.filter { !$0.installedOnRequest }.map(\.name)
-        let leaves = candidateLeaves.isEmpty ? allPackages.prefix(5).map(\.name) : candidateLeaves
-        let report = await aiEngine.assessHousekeeping(installedPackages: allPackages, leaves: Array(leaves))
+        defer { isAnalyzingHousekeeping = false }
+        let packages = repository.userManagedPackages.isEmpty ? allRows : repository.userManagedPackages
+        let candidateLeaves = packages.filter { !$0.installedOnRequest }.map(\.name)
+        let leaves = candidateLeaves.isEmpty ? packages.prefix(5).map(\.name) : candidateLeaves
+        let report = await aiEngine.assessHousekeeping(installedPackages: packages, leaves: Array(leaves))
         self.housekeepingReport = report
-        self.isAnalyzingHousekeeping = false
     }
 
     func runHousekeepingCommand(_ command: String) {
         guard let commandFactory, let brewCommandCenter else { return }
         let parts = command.split(separator: " ").map(String.init)
-        guard parts.first == "brew" else { return }
+        guard parts.first == "brew",
+              !command.contains(";"),
+              !command.contains("&&"),
+              !command.contains("|"),
+              !command.contains(">"),
+              !command.contains("<"),
+              !command.contains("sudo")
+        else { return }
         let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
         guard !args.isEmpty else { return }
         let brewCommand = commandFactory.doctorFixCommand(arguments: args)

@@ -299,7 +299,25 @@ struct InstalledViewModelTests {
         #expect(!vm.housekeepingReport!.orphanCandidates.isEmpty)
     }
 
-    @Test @MainActor func `runHousekeepingCommand rejects non-brew commands`() async {
+    @Test @MainActor func `analyzeHousekeeping uses full inventory even when hideDependencies and search are active`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                .fixture(name: "git", kind: .formula, installedOnRequest: true),
+                .fixture(name: "libpng", kind: .formula, installedOnRequest: false),
+            ],
+            aiEngine: PreviewSupport.aiEngine,
+        )
+
+        vm.hideDependencies = true
+        vm.searchQuery = "git"
+
+        await vm.analyzeHousekeeping()
+
+        #expect(vm.housekeepingReport != nil)
+        #expect(vm.housekeepingReport?.orphanCandidates.contains(where: { $0.packageName == "libpng" }) == true)
+    }
+
+    @Test @MainActor func `runHousekeepingCommand rejects non-brew commands and shell metacharacters`() async {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [.fixture(name: "git")],
             aiEngine: PreviewSupport.aiEngine,
@@ -307,5 +325,9 @@ struct InstalledViewModelTests {
 
         vm.runHousekeepingCommand("rm -rf /")
         vm.runHousekeepingCommand("echo clean")
+        vm.runHousekeepingCommand("brew cleanup; rm -rf /")
+        vm.runHousekeepingCommand("brew cleanup && rm -rf /")
+        vm.runHousekeepingCommand("brew cleanup | cat")
+        vm.runHousekeepingCommand("brew cleanup > /dev/null")
     }
 }

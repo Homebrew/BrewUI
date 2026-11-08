@@ -623,11 +623,35 @@ extension InstalledDetailsViewModelTests {
         #expect(!viewModel.isAnalyzingUpgradeImpact)
     }
 
-    @Test @MainActor func `runVerificationCommand rejects non-brew commands`() {
+    @Test @MainActor func `update package resets upgradeImpact when selection changes`() async {
+        let package = InstalledBrewPackage.fixture(
+            name: "node",
+            latestVersion: "22.0.0",
+            installedVersions: ["20.0.0"],
+            outdated: true
+        )
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            aiEngine: PreviewSupport.aiEngine
+        )
+
+        await viewModel.analyzeUpgradeImpact()
+        #expect(viewModel.upgradeImpact != nil)
+
+        viewModel.update(package: InstalledBrewPackage.fixture(name: "curl"))
+        #expect(viewModel.upgradeImpact == nil)
+        #expect(!viewModel.isAnalyzingUpgradeImpact)
+    }
+
+    @Test @MainActor func `runVerificationCommand rejects non-brew commands and shell metacharacters`() {
         let package = InstalledBrewPackage.fixture(name: "node")
         let viewModel = makeInstalledDetailsViewModel(package: package)
 
         viewModel.runVerificationCommand("rm -rf /")
         viewModel.runVerificationCommand("echo test")
+        viewModel.runVerificationCommand("brew test node; rm -rf /")
+        viewModel.runVerificationCommand("brew test node && rm -rf /")
+        viewModel.runVerificationCommand("brew test node | cat")
+        viewModel.runVerificationCommand("brew test node > /dev/null")
     }
 }

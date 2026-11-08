@@ -256,14 +256,149 @@ struct AIEngineTests {
         guard let defaults = UserDefaults(suiteName: defaultsSuite) else { return }
         defer { defaults.removePersistentDomain(forName: defaultsSuite) }
 
-        let manager = BrewAIModelManager(defaults: defaults)
+        let tempDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString, isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let manager = BrewAIModelManager(modelsDirectory: tempDir, defaults: defaults)
         #expect(!manager.availableModels.isEmpty)
 
         let firstModel = manager.availableModels[0]
+        #expect(manager.downloadState(for: firstModel) == .notDownloaded)
+
         manager.setActiveModel(id: firstModel.id)
         #expect(manager.activeModelID == firstModel.id)
 
         manager.setActiveModel(id: nil as String?)
         #expect(manager.activeModelID == nil)
+    }
+
+    @Test @MainActor func `model manager deleteModel cancels download and removes file`() {
+        let defaultsSuite = "test.brew.modelmanager.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: defaultsSuite) else { return }
+        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
+
+        let tempDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: tempDir) }
+
+        let manager = BrewAIModelManager(modelsDirectory: tempDir, defaults: defaults)
+        let model = manager.availableModels[0]
+
+        // Manually place a fake model file in tempDir
+        let fileURL = tempDir.appendingPathComponent(model.filename)
+        try? "marker".write(to: fileURL, atomically: true, encoding: .utf8)
+        #expect(manager.downloadState(for: model) == .ready)
+
+        manager.setActiveModel(id: model.id)
+        manager.deleteModel(for: model)
+
+        #expect(manager.downloadState(for: model) == .notDownloaded)
+        #expect(manager.activeModelID == nil)
+        #expect(!FileManager.default.fileExists(atPath: fileURL.path))
+    }
+
+    @Test func `engine extracts formula names across blank lines in doctor output`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let doctorText = """
+        Warning: You have unlinked kegs in your Cellar.
+        Leaving kegs unlinked can lead to build-trouble. Run `brew link` on these:
+
+          `openssl@3`
+          readline
+
+        Homebrew doctor finished.
+        """
+        let result = await engine.analyzeDoctorIssue(
+            title: "You have unlinked kegs in your Cellar",
+            rawOutput: doctorText
+        )
+
+        #expect(result.suggestedCommands.contains("brew link --overwrite openssl@3"))
+        #expect(result.suggestedCommands.contains("brew link --overwrite readline"))
+    }
+
+    @Test func `engine detects major version bumps with v prefix and versioned daemons`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let package = InstalledBrewPackage.fixture(
+            name: "postgresql@16",
+            latestVersion: "v17.0.0",
+            installedVersions: ["v16.4.0"]
+        )
+
+        let impact = await engine.assessUpgradeImpact(
+            package: package,
+            targetVersion: "v17.0.0",
+            dependents: ["app-backend"]
+        )
+
+        #expect(impact.isMajorVersionBump)
+        #expect(impact.riskLevel == .high)
+        #expect(impact.serviceRestartNotice != nil)
+        #expect(impact.recommendedVerificationCommands.contains("brew services restart postgresql@16"))
+    }
+
+    @Test func `engine handles non-major version bump with low risk`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let package = InstalledBrewPackage.fixture(
+            name: "curl",
+            latestVersion: "v8.10.1",
+            installedVersions: ["v8.10.0"]
+        )
+
+        let impact = await engine.assessUpgradeImpact(
+            package: package,
+            targetVersion: "v8.10.1",
+            dependents: []
+        )
+
+        #expect(!impact.isMajorVersionBump)
+        #expect(impact.riskLevel == .low)
+    }
+
+    @Test func `engine extracts package name ignoring flags on command failure`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let failure = await engine.analyzeCommandFailure(
+            command: "brew install ripgrep --verbose --debug",
+            exitCode: 1,
+            output: "Error: SHA256 mismatch"
+        )
+
+        #expect(failure.suggestedCommands.contains("brew fetch --force ripgrep"))
+    }
+
+    @Test func `engine handles command failure with no package argument safely`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let failure = await engine.analyzeCommandFailure(
+            command: "brew install",
+            exitCode: 1,
+            output: "Error: already installed"
+        )
+
+        #expect(failure.suggestedCommands.contains("brew doctor"))
+    }
+
+    @Test func `hardware profile with zero memory defaults to heavy without crashing`() {
+        let zeroProfile = AISystemHardwareProfile(totalMemoryBytes: 0)
+        let spec = AIModelCatalog.smolLM2
+        #expect(zeroProfile.fit(for: spec) == .heavy)
+    }
+
+    @Test func `devops brewfile generation avoids docker formula and cask collision`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let env = await engine.generateBrewfileEnvironment(prompt: "Devops Docker and cloud stack")
+
+        #expect(env.casks.contains("docker"))
+        #expect(!env.formulae.contains("docker"))
+    }
+
+    @Test func `engine comparison formats unknown versions cleanly`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let packageA = BrewPackage.fixture(name: "pkg-a", latestVersion: "")
+        let packageB = BrewPackage.fixture(name: "pkg-b", latestVersion: "1.2.3")
+
+        let comparison = await engine.comparePackages(packageA: packageA, packageB: packageB)
+        let versionRow = comparison.matrix.first(where: { $0.feature == "Latest Version" })
+        #expect(versionRow?.packageAValue == "Unknown")
+        #expect(versionRow?.packageBValue == "1.2.3")
     }
 }
