@@ -7,6 +7,7 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
+    @Binding var searchQuery: String
 
     @State private var searchFocus = SearchFocusArbiter()
     @FocusState private var focus: SearchFocusTarget?
@@ -32,18 +33,6 @@ struct DiscoverPackagesView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.discoverScreen)
-        // `.searchable` injects its field into the window toolbar, and SwiftUI offers no hook to
-        // put an accessibility identifier on it — an `.axid` here would land on this content and
-        // overwrite `.discoverScreen`. `AXID.discoverSearchField` therefore stays unattached until
-        // the field is custom; query it via `app.searchFields` for now.
-        .searchable(
-            text: $viewModel.query,
-            isPresented: searchFieldPresented,
-            placement: .toolbar,
-            prompt: String(localized: "Search Homebrew’s Packages", bundle: #bundle, comment: "Search field placeholder, Discover tab"),
-        )
-        .searchFocused($focus, equals: .searchField)
-        .focusedSceneValue(\.focusSearchField, focusSearchField)
         .onChange(of: searchFocus.target) { _, _ in
             moveFocusToTarget()
         }
@@ -59,24 +48,22 @@ struct DiscoverPackagesView: View {
             }
             searchFocus.clickLandedOutsideSearchField(searchFieldIsEmpty: viewModel.query.isEmpty)
         }
-        .onChange(of: searchFocus.isSearchFieldPresented) { _, presented in
-            guard presented else {
-                return
-            }
-            // The field only reaches the toolbar after this update commits, so a ⌘F that had to
-            // present it first has to wait a turn before it can be handed the keyboard.
-            Task { @MainActor in
-                searchFocus.searchFieldDidPresent()
-            }
-        }
         .onChange(of: canFocusList, initial: true) { _, canFocus in
             if canFocus {
                 searchFocus.contentDidLoad()
             }
         }
         .onChange(of: viewModel.query, initial: true) { _, query in
+            if searchQuery != query {
+                searchQuery = query
+            }
             if !query.isEmpty {
                 searchFocus.searchFieldDidPresent()
+            }
+        }
+        .onChange(of: searchQuery, initial: true) { _, query in
+            if viewModel.query != query {
+                viewModel.query = query
             }
         }
         .task(id: viewModel.query) {
@@ -99,25 +86,6 @@ struct DiscoverPackagesView: View {
             }
             focus = searchFocus.target
         }
-    }
-
-    private var focusSearchField: FocusSearchFieldAction {
-        FocusSearchFieldAction {
-            searchFocus.requestSearchFocus()
-        }
-    }
-
-    private var searchFieldPresented: Binding<Bool> {
-        Binding(
-            get: { searchFocus.isSearchFieldPresented },
-            set: { presented in
-                if presented {
-                    searchFocus.searchFieldDidPresent()
-                } else {
-                    searchFocus.searchFieldDidDismiss()
-                }
-            },
-        )
     }
 
     /// Clearing the query back to empty must not kick the cursor out of the search field.

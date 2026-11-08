@@ -10,6 +10,15 @@ import SwiftUI
 public struct InstalledUpgradesRoot: View {
     public enum Mode: Sendable { case installed, upgrades }
 
+    public static func searchPrompt(for mode: Mode) -> String {
+        switch mode {
+        case .installed:
+            String(localized: "Search Installed Packages", bundle: #bundle, comment: "Search field placeholder, Installed tab")
+        case .upgrades:
+            String(localized: "Search Upgrades", bundle: #bundle, comment: "Search field placeholder, Upgrades tab")
+        }
+    }
+
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.installedPreferences) private var installedPreferences
     @Environment(\.brewCommandCenter) private var brewCommandCenter
@@ -18,13 +27,16 @@ public struct InstalledUpgradesRoot: View {
 
     private let mode: Mode
     @Binding private var deepLinkSelection: InstalledBrewPackage.ID?
+    @Binding private var searchQuery: String
 
     public init(
         mode: Mode,
         deepLinkSelection: Binding<InstalledBrewPackage.ID?> = .constant(nil),
+        searchQuery: Binding<String> = .constant(""),
     ) {
         self.mode = mode
         _deepLinkSelection = deepLinkSelection
+        _searchQuery = searchQuery
     }
 
     public var body: some View {
@@ -36,6 +48,7 @@ public struct InstalledUpgradesRoot: View {
             navigateToInstalledPackage: navigateToInstalledPackage,
             mode: mode,
             deepLinkSelection: $deepLinkSelection,
+            searchQuery: $searchQuery,
         )
     }
 }
@@ -52,6 +65,7 @@ struct InstalledUpgradesContainer: View {
     private let mode: InstalledUpgradesRoot.Mode
     private let navigateToInstalledPackage: @MainActor (InstalledBrewPackage.ID) -> Void
     @Binding private var deepLinkSelection: InstalledBrewPackage.ID?
+    @Binding private var searchQuery: String
 
     init(
         installedPackagesRepository: any InstalledPackagesRepository,
@@ -61,6 +75,7 @@ struct InstalledUpgradesContainer: View {
         navigateToInstalledPackage: @escaping @MainActor (InstalledBrewPackage.ID) -> Void,
         mode: InstalledUpgradesRoot.Mode,
         deepLinkSelection: Binding<InstalledBrewPackage.ID?>,
+        searchQuery: Binding<String>,
     ) {
         _installed = State(
             initialValue: InstalledViewModel(
@@ -79,18 +94,11 @@ struct InstalledUpgradesContainer: View {
         self.mode = mode
         self.navigateToInstalledPackage = navigateToInstalledPackage
         _deepLinkSelection = deepLinkSelection
+        _searchQuery = searchQuery
     }
 
     var body: some View {
         content
-            .searchable(
-                text: activeSearchQuery,
-                isPresented: searchFieldPresented,
-                placement: .toolbar,
-                prompt: activeSearchPrompt,
-            )
-            .searchFocused($focus, equals: .searchField)
-            .focusedSceneValue(\.focusSearchField, focusSearchField)
             .onChange(of: searchFocus.target) { _, _ in
                 moveFocusToTarget()
             }
@@ -130,8 +138,16 @@ struct InstalledUpgradesContainer: View {
             // Also this view's only read of the query, which is what subscribes it to changes:
             // the binding handed to `.searchable` is lazy and subscribes to nothing.
             .onChange(of: activeSearchQuery.wrappedValue, initial: true) { _, query in
+                if searchQuery != query {
+                    searchQuery = query
+                }
                 if !query.isEmpty {
                     searchFocus.searchFieldDidPresent()
+                }
+            }
+            .onChange(of: searchQuery, initial: true) { _, query in
+                if activeSearchQuery.wrappedValue != query {
+                    activeSearchQuery.wrappedValue = query
                 }
             }
     }
@@ -146,25 +162,6 @@ struct InstalledUpgradesContainer: View {
             }
             focus = searchFocus.target
         }
-    }
-
-    private var focusSearchField: FocusSearchFieldAction {
-        FocusSearchFieldAction {
-            searchFocus.requestSearchFocus()
-        }
-    }
-
-    private var searchFieldPresented: Binding<Bool> {
-        Binding(
-            get: { searchFocus.isSearchFieldPresented },
-            set: { presented in
-                if presented {
-                    searchFocus.searchFieldDidPresent()
-                } else {
-                    searchFocus.searchFieldDidDismiss()
-                }
-            },
-        )
     }
 
     @ViewBuilder private var content: some View {
