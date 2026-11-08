@@ -179,9 +179,17 @@ final class InstalledPackageDetailViewModel {
 
     private func refreshDependents() async {
         let dependents = await installedDependentsRepository.installedDependents(for: package.id)
-        dependentRelationships = PackageRelationshipItem.dependents(dependents)
+        let oldDependents = dependentRelationships.map(\.displayName)
+        let newRelationships = PackageRelationshipItem.dependents(dependents)
+        let newDependents = newRelationships.map(\.displayName)
+        dependentRelationships = newRelationships
         if !uninstallItem.isBlockedByDependents {
             showUninstallBlockedCallout = false
+        }
+        if oldDependents != newDependents {
+            upgradeImpact = nil
+            isAnalyzingUpgradeImpact = false
+            upgradeAnalysisGeneration += 1
         }
     }
 
@@ -198,9 +206,15 @@ final class InstalledPackageDetailViewModel {
         guard newPackage != package else {
             return
         }
-        // One view model serves every selection, so drop the old subject's chrome before the reseed.
-        if newPackage.id != package.id {
-            operationPhase = .idle
+        let inputsChanged = newPackage.id != package.id
+            || newPackage.latestVersion != package.latestVersion
+            || newPackage.installedVersions != package.installedVersions
+            || newPackage.outdated != package.outdated
+
+        if inputsChanged {
+            if newPackage.id != package.id {
+                operationPhase = .idle
+            }
             upgradeImpact = nil
             isAnalyzingUpgradeImpact = false
             upgradeAnalysisGeneration += 1

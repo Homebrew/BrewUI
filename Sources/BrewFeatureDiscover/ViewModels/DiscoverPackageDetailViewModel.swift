@@ -207,6 +207,10 @@ final class DiscoverPackageDetailViewModel {
             }
             do {
                 try await brewCommandCenter.perform(command, id: operationID)
+                let stream = await brewCommandCenter.phaseChanges(for: operationID)
+                for await phase in stream where !DiscoverInstallBusyPresentation.showsInstallBusy(phase: phase) {
+                    break
+                }
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {
@@ -233,6 +237,10 @@ final class DiscoverPackageDetailViewModel {
             }
             do {
                 try await brewCommandCenter.perform(command, id: operationID)
+                let stream = await brewCommandCenter.phaseChanges(for: operationID)
+                for await phase in stream where !DiscoverInstallBusyPresentation.showsInstallBusy(phase: phase) {
+                    break
+                }
             } catch {
                 let latestPhase = await brewCommandCenter.phase(for: operationID)
                 if case let .failed(reason: failure) = latestPhase {

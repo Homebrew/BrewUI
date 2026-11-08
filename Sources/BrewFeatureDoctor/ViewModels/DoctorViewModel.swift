@@ -357,6 +357,13 @@ extension DoctorViewModel {
         })
         guard !isDestructive, !hasDestructiveFlag else { return false }
 
+        if sub == "link" {
+            let formulaTargets = parts.dropFirst(2).filter { !$0.hasPrefix("-") }
+            guard !formulaTargets.isEmpty,
+                  formulaTargets.allSatisfy({ !$0.contains("/") && !$0.contains("\\") && !$0.contains("..") })
+            else { return false }
+        }
+
         if let item {
             let allowedSafeFixVerbs = ["cleanup", "doctor", "link", "prune", "update"]
             let matchesRunnable = item.primaryRunnableStep?.displayCommand == raw

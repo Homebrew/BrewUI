@@ -643,6 +643,32 @@ extension InstalledDetailsViewModelTests {
         #expect(!viewModel.isAnalyzingUpgradeImpact)
     }
 
+    @Test @MainActor func `update package resets upgradeImpact when target version changes`() async {
+        let package = InstalledBrewPackage.fixture(
+            name: "node",
+            latestVersion: "22.0.0",
+            installedVersions: ["20.0.0"],
+            outdated: true,
+        )
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            aiEngine: PreviewSupport.aiEngine,
+        )
+
+        await viewModel.analyzeUpgradeImpact()
+        #expect(viewModel.upgradeImpact != nil)
+
+        let updatedPackage = InstalledBrewPackage.fixture(
+            name: "node",
+            latestVersion: "22.1.0",
+            installedVersions: ["20.0.0"],
+            outdated: true,
+        )
+        viewModel.update(package: updatedPackage)
+        #expect(viewModel.upgradeImpact == nil)
+        #expect(!viewModel.isAnalyzingUpgradeImpact)
+    }
+
     @Test @MainActor func `analyzeUpgradeImpact ignores stale completion when selection changes back`() async {
         let packageA = InstalledBrewPackage.fixture(
             name: "node",

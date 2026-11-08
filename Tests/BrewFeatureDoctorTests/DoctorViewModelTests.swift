@@ -584,6 +584,7 @@ struct DoctorViewModelTests {
         #expect(!viewModel.isAICommandExecutable("brew link --overwrite openssl@3"))
         #expect(!viewModel.isAICommandExecutable("brew link --force openssl@3"))
         #expect(!viewModel.isAICommandExecutable("brew link -f openssl@3"))
+        #expect(!viewModel.isAICommandExecutable("brew link /opt/homebrew/Cellar"))
         #expect(!viewModel.isAICommandExecutable("brew uninstall openssl@3"))
         #expect(!viewModel.isAICommandExecutable("brew zap openssl@3"))
 

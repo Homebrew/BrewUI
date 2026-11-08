@@ -326,6 +326,26 @@ struct AIEngineTests {
         #expect(result.suggestedCommands == ["brew link openssl@3", "brew link readline"])
     }
 
+    @Test func `engine ignores stray paths in unlinked kegs doctor output`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let doctorText = """
+        Warning: You have unlinked kegs in your Cellar.
+        /opt/homebrew/Cellar
+        you may need to run `brew link` on these:
+
+          /opt/homebrew/Cellar
+          openssl@3
+
+        Homebrew doctor finished.
+        """
+        let result = await engine.analyzeDoctorIssue(
+            title: "You have unlinked kegs in your Cellar",
+            rawOutput: doctorText,
+        )
+
+        #expect(result.suggestedCommands == ["brew link openssl@3"])
+    }
+
     @Test func `engine detects major version bumps with v prefix and versioned daemons`() async {
         let engine = LocalAIEngine(modelManager: MockModelManager())
         let package = InstalledBrewPackage.fixture(
