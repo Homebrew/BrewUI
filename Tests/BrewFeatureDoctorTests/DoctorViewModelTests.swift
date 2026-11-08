@@ -572,6 +572,25 @@ struct DoctorViewModelTests {
         #expect(!viewModel.isAICommandRunning("brew cleanup > /dev/null"))
     }
 
+    @Test func `runAICommand rejects destructive verbs and flags`() {
+        let center = StubBrewCommandCenter()
+        let viewModel = DoctorViewModel(
+            doctorRepository: StubDoctorRepository(report: Self.issuesReport()),
+            brewCommandCenter: center,
+            commandFactory: StubMutatingCommandFactory(),
+            aiEngine: StubAIEngine(),
+        )
+
+        #expect(!viewModel.isAICommandExecutable("brew link --overwrite openssl@3"))
+        #expect(!viewModel.isAICommandExecutable("brew link --force openssl@3"))
+        #expect(!viewModel.isAICommandExecutable("brew link -f openssl@3"))
+        #expect(!viewModel.isAICommandExecutable("brew uninstall openssl@3"))
+        #expect(!viewModel.isAICommandExecutable("brew zap openssl@3"))
+
+        viewModel.runAICommand("brew link --overwrite openssl@3")
+        #expect(!viewModel.isAICommandRunning("brew link --overwrite openssl@3"))
+    }
+
     @Test func `runAICommand executes brew command and records running state`() {
         let center = Self.recordingCenter(cleanupExitCode: 0)
         let viewModel = DoctorViewModel(

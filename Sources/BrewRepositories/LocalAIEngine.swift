@@ -44,7 +44,7 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
         if lower.contains("unlinked kegs") || lower.contains("not linked") {
             let formulaNames = extractFormulaNames(from: rawOutput)
             let commands: [String] = if !formulaNames.isEmpty {
-                formulaNames.map { "brew link --overwrite \($0)" }
+                formulaNames.map { "brew link \($0)" }
             } else {
                 ["brew doctor"]
             }

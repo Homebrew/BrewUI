@@ -351,7 +351,11 @@ extension DoctorViewModel {
 
         let sub = parts.count > 1 ? parts[1] : ""
         let isDestructive = ["uninstall", "zap", "rm"].contains(sub)
-        guard !isDestructive else { return false }
+        let destructiveFlags: Set = ["--overwrite", "--force", "-f", "--zap"]
+        let hasDestructiveFlag = parts.contains(where: {
+            destructiveFlags.contains($0) || $0.hasPrefix("--overwrite=") || $0.hasPrefix("--force=")
+        })
+        guard !isDestructive, !hasDestructiveFlag else { return false }
 
         if let item {
             let allowedSafeFixVerbs = ["cleanup", "doctor", "link", "prune", "update"]

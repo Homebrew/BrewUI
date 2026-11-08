@@ -323,8 +323,8 @@ struct AIEngineTests {
             rawOutput: doctorText,
         )
 
-        #expect(result.suggestedCommands.contains("brew link --overwrite openssl@3"))
-        #expect(result.suggestedCommands.contains("brew link --overwrite readline"))
+        #expect(result.suggestedCommands.contains("brew link openssl@3"))
+        #expect(result.suggestedCommands.contains("brew link readline"))
     }
 
     @Test func `engine detects major version bumps with v prefix and versioned daemons`() async {

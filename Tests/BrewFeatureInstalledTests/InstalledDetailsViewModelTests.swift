@@ -643,6 +643,51 @@ extension InstalledDetailsViewModelTests {
         #expect(!viewModel.isAnalyzingUpgradeImpact)
     }
 
+    @Test @MainActor func `analyzeUpgradeImpact ignores stale completion when selection changes back`() async {
+        let packageA = InstalledBrewPackage.fixture(
+            name: "node",
+            latestVersion: "22.0.0",
+            installedVersions: ["20.0.0"],
+            outdated: true,
+        )
+        let packageB = InstalledBrewPackage.fixture(name: "curl")
+        let (startedStream, startedContinuation) = AsyncStream<Void>.makeStream()
+        let (resumeStream, resumeContinuation) = AsyncStream<Void>.makeStream()
+
+        let suspendingEngine = SuspendingUpgradeAIEngine {
+            startedContinuation.yield()
+            for await _ in resumeStream {
+                break
+            }
+        }
+
+        let viewModel = makeInstalledDetailsViewModel(
+            package: packageA,
+            aiEngine: suspendingEngine,
+        )
+
+        let task = Task {
+            await viewModel.analyzeUpgradeImpact()
+        }
+
+        // Wait until assessUpgradeImpact is actively executing
+        for await _ in startedStream {
+            break
+        }
+
+        // Switch selection away and back to simulate rapid toggling
+        viewModel.update(package: packageB)
+        viewModel.update(package: packageA)
+
+        // Resume engine
+        resumeContinuation.yield()
+        resumeContinuation.finish()
+        await task.value
+
+        #expect(viewModel.upgradeImpact == nil)
+        #expect(!viewModel.isAnalyzingUpgradeImpact)
+    }
+
     @Test @MainActor func `runVerificationCommand rejects non-brew commands and shell metacharacters`() {
         let package = InstalledBrewPackage.fixture(name: "node")
         let viewModel = makeInstalledDetailsViewModel(package: package)
@@ -653,5 +698,47 @@ extension InstalledDetailsViewModelTests {
         viewModel.runVerificationCommand("brew test node && rm -rf /")
         viewModel.runVerificationCommand("brew test node | cat")
         viewModel.runVerificationCommand("brew test node > /dev/null")
+    }
+}
+
+private struct SuspendingUpgradeAIEngine: AIEngineProtocol {
+    let underlying = StubAIEngine()
+    let onAssess: @Sendable () async -> Void
+
+    func analyzeDoctorIssue(title: String, rawOutput: String) async -> AIAnalysisResult {
+        await underlying.analyzeDoctorIssue(title: title, rawOutput: rawOutput)
+    }
+
+    func analyzeCommandFailure(command: String, exitCode: Int, output: String) async -> AIAnalysisResult {
+        await underlying.analyzeCommandFailure(command: command, exitCode: exitCode, output: output)
+    }
+
+    func semanticSearch(query: String, catalogue: [BrewPackage], limit: Int) async -> [AISemanticSearchResult] {
+        await underlying.semanticSearch(query: query, catalogue: catalogue, limit: limit)
+    }
+
+    func assessUpgradeImpact(package: InstalledBrewPackage, targetVersion: String, dependents: [String]) async -> AIUpgradeImpact {
+        await onAssess()
+        return await underlying.assessUpgradeImpact(package: package, targetVersion: targetVersion, dependents: dependents)
+    }
+
+    func generateBrewfileEnvironment(prompt: String) async -> AIBrewfileEnvironment {
+        await underlying.generateBrewfileEnvironment(prompt: prompt)
+    }
+
+    func assessHousekeeping(installedPackages: [InstalledBrewPackage], leaves: [String]) async -> AIHousekeepingReport {
+        await underlying.assessHousekeeping(installedPackages: installedPackages, leaves: leaves)
+    }
+
+    func suggestAlternatives(for package: BrewPackage) async -> [AIPackageAlternative] {
+        await underlying.suggestAlternatives(for: package)
+    }
+
+    func recommendPackages(basedOn installedPackages: [InstalledBrewPackage]) async -> [AIPackageRecommendation] {
+        await underlying.recommendPackages(basedOn: installedPackages)
+    }
+
+    func comparePackages(packageA: BrewPackage, packageB: BrewPackage) async -> AIPackageComparison {
+        await underlying.comparePackages(packageA: packageA, packageB: packageB)
     }
 }

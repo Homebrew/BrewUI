@@ -34,7 +34,7 @@ final class DiscoverPackageDetailViewModel {
 
     /// True while an install is in flight, including the reconcile that lands the badge.
     var isInstalling: Bool {
-        DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
+        DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase) || activeInstallingPackageID != nil
     }
 
     init(
@@ -168,7 +168,10 @@ final class DiscoverPackageDetailViewModel {
     private(set) var activeInstallingPackageID: HomebrewPackageID?
 
     func isPackageInstalling(_ packageID: HomebrewPackageID) -> Bool {
-        isInstalling && activeInstallingPackageID == packageID
+        if activeInstallingPackageID == packageID {
+            return true
+        }
+        return packageID == discoveryPackage.id && DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
     }
 
     func update(package: DiscoveryBrewPackage) {
@@ -194,9 +197,7 @@ final class DiscoverPackageDetailViewModel {
         mutationTask?.cancel()
         mutationTask = Task { @MainActor [self] in
             defer {
-                if !isInstalling {
-                    activeInstallingPackageID = nil
-                }
+                activeInstallingPackageID = nil
             }
             do {
                 try await brewCommandCenter.perform(command, id: operationID)
@@ -222,9 +223,7 @@ final class DiscoverPackageDetailViewModel {
         mutationTask?.cancel()
         mutationTask = Task { @MainActor [self] in
             defer {
-                if !isInstalling {
-                    activeInstallingPackageID = nil
-                }
+                activeInstallingPackageID = nil
             }
             do {
                 try await brewCommandCenter.perform(command, id: operationID)

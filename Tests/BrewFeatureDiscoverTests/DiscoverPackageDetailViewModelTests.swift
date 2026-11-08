@@ -263,6 +263,21 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.installErrorMessage == nil)
     }
 
+    @Test @MainActor func `installPackage tracks installing state for alternative`() {
+        let factory = StubMutatingCommandFactory()
+        let altPackage = BrewPackage.fixture(name: "ripgrep")
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "grep"), thirtyDayInstallCount: 0),
+            installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: factory,
+        )
+
+        viewModel.installPackage(altPackage)
+        #expect(viewModel.isPackageInstalling(altPackage.id))
+        #expect(viewModel.isInstalling)
+    }
+
     @Test @MainActor func `update package resets alternatives and comparison state`() async {
         let viewModel = DiscoverPackageDetailViewModel(
             package: DiscoveryBrewPackage(package: .fixture(name: "grep"), thirtyDayInstallCount: 0),

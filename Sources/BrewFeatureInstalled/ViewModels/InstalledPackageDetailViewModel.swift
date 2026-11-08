@@ -23,6 +23,7 @@ final class InstalledPackageDetailViewModel {
 
     private(set) var upgradeImpact: AIUpgradeImpact?
     private(set) var isAnalyzingUpgradeImpact: Bool = false
+    private var upgradeAnalysisGeneration: Int = 0
 
     private(set) var package: InstalledBrewPackage
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
@@ -131,10 +132,12 @@ final class InstalledPackageDetailViewModel {
 
     func analyzeUpgradeImpact() async {
         guard let aiEngine, showsUpgradeAvailable else { return }
+        upgradeAnalysisGeneration += 1
+        let generation = upgradeAnalysisGeneration
         let currentPackageID = package.id
         isAnalyzingUpgradeImpact = true
         defer {
-            if package.id == currentPackageID {
+            if upgradeAnalysisGeneration == generation {
                 isAnalyzingUpgradeImpact = false
             }
         }
@@ -145,7 +148,7 @@ final class InstalledPackageDetailViewModel {
             targetVersion: targetVersion,
             dependents: dependents,
         )
-        guard package.id == currentPackageID else { return }
+        guard upgradeAnalysisGeneration == generation, package.id == currentPackageID else { return }
         upgradeImpact = impact
     }
 
@@ -200,6 +203,7 @@ final class InstalledPackageDetailViewModel {
             operationPhase = .idle
             upgradeImpact = nil
             isAnalyzingUpgradeImpact = false
+            upgradeAnalysisGeneration += 1
         }
         package = newPackage
         showUninstallConfirmation = false
