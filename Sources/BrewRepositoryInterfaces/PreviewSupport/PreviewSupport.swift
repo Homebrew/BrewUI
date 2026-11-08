@@ -327,21 +327,21 @@ public extension PreviewSupport {
 
 public struct StubAIEngine: AIEngineProtocol, Sendable {
     public init() {}
-    public func analyzeDoctorIssue(title: String, rawOutput: String) async -> AIAnalysisResult {
+    public func analyzeDoctorIssue(title: String, rawOutput _: String) async -> AIAnalysisResult {
         AIAnalysisResult(
             summary: "Sample explanation for preview: \(title)",
             rootCause: "Preview root cause",
             suggestedCommands: ["brew doctor"],
-            modelName: "Preview Model"
+            modelName: "Preview Model",
         )
     }
 
-    public func analyzeCommandFailure(command: String, exitCode: Int, output: String) async -> AIAnalysisResult {
+    public func analyzeCommandFailure(command: String, exitCode: Int, output _: String) async -> AIAnalysisResult {
         AIAnalysisResult(
             summary: "Sample failure explanation for preview: \(command)",
             rootCause: "Exit code \(exitCode)",
             suggestedCommands: ["brew update"],
-            modelName: "Preview Model"
+            modelName: "Preview Model",
         )
     }
 
@@ -362,7 +362,7 @@ public struct StubAIEngine: AIEngineProtocol, Sendable {
             summary: "Preview impact assessment for \(package.name).",
             breakingChangesWarning: nil,
             serviceRestartNotice: nil,
-            recommendedVerificationCommands: ["brew test \(package.name)"]
+            recommendedVerificationCommands: ["brew test \(package.name)"],
         )
     }
 
@@ -375,7 +375,7 @@ public struct StubAIEngine: AIEngineProtocol, Sendable {
             casks: ["visual-studio-code"],
             generatedBrewfileContent: "tap \"homebrew/core\"\nbrew \"git\"\nbrew \"node\"\ncask \"visual-studio-code\"",
             bundleCommand: "brew bundle --file=Brewfile",
-            explanation: "Curated development environment based on “\(prompt)”."
+            explanation: "Curated development environment based on “\(prompt)”.",
         )
     }
 
@@ -387,41 +387,41 @@ public struct StubAIEngine: AIEngineProtocol, Sendable {
                     packageName: pkg.name,
                     installedVersion: pkg.installedVersions.first ?? "1.0",
                     reason: "Top-level formula with no dependents detected",
-                    safetyLevel: .safeToPrune
+                    safetyLevel: .safeToPrune,
                 )
             },
             summary: "Housekeeping analysis preview.",
             recommendedCommands: ["brew autoremove --dry-run", "brew cleanup -s"],
-            reclaimableEstimate: "1.2 GB"
+            reclaimableEstimate: "1.2 GB",
         )
     }
 
-    public func suggestAlternatives(for package: BrewPackage) async -> [AIPackageAlternative] {
+    public func suggestAlternatives(for _: BrewPackage) async -> [AIPackageAlternative] {
         [
             AIPackageAlternative(
                 name: "ripgrep",
                 relationship: "Modern Rust Replacement",
                 headline: "Significantly faster search with regex, recursive search, and respect for .gitignore",
                 keyAdvantages: ["Up to 10x faster execution", "Automatic .gitignore filtering", "Coloured syntax output"],
-                installCommand: "brew install ripgrep"
-            )
+                installCommand: "brew install ripgrep",
+            ),
         ]
     }
 
-    public func recommendPackages(basedOn installedPackages: [InstalledBrewPackage]) async -> [AIPackageRecommendation] {
+    public func recommendPackages(basedOn _: [InstalledBrewPackage]) async -> [AIPackageRecommendation] {
         [
             AIPackageRecommendation(
                 packageName: "bat",
                 category: "Modern CLI",
                 reason: "Cat clone with syntax highlighting and Git integration",
-                confidenceScore: 0.95
+                confidenceScore: 0.95,
             ),
             AIPackageRecommendation(
                 packageName: "eza",
                 category: "Modern CLI",
                 reason: "Modern, feature-rich replacement for ls with tree views",
-                confidenceScore: 0.90
-            )
+                confidenceScore: 0.90,
+            ),
         ]
     }
 
@@ -437,22 +437,35 @@ public struct StubAIEngine: AIEngineProtocol, Sendable {
             matrix: [
                 AIComparisonRow(feature: "Search Performance", packageAValue: "Standard linear scan", packageBValue: "Multi-threaded SIMD accelerated"),
                 AIComparisonRow(feature: "Git Integration", packageAValue: "None", packageBValue: "Respects .gitignore by default"),
-                AIComparisonRow(feature: "Binary Files", packageAValue: "Scans or skips via flags", packageBValue: "Smart automatic skipping")
-            ]
+                AIComparisonRow(feature: "Binary Files", packageAValue: "Scans or skips via flags", packageBValue: "Smart automatic skipping"),
+            ],
         )
     }
 }
 
+@Observable
 @MainActor
 public final class StubAIModelManager: AIModelManaging {
     public init() {}
-    public var availableModels: [AIModelSpec] { AIModelCatalog.allModels }
-    public var activeModelID: String? { AIModelCatalog.qwenCoder15B.id }
-    public var hardwareProfile = AISystemHardwareProfile()
-    public func downloadState(for model: AIModelSpec) -> AIModelDownloadState { .ready }
-    public func setActiveModel(id: String?) {}
-    public func startDownload(for model: AIModelSpec) async {}
-    public func cancelDownload(for model: AIModelSpec) {}
-    public func deleteModel(for model: AIModelSpec) {}
-}
+    public var availableModels: [AIModelSpec] {
+        AIModelCatalog.allModels
+    }
 
+    public var activeModelID: String? {
+        AIModelCatalog.qwenCoder15B.id
+    }
+
+    public var hardwareProfile = AISystemHardwareProfile()
+    public var lastErrorMessage: String? {
+        nil
+    }
+
+    public func downloadState(for _: AIModelSpec) -> AIModelDownloadState {
+        .ready
+    }
+
+    public func setActiveModel(id _: String?) {}
+    public func startDownload(for _: AIModelSpec) async {}
+    public func cancelDownload(for _: AIModelSpec) {}
+    public func deleteModel(for _: AIModelSpec) {}
+}

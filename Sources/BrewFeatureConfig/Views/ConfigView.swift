@@ -50,18 +50,29 @@ struct ConfigView: View {
         .brewPaneContentWidth()
     }
 
-    @ViewBuilder
     private var content: some View {
-        if viewModel.isBrewNotFound {
-            brewNotFoundState
-        } else {
-            AsyncContentView(
-                state: viewModel.pageState,
-                onRetry: { Task { await viewModel.refresh() } },
-                loaded: { snapshot in
-                    loadedCards(snapshot: snapshot)
-                },
-            )
+        ScrollView {
+            VStack(alignment: .leading, spacing: BrewSpacing.lg) {
+                NoteCallout(settingsNote, tone: .info)
+                aiModelsCard
+                if viewModel.isBrewNotFound {
+                    brewNotFoundState
+                } else {
+                    AsyncContentView(
+                        state: viewModel.pageState,
+                        onRetry: { Task { await viewModel.refresh() } },
+                        loaded: { snapshot in
+                            VStack(alignment: .leading, spacing: BrewSpacing.lg) {
+                                ForEach(viewModel.sections(for: snapshot)) { section in
+                                    ConfigSectionCard(section: section)
+                                }
+                            }
+                        },
+                    )
+                }
+            }
+            .padding(BrewSpacing.lg)
+            .brewPaneContentWidth()
         }
     }
 
@@ -70,20 +81,6 @@ struct ConfigView: View {
         Homebrew settings are read from brew.env files. Shell profiles and exported variables are ignored. \
         Put user settings in ~/.homebrew/brew.env, then relaunch BrewUI.
         """, bundle: #bundle, comment: "Configuration tab: where Homebrew reads its settings from")
-    }
-
-    private func loadedCards(snapshot: BrewConfigSnapshot) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BrewSpacing.lg) {
-                NoteCallout(settingsNote, tone: .info)
-                aiModelsCard
-                ForEach(viewModel.sections(for: snapshot)) { section in
-                    ConfigSectionCard(section: section)
-                }
-            }
-            .padding(BrewSpacing.lg)
-            .brewPaneContentWidth()
-        }
     }
 
     private var aiModelsCard: some View {

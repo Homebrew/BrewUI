@@ -31,6 +31,7 @@ final class DiscoverViewModel {
 
     private var collectionPackages: [DiscoverCuratedCollection: [DiscoveryBrewPackage]] = [:]
     private(set) var curatedState: LoadState<[DiscoveryBrewPackage], String> = .loaded([])
+    private var activeSearchID = UUID()
 
     var isSemanticSearch: Bool = false {
         didSet {
@@ -359,68 +360,83 @@ extension DiscoverViewModel {
 
     func loadCollection(_ collection: DiscoverCuratedCollection) async {
         curatedState = .loading
-        if collection == .forYou {
-            let installed: [InstalledBrewPackage] = installedInventory?.state.value ?? []
-            if let aiEngine {
-                let recs = await aiEngine.recommendPackages(basedOn: installed)
-                var pkgs: [DiscoveryBrewPackage] = []
-                for rec in recs {
-                    let ref = rec.isCask ? HomebrewPackageID.cask(token: rec.packageName) : HomebrewPackageID.formula(name: rec.packageName)
-                    if let found = try? await catalogueRepository.package(for: ref) {
-                        pkgs.append(DiscoveryBrewPackage(package: found, thirtyDayInstallCount: 0))
-                    } else {
-                        let fallback = BrewPackage(
-                            name: rec.packageName,
-                            displayName: rec.packageName,
-                            kind: rec.isCask ? .cask : .formula,
-                            description: rec.reason,
-                            homepage: "",
-                            latestVersion: "",
-                            dependencies: []
-                        )
-                        pkgs.append(DiscoveryBrewPackage(package: fallback, thirtyDayInstallCount: 0))
-                    }
-                }
-                collectionPackages[.forYou] = pkgs
-                curatedState = .loaded(pkgs)
+        do {
+            let pkgs = if collection == .forYou {
+                try await loadForYouCollection()
             } else {
-                curatedState = .loaded([])
+                try await loadCuratedCollection(collection)
             }
-        } else {
-            let names = collection.curatedPackageNames
-            var pkgs: [DiscoveryBrewPackage] = []
-            for name in names {
-                let formulaRef = HomebrewPackageID.formula(name: name)
-                let caskRef = HomebrewPackageID.cask(token: name)
-                let foundFormula = try? await catalogueRepository.package(for: formulaRef)
-                let found: BrewPackage? = if let foundFormula {
-                    foundFormula
-                } else {
-                    try? await catalogueRepository.package(for: caskRef)
-                }
-
-                if let found {
-                    pkgs.append(DiscoveryBrewPackage(package: found, thirtyDayInstallCount: 0))
-                } else {
-                    let fallback = BrewPackage(
-                        name: name,
-                        displayName: name,
-                        kind: collection == .essentialCasks ? .cask : .formula,
-                        description: "",
-                        homepage: "",
-                        latestVersion: "",
-                        dependencies: []
-                    )
-                    pkgs.append(DiscoveryBrewPackage(package: fallback, thirtyDayInstallCount: 0))
-                }
-            }
+            guard selectedCollection == collection else { return }
             collectionPackages[collection] = pkgs
             curatedState = .loaded(pkgs)
+        } catch {
+            guard selectedCollection == collection else { return }
+            curatedState = .failed(Self.userMessage(for: error, searching: false))
         }
+        guard selectedCollection == collection else { return }
         synchronizeSelectionWithVisibleRows()
     }
 
+    private func loadForYouCollection() async throws -> [DiscoveryBrewPackage] {
+        guard let aiEngine else { return [] }
+        let installed: [InstalledBrewPackage] = installedInventory?.state.value ?? []
+        let installedNames = Set(installed.map(\.name))
+        let recs = await aiEngine.recommendPackages(basedOn: installed)
+        var pkgs: [DiscoveryBrewPackage] = []
+        for rec in recs where !installedNames.contains(rec.packageName) {
+            let ref = rec.isCask ? HomebrewPackageID.cask(token: rec.packageName) : HomebrewPackageID.formula(name: rec.packageName)
+            if let found = try await catalogueRepository.package(for: ref) {
+                pkgs.append(DiscoveryBrewPackage(package: found, thirtyDayInstallCount: 0))
+            } else {
+                let fallback = BrewPackage(
+                    name: rec.packageName,
+                    displayName: rec.packageName,
+                    kind: rec.isCask ? .cask : .formula,
+                    description: rec.reason,
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                )
+                pkgs.append(DiscoveryBrewPackage(package: fallback, thirtyDayInstallCount: 0))
+            }
+        }
+        return pkgs
+    }
+
+    private func loadCuratedCollection(_ collection: DiscoverCuratedCollection) async throws -> [DiscoveryBrewPackage] {
+        let names = collection.curatedPackageNames
+        var pkgs: [DiscoveryBrewPackage] = []
+        for name in names {
+            let formulaRef = HomebrewPackageID.formula(name: name)
+            let caskRef = HomebrewPackageID.cask(token: name)
+            let foundFormula = try await catalogueRepository.package(for: formulaRef)
+            let found: BrewPackage? = if let foundFormula {
+                foundFormula
+            } else {
+                try await catalogueRepository.package(for: caskRef)
+            }
+
+            if let found {
+                pkgs.append(DiscoveryBrewPackage(package: found, thirtyDayInstallCount: 0))
+            } else {
+                let fallback = BrewPackage(
+                    name: name,
+                    displayName: name,
+                    kind: collection == .essentialCasks ? .cask : .formula,
+                    description: "",
+                    homepage: "",
+                    latestVersion: "",
+                    dependencies: [],
+                )
+                pkgs.append(DiscoveryBrewPackage(package: fallback, thirtyDayInstallCount: 0))
+            }
+        }
+        return pkgs
+    }
+
     func search() async {
+        let currentSearchID = UUID()
+        activeSearchID = currentSearchID
         guard isSearching else {
             results = .loaded([])
             synchronizeSelectionWithVisibleRows()
@@ -429,44 +445,69 @@ extension DiscoverViewModel {
         results = .loading
         do {
             let limit = isSemanticSearch ? searchResultsLimit * 3 : searchResultsLimit
-            var matches = try await catalogueRepository.searchPackages(
+            let matches = try await catalogueRepository.searchPackages(
                 matching: normalizedQuery,
                 limit: limit,
             )
-            if isSemanticSearch, matches.isEmpty {
-                let tokens = normalizedQuery
-                    .components(separatedBy: CharacterSet.alphanumerics.inverted)
-                    .filter { $0.count >= 2 }
-                var candidateSet = Set<BrewPackage.ID>()
-                var candidateMatches: [BrewPackage] = []
-                for token in tokens.prefix(3) {
-                    if let tokenMatches = try? await catalogueRepository.searchPackages(matching: token, limit: limit) {
-                        for pkg in tokenMatches where !candidateSet.contains(pkg.id) {
-                            candidateSet.insert(pkg.id)
-                            candidateMatches.append(pkg)
-                        }
-                    }
-                }
-                matches = candidateMatches
-            }
+            guard activeSearchID == currentSearchID else { return }
 
-            if isSemanticSearch, let aiEngine {
-                let semanticResults = await aiEngine.semanticSearch(
-                    query: normalizedQuery,
-                    catalogue: matches,
-                    limit: searchResultsLimit
-                )
-                results = .loaded(semanticResults.map { DiscoveryBrewPackage(package: $0.package, thirtyDayInstallCount: 0) })
+            if isSemanticSearch {
+                let candidates = await gatherSemanticCandidates(query: normalizedQuery, initialMatches: matches, limit: limit)
+                guard activeSearchID == currentSearchID else { return }
+                let searchPkgs = await executeSemanticSearch(query: normalizedQuery, candidates: candidates, fallback: matches)
+                guard activeSearchID == currentSearchID else { return }
+                results = .loaded(searchPkgs)
             } else {
                 results = .loaded(matches.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) })
             }
         } catch {
+            guard activeSearchID == currentSearchID else { return }
             results = .failed(Self.userMessage(for: error, searching: true))
         }
+        guard activeSearchID == currentSearchID else { return }
         synchronizeSelectionWithVisibleRows()
     }
 
+    private func gatherSemanticCandidates(query: String, initialMatches: [BrewPackage], limit: Int) async -> [BrewPackage] {
+        var candidateSet = Set(initialMatches.map(\.id))
+        var candidates = initialMatches
+
+        let trending = discoverPackagesRepository.state.value ?? []
+        for p in trending where !candidateSet.contains(p.id) {
+            candidateSet.insert(p.id)
+            candidates.append(p.package)
+        }
+
+        if candidates.count < limit {
+            let tokens = query
+                .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter { $0.count >= 2 }
+            for token in tokens.prefix(3) {
+                if let tokenMatches = try? await catalogueRepository.searchPackages(matching: token, limit: limit) {
+                    for pkg in tokenMatches where !candidateSet.contains(pkg.id) {
+                        candidateSet.insert(pkg.id)
+                        candidates.append(pkg)
+                    }
+                }
+            }
+        }
+        return candidates
+    }
+
+    private func executeSemanticSearch(query: String, candidates: [BrewPackage], fallback: [BrewPackage]) async -> [DiscoveryBrewPackage] {
+        guard let aiEngine else {
+            return fallback.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) }
+        }
+        let semanticResults = await aiEngine.semanticSearch(
+            query: query,
+            catalogue: candidates,
+            limit: searchResultsLimit,
+        )
+        return semanticResults.map { DiscoveryBrewPackage(package: $0.package, thirtyDayInstallCount: 0) }
+    }
+
     func reloadActive() async {
+        collectionPackages.removeAll()
         if isSearching {
             await search()
         } else if selectedCollection == .trending {

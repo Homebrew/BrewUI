@@ -349,7 +349,7 @@ func makeInstalledDetailsViewModel(
         brewCommandCenter: brewCommandCenter,
         installedDependentsRepository: installedDependentsRepository,
         installedInventoryReading: installedInventoryReading,
-        aiEngine: nil
+        aiEngine: nil,
     )
 }
 

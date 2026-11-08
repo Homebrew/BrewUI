@@ -170,7 +170,7 @@ struct DiscoverPackagesView: View {
                         .clipShape(Capsule())
                         .overlay(
                             Capsule()
-                                .stroke(isSelected ? Color.clear : Color.brewBorderDefault, lineWidth: 1)
+                                .stroke(isSelected ? Color.clear : Color.brewBorderDefault, lineWidth: 1),
                         )
                     }
                     .buttonStyle(.plain)

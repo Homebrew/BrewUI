@@ -26,7 +26,7 @@ public struct AIModelSpec: Identifiable, Sendable, Equatable, Hashable {
         requiredMemoryGB: Double,
         summary: String,
         downloadURL: URL,
-        filename: String
+        filename: String,
     ) {
         self.id = id
         self.name = name
@@ -62,7 +62,7 @@ public struct AISystemHardwareProfile: Sendable, Equatable {
 
     public init(totalMemoryBytes: UInt64 = ProcessInfo.processInfo.physicalMemory) {
         self.totalMemoryBytes = totalMemoryBytes
-        self.totalMemoryGB = Double(totalMemoryBytes) / 1_073_741_824.0
+        totalMemoryGB = Double(totalMemoryBytes) / 1_073_741_824.0
     }
 
     public func fit(for model: AIModelSpec) -> AISystemFit {
@@ -89,7 +89,7 @@ public enum AIModelCatalog: Sendable {
         requiredMemoryGB: 1.8,
         summary: "Ultra-fast, lightweight model ideal for quick diagnostic summaries and low-RAM systems.",
         downloadURL: URL(string: "https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B-Instruct-GGUF/resolve/main/smollm2-1.7b-instruct-q4_k_m.gguf")!,
-        filename: "smollm2-1.7b-instruct-q4_k_m.gguf"
+        filename: "smollm2-1.7b-instruct-q4_k_m.gguf",
     )
 
     public static let qwenCoder15B = AIModelSpec(
@@ -101,10 +101,10 @@ public enum AIModelCatalog: Sendable {
         requiredMemoryGB: 1.9,
         summary: "Specialized for command-line syntax, compiler error resolution, and shell remediation.",
         downloadURL: URL(string: "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf")!,
-        filename: "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf"
+        filename: "qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
     )
 
-    public static let llama32_3B = AIModelSpec(
+    public static let llama323B = AIModelSpec(
         id: "llama-3.2-3b",
         name: "Llama 3.2 3B Instruct",
         parameterSize: "3B",
@@ -113,13 +113,13 @@ public enum AIModelCatalog: Sendable {
         requiredMemoryGB: 3.5,
         summary: "High reasoning capacity for complex doctor diagnostics and multi-dependency conflicts.",
         downloadURL: URL(string: "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf")!,
-        filename: "llama-3.2-3b-instruct-q4_k_m.gguf"
+        filename: "llama-3.2-3b-instruct-q4_k_m.gguf",
     )
 
     public static let allModels: [AIModelSpec] = [
         qwenCoder15B,
         smolLM2,
-        llama32_3B,
+        llama323B,
     ]
 }
 
@@ -134,7 +134,7 @@ public struct AIAnalysisResult: Sendable, Equatable {
         summary: String,
         rootCause: String,
         suggestedCommands: [String],
-        modelName: String
+        modelName: String,
     ) {
         self.summary = summary
         self.rootCause = rootCause
@@ -145,7 +145,10 @@ public struct AIAnalysisResult: Sendable, Equatable {
 
 /// Result of an AI-powered semantic package search.
 public struct AISemanticSearchResult: Identifiable, Sendable, Equatable {
-    public var id: BrewPackage.ID { package.id }
+    public var id: BrewPackage.ID {
+        package.id
+    }
+
     public let package: BrewPackage
     public let relevanceScore: Double
     public let matchReason: String
@@ -195,7 +198,7 @@ public struct AIUpgradeImpact: Sendable, Equatable {
         summary: String,
         breakingChangesWarning: String? = nil,
         serviceRestartNotice: String? = nil,
-        recommendedVerificationCommands: [String] = []
+        recommendedVerificationCommands: [String] = [],
     ) {
         self.packageName = packageName
         self.currentVersion = currentVersion
@@ -229,7 +232,7 @@ public struct AIBrewfileEnvironment: Sendable, Equatable {
         casks: [String],
         generatedBrewfileContent: String,
         bundleCommand: String,
-        explanation: String
+        explanation: String,
     ) {
         self.title = title
         self.prompt = prompt
@@ -257,7 +260,10 @@ public enum AISafetyLevel: String, Sendable, Equatable {
 
 /// Candidate orphan package identified during housekeeping analysis.
 public struct AIOrphanCandidate: Identifiable, Sendable, Equatable {
-    public var id: String { packageName }
+    public var id: String {
+        packageName
+    }
+
     public let packageName: String
     public let installedVersion: String
     public let reason: String
@@ -267,7 +273,7 @@ public struct AIOrphanCandidate: Identifiable, Sendable, Equatable {
         packageName: String,
         installedVersion: String,
         reason: String,
-        safetyLevel: AISafetyLevel
+        safetyLevel: AISafetyLevel,
     ) {
         self.packageName = packageName
         self.installedVersion = installedVersion
@@ -287,7 +293,7 @@ public struct AIHousekeepingReport: Sendable, Equatable {
         orphanCandidates: [AIOrphanCandidate],
         summary: String,
         recommendedCommands: [String],
-        reclaimableEstimate: String
+        reclaimableEstimate: String,
     ) {
         self.orphanCandidates = orphanCandidates
         self.summary = summary
@@ -298,7 +304,10 @@ public struct AIHousekeepingReport: Sendable, Equatable {
 
 /// A modern alternative or complement to a given package.
 public struct AIPackageAlternative: Identifiable, Sendable, Equatable {
-    public var id: String { name }
+    public var id: String {
+        name
+    }
+
     public let name: String
     public let relationship: String
     public let headline: String
@@ -312,7 +321,7 @@ public struct AIPackageAlternative: Identifiable, Sendable, Equatable {
         headline: String,
         keyAdvantages: [String],
         installCommand: String,
-        isFormula: Bool = true
+        isFormula: Bool = true,
     ) {
         self.name = name
         self.relationship = relationship
@@ -325,7 +334,10 @@ public struct AIPackageAlternative: Identifiable, Sendable, Equatable {
 
 /// Personalized package recommendation synthesized from installed machine environment.
 public struct AIPackageRecommendation: Identifiable, Sendable, Equatable {
-    public var id: String { packageName }
+    public var id: String {
+        packageName
+    }
+
     public let packageName: String
     public let category: String
     public let reason: String
@@ -337,7 +349,7 @@ public struct AIPackageRecommendation: Identifiable, Sendable, Equatable {
         category: String,
         reason: String,
         confidenceScore: Double,
-        isCask: Bool = false
+        isCask: Bool = false,
     ) {
         self.packageName = packageName
         self.category = category
@@ -349,7 +361,10 @@ public struct AIPackageRecommendation: Identifiable, Sendable, Equatable {
 
 /// Row comparing a single attribute between two packages.
 public struct AIComparisonRow: Identifiable, Sendable, Equatable {
-    public var id: String { feature }
+    public var id: String {
+        feature
+    }
+
     public let feature: String
     public let packageAValue: String
     public let packageBValue: String
@@ -357,7 +372,7 @@ public struct AIComparisonRow: Identifiable, Sendable, Equatable {
     public init(
         feature: String,
         packageAValue: String,
-        packageBValue: String
+        packageBValue: String,
     ) {
         self.feature = feature
         self.packageAValue = packageAValue
@@ -384,7 +399,7 @@ public struct AIPackageComparison: Sendable, Equatable {
         strengthsB: [String],
         bestForA: String,
         bestForB: String,
-        matrix: [AIComparisonRow]
+        matrix: [AIComparisonRow],
     ) {
         self.packageAName = packageAName
         self.packageBName = packageBName
@@ -396,4 +411,3 @@ public struct AIPackageComparison: Sendable, Equatable {
         self.matrix = matrix
     }
 }
-

@@ -17,7 +17,7 @@ public struct AIDiagnosticView: View {
         result: AIAnalysisResult,
         isCommandRunning: ((String) -> Bool)? = nil,
         errorMessage: ((String) -> String?)? = nil,
-        onRunCommand: ((String) -> Void)? = nil
+        onRunCommand: ((String) -> Void)? = nil,
     ) {
         self.result = result
         self.isCommandRunning = isCommandRunning
@@ -75,7 +75,7 @@ public struct AIDiagnosticView: View {
                                     command: cmd,
                                     summaryText: nil,
                                     title: nil,
-                                    collapsible: false
+                                    collapsible: false,
                                 )
 
                                 if onRunCommand != nil, isRunnableCommand(cmd) {
@@ -113,7 +113,7 @@ public struct AIDiagnosticView: View {
         .background(Color.brewSurface)
         .overlay(
             RoundedRectangle(cornerRadius: BrewRadius.lg)
-                .stroke(Color.brewBrandPrimary.opacity(0.3), lineWidth: 1)
+                .stroke(Color.brewBrandPrimary.opacity(0.3), lineWidth: 1),
         )
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
     }

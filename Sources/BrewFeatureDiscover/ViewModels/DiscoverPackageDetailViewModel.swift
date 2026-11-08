@@ -163,53 +163,19 @@ final class DiscoverPackageDetailViewModel {
         installedPackage?.formulaSourceURL
     }
 
+    private var activeComparisonPackageID: DiscoveryBrewPackage.ID?
+
     func update(package: DiscoveryBrewPackage) {
+        let samePackage = discoveryPackage.id == package.id
         discoveryPackage = package
         installErrorMessage = nil
-        alternatives = []
-        comparisonResult = nil
-        comparisonTarget = nil
-        isShowingComparison = false
-    }
-
-    func loadAlternatives(using aiEngine: (any AIEngineProtocol)?) async {
-        guard let aiEngine else { return }
-        alternatives = await aiEngine.suggestAlternatives(for: discoveryPackage.package)
-    }
-
-    func compare(
-        with targetName: String,
-        using aiEngine: (any AIEngineProtocol)?,
-        catalogue: any CatalogueRepository
-    ) async {
-        guard let aiEngine else { return }
-        let formulaRef = HomebrewPackageID.formula(name: targetName)
-        let caskRef = HomebrewPackageID.cask(token: targetName)
-        let foundFormula = try? await catalogue.package(for: formulaRef)
-        let foundTarget: BrewPackage? = if let foundFormula {
-            foundFormula
-        } else {
-            try? await catalogue.package(for: caskRef)
+        if !samePackage {
+            alternatives = []
+            comparisonResult = nil
+            comparisonTarget = nil
+            isShowingComparison = false
+            activeComparisonPackageID = nil
         }
-
-        let target = foundTarget ?? BrewPackage(
-            name: targetName,
-            displayName: targetName,
-            kind: .formula,
-            description: "",
-            homepage: "",
-            latestVersion: "",
-            dependencies: []
-        )
-
-        let comparison = await aiEngine.comparePackages(packageA: discoveryPackage.package, packageB: target)
-        comparisonResult = comparison
-        comparisonTarget = target
-        isShowingComparison = true
-    }
-
-    func dismissComparison() {
-        isShowingComparison = false
     }
 
     func installPackage(_ package: BrewPackage) {
@@ -230,24 +196,6 @@ final class DiscoverPackageDetailViewModel {
                 }
             }
         }
-    }
-
-    func installAlternative(command: String) {
-        // Find if it's formula or cask from command string
-        let isCask = command.contains("--cask")
-        let components = command.components(separatedBy: .whitespaces)
-        guard let targetName = components.last, !targetName.isEmpty else { return }
-        let kind: HomebrewPackageKind = isCask ? .cask : .formula
-        let pkg = BrewPackage(
-            name: targetName,
-            displayName: targetName,
-            kind: kind,
-            description: "",
-            homepage: "",
-            latestVersion: "",
-            dependencies: []
-        )
-        installPackage(pkg)
     }
 
     func installSelectedPackage() {
@@ -290,5 +238,84 @@ final class DiscoverPackageDetailViewModel {
                 comment: "Discover detail generic install error",
             ),
         )
+    }
+}
+
+// MARK: - AI Alternatives & Comparison
+
+extension DiscoverPackageDetailViewModel {
+    func loadAlternatives(using aiEngine: (any AIEngineProtocol)?) async {
+        guard let aiEngine else { return }
+        let currentID = discoveryPackage.id
+        let alts = await aiEngine.suggestAlternatives(for: discoveryPackage.package)
+        guard discoveryPackage.id == currentID else { return }
+        alternatives = alts
+    }
+
+    func compare(
+        with targetName: String,
+        kind: HomebrewPackageKind = .formula,
+        using aiEngine: (any AIEngineProtocol)?,
+        catalogue: any CatalogueRepository,
+    ) async {
+        guard let aiEngine else { return }
+        let currentID = discoveryPackage.id
+        activeComparisonPackageID = currentID
+
+        let primaryRef = kind == .cask ? HomebrewPackageID.cask(token: targetName) : HomebrewPackageID.formula(name: targetName)
+        let fallbackRef = kind == .cask ? HomebrewPackageID.formula(name: targetName) : HomebrewPackageID.cask(token: targetName)
+
+        let foundPrimary = try? await catalogue.package(for: primaryRef)
+        let foundTarget: BrewPackage? = if let foundPrimary {
+            foundPrimary
+        } else {
+            try? await catalogue.package(for: fallbackRef)
+        }
+
+        guard discoveryPackage.id == currentID, activeComparisonPackageID == currentID else { return }
+
+        let target = foundTarget ?? BrewPackage(
+            name: targetName,
+            displayName: targetName,
+            kind: kind,
+            description: "",
+            homepage: "",
+            latestVersion: "",
+            dependencies: [],
+        )
+
+        let comparison = await aiEngine.comparePackages(packageA: discoveryPackage.package, packageB: target)
+        guard discoveryPackage.id == currentID, activeComparisonPackageID == currentID else { return }
+
+        comparisonResult = comparison
+        comparisonTarget = target
+        isShowingComparison = true
+    }
+
+    func dismissComparison() {
+        isShowingComparison = false
+    }
+
+    func installAlternative(command: String) {
+        guard !isInstalling else { return }
+        let isCask = command.contains("--cask")
+        let components = command.components(separatedBy: .whitespaces)
+        guard let targetName = components.last, !targetName.isEmpty else { return }
+        let kind: HomebrewPackageKind = isCask ? .cask : .formula
+        installAlternative(name: targetName, kind: kind)
+    }
+
+    func installAlternative(name targetName: String, kind: HomebrewPackageKind) {
+        guard !isInstalling else { return }
+        let pkg = BrewPackage(
+            name: targetName,
+            displayName: targetName,
+            kind: kind,
+            description: "",
+            homepage: "",
+            latestVersion: "",
+            dependencies: [],
+        )
+        installPackage(pkg)
     }
 }

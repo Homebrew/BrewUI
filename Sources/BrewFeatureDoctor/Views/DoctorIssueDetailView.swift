@@ -71,8 +71,8 @@ struct DoctorIssueDetailView: View {
                 isCommandRunning: { viewModel.isAICommandRunning($0) },
                 errorMessage: { viewModel.aiCommandError($0) },
                 onRunCommand: { command in
-                    viewModel.runAICommand(command)
-                }
+                    viewModel.runAICommand(command, for: item)
+                },
             )
         } else {
             Button {
@@ -81,7 +81,7 @@ struct DoctorIssueDetailView: View {
                 }
             } label: {
                 HStack(spacing: BrewSpacing.xs) {
-                    if viewModel.isAnalyzingAI {
+                    if viewModel.isAnalyzingAI(for: item) {
                         ProgressView().controlSize(.small)
                     } else {
                         Image(systemName: "sparkles")
@@ -91,7 +91,7 @@ struct DoctorIssueDetailView: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.small)
-            .disabled(viewModel.isAnalyzingAI)
+            .disabled(viewModel.isAnalyzingAI(for: item))
         }
     }
 

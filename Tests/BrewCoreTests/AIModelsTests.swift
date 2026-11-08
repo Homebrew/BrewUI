@@ -20,11 +20,11 @@ struct AIModelsTests {
         }
     }
 
-    @Test func `hardware profile calculates system fit accurately`() {
+    @Test func `hardware profile calculates system fit accurately`() throws {
         // 16 GB RAM Mac
         let profile16GB = AISystemHardwareProfile(totalMemoryBytes: 16 * 1024 * 1024 * 1024)
 
-        let smallModel = AIModelSpec(
+        let smallModel = try AIModelSpec(
             id: "small",
             name: "Small",
             parameterSize: "1B",
@@ -32,12 +32,12 @@ struct AIModelsTests {
             downloadSizeMB: 800,
             requiredMemoryGB: 1.5,
             summary: "test",
-            downloadURL: URL(string: "https://example.com")!,
-            filename: "small.gguf"
+            downloadURL: #require(URL(string: "https://example.com")),
+            filename: "small.gguf",
         )
         #expect(profile16GB.fit(for: smallModel) == .optimal)
 
-        let heavyModel = AIModelSpec(
+        let heavyModel = try AIModelSpec(
             id: "heavy",
             name: "Heavy",
             parameterSize: "14B",
@@ -45,8 +45,8 @@ struct AIModelsTests {
             downloadSizeMB: 12000,
             requiredMemoryGB: 12.0,
             summary: "test",
-            downloadURL: URL(string: "https://example.com")!,
-            filename: "heavy.gguf"
+            downloadURL: #require(URL(string: "https://example.com")),
+            filename: "heavy.gguf",
         )
         #expect(profile16GB.fit(for: heavyModel) == .heavy)
     }
@@ -57,7 +57,7 @@ struct AIModelsTests {
             relationship: "Modern Rust Replacement",
             headline: "Fast search",
             keyAdvantages: ["SIMD acceleration"],
-            installCommand: "brew install ripgrep"
+            installCommand: "brew install ripgrep",
         )
         #expect(alt.id == "ripgrep")
         #expect(alt.name == "ripgrep")
@@ -68,7 +68,7 @@ struct AIModelsTests {
             category: "Productivity",
             reason: "Extensible launcher",
             confidenceScore: 0.95,
-            isCask: true
+            isCask: true,
         )
         #expect(rec.id == "raycast")
         #expect(rec.isCask)
@@ -87,7 +87,7 @@ struct AIModelsTests {
             packageName: "libpng",
             installedVersion: "1.6.40",
             reason: "Leaf library",
-            safetyLevel: .safeToPrune
+            safetyLevel: .safeToPrune,
         )
         #expect(candidate.id == "libpng")
 
@@ -95,7 +95,7 @@ struct AIModelsTests {
             orphanCandidates: [candidate],
             summary: "1 orphan",
             recommendedCommands: ["brew autoremove"],
-            reclaimableEstimate: "150 MB"
+            reclaimableEstimate: "150 MB",
         )
         #expect(report.orphanCandidates.count == 1)
         #expect(report.reclaimableEstimate == "150 MB")

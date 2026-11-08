@@ -17,6 +17,7 @@ struct ConsoleToolbar: View {
     @Environment(\.aiEngine) private var aiEngine
 
     @State private var failureAnalysis: AIAnalysisResult?
+    @State private var failureAnalysisJobID: CommandJob.ID?
     @State private var isAnalyzingFailure = false
     @State private var showAnalysisSheet = false
 
@@ -110,12 +111,14 @@ struct ConsoleToolbar: View {
         Button {
             Task {
                 isAnalyzingFailure = true
-                failureAnalysis = await aiEngine.analyzeCommandFailure(
+                let analysis = await aiEngine.analyzeCommandFailure(
                     command: job.command,
                     exitCode: Int(job.exitCode ?? 1),
-                    output: job.formattedOutputForExport()
+                    output: job.formattedOutputForExport(),
                 )
                 isAnalyzingFailure = false
+                failureAnalysis = analysis
+                failureAnalysisJobID = job.id
                 showAnalysisSheet = true
             }
         } label: {
@@ -140,6 +143,8 @@ struct ConsoleToolbar: View {
                         Spacer()
                         Button(String(localized: "Done", bundle: #bundle, comment: "Console AI sheet dismiss")) {
                             showAnalysisSheet = false
+                            failureAnalysis = nil
+                            failureAnalysisJobID = nil
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.small)

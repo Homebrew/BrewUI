@@ -183,7 +183,7 @@ struct DoctorViewModelTests {
             doctorRepository: repo,
             brewCommandCenter: center,
             commandFactory: factory,
-            aiEngine: PreviewSupport.aiEngine
+            aiEngine: PreviewSupport.aiEngine,
         )
         await viewModel.load(forceRefresh: false)
         let item = try #require(viewModel.selectedIssue)
@@ -192,7 +192,7 @@ struct DoctorViewModelTests {
         #expect(viewModel.aiAnalysis(for: item) != nil)
     }
 
-    @Test func `runAICommand executes command and tracks running status`() async throws {
+    @Test func `runAICommand executes command and tracks running status`() async {
         let repo = StubDoctorRepository(report: Self.issuesReport())
         let center = StubBrewCommandCenter()
         let factory = StubMutatingCommandFactory()
@@ -200,7 +200,7 @@ struct DoctorViewModelTests {
             doctorRepository: repo,
             brewCommandCenter: center,
             commandFactory: factory,
-            aiEngine: PreviewSupport.aiEngine
+            aiEngine: PreviewSupport.aiEngine,
         )
         await viewModel.load(forceRefresh: false)
 
@@ -531,7 +531,7 @@ struct DoctorViewModelTests {
             doctorRepository: StubDoctorRepository(report: report),
             brewCommandCenter: StubBrewCommandCenter(),
             commandFactory: StubMutatingCommandFactory(),
-            aiEngine: stubAI
+            aiEngine: stubAI,
         )
         await viewModel.load(forceRefresh: true)
         let items = Self.displayedItems(report)
@@ -554,7 +554,7 @@ struct DoctorViewModelTests {
             doctorRepository: StubDoctorRepository(report: Self.issuesReport()),
             brewCommandCenter: center,
             commandFactory: StubMutatingCommandFactory(),
-            aiEngine: StubAIEngine()
+            aiEngine: StubAIEngine(),
         )
 
         viewModel.runAICommand("sudo rm -rf /")
@@ -572,13 +572,13 @@ struct DoctorViewModelTests {
         #expect(!viewModel.isAICommandRunning("brew cleanup > /dev/null"))
     }
 
-    @Test func `runAICommand executes brew command and records running state`() async {
+    @Test func `runAICommand executes brew command and records running state`() {
         let center = Self.recordingCenter(cleanupExitCode: 0)
         let viewModel = DoctorViewModel(
             doctorRepository: StubDoctorRepository(report: Self.issuesReport()),
             brewCommandCenter: center,
             commandFactory: StubMutatingCommandFactory(),
-            aiEngine: StubAIEngine()
+            aiEngine: StubAIEngine(),
         )
 
         viewModel.runAICommand("brew cleanup -s")

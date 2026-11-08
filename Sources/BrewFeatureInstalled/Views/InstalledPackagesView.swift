@@ -33,7 +33,9 @@ struct InstalledPackagesView: View {
                     Button {
                         Task {
                             await viewModel.analyzeHousekeeping()
-                            isPresentingHousekeeping = true
+                            if viewModel.housekeepingReport != nil {
+                                isPresentingHousekeeping = true
+                            }
                         }
                     } label: {
                         if viewModel.isAnalyzingHousekeeping {

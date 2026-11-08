@@ -11,23 +11,33 @@ import Testing
 
 @Suite("AIEngine")
 struct AIEngineTests {
-    private final class MockModelManager: AIModelManaging, @unchecked Sendable {
+    @Observable
+    // Safe in test harness as instances are confined to individual test methods.
+    // swiftlint:disable:next unchecked_sendable
+    fileprivate final class MockModelManager: AIModelManaging, @unchecked Sendable {
         let availableModels: [AIModelSpec] = AIModelCatalog.allModels
         var activeModelID: String? = AIModelCatalog.qwenCoder15B.id
         var hardwareProfile = AISystemHardwareProfile()
+        var lastErrorMessage: String?
 
-        func downloadState(for model: AIModelSpec) -> AIModelDownloadState { .ready }
-        func setActiveModel(id: String?) { activeModelID = id }
-        func startDownload(for model: AIModelSpec) async {}
-        func cancelDownload(for model: AIModelSpec) {}
-        func deleteModel(for model: AIModelSpec) {}
+        func downloadState(for _: AIModelSpec) -> AIModelDownloadState {
+            .ready
+        }
+
+        func setActiveModel(id: String?) {
+            activeModelID = id
+        }
+
+        func startDownload(for _: AIModelSpec) async {}
+        func cancelDownload(for _: AIModelSpec) {}
+        func deleteModel(for _: AIModelSpec) {}
     }
 
     @Test func `engine identifies unlinked keg and generates link command`() async {
         let engine = LocalAIEngine(modelManager: MockModelManager())
         let result = await engine.analyzeDoctorIssue(
             title: "You have unlinked kegs in your Cellar",
-            rawOutput: "node\ngit"
+            rawOutput: "node\ngit",
         )
 
         #expect(result.summary.contains("symlinked"))
@@ -38,7 +48,7 @@ struct AIEngineTests {
         let engine = LocalAIEngine(modelManager: MockModelManager())
         let result = await engine.analyzeDoctorIssue(
             title: "Your Command Line Tools (CLT) does not appear to be installed",
-            rawOutput: "A CLT error was detected"
+            rawOutput: "A CLT error was detected",
         )
 
         #expect(result.suggestedCommands.contains("xcode-select --install"))
@@ -49,7 +59,7 @@ struct AIEngineTests {
         let result = await engine.analyzeCommandFailure(
             command: "brew install ripgrep",
             exitCode: 1,
-            output: "Error: SHA256 mismatch\nExpected: abc\nActual: def"
+            output: "Error: SHA256 mismatch\nExpected: abc\nActual: def",
         )
 
         #expect(result.summary.contains("checksum"))
@@ -80,7 +90,7 @@ struct AIEngineTests {
         let impact = await engine.assessUpgradeImpact(
             package: package,
             targetVersion: "22.2.0",
-            dependents: ["yarn", "pnpm"]
+            dependents: ["yarn", "pnpm"],
         )
 
         #expect(impact.riskLevel == .high)
@@ -130,7 +140,7 @@ struct AIEngineTests {
         let engine = LocalAIEngine(modelManager: MockModelManager())
         let installed: [InstalledBrewPackage] = [
             .fixture(name: "git", installedVersions: ["2.46.0"]),
-            .fixture(name: "python@3.12", installedVersions: ["3.12.5"])
+            .fixture(name: "python@3.12", installedVersions: ["3.12.5"]),
         ]
 
         let recommendations = await engine.recommendPackages(basedOn: installed)
@@ -223,13 +233,13 @@ struct AIEngineTests {
         let engine = LocalAIEngine(modelManager: MockModelManager())
         let brokenSymlinksResult = await engine.analyzeDoctorIssue(
             title: "You have broken symlinks in your Homebrew prefix",
-            rawOutput: "/opt/homebrew/bin/dead-link"
+            rawOutput: "/opt/homebrew/bin/dead-link",
         )
         #expect(brokenSymlinksResult.suggestedCommands.contains("brew cleanup -s"))
 
         let genericResult = await engine.analyzeDoctorIssue(
             title: "Something unexpected occurred",
-            rawOutput: "random debug details"
+            rawOutput: "random debug details",
         )
         #expect(genericResult.suggestedCommands.contains("brew doctor"))
     }
@@ -239,14 +249,14 @@ struct AIEngineTests {
         let permResult = await engine.analyzeCommandFailure(
             command: "brew install node",
             exitCode: 1,
-            output: "Permission denied @ dir_s_mkdir - /usr/local/share/man"
+            output: "Permission denied @ dir_s_mkdir - /usr/local/share/man",
         )
         #expect(permResult.summary.contains("permissions") || permResult.summary.contains("Permission"))
 
         let bottleResult = await engine.analyzeCommandFailure(
             command: "brew install special-tool",
             exitCode: 1,
-            output: "Error: No bottle available!"
+            output: "Error: No bottle available!",
         )
         #expect(bottleResult.suggestedCommands.contains { $0.contains("--build-from-source") })
     }
@@ -310,7 +320,7 @@ struct AIEngineTests {
         """
         let result = await engine.analyzeDoctorIssue(
             title: "You have unlinked kegs in your Cellar",
-            rawOutput: doctorText
+            rawOutput: doctorText,
         )
 
         #expect(result.suggestedCommands.contains("brew link --overwrite openssl@3"))
@@ -322,13 +332,13 @@ struct AIEngineTests {
         let package = InstalledBrewPackage.fixture(
             name: "postgresql@16",
             latestVersion: "v17.0.0",
-            installedVersions: ["v16.4.0"]
+            installedVersions: ["v16.4.0"],
         )
 
         let impact = await engine.assessUpgradeImpact(
             package: package,
             targetVersion: "v17.0.0",
-            dependents: ["app-backend"]
+            dependents: ["app-backend"],
         )
 
         #expect(impact.isMajorVersionBump)
@@ -342,13 +352,13 @@ struct AIEngineTests {
         let package = InstalledBrewPackage.fixture(
             name: "curl",
             latestVersion: "v8.10.1",
-            installedVersions: ["v8.10.0"]
+            installedVersions: ["v8.10.0"],
         )
 
         let impact = await engine.assessUpgradeImpact(
             package: package,
             targetVersion: "v8.10.1",
-            dependents: []
+            dependents: [],
         )
 
         #expect(!impact.isMajorVersionBump)
@@ -360,7 +370,7 @@ struct AIEngineTests {
         let failure = await engine.analyzeCommandFailure(
             command: "brew install ripgrep --verbose --debug",
             exitCode: 1,
-            output: "Error: SHA256 mismatch"
+            output: "Error: SHA256 mismatch",
         )
 
         #expect(failure.suggestedCommands.contains("brew fetch --force ripgrep"))
@@ -371,7 +381,7 @@ struct AIEngineTests {
         let failure = await engine.analyzeCommandFailure(
             command: "brew install",
             exitCode: 1,
-            output: "Error: already installed"
+            output: "Error: already installed",
         )
 
         #expect(failure.suggestedCommands.contains("brew doctor"))

@@ -57,26 +57,31 @@ struct DiscoverPackageDetailView: View {
                     viewModel: viewModel,
                     onCompare: {
                         if let firstAlt = viewModel.alternatives.first {
+                            let kind: HomebrewPackageKind = firstAlt.isFormula ? .formula : .cask
                             Task {
-                                await viewModel.compare(with: firstAlt.name, using: aiEngine, catalogue: catalogueRepository)
+                                await viewModel.compare(with: firstAlt.name, kind: kind, using: aiEngine, catalogue: catalogueRepository)
                             }
                         }
-                    }
+                    },
                 )
                 DiscoverPackageDetailMetadataSection(viewModel: viewModel)
                 if !viewModel.alternatives.isEmpty {
                     PackageDetailSectionDivider()
                     PackageAlternativesShelf(
                         alternatives: viewModel.alternatives,
+                        isInstalling: viewModel.isInstalling,
                         onSelectPackage: nil,
                         onComparePackage: { targetName in
+                            let alt = viewModel.alternatives.first(where: { $0.name == targetName })
+                            let kind: HomebrewPackageKind = (alt?.isFormula ?? true) ? .formula : .cask
                             Task {
-                                await viewModel.compare(with: targetName, using: aiEngine, catalogue: catalogueRepository)
+                                await viewModel.compare(with: targetName, kind: kind, using: aiEngine, catalogue: catalogueRepository)
                             }
                         },
-                        onInstallPackage: { command in
-                            viewModel.installAlternative(command: command)
-                        }
+                        onInstallPackage: { alt in
+                            let kind: HomebrewPackageKind = alt.isFormula ? .formula : .cask
+                            viewModel.installAlternative(name: alt.name, kind: kind)
+                        },
                     )
                 }
                 PackageDetailSectionDivider()
@@ -115,7 +120,7 @@ struct DiscoverPackageDetailView: View {
                     },
                     onDismiss: {
                         viewModel.dismissComparison()
-                    }
+                    },
                 )
             }
         }
@@ -124,7 +129,7 @@ struct DiscoverPackageDetailView: View {
 
 private struct DiscoverPackageDetailHeroSection: View {
     let viewModel: DiscoverPackageDetailViewModel
-    var onCompare: (() -> Void)? = nil
+    var onCompare: (() -> Void)?
 
     var body: some View {
         let chrome = viewModel.packageKindChrome

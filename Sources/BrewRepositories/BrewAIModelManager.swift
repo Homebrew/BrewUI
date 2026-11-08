@@ -20,6 +20,7 @@ public final class BrewAIModelManager: AIModelManaging {
 
     public private(set) var activeModelID: String?
     public private(set) var downloadProgresses: [String: Double] = [:]
+    public private(set) var lastErrorMessage: String?
     private var downloadTasks: [String: Task<Void, Never>] = [:]
 
     public init(modelsDirectory: URL? = nil, defaults: UserDefaults = .standard) {
@@ -30,7 +31,20 @@ public final class BrewAIModelManager: AIModelManaging {
         self.modelsDirectory = directory
 
         try? FileManager.default.createDirectory(at: self.modelsDirectory, withIntermediateDirectories: true)
-        self.activeModelID = defaults.string(forKey: activeModelKey) ?? AIModelCatalog.qwenCoder15B.id
+        if let stored = defaults.string(forKey: activeModelKey), !stored.isEmpty {
+            if let model = AIModelCatalog.allModels.first(where: { $0.id == stored }) {
+                let fileURL = directory.appendingPathComponent(model.filename)
+                if FileManager.default.fileExists(atPath: fileURL.path) {
+                    activeModelID = stored
+                } else {
+                    activeModelID = nil
+                }
+            } else {
+                activeModelID = nil
+            }
+        } else {
+            activeModelID = nil
+        }
     }
 
     public func downloadState(for model: AIModelSpec) -> AIModelDownloadState {
@@ -49,35 +63,41 @@ public final class BrewAIModelManager: AIModelManaging {
         if let id {
             defaults.set(id, forKey: activeModelKey)
         } else {
-            defaults.removeObject(forKey: activeModelKey)
+            defaults.set("", forKey: activeModelKey)
         }
     }
 
     public func startDownload(for model: AIModelSpec) async {
         guard downloadTasks[model.id] == nil else { return }
         downloadProgresses[model.id] = 0.05
+        lastErrorMessage = nil
 
         let task = Task { @MainActor [weak self] in
             guard let self else { return }
-            let destinationURL = self.modelsDirectory.appendingPathComponent(model.filename)
+            let destinationURL = modelsDirectory.appendingPathComponent(model.filename)
 
             // Simulate / run download stream with progress updates
-            for step in 1...10 {
+            for step in 1 ... 10 {
                 if Task.isCancelled { break }
                 try? await Task.sleep(nanoseconds: 200_000_000)
                 if !Task.isCancelled {
-                    self.downloadProgresses[model.id] = Double(step) / 10.0
+                    downloadProgresses[model.id] = Double(step) / 10.0
                 }
             }
 
             if !Task.isCancelled {
                 // Write a lightweight model descriptor file to represent local availability
                 let marker = "Model: \(model.name)\nFormat: \(model.quantization)\n"
-                try? marker.write(to: destinationURL, atomically: true, encoding: .utf8)
+                do {
+                    try marker.write(to: destinationURL, atomically: true, encoding: .utf8)
+                    lastErrorMessage = nil
+                } catch {
+                    lastErrorMessage = error.localizedDescription
+                }
             }
 
-            self.downloadProgresses.removeValue(forKey: model.id)
-            self.downloadTasks.removeValue(forKey: model.id)
+            downloadProgresses.removeValue(forKey: model.id)
+            downloadTasks.removeValue(forKey: model.id)
         }
 
         downloadTasks[model.id] = task
@@ -92,10 +112,17 @@ public final class BrewAIModelManager: AIModelManaging {
     public func deleteModel(for model: AIModelSpec) {
         cancelDownload(for: model)
         let fileURL = modelsDirectory.appendingPathComponent(model.filename)
-        try? FileManager.default.removeItem(at: fileURL)
-        if activeModelID == model.id {
-            activeModelID = nil
-            defaults.removeObject(forKey: activeModelKey)
+        if FileManager.default.fileExists(atPath: fileURL.path) {
+            do {
+                try FileManager.default.removeItem(at: fileURL)
+                lastErrorMessage = nil
+                if activeModelID == model.id {
+                    activeModelID = nil
+                    defaults.set("", forKey: activeModelKey)
+                }
+            } catch {
+                lastErrorMessage = error.localizedDescription
+            }
         }
     }
 }

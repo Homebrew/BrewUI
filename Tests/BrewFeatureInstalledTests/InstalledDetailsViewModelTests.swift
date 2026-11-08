@@ -606,11 +606,11 @@ extension InstalledDetailsViewModelTests {
             name: "node",
             latestVersion: "22.0.0",
             installedVersions: ["20.0.0"],
-            outdated: true
+            outdated: true,
         )
         let viewModel = makeInstalledDetailsViewModel(
             package: package,
-            aiEngine: PreviewSupport.aiEngine
+            aiEngine: PreviewSupport.aiEngine,
         )
 
         #expect(viewModel.upgradeImpact == nil)
@@ -628,11 +628,11 @@ extension InstalledDetailsViewModelTests {
             name: "node",
             latestVersion: "22.0.0",
             installedVersions: ["20.0.0"],
-            outdated: true
+            outdated: true,
         )
         let viewModel = makeInstalledDetailsViewModel(
             package: package,
-            aiEngine: PreviewSupport.aiEngine
+            aiEngine: PreviewSupport.aiEngine,
         )
 
         await viewModel.analyzeUpgradeImpact()

@@ -7,17 +7,19 @@
 import Foundation
 
 /// Curated collections and stacks of packages in Discover.
-enum DiscoverCuratedCollection: String, CaseIterable, Identifiable, Sendable {
-    case trending = "trending"
-    case forYou = "forYou"
-    case cliTools = "cliTools"
-    case developer = "developer"
-    case devops = "devops"
-    case security = "security"
-    case media = "media"
-    case essentialCasks = "essentialCasks"
+enum DiscoverCuratedCollection: String, CaseIterable, Identifiable {
+    case trending
+    case forYou
+    case cliTools
+    case developer
+    case devops
+    case security
+    case media
+    case essentialCasks
 
-    var id: String { rawValue }
+    var id: String {
+        rawValue
+    }
 
     var title: LocalizedStringResource {
         switch self {

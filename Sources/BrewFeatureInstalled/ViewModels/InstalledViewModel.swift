@@ -167,37 +167,6 @@ final class InstalledViewModel {
         self.brewCommandCenter = brewCommandCenter
     }
 
-    func analyzeHousekeeping() async {
-        guard let aiEngine else { return }
-        isAnalyzingHousekeeping = true
-        defer { isAnalyzingHousekeeping = false }
-        let packages = repository.userManagedPackages.isEmpty ? allRows : repository.userManagedPackages
-        let candidateLeaves = packages.filter { !$0.installedOnRequest }.map(\.name)
-        let leaves = candidateLeaves.isEmpty ? packages.prefix(5).map(\.name) : candidateLeaves
-        let report = await aiEngine.assessHousekeeping(installedPackages: packages, leaves: Array(leaves))
-        self.housekeepingReport = report
-    }
-
-    func runHousekeepingCommand(_ command: String) {
-        guard let commandFactory, let brewCommandCenter else { return }
-        let parts = command.split(separator: " ").map(String.init)
-        guard parts.first == "brew",
-              !command.contains(";"),
-              !command.contains("&&"),
-              !command.contains("|"),
-              !command.contains(">"),
-              !command.contains("<"),
-              !command.contains("sudo")
-        else { return }
-        let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
-        guard !args.isEmpty else { return }
-        let brewCommand = commandFactory.doctorFixCommand(arguments: args)
-        let operationID = BrewOperationID(maintenanceToken: command, displayCommand: command)
-        Task {
-            try? await brewCommandCenter.perform(brewCommand, id: operationID)
-        }
-    }
-
     func load() async {
         await repository.load()
     }
@@ -370,5 +339,40 @@ extension Array where Element: Equatable {
             return nil
         }
         return self[index - 1]
+    }
+}
+
+// MARK: - AI Housekeeping
+
+extension InstalledViewModel {
+    func analyzeHousekeeping() async {
+        guard let aiEngine else { return }
+        isAnalyzingHousekeeping = true
+        defer { isAnalyzingHousekeeping = false }
+        let packages = repository.userManagedPackages.isEmpty ? allRows : repository.userManagedPackages
+        let candidateLeaves = packages.filter { !$0.installedOnRequest }.map(\.name)
+        let leaves = candidateLeaves.isEmpty ? packages.prefix(5).map(\.name) : candidateLeaves
+        let report = await aiEngine.assessHousekeeping(installedPackages: packages, leaves: Array(leaves))
+        housekeepingReport = report
+    }
+
+    func runHousekeepingCommand(_ command: String) {
+        guard let commandFactory, let brewCommandCenter else { return }
+        let parts = command.split(separator: " ").map(String.init)
+        guard parts.first == "brew",
+              !command.contains(";"),
+              !command.contains("&&"),
+              !command.contains("|"),
+              !command.contains(">"),
+              !command.contains("<"),
+              !command.contains("sudo")
+        else { return }
+        let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
+        guard !args.isEmpty else { return }
+        let brewCommand = commandFactory.doctorFixCommand(arguments: args)
+        let operationID = BrewOperationID(maintenanceToken: command, displayCommand: command)
+        Task {
+            try? await brewCommandCenter.perform(brewCommand, id: operationID)
+        }
     }
 }

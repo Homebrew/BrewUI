@@ -14,7 +14,7 @@ public struct AIHousekeepingSheet: View {
 
     public init(
         report: AIHousekeepingReport,
-        onRunCommand: ((String) -> Void)? = nil
+        onRunCommand: ((String) -> Void)? = nil,
     ) {
         self.report = report
         self.onRunCommand = onRunCommand
@@ -84,7 +84,7 @@ public struct AIHousekeepingSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: BrewRadius.md, style: .continuous)
-                .stroke(Color.brewBorderDefault, lineWidth: 1)
+                .stroke(Color.brewBorderDefault, lineWidth: 1),
         )
     }
 
@@ -138,7 +138,7 @@ public struct AIHousekeepingSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.sm, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: BrewRadius.sm, style: .continuous)
-                .stroke(Color.brewBorderDefault, lineWidth: 1)
+                .stroke(Color.brewBorderDefault, lineWidth: 1),
         )
     }
 
@@ -165,7 +165,7 @@ public struct AIHousekeepingSheet: View {
             ForEach(report.recommendedCommands, id: \.self) { cmd in
                 HStack(spacing: BrewSpacing.sm) {
                     CommandBlockView(command: cmd)
-                    if let onRunCommand {
+                    if let onRunCommand, isSupportedCommand(cmd) {
                         Button {
                             onRunCommand(cmd)
                             dismiss()
@@ -178,6 +178,20 @@ public struct AIHousekeepingSheet: View {
                 }
             }
         }
+    }
+
+    private func isSupportedCommand(_ command: String) -> Bool {
+        let trimmed = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = trimmed.split(separator: " ").map(String.init)
+        guard parts.first == "brew",
+              !trimmed.contains(";"),
+              !trimmed.contains("&&"),
+              !trimmed.contains("|"),
+              !trimmed.contains(">"),
+              !trimmed.contains("<"),
+              !trimmed.contains("sudo")
+        else { return false }
+        return true
     }
 
     private var footer: some View {

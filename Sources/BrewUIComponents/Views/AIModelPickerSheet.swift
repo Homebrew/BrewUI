@@ -22,6 +22,9 @@ public struct AIModelPickerSheet: View {
             Divider()
             ScrollView {
                 VStack(alignment: .leading, spacing: BrewSpacing.lg) {
+                    if let error = modelManager.lastErrorMessage {
+                        NoteCallout(verbatim: error, tone: .info)
+                    }
                     systemProfileBanner
                     modelsSection
                 }
@@ -60,7 +63,8 @@ public struct AIModelPickerSheet: View {
                 .foregroundStyle(Color.brewBrandPrimary)
 
             VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
-                Text("System Memory: \(String(format: "%.1f", modelManager.hardwareProfile.totalMemoryGB)) GB Unified RAM", bundle: #bundle, comment: "AI Models Sheet: hardware specs banner; %.1f is memory size in gigabytes")
+                let memGB = String(format: "%.1f", modelManager.hardwareProfile.totalMemoryGB)
+                Text("System Memory: \(memGB) GB Unified RAM", bundle: #bundle, comment: "AI Models Sheet: hardware specs banner; %.1f is memory size in gigabytes")
                     .font(.brewSubheadline)
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.brewTextPrimary)
@@ -91,58 +95,13 @@ public struct AIModelPickerSheet: View {
 
         return VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
-                    HStack(spacing: BrewSpacing.sm) {
-                        Text(verbatim: model.name)
-                            .font(.brewBodyEmphasized)
-                            .foregroundStyle(Color.brewTextPrimary)
-
-                        fitBadge(fit)
-
-                        if isActive {
-                            Text("Active", bundle: #bundle, comment: "AI Models Sheet: active model badge")
-                                .font(.brewCaption)
-                                .fontWeight(.semibold)
-                                .padding(.horizontal, BrewSpacing.xs)
-                                .padding(.vertical, 2)
-                                .background(Color.brewBrandPrimary.opacity(0.15))
-                                .foregroundStyle(Color.brewBrandPrimary)
-                                .clipShape(Capsule())
-                        }
-                    }
-
-                    Text(verbatim: model.summary)
-                        .font(.brewBody)
-                        .foregroundStyle(Color.brewTextSecondary)
-
-                    HStack(spacing: BrewSpacing.md) {
-                        Text("Size: \(model.downloadSizeMB) MB", bundle: #bundle, comment: "AI Models Sheet: model download size; %lld is size in MB")
-                            .font(.brewCaption)
-                            .foregroundStyle(Color.brewTextSecondary)
-
-                        Text("RAM: \(String(format: "%.1f", model.requiredMemoryGB)) GB", bundle: #bundle, comment: "AI Models Sheet: model memory requirement; %.1f is memory in GB")
-                            .font(.brewCaption)
-                            .foregroundStyle(Color.brewTextSecondary)
-
-                        Text("Quantization: \(model.quantization)", bundle: #bundle, comment: "AI Models Sheet: model quantization level; %@ is quantization string")
-                            .font(.brewCaption)
-                            .foregroundStyle(Color.brewTextSecondary)
-                    }
-                }
-
+                modelInfo(model, fit: fit, isActive: isActive)
                 Spacer()
-
                 actionButtons(for: model, state: state, isActive: isActive)
             }
 
             if case let .downloading(progress) = state {
-                VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
-                    ProgressView(value: progress, total: 1.0)
-                        .progressViewStyle(.linear)
-                    Text("Downloading… \(Int(progress * 100))%", bundle: #bundle, comment: "AI Models Sheet: download progress percentage; %lld is percentage")
-                        .font(.brewCaption)
-                        .foregroundStyle(Color.brewTextSecondary)
-                }
+                downloadProgress(progress)
             }
         }
         .padding(BrewSpacing.md)
@@ -150,18 +109,72 @@ public struct AIModelPickerSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
     }
 
+    private func downloadProgress(_ progress: Double) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
+            ProgressView(value: progress, total: 1.0)
+                .progressViewStyle(.linear)
+            Text("Downloading… \(Int(progress * 100))%", bundle: #bundle, comment: "AI Models Sheet: download progress percentage; %lld is percentage")
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+        }
+    }
+
+    private func modelInfo(_ model: AIModelSpec, fit: AISystemFit, isActive: Bool) -> some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
+            HStack(spacing: BrewSpacing.sm) {
+                Text(verbatim: model.name)
+                    .font(.brewBodyEmphasized)
+                    .foregroundStyle(Color.brewTextPrimary)
+
+                fitBadge(fit)
+
+                if isActive {
+                    Text("Active", bundle: #bundle, comment: "AI Models Sheet: active model badge")
+                        .font(.brewCaption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, BrewSpacing.xs)
+                        .padding(.vertical, 2)
+                        .background(Color.brewBrandPrimary.opacity(0.15))
+                        .foregroundStyle(Color.brewBrandPrimary)
+                        .clipShape(Capsule())
+                }
+            }
+
+            Text(verbatim: model.summary)
+                .font(.brewBody)
+                .foregroundStyle(Color.brewTextSecondary)
+
+            modelSpecs(model)
+        }
+    }
+
+    private func modelSpecs(_ model: AIModelSpec) -> some View {
+        let ramGB = String(format: "%.1f", model.requiredMemoryGB)
+        return HStack(spacing: BrewSpacing.md) {
+            Text("Size: \(model.downloadSizeMB) MB", bundle: #bundle, comment: "AI Models Sheet: model download size; %lld is size in MB")
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+
+            Text("RAM: \(ramGB) GB", bundle: #bundle, comment: "AI Models Sheet: model memory requirement; %.1f is memory in GB")
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+
+            Text("Quantization: \(model.quantization)", bundle: #bundle, comment: "AI Models Sheet: model quantization level; %@ is quantization string")
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+        }
+    }
+
     @ViewBuilder
     private func fitBadge(_ fit: AISystemFit) -> some View {
-        let (color, text): (Color, LocalizedStringResource) = {
-            switch fit {
-            case .optimal:
-                return (.green, LocalizedStringResource("Optimal Fit", bundle: #bundle, comment: "AI model memory fit: optimal"))
-            case .acceptable:
-                return (.orange, LocalizedStringResource("Acceptable Fit", bundle: #bundle, comment: "AI model memory fit: acceptable"))
-            case .heavy:
-                return (.red, LocalizedStringResource("Heavy Memory Usage", bundle: #bundle, comment: "AI model memory fit: heavy"))
-            }
-        }()
+        let (color, text): (Color, LocalizedStringResource) = switch fit {
+        case .optimal:
+            (.green, LocalizedStringResource("Optimal Fit", bundle: #bundle, comment: "AI model memory fit: optimal"))
+        case .acceptable:
+            (.orange, LocalizedStringResource("Acceptable Fit", bundle: #bundle, comment: "AI model memory fit: acceptable"))
+        case .heavy:
+            (.red, LocalizedStringResource("Heavy Memory Usage", bundle: #bundle, comment: "AI model memory fit: heavy"))
+        }
 
         Text(text)
             .font(.brewCaption)

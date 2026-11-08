@@ -48,6 +48,7 @@ struct BrewApp: App {
         private let selfUpgradeDebugControl = SelfUpgradeDebugControl()
     #endif
 
+    // swiftlint:disable:next function_body_length
     init() {
         let inventoryCache = InstalledInventoryCache()
         // nil in every production launch, so both process-boundary seams below fall through to the

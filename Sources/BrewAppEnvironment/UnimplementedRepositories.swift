@@ -213,27 +213,35 @@ public struct UnimplementedAIEngine: AIEngineProtocol, Sendable {
     public func analyzeDoctorIssue(title _: String, rawOutput _: String) async -> AIAnalysisResult {
         unimplemented()
     }
+
     public func analyzeCommandFailure(command _: String, exitCode _: Int, output _: String) async -> AIAnalysisResult {
         unimplemented()
     }
+
     public func semanticSearch(query _: String, catalogue _: [BrewPackage], limit _: Int) async -> [AISemanticSearchResult] {
         unimplemented()
     }
+
     public func assessUpgradeImpact(package _: InstalledBrewPackage, targetVersion _: String, dependents _: [String]) async -> AIUpgradeImpact {
         unimplemented()
     }
+
     public func generateBrewfileEnvironment(prompt _: String) async -> AIBrewfileEnvironment {
         unimplemented()
     }
+
     public func assessHousekeeping(installedPackages _: [InstalledBrewPackage], leaves _: [String]) async -> AIHousekeepingReport {
         unimplemented()
     }
+
     public func suggestAlternatives(for _: BrewPackage) async -> [AIPackageAlternative] {
         unimplemented()
     }
+
     public func recommendPackages(basedOn _: [InstalledBrewPackage]) async -> [AIPackageRecommendation] {
         unimplemented()
     }
+
     public func comparePackages(packageA _: BrewPackage, packageB _: BrewPackage) async -> AIPackageComparison {
         unimplemented()
     }
@@ -243,13 +251,39 @@ public struct UnimplementedAIEngine: AIEngineProtocol, Sendable {
 @MainActor
 public final class UnimplementedAIModelManager: AIModelManaging {
     public init() {}
-    public var availableModels: [AIModelSpec] { unimplemented() }
-    public var activeModelID: String? { unimplemented() }
-    public var hardwareProfile: AISystemHardwareProfile { unimplemented() }
-    public func downloadState(for _: AIModelSpec) -> AIModelDownloadState { unimplemented() }
-    public func setActiveModel(id _: String?) { unimplemented() }
-    public func startDownload(for _: AIModelSpec) async { unimplemented() }
-    public func cancelDownload(for _: AIModelSpec) { unimplemented() }
-    public func deleteModel(for _: AIModelSpec) { unimplemented() }
-}
+    public var availableModels: [AIModelSpec] {
+        unimplemented()
+    }
 
+    public var activeModelID: String? {
+        unimplemented()
+    }
+
+    public var hardwareProfile: AISystemHardwareProfile {
+        unimplemented()
+    }
+
+    public var lastErrorMessage: String? {
+        unimplemented()
+    }
+
+    public func downloadState(for _: AIModelSpec) -> AIModelDownloadState {
+        unimplemented()
+    }
+
+    public func setActiveModel(id _: String?) {
+        unimplemented()
+    }
+
+    public func startDownload(for _: AIModelSpec) async {
+        unimplemented()
+    }
+
+    public func cancelDownload(for _: AIModelSpec) {
+        unimplemented()
+    }
+
+    public func deleteModel(for _: AIModelSpec) {
+        unimplemented()
+    }
+}

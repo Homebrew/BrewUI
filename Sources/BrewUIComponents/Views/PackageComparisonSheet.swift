@@ -24,7 +24,7 @@ public struct PackageComparisonSheet: View {
         isPackageAInstalled: Bool = false,
         isPackageBInstalled: Bool = false,
         onInstall: ((BrewPackage) -> Void)? = nil,
-        onDismiss: @escaping () -> Void
+        onDismiss: @escaping () -> Void,
     ) {
         self.comparison = comparison
         self.packageA = packageA
@@ -82,7 +82,7 @@ public struct PackageComparisonSheet: View {
 
     private var versusHeader: some View {
         HStack(spacing: BrewSpacing.md) {
-            packageCard(package: packageA, isInstalled: isPackageAInstalled)
+            PackageComparisonCard(package: packageA, isInstalled: isPackageAInstalled, onInstall: onInstall)
             Text("VS", bundle: #bundle, comment: "Versus label between two packages")
                 .font(.brewSubheadline)
                 .fontWeight(.bold)
@@ -90,68 +90,8 @@ public struct PackageComparisonSheet: View {
                 .padding(BrewSpacing.xs)
                 .background(Color.brewSurface)
                 .clipShape(Circle())
-            packageCard(package: packageB, isInstalled: isPackageBInstalled)
+            PackageComparisonCard(package: packageB, isInstalled: isPackageBInstalled, onInstall: onInstall)
         }
-    }
-
-    private func packageCard(package: BrewPackage, isInstalled: Bool) -> some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            HStack {
-                Text(verbatim: package.displayName)
-                    .font(.brewTitle3)
-                    .fontWeight(.bold)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Spacer()
-                if isInstalled {
-                    Text("Installed", bundle: #bundle, comment: "Package comparison card installed badge")
-                        .font(.brewCaption2)
-                        .padding(.horizontal, BrewSpacing.xs)
-                        .padding(.vertical, 2)
-                        .background(Color.brewStatusSuccess.opacity(0.15))
-                        .foregroundStyle(Color.brewStatusSuccess)
-                        .clipShape(Capsule())
-                }
-            }
-
-            Text(verbatim: package.kind == .cask ? "GUI Application" : "CLI Utility")
-                .font(.brewCaption)
-                .foregroundStyle(Color.brewTextSecondary)
-
-            if !package.description.isEmpty {
-                Text(verbatim: package.description)
-                    .font(.brewCaption)
-                    .foregroundStyle(Color.brewTextSecondary)
-                    .lineLimit(2)
-            }
-
-            HStack {
-                Text(verbatim: "v\(package.latestVersion)")
-                    .font(.brewCaption2)
-                    .foregroundStyle(Color.brewTextTertiary)
-
-                Spacer()
-
-                if !isInstalled, let onInstall {
-                    Button {
-                        onInstall(package)
-                    } label: {
-                        Text("Install", bundle: #bundle, comment: "Package comparison install button")
-                            .font(.brewCaption)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                }
-            }
-            .padding(.top, BrewSpacing.xxs)
-        }
-        .padding(BrewSpacing.md)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.brewSurfaceElevated)
-        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
-        .overlay(
-            RoundedRectangle(cornerRadius: BrewRadius.lg)
-                .stroke(Color.brewBorderDefault, lineWidth: 1)
-        )
     }
 
     private var verdictCard: some View {
@@ -175,7 +115,7 @@ public struct PackageComparisonSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
         .overlay(
             RoundedRectangle(cornerRadius: BrewRadius.lg)
-                .stroke(Color.brewBrandPrimary.opacity(0.2), lineWidth: 1)
+                .stroke(Color.brewBrandPrimary.opacity(0.2), lineWidth: 1),
         )
     }
 
@@ -183,11 +123,11 @@ public struct PackageComparisonSheet: View {
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             strengthsColumn(
                 title: String(localized: "Strengths of \(comparison.packageAName)", bundle: #bundle, comment: "Strengths heading for package A"),
-                strengths: comparison.strengthsA
+                strengths: comparison.strengthsA,
             )
             strengthsColumn(
                 title: String(localized: "Strengths of \(comparison.packageBName)", bundle: #bundle, comment: "Strengths heading for package B"),
-                strengths: comparison.strengthsB
+                strengths: comparison.strengthsB,
             )
         }
     }
@@ -226,7 +166,7 @@ public struct PackageComparisonSheet: View {
 
             HStack(alignment: .top, spacing: BrewSpacing.md) {
                 VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
-                    Text(verbatim: "Choose \(comparison.packageAName) if:")
+                    Text("Choose \(comparison.packageAName) if:", bundle: #bundle, comment: "Package comparison: condition heading; %@ is package name")
                         .font(.brewCaption)
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.brewTextPrimary)
@@ -240,7 +180,7 @@ public struct PackageComparisonSheet: View {
                 .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
 
                 VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
-                    Text(verbatim: "Choose \(comparison.packageBName) if:")
+                    Text("Choose \(comparison.packageBName) if:", bundle: #bundle, comment: "Package comparison: condition heading; %@ is package name")
                         .font(.brewCaption)
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.brewTextPrimary)
@@ -309,7 +249,7 @@ public struct PackageComparisonSheet: View {
             .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
             .overlay(
                 RoundedRectangle(cornerRadius: BrewRadius.md)
-                    .stroke(Color.brewBorderDefault, lineWidth: 1)
+                    .stroke(Color.brewBorderDefault, lineWidth: 1),
             )
         }
     }
@@ -327,5 +267,80 @@ public struct PackageComparisonSheet: View {
             .controlSize(.regular)
         }
         .padding(BrewSpacing.lg)
+    }
+}
+
+private struct PackageComparisonCard: View {
+    let package: BrewPackage
+    let isInstalled: Bool
+    let onInstall: ((BrewPackage) -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            HStack {
+                Text(verbatim: package.displayName)
+                    .font(.brewTitle3)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.brewTextPrimary)
+                Spacer()
+                if isInstalled {
+                    Text("Installed", bundle: #bundle, comment: "Package comparison card installed badge")
+                        .font(.brewCaption2)
+                        .padding(.horizontal, BrewSpacing.xs)
+                        .padding(.vertical, 2)
+                        .background(Color.brewStatusSuccess.opacity(0.15))
+                        .foregroundStyle(Color.brewStatusSuccess)
+                        .clipShape(Capsule())
+                }
+            }
+
+            Text(kindLabel)
+                .font(.brewCaption)
+                .foregroundStyle(Color.brewTextSecondary)
+
+            if !package.description.isEmpty {
+                Text(verbatim: package.description)
+                    .font(.brewCaption)
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .lineLimit(2)
+            }
+
+            HStack {
+                Text(verbatim: "v\(package.latestVersion)")
+                    .font(.brewCaption2)
+                    .foregroundStyle(Color.brewTextTertiary)
+
+                Spacer()
+
+                if !isInstalled, let onInstall {
+                    Button {
+                        onInstall(package)
+                    } label: {
+                        Text("Install", bundle: #bundle, comment: "Package comparison install button")
+                            .font(.brewCaption)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                }
+            }
+            .padding(.top, BrewSpacing.xxs)
+        }
+        .padding(BrewSpacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.brewSurfaceElevated)
+        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
+        .overlay(
+            RoundedRectangle(cornerRadius: BrewRadius.lg)
+                .stroke(Color.brewBorderDefault, lineWidth: 1),
+        )
+    }
+
+    private var kindLabel: String {
+        switch package.kind {
+        case .cask:
+            String(localized: "GUI Application", bundle: #bundle, comment: "Package comparison: cask kind label")
+        case .formula:
+            String(localized: "CLI Utility", bundle: #bundle, comment: "Package comparison: formula kind label")
+        }
     }
 }

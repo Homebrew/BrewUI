@@ -37,14 +37,23 @@ final class DoctorViewModel {
     private(set) var fixErrorMessages: [String: String] = [:]
     /// AI diagnostic analysis keyed by issue content id.
     private(set) var aiAnalysisByIssueID: [Int: AIAnalysisResult] = [:]
-    /// Whether an AI analysis task is currently executing.
-    private(set) var isAnalyzingAI: Bool = false
+    /// Issue IDs whose AI analysis task is currently executing.
+    private(set) var analyzingIssueIDs: Set<DoctorIssueItem.ID> = []
+
+    /// Whether any AI analysis task is currently executing.
+    var isAnalyzingAI: Bool {
+        !analyzingIssueIDs.isEmpty
+    }
+
+    func isAnalyzingAI(for item: DoctorIssueItem) -> Bool {
+        analyzingIssueIDs.contains(item.id)
+    }
 
     init(
         doctorRepository: any DoctorRepository,
         brewCommandCenter: any BrewCommandCenter,
         commandFactory: any BrewMutatingCommandFactory,
-        aiEngine: (any AIEngineProtocol)? = nil
+        aiEngine: (any AIEngineProtocol)? = nil,
     ) {
         self.doctorRepository = doctorRepository
         self.brewCommandCenter = brewCommandCenter
@@ -187,100 +196,6 @@ final class DoctorViewModel {
         return fixErrorMessages[token]
     }
 
-    func aiAnalysis(for item: DoctorIssueItem) -> AIAnalysisResult? {
-        aiAnalysisByIssueID[item.id]
-    }
-
-    func analyzeWithAI(for item: DoctorIssueItem) async {
-        guard let aiEngine else { return }
-        isAnalyzingAI = true
-        defer { isAnalyzingAI = false }
-
-        let raw = item.blocks.compactMap { block -> String? in
-            switch block.content {
-            case let .prose(lines): lines.joined(separator: "\n")
-            case let .command(steps): steps.map(\.displayCommand).joined(separator: "\n")
-            case let .data(items): items.joined(separator: "\n")
-            case let .link(links): links.map(\.url.absoluteString).joined(separator: "\n")
-            }
-        }.joined(separator: "\n")
-
-        var result = await aiEngine.analyzeDoctorIssue(title: item.title, rawOutput: raw)
-
-        if let runnable = item.primaryRunnableStep?.displayCommand, !runnable.isEmpty {
-            if !result.suggestedCommands.contains(runnable) {
-                var commands = result.suggestedCommands.filter { !$0.contains("<") }
-                commands.insert(runnable, at: 0)
-                result = AIAnalysisResult(
-                    summary: result.summary,
-                    rootCause: result.rootCause,
-                    suggestedCommands: commands,
-                    modelName: result.modelName
-                )
-            }
-        }
-
-        aiAnalysisByIssueID[item.id] = result
-    }
-
-    func isAICommandRunning(_ command: String) -> Bool {
-        runningFixTokens.contains(command)
-    }
-
-    func aiCommandError(_ command: String) -> String? {
-        fixErrorMessages[command]
-    }
-
-    func runAICommand(_ command: String) {
-        let parts = command.split(separator: " ").map(String.init)
-        guard parts.first == "brew",
-              !command.contains(";"),
-              !command.contains("&&"),
-              !command.contains("|"),
-              !command.contains(">"),
-              !command.contains("<"),
-              !command.contains("sudo")
-        else { return }
-        let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
-        guard !args.isEmpty else { return }
-
-        let token = command
-        guard !runningFixTokens.contains(token) else { return }
-
-        let operationID = BrewOperationID(maintenanceToken: token, displayCommand: command)
-        let brewCommand = commandFactory.doctorFixCommand(arguments: args)
-        fixErrorMessages[token] = nil
-        runningFixTokens.insert(token)
-        fixTasks[token]?.cancel()
-        fixTasks[token] = Task { @MainActor [weak self] in
-            guard let self else { return }
-            defer {
-                if !Task.isCancelled {
-                    fixTasks[token] = nil
-                }
-            }
-            do {
-                try await brewCommandCenter.perform(brewCommand, id: operationID)
-            } catch {
-                if error is CancellationError {
-                    runningFixTokens.remove(token)
-                    return
-                }
-                let latestPhase = await brewCommandCenter.phase(for: operationID)
-                let message: String = if case let .failed(reason) = latestPhase {
-                    BrewErrorCopy.message(for: reason)
-                } else {
-                    BrewErrorCopy.message(for: OperationFailure(catching: error))
-                }
-                fixErrorMessages[token] = message
-                runningFixTokens.remove(token)
-                return
-            }
-            runningFixTokens.remove(token)
-            await load(forceRefresh: true)
-        }
-    }
-
     // MARK: - Intents
 
     func copyDoctorOutput() {
@@ -375,5 +290,123 @@ extension Array where Element: Equatable {
             return nil
         }
         return self[index - 1]
+    }
+}
+
+// MARK: - AI Diagnostics
+
+extension DoctorViewModel {
+    func aiAnalysis(for item: DoctorIssueItem) -> AIAnalysisResult? {
+        aiAnalysisByIssueID[item.id]
+    }
+
+    func analyzeWithAI(for item: DoctorIssueItem) async {
+        guard let aiEngine else { return }
+        analyzingIssueIDs.insert(item.id)
+        defer { analyzingIssueIDs.remove(item.id) }
+
+        let raw = formatIssueOutput(for: item)
+        var result = await aiEngine.analyzeDoctorIssue(title: item.title, rawOutput: raw)
+
+        if let runnable = item.primaryRunnableStep?.displayCommand, !runnable.isEmpty {
+            if !result.suggestedCommands.contains(runnable) {
+                var commands = result.suggestedCommands.filter { !$0.contains("<") }
+                commands.insert(runnable, at: 0)
+                result = AIAnalysisResult(
+                    summary: result.summary,
+                    rootCause: result.rootCause,
+                    suggestedCommands: commands,
+                    modelName: result.modelName,
+                )
+            }
+        }
+
+        aiAnalysisByIssueID[item.id] = result
+    }
+
+    private func formatIssueOutput(for item: DoctorIssueItem) -> String {
+        item.blocks.compactMap { block -> String? in
+            switch block.content {
+            case let .prose(lines): lines.joined(separator: "\n")
+            case let .command(steps): steps.map(\.displayCommand).joined(separator: "\n")
+            case let .data(items): items.joined(separator: "\n")
+            case let .link(links): links.map(\.url.absoluteString).joined(separator: "\n")
+            }
+        }.joined(separator: "\n")
+    }
+
+    func isAICommandRunning(_ command: String) -> Bool {
+        runningFixTokens.contains(command)
+    }
+
+    func aiCommandError(_ command: String) -> String? {
+        fixErrorMessages[command]
+    }
+
+    private func isSafeAICommand(_ parts: [String], raw: String, for item: DoctorIssueItem?) -> Bool {
+        guard parts.first == "brew" else { return false }
+        guard !raw.contains(";"), !raw.contains("&&"), !raw.contains("|"),
+              !raw.contains(">"), !raw.contains("<"), !raw.contains("sudo")
+        else { return false }
+
+        let sub = parts.count > 1 ? parts[1] : ""
+        let isDestructive = ["uninstall", "zap", "rm"].contains(sub)
+        guard !isDestructive else { return false }
+
+        if let item {
+            let allowedSafeFixVerbs = ["cleanup", "doctor", "link", "prune", "update"]
+            let matchesRunnable = item.primaryRunnableStep?.displayCommand == raw
+            let isSafeVerb = allowedSafeFixVerbs.contains(sub)
+            guard matchesRunnable || isSafeVerb else { return false }
+        }
+        return true
+    }
+
+    func runAICommand(_ command: String, for item: DoctorIssueItem? = nil) {
+        let parts = command.split(separator: " ").map(String.init)
+        guard isSafeAICommand(parts, raw: command, for: item) else { return }
+
+        let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
+        guard !args.isEmpty else { return }
+
+        let token = command
+        guard !runningFixTokens.contains(token) else { return }
+
+        let operationID = BrewOperationID(maintenanceToken: token, displayCommand: command)
+        let brewCommand = commandFactory.doctorFixCommand(arguments: args)
+        fixErrorMessages[token] = nil
+        runningFixTokens.insert(token)
+        fixTasks[token]?.cancel()
+        fixTasks[token] = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                if !Task.isCancelled {
+                    fixTasks[token] = nil
+                }
+            }
+            await executeAICommand(brewCommand, operationID: operationID, token: token)
+        }
+    }
+
+    private func executeAICommand(_ brewCommand: BrewCommand, operationID: BrewOperationID, token: String) async {
+        do {
+            try await brewCommandCenter.perform(brewCommand, id: operationID)
+        } catch {
+            if error is CancellationError {
+                runningFixTokens.remove(token)
+                return
+            }
+            let latestPhase = await brewCommandCenter.phase(for: operationID)
+            let message: String = if case let .failed(reason) = latestPhase {
+                BrewErrorCopy.message(for: reason)
+            } else {
+                BrewErrorCopy.message(for: OperationFailure(catching: error))
+            }
+            fixErrorMessages[token] = message
+            runningFixTokens.remove(token)
+            return
+        }
+        runningFixTokens.remove(token)
+        await load(forceRefresh: true)
     }
 }

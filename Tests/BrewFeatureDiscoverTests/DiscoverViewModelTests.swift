@@ -614,11 +614,11 @@ struct DiscoverViewModelTests {
     @Test func `switching curated collection loads curated packages`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: [])
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
-            aiEngine: PreviewSupport.aiEngine
+            aiEngine: PreviewSupport.aiEngine,
         )
         await viewModel.load()
         #expect(viewModel.selectedCollection == .trending)
@@ -632,11 +632,11 @@ struct DiscoverViewModelTests {
     @Test func `selecting for you collection loads ai recommendations`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: [])
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
             catalogueRepository: StubCatalogueRepository(),
             installedRepository: installedRepo(),
-            aiEngine: PreviewSupport.aiEngine
+            aiEngine: PreviewSupport.aiEngine,
         )
         await viewModel.selectCollection(.forYou)
         #expect(viewModel.selectedCollection == .forYou)
@@ -658,11 +658,11 @@ struct DiscoverViewModelTests {
 
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
-                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: [])
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
             ),
             catalogueRepository: catalogue,
             installedRepository: installedRepo(),
-            aiEngine: PreviewSupport.aiEngine
+            aiEngine: PreviewSupport.aiEngine,
         )
 
         viewModel.isSemanticSearch = true

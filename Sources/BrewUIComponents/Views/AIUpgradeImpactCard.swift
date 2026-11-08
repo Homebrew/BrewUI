@@ -13,7 +13,7 @@ public struct AIUpgradeImpactCard: View {
 
     public init(
         impact: AIUpgradeImpact,
-        onRunCommand: ((String) -> Void)? = nil
+        onRunCommand: ((String) -> Void)? = nil,
     ) {
         self.impact = impact
         self.onRunCommand = onRunCommand
@@ -22,11 +22,11 @@ public struct AIUpgradeImpactCard: View {
     private var riskColor: Color {
         switch impact.riskLevel {
         case .low:
-            return Color.brewStatusSuccess
+            Color.brewStatusSuccess
         case .medium:
-            return Color.brewStatusWarning
+            Color.brewStatusWarning
         case .high:
-            return Color.brewStatusError
+            Color.brewStatusError
         }
     }
 
@@ -116,7 +116,7 @@ public struct AIUpgradeImpactCard: View {
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: BrewRadius.md, style: .continuous)
-                .stroke(Color.brewBorderDefault, lineWidth: 1)
+                .stroke(Color.brewBorderDefault, lineWidth: 1),
         )
     }
 }

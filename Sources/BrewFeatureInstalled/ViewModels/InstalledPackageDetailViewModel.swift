@@ -131,6 +131,7 @@ final class InstalledPackageDetailViewModel {
 
     func analyzeUpgradeImpact() async {
         guard let aiEngine, showsUpgradeAvailable else { return }
+        let currentPackageID = package.id
         isAnalyzingUpgradeImpact = true
         defer { isAnalyzingUpgradeImpact = false }
         let targetVersion = package.latestVersion.isEmpty ? "latest" : package.latestVersion
@@ -138,9 +139,10 @@ final class InstalledPackageDetailViewModel {
         let impact = await aiEngine.assessUpgradeImpact(
             package: package,
             targetVersion: targetVersion,
-            dependents: dependents
+            dependents: dependents,
         )
-        self.upgradeImpact = impact
+        guard package.id == currentPackageID else { return }
+        upgradeImpact = impact
     }
 
     func runVerificationCommand(_ command: String) {

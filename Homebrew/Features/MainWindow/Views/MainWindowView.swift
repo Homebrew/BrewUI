@@ -183,6 +183,14 @@ struct MainWindowView: View {
         let brewCommand = mutatingCommandFactory.doctorFixCommand(arguments: args)
         let id = BrewOperationID(maintenanceToken: command, displayCommand: command)
         Task {
+            defer {
+                if let fileIdx = args.firstIndex(of: "--file"), fileIdx + 1 < args.count {
+                    let path = args[fileIdx + 1]
+                    if path.contains("Brewfile-") {
+                        try? FileManager.default.removeItem(atPath: path)
+                    }
+                }
+            }
             try? await brewCommandCenter.perform(brewCommand, id: id)
         }
     }

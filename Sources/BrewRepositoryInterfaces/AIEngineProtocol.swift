@@ -5,6 +5,7 @@
 
 import BrewCore
 import Foundation
+import Observation
 
 /// Analyzes diagnostics and command output to generate explanations and safe fixes.
 public protocol AIEngineProtocol: Sendable {
@@ -28,10 +29,11 @@ public enum AIModelDownloadState: Sendable, Equatable {
 
 /// Manages downloaded models, downloads, and active selection.
 @MainActor
-public protocol AIModelManaging: AnyObject, Sendable {
+public protocol AIModelManaging: AnyObject, Observable, Sendable {
     var availableModels: [AIModelSpec] { get }
     var activeModelID: String? { get }
     var hardwareProfile: AISystemHardwareProfile { get }
+    var lastErrorMessage: String? { get }
 
     func downloadState(for model: AIModelSpec) -> AIModelDownloadState
     func setActiveModel(id: String?)

@@ -280,7 +280,7 @@ struct InstalledViewModelTests {
 
     // MARK: - AI Housekeeping Advisor
 
-    @Test @MainActor func `analyzeHousekeeping computes orphan candidates and reclaimable space`() async {
+    @Test @MainActor func `analyzeHousekeeping computes orphan candidates and reclaimable space`() async throws {
         let vm = await InstalledFeatureTestSupport.loadedViewModel(
             formulae: [
                 .fixture(name: "git", kind: .formula, installedOnRequest: true),
@@ -296,7 +296,7 @@ struct InstalledViewModelTests {
 
         #expect(vm.housekeepingReport != nil)
         #expect(!vm.isAnalyzingHousekeeping)
-        #expect(!vm.housekeepingReport!.orphanCandidates.isEmpty)
+        #expect(try !(#require(vm.housekeepingReport?.orphanCandidates.isEmpty)))
     }
 
     @Test @MainActor func `analyzeHousekeeping uses full inventory even when hideDependencies and search are active`() async {
