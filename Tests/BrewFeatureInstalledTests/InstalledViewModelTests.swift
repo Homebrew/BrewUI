@@ -296,7 +296,8 @@ struct InstalledViewModelTests {
 
         #expect(vm.housekeepingReport != nil)
         #expect(!vm.isAnalyzingHousekeeping)
-        #expect(try !(#require(vm.housekeepingReport?.orphanCandidates.isEmpty)))
+        let candidates = try #require(vm.housekeepingReport?.orphanCandidates)
+        #expect(!candidates.isEmpty)
     }
 
     @Test @MainActor func `analyzeHousekeeping uses full inventory even when hideDependencies and search are active`() async {

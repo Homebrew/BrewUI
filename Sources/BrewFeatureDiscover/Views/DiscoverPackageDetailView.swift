@@ -65,6 +65,12 @@ struct DiscoverPackageDetailView: View {
                     },
                 )
                 DiscoverPackageDetailMetadataSection(viewModel: viewModel)
+                PackageDetailSectionDivider()
+                DiscoverPackageDetailDependenciesSection(viewModel: viewModel)
+                if viewModel.showsInstallSection {
+                    PackageDetailSectionDivider()
+                    DiscoverPackageInstallSection(viewModel: viewModel)
+                }
                 if !viewModel.alternatives.isEmpty {
                     PackageDetailSectionDivider()
                     PackageAlternativesShelf(
@@ -83,12 +89,6 @@ struct DiscoverPackageDetailView: View {
                             viewModel.installAlternative(name: alt.name, kind: kind)
                         },
                     )
-                }
-                PackageDetailSectionDivider()
-                DiscoverPackageDetailDependenciesSection(viewModel: viewModel)
-                if viewModel.showsInstallSection {
-                    PackageDetailSectionDivider()
-                    DiscoverPackageInstallSection(viewModel: viewModel)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -288,6 +288,12 @@
         }
       }
     },
+    "Acceptable Fit" : {
+      "comment" : "AI model memory fit: acceptable"
+    },
+    "Active" : {
+      "comment" : "AI Models Sheet: active model badge"
+    },
     "AI Brewfile & Environment Architect" : {
       "comment" : "Brewfile generator title"
     },
@@ -306,11 +312,8 @@
     "AI Verdict & Summary" : {
       "comment" : "Package comparison AI verdict label"
     },
-    "Acceptable Fit" : {
-      "comment" : "AI model memory fit: acceptable"
-    },
-    "Active" : {
-      "comment" : "AI Models Sheet: active model badge"
+    "Apple & Swift" : {
+      "comment" : "Brewfile preset: iOS and macOS Swift engineering"
     },
     "Architecting environment Brewfile…" : {
       "comment" : "Brewfile generator progress label"
@@ -321,11 +324,17 @@
     "Cancel" : {
       "comment" : "AI Models Sheet: cancel download button"
     },
+    "Choose %@ if:" : {
+      "comment" : "Package comparison: condition heading; %@ is package name"
+    },
     "Choose and download on-device models to power intelligent diagnostics and command explanation." : {
       "comment" : "AI Models Sheet: subtitle"
     },
     "Cleanup Commands" : {
       "comment" : "Housekeeping recommended commands section"
+    },
+    "CLI Utility" : {
+      "comment" : "Package comparison: formula kind label"
     },
     "Close" : {
       "comment" : "Brewfile generator close button"
@@ -476,14 +485,17 @@
     "Delete" : {
       "comment" : "AI Models Sheet: delete local model button"
     },
-    "Describe Your Target Environment" : {
-      "comment" : "Brewfile prompt section heading"
-    },
     "Describe your project stack or choose a preset to generate a curated Brewfile." : {
       "comment" : "Brewfile generator subtitle"
     },
+    "Describe Your Target Environment" : {
+      "comment" : "Brewfile prompt section heading"
+    },
     "Detected Leaf Packages (%lld)" : {
       "comment" : "Housekeeping detected leaves section header"
+    },
+    "DevOps & Cloud" : {
+      "comment" : "Brewfile preset: DevOps and Cloud"
     },
     "Done" : {
       "comment" : "AI Models Sheet: dismiss button\nClose comparison sheet\nHousekeeping sheet dismiss button"
@@ -493,6 +505,9 @@
     },
     "Downloading… %lld%%" : {
       "comment" : "AI Models Sheet: download progress percentage; %lld is percentage"
+    },
+    "e.g. Fullstack React + Go backend with PostgreSQL" : {
+      "comment" : "Brewfile prompt placeholder"
     },
     "Feature" : {
       "comment" : "Comparison matrix feature column"
@@ -535,8 +550,14 @@
         }
       }
     },
+    "Fullstack Web" : {
+      "comment" : "Brewfile preset: web development"
+    },
     "Generate" : {
       "comment" : "Generate Brewfile button"
+    },
+    "GUI Application" : {
+      "comment" : "Package comparison: cask kind label"
     },
     "Heavy Memory Usage" : {
       "comment" : "AI model memory fit: heavy"
@@ -646,6 +667,41 @@
     "Installed" : {
       "comment" : "Package comparison card installed badge"
     },
+    "just now" : {
+      "comment" : "Relative time: under a minute ago",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "justo ahora"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방금"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "just nu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刚刚"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "剛剛"
+          }
+        }
+      }
+    },
     "Local AI Models" : {
       "comment" : "AI Models Sheet: title"
     },
@@ -658,6 +714,9 @@
     "Modern Alternatives & Complements" : {
       "comment" : "Title for modern alternatives shelf in package detail"
     },
+    "Modern CLI" : {
+      "comment" : "Brewfile preset: modern CLI tools"
+    },
     "No orphaned packages found. Your Homebrew environment is clean!" : {
       "comment" : "Housekeeping empty state"
     },
@@ -669,6 +728,9 @@
     },
     "Probable Cause" : {
       "comment" : "AI Diagnostic: root cause heading"
+    },
+    "Python & ML" : {
+      "comment" : "Brewfile preset: python and ML"
     },
     "Quantization: %@" : {
       "comment" : "AI Models Sheet: model quantization level; %@ is quantization string"
@@ -883,44 +945,6 @@
     },
     "What this means" : {
       "comment" : "AI Diagnostic: explanation section heading"
-    },
-    "e.g. Fullstack React + Go backend with PostgreSQL" : {
-      "comment" : "Brewfile prompt placeholder"
-    },
-    "just now" : {
-      "comment" : "Relative time: under a minute ago",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "justo ahora"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "방금"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "just nu"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刚刚"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "剛剛"
-          }
-        }
-      }
     }
   },
   "version" : "1.0"

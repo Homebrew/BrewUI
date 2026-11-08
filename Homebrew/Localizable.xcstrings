@@ -38,7 +38,6 @@
     },
     "Administrator password" : {
       "comment" : "Askpass: secure password field label",
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -50,7 +49,6 @@
     },
     "Authenticate" : {
       "comment" : "Askpass: submit the administrator password",
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -132,7 +130,6 @@
     },
     "Cancel" : {
       "comment" : "Askpass: cancel administrator authentication",
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -337,7 +334,6 @@
     },
     "Enter your password to allow this." : {
       "comment" : "Askpass: explains that the password allows the change",
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -422,7 +418,6 @@
     },
     "Homebrew wants to make changes." : {
       "comment" : "Askpass: primary message, standard macOS authorization wording",
-      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
