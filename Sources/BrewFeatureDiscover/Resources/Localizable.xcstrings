@@ -33,8 +33,13 @@
             "state" : "translated",
             "value" : "%@ (링크됨)"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (vinculado)"
+          }
+        }}
     },
     "%@ installs (30d)" : {
       "comment" : "Discover row: 30-day install count; %@ is a formatted number",
@@ -68,8 +73,13 @@
             "state" : "translated",
             "value" : "%@회 설치 (30일)"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ instalações (30 dias)"
+          }
+        }}
     },
     "%@ installs in 30 days" : {
       "comment" : "VoiceOver: install count over the last 30 days; %@ is the formatted count",
@@ -103,8 +113,13 @@
             "state" : "translated",
             "value" : "30일간 %@회 설치"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ instalações em 30 dias"
+          }
+        }}
     },
     "%lld packages match “%@”" : {
       "comment" : "Discover subhead, search result count",
@@ -144,8 +159,13 @@
             "state" : "translated",
             "value" : "“%2$@” 검색 결과 패키지 %1$lld개"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pacotes correspondem a “%@”"
+          }
+        }}
     },
     "1 package matches “%@”" : {
       "comment" : "Discover subhead, single search result",
@@ -179,8 +199,13 @@
             "state" : "translated",
             "value" : "“%@” 검색 결과 패키지 1개"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 pacote corresponde a “%@”"
+          }
+        }}
     },
     "30-day installs" : {
       "comment" : "Package detail row: Homebrew analytics install count",
@@ -214,8 +239,13 @@
             "state" : "translated",
             "value" : "30일간 설치 수"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalações em 30 dias"
+          }
+        }}
     },
     "All" : {
       "comment" : "Scope picker: every package kind",
@@ -249,8 +279,13 @@
             "state" : "translated",
             "value" : "전체"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos"
+          }
+        }}
     },
     "As dependency" : {
       "comment" : "Install reason row: installed only because another package needed it",
@@ -284,8 +319,13 @@
             "state" : "translated",
             "value" : "의존성으로 설치"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como dependência"
+          }
+        }}
     },
     "Casks" : {
       "comment" : "Discover casks section header while searching\nScope picker: casks only",
@@ -319,8 +359,13 @@
             "state" : "translated",
             "value" : "Cask"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casks"
+          }
+        }}
     },
     "Choose a package from Discover to see details." : {
       "comment" : "Package detail placeholder body when nothing is selected",
@@ -354,8 +399,13 @@
             "state" : "translated",
             "value" : "둘러보기에서 패키지를 선택하면 세부사항이 표시됩니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha um pacote em Descobrir para ver os detalhes."
+          }
+        }}
     },
     "Could not load packages" : {
       "comment" : "Discover subtitle on error",
@@ -389,8 +439,13 @@
             "state" : "translated",
             "value" : "패키지를 불러올 수 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível carregar os pacotes"
+          }
+        }}
     },
     "Could not search packages" : {
       "comment" : "Discover subtitle on search error",
@@ -424,8 +479,13 @@
             "state" : "translated",
             "value" : "패키지를 검색할 수 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível pesquisar pacotes"
+          }
+        }}
     },
     "Dependencies" : {
       "comment" : "Package detail section heading",
@@ -459,8 +519,13 @@
             "state" : "translated",
             "value" : "의존성"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dependências"
+          }
+        }}
     },
     "Details" : {
       "comment" : "Package detail section heading",
@@ -494,8 +559,13 @@
             "state" : "translated",
             "value" : "세부사항"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalhes"
+          }
+        }}
     },
     "Discover packages" : {
       "comment" : "VoiceOver: the Discover results list",
@@ -529,8 +599,13 @@
             "state" : "translated",
             "value" : "패키지 둘러보기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pacotes em Descobrir"
+          }
+        }}
     },
     "Formulae" : {
       "comment" : "Discover formulae section header while searching\nScope picker: formulae only",
@@ -564,8 +639,13 @@
             "state" : "translated",
             "value" : "Formula"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fórmulas"
+          }
+        }}
     },
     "Homepage" : {
       "comment" : "Package detail row: homepage link",
@@ -599,8 +679,13 @@
             "state" : "translated",
             "value" : "홈페이지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página inicial"
+          }
+        }}
     },
     "INSTALLED" : {
       "comment" : "Discover installed status badge label",
@@ -634,8 +719,13 @@
             "state" : "translated",
             "value" : "설치됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INSTALADO"
+          }
+        }}
     },
     "Install" : {
       "comment" : "Discover detail: install button\nPackage detail section heading\nVoiceOver: install button",
@@ -669,8 +759,13 @@
             "state" : "translated",
             "value" : "설치"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalar"
+          }
+        }}
     },
     "Install reason" : {
       "comment" : "Package detail row: on request or as a dependency",
@@ -704,8 +799,13 @@
             "state" : "translated",
             "value" : "설치 이유"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motivo da instalação"
+          }
+        }}
     },
     "Installed" : {
       "comment" : "Discover installed status badge accessibility label\nDiscover list row installed status\nDiscover package installed status\nPackage detail row: installed version(s)",
@@ -739,8 +839,13 @@
             "state" : "translated",
             "value" : "설치됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        }}
     },
     "Installed on" : {
       "comment" : "Package detail row: install date",
@@ -774,8 +879,13 @@
             "state" : "translated",
             "value" : "설치 날짜"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado em"
+          }
+        }}
     },
     "Installing" : {
       "comment" : "VoiceOver: package installing",
@@ -809,8 +919,13 @@
             "state" : "translated",
             "value" : "설치 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalando"
+          }
+        }}
     },
     "Installs this package on your Mac" : {
       "comment" : "Command block summary above brew install",
@@ -844,8 +959,13 @@
             "state" : "translated",
             "value" : "이 Mac에 패키지를 설치합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instala este pacote no seu Mac"
+          }
+        }}
     },
     "Latest version" : {
       "comment" : "Package detail row",
@@ -879,8 +999,13 @@
             "state" : "translated",
             "value" : "최신 버전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão mais recente"
+          }
+        }}
     },
     "License" : {
       "comment" : "Package detail row",
@@ -920,8 +1045,13 @@
             "state" : "translated",
             "value" : "라이선스"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licença"
+          }
+        }}
     },
     "Loading packages…" : {
       "comment" : "Discover subtitle while loading",
@@ -955,8 +1085,13 @@
             "state" : "translated",
             "value" : "패키지 불러오는 중…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando pacotes…"
+          }
+        }}
     },
     "Most-installed packages in the last 30 days" : {
       "comment" : "Discover subhead on the trending landing",
@@ -990,8 +1125,13 @@
             "state" : "translated",
             "value" : "최근 30일간 가장 많이 설치된 패키지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pacotes mais instalados nos últimos 30 dias"
+          }
+        }}
     },
     "No casks match" : {
       "comment" : "Discover empty casks section",
@@ -1025,8 +1165,13 @@
             "state" : "translated",
             "value" : "일치하는 Cask 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum cask corresponde"
+          }
+        }}
     },
     "No dependencies." : {
       "comment" : "Package detail: empty dependency list",
@@ -1060,8 +1205,13 @@
             "state" : "translated",
             "value" : "의존성이 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dependências."
+          }
+        }}
     },
     "No formulae match" : {
       "comment" : "Discover empty formulae section",
@@ -1095,8 +1245,13 @@
             "state" : "translated",
             "value" : "일치하는 Formula 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma fórmula corresponde"
+          }
+        }}
     },
     "No matches" : {
       "comment" : "Discover list heading, zero search results",
@@ -1130,8 +1285,13 @@
             "state" : "translated",
             "value" : "일치 항목 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum resultado"
+          }
+        }}
     },
     "No selection" : {
       "comment" : "Package detail placeholder title when nothing is selected",
@@ -1165,8 +1325,13 @@
             "state" : "translated",
             "value" : "선택 항목 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma selecção"
+          }
+        }}
     },
     "Nothing found for “%@”" : {
       "comment" : "Discover subhead, no search results",
@@ -1200,8 +1365,13 @@
             "state" : "translated",
             "value" : "“%@” 검색 결과 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada encontrado para “%@”"
+          }
+        }}
     },
     "Popular Casks" : {
       "comment" : "Discover trending casks section header",
@@ -1235,8 +1405,13 @@
             "state" : "translated",
             "value" : "인기 Cask"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casks populares"
+          }
+        }}
     },
     "Popular Formulae" : {
       "comment" : "Discover trending formulae section header",
@@ -1270,8 +1445,13 @@
             "state" : "translated",
             "value" : "인기 Formula"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fórmulas populares"
+          }
+        }}
     },
     "Poured from bottle — %@" : {
       "comment" : "Install date row; %@ is the formatted date",
@@ -1305,8 +1485,13 @@
             "state" : "translated",
             "value" : "Bottle에서 설치 — %@"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado a partir do bottle — %@"
+          }
+        }}
     },
     "Results" : {
       "comment" : "Discover list heading, search results",
@@ -1340,8 +1525,13 @@
             "state" : "translated",
             "value" : "결과"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultados"
+          }
+        }}
     },
     "Scope" : {
       "comment" : "Discover tab: formula/cask scope picker label",
@@ -1375,8 +1565,13 @@
             "state" : "translated",
             "value" : "범위"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escopo"
+          }
+        }}
     },
     "Search Homebrew’s Packages" : {
       "comment" : "Search field placeholder, Discover tab",
@@ -1410,8 +1605,13 @@
             "state" : "translated",
             "value" : "Homebrew 패키지 검색"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesquisar pacotes do Homebrew"
+          }
+        }}
     },
     "Searching…" : {
       "comment" : "Discover subtitle while searching",
@@ -1445,8 +1645,13 @@
             "state" : "translated",
             "value" : "검색 중…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesquisando…"
+          }
+        }}
     },
     "Something went wrong loading Discover packages." : {
       "comment" : "Discover tab generic load failure",
@@ -1480,8 +1685,13 @@
             "state" : "translated",
             "value" : "둘러보기 패키지를 불러오는 중 문제가 발생했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado ao carregar os pacotes em Descobrir."
+          }
+        }}
     },
     "Something went wrong searching the catalog." : {
       "comment" : "Discover tab generic search failure",
@@ -1521,8 +1731,13 @@
             "state" : "translated",
             "value" : "카탈로그를 검색하는 중 문제가 발생했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado ao pesquisar o catálogo."
+          }
+        }}
     },
     "Something went wrong while installing this package." : {
       "comment" : "Discover detail generic install error",
@@ -1556,8 +1771,13 @@
             "state" : "translated",
             "value" : "이 패키지를 설치하는 중 문제가 발생했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado ao instalar este pacote."
+          }
+        }}
     },
     "Source" : {
       "comment" : "Package detail row: source tap",
@@ -1591,8 +1811,13 @@
             "state" : "translated",
             "value" : "출처"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonte"
+          }
+        }}
     },
     "Trending" : {
       "comment" : "Discover list heading, trending landing",
@@ -1626,8 +1851,13 @@
             "state" : "translated",
             "value" : "인기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em alta"
+          }
+        }}
     }
   },
   "version" : "1.0"

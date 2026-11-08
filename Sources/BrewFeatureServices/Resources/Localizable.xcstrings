@@ -27,8 +27,13 @@
             "state" : "translated",
             "value" : "%1$@: %2$@"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        }}
     },
     "%lld running services" : {
       "comment" : "Services subtitle: running service count, never one",
@@ -56,8 +61,13 @@
             "state" : "translated",
             "value" : "실행 중인 서비스 %lld개"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld serviços em execução"
+          }
+        }}
     },
     "1 running service" : {
       "comment" : "Services subtitle: one running service",
@@ -85,8 +95,13 @@
             "state" : "translated",
             "value" : "실행 중인 서비스 1개"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 serviço em execução"
+          }
+        }}
     },
     "All" : {
       "comment" : "Services filter: every service",
@@ -114,8 +129,13 @@
             "state" : "translated",
             "value" : "전체"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos"
+          }
+        }}
     },
     "Check the error log for details." : {
       "comment" : "Service details: error status guidance",
@@ -143,8 +163,13 @@
             "state" : "translated",
             "value" : "자세한 내용은 오류 로그를 확인하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consulte o registro de erros para obter detalhes."
+          }
+        }}
     },
     "Choose All to see every service." : {
       "comment" : "Services: filter-empty state hint; All is the status filter option",
@@ -160,8 +185,13 @@
             "state" : "translated",
             "value" : "모든 서비스를 보려면 전체를 선택하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha Todos para ver todos os serviços."
+          }
+        }}
     },
     "Choose a service from the list to see details." : {
       "comment" : "Service detail placeholder body when nothing is selected",
@@ -177,8 +207,13 @@
             "state" : "translated",
             "value" : "목록에서 서비스를 선택하면 세부사항이 표시됩니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha um serviço da lista para ver os detalhes."
+          }
+        }}
     },
     "Configuration file" : {
       "comment" : "Service details: launchd service file path",
@@ -206,8 +241,13 @@
             "state" : "translated",
             "value" : "구성 파일"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arquivo de configuração"
+          }
+        }}
     },
     "Copied" : {
       "comment" : "Service files: confirms the path was copied",
@@ -235,8 +275,13 @@
             "state" : "translated",
             "value" : "복사됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiado"
+          }
+        }}
     },
     "Copy" : {
       "comment" : "Service files: copy a file path",
@@ -264,8 +309,13 @@
             "state" : "translated",
             "value" : "복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar"
+          }
+        }}
     },
     "Copy path: %@" : {
       "comment" : "Service files: copy button; %@ is the configuration or log path label",
@@ -293,8 +343,13 @@
             "state" : "translated",
             "value" : "경로 복사: %@"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar caminho: %@"
+          }
+        }}
     },
     "Couldn't read Homebrew services." : {
       "comment" : "Services: fallback message when reading the service inventory fails",
@@ -322,8 +377,13 @@
             "state" : "translated",
             "value" : "Homebrew 서비스를 읽을 수 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler os serviços do Homebrew."
+          }
+        }}
     },
     "Details" : {
       "comment" : "Service details: section containing ownership and login registration",
@@ -351,8 +411,13 @@
             "state" : "translated",
             "value" : "세부사항"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalhes"
+          }
+        }}
     },
     "Error log" : {
       "comment" : "Service details: standard error log path",
@@ -380,8 +445,13 @@
             "state" : "translated",
             "value" : "오류 로그"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro de erros"
+          }
+        }}
     },
     "Exit code" : {
       "comment" : "Service details: last process exit code reported by Homebrew",
@@ -409,8 +479,13 @@
             "state" : "translated",
             "value" : "종료 코드"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Código de saída"
+          }
+        }}
     },
     "Files" : {
       "comment" : "Service details: section containing configuration and log paths",
@@ -438,8 +513,13 @@
             "state" : "translated",
             "value" : "파일"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arquivos"
+          }
+        }}
     },
     "Homebrew hasn't reported enough information to manage this service." : {
       "comment" : "Services: actions are unavailable when registration or load state is unknown",
@@ -461,8 +541,13 @@
             "state" : "translated",
             "value" : "Homebrew에서 이 서비스를 관리하는 데 필요한 정보를 충분히 제공하지 않았습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Homebrew não informou dados suficientes para gerir este serviço."
+          }
+        }}
     },
     "No" : {
       "comment" : "Service details: reported boolean is false",
@@ -490,8 +575,13 @@
             "state" : "translated",
             "value" : "아니요"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não"
+          }
+        }}
     },
     "No error log path reported." : {
       "comment" : "Service details: Homebrew returned an error without an error log path",
@@ -519,8 +609,13 @@
             "state" : "translated",
             "value" : "보고된 오류 로그 경로가 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum caminho de registro de erros foi informado."
+          }
+        }}
     },
     "No matching services" : {
       "comment" : "Services: filter-empty state title",
@@ -536,8 +631,13 @@
             "state" : "translated",
             "value" : "일치하는 서비스 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum serviço correspondente"
+          }
+        }}
     },
     "No selection" : {
       "comment" : "Service detail placeholder title when nothing is selected",
@@ -553,8 +653,13 @@
             "state" : "translated",
             "value" : "선택 항목 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma selecção"
+          }
+        }}
     },
     "No services" : {
       "comment" : "Services: empty inventory title",
@@ -582,8 +687,13 @@
             "state" : "translated",
             "value" : "서비스 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum serviço"
+          }
+        }}
     },
     "Only services owned by the current user can be managed here." : {
       "comment" : "Services: other-user and system services remain read-only",
@@ -605,8 +715,13 @@
             "state" : "translated",
             "value" : "현재 사용자가 소유한 서비스만 여기에서 관리할 수 있습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apenas os serviços do usuário atual podem ser geridos aqui."
+          }
+        }}
     },
     "Process ID (PID)" : {
       "comment" : "Service details: process identifier reported by Homebrew",
@@ -634,8 +749,13 @@
             "state" : "translated",
             "value" : "프로세스 ID(PID)"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ID do processo (PID)"
+          }
+        }}
     },
     "Refresh" : {
       "comment" : "Services: read the current service inventory",
@@ -663,8 +783,13 @@
             "state" : "translated",
             "value" : "새로 고침"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar"
+          }
+        }}
     },
     "Restart" : {
       "comment" : "Service action: restart the selected service",
@@ -686,8 +811,13 @@
             "state" : "translated",
             "value" : "재시작"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reiniciar"
+          }
+        }}
     },
     "Restarts this service" : {
       "comment" : "Service restart command summary",
@@ -709,8 +839,13 @@
             "state" : "translated",
             "value" : "이 서비스를 재시작합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reinicia este serviço"
+          }
+        }}
     },
     "Running" : {
       "comment" : "Services filter: running processes",
@@ -738,8 +873,13 @@
             "state" : "translated",
             "value" : "실행 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em execução"
+          }
+        }}
     },
     "Schedulable" : {
       "comment" : "Service details: whether the service defines a cron schedule or fixed interval",
@@ -767,8 +907,13 @@
             "state" : "translated",
             "value" : "예약 가능"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agendável"
+          }
+        }}
     },
     "Services" : {
       "comment" : "Services list heading\nVoiceOver: the services list",
@@ -796,8 +941,13 @@
             "state" : "translated",
             "value" : "서비스"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serviços"
+          }
+        }}
     },
     "Services from installed formulae will appear here." : {
       "comment" : "Services: empty inventory explanation",
@@ -825,8 +975,13 @@
             "state" : "translated",
             "value" : "설치된 Formula의 서비스가 여기에 표시됩니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os serviços das fórmulas instaladas aparecerão aqui."
+          }
+        }}
     },
     "Shows services for the current user" : {
       "comment" : "Services command: reads the current user inventory",
@@ -854,8 +1009,13 @@
             "state" : "translated",
             "value" : "현재 사용자의 서비스를 표시합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra os serviços do usuário atual"
+          }
+        }}
     },
     "Standard log" : {
       "comment" : "Service details: standard output log path",
@@ -883,8 +1043,13 @@
             "state" : "translated",
             "value" : "표준 로그"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro padrão"
+          }
+        }}
     },
     "Start" : {
       "comment" : "Service action: start the selected service",
@@ -906,8 +1071,13 @@
             "state" : "translated",
             "value" : "시작"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar"
+          }
+        }}
     },
     "Starts at login" : {
       "comment" : "Service details: whether Homebrew registered this service for login",
@@ -935,8 +1105,13 @@
             "state" : "translated",
             "value" : "로그인 시 시작"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia no início de sessão"
+          }
+        }}
     },
     "Starts this service" : {
       "comment" : "Service start command summary",
@@ -958,8 +1133,13 @@
             "state" : "translated",
             "value" : "이 서비스를 시작합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia este serviço"
+          }
+        }}
     },
     "Status" : {
       "comment" : "Services: status filter label",
@@ -987,8 +1167,13 @@
             "state" : "translated",
             "value" : "상태"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estado"
+          }
+        }}
     },
     "Stop" : {
       "comment" : "Service action: stop the selected service",
@@ -1010,8 +1195,13 @@
             "state" : "translated",
             "value" : "중지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar"
+          }
+        }}
     },
     "Stopped" : {
       "comment" : "Services filter: services without a running process",
@@ -1039,8 +1229,13 @@
             "state" : "translated",
             "value" : "중지됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parado"
+          }
+        }}
     },
     "Stops this service" : {
       "comment" : "Service stop command summary",
@@ -1062,8 +1257,13 @@
             "state" : "translated",
             "value" : "이 서비스를 중지합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para este serviço"
+          }
+        }}
     },
     "Unknown" : {
       "comment" : "Service details: Homebrew did not report this value",
@@ -1091,8 +1291,13 @@
             "state" : "translated",
             "value" : "알 수 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desconhecido"
+          }
+        }}
     },
     "User" : {
       "comment" : "Service details: service owner reported by Homebrew",
@@ -1120,8 +1325,13 @@
             "state" : "translated",
             "value" : "사용자"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuário"
+          }
+        }}
     },
     "Yes" : {
       "comment" : "Service details: reported boolean is true",
@@ -1149,8 +1359,13 @@
             "state" : "translated",
             "value" : "예"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim"
+          }
+        }}
     }
   },
   "version" : "1.0"

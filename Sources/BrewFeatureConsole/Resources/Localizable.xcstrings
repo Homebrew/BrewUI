@@ -33,8 +33,13 @@
             "state" : "translated",
             "value" : "지우기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar"
+          }
+        }}
     },
     "Clear completed jobs" : {
       "comment" : "Tooltip: console clear button",
@@ -68,8 +73,13 @@
             "state" : "translated",
             "value" : "완료된 작업 지우기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpar tarefas concluídas"
+          }
+        }}
     },
     "Cleared" : {
       "comment" : "Console toolbar: shown briefly after clearing",
@@ -103,8 +113,13 @@
             "state" : "translated",
             "value" : "지워짐"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limpo"
+          }
+        }}
     },
     "Copied" : {
       "comment" : "Console toolbar: shown briefly after copying",
@@ -138,8 +153,13 @@
             "state" : "translated",
             "value" : "복사됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiado"
+          }
+        }}
     },
     "Copy" : {
       "comment" : "Console toolbar: copy output",
@@ -173,8 +193,13 @@
             "state" : "translated",
             "value" : "복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar"
+          }
+        }}
     },
     "Copy output to clipboard" : {
       "comment" : "Tooltip: console copy button",
@@ -208,8 +233,13 @@
             "state" : "translated",
             "value" : "출력을 클립보드에 복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar saída para a área de transferência"
+          }
+        }}
     },
     "Dismiss" : {
       "comment" : "Tooltip: close a finished job tab",
@@ -243,8 +273,13 @@
             "state" : "translated",
             "value" : "닫기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dispensar"
+          }
+        }}
     },
     "Expand Console Panel Automatically" : {
       "comment" : "View menu: open the console when a command starts",
@@ -278,8 +313,13 @@
             "state" : "translated",
             "value" : "콘솔 패널 자동으로 펼치기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expandir o painel do console automaticamente"
+          }
+        }}
     },
     "Hide Console" : {
       "comment" : "View menu: collapse the console panel (⌘`)",
@@ -313,8 +353,13 @@
             "state" : "translated",
             "value" : "콘솔 가리기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar console"
+          }
+        }}
     },
     "Hide console" : {
       "comment" : "Console status bar: collapse button\nConsole toolbar: collapse button",
@@ -348,8 +393,13 @@
             "state" : "translated",
             "value" : "콘솔 가리기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar console"
+          }
+        }}
     },
     "No activity" : {
       "comment" : "Console empty state title\nConsole toolbar title when nothing has run",
@@ -383,8 +433,13 @@
             "state" : "translated",
             "value" : "활동 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma actividade"
+          }
+        }}
     },
     "Ready" : {
       "comment" : "Console status bar when nothing has run",
@@ -418,8 +473,13 @@
             "state" : "translated",
             "value" : "준비됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pronto"
+          }
+        }}
     },
     "Run a brew command to see output here." : {
       "comment" : "Console empty state body",
@@ -453,8 +513,13 @@
             "state" : "translated",
             "value" : "brew 명령을 실행하면 여기에 출력이 표시됩니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Execute um comando brew para ver a saída aqui."
+          }
+        }}
     },
     "Save" : {
       "comment" : "Console toolbar: save output to a file",
@@ -488,8 +553,13 @@
             "state" : "translated",
             "value" : "저장"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar"
+          }
+        }}
     },
     "Save output to file" : {
       "comment" : "Tooltip: console save button",
@@ -523,8 +593,13 @@
             "state" : "translated",
             "value" : "출력을 파일로 저장"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar saída em arquivo"
+          }
+        }}
     },
     "Show Console" : {
       "comment" : "View menu: expand the console panel (⌘`)",
@@ -558,8 +633,13 @@
             "state" : "translated",
             "value" : "콘솔 보기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar console"
+          }
+        }}
     },
     "Show console" : {
       "comment" : "Console status bar: expand button",
@@ -593,8 +673,13 @@
             "state" : "translated",
             "value" : "콘솔 보기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar console"
+          }
+        }}
     },
     "done" : {
       "comment" : "Console status bar: operation finished",
@@ -628,8 +713,13 @@
             "state" : "translated",
             "value" : "완료"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "concluído"
+          }
+        }}
     },
     "failed" : {
       "comment" : "Console status bar: operation failed",
@@ -663,8 +753,13 @@
             "state" : "translated",
             "value" : "실패"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "falhou"
+          }
+        }}
     },
     "refreshing" : {
       "comment" : "Console status bar: command finished, refreshing the installed package list",
@@ -686,8 +781,13 @@
             "state" : "translated",
             "value" : "새로 고치는 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "atualizando"
+          }
+        }}
     },
     "running" : {
       "comment" : "Console status bar: operation in progress",
@@ -721,8 +821,13 @@
             "state" : "translated",
             "value" : "실행 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "em execução"
+          }
+        }}
     },
     "— %@" : {
       "comment" : "Console status bar suffix while a command runs; %@ is the phase label",
@@ -756,8 +861,13 @@
             "state" : "translated",
             "value" : "— %@"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        }}
     },
     "— done" : {
       "comment" : "Console status bar suffix after a command succeeded",
@@ -791,8 +901,13 @@
             "state" : "translated",
             "value" : "— 완료"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— concluído"
+          }
+        }}
     },
     "— failed · exit %d" : {
       "comment" : "Console status bar suffix after a command failed; %d is the exit code",
@@ -826,8 +941,13 @@
             "state" : "translated",
             "value" : "— 실패 · 종료 코드 %d"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— falhou · saída %d"
+          }
+        }}
     }
   },
   "version" : "1.0"

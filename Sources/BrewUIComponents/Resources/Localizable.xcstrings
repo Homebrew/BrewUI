@@ -39,8 +39,13 @@
             "state" : "translated",
             "value" : "%1$@ %2$@"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
+        }}
     },
     "%lld days ago" : {
       "comment" : "Relative time, %lld ≥ 2",
@@ -86,8 +91,13 @@
             "state" : "translated",
             "value" : "%lld일 전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "há %lld dias"
+          }
+        }}
     },
     "%lld hours ago" : {
       "comment" : "Relative time, %lld ≥ 2",
@@ -133,8 +143,13 @@
             "state" : "translated",
             "value" : "%lld시간 전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "há %lld horas"
+          }
+        }}
     },
     "%lld minutes ago" : {
       "comment" : "Relative time, %lld ≥ 2",
@@ -180,8 +195,13 @@
             "state" : "translated",
             "value" : "%lld분 전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "há %lld minutos"
+          }
+        }}
     },
     "1 day ago" : {
       "comment" : "Relative time",
@@ -215,8 +235,13 @@
             "state" : "translated",
             "value" : "1일 전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "há 1 dia"
+          }
+        }}
     },
     "1 hour ago" : {
       "comment" : "Relative time",
@@ -250,8 +275,13 @@
             "state" : "translated",
             "value" : "1시간 전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "há 1 hora"
+          }
+        }}
     },
     "1 minute ago" : {
       "comment" : "Relative time",
@@ -285,8 +315,13 @@
             "state" : "translated",
             "value" : "1분 전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "há 1 minuto"
+          }
+        }}
     },
     "Copied" : {
       "comment" : "Command block: shown briefly after copying",
@@ -320,8 +355,13 @@
             "state" : "translated",
             "value" : "복사됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiado"
+          }
+        }}
     },
     "Copy" : {
       "comment" : "Command block: copy the command",
@@ -355,8 +395,13 @@
             "state" : "translated",
             "value" : "복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar"
+          }
+        }}
     },
     "Copy all" : {
       "comment" : "Command block: copy every command",
@@ -390,8 +435,13 @@
             "state" : "translated",
             "value" : "모두 복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar tudo"
+          }
+        }}
     },
     "Could not find Homebrew. Install it or ensure brew is in the default location." : {
       "comment" : "Error when the brew executable is not in either default prefix",
@@ -425,8 +475,13 @@
             "state" : "translated",
             "value" : "Homebrew를 찾을 수 없습니다. Homebrew를 설치하거나 brew가 기본 위치에 있는지 확인하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível encontrar o Homebrew. Instale-o ou verifique se o brew está no local padrão."
+          }
+        }}
     },
     "Find" : {
       "comment" : "Edit menu: focus the search field (⌘F)",
@@ -460,8 +515,13 @@
             "state" : "translated",
             "value" : "찾기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Localizar"
+          }
+        }}
     },
     "Homebrew command failed." : {
       "comment" : "Error when brew exits non-zero without printing anything to stderr",
@@ -495,8 +555,13 @@
             "state" : "translated",
             "value" : "Homebrew 명령이 실패했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O comando do Homebrew falhou."
+          }
+        }}
     },
     "Homebrew finished, but the service hasn't reached the requested state. Check the console and refresh." : {
       "comment" : "Service action error: reported state does not match the completed command",
@@ -518,8 +583,13 @@
             "state" : "translated",
             "value" : "Homebrew 명령은 끝났지만 서비스가 요청한 상태가 되지 않았습니다. 콘솔을 확인하고 새로 고치세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Homebrew terminou, mas o serviço não atingiu o estado solicitado. Verifique o console e atualize."
+          }
+        }}
     },
     "Homebrew returned output the app couldn’t read." : {
       "comment" : "Error when brew succeeded but its JSON output failed to decode",
@@ -553,8 +623,13 @@
             "state" : "translated",
             "value" : "Homebrew가 앱에서 읽을 수 없는 출력을 반환했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Homebrew devolveu uma saída que o app não conseguiu ler."
+          }
+        }}
     },
     "Refresh" : {
       "comment" : "View menu: refresh every surface (⌘R)",
@@ -588,8 +663,13 @@
             "state" : "translated",
             "value" : "새로 고침"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar"
+          }
+        }}
     },
     "Retry" : {
       "comment" : "Error state: retry the failed load",
@@ -623,8 +703,13 @@
             "state" : "translated",
             "value" : "다시 시도"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tentar novamente"
+          }
+        }}
     },
     "Terminal command" : {
       "comment" : "Command block header, one command",
@@ -658,8 +743,13 @@
             "state" : "translated",
             "value" : "터미널 명령"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comando do Terminal"
+          }
+        }}
     },
     "Terminal commands" : {
       "comment" : "Command block header, several commands",
@@ -693,8 +783,13 @@
             "state" : "translated",
             "value" : "터미널 명령"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comandos do Terminal"
+          }
+        }}
     },
     "This service can't be managed here. Refresh its status or use Terminal." : {
       "comment" : "Service action error: ownership or state prevents a safe operation",
@@ -716,8 +811,13 @@
             "state" : "translated",
             "value" : "이 서비스는 여기에서 관리할 수 없습니다. 상태를 새로 고치거나 터미널을 사용하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este serviço não pode ser gerido aqui. Atualize o estado ou use o Terminal."
+          }
+        }}
     },
     "just now" : {
       "comment" : "Relative time: under a minute ago",
@@ -751,8 +851,13 @@
             "state" : "translated",
             "value" : "방금"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "agora mesmo"
+          }
+        }}
     }
   },
   "version" : "1.0"

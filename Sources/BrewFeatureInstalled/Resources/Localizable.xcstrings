@@ -4,6 +4,12 @@
     "%@\n\nUntil this succeeds the app can't tell whether anything needs upgrading." : {
       "comment" : "Upgrades empty state under a failed check: brew's error, then why the list is empty",
       "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@\n\nAté que isto seja concluído, o app não consegue saber se algo precisa de atualização."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -68,8 +74,13 @@
             "state" : "translated",
             "value" : "%@ (링크됨)"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (vinculado)"
+          }
+        }}
     },
     "%@ — last check failed" : {
       "comment" : "Upgrades tab subtitle when cached upgrades are shown after a failed re-check",
@@ -103,8 +114,13 @@
             "state" : "translated",
             "value" : "%@ — 마지막 확인 실패"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — a última verificação falhou"
+          }
+        }}
     },
     "%@, not installed" : {
       "comment" : "VoiceOver: dependency row for a package that is not installed; %@ is its name",
@@ -138,8 +154,13 @@
             "state" : "translated",
             "value" : "%@, 설치되지 않음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, não instalado"
+          }
+        }}
     },
     "%lld outdated packages are hidden by the current filters." : {
       "comment" : "Upgrades filter-empty state with multiple hidden outdated packages",
@@ -173,8 +194,13 @@
             "state" : "translated",
             "value" : "현재 필터로 구버전 패키지 %lld개가 숨겨져 있습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pacotes desatualizados estão ocultos pelos filtros actuais."
+          }
+        }}
     },
     "%lld packages" : {
       "comment" : "Installed tab subtitle; %lld is the package count (never 1)",
@@ -220,8 +246,13 @@
             "state" : "translated",
             "value" : "패키지 %lld개"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pacotes"
+          }
+        }}
     },
     "%lld packages above depend on %@. Uninstall them first." : {
       "comment" : "Installed detail uninstall blocked callout body for multiple dependents",
@@ -261,8 +292,13 @@
             "state" : "translated",
             "value" : "위의 패키지 %1$lld개가 %2$@에 의존합니다. 먼저 해당 패키지를 제거하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pacotes instalados dependem de %@. Desinstale-os primeiro."
+          }
+        }}
     },
     "%lld packages can be upgraded" : {
       "comment" : "Upgrades tab subtitle when multiple packages are outdated",
@@ -296,8 +332,13 @@
             "state" : "translated",
             "value" : "패키지 %lld개를 업그레이드할 수 있습니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pacotes podem ser atualizados"
+          }
+        }}
     },
     "%lld upgrades available" : {
       "comment" : "VoiceOver: sidebar badge; %lld is the outdated count",
@@ -331,8 +372,13 @@
             "state" : "translated",
             "value" : "업그레이드 %lld개 사용 가능"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld atualizações disponíveis"
+          }
+        }}
     },
     "1 outdated package is hidden by the current filters." : {
       "comment" : "Upgrades filter-empty state with a single hidden outdated package",
@@ -366,8 +412,13 @@
             "state" : "translated",
             "value" : "현재 필터로 구버전 패키지 1개가 숨겨져 있습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 pacote desatualizado está oculto pelos filtros actuais."
+          }
+        }}
     },
     "1 package" : {
       "comment" : "Installed tab subtitle, exactly one package",
@@ -401,8 +452,13 @@
             "state" : "translated",
             "value" : "패키지 1개"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 pacote"
+          }
+        }}
     },
     "1 package above depends on %@. Uninstall it first." : {
       "comment" : "Installed detail uninstall blocked callout body for one dependent",
@@ -436,8 +492,13 @@
             "state" : "translated",
             "value" : "위의 패키지 1개가 %@에 의존합니다. 먼저 해당 패키지를 제거하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 pacote instalado depende de %@. Desinstale-o primeiro."
+          }
+        }}
     },
     "1 package can be upgraded" : {
       "comment" : "Upgrades tab subtitle for a single outdated package",
@@ -471,8 +532,13 @@
             "state" : "translated",
             "value" : "패키지 1개를 업그레이드할 수 있습니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 pacote pode ser atualizado"
+          }
+        }}
     },
     "All" : {
       "comment" : "Scope picker: every package kind",
@@ -506,8 +572,13 @@
             "state" : "translated",
             "value" : "전체"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos"
+          }
+        }}
     },
     "All %lld installed packages are up to date." : {
       "comment" : "Upgrades empty state with total installed count",
@@ -541,8 +612,13 @@
             "state" : "translated",
             "value" : "설치된 패키지 %lld개가 모두 최신 버전입니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os %lld pacotes instalados estão atualizados."
+          }
+        }}
     },
     "As dependency" : {
       "comment" : "Install reason row: installed only because another package needed it",
@@ -576,8 +652,13 @@
             "state" : "translated",
             "value" : "의존성으로 설치"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como dependência"
+          }
+        }}
     },
     "Available upgrades" : {
       "comment" : "Upgrades tab heading",
@@ -611,8 +692,13 @@
             "state" : "translated",
             "value" : "사용 가능한 업그레이드"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizações disponíveis"
+          }
+        }}
     },
     "Blocked by installed dependents. Activate to see why." : {
       "comment" : "Installed detail uninstall button accessibility hint when blocked",
@@ -646,8 +732,13 @@
             "state" : "translated",
             "value" : "이 패키지에 의존하는 패키지가 설치되어 있어 제거할 수 없습니다. 활성화하면 이유를 볼 수 있습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloqueado por dependências instaladas. Active para saber por quê."
+          }
+        }}
     },
     "Can't uninstall yet." : {
       "comment" : "Installed detail uninstall blocked callout lead sentence",
@@ -681,8 +772,13 @@
             "state" : "translated",
             "value" : "아직 제거할 수 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não é possível desinstalar."
+          }
+        }}
     },
     "Cancel" : {
       "comment" : "Uninstall confirmation: keep the package",
@@ -716,8 +812,13 @@
             "state" : "translated",
             "value" : "취소"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }}
     },
     "Casks" : {
       "comment" : "Scope picker: casks only",
@@ -751,8 +852,13 @@
             "state" : "translated",
             "value" : "Cask"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casks"
+          }
+        }}
     },
     "Check for upgrades again" : {
       "comment" : "VoiceOver: upgrades refresh button",
@@ -786,8 +892,13 @@
             "state" : "translated",
             "value" : "업그레이드 다시 확인"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificar atualizações novamente"
+          }
+        }}
     },
     "Choose a package from the list to see details." : {
       "comment" : "Package detail placeholder body when nothing is selected",
@@ -821,8 +932,13 @@
             "state" : "translated",
             "value" : "목록에서 패키지를 선택하면 세부사항이 표시됩니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha um pacote da lista para ver os detalhes."
+          }
+        }}
     },
     "Couldn't check for upgrades" : {
       "comment" : "Upgrades tab: the outdated check failed, so the tab cannot report an answer",
@@ -856,8 +972,13 @@
             "state" : "translated",
             "value" : "업그레이드를 확인할 수 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível verificar atualizações"
+          }
+        }}
     },
     "DEPRECATED" : {
       "comment" : "Installed deprecated status badge label",
@@ -891,8 +1012,13 @@
             "state" : "translated",
             "value" : "지원 중단됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DESCONTINUADO"
+          }
+        }}
     },
     "Dependencies" : {
       "comment" : "Package detail section heading",
@@ -926,8 +1052,13 @@
             "state" : "translated",
             "value" : "의존성"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dependências"
+          }
+        }}
     },
     "Dependents" : {
       "comment" : "Package detail section heading: packages that depend on this one",
@@ -961,8 +1092,13 @@
             "state" : "translated",
             "value" : "의존하는 패키지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dependentes"
+          }
+        }}
     },
     "Deprecated" : {
       "comment" : "Installed deprecated status badge accessibility label",
@@ -996,8 +1132,13 @@
             "state" : "translated",
             "value" : "지원 중단됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descontinuado"
+          }
+        }}
     },
     "Details" : {
       "comment" : "Package detail section heading",
@@ -1031,8 +1172,13 @@
             "state" : "translated",
             "value" : "세부사항"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalhes"
+          }
+        }}
     },
     "Everything is up to date" : {
       "comment" : "Upgrades tab: canonical phrase for having no upgrades available",
@@ -1066,8 +1212,13 @@
             "state" : "translated",
             "value" : "모두 최신 버전입니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo está atualizado"
+          }
+        }}
     },
     "Formulae" : {
       "comment" : "Scope picker: formulae only",
@@ -1101,8 +1252,13 @@
             "state" : "translated",
             "value" : "Formula"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fórmulas"
+          }
+        }}
     },
     "Hide dependencies" : {
       "comment" : "Installed tab: hide dependency-only packages",
@@ -1136,8 +1292,13 @@
             "state" : "translated",
             "value" : "의존성 가리기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ocultar dependências"
+          }
+        }}
     },
     "Homepage" : {
       "comment" : "Package detail row: homepage link",
@@ -1171,8 +1332,13 @@
             "state" : "translated",
             "value" : "홈페이지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Página inicial"
+          }
+        }}
     },
     "Install reason" : {
       "comment" : "Package detail row: on request or as a dependency",
@@ -1206,8 +1372,13 @@
             "state" : "translated",
             "value" : "설치 이유"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motivo da instalação"
+          }
+        }}
     },
     "Installed" : {
       "comment" : "Package detail row: installed version(s)\nVoiceOver: package is installed",
@@ -1241,8 +1412,13 @@
             "state" : "translated",
             "value" : "설치됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        }}
     },
     "Installed and up to date" : {
       "comment" : "Installed list: tooltip on the up-to-date tick",
@@ -1276,8 +1452,13 @@
             "state" : "translated",
             "value" : "설치됨, 최신 버전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado e atualizado"
+          }
+        }}
     },
     "Installed on" : {
       "comment" : "Package detail row: install date",
@@ -1311,8 +1492,13 @@
             "state" : "translated",
             "value" : "설치 날짜"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado em"
+          }
+        }}
     },
     "Installed packages" : {
       "comment" : "VoiceOver: the installed packages list",
@@ -1346,8 +1532,13 @@
             "state" : "translated",
             "value" : "설치된 패키지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pacotes instalados"
+          }
+        }}
     },
     "Keg-only" : {
       "comment" : "Package detail row: formula is keg-only",
@@ -1381,8 +1572,13 @@
             "state" : "translated",
             "value" : "Keg-only"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apenas keg"
+          }
+        }}
     },
     "Latest version" : {
       "comment" : "Package detail row",
@@ -1416,8 +1612,13 @@
             "state" : "translated",
             "value" : "최신 버전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão mais recente"
+          }
+        }}
     },
     "License" : {
       "comment" : "Package detail row",
@@ -1457,8 +1658,13 @@
             "state" : "translated",
             "value" : "라이선스"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licença"
+          }
+        }}
     },
     "Loading packages…" : {
       "comment" : "Installed tab subtitle while fetching\nUpgrades tab subtitle while fetching",
@@ -1492,8 +1698,13 @@
             "state" : "translated",
             "value" : "패키지 불러오는 중…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando pacotes…"
+          }
+        }}
     },
     "No dependencies." : {
       "comment" : "Package detail: empty dependency list",
@@ -1527,8 +1738,13 @@
             "state" : "translated",
             "value" : "의존성이 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dependências."
+          }
+        }}
     },
     "No dependents." : {
       "comment" : "Package detail: nothing depends on this package",
@@ -1562,8 +1778,13 @@
             "state" : "translated",
             "value" : "이 패키지에 의존하는 패키지가 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem dependentes."
+          }
+        }}
     },
     "No installed packages to check." : {
       "comment" : "Upgrades empty state when nothing is installed",
@@ -1597,8 +1818,13 @@
             "state" : "translated",
             "value" : "확인할 설치된 패키지가 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não há pacotes instalados para verificar."
+          }
+        }}
     },
     "No matches in %lld outdated packages" : {
       "comment" : "Upgrades tab subtitle when filters hide every available upgrade",
@@ -1632,8 +1858,13 @@
             "state" : "translated",
             "value" : "구버전 패키지 %lld개 중 일치 항목 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum resultado em %lld pacotes desatualizados"
+          }
+        }}
     },
     "No matches in 1 outdated package" : {
       "comment" : "Upgrades tab subtitle when filters hide the single available upgrade",
@@ -1667,8 +1898,13 @@
             "state" : "translated",
             "value" : "구버전 패키지 1개 중 일치 항목 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum resultado em 1 pacote desatualizado"
+          }
+        }}
     },
     "No matching upgrades" : {
       "comment" : "Upgrades filter-empty state title",
@@ -1702,8 +1938,13 @@
             "state" : "translated",
             "value" : "일치하는 업그레이드 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma atualização correspondente"
+          }
+        }}
     },
     "No selection" : {
       "comment" : "Package detail placeholder title when nothing is selected",
@@ -1737,8 +1978,13 @@
             "state" : "translated",
             "value" : "선택 항목 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma selecção"
+          }
+        }}
     },
     "None." : {
       "comment" : "Package detail: empty relationship list",
@@ -1772,8 +2018,13 @@
             "state" : "translated",
             "value" : "없음."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum."
+          }
+        }}
     },
     "Nothing to upgrade here" : {
       "comment" : "Upgrades header stand-in when filters hide every available upgrade",
@@ -1807,8 +2058,13 @@
             "state" : "translated",
             "value" : "여기에는 업그레이드할 항목이 없습니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada para atualizar aqui"
+          }
+        }}
     },
     "OUTDATED" : {
       "comment" : "Installed outdated status badge label",
@@ -1842,8 +2098,13 @@
             "state" : "translated",
             "value" : "구버전"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DESACTUALIZADO"
+          }
+        }}
     },
     "Open installed package %@" : {
       "comment" : "VoiceOver: dependency row that jumps to that package; %@ is its name",
@@ -1877,8 +2138,13 @@
             "state" : "translated",
             "value" : "설치된 패키지 %@ 열기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir pacote instalado %@"
+          }
+        }}
     },
     "Outdated packages" : {
       "comment" : "VoiceOver: the outdated packages list",
@@ -1912,8 +2178,13 @@
             "state" : "translated",
             "value" : "구버전 패키지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pacotes desatualizados"
+          }
+        }}
     },
     "Pinned" : {
       "comment" : "Package detail row: brew pin",
@@ -1947,8 +2218,13 @@
             "state" : "translated",
             "value" : "고정됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixado"
+          }
+        }}
     },
     "Poured from bottle — %@" : {
       "comment" : "Install date row; %@ is the formatted date",
@@ -1982,8 +2258,13 @@
             "state" : "translated",
             "value" : "Bottle에서 설치 — %@"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado a partir do bottle — %@"
+          }
+        }}
     },
     "Refresh" : {
       "comment" : "Upgrades tab: re-check for upgrades button",
@@ -2017,8 +2298,13 @@
             "state" : "translated",
             "value" : "새로 고침"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar"
+          }
+        }}
     },
     "Scope" : {
       "comment" : "Installed tab: formula/cask scope picker label\nUpgrades tab: formula/cask scope picker label",
@@ -2052,8 +2338,13 @@
             "state" : "translated",
             "value" : "범위"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escopo"
+          }
+        }}
     },
     "Search Installed Packages" : {
       "comment" : "Search field placeholder, Installed tab",
@@ -2087,8 +2378,13 @@
             "state" : "translated",
             "value" : "설치된 패키지 검색"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesquisar pacotes instalados"
+          }
+        }}
     },
     "Search Upgrades" : {
       "comment" : "Search field placeholder, Upgrades tab",
@@ -2122,8 +2418,13 @@
             "state" : "translated",
             "value" : "업그레이드 검색"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pesquisar atualizações"
+          }
+        }}
     },
     "Show all upgrades" : {
       "comment" : "Upgrades tab: clear the scope and search filters",
@@ -2157,8 +2458,13 @@
             "state" : "translated",
             "value" : "모든 업그레이드 보기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas as atualizações"
+          }
+        }}
     },
     "Showing %lld of %lld upgrades" : {
       "comment" : "Upgrades tab subtitle while filtering with at least one match",
@@ -2198,8 +2504,13 @@
             "state" : "translated",
             "value" : "업그레이드 %2$lld개 중 %1$lld개 표시"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A mostrar %lld de %lld atualizações"
+          }
+        }}
     },
     "Something went wrong loading packages." : {
       "comment" : "Installed tab generic error\nUpgrades tab generic error",
@@ -2233,8 +2544,13 @@
             "state" : "translated",
             "value" : "패키지를 불러오는 중 문제가 발생했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado ao carregar os pacotes."
+          }
+        }}
     },
     "Something went wrong while uninstalling this package." : {
       "comment" : "Installed detail generic uninstall error",
@@ -2268,8 +2584,13 @@
             "state" : "translated",
             "value" : "이 패키지를 제거하는 중 문제가 발생했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado ao desinstalar este pacote."
+          }
+        }}
     },
     "Something went wrong while upgrading this package." : {
       "comment" : "Installed detail generic upgrade error",
@@ -2303,8 +2624,13 @@
             "state" : "translated",
             "value" : "이 패키지를 업그레이드하는 중 문제가 발생했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algo deu errado ao atualizar este pacote."
+          }
+        }}
     },
     "Source" : {
       "comment" : "Package detail row: source tap",
@@ -2338,8 +2664,13 @@
             "state" : "translated",
             "value" : "출처"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonte"
+          }
+        }}
     },
     "This will remove %@ from this Mac using Homebrew." : {
       "comment" : "Installed detail uninstall confirmation message; interpolated package name",
@@ -2373,8 +2704,13 @@
             "state" : "translated",
             "value" : "Homebrew를 사용해 이 Mac에서 %@ 패키지를 제거합니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isto removerá %@ deste Mac usando o Homebrew."
+          }
+        }}
     },
     "Try Again" : {
       "comment" : "Upgrades tab: re-run the failed upgrade check",
@@ -2408,8 +2744,13 @@
             "state" : "translated",
             "value" : "다시 시도"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tentar novamente"
+          }
+        }}
     },
     "Uninstall" : {
       "comment" : "Installed detail uninstall button title\nPackage detail section heading",
@@ -2443,8 +2784,13 @@
             "state" : "translated",
             "value" : "제거"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desinstalar"
+          }
+        }}
     },
     "Uninstall %@?" : {
       "comment" : "Installed detail uninstall confirmation title; interpolated package name",
@@ -2478,8 +2824,13 @@
             "state" : "translated",
             "value" : "%@ 패키지를 제거할까요?"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desinstalar %@?"
+          }
+        }}
     },
     "Uninstalling" : {
       "comment" : "VoiceOver: package uninstalling",
@@ -2513,8 +2864,13 @@
             "state" : "translated",
             "value" : "제거 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desinstalando"
+          }
+        }}
     },
     "Uninstalls this package from this Mac" : {
       "comment" : "Command block summary above brew uninstall",
@@ -2548,8 +2904,13 @@
             "state" : "translated",
             "value" : "이 Mac에서 패키지를 제거합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desinstala este pacote deste Mac"
+          }
+        }}
     },
     "Upgrade" : {
       "comment" : "Package detail section heading",
@@ -2583,8 +2944,13 @@
             "state" : "translated",
             "value" : "업그레이드"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar"
+          }
+        }}
     },
     "Upgrade All (%lld)" : {
       "comment" : "Upgrades tab button; %lld is the outdated count",
@@ -2618,8 +2984,13 @@
             "state" : "translated",
             "value" : "모두 업그레이드 (%lld)"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar tudo (%lld)"
+          }
+        }}
     },
     "Upgrade all %lld packages" : {
       "comment" : "VoiceOver: upgrade-all button; %lld is the outdated count",
@@ -2653,8 +3024,13 @@
             "state" : "translated",
             "value" : "패키지 %lld개 모두 업그레이드"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza todos os %lld pacotes"
+          }
+        }}
     },
     "Upgrade available" : {
       "comment" : "Installed outdated status badge accessibility label",
@@ -2688,8 +3064,13 @@
             "state" : "translated",
             "value" : "업그레이드 가능"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualização disponível"
+          }
+        }}
     },
     "Upgrade available to %@" : {
       "comment" : "VoiceOver: installed row with an available upgrade; the value is the latest version",
@@ -2723,8 +3104,13 @@
             "state" : "translated",
             "value" : "%@(으)로 업그레이드 가능"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualização disponível para %@"
+          }
+        }}
     },
     "Upgrade to %@" : {
       "comment" : "Installed detail upgrade button; interpolated label shows target tap version.",
@@ -2758,8 +3144,13 @@
             "state" : "translated",
             "value" : "%@(으)로 업그레이드"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar para %@"
+          }
+        }}
     },
     "Upgrades every outdated cask" : {
       "comment" : "Upgrades header command summary scoped to casks",
@@ -2793,8 +3184,13 @@
             "state" : "translated",
             "value" : "구버전 Cask를 모두 업그레이드합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza todos os casks desatualizados"
+          }
+        }}
     },
     "Upgrades every outdated formula" : {
       "comment" : "Upgrades header command summary scoped to formulae",
@@ -2828,8 +3224,13 @@
             "state" : "translated",
             "value" : "구버전 Formula를 모두 업그레이드합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza todas as fórmulas desatualizadas"
+          }
+        }}
     },
     "Upgrades every outdated package" : {
       "comment" : "Upgrades header command summary for an unfiltered batch",
@@ -2863,8 +3264,13 @@
             "state" : "translated",
             "value" : "구버전 패키지를 모두 업그레이드합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza todos os pacotes desatualizados"
+          }
+        }}
     },
     "Upgrades the %lld packages matching your search" : {
       "comment" : "Upgrades header command summary for multiple searched packages",
@@ -2898,8 +3304,13 @@
             "state" : "translated",
             "value" : "검색과 일치하는 패키지 %lld개를 업그레이드합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza os %lld pacotes correspondentes à sua pesquisa"
+          }
+        }}
     },
     "Upgrades the 1 package matching your search" : {
       "comment" : "Upgrades header command summary for a single searched package",
@@ -2933,8 +3344,13 @@
             "state" : "translated",
             "value" : "검색과 일치하는 패키지 1개를 업그레이드합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza o pacote correspondente à sua pesquisa"
+          }
+        }}
     },
     "Upgrades this package to the latest available version" : {
       "comment" : "Command block summary above brew upgrade",
@@ -2968,8 +3384,13 @@
             "state" : "translated",
             "value" : "이 패키지를 사용 가능한 최신 버전으로 업그레이드합니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualiza este pacote para a versão mais recente disponível"
+          }
+        }}
     },
     "Upgrading" : {
       "comment" : "VoiceOver: package upgrading",
@@ -3003,8 +3424,13 @@
             "state" : "translated",
             "value" : "업그레이드 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizando"
+          }
+        }}
     },
     "Yes" : {
       "comment" : "Package detail value for a true flag",
@@ -3038,8 +3464,13 @@
             "state" : "translated",
             "value" : "예"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim"
+          }
+        }}
     },
     "Your installed package is up to date." : {
       "comment" : "Upgrades empty state for a single installed package",
@@ -3073,8 +3504,13 @@
             "state" : "translated",
             "value" : "설치된 패키지가 최신 버전입니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu pacote instalado está atualizado."
+          }
+        }}
     },
     "Your packages" : {
       "comment" : "Installed tab heading",
@@ -3108,8 +3544,13 @@
             "state" : "translated",
             "value" : "내 패키지"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus pacotes"
+          }
+        }}
     },
     "blocking uninstall" : {
       "comment" : "Installed detail Used by badge when dependents block uninstall",
@@ -3143,8 +3584,13 @@
             "state" : "translated",
             "value" : "제거 차단 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "desinstalação bloqueada"
+          }
+        }}
     }
   },
   "version" : "1.0"

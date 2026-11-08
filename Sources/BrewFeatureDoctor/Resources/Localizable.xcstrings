@@ -33,8 +33,13 @@
             "state" : "translated",
             "value" : "%@, 수정 가능"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, correção disponível"
+          }
+        }}
     },
     "Copy brew doctor output" : {
       "comment" : "VoiceOver: Doctor copy-output button",
@@ -68,8 +73,13 @@
             "state" : "translated",
             "value" : "brew doctor 출력 복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar saída do brew doctor"
+          }
+        }}
     },
     "Copy output" : {
       "comment" : "Doctor header: copy raw brew doctor output",
@@ -103,8 +113,13 @@
             "state" : "translated",
             "value" : "출력 복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar saída"
+          }
+        }}
     },
     "Danger" : {
       "comment" : "Doctor severity name",
@@ -138,8 +153,13 @@
             "state" : "translated",
             "value" : "위험"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perigo"
+          }
+        }}
     },
     "Doctor" : {
       "comment" : "Doctor tab heading",
@@ -173,8 +193,13 @@
             "state" : "translated",
             "value" : "진단"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnóstico"
+          }
+        }}
     },
     "Doctor issues" : {
       "comment" : "VoiceOver: the Doctor issues list",
@@ -208,8 +233,13 @@
             "state" : "translated",
             "value" : "진단 문제"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problemas do diagnóstico"
+          }
+        }}
     },
     "Fix available" : {
       "comment" : "Doctor issue row badge",
@@ -243,8 +273,13 @@
             "state" : "translated",
             "value" : "수정 가능"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Correção disponível"
+          }
+        }}
     },
     "Last checked" : {
       "comment" : "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”",
@@ -278,8 +313,13 @@
             "state" : "translated",
             "value" : "마지막 확인"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última verificação"
+          }
+        }}
     },
     "Needs admin · runs in Terminal" : {
       "comment" : "Doctor fix note: the command needs sudo so it opens in Terminal",
@@ -313,8 +353,13 @@
             "state" : "translated",
             "value" : "관리자 권한 필요 · 터미널에서 실행"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Requer administrador · executa no Terminal"
+          }
+        }}
     },
     "No problems found" : {
       "comment" : "Doctor subtitle, healthy",
@@ -348,8 +393,13 @@
             "state" : "translated",
             "value" : "문제 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum problema encontrado"
+          }
+        }}
     },
     "No selection" : {
       "comment" : "Doctor detail placeholder title when nothing is selected",
@@ -383,8 +433,13 @@
             "state" : "translated",
             "value" : "선택 항목 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma selecção"
+          }
+        }}
     },
     "Raw output" : {
       "comment" : "Doctor detail: collapsible header for the raw brew doctor text",
@@ -418,8 +473,13 @@
             "state" : "translated",
             "value" : "원본 출력"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saída bruta"
+          }
+        }}
     },
     "Re-checking" : {
       "comment" : "VoiceOver: Doctor re-check spinner",
@@ -453,8 +513,13 @@
             "state" : "translated",
             "value" : "다시 확인 중"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificando novamente"
+          }
+        }}
     },
     "Re-checking…" : {
       "comment" : "Doctor subtitle while a re-check runs",
@@ -488,8 +553,13 @@
             "state" : "translated",
             "value" : "다시 확인 중…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificando novamente…"
+          }
+        }}
     },
     "Run Again" : {
       "comment" : "Doctor header: re-run brew doctor",
@@ -523,8 +593,13 @@
             "state" : "translated",
             "value" : "다시 실행"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Executar novamente"
+          }
+        }}
     },
     "Run Fix" : {
       "comment" : "Doctor detail: run the suggested fix button\nVoiceOver: run-fix button",
@@ -558,8 +633,13 @@
             "state" : "translated",
             "value" : "수정 실행"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Executar correção"
+          }
+        }}
     },
     "Run diagnostics, then choose an issue to see details and fixes." : {
       "comment" : "Doctor detail placeholder body when nothing is selected",
@@ -593,8 +673,13 @@
             "state" : "translated",
             "value" : "진단을 실행한 후 문제를 선택하면 세부사항과 수정 방법이 표시됩니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Execute os diagnósticos e escolha um problema para ver detalhes e correções."
+          }
+        }}
     },
     "Running brew doctor…" : {
       "comment" : "Doctor subtitle during the first check",
@@ -628,8 +713,13 @@
             "state" : "translated",
             "value" : "brew doctor 실행 중…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Executando brew doctor…"
+          }
+        }}
     },
     "Severity: %@" : {
       "comment" : "VoiceOver: Doctor severity badge; %@ is the severity name",
@@ -663,8 +753,13 @@
             "state" : "translated",
             "value" : "심각도: %@"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravidade: %@"
+          }
+        }}
     },
     "The check could not be completed" : {
       "comment" : "Doctor subtitle when brew doctor failed to run",
@@ -698,8 +793,13 @@
             "state" : "translated",
             "value" : "확인을 완료할 수 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível concluir a verificação"
+          }
+        }}
     },
     "Unsupported" : {
       "comment" : "Doctor severity name: unsupported configuration",
@@ -733,8 +833,13 @@
             "state" : "translated",
             "value" : "지원되지 않음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não compatível"
+          }
+        }}
     },
     "Warning" : {
       "comment" : "Doctor severity name",
@@ -768,8 +873,13 @@
             "state" : "translated",
             "value" : "경고"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aviso"
+          }
+        }}
     },
     "Warnings found" : {
       "comment" : "Doctor subtitle, issues listed",
@@ -803,8 +913,13 @@
             "state" : "translated",
             "value" : "경고 발견"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avisos encontrados"
+          }
+        }}
     },
     "Your system is ready to brew" : {
       "comment" : "Doctor healthy state title",
@@ -838,8 +953,13 @@
             "state" : "translated",
             "value" : "시스템에서 Homebrew를 사용할 준비가 되었습니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu sistema está pronto para usar o brew"
+          }
+        }}
     },
     "brew doctor found no problems." : {
       "comment" : "Doctor healthy state body",
@@ -873,8 +993,13 @@
             "state" : "translated",
             "value" : "brew doctor에서 문제를 찾지 못했습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O brew doctor não encontrou problemas."
+          }
+        }}
     }
   },
   "version" : "1.0"

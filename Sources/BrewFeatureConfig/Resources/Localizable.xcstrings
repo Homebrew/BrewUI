@@ -33,8 +33,13 @@
             "state" : "translated",
             "value" : "빌드 설정"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes de compilação"
+          }
+        }}
     },
     "Copy report" : {
       "comment" : "Configuration header: copy the diagnostic report",
@@ -68,8 +73,13 @@
             "state" : "translated",
             "value" : "보고서 복사"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar relatório"
+          }
+        }}
     },
     "Couldn't locate the brew executable. Install Homebrew, then refresh." : {
       "comment" : "Configuration tab, brew-not-found message",
@@ -103,8 +113,13 @@
             "state" : "translated",
             "value" : "brew 실행 파일을 찾을 수 없습니다. Homebrew를 설치한 후 새로 고치세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível localizar o executável do brew. Instale o Homebrew e atualize."
+          }
+        }}
     },
     "Couldn't read the Homebrew configuration." : {
       "comment" : "Configuration tab, generic load failure",
@@ -138,8 +153,13 @@
             "state" : "translated",
             "value" : "Homebrew 구성을 읽을 수 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler a configuração do Homebrew."
+          }
+        }}
     },
     "Homebrew" : {
       "comment" : "Configuration card title: brew version, prefix, taps",
@@ -173,8 +193,13 @@
             "state" : "translated",
             "value" : "Homebrew"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        }}
     },
     "Homebrew not found" : {
       "comment" : "Configuration tab, brew-not-found title",
@@ -208,8 +233,13 @@
             "state" : "translated",
             "value" : "Homebrew를 찾을 수 없음"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew não encontrado"
+          }
+        }}
     },
     "Homebrew settings are read from brew.env files. Shell profiles and exported variables are ignored. Put user settings in ~/.homebrew/brew.env, then relaunch BrewUI." : {
       "comment" : "Configuration tab: where Homebrew reads its settings from",
@@ -243,8 +273,13 @@
             "state" : "translated",
             "value" : "Homebrew 설정은 brew.env 파일에서 읽습니다. 셸 프로파일과 내보낸 변수는 무시됩니다. 사용자 설정을 ~/.homebrew/brew.env에 넣은 다음 BrewUI를 다시 실행하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os ajustes do Homebrew são lidos dos arquivos brew.env. Perfis de shell e variáveis exportadas são ignorados. Coloque seus ajustes em ~/.homebrew/brew.env e reabra o BrewUI."
+          }
+        }}
     },
     "Refresh" : {
       "comment" : "Configuration header: re-run brew config",
@@ -278,8 +313,13 @@
             "state" : "translated",
             "value" : "새로 고침"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizar"
+          }
+        }}
     },
     "System" : {
       "comment" : "Configuration card title: macOS, CPU, Xcode",
@@ -313,8 +353,13 @@
             "state" : "translated",
             "value" : "시스템"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sistema"
+          }
+        }}
     }
   },
   "version" : "1.0"

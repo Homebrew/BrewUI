@@ -33,8 +33,13 @@
             "state" : "translated",
             "value" : "앱이 예기치 않게 종료된 후 보고서가 저장되었습니다. GitHub에서 Homebrew 팀에 보내 문제 해결을 돕거나 보고서를 폐기할 수 있습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um relatório foi salvo após o encerramento inesperado do app. Você pode enviá-lo à equipe do Homebrew no GitHub para ajudar a corrigir o problema ou descartá-lo."
+          }
+        }}
     },
     "Administrator password" : {
       "comment" : "Askpass: secure password field label",
@@ -44,8 +49,13 @@
             "state" : "translated",
             "value" : "관리자 암호"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senha do administrador"
+          }
+        }}
     },
     "Authenticate" : {
       "comment" : "Askpass: submit the administrator password",
@@ -55,8 +65,13 @@
             "state" : "translated",
             "value" : "인증"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autenticar"
+          }
+        }}
     },
     "Browse and search %lld+ packages" : {
       "comment" : "Window subtitle, Discover; %lld is the approximate catalog size",
@@ -90,8 +105,13 @@
             "state" : "translated",
             "value" : "패키지 %lld개 이상 둘러보기 및 검색"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explore e pesquise mais de %lld pacotes"
+          }
+        }}
     },
     "Browse or search your installed packages" : {
       "comment" : "Window subtitle, Installed",
@@ -125,8 +145,13 @@
             "state" : "translated",
             "value" : "설치된 패키지 둘러보기 및 검색"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explore ou pesquise seus pacotes instalados"
+          }
+        }}
     },
     "Cancel" : {
       "comment" : "Askpass: cancel administrator authentication",
@@ -136,8 +161,13 @@
             "state" : "translated",
             "value" : "취소"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }}
     },
     "Check your Homebrew installation for problems" : {
       "comment" : "Window subtitle, Doctor",
@@ -171,8 +201,13 @@
             "state" : "translated",
             "value" : "Homebrew 설치의 문제 확인"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verifique se há problemas na instalação do Homebrew"
+          }
+        }}
     },
     "Configuration" : {
       "comment" : "Sidebar: brew config and environment",
@@ -212,8 +247,13 @@
             "state" : "translated",
             "value" : "구성"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configuração"
+          }
+        }}
     },
     "Discard" : {
       "comment" : "Crash report dialog: delete the report",
@@ -247,8 +287,13 @@
             "state" : "translated",
             "value" : "폐기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descartar"
+          }
+        }}
     },
     "Discover" : {
       "comment" : "Sidebar: browse and search the catalog",
@@ -288,8 +333,13 @@
             "state" : "translated",
             "value" : "둘러보기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descobrir"
+          }
+        }}
     },
     "Doctor" : {
       "comment" : "Sidebar: brew doctor diagnostics",
@@ -329,8 +379,13 @@
             "state" : "translated",
             "value" : "진단"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnóstico"
+          }
+        }}
     },
     "Enter your password to allow this." : {
       "comment" : "Askpass: explains that the password allows the change",
@@ -340,8 +395,13 @@
             "state" : "translated",
             "value" : "이 작업을 허용하려면 암호를 입력하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Digite sua senha para permitir isso."
+          }
+        }}
     },
     "Homebrew Documentation" : {
       "comment" : "Help menu",
@@ -375,8 +435,13 @@
             "state" : "translated",
             "value" : "Homebrew 문서"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Documentação do Homebrew"
+          }
+        }}
     },
     "Homebrew environment & diagnostics" : {
       "comment" : "Window subtitle, Configuration",
@@ -410,8 +475,13 @@
             "state" : "translated",
             "value" : "Homebrew 환경 및 진단 정보"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambiente e diagnósticos do Homebrew"
+          }
+        }}
     },
     "Homebrew wants to make changes." : {
       "comment" : "Askpass: primary message, standard macOS authorization wording",
@@ -421,8 +491,13 @@
             "state" : "translated",
             "value" : "Homebrew가 변경하려고 합니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Homebrew quer fazer alterações."
+          }
+        }}
     },
     "Installed" : {
       "comment" : "Sidebar: installed packages",
@@ -462,8 +537,13 @@
             "state" : "translated",
             "value" : "설치됨"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalado"
+          }
+        }}
     },
     "OK" : {
       "comment" : "Self-upgrade outcome alert: dismiss",
@@ -497,8 +577,13 @@
             "state" : "translated",
             "value" : "확인"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }}
     },
     "Report an Issue…" : {
       "comment" : "Help menu: opens the GitHub issue form",
@@ -532,8 +617,13 @@
             "state" : "translated",
             "value" : "문제 신고…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relatar um problema…"
+          }
+        }}
     },
     "Report on GitHub…" : {
       "comment" : "Crash report dialog: open a prefilled GitHub issue",
@@ -567,8 +657,13 @@
             "state" : "translated",
             "value" : "GitHub에 신고…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relatar no GitHub…"
+          }
+        }}
     },
     "Review and upgrade outdated packages" : {
       "comment" : "Window subtitle, Upgrades",
@@ -602,8 +697,13 @@
             "state" : "translated",
             "value" : "구버전 패키지 검토 및 업그레이드"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revise e atualize pacotes desatualizados"
+          }
+        }}
     },
     "Services" : {
       "comment" : "Sidebar: read-only Homebrew service inventory",
@@ -631,8 +731,13 @@
             "state" : "translated",
             "value" : "서비스"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serviços"
+          }
+        }}
     },
     "Save Brewfile…" : {
       "comment" : "File menu: save the installed packages as a Brewfile",
@@ -648,8 +753,13 @@
             "state" : "translated",
             "value" : "Brewfile 저장…"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salvar Brewfile…"
+          }
+        }}
     },
     "The Homebrew app quit unexpectedly" : {
       "comment" : "Crash report dialog title",
@@ -683,8 +793,13 @@
             "state" : "translated",
             "value" : "Homebrew 앱이 예기치 않게 종료되었습니다"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O app Homebrew encerrou inesperadamente"
+          }
+        }}
     },
     "The upgrade helper is missing from this build of the Homebrew app." : {
       "comment" : "Shown when the bundled self-upgrade helper executable cannot be found",
@@ -718,8 +833,13 @@
             "state" : "translated",
             "value" : "이 Homebrew 앱 빌드에 업그레이드 도우미가 없습니다."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O auxiliar de atualização não está presente nesta compilação do app Homebrew."
+          }
+        }}
     },
     "Upgrades" : {
       "comment" : "Sidebar: outdated packages",
@@ -759,8 +879,13 @@
             "state" : "translated",
             "value" : "업그레이드"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizações"
+          }
+        }}
     },
     "View your Homebrew services" : {
       "comment" : "Window subtitle, read-only Services tab",
@@ -788,8 +913,13 @@
             "state" : "translated",
             "value" : "Homebrew 서비스 보기"
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veja seus serviços do Homebrew"
+          }
+        }}
     },
     "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
       "comment" : "Shown when the self-upgrade is attempted while another brew command is still running",
@@ -823,8 +953,13 @@
             "state" : "translated",
             "value" : "실행 중인 Homebrew 명령이 끝난 후 Homebrew 앱을 업그레이드하세요."
           }
-        }
-      }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aguarde o comando do Homebrew em execução terminar e atualize o app Homebrew."
+          }
+        }}
     }
   },
   "version" : "1.0"
