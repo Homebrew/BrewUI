@@ -182,7 +182,7 @@ final class InstalledViewModel {
         guard let commandFactory, let brewCommandCenter else { return }
         let parts = command.split(separator: " ").map(String.init)
         guard parts.first == "brew" else { return }
-        let args = Array(parts.dropFirst())
+        let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
         guard !args.isEmpty else { return }
         let brewCommand = commandFactory.doctorFixCommand(arguments: args)
         let operationID = BrewOperationID(maintenanceToken: command, displayCommand: command)

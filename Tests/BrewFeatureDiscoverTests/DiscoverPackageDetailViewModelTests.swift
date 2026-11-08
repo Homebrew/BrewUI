@@ -211,6 +211,80 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.stableVersionLabel == "4.0.0")
         #expect(viewModel.homepageURL?.absoluteString == "https://docker.com")
     }
+
+    // MARK: - AI Alternatives and Comparison
+
+    @Test @MainActor func `loadAlternatives populates alternatives from AI engine`() async {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "grep"), thirtyDayInstallCount: 0),
+            installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        #expect(viewModel.alternatives.isEmpty)
+        await viewModel.loadAlternatives(using: PreviewSupport.aiEngine)
+        #expect(!viewModel.alternatives.isEmpty)
+        #expect(viewModel.alternatives.contains(where: { $0.name == "ripgrep" }))
+    }
+
+    @Test @MainActor func `compare triggers AI comparison and opens sheet`() async {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "grep"), thirtyDayInstallCount: 0),
+            installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        #expect(!viewModel.isShowingComparison)
+        #expect(viewModel.comparisonResult == nil)
+
+        let catalogue = PreviewSupport.makeDiscoverCatalogueRepository()
+        await viewModel.compare(with: "ripgrep", using: PreviewSupport.aiEngine, catalogue: catalogue)
+
+        #expect(viewModel.isShowingComparison)
+        #expect(viewModel.comparisonResult != nil)
+        #expect(viewModel.comparisonTarget?.name == "ripgrep")
+
+        viewModel.dismissComparison()
+        #expect(!viewModel.isShowingComparison)
+    }
+
+    @Test @MainActor func `installAlternative triggers command execution`() {
+        let factory = StubMutatingCommandFactory()
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "grep"), thirtyDayInstallCount: 0),
+            installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: factory,
+        )
+
+        viewModel.installAlternative(command: "brew install ripgrep")
+        #expect(viewModel.installErrorMessage == nil)
+    }
+
+    @Test @MainActor func `update package resets alternatives and comparison state`() async {
+        let viewModel = DiscoverPackageDetailViewModel(
+            package: DiscoveryBrewPackage(package: .fixture(name: "grep"), thirtyDayInstallCount: 0),
+            installedRepository: installedRepo(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+            commandFactory: StubMutatingCommandFactory(),
+        )
+
+        await viewModel.loadAlternatives(using: PreviewSupport.aiEngine)
+        let catalogue = PreviewSupport.makeDiscoverCatalogueRepository()
+        await viewModel.compare(with: "ripgrep", using: PreviewSupport.aiEngine, catalogue: catalogue)
+
+        #expect(!viewModel.alternatives.isEmpty)
+        #expect(viewModel.isShowingComparison)
+
+        viewModel.update(package: DiscoveryBrewPackage(package: .fixture(name: "curl"), thirtyDayInstallCount: 0))
+
+        #expect(viewModel.alternatives.isEmpty)
+        #expect(!viewModel.isShowingComparison)
+        #expect(viewModel.comparisonResult == nil)
+        #expect(viewModel.comparisonTarget == nil)
+    }
 }
 
 @MainActor

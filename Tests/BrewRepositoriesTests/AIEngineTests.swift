@@ -6,6 +6,7 @@
 import BrewCore
 import BrewRepositories
 import BrewRepositoryInterfaces
+import Foundation
 import Testing
 
 @Suite("AIEngine")
@@ -150,5 +151,119 @@ struct AIEngineTests {
         #expect(!comparison.strengthsA.isEmpty)
         #expect(!comparison.strengthsB.isEmpty)
         #expect(!comparison.matrix.isEmpty)
+    }
+
+    @Test func `engine suggests alternatives across classic tools and GUI casks`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+
+        let catAlts = await engine.suggestAlternatives(for: .fixture(name: "cat"))
+        #expect(catAlts.contains(where: { $0.name == "bat" }))
+
+        let findAlts = await engine.suggestAlternatives(for: .fixture(name: "find"))
+        #expect(findAlts.contains(where: { $0.name == "fd" }))
+
+        let lsAlts = await engine.suggestAlternatives(for: .fixture(name: "ls"))
+        #expect(lsAlts.contains(where: { $0.name == "eza" }))
+
+        let topAlts = await engine.suggestAlternatives(for: .fixture(name: "top"))
+        #expect(topAlts.contains(where: { $0.name == "btop" }))
+
+        let curlAlts = await engine.suggestAlternatives(for: .fixture(name: "curl"))
+        #expect(curlAlts.contains(where: { $0.name == "httpie" }))
+
+        let dockerAlts = await engine.suggestAlternatives(for: .fixture(name: "docker"))
+        #expect(dockerAlts.contains(where: { $0.name == "orbstack" && !$0.isFormula }))
+
+        let itermAlts = await engine.suggestAlternatives(for: .fixture(name: "iterm2"))
+        #expect(itermAlts.contains(where: { $0.name == "ghostty" }))
+
+        let unknownAlts = await engine.suggestAlternatives(for: .fixture(name: "unknown-binary-xyz"))
+        #expect(unknownAlts.isEmpty)
+    }
+
+    @Test func `engine deduplicates recommendations for tools already installed`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let installed: [InstalledBrewPackage] = [
+            .fixture(name: "git", installedVersions: ["2.46.0"]),
+            .fixture(name: "lazygit", installedVersions: ["0.44.0"]),
+            .fixture(name: "gh", installedVersions: ["2.56.0"]),
+            .fixture(name: "python@3.12", installedVersions: ["3.12.5"]),
+            .fixture(name: "uv", installedVersions: ["0.4.0"]),
+            .fixture(name: "ripgrep", installedVersions: ["14.1.0"]),
+            .fixture(name: "bat", installedVersions: ["0.24.0"]),
+            .fixture(name: "eza", installedVersions: ["0.19.0"]),
+            .fixture(name: "zoxide", installedVersions: ["0.9.0"]),
+            .fixture(name: "raycast", installedVersions: ["1.80.0"]),
+        ]
+
+        let recommendations = await engine.recommendPackages(basedOn: installed)
+        // Should not recommend tools that are already installed!
+        #expect(!recommendations.contains(where: { $0.packageName == "lazygit" }))
+        #expect(!recommendations.contains(where: { $0.packageName == "gh" }))
+        #expect(!recommendations.contains(where: { $0.packageName == "uv" }))
+        #expect(!recommendations.contains(where: { $0.packageName == "ripgrep" }))
+        #expect(!recommendations.contains(where: { $0.packageName == "raycast" }))
+    }
+
+    @Test func `engine compares two general packages side by side`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let packageA = BrewPackage.fixture(name: "ghostty", displayName: "Ghostty", kind: .cask)
+        let packageB = BrewPackage.fixture(name: "alacritty", displayName: "Alacritty", kind: .cask)
+
+        let comparison = await engine.comparePackages(packageA: packageA, packageB: packageB)
+        #expect(comparison.packageAName == "Ghostty")
+        #expect(comparison.packageBName == "Alacritty")
+        #expect(!comparison.verdictSummary.isEmpty)
+        #expect(!comparison.strengthsA.isEmpty)
+        #expect(!comparison.strengthsB.isEmpty)
+        #expect(comparison.matrix.count == 4)
+    }
+
+    @Test func `engine handles doctor broken symlinks and generic fallback`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let brokenSymlinksResult = await engine.analyzeDoctorIssue(
+            title: "You have broken symlinks in your Homebrew prefix",
+            rawOutput: "/opt/homebrew/bin/dead-link"
+        )
+        #expect(brokenSymlinksResult.suggestedCommands.contains("brew cleanup -s"))
+
+        let genericResult = await engine.analyzeDoctorIssue(
+            title: "Something unexpected occurred",
+            rawOutput: "random debug details"
+        )
+        #expect(genericResult.suggestedCommands.contains("brew doctor"))
+    }
+
+    @Test func `engine handles command permission error and bottle missing`() async {
+        let engine = LocalAIEngine(modelManager: MockModelManager())
+        let permResult = await engine.analyzeCommandFailure(
+            command: "brew install node",
+            exitCode: 1,
+            output: "Permission denied @ dir_s_mkdir - /usr/local/share/man"
+        )
+        #expect(permResult.summary.contains("permissions") || permResult.summary.contains("Permission"))
+
+        let bottleResult = await engine.analyzeCommandFailure(
+            command: "brew install special-tool",
+            exitCode: 1,
+            output: "Error: No bottle available!"
+        )
+        #expect(bottleResult.suggestedCommands.contains { $0.contains("--build-from-source") })
+    }
+
+    @Test @MainActor func `model manager manages active model and download state`() {
+        let defaultsSuite = "test.brew.modelmanager.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: defaultsSuite) else { return }
+        defer { defaults.removePersistentDomain(forName: defaultsSuite) }
+
+        let manager = BrewAIModelManager(defaults: defaults)
+        #expect(!manager.availableModels.isEmpty)
+
+        let firstModel = manager.availableModels[0]
+        manager.setActiveModel(id: firstModel.id)
+        #expect(manager.activeModelID == firstModel.id)
+
+        manager.setActiveModel(id: nil as String?)
+        #expect(manager.activeModelID == nil)
     }
 }

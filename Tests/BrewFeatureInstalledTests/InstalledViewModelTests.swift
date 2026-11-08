@@ -277,4 +277,35 @@ struct InstalledViewModelTests {
         }
         #expect(message == "Something went wrong loading packages.")
     }
+
+    // MARK: - AI Housekeeping Advisor
+
+    @Test @MainActor func `analyzeHousekeeping computes orphan candidates and reclaimable space`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [
+                .fixture(name: "git", kind: .formula, installedOnRequest: true),
+                .fixture(name: "libpng", kind: .formula, installedOnRequest: false),
+            ],
+            aiEngine: PreviewSupport.aiEngine,
+        )
+
+        #expect(vm.housekeepingReport == nil)
+        #expect(!vm.isAnalyzingHousekeeping)
+
+        await vm.analyzeHousekeeping()
+
+        #expect(vm.housekeepingReport != nil)
+        #expect(!vm.isAnalyzingHousekeeping)
+        #expect(!vm.housekeepingReport!.orphanCandidates.isEmpty)
+    }
+
+    @Test @MainActor func `runHousekeepingCommand rejects non-brew commands`() async {
+        let vm = await InstalledFeatureTestSupport.loadedViewModel(
+            formulae: [.fixture(name: "git")],
+            aiEngine: PreviewSupport.aiEngine,
+        )
+
+        vm.runHousekeepingCommand("rm -rf /")
+        vm.runHousekeepingCommand("echo clean")
+    }
 }

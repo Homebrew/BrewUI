@@ -234,7 +234,7 @@ final class DoctorViewModel {
     func runAICommand(_ command: String) {
         let parts = command.split(separator: " ").map(String.init)
         guard parts.first == "brew" else { return }
-        let args = Array(parts.dropFirst())
+        let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
         guard !args.isEmpty else { return }
 
         let token = command

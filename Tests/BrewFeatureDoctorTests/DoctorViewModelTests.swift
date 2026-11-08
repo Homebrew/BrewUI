@@ -521,6 +521,61 @@ struct DoctorViewModelTests {
 
         #expect(viewModel.lastCheckedAt == nil)
     }
+
+    // MARK: - AI Diagnostics
+
+    @Test func `analyzeWithAI populates analysis result and prioritizes primary runnable step`() async {
+        let report = Self.issuesReport()
+        let stubAI = StubAIEngine()
+        let viewModel = DoctorViewModel(
+            doctorRepository: StubDoctorRepository(report: report),
+            brewCommandCenter: StubBrewCommandCenter(),
+            commandFactory: StubMutatingCommandFactory(),
+            aiEngine: stubAI
+        )
+        await viewModel.load(forceRefresh: true)
+        let items = Self.displayedItems(report)
+        guard let firstItem = items.first else {
+            Issue.record("Expected at least one issue item")
+            return
+        }
+
+        #expect(viewModel.aiAnalysis(for: firstItem) == nil)
+        await viewModel.analyzeWithAI(for: firstItem)
+
+        let analysis = viewModel.aiAnalysis(for: firstItem)
+        #expect(analysis != nil)
+        #expect(analysis?.suggestedCommands.first == "brew link openssl@3")
+    }
+
+    @Test func `runAICommand rejects non-brew commands silently`() {
+        let center = StubBrewCommandCenter()
+        let viewModel = DoctorViewModel(
+            doctorRepository: StubDoctorRepository(report: Self.issuesReport()),
+            brewCommandCenter: center,
+            commandFactory: StubMutatingCommandFactory(),
+            aiEngine: StubAIEngine()
+        )
+
+        viewModel.runAICommand("sudo rm -rf /")
+        viewModel.runAICommand("xcode-select --install")
+
+        #expect(!viewModel.isAICommandRunning("sudo rm -rf /"))
+        #expect(!viewModel.isAICommandRunning("xcode-select --install"))
+    }
+
+    @Test func `runAICommand executes brew command and records running state`() async {
+        let center = Self.recordingCenter(cleanupExitCode: 0)
+        let viewModel = DoctorViewModel(
+            doctorRepository: StubDoctorRepository(report: Self.issuesReport()),
+            brewCommandCenter: center,
+            commandFactory: StubMutatingCommandFactory(),
+            aiEngine: StubAIEngine()
+        )
+
+        viewModel.runAICommand("brew cleanup -s")
+        #expect(viewModel.isAICommandRunning("brew cleanup -s"))
+    }
 }
 
 /// Test-scoped doctor repository pinned in the `.loading` state. Used to exercise the loading branches of

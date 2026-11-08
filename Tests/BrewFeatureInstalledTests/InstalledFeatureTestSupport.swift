@@ -13,6 +13,7 @@ enum InstalledFeatureTestSupport {
         formulae: [InstalledBrewPackage] = [],
         casks: [InstalledBrewPackage] = [],
         preferences: any InstalledPreferences = StubInstalledPreferences(),
+        aiEngine: (any AIEngineProtocol)? = nil,
     ) async -> InstalledViewModel {
         let cache = InstalledInventoryCache()
         let snapshot = InstalledInventorySnapshot(fetchedAt: .now, packages: formulae + casks)
@@ -21,7 +22,13 @@ enum InstalledFeatureTestSupport {
             commandRunner: MockBrewCommandRunner(responses: [:]),
             cache: cache,
         )
-        let viewModel = InstalledViewModel(repository: repository, preferences: preferences)
+        let viewModel = InstalledViewModel(
+            repository: repository,
+            preferences: preferences,
+            aiEngine: aiEngine,
+            commandFactory: StubMutatingCommandFactory(),
+            brewCommandCenter: NoopBrewCommandCenter.forTesting(),
+        )
         await viewModel.load()
         return viewModel
     }

@@ -93,7 +93,7 @@ public struct AIModelPickerSheet: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
                     HStack(spacing: BrewSpacing.sm) {
-                        Text(model.name)
+                        Text(verbatim: model.name)
                             .font(.brewBodyEmphasized)
                             .foregroundStyle(Color.brewTextPrimary)
 
@@ -111,7 +111,7 @@ public struct AIModelPickerSheet: View {
                         }
                     }
 
-                    Text(model.summary)
+                    Text(verbatim: model.summary)
                         .font(.brewBody)
                         .foregroundStyle(Color.brewTextSecondary)
 

@@ -598,4 +598,36 @@ extension InstalledDetailsViewModelTests {
         #expect(!viewModel.showUninstallBlockedCallout)
         #expect(!viewModel.showUninstallConfirmation)
     }
+
+    // MARK: - AI Upgrade Impact Advisor
+
+    @Test @MainActor func `analyzeUpgradeImpact performs risk assessment for outdated package`() async {
+        let package = InstalledBrewPackage.fixture(
+            name: "node",
+            latestVersion: "22.0.0",
+            installedVersions: ["20.0.0"],
+            outdated: true
+        )
+        let viewModel = makeInstalledDetailsViewModel(
+            package: package,
+            aiEngine: PreviewSupport.aiEngine
+        )
+
+        #expect(viewModel.upgradeImpact == nil)
+        #expect(!viewModel.isAnalyzingUpgradeImpact)
+
+        await viewModel.analyzeUpgradeImpact()
+
+        #expect(viewModel.upgradeImpact != nil)
+        #expect(viewModel.upgradeImpact?.packageName == "node")
+        #expect(!viewModel.isAnalyzingUpgradeImpact)
+    }
+
+    @Test @MainActor func `runVerificationCommand rejects non-brew commands`() {
+        let package = InstalledBrewPackage.fixture(name: "node")
+        let viewModel = makeInstalledDetailsViewModel(package: package)
+
+        viewModel.runVerificationCommand("rm -rf /")
+        viewModel.runVerificationCommand("echo test")
+    }
 }

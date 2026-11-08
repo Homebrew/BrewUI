@@ -344,12 +344,30 @@ func makeInstalledDetailsViewModel(
     installedDependentsRepository: (any InstalledDependentsRepository)? = nil,
     installedInventoryReading: (any InstalledInventoryReading)? = nil,
 ) -> InstalledPackageDetailViewModel {
+    makeInstalledDetailsViewModel(
+        package: package,
+        brewCommandCenter: brewCommandCenter,
+        installedDependentsRepository: installedDependentsRepository,
+        installedInventoryReading: installedInventoryReading,
+        aiEngine: nil
+    )
+}
+
+@MainActor
+func makeInstalledDetailsViewModel(
+    package: InstalledBrewPackage,
+    brewCommandCenter: any BrewCommandCenter = NoopBrewCommandCenter.forTesting(),
+    installedDependentsRepository: (any InstalledDependentsRepository)? = nil,
+    installedInventoryReading: (any InstalledInventoryReading)? = nil,
+    aiEngine: (any AIEngineProtocol)? = nil,
+) -> InstalledPackageDetailViewModel {
     InstalledPackageDetailViewModel(
         package: package,
         brewCommandCenter: brewCommandCenter,
         commandFactory: StubMutatingCommandFactory(),
         installedDependentsRepository: installedDependentsRepository ?? EmptyInstalledDependentsRepository(),
         installedInventoryReading: installedInventoryReading ?? EmptyInstalledInventoryReading(),
+        aiEngine: aiEngine,
     )
 }
 

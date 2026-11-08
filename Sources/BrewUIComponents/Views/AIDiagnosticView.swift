@@ -43,7 +43,7 @@ public struct AIDiagnosticView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.brewTextPrimary)
 
-                Text(result.summary)
+                Text(verbatim: result.summary)
                     .font(.brewBody)
                     .foregroundStyle(Color.brewTextSecondary)
                     .textSelection(.enabled)
@@ -55,7 +55,7 @@ public struct AIDiagnosticView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(Color.brewTextPrimary)
 
-                Text(result.rootCause)
+                Text(verbatim: result.rootCause)
                     .font(.brewBody)
                     .foregroundStyle(Color.brewTextSecondary)
                     .textSelection(.enabled)
@@ -99,7 +99,7 @@ public struct AIDiagnosticView: View {
                             }
 
                             if let error = errorMessage?(cmd) {
-                                Text(error)
+                                Text(verbatim: error)
                                     .font(.brewCallout)
                                     .foregroundStyle(Color.brewStatusError)
                                     .textSelection(.enabled)
@@ -130,7 +130,7 @@ public struct AIDiagnosticView: View {
 
             Spacer()
 
-            Text(result.modelName)
+            Text(verbatim: result.modelName)
                 .font(.brewCaption)
                 .padding(.horizontal, BrewSpacing.sm)
                 .padding(.vertical, BrewSpacing.xxs)
