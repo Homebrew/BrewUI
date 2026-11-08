@@ -244,7 +244,7 @@ public final class LocalAIEngine: AIEngineProtocol, Sendable {
         var summary = "\(package.name) will upgrade from v\(currentVersion) to v\(targetVersion)."
         var breakingWarning: String?
         var serviceNotice: String?
-        var verifyCommands = ["brew test \(package.name)"]
+        var verifyCommands = package.package.kind == .cask ? [] : ["brew test \(package.name)"]
 
         if isMajor {
             summary += " This is a major version release that may include breaking interface changes."

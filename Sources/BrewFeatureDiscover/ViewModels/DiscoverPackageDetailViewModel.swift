@@ -164,6 +164,12 @@ final class DiscoverPackageDetailViewModel {
     }
 
     private var activeComparisonPackageID: DiscoveryBrewPackage.ID?
+    private var activeComparisonRequestID: UUID?
+    private(set) var activeInstallingPackageID: HomebrewPackageID?
+
+    func isPackageInstalling(_ packageID: HomebrewPackageID) -> Bool {
+        isInstalling && activeInstallingPackageID == packageID
+    }
 
     func update(package: DiscoveryBrewPackage) {
         let samePackage = discoveryPackage.id == package.id
@@ -175,16 +181,23 @@ final class DiscoverPackageDetailViewModel {
             comparisonTarget = nil
             isShowingComparison = false
             activeComparisonPackageID = nil
+            activeComparisonRequestID = nil
         }
     }
 
     func installPackage(_ package: BrewPackage) {
         guard !isInstalling else { return }
         installErrorMessage = nil
+        activeInstallingPackageID = package.id
         let operationID = BrewOperationID(kind: package.kind, name: package.name)
         let command = commandFactory.installCommand(kind: package.kind, name: package.name)
         mutationTask?.cancel()
         mutationTask = Task { @MainActor [self] in
+            defer {
+                if !isInstalling {
+                    activeInstallingPackageID = nil
+                }
+            }
             do {
                 try await brewCommandCenter.perform(command, id: operationID)
             } catch {
@@ -203,10 +216,16 @@ final class DiscoverPackageDetailViewModel {
             return
         }
         installErrorMessage = nil
+        activeInstallingPackageID = discoveryPackage.id
         let operationID = BrewOperationID(kind: packageKind, name: discoveryPackage.name)
         let command = commandFactory.installCommand(kind: packageKind, name: discoveryPackage.name)
         mutationTask?.cancel()
         mutationTask = Task { @MainActor [self] in
+            defer {
+                if !isInstalling {
+                    activeInstallingPackageID = nil
+                }
+            }
             do {
                 try await brewCommandCenter.perform(command, id: operationID)
             } catch {
@@ -260,7 +279,9 @@ extension DiscoverPackageDetailViewModel {
     ) async {
         guard let aiEngine else { return }
         let currentID = discoveryPackage.id
+        let requestID = UUID()
         activeComparisonPackageID = currentID
+        activeComparisonRequestID = requestID
 
         let primaryRef = kind == .cask ? HomebrewPackageID.cask(token: targetName) : HomebrewPackageID.formula(name: targetName)
         let fallbackRef = kind == .cask ? HomebrewPackageID.formula(name: targetName) : HomebrewPackageID.cask(token: targetName)
@@ -272,7 +293,7 @@ extension DiscoverPackageDetailViewModel {
             try? await catalogue.package(for: fallbackRef)
         }
 
-        guard discoveryPackage.id == currentID, activeComparisonPackageID == currentID else { return }
+        guard discoveryPackage.id == currentID, activeComparisonRequestID == requestID else { return }
 
         let target = foundTarget ?? BrewPackage(
             name: targetName,
@@ -285,7 +306,7 @@ extension DiscoverPackageDetailViewModel {
         )
 
         let comparison = await aiEngine.comparePackages(packageA: discoveryPackage.package, packageB: target)
-        guard discoveryPackage.id == currentID, activeComparisonPackageID == currentID else { return }
+        guard discoveryPackage.id == currentID, activeComparisonRequestID == requestID else { return }
 
         comparisonResult = comparison
         comparisonTarget = target

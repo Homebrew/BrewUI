@@ -10,17 +10,20 @@ import SwiftUI
 public struct AIDiagnosticView: View {
     public let result: AIAnalysisResult
     public let isCommandRunning: ((String) -> Bool)?
+    public let isCommandExecutable: ((String) -> Bool)?
     public let errorMessage: ((String) -> String?)?
     public let onRunCommand: ((String) -> Void)?
 
     public init(
         result: AIAnalysisResult,
         isCommandRunning: ((String) -> Bool)? = nil,
+        isCommandExecutable: ((String) -> Bool)? = nil,
         errorMessage: ((String) -> String?)? = nil,
         onRunCommand: ((String) -> Void)? = nil,
     ) {
         self.result = result
         self.isCommandRunning = isCommandRunning
+        self.isCommandExecutable = isCommandExecutable
         self.errorMessage = errorMessage
         self.onRunCommand = onRunCommand
     }
@@ -78,7 +81,7 @@ public struct AIDiagnosticView: View {
                                     collapsible: false,
                                 )
 
-                                if onRunCommand != nil, isRunnableCommand(cmd) {
+                                if onRunCommand != nil, isRunnableCommand(cmd), isCommandExecutable?(cmd) ?? true {
                                     let running = isCommandRunning?(cmd) ?? false
                                     Button {
                                         onRunCommand?(cmd)

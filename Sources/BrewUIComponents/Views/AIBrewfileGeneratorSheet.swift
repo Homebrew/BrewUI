@@ -329,9 +329,13 @@ private struct AIBrewfileResultCard: View {
                 if let onRunCommand {
                     Button {
                         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Brewfile-\(UUID().uuidString)")
-                        try? env.generatedBrewfileContent.write(to: tempURL, atomically: true, encoding: .utf8)
-                        onRunCommand("brew bundle --file \(tempURL.path)")
-                        onDismiss()
+                        do {
+                            try env.generatedBrewfileContent.write(to: tempURL, atomically: true, encoding: .utf8)
+                            onRunCommand("brew bundle --file \(tempURL.path)")
+                            onDismiss()
+                        } catch {
+                            // Keep sheet open so the user does not lose generated content if temporary write fails
+                        }
                     } label: {
                         Text("Run", bundle: #bundle, comment: "AI run command button")
                     }

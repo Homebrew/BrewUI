@@ -116,13 +116,14 @@ public final class BrewAIModelManager: AIModelManaging {
             do {
                 try FileManager.default.removeItem(at: fileURL)
                 lastErrorMessage = nil
-                if activeModelID == model.id {
-                    activeModelID = nil
-                    defaults.set("", forKey: activeModelKey)
-                }
             } catch {
                 lastErrorMessage = error.localizedDescription
+                return
             }
+        }
+        if activeModelID == model.id {
+            activeModelID = nil
+            defaults.set("", forKey: activeModelKey)
         }
     }
 }

@@ -324,6 +324,9 @@
     "Cancel" : {
       "comment" : "AI Models Sheet: cancel download button"
     },
+    "Cask" : {
+      "comment" : "Package comparison: cask kind label"
+    },
     "Choose %@ if:" : {
       "comment" : "Package comparison: condition heading; %@ is package name"
     },
@@ -332,9 +335,6 @@
     },
     "Cleanup Commands" : {
       "comment" : "Housekeeping recommended commands section"
-    },
-    "CLI Utility" : {
-      "comment" : "Package comparison: formula kind label"
     },
     "Close" : {
       "comment" : "Brewfile generator close button"
@@ -550,14 +550,14 @@
         }
       }
     },
+    "Formula" : {
+      "comment" : "Package comparison: formula kind label"
+    },
     "Fullstack Web" : {
       "comment" : "Brewfile preset: web development"
     },
     "Generate" : {
       "comment" : "Generate Brewfile button"
-    },
-    "GUI Application" : {
-      "comment" : "Package comparison: cask kind label"
     },
     "Heavy Memory Usage" : {
       "comment" : "AI model memory fit: heavy"

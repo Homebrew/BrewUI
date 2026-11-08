@@ -133,7 +133,11 @@ final class InstalledPackageDetailViewModel {
         guard let aiEngine, showsUpgradeAvailable else { return }
         let currentPackageID = package.id
         isAnalyzingUpgradeImpact = true
-        defer { isAnalyzingUpgradeImpact = false }
+        defer {
+            if package.id == currentPackageID {
+                isAnalyzingUpgradeImpact = false
+            }
+        }
         let targetVersion = package.latestVersion.isEmpty ? "latest" : package.latestVersion
         let dependents = dependentRelationships.map(\.displayName)
         let impact = await aiEngine.assessUpgradeImpact(

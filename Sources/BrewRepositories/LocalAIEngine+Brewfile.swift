@@ -16,7 +16,7 @@ extension LocalAIEngine {
         let words = Set(lower.components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty })
         let hasAIOrML = words.contains("ai") || words.contains("ml")
 
-        let config = resolveBrewfileConfig(lower: lower, hasAIOrML: hasAIOrML)
+        let config = resolveBrewfileConfig(lower: lower, words: words, hasAIOrML: hasAIOrML)
         let content = buildBrewfileContent(prompt: prompt, formulae: config.formulae, casks: config.casks, taps: config.taps)
 
         return AIBrewfileEnvironment(
@@ -39,56 +39,85 @@ extension LocalAIEngine {
         let explanation: String
     }
 
-    private func resolveBrewfileConfig(lower: String, hasAIOrML: Bool) -> BrewfileStackConfig {
-        if lower.contains("web") || lower.contains("node") || lower.contains("react") || lower.contains("typescript") {
-            BrewfileStackConfig(
-                title: "Modern Fullstack Web Stack",
-                formulae: ["git", "curl", "node", "pnpm", "yarn", "gh"],
-                casks: ["visual-studio-code", "google-chrome", "postman"],
-                taps: [],
-                explanation: "Node.js ecosystem toolchain with package managers, Git CLI, and development runtime.",
-            )
+    private func resolveBrewfileConfig(lower: String, words: Set<String>, hasAIOrML: Bool) -> BrewfileStackConfig {
+        let isCloud = lower.contains("devops") || lower.contains("cloud") || lower.contains("docker")
+            || lower.contains("k8s") || lower.contains("kubernetes") || lower.contains("terraform") || words.contains("aws")
+        let isNode = lower.contains("node.js") || lower.contains("nodejs") || (words.contains("node") && !lower.contains("nodes") && !isCloud)
+        let isWeb = lower.contains("web") || isNode || lower.contains("react") || lower.contains("typescript")
+
+        if isCloud {
+            return cloudStackConfig
+        } else if isWeb {
+            return webStackConfig
         } else if lower.contains("python") || lower.contains("data") || hasAIOrML {
-            BrewfileStackConfig(
-                title: "Python Data & Machine Learning Stack",
-                formulae: ["git", "curl", "python@3.12", "uv", "ffmpeg", "libomp"],
-                casks: ["visual-studio-code", "jupyterlab"],
-                taps: [],
-                explanation: "High-performance Python 3.12 environment with uv package runner and C/OMP acceleration libraries.",
-            )
+            return pythonStackConfig
         } else if lower.contains("ios") || lower.contains("swift") || lower.contains("apple") || lower.contains("mobile") {
-            BrewfileStackConfig(
-                title: "Apple Platform & Swift Engineering Stack",
-                formulae: ["git", "curl", "swiftlint", "swiftformat", "xcbeautify", "cocoapods"],
-                casks: ["sf-symbols"],
-                taps: [],
-                explanation: "Essential iOS/macOS developer toolchain for Swift linting, formatting, and Xcode build log beautification.",
-            )
-        } else if lower.contains("devops") || lower.contains("cloud") || lower.contains("docker") || lower.contains("k8s") {
-            BrewfileStackConfig(
-                title: "DevOps, Cloud & Infrastructure Stack",
-                formulae: ["git", "curl", "kubernetes-cli", "helm", "terraform", "awscli"],
-                casks: ["docker"],
-                taps: [],
-                explanation: "Containerization, cluster management, and Infrastructure-as-Code utilities.",
-            )
+            return appleStackConfig
         } else if lower.contains("rust") || lower.contains("systems") || lower.contains("terminal") {
-            BrewfileStackConfig(
-                title: "Modern CLI & Rust Power Tools",
-                formulae: ["git", "curl", "rustup-init", "ripgrep", "bat", "eza", "fd", "starship", "fzf"],
-                casks: ["iterm2"],
-                taps: [],
-                explanation: "Blazing-fast modern command-line tools replacing legacy coreutils with Rust alternatives.",
-            )
+            return rustStackConfig
         } else {
-            BrewfileStackConfig(
-                title: "Custom Development Stack",
-                formulae: ["git", "curl", "zsh-autosuggestions", "zsh-syntax-highlighting", "tree"],
-                casks: ["visual-studio-code"],
-                taps: [],
-                explanation: "Tailored Brewfile configuration generated for your workflow.",
-            )
+            return customStackConfig
         }
+    }
+
+    private var cloudStackConfig: BrewfileStackConfig {
+        BrewfileStackConfig(
+            title: "DevOps, Cloud & Infrastructure Stack",
+            formulae: ["git", "curl", "kubernetes-cli", "helm", "terraform", "awscli"],
+            casks: ["docker"],
+            taps: [],
+            explanation: "Containerization, cluster management, and Infrastructure-as-Code utilities.",
+        )
+    }
+
+    private var webStackConfig: BrewfileStackConfig {
+        BrewfileStackConfig(
+            title: "Modern Fullstack Web Stack",
+            formulae: ["git", "curl", "node", "pnpm", "yarn", "gh"],
+            casks: ["visual-studio-code", "google-chrome", "postman"],
+            taps: [],
+            explanation: "Node.js ecosystem toolchain with package managers, Git CLI, and development runtime.",
+        )
+    }
+
+    private var pythonStackConfig: BrewfileStackConfig {
+        BrewfileStackConfig(
+            title: "Python Data & Machine Learning Stack",
+            formulae: ["git", "curl", "python@3.12", "uv", "ffmpeg", "libomp"],
+            casks: ["visual-studio-code", "jupyterlab"],
+            taps: [],
+            explanation: "High-performance Python 3.12 environment with uv package runner and C/OMP acceleration libraries.",
+        )
+    }
+
+    private var appleStackConfig: BrewfileStackConfig {
+        BrewfileStackConfig(
+            title: "Apple Platform & Swift Engineering Stack",
+            formulae: ["git", "curl", "swiftlint", "swiftformat", "xcbeautify", "cocoapods"],
+            casks: ["sf-symbols"],
+            taps: [],
+            explanation: "Essential iOS/macOS developer toolchain for Swift linting, formatting, and Xcode build log beautification.",
+        )
+    }
+
+    private var rustStackConfig: BrewfileStackConfig {
+        BrewfileStackConfig(
+            title: "Modern CLI & Rust Power Tools",
+            formulae: ["git", "curl", "rustup-init", "ripgrep", "bat", "eza", "fd", "starship", "fzf"],
+            casks: ["iterm2"],
+            taps: [],
+            explanation: "Blazing-fast modern command-line tools replacing legacy coreutils with Rust alternatives.",
+        )
+    }
+
+    private var customStackConfig: BrewfileStackConfig {
+        BrewfileStackConfig(
+            title: "Custom Development Stack",
+            formulae: ["git", "curl", "zsh-autosuggestions", "zsh-syntax-highlighting", "tree"],
+            casks: ["visual-studio-code"],
+            taps: [],
+            explanation: "Tailored Brewfile configuration generated for your workflow.",
+        )
     }
 
     private func buildBrewfileContent(prompt: String, formulae: [String], casks: [String], taps: [String]) -> String {

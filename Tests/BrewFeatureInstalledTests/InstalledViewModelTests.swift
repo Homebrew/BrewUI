@@ -298,6 +298,7 @@ struct InstalledViewModelTests {
         #expect(!vm.isAnalyzingHousekeeping)
         let candidates = try #require(vm.housekeepingReport?.orphanCandidates)
         #expect(!candidates.isEmpty)
+        #expect(candidates.allSatisfy { ["git", "libpng"].contains($0.packageName) })
     }
 
     @Test @MainActor func `analyzeHousekeeping uses full inventory even when hideDependencies and search are active`() async {

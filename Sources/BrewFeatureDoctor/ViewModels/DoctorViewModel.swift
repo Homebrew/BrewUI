@@ -362,6 +362,11 @@ extension DoctorViewModel {
         return true
     }
 
+    func isAICommandExecutable(_ command: String, for item: DoctorIssueItem? = nil) -> Bool {
+        let parts = command.split(separator: " ").map(String.init)
+        return isSafeAICommand(parts, raw: command, for: item)
+    }
+
     func runAICommand(_ command: String, for item: DoctorIssueItem? = nil) {
         let parts = command.split(separator: " ").map(String.init)
         guard isSafeAICommand(parts, raw: command, for: item) else { return }

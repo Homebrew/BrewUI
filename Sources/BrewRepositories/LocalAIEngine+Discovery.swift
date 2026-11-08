@@ -281,9 +281,7 @@ extension LocalAIEngine {
 
     private func appendContainerRecommendations(to recommendations: inout [AIPackageRecommendation], installedNames: Set<String>) {
         let hasContainers = installedNames.contains("docker") || installedNames.contains("colima") || installedNames.contains("podman")
-        guard hasContainers else { return }
-
-        if !installedNames.contains("lazydocker") {
+        if hasContainers, !installedNames.contains("lazydocker") {
             recommendations.append(
                 AIPackageRecommendation(
                     packageName: "lazydocker",

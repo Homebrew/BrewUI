@@ -13,7 +13,13 @@ extension LocalAIEngine {
 
     public func suggestAlternatives(for package: BrewPackage) async -> [AIPackageAlternative] {
         let name = package.name.lowercased()
-        if let direct = Self.alternativesCatalog[name] {
+        let lookupKey: String = switch name {
+        case "findutils": "find"
+        case "gnu-sed": "sed"
+        case "coreutils": "ls"
+        default: name
+        }
+        if let direct = Self.alternativesCatalog[lookupKey] ?? Self.alternativesCatalog[name] {
             return direct
         }
         return fallbackAlternatives(for: package)

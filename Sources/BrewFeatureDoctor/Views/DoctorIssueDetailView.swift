@@ -69,6 +69,7 @@ struct DoctorIssueDetailView: View {
             AIDiagnosticView(
                 result: analysis,
                 isCommandRunning: { viewModel.isAICommandRunning($0) },
+                isCommandExecutable: { viewModel.isAICommandExecutable($0, for: item) },
                 errorMessage: { viewModel.aiCommandError($0) },
                 onRunCommand: { command in
                     viewModel.runAICommand(command, for: item)

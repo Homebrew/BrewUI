@@ -14,6 +14,8 @@ public struct PackageComparisonSheet: View {
     public let packageB: BrewPackage
     public let isPackageAInstalled: Bool
     public let isPackageBInstalled: Bool
+    public let isPackageAInstalling: Bool
+    public let isPackageBInstalling: Bool
     public let onInstall: ((BrewPackage) -> Void)?
     public let onDismiss: () -> Void
 
@@ -23,6 +25,8 @@ public struct PackageComparisonSheet: View {
         packageB: BrewPackage,
         isPackageAInstalled: Bool = false,
         isPackageBInstalled: Bool = false,
+        isPackageAInstalling: Bool = false,
+        isPackageBInstalling: Bool = false,
         onInstall: ((BrewPackage) -> Void)? = nil,
         onDismiss: @escaping () -> Void,
     ) {
@@ -31,6 +35,8 @@ public struct PackageComparisonSheet: View {
         self.packageB = packageB
         self.isPackageAInstalled = isPackageAInstalled
         self.isPackageBInstalled = isPackageBInstalled
+        self.isPackageAInstalling = isPackageAInstalling
+        self.isPackageBInstalling = isPackageBInstalling
         self.onInstall = onInstall
         self.onDismiss = onDismiss
     }
@@ -82,7 +88,12 @@ public struct PackageComparisonSheet: View {
 
     private var versusHeader: some View {
         HStack(spacing: BrewSpacing.md) {
-            PackageComparisonCard(package: packageA, isInstalled: isPackageAInstalled, onInstall: onInstall)
+            PackageComparisonCard(
+                package: packageA,
+                isInstalled: isPackageAInstalled,
+                isInstalling: isPackageAInstalling,
+                onInstall: onInstall,
+            )
             Text("VS", bundle: #bundle, comment: "Versus label between two packages")
                 .font(.brewSubheadline)
                 .fontWeight(.bold)
@@ -90,7 +101,12 @@ public struct PackageComparisonSheet: View {
                 .padding(BrewSpacing.xs)
                 .background(Color.brewSurface)
                 .clipShape(Circle())
-            PackageComparisonCard(package: packageB, isInstalled: isPackageBInstalled, onInstall: onInstall)
+            PackageComparisonCard(
+                package: packageB,
+                isInstalled: isPackageBInstalled,
+                isInstalling: isPackageBInstalling,
+                onInstall: onInstall,
+            )
         }
     }
 
@@ -119,7 +135,24 @@ public struct PackageComparisonSheet: View {
         )
     }
 
-    private var strengthsComparison: some View {
+    private var footer: some View {
+        HStack {
+            Spacer()
+            Button {
+                onDismiss()
+            } label: {
+                Text("Done", bundle: #bundle, comment: "Close comparison sheet")
+                    .frame(minWidth: 70)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+        }
+        .padding(BrewSpacing.lg)
+    }
+}
+
+private extension PackageComparisonSheet {
+    var strengthsComparison: some View {
         HStack(alignment: .top, spacing: BrewSpacing.md) {
             strengthsColumn(
                 title: String(localized: "Strengths of \(comparison.packageAName)", bundle: #bundle, comment: "Strengths heading for package A"),
@@ -132,7 +165,7 @@ public struct PackageComparisonSheet: View {
         }
     }
 
-    private func strengthsColumn(title: String, strengths: [String]) -> some View {
+    func strengthsColumn(title: String, strengths: [String]) -> some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
             Text(verbatim: title)
                 .font(.brewCaption)
@@ -157,7 +190,7 @@ public struct PackageComparisonSheet: View {
         .clipShape(RoundedRectangle(cornerRadius: BrewRadius.md))
     }
 
-    private var bestForComparison: some View {
+    var bestForComparison: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             Text("Recommendation Guidelines", bundle: #bundle, comment: "Heading for recommendation guidelines")
                 .font(.brewSubheadline)
@@ -196,7 +229,7 @@ public struct PackageComparisonSheet: View {
         }
     }
 
-    private var matrixSection: some View {
+    var matrixSection: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.xs) {
             Text("Feature Comparison Matrix", bundle: #bundle, comment: "Matrix section heading")
                 .font(.brewSubheadline)
@@ -253,26 +286,12 @@ public struct PackageComparisonSheet: View {
             )
         }
     }
-
-    private var footer: some View {
-        HStack {
-            Spacer()
-            Button {
-                onDismiss()
-            } label: {
-                Text("Done", bundle: #bundle, comment: "Close comparison sheet")
-                    .frame(minWidth: 70)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.regular)
-        }
-        .padding(BrewSpacing.lg)
-    }
 }
 
 private struct PackageComparisonCard: View {
     let package: BrewPackage
     let isInstalled: Bool
+    let isInstalling: Bool
     let onInstall: ((BrewPackage) -> Void)?
 
     var body: some View {
@@ -321,6 +340,7 @@ private struct PackageComparisonCard: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
+                    .disabled(isInstalling)
                 }
             }
             .padding(.top, BrewSpacing.xxs)
@@ -338,9 +358,9 @@ private struct PackageComparisonCard: View {
     private var kindLabel: String {
         switch package.kind {
         case .cask:
-            String(localized: "GUI Application", bundle: #bundle, comment: "Package comparison: cask kind label")
+            String(localized: "Cask", bundle: #bundle, comment: "Package comparison: cask kind label")
         case .formula:
-            String(localized: "CLI Utility", bundle: #bundle, comment: "Package comparison: formula kind label")
+            String(localized: "Formula", bundle: #bundle, comment: "Package comparison: formula kind label")
         }
     }
 }

@@ -47,6 +47,7 @@ final class DiscoverViewModel {
             guard oldValue != query else {
                 return
             }
+            activeSearchID = UUID()
             synchronizeSelectionWithVisibleRows()
         }
     }
@@ -338,6 +339,9 @@ extension DiscoverViewModel {
             collectionPackages.removeAll()
         }
         await discoverPackagesRepository.load(forceRefresh: forceRefresh)
+        if selectedCollection != .trending {
+            await loadCollection(selectedCollection)
+        }
         synchronizeSelectionWithVisibleRows()
     }
 
@@ -437,7 +441,8 @@ extension DiscoverViewModel {
     func search() async {
         let currentSearchID = UUID()
         activeSearchID = currentSearchID
-        guard isSearching else {
+        let querySnapshot = normalizedQuery
+        guard !querySnapshot.isEmpty else {
             results = .loaded([])
             synchronizeSelectionWithVisibleRows()
             return
@@ -446,15 +451,15 @@ extension DiscoverViewModel {
         do {
             let limit = isSemanticSearch ? searchResultsLimit * 3 : searchResultsLimit
             let matches = try await catalogueRepository.searchPackages(
-                matching: normalizedQuery,
+                matching: querySnapshot,
                 limit: limit,
             )
             guard activeSearchID == currentSearchID else { return }
 
             if isSemanticSearch {
-                let candidates = await gatherSemanticCandidates(query: normalizedQuery, initialMatches: matches, limit: limit)
+                let candidates = await gatherSemanticCandidates(query: querySnapshot, initialMatches: matches, limit: limit)
                 guard activeSearchID == currentSearchID else { return }
-                let searchPkgs = await executeSemanticSearch(query: normalizedQuery, candidates: candidates, fallback: matches)
+                let searchPkgs = await executeSemanticSearch(query: querySnapshot, candidates: candidates, fallback: matches)
                 guard activeSearchID == currentSearchID else { return }
                 results = .loaded(searchPkgs)
             } else {
@@ -472,25 +477,24 @@ extension DiscoverViewModel {
         var candidateSet = Set(initialMatches.map(\.id))
         var candidates = initialMatches
 
+        let tokens = query
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { $0.count >= 2 }
+        for token in tokens.prefix(3) {
+            if let tokenMatches = try? await catalogueRepository.searchPackages(matching: token, limit: limit) {
+                for pkg in tokenMatches where !candidateSet.contains(pkg.id) {
+                    candidateSet.insert(pkg.id)
+                    candidates.append(pkg)
+                }
+            }
+        }
+
         let trending = discoverPackagesRepository.state.value ?? []
         for p in trending where !candidateSet.contains(p.id) {
             candidateSet.insert(p.id)
             candidates.append(p.package)
         }
 
-        if candidates.count < limit {
-            let tokens = query
-                .components(separatedBy: CharacterSet.alphanumerics.inverted)
-                .filter { $0.count >= 2 }
-            for token in tokens.prefix(3) {
-                if let tokenMatches = try? await catalogueRepository.searchPackages(matching: token, limit: limit) {
-                    for pkg in tokenMatches where !candidateSet.contains(pkg.id) {
-                        candidateSet.insert(pkg.id)
-                        candidates.append(pkg)
-                    }
-                }
-            }
-        }
         return candidates
     }
 

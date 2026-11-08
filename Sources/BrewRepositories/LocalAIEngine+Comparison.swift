@@ -18,7 +18,8 @@ extension LocalAIEngine {
         let nameA = packageA.displayName.lowercased()
         let nameB = packageB.displayName.lowercased()
 
-        if (nameA.contains("grep") && nameB.contains("ripgrep")) || (nameB.contains("grep") && nameA.contains("ripgrep")) {
+        let isExactGrepPair = (nameA == "grep" && nameB == "ripgrep") || (nameA == "ripgrep" && nameB == "grep")
+        if isExactGrepPair {
             return compareGrepVsRipgrep(packageA: packageA, packageB: packageB)
         } else {
             return generalPackageComparison(packageA: packageA, packageB: packageB)
@@ -81,23 +82,17 @@ extension LocalAIEngine {
     }
 
     private func generalPackageComparison(packageA: BrewPackage, packageB: BrewPackage) -> AIPackageComparison {
-        let kindA = packageA.kind == .cask ? "GUI Application" : "CLI Utility"
-        let kindB = packageB.kind == .cask ? "GUI Application" : "CLI Utility"
+        let kindA = packageA.kind == .cask ? "Cask" : "Formula"
+        let kindB = packageB.kind == .cask ? "Cask" : "Formula"
 
         let verdict = "Both \(packageA.displayName) and \(packageB.displayName) are high-quality Homebrew packages. "
             + "Selection depends primarily on your preferred workflow and resource requirements."
-        let strengthsA = [
-            "Dedicated \(packageA.displayName) feature set and mature configuration options",
-            "Clear documentation and stable release cadence",
-            "Streamlined for \(packageA.name) workflows",
-        ]
-        let strengthsB = [
-            "Focused on \(packageB.displayName) paradigms and performance",
-            "Modern architecture with active community maintenance",
-            "Seamless integration with contemporary macOS tooling",
-        ]
-        let bestForA = "Users prioritising established stability and customisation within \(packageA.displayName)"
-        let bestForB = "Users looking for modern ergonomics and capabilities in \(packageB.displayName)"
+
+        let strengthsA = packageStrengths(for: packageA)
+        let strengthsB = packageStrengths(for: packageB)
+
+        let bestForA = "Users opting for \(packageA.displayName) based on their specific ecosystem and workflow requirements."
+        let bestForB = "Users opting for \(packageB.displayName) based on their specific ecosystem and workflow requirements."
 
         let versionA = packageA.latestVersion.isEmpty ? "Unknown" : packageA.latestVersion
         let versionB = packageB.latestVersion.isEmpty ? "Unknown" : packageB.latestVersion
@@ -126,5 +121,23 @@ extension LocalAIEngine {
             bestForB: bestForB,
             matrix: matrix,
         )
+    }
+
+    private func packageStrengths(for package: BrewPackage) -> [String] {
+        var strengths: [String] = []
+        if package.kind == .cask {
+            strengths.append("Native macOS graphical user interface application")
+        } else {
+            strengths.append("Command-line interface tool integrated with terminal workflows")
+        }
+        if package.dependencies.isEmpty {
+            strengths.append("Standalone package with zero external dependencies")
+        } else {
+            strengths.append("Rich feature set with \(package.dependencies.count) direct dependencies")
+        }
+        if !package.homepage.isEmpty {
+            strengths.append("Documented project with accessible developer portal")
+        }
+        return strengths
     }
 }

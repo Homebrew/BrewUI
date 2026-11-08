@@ -184,6 +184,7 @@ public struct AIHousekeepingSheet: View {
         let trimmed = command.trimmingCharacters(in: .whitespacesAndNewlines)
         let parts = trimmed.split(separator: " ").map(String.init)
         guard parts.first == "brew",
+              parts.count > 1,
               !trimmed.contains(";"),
               !trimmed.contains("&&"),
               !trimmed.contains("|"),
@@ -191,7 +192,8 @@ public struct AIHousekeepingSheet: View {
               !trimmed.contains("<"),
               !trimmed.contains("sudo")
         else { return false }
-        return true
+        let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
+        return !args.isEmpty
     }
 
     private var footer: some View {

@@ -358,19 +358,21 @@ extension InstalledViewModel {
 
     func runHousekeepingCommand(_ command: String) {
         guard let commandFactory, let brewCommandCenter else { return }
-        let parts = command.split(separator: " ").map(String.init)
+        let trimmed = command.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parts = trimmed.split(separator: " ").map(String.init)
         guard parts.first == "brew",
-              !command.contains(";"),
-              !command.contains("&&"),
-              !command.contains("|"),
-              !command.contains(">"),
-              !command.contains("<"),
-              !command.contains("sudo")
+              parts.count > 1,
+              !trimmed.contains(";"),
+              !trimmed.contains("&&"),
+              !trimmed.contains("|"),
+              !trimmed.contains(">"),
+              !trimmed.contains("<"),
+              !trimmed.contains("sudo")
         else { return }
         let args = Array(parts.dropFirst()).map { $0.trimmingCharacters(in: CharacterSet(charactersIn: "\"'")) }
         guard !args.isEmpty else { return }
         let brewCommand = commandFactory.doctorFixCommand(arguments: args)
-        let operationID = BrewOperationID(maintenanceToken: command, displayCommand: command)
+        let operationID = BrewOperationID(maintenanceToken: trimmed, displayCommand: trimmed)
         Task {
             try? await brewCommandCenter.perform(brewCommand, id: operationID)
         }

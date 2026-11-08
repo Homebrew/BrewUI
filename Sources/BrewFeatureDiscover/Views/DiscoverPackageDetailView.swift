@@ -115,6 +115,8 @@ struct DiscoverPackageDetailView: View {
                     packageB: target,
                     isPackageAInstalled: installedPackagesRepository.isInstalled(viewModel.discoveryPackage.id),
                     isPackageBInstalled: installedPackagesRepository.isInstalled(target.id),
+                    isPackageAInstalling: viewModel.isPackageInstalling(viewModel.discoveryPackage.id),
+                    isPackageBInstalling: viewModel.isPackageInstalling(target.id),
                     onInstall: { pkg in
                         viewModel.installPackage(pkg)
                     },
