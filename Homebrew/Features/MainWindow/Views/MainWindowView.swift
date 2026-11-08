@@ -168,6 +168,9 @@ private struct FeatureColumnContent: View {
 
     private var searchableContent: some View {
         content
+            // List rows use tap gestures and do not become AppKit first responders themselves.
+            // Explicitly end text editing so typing after a row selection cannot continue the query.
+            .simultaneousGesture(TapGesture().onEnded { isSearchFocused = false })
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     ToolbarSearchField(

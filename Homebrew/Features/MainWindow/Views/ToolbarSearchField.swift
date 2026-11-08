@@ -29,6 +29,13 @@ struct ToolbarSearchField: NSViewRepresentable {
         field.placeholderString = prompt
         field.setAccessibilityLabel(prompt)
 
+        if !isFocused,
+           let window = field.window,
+           window.firstResponder === field.currentEditor() || window.firstResponder === field
+        {
+            window.makeFirstResponder(nil)
+        }
+
         guard context.coordinator.focusRequest != focusRequest else {
             return
         }
