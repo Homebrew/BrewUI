@@ -5,7 +5,7 @@ let package = Package(
     name: "BrewKit",
     defaultLocalization: "en",
     platforms: [
-        .macOS("15.0"),
+        .macOS("26.0"),
     ],
     products: [
         .library(name: "BrewAccessibilityID", targets: ["BrewAccessibilityID"]),

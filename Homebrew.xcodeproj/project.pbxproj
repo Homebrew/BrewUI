@@ -21,18 +21,18 @@
 		EEAA110A00000000000000BA /* BrewAppEnvironment in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100A00000000000000CA /* BrewAppEnvironment */; };
 		EEAA110B00000000000000BB /* BrewFeatureDoctor in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100B00000000000000CB /* BrewFeatureDoctor */; };
 		EEAA110C00000000000000BC /* BrewFeatureConfig in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100C00000000000000CC /* BrewFeatureConfig */; };
+		EEAA112000000000000000E0 /* BrewFeatureServices in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA102000000000000000F0 /* BrewFeatureServices */; };
 		EEAA110D00000000000000BD /* BrewCrashReporting in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100D00000000000000CD /* BrewCrashReporting */; };
 		EEAA110E00000000000000BE /* BrewAccessibilityID in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100E00000000000000CE /* BrewAccessibilityID */; };
 		EEAA110F00000000000000BF /* BrewAccessibilityID in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA100F00000000000000CF /* BrewAccessibilityID */; };
 		EEAA111000000000000000C0 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101000000000000000D0 /* BrewUITestContract */; };
 		EEAA111100000000000000C1 /* BrewUITestContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA101100000000000000D1 /* BrewUITestContract */; };
-		EEAA112000000000000000E0 /* BrewFeatureServices in Frameworks */ = {isa = PBXBuildFile; productRef = EEAA102000000000000000F0 /* BrewFeatureServices */; };
 		EEBB110100000000000000E1 /* BrewSelfUpgradeContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100100000000000000F1 /* BrewSelfUpgradeContract */; };
 		EEBB110200000000000000E2 /* BrewSelfUpgradeContract in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100200000000000000F2 /* BrewSelfUpgradeContract */; };
 		EEBB110300000000000000E3 /* HomebrewUpgradeHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBB120100000000000000A1 /* HomebrewUpgradeHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		EEBC110300000000000000E3 /* HomebrewAskpassHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBC120100000000000000A1 /* HomebrewAskpassHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		EEBB110400000000000000E4 /* BrewSelfUpgradeHelperCore in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100300000000000000F3 /* BrewSelfUpgradeHelperCore */; };
 		EEBB110500000000000000E5 /* BrewFeatureSelfUpgrade in Frameworks */ = {isa = PBXBuildFile; productRef = EEBB100400000000000000F4 /* BrewFeatureSelfUpgrade */; };
-		EEBC110300000000000000E3 /* HomebrewAskpassHelper in Copy Helpers */ = {isa = PBXBuildFile; fileRef = EEBC120100000000000000A1 /* HomebrewAskpassHelper */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -448,21 +448,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		EEBC170200000000000000F2 /* Validate askpass packaging */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Validate askpass packaging";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -eu\nhelper_dir=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\ntest -x \"$helper_dir/HomebrewAskpassHelper\"\nif [ \"${CODE_SIGNING_ALLOWED:-NO}\" = YES ]; then\n  codesign --verify --strict \"$helper_dir/HomebrewAskpassHelper\"\nfi\n\"$helper_dir/HomebrewAskpassHelper\" --validate-packaging < /dev/null > /dev/null\n";
-		};
 		EEDDAA0100000000000000F1 /* Stamp app version */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -481,6 +466,18 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
 			shellScript = "\"${SRCROOT}/scripts/stamp-app-version\"\n";
+		};
+		EEBC170200000000000000F2 /* Validate askpass packaging */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = ();
+			outputPaths = ();
+			name = "Validate askpass packaging";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\nhelper_dir=\"${TARGET_BUILD_DIR}/${CONTENTS_FOLDER_PATH}/Helpers\"\ntest -x \"$helper_dir/HomebrewAskpassHelper\"\nif [ \"${CODE_SIGNING_ALLOWED:-NO}\" = YES ]; then\n  codesign --verify --strict \"$helper_dir/HomebrewAskpassHelper\"\nfi\n\"$helper_dir/HomebrewAskpassHelper\" --validate-packaging < /dev/null > /dev/null\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -555,9 +552,8 @@
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = K94MB8L8AV;
 				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.upgradehelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -569,33 +565,13 @@
 			};
 			name = Debug;
 		};
-		EEBB1B0200000000000000D2 /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = K94MB8L8AV;
-				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.upgradehelper;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 6.0;
-			};
-			name = Release;
-		};
 		EEBC1B0100000000000000D1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = K94MB8L8AV;
 				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.askpasshelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -607,14 +583,31 @@
 			};
 			name = Debug;
 		};
+		EEBB1B0200000000000000D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				ENABLE_HARDENED_RUNTIME = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.upgradehelper;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
 		EEBC1B0200000000000000D2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = EE00AA000000000000000001 /* Signing.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = K94MB8L8AV;
 				ENABLE_HARDENED_RUNTIME = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.app.askpasshelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -682,7 +675,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -743,7 +736,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -759,7 +752,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = K94MB8L8AV;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -789,7 +781,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = K94MB8L8AV;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -818,7 +809,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -836,7 +827,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.2;
 				PRODUCT_BUNDLE_IDENTIFIER = sh.brew.BrewTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -1020,6 +1011,11 @@
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewFeatureConfig;
 		};
+		EEAA102000000000000000F0 /* BrewFeatureServices */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
+			productName = BrewFeatureServices;
+		};
 		EEAA100D00000000000000CD /* BrewCrashReporting */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
@@ -1044,11 +1040,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
 			productName = BrewUITestContract;
-		};
-		EEAA102000000000000000F0 /* BrewFeatureServices */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = EEAA1F0000000000000000FF /* XCLocalSwiftPackageReference "." */;
-			productName = BrewFeatureServices;
 		};
 		EEBB100100000000000000F1 /* BrewSelfUpgradeContract */ = {
 			isa = XCSwiftPackageProductDependency;
