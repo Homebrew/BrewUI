@@ -104,6 +104,11 @@ public enum PreviewSupport {
     public static func makeConfigRepository() -> any ConfigRepository {
         StubConfigRepository(snapshot: configSnapshot)
     }
+
+    @MainActor
+    public static func makeAIModelManager() -> any AIModelManaging {
+        StubAIModelManager()
+    }
 }
 
 public extension PreviewSupport {
@@ -316,4 +321,138 @@ public extension PreviewSupport {
             ),
         ],
     )
+
+    static let aiEngine: any AIEngineProtocol = StubAIEngine()
 }
+
+public struct StubAIEngine: AIEngineProtocol, Sendable {
+    public init() {}
+    public func analyzeDoctorIssue(title: String, rawOutput: String) async -> AIAnalysisResult {
+        AIAnalysisResult(
+            summary: "Sample explanation for preview: \(title)",
+            rootCause: "Preview root cause",
+            suggestedCommands: ["brew doctor"],
+            modelName: "Preview Model"
+        )
+    }
+
+    public func analyzeCommandFailure(command: String, exitCode: Int, output: String) async -> AIAnalysisResult {
+        AIAnalysisResult(
+            summary: "Sample failure explanation for preview: \(command)",
+            rootCause: "Exit code \(exitCode)",
+            suggestedCommands: ["brew update"],
+            modelName: "Preview Model"
+        )
+    }
+
+    public func semanticSearch(query: String, catalogue: [BrewPackage], limit: Int) async -> [AISemanticSearchResult] {
+        catalogue.prefix(limit).map {
+            AISemanticSearchResult(package: $0, relevanceScore: 0.95, matchReason: "Matches preview query “\(query)”")
+        }
+    }
+
+    public func assessUpgradeImpact(package: InstalledBrewPackage, targetVersion: String, dependents: [String]) async -> AIUpgradeImpact {
+        AIUpgradeImpact(
+            packageName: package.name,
+            currentVersion: package.installedVersions.first ?? "1.0.0",
+            targetVersion: targetVersion,
+            riskLevel: dependents.isEmpty ? .low : .medium,
+            isMajorVersionBump: true,
+            affectedDependents: dependents,
+            summary: "Preview impact assessment for \(package.name).",
+            breakingChangesWarning: nil,
+            serviceRestartNotice: nil,
+            recommendedVerificationCommands: ["brew test \(package.name)"]
+        )
+    }
+
+    public func generateBrewfileEnvironment(prompt: String) async -> AIBrewfileEnvironment {
+        AIBrewfileEnvironment(
+            title: "Preview Environment",
+            prompt: prompt,
+            taps: ["homebrew/core"],
+            formulae: ["git", "node"],
+            casks: ["visual-studio-code"],
+            generatedBrewfileContent: "tap \"homebrew/core\"\nbrew \"git\"\nbrew \"node\"\ncask \"visual-studio-code\"",
+            bundleCommand: "brew bundle --file=Brewfile",
+            explanation: "Curated development environment based on “\(prompt)”."
+        )
+    }
+
+    public func assessHousekeeping(installedPackages: [InstalledBrewPackage], leaves: [String]) async -> AIHousekeepingReport {
+        AIHousekeepingReport(
+            orphanCandidates: leaves.prefix(3).compactMap { leaf in
+                guard let pkg = installedPackages.first(where: { $0.name == leaf }) else { return nil }
+                return AIOrphanCandidate(
+                    packageName: pkg.name,
+                    installedVersion: pkg.installedVersions.first ?? "1.0",
+                    reason: "Top-level formula with no dependents detected",
+                    safetyLevel: .safeToPrune
+                )
+            },
+            summary: "Housekeeping analysis preview.",
+            recommendedCommands: ["brew autoremove --dry-run", "brew cleanup -s"],
+            reclaimableEstimate: "1.2 GB"
+        )
+    }
+
+    public func suggestAlternatives(for package: BrewPackage) async -> [AIPackageAlternative] {
+        [
+            AIPackageAlternative(
+                name: "ripgrep",
+                relationship: "Modern Rust Replacement",
+                headline: "Significantly faster search with regex, recursive search, and respect for .gitignore",
+                keyAdvantages: ["Up to 10x faster execution", "Automatic .gitignore filtering", "Coloured syntax output"],
+                installCommand: "brew install ripgrep"
+            )
+        ]
+    }
+
+    public func recommendPackages(basedOn installedPackages: [InstalledBrewPackage]) async -> [AIPackageRecommendation] {
+        [
+            AIPackageRecommendation(
+                packageName: "bat",
+                category: "Modern CLI",
+                reason: "Cat clone with syntax highlighting and Git integration",
+                confidenceScore: 0.95
+            ),
+            AIPackageRecommendation(
+                packageName: "eza",
+                category: "Modern CLI",
+                reason: "Modern, feature-rich replacement for ls with tree views",
+                confidenceScore: 0.90
+            )
+        ]
+    }
+
+    public func comparePackages(packageA: BrewPackage, packageB: BrewPackage) async -> AIPackageComparison {
+        AIPackageComparison(
+            packageAName: packageA.displayName,
+            packageBName: packageB.displayName,
+            verdictSummary: "\(packageB.displayName) is a modern replacement for \(packageA.displayName) with superior performance and user ergonomics.",
+            strengthsA: ["Universal availability on POSIX systems", "Zero dependencies", "Standardised scripting behaviour"],
+            strengthsB: ["Exceptional speed with multi-threading", "Native Unicode & regex handling", "Intuitive CLI defaults"],
+            bestForA: "Legacy shell scripts requiring standard POSIX conformity",
+            bestForB: "Interactive daily terminal workflows and large codebases",
+            matrix: [
+                AIComparisonRow(feature: "Search Performance", packageAValue: "Standard linear scan", packageBValue: "Multi-threaded SIMD accelerated"),
+                AIComparisonRow(feature: "Git Integration", packageAValue: "None", packageBValue: "Respects .gitignore by default"),
+                AIComparisonRow(feature: "Binary Files", packageAValue: "Scans or skips via flags", packageBValue: "Smart automatic skipping")
+            ]
+        )
+    }
+}
+
+@MainActor
+public final class StubAIModelManager: AIModelManaging {
+    public init() {}
+    public var availableModels: [AIModelSpec] { AIModelCatalog.allModels }
+    public var activeModelID: String? { AIModelCatalog.qwenCoder15B.id }
+    public var hardwareProfile = AISystemHardwareProfile()
+    public func downloadState(for model: AIModelSpec) -> AIModelDownloadState { .ready }
+    public func setActiveModel(id: String?) {}
+    public func startDownload(for model: AIModelSpec) async {}
+    public func cancelDownload(for model: AIModelSpec) {}
+    public func deleteModel(for model: AIModelSpec) {}
+}
+

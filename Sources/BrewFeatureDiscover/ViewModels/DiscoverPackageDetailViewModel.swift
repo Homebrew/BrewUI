@@ -25,6 +25,13 @@ final class DiscoverPackageDetailViewModel {
     /// Inline message when an install fails; cleared when a new install starts.
     private(set) var installErrorMessage: String?
 
+    // MARK: - AI Enhancements State
+
+    private(set) var alternatives: [AIPackageAlternative] = []
+    private(set) var comparisonResult: AIPackageComparison?
+    private(set) var comparisonTarget: BrewPackage?
+    var isShowingComparison: Bool = false
+
     /// True while an install is in flight, including the reconcile that lands the badge.
     var isInstalling: Bool {
         DiscoverInstallBusyPresentation.showsInstallBusy(phase: operationPhase)
@@ -159,6 +166,88 @@ final class DiscoverPackageDetailViewModel {
     func update(package: DiscoveryBrewPackage) {
         discoveryPackage = package
         installErrorMessage = nil
+        alternatives = []
+        comparisonResult = nil
+        comparisonTarget = nil
+        isShowingComparison = false
+    }
+
+    func loadAlternatives(using aiEngine: (any AIEngineProtocol)?) async {
+        guard let aiEngine else { return }
+        alternatives = await aiEngine.suggestAlternatives(for: discoveryPackage.package)
+    }
+
+    func compare(
+        with targetName: String,
+        using aiEngine: (any AIEngineProtocol)?,
+        catalogue: any CatalogueRepository
+    ) async {
+        guard let aiEngine else { return }
+        let formulaRef = HomebrewPackageID.formula(name: targetName)
+        let caskRef = HomebrewPackageID.cask(token: targetName)
+        let foundFormula = try? await catalogue.package(for: formulaRef)
+        let foundTarget: BrewPackage? = if let foundFormula {
+            foundFormula
+        } else {
+            try? await catalogue.package(for: caskRef)
+        }
+
+        let target = foundTarget ?? BrewPackage(
+            name: targetName,
+            displayName: targetName,
+            kind: .formula,
+            description: "",
+            homepage: "",
+            latestVersion: "",
+            dependencies: []
+        )
+
+        let comparison = await aiEngine.comparePackages(packageA: discoveryPackage.package, packageB: target)
+        comparisonResult = comparison
+        comparisonTarget = target
+        isShowingComparison = true
+    }
+
+    func dismissComparison() {
+        isShowingComparison = false
+    }
+
+    func installPackage(_ package: BrewPackage) {
+        guard !isInstalling else { return }
+        installErrorMessage = nil
+        let operationID = BrewOperationID(kind: package.kind, name: package.name)
+        let command = commandFactory.installCommand(kind: package.kind, name: package.name)
+        mutationTask?.cancel()
+        mutationTask = Task { @MainActor [self] in
+            do {
+                try await brewCommandCenter.perform(command, id: operationID)
+            } catch {
+                let latestPhase = await brewCommandCenter.phase(for: operationID)
+                if case let .failed(reason: failure) = latestPhase {
+                    installErrorMessage = BrewErrorCopy.message(for: failure)
+                } else {
+                    installErrorMessage = Self.userMessage(for: error)
+                }
+            }
+        }
+    }
+
+    func installAlternative(command: String) {
+        // Find if it's formula or cask from command string
+        let isCask = command.contains("--cask")
+        let components = command.components(separatedBy: .whitespaces)
+        guard let targetName = components.last, !targetName.isEmpty else { return }
+        let kind: HomebrewPackageKind = isCask ? .cask : .formula
+        let pkg = BrewPackage(
+            name: targetName,
+            displayName: targetName,
+            kind: kind,
+            description: "",
+            homepage: "",
+            latestVersion: "",
+            dependencies: []
+        )
+        installPackage(pkg)
     }
 
     func installSelectedPackage() {

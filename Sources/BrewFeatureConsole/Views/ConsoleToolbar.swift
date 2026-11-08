@@ -4,6 +4,7 @@
 //
 
 import BrewAccessibilityID
+import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -13,6 +14,11 @@ import SwiftUI
 struct ConsoleToolbar: View {
     @Binding var expanded: Bool
     @Bindable var viewModel: ConsoleViewModel
+    @Environment(\.aiEngine) private var aiEngine
+
+    @State private var failureAnalysis: AIAnalysisResult?
+    @State private var isAnalyzingFailure = false
+    @State private var showAnalysisSheet = false
 
     var body: some View {
         HStack(spacing: BrewSpacing.xs) {
@@ -70,6 +76,9 @@ struct ConsoleToolbar: View {
     @ViewBuilder
     private var actionButtons: some View {
         if let job = viewModel.selectedJob {
+            if job.dotState == .failed {
+                aiExplainerAffordance(for: job)
+            }
             // Saving ends in a save panel, which is its own confirmation.
             BrewActionButton(
                 LocalizedStringResource("Save", bundle: #bundle, comment: "Console toolbar: save output to a file"),
@@ -94,6 +103,52 @@ struct ConsoleToolbar: View {
             help: LocalizedStringResource("Clear completed jobs", bundle: #bundle, comment: "Tooltip: console clear button"),
         ) {
             viewModel.clearCompleted()
+        }
+    }
+
+    private func aiExplainerAffordance(for job: CommandJob) -> some View {
+        Button {
+            Task {
+                isAnalyzingFailure = true
+                failureAnalysis = await aiEngine.analyzeCommandFailure(
+                    command: job.command,
+                    exitCode: Int(job.exitCode ?? 1),
+                    output: job.formattedOutputForExport()
+                )
+                isAnalyzingFailure = false
+                showAnalysisSheet = true
+            }
+        } label: {
+            HStack(spacing: BrewSpacing.xxs) {
+                if isAnalyzingFailure {
+                    ProgressView().controlSize(.small)
+                } else {
+                    Image(systemName: "sparkles")
+                }
+                Text("Explain", bundle: #bundle, comment: "Console toolbar: AI failure explainer button")
+            }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .disabled(isAnalyzingFailure)
+        .sheet(isPresented: $showAnalysisSheet) {
+            if let analysis = failureAnalysis {
+                VStack(alignment: .leading, spacing: BrewSpacing.md) {
+                    HStack {
+                        Text("Command Failure Analysis", bundle: #bundle, comment: "Console AI sheet title")
+                            .font(.brewBodyEmphasized)
+                        Spacer()
+                        Button(String(localized: "Done", bundle: #bundle, comment: "Console AI sheet dismiss")) {
+                            showAnalysisSheet = false
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    }
+                    AIDiagnosticView(result: analysis)
+                }
+                .padding(BrewSpacing.xl)
+                .frame(minWidth: 500)
+            }
         }
     }
 }

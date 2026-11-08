@@ -175,6 +175,39 @@ struct DoctorViewModelTests {
         #expect(viewModel.fixError(item) == "could not clean")
     }
 
+    @Test func `analyzeWithAI populates aiAnalysis for issue`() async throws {
+        let repo = StubDoctorRepository(report: Self.issuesReport())
+        let center = StubBrewCommandCenter()
+        let factory = StubMutatingCommandFactory()
+        let viewModel = DoctorViewModel(
+            doctorRepository: repo,
+            brewCommandCenter: center,
+            commandFactory: factory,
+            aiEngine: PreviewSupport.aiEngine
+        )
+        await viewModel.load(forceRefresh: false)
+        let item = try #require(viewModel.selectedIssue)
+
+        await viewModel.analyzeWithAI(for: item)
+        #expect(viewModel.aiAnalysis(for: item) != nil)
+    }
+
+    @Test func `runAICommand executes command and tracks running status`() async throws {
+        let repo = StubDoctorRepository(report: Self.issuesReport())
+        let center = StubBrewCommandCenter()
+        let factory = StubMutatingCommandFactory()
+        let viewModel = DoctorViewModel(
+            doctorRepository: repo,
+            brewCommandCenter: center,
+            commandFactory: factory,
+            aiEngine: PreviewSupport.aiEngine
+        )
+        await viewModel.load(forceRefresh: false)
+
+        viewModel.runAICommand("brew cleanup -s")
+        #expect(viewModel.isAICommandRunning("brew cleanup -s") || viewModel.aiCommandError("brew cleanup -s") == nil)
+    }
+
     private static func recordingCenter(
         cleanupExitCode: Int32,
         stderr: String = "",

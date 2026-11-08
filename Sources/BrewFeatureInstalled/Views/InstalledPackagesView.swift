@@ -15,6 +15,7 @@ struct InstalledPackagesView: View {
     @Bindable var viewModel: InstalledViewModel
     @FocusState.Binding var focus: SearchFocusTarget?
 
+    @State private var isPresentingHousekeeping: Bool = false
     @Environment(\.packageListBanner) private var packageListBanner
 
     var body: some View {
@@ -22,9 +23,34 @@ struct InstalledPackagesView: View {
             packageListBanner()
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
+                HStack {
+                    Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
+                        .font(.brewTitle2)
+                        .foregroundStyle(Color.brewTextPrimary)
+
+                    Spacer()
+
+                    Button {
+                        Task {
+                            await viewModel.analyzeHousekeeping()
+                            isPresentingHousekeeping = true
+                        }
+                    } label: {
+                        if viewModel.isAnalyzingHousekeeping {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Label {
+                                Text("AI Housekeeping", bundle: #bundle, comment: "Installed tab: AI storage & housekeeping advisor")
+                            } icon: {
+                                Image(systemName: "sparkles")
+                            }
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(viewModel.isAnalyzingHousekeeping)
+                }
+
                 Text(viewModel.packageCountSubtitle)
                     .font(.brewSubheadline)
                     .foregroundStyle(Color.brewTextSecondary)
@@ -51,6 +77,13 @@ struct InstalledPackagesView: View {
         .axid(.installedScreen)
         .task {
             await viewModel.load()
+        }
+        .sheet(isPresented: $isPresentingHousekeeping) {
+            if let report = viewModel.housekeepingReport {
+                AIHousekeepingSheet(report: report) { cmd in
+                    viewModel.runHousekeepingCommand(cmd)
+                }
+            }
         }
     }
 

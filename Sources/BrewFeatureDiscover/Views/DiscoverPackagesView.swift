@@ -18,6 +18,7 @@ struct DiscoverPackagesView: View {
             packageListBanner()
 
             header
+            curatedCollectionsBar
             scopePicker
             Divider()
             AsyncContentView(
@@ -147,15 +148,61 @@ struct DiscoverPackagesView: View {
         .accessibilityElement(children: .combine)
     }
 
+    private var curatedCollectionsBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: BrewSpacing.xs) {
+                ForEach(DiscoverCuratedCollection.allCases) { collection in
+                    let isSelected = !viewModel.isSearching && viewModel.selectedCollection == collection
+                    Button {
+                        Task { await viewModel.selectCollection(collection) }
+                    } label: {
+                        HStack(spacing: BrewSpacing.xxs) {
+                            Image(systemName: collection.iconName)
+                                .font(.system(size: 11))
+                            Text(collection.title)
+                                .font(.brewCaption)
+                                .fontWeight(isSelected ? .semibold : .regular)
+                        }
+                        .padding(.horizontal, BrewSpacing.sm)
+                        .padding(.vertical, BrewSpacing.xxs)
+                        .background(isSelected ? Color.brewBrandPrimary : Color.brewSurfaceElevated)
+                        .foregroundStyle(isSelected ? Color.white : Color.brewTextSecondary)
+                        .clipShape(Capsule())
+                        .overlay(
+                            Capsule()
+                                .stroke(isSelected ? Color.clear : Color.brewBorderDefault, lineWidth: 1)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.bottom, BrewSpacing.sm)
+        }
+    }
+
     /// Persistent kind filter, always visible (trending and results). Filters client-side; never refetches.
     private var scopePicker: some View {
-        Picker(String(localized: "Scope", bundle: #bundle, comment: "Discover tab: formula/cask scope picker label"), selection: $viewModel.scope) {
-            Text("All", bundle: #bundle, comment: "Scope picker: every package kind").tag(DiscoverSearchScope.all)
-            Text("Formulae", bundle: #bundle, comment: "Scope picker: formulae only").tag(DiscoverSearchScope.formulae)
-            Text("Casks", bundle: #bundle, comment: "Scope picker: casks only").tag(DiscoverSearchScope.casks)
+        HStack(spacing: BrewSpacing.sm) {
+            Picker(String(localized: "Scope", bundle: #bundle, comment: "Discover tab: formula/cask scope picker label"), selection: $viewModel.scope) {
+                Text("All", bundle: #bundle, comment: "Scope picker: every package kind").tag(DiscoverSearchScope.all)
+                Text("Formulae", bundle: #bundle, comment: "Scope picker: formulae only").tag(DiscoverSearchScope.formulae)
+                Text("Casks", bundle: #bundle, comment: "Scope picker: casks only").tag(DiscoverSearchScope.casks)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+
+            Button {
+                viewModel.isSemanticSearch.toggle()
+                Task { await viewModel.search() }
+            } label: {
+                Image(systemName: viewModel.isSemanticSearch ? "sparkles" : "sparkle")
+                    .foregroundStyle(viewModel.isSemanticSearch ? Color.brewBrandPrimary : Color.brewTextSecondary)
+            }
+            .buttonStyle(.bordered)
+            .tint(viewModel.isSemanticSearch ? Color.brewBrandPrimary : nil)
+            .help(String(localized: "Toggle AI Semantic Search", bundle: #bundle, comment: "AI semantic search tooltip"))
         }
-        .pickerStyle(.segmented)
-        .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
         .padding(.bottom, BrewSpacing.md)
     }

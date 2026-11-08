@@ -10,12 +10,26 @@ import SwiftUI
 /// File menu commands for saving the installed environment as a Brewfile.
 struct BrewfileCommands: Commands {
     @FocusedValue(\.saveBrewfile) private var saveBrewfile
+    @FocusedValue(\.generateBrewfile) private var generateBrewfile
 
     var body: some Commands {
         CommandGroup(after: .saveItem) {
             Button(String(localized: "Save Brewfile…", bundle: #bundle, comment: "File menu: save the installed packages as a Brewfile")) { saveBrewfile?() }
                 .disabled(saveBrewfile == nil)
+
+            Button(String(localized: "Generate Brewfile with AI…", bundle: #bundle, comment: "File menu: generate Brewfile with AI")) { generateBrewfile?() }
+                .disabled(generateBrewfile == nil)
         }
+    }
+}
+
+/// Triggers presenting the AI Brewfile Architect sheet.
+struct GenerateBrewfileAction {
+    let handler: @MainActor () -> Void
+
+    @MainActor
+    func callAsFunction() {
+        handler()
     }
 }
 
@@ -43,4 +57,5 @@ struct SaveBrewfileAction {
 
 extension FocusedValues {
     @Entry var saveBrewfile: SaveBrewfileAction?
+    @Entry var generateBrewfile: GenerateBrewfileAction?
 }

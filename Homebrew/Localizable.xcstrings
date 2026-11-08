@@ -10,6 +10,18 @@
             "value" : "Se guardó un reporte después de que la app se cerró de forma inesperada. Puedes enviarlo al equipo de Homebrew en GitHub para ayudar a solucionar el problema, o descartarlo."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱이 예기치 않게 종료된 후 보고서가 저장되었습니다. GitHub에서 Homebrew 팀에 보내 문제 해결을 돕거나 보고서를 폐기할 수 있습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En rapport sparades när programmet avslutades oväntat. Du kan skicka den till Homebrewteamet på GitHub för att hjälpa till att lösa problemet eller kasta den."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,23 +33,12 @@
             "state" : "translated",
             "value" : "App 意外結束後已儲存一份報告。你可以透過 GitHub 將報告傳送給 Homebrew 團隊，協助修正問題，也可以將報告捨棄。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En rapport sparades när programmet avslutades oväntat. Du kan skicka den till Homebrewteamet på GitHub för att hjälpa till att lösa problemet eller kasta den."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "앱이 예기치 않게 종료된 후 보고서가 저장되었습니다. GitHub에서 Homebrew 팀에 보내 문제 해결을 돕거나 보고서를 폐기할 수 있습니다."
-          }
         }
       }
     },
     "Administrator password" : {
       "comment" : "Askpass: secure password field label",
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -49,6 +50,7 @@
     },
     "Authenticate" : {
       "comment" : "Askpass: submit the administrator password",
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -67,6 +69,18 @@
             "value" : "Explora y busca %lld+ paquetes"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 %lld개 이상 둘러보기 및 검색"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bläddra bland och sök i %lld+ paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -77,18 +91,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "瀏覽並搜尋 %lld 多個套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bläddra bland och sök i %lld+ paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지 %lld개 이상 둘러보기 및 검색"
           }
         }
       }
@@ -102,6 +104,18 @@
             "value" : "Explora o busca tus paquetes instalados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 패키지 둘러보기 및 검색"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bläddra bland eller sök i dina installerade paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -113,23 +127,12 @@
             "state" : "translated",
             "value" : "瀏覽或搜尋已安裝的套件"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bläddra bland eller sök i dina installerade paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치된 패키지 둘러보기 및 검색"
-          }
         }
       }
     },
     "Cancel" : {
       "comment" : "Askpass: cancel administrator authentication",
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -148,6 +151,18 @@
             "value" : "Busca problemas en tu instalación de Homebrew"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 설치의 문제 확인"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollera din installation av Homebrew efter problem"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -158,18 +173,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "檢查 Homebrew 安裝是否有問題"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontrollera din installation av Homebrew efter problem"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 설치의 문제 확인"
           }
         }
       }
@@ -189,6 +192,18 @@
             "value" : "Configuración"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구성"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Konfiguration"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -199,18 +214,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "配置"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Konfiguration"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구성"
           }
         }
       }
@@ -224,6 +227,18 @@
             "value" : "Descartar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폐기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kasta"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -234,18 +249,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "捨棄"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kasta"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "폐기"
           }
         }
       }
@@ -265,6 +268,18 @@
             "value" : "Descubrir"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "둘러보기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upptäck"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -275,18 +290,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "探索"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upptäck"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "둘러보기"
           }
         }
       }
@@ -306,6 +309,18 @@
             "value" : "Doctor"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "진단"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnostik"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -317,23 +332,12 @@
             "state" : "translated",
             "value" : "診斷"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diagnostik"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "진단"
-          }
         }
       }
     },
     "Enter your password to allow this." : {
       "comment" : "Askpass: explains that the password allows the change",
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -343,6 +347,9 @@
         }
       }
     },
+    "Generate Brewfile with AI…" : {
+      "comment" : "File menu: generate Brewfile with AI"
+    },
     "Homebrew Documentation" : {
       "comment" : "Help menu",
       "localizations" : {
@@ -350,6 +357,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Documentación de Homebrew"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 문서"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew-dokumentation"
           }
         },
         "zh-Hans" : {
@@ -363,18 +382,6 @@
             "state" : "translated",
             "value" : "Homebrew 說明文件"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew-dokumentation"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 문서"
-          }
         }
       }
     },
@@ -385,6 +392,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entorno y diagnóstico de Homebrew"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 환경 및 진단 정보"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew-miljö och diagnostik"
           }
         },
         "zh-Hans" : {
@@ -398,23 +417,12 @@
             "state" : "translated",
             "value" : "Homebrew 環境與診斷資訊"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew-miljö och diagnostik"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 환경 및 진단 정보"
-          }
         }
       }
     },
     "Homebrew wants to make changes." : {
       "comment" : "Askpass: primary message, standard macOS authorization wording",
+      "extractionState" : "stale",
       "localizations" : {
         "ko" : {
           "stringUnit" : {
@@ -439,6 +447,18 @@
             "value" : "Instalado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치됨"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerade"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -449,18 +469,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installerade"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치됨"
           }
         }
       }
@@ -474,6 +482,18 @@
             "value" : "OK"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -484,18 +504,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "好"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "확인"
           }
         }
       }
@@ -509,6 +517,18 @@
             "value" : "Informar de un problema…"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문제 신고…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapportera ett problem…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -519,18 +539,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "回報問題…"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rapportera ett problem…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "문제 신고…"
           }
         }
       }
@@ -544,6 +552,18 @@
             "value" : "Informar en GitHub…"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GitHub에 신고…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapportera på GitHub…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -554,18 +574,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在 GitHub 回報…"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rapportera på GitHub…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub에 신고…"
           }
         }
       }
@@ -579,6 +587,18 @@
             "value" : "Revisa y actualiza paquetes desactualizados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전 패키지 검토 및 업그레이드"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Granska och uppgradera inaktuella paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -590,17 +610,22 @@
             "state" : "translated",
             "value" : "檢視並升級可升級套件"
           }
+        }
+      }
+    },
+    "Save Brewfile…" : {
+      "comment" : "File menu: save the installed packages as a Brewfile",
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brewfile 저장…"
+          }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Granska och uppgradera inaktuella paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전 패키지 검토 및 업그레이드"
+            "value" : "Spara Brewfile…"
           }
         }
       }
@@ -608,6 +633,18 @@
     "Services" : {
       "comment" : "Sidebar: read-only Homebrew service inventory",
       "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "서비스"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tjänster"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -618,35 +655,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "服務"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tjänster"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "서비스"
-          }
-        }
-      }
-    },
-    "Save Brewfile…" : {
-      "comment" : "File menu: save the installed packages as a Brewfile",
-      "localizations" : {
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spara Brewfile…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brewfile 저장…"
           }
         }
       }
@@ -660,6 +668,18 @@
             "value" : "La app de Homebrew se cerró inesperadamente"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 앱이 예기치 않게 종료되었습니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew-appen avslutades oväntat"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -670,18 +690,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew App 意外結束"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew-appen avslutades oväntat"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 앱이 예기치 않게 종료되었습니다"
           }
         }
       }
@@ -695,6 +703,18 @@
             "value" : "No se encuentra el asistente de actualización en esta compilación de la app de Homebrew."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Homebrew 앱 빌드에 업그레이드 도우미가 없습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderingshjälparen saknas i den här versionen av Homebrew-appen."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -705,18 +725,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這個版本的 Homebrew App 缺少升級輔助程式。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderingshjälparen saknas i den här versionen av Homebrew-appen."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 Homebrew 앱 빌드에 업그레이드 도우미가 없습니다."
           }
         }
       }
@@ -736,6 +744,18 @@
             "value" : "Actualizaciones"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderingar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -747,24 +767,24 @@
             "state" : "translated",
             "value" : "升級"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderingar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드"
-          }
         }
       }
     },
     "View your Homebrew services" : {
       "comment" : "Window subtitle, read-only Services tab",
       "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 서비스 보기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa dina tjänster i Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -775,18 +795,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "檢視你的 Homebrew 服務"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visa dina tjänster i Homebrew"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 서비스 보기"
           }
         }
       }
@@ -800,6 +808,18 @@
             "value" : "Espera a que termine el comando de Homebrew en ejecución y luego actualiza la app de Homebrew."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중인 Homebrew 명령이 끝난 후 Homebrew 앱을 업그레이드하세요."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vänta tills det pågående Homebrew-kommandot är klart och uppgradera sedan Homebrew-appen."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -810,18 +830,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "請等待執行中的 Homebrew 指令完成，再升級 Homebrew App。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vänta tills det pågående Homebrew-kommandot är klart och uppgradera sedan Homebrew-appen."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "실행 중인 Homebrew 명령이 끝난 후 Homebrew 앱을 업그레이드하세요."
           }
         }
       }

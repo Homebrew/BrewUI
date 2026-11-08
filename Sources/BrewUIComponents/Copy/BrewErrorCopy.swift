@@ -8,7 +8,7 @@ import BrewRepositoryInterfaces
 import Foundation
 
 /// Words the typed errors thrown by the core and repository layers.
-public nonisolated enum BrewErrorCopy {
+public enum BrewErrorCopy {
     public static func message(for error: any Error, fallback: String) -> String {
         switch error {
         case BrewLookupError.executableNotFound:

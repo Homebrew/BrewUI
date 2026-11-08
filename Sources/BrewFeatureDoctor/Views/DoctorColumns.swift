@@ -15,6 +15,7 @@ public struct DoctorColumnsRoot: View {
     @Environment(\.doctorRepository) private var doctorRepository
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
+    @Environment(\.aiEngine) private var aiEngine
 
     public init() {}
 
@@ -23,6 +24,7 @@ public struct DoctorColumnsRoot: View {
             doctorRepository: doctorRepository,
             brewCommandCenter: brewCommandCenter,
             mutatingCommandFactory: mutatingCommandFactory,
+            aiEngine: aiEngine,
         )
     }
 }
@@ -35,12 +37,14 @@ struct DoctorColumns: View {
         doctorRepository: any DoctorRepository,
         brewCommandCenter: any BrewCommandCenter,
         mutatingCommandFactory: any BrewMutatingCommandFactory,
+        aiEngine: any AIEngineProtocol,
     ) {
         _viewModel = State(
             initialValue: DoctorViewModel(
                 doctorRepository: doctorRepository,
                 brewCommandCenter: brewCommandCenter,
                 commandFactory: mutatingCommandFactory,
+                aiEngine: aiEngine,
             ),
         )
     }
@@ -85,6 +89,7 @@ struct DoctorColumns: View {
             doctorRepository: PreviewSupport.makeDoctorRepository(),
             brewCommandCenter: PreviewSupport.commandCenter,
             mutatingCommandFactory: PreviewSupport.mutatingCommandFactory,
+            aiEngine: PreviewSupport.aiEngine,
         )
         .frame(minWidth: 700, minHeight: 480)
     }

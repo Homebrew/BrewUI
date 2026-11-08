@@ -16,7 +16,30 @@ final class DiscoverViewModel {
     @ObservationIgnored private let discoverPackagesRepository: any DiscoverPackagesRepository
     @ObservationIgnored private let catalogueRepository: any CatalogueRepository
     @ObservationIgnored private let installedRepository: any InstalledPackageStatusReading
+    @ObservationIgnored private let installedInventory: (any InstalledInventoryObserving)?
+    @ObservationIgnored private let aiEngine: (any AIEngineProtocol)?
     @ObservationIgnored private let searchResultsLimit: Int
+
+    var selectedCollection: DiscoverCuratedCollection = .trending {
+        didSet {
+            guard oldValue != selectedCollection else {
+                return
+            }
+            synchronizeSelectionWithVisibleRows()
+        }
+    }
+
+    private var collectionPackages: [DiscoverCuratedCollection: [DiscoveryBrewPackage]] = [:]
+    private(set) var curatedState: LoadState<[DiscoveryBrewPackage], String> = .loaded([])
+
+    var isSemanticSearch: Bool = false {
+        didSet {
+            guard oldValue != isSemanticSearch else {
+                return
+            }
+            synchronizeSelectionWithVisibleRows()
+        }
+    }
 
     var query: String = "" {
         didSet {
@@ -54,11 +77,15 @@ final class DiscoverViewModel {
         discoverPackagesRepository: any DiscoverPackagesRepository,
         catalogueRepository: any CatalogueRepository,
         installedRepository: any InstalledPackageStatusReading,
+        installedInventory: (any InstalledInventoryObserving)? = nil,
+        aiEngine: (any AIEngineProtocol)? = nil,
         searchResultsLimit: Int = 50,
     ) {
         self.discoverPackagesRepository = discoverPackagesRepository
         self.catalogueRepository = catalogueRepository
         self.installedRepository = installedRepository
+        self.installedInventory = installedInventory ?? (installedRepository as? any InstalledInventoryObserving)
+        self.aiEngine = aiEngine
         self.searchResultsLimit = searchResultsLimit
     }
 
@@ -73,19 +100,22 @@ final class DiscoverViewModel {
     }
 
     var activeState: LoadState<[DiscoveryBrewPackage], String> {
-        isSearching ? results : trending
+        if isSearching {
+            return results
+        }
+        return selectedCollection == .trending ? trending : curatedState
     }
 
     /// Search results have no analytics, so install-count metadata is suppressed in that mode.
     var showsInstallMetrics: Bool {
-        !isSearching
+        !isSearching && selectedCollection == .trending
     }
 
     // MARK: - Heading
 
     var paneHeading: LocalizedStringResource {
         guard isSearching else {
-            return LocalizedStringResource("Trending", bundle: #bundle, comment: "Discover list heading, trending landing")
+            return selectedCollection.title
         }
         if case .loaded = results, visiblePackages.isEmpty {
             return LocalizedStringResource("No matches", bundle: #bundle, comment: "Discover list heading, zero search results")
@@ -105,13 +135,30 @@ final class DiscoverViewModel {
                 : LocalizedStringResource("Could not load packages", bundle: #bundle, comment: "Discover subtitle on error")
         case .loaded:
             guard isSearching else {
-                return LocalizedStringResource(
-                    "Most-installed packages in the last 30 days",
-                    bundle: #bundle,
-                    comment: "Discover subhead on the trending landing",
-                )
+                return curatedCollectionSubtitle
             }
             return searchResultsSubtitle
+        }
+    }
+
+    private var curatedCollectionSubtitle: LocalizedStringResource {
+        switch selectedCollection {
+        case .trending:
+            LocalizedStringResource("Most-installed packages in the last 30 days", bundle: #bundle, comment: "Discover subhead on trending landing")
+        case .forYou:
+            LocalizedStringResource("Personalised recommendations based on your installed tools", bundle: #bundle, comment: "Discover subhead on For You landing")
+        case .cliTools:
+            LocalizedStringResource("Essential high-performance command-line utilities", bundle: #bundle, comment: "Discover subhead on CLI tools landing")
+        case .developer:
+            LocalizedStringResource("Version control, editors, and modern developer tooling", bundle: #bundle, comment: "Discover subhead on developer tools landing")
+        case .devops:
+            LocalizedStringResource("Containers, Kubernetes, and cloud infrastructure", bundle: #bundle, comment: "Discover subhead on devops landing")
+        case .security:
+            LocalizedStringResource("Encryption, secret management, and network security", bundle: #bundle, comment: "Discover subhead on security landing")
+        case .media:
+            LocalizedStringResource("Audio, video, and image manipulation utilities", bundle: #bundle, comment: "Discover subhead on media landing")
+        case .essentialCasks:
+            LocalizedStringResource("Hand-picked GUI applications for macOS", bundle: #bundle, comment: "Discover subhead on essential casks landing")
         }
     }
 
@@ -125,21 +172,33 @@ final class DiscoverViewModel {
             )
         }
         if count == 1 {
-            return LocalizedStringResource(
-                "1 package matches “\(normalizedQuery)”",
-                bundle: #bundle,
-                comment: "Discover subhead, single search result",
-            )
+            return isSemanticSearch
+                ? LocalizedStringResource(
+                    "1 AI semantic match for “\(normalizedQuery)”",
+                    bundle: #bundle,
+                    comment: "Discover subhead, single AI semantic result",
+                )
+                : LocalizedStringResource(
+                    "1 package matches “\(normalizedQuery)”",
+                    bundle: #bundle,
+                    comment: "Discover subhead, single search result",
+                )
         }
-        return LocalizedStringResource(
-            "\(count) packages match “\(normalizedQuery)”",
-            bundle: #bundle,
-            comment: "Discover subhead, search result count",
-        )
+        return isSemanticSearch
+            ? LocalizedStringResource(
+                "\(count) AI semantic matches for “\(normalizedQuery)”",
+                bundle: #bundle,
+                comment: "Discover subhead, AI semantic result count",
+            )
+            : LocalizedStringResource(
+                "\(count) packages match “\(normalizedQuery)”",
+                bundle: #bundle,
+                comment: "Discover subhead, search result count",
+            )
     }
 
     var showsSubtitleTrendIcon: Bool {
-        if case .loaded = activeState, !isSearching {
+        if case .loaded = activeState, !isSearching, selectedCollection == .trending {
             return true
         }
         return false
@@ -274,7 +333,90 @@ extension DiscoverViewModel {
 
 extension DiscoverViewModel {
     func load(forceRefresh: Bool = false) async {
+        if forceRefresh {
+            collectionPackages.removeAll()
+        }
         await discoverPackagesRepository.load(forceRefresh: forceRefresh)
+        synchronizeSelectionWithVisibleRows()
+    }
+
+    func selectCollection(_ collection: DiscoverCuratedCollection) async {
+        selectedCollection = collection
+        if isSearching {
+            query = ""
+        }
+        if collection == .trending {
+            await load()
+            return
+        }
+        if let cached = collectionPackages[collection] {
+            curatedState = .loaded(cached)
+            synchronizeSelectionWithVisibleRows()
+            return
+        }
+        await loadCollection(collection)
+    }
+
+    func loadCollection(_ collection: DiscoverCuratedCollection) async {
+        curatedState = .loading
+        if collection == .forYou {
+            let installed: [InstalledBrewPackage] = installedInventory?.state.value ?? []
+            if let aiEngine {
+                let recs = await aiEngine.recommendPackages(basedOn: installed)
+                var pkgs: [DiscoveryBrewPackage] = []
+                for rec in recs {
+                    let ref = rec.isCask ? HomebrewPackageID.cask(token: rec.packageName) : HomebrewPackageID.formula(name: rec.packageName)
+                    if let found = try? await catalogueRepository.package(for: ref) {
+                        pkgs.append(DiscoveryBrewPackage(package: found, thirtyDayInstallCount: 0))
+                    } else {
+                        let fallback = BrewPackage(
+                            name: rec.packageName,
+                            displayName: rec.packageName,
+                            kind: rec.isCask ? .cask : .formula,
+                            description: rec.reason,
+                            homepage: "",
+                            latestVersion: "",
+                            dependencies: []
+                        )
+                        pkgs.append(DiscoveryBrewPackage(package: fallback, thirtyDayInstallCount: 0))
+                    }
+                }
+                collectionPackages[.forYou] = pkgs
+                curatedState = .loaded(pkgs)
+            } else {
+                curatedState = .loaded([])
+            }
+        } else {
+            let names = collection.curatedPackageNames
+            var pkgs: [DiscoveryBrewPackage] = []
+            for name in names {
+                let formulaRef = HomebrewPackageID.formula(name: name)
+                let caskRef = HomebrewPackageID.cask(token: name)
+                let foundFormula = try? await catalogueRepository.package(for: formulaRef)
+                let found: BrewPackage? = if let foundFormula {
+                    foundFormula
+                } else {
+                    try? await catalogueRepository.package(for: caskRef)
+                }
+
+                if let found {
+                    pkgs.append(DiscoveryBrewPackage(package: found, thirtyDayInstallCount: 0))
+                } else {
+                    let fallback = BrewPackage(
+                        name: name,
+                        displayName: name,
+                        kind: collection == .essentialCasks ? .cask : .formula,
+                        description: "",
+                        homepage: "",
+                        latestVersion: "",
+                        dependencies: []
+                    )
+                    pkgs.append(DiscoveryBrewPackage(package: fallback, thirtyDayInstallCount: 0))
+                }
+            }
+            collectionPackages[collection] = pkgs
+            curatedState = .loaded(pkgs)
+        }
         synchronizeSelectionWithVisibleRows()
     }
 
@@ -286,12 +428,21 @@ extension DiscoverViewModel {
         }
         results = .loading
         do {
+            let limit = isSemanticSearch ? searchResultsLimit * 3 : searchResultsLimit
             let matches = try await catalogueRepository.searchPackages(
                 matching: normalizedQuery,
-                limit: searchResultsLimit,
+                limit: limit,
             )
-            // Catalogue search has no analytics, so install counts are zero (hidden in this mode).
-            results = .loaded(matches.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) })
+            if isSemanticSearch, let aiEngine {
+                let semanticResults = await aiEngine.semanticSearch(
+                    query: normalizedQuery,
+                    catalogue: matches,
+                    limit: searchResultsLimit
+                )
+                results = .loaded(semanticResults.map { DiscoveryBrewPackage(package: $0.package, thirtyDayInstallCount: 0) })
+            } else {
+                results = .loaded(matches.map { DiscoveryBrewPackage(package: $0, thirtyDayInstallCount: 0) })
+            }
         } catch {
             results = .failed(Self.userMessage(for: error, searching: true))
         }
@@ -301,8 +452,10 @@ extension DiscoverViewModel {
     func reloadActive() async {
         if isSearching {
             await search()
-        } else {
+        } else if selectedCollection == .trending {
             await load(forceRefresh: true)
+        } else {
+            await loadCollection(selectedCollection)
         }
     }
 }

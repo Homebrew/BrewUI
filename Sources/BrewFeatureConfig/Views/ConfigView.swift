@@ -5,6 +5,7 @@
 
 import AppKit
 import BrewAccessibilityID
+import BrewAppEnvironment
 import BrewCore
 import BrewRepositoryInterfaces
 import BrewUIComponents
@@ -13,6 +14,8 @@ import SwiftUI
 /// Single scrolling pane presenting `brew config` output, with copy/refresh.
 struct ConfigView: View {
     @State private var viewModel: ConfigViewModel
+    @Environment(\.aiModelManager) private var aiModelManager
+    @State private var showModelPicker = false
 
     init(repository: any ConfigRepository) {
         _viewModel = State(initialValue: ConfigViewModel(repository: repository))
@@ -73,12 +76,65 @@ struct ConfigView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
                 NoteCallout(settingsNote, tone: .info)
+                aiModelsCard
                 ForEach(viewModel.sections(for: snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }
             }
             .padding(BrewSpacing.lg)
             .brewPaneContentWidth()
+        }
+    }
+
+    private var aiModelsCard: some View {
+        let activeModel = aiModelManager.availableModels.first(where: { $0.id == aiModelManager.activeModelID })
+        let modelName = activeModel?.name ?? String(localized: "Local Expert Engine", bundle: #bundle, comment: "Config: default built-in AI engine name")
+        let ramText = String(format: "%.1f GB", aiModelManager.hardwareProfile.totalMemoryGB)
+
+        return VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+            HStack(spacing: BrewSpacing.sm) {
+                Image(systemName: "sparkles")
+                    .foregroundStyle(Color.brewBrandPrimary)
+                Text("On-Device AI Engine & Models", bundle: #bundle, comment: "Config card title: AI diagnostics")
+                    .font(.brewBodyEmphasized)
+                    .foregroundStyle(Color.brewTextPrimary)
+                Spacer()
+                Button(String(localized: "Manage Models…", bundle: #bundle, comment: "Config: open model manager sheet")) {
+                    showModelPicker = true
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+
+            VStack(alignment: .leading, spacing: BrewSpacing.xxs) {
+                HStack {
+                    Text("Active Engine:", bundle: #bundle, comment: "Config: active AI engine label")
+                        .font(.brewSubheadline)
+                        .foregroundStyle(Color.brewTextSecondary)
+                    Text(modelName)
+                        .font(.brewSubheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.brewTextPrimary)
+                }
+
+                HStack {
+                    Text("Host RAM:", bundle: #bundle, comment: "Config: host memory label")
+                        .font(.brewCaption)
+                        .foregroundStyle(Color.brewTextSecondary)
+                    Text(ramText)
+                        .font(.brewCaption)
+                        .foregroundStyle(Color.brewTextPrimary)
+                    Text("• Zero telemetry, runs 100% locally", bundle: #bundle, comment: "Config: local privacy note")
+                        .font(.brewCaption)
+                        .foregroundStyle(Color.brewTextSecondary)
+                }
+            }
+        }
+        .padding(BrewSpacing.lg)
+        .background(Color.brewSurface)
+        .clipShape(RoundedRectangle(cornerRadius: BrewRadius.lg))
+        .sheet(isPresented: $showModelPicker) {
+            AIModelPickerSheet(modelManager: aiModelManager)
         }
     }
 

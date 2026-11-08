@@ -10,6 +10,18 @@
             "value" : "Borrar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지우기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rensa"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20,18 +32,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "清除"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rensa"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지우기"
           }
         }
       }
@@ -45,6 +45,18 @@
             "value" : "Borrar tareas completadas"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료된 작업 지우기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rensa slutförda jobb"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,18 +67,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "清除已完成的工作"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rensa slutförda jobb"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "완료된 작업 지우기"
           }
         }
       }
@@ -80,6 +80,18 @@
             "value" : "Borrado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지워짐"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rensat"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -91,20 +103,11 @@
             "state" : "translated",
             "value" : "已清除"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rensat"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지워짐"
-          }
         }
       }
+    },
+    "Command Failure Analysis" : {
+      "comment" : "Console AI sheet title"
     },
     "Copied" : {
       "comment" : "Console toolbar: shown briefly after copying",
@@ -113,6 +116,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiado"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사됨"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopierat"
           }
         },
         "zh-Hans" : {
@@ -126,18 +141,6 @@
             "state" : "translated",
             "value" : "已拷貝"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopierat"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "복사됨"
-          }
         }
       }
     },
@@ -148,6 +151,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "복사"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera"
           }
         },
         "zh-Hans" : {
@@ -161,18 +176,6 @@
             "state" : "translated",
             "value" : "拷貝"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopiera"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "복사"
-          }
         }
       }
     },
@@ -183,6 +186,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiar salida al portapapeles"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출력을 클립보드에 복사"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera utdata till urklipp"
           }
         },
         "zh-Hans" : {
@@ -196,18 +211,6 @@
             "state" : "translated",
             "value" : "將輸出拷貝到剪貼簿"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopiera utdata till urklipp"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "출력을 클립보드에 복사"
-          }
         }
       }
     },
@@ -218,6 +221,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cerrar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "닫기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stäng"
           }
         },
         "zh-Hans" : {
@@ -231,20 +246,11 @@
             "state" : "translated",
             "value" : "關閉"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stäng"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "닫기"
-          }
         }
       }
+    },
+    "Done" : {
+      "comment" : "Console AI sheet dismiss"
     },
     "Expand Console Panel Automatically" : {
       "comment" : "View menu: open the console when a command starts",
@@ -253,6 +259,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Expandir el panel de la consola automáticamente"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 패널 자동으로 펼치기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expandera konsolpanelen automatiskt"
           }
         },
         "zh-Hans" : {
@@ -266,20 +284,11 @@
             "state" : "translated",
             "value" : "自動展開主控台面板"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expandera konsolpanelen automatiskt"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "콘솔 패널 자동으로 펼치기"
-          }
         }
       }
+    },
+    "Explain" : {
+      "comment" : "Console toolbar: AI failure explainer button"
     },
     "Hide Console" : {
       "comment" : "View menu: collapse the console panel (⌘`)",
@@ -288,6 +297,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ocultar consola"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 가리기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj konsol"
           }
         },
         "zh-Hans" : {
@@ -300,18 +321,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隱藏主控台"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dölj konsol"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "콘솔 가리기"
           }
         }
       }
@@ -325,6 +334,18 @@
             "value" : "Ocultar consola"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 가리기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj konsol"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -335,18 +356,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隱藏主控台"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dölj konsol"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "콘솔 가리기"
           }
         }
       }
@@ -360,6 +369,18 @@
             "value" : "Sin actividad"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활동 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen aktivitet"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -370,18 +391,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚無活動"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen aktivitet"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "활동 없음"
           }
         }
       }
@@ -395,6 +404,18 @@
             "value" : "Listo"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "준비됨"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redo"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -405,18 +426,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "就緒"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Redo"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "준비됨"
           }
         }
       }
@@ -430,6 +439,18 @@
             "value" : "Ejecuta un comando de brew para ver su salida aquí."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew 명령을 실행하면 여기에 출력이 표시됩니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör kommandot brew för att se utdata här."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -440,18 +461,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "執行 brew 指令後，輸出會顯示在這裡。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kör kommandot brew för att se utdata här."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brew 명령을 실행하면 여기에 출력이 표시됩니다."
           }
         }
       }
@@ -465,6 +474,18 @@
             "value" : "Guardar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spara"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -475,18 +496,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "儲存"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spara"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "저장"
           }
         }
       }
@@ -500,6 +509,18 @@
             "value" : "Guardar salida en un archivo"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출력을 파일로 저장"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spara utdata till fil"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -510,18 +531,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "將輸出儲存為檔案"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spara utdata till fil"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "출력을 파일로 저장"
           }
         }
       }
@@ -535,6 +544,18 @@
             "value" : "Mostrar consola"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 보기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa konsol"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -545,18 +566,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示主控台"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visa konsol"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "콘솔 보기"
           }
         }
       }
@@ -570,6 +579,18 @@
             "value" : "Mostrar consola"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "콘솔 보기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa konsol"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -580,18 +601,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示主控台"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visa konsol"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "콘솔 보기"
           }
         }
       }
@@ -605,6 +614,18 @@
             "value" : "completado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "완료"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "klar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -615,18 +636,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已完成"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "klar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "완료"
           }
         }
       }
@@ -640,6 +649,18 @@
             "value" : "falló"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실패"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "misslyckades"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -650,18 +671,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "失敗"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "misslyckades"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "실패"
           }
         }
       }
@@ -675,16 +684,16 @@
             "value" : "recargando"
           }
         },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "uppdaterar"
-          }
-        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "새로 고치는 중"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uppdaterar"
           }
         }
       }
@@ -698,6 +707,18 @@
             "value" : "en ejecución"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실행 중"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "körs"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -708,18 +729,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "執行中"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "körs"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "실행 중"
           }
         }
       }
@@ -733,13 +742,7 @@
             "value" : "— %@"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— %@"
-          }
-        },
-        "zh-Hant" : {
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "— %@"
@@ -751,7 +754,13 @@
             "value" : "— %@"
           }
         },
-        "ko" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "— %@"
@@ -768,6 +777,18 @@
             "value" : "— completado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 완료"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": klar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -778,18 +799,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "— 已完成"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ": klar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— 완료"
           }
         }
       }
@@ -803,6 +812,18 @@
             "value" : "— falló · código de salida %d"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 실패 · 종료 코드 %d"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ": misslyckades · avslutningskod %d"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -813,18 +834,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "— 失敗 · 結束代碼 %d"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : ": misslyckades · avslutningskod %d"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "— 실패 · 종료 코드 %d"
           }
         }
       }

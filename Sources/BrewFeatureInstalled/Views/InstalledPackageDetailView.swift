@@ -20,6 +20,7 @@ struct InstalledPackageDetailRoot: View {
     @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
     @Environment(\.installedDependentsRepository) private var installedDependentsRepository
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+    @Environment(\.aiEngine) private var aiEngine
 
     var body: some View {
         InstalledPackageDetailView(
@@ -28,6 +29,7 @@ struct InstalledPackageDetailRoot: View {
             mutatingCommandFactory: mutatingCommandFactory,
             installedDependentsRepository: installedDependentsRepository,
             installedInventoryReading: installedPackagesRepository,
+            aiEngine: aiEngine,
             onSelectInstalledPackage: onSelectInstalledPackage,
         )
     }
@@ -45,6 +47,7 @@ struct InstalledPackageDetailView: View {
         mutatingCommandFactory: any BrewMutatingCommandFactory,
         installedDependentsRepository: any InstalledDependentsRepository,
         installedInventoryReading: any InstalledInventoryReading,
+        aiEngine: any AIEngineProtocol = PreviewSupport.aiEngine,
         onSelectInstalledPackage: @escaping (InstalledBrewPackage.ID) -> Void = { _ in },
     ) {
         self.package = package
@@ -56,6 +59,7 @@ struct InstalledPackageDetailView: View {
                 commandFactory: mutatingCommandFactory,
                 installedDependentsRepository: installedDependentsRepository,
                 installedInventoryReading: installedInventoryReading,
+                aiEngine: aiEngine,
             ),
         )
     }
@@ -240,6 +244,29 @@ private struct InstalledPackageDetailUpgradeChrome: View {
                         comment: "Command block summary above brew upgrade",
                     ),
                 )
+
+                if let impact = viewModel.upgradeImpact {
+                    AIUpgradeImpactCard(impact: impact) { cmd in
+                        viewModel.runVerificationCommand(cmd)
+                    }
+                } else {
+                    Button {
+                        Task { await viewModel.analyzeUpgradeImpact() }
+                    } label: {
+                        if viewModel.isAnalyzingUpgradeImpact {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Label {
+                                Text("Assess Upgrade Impact with AI", bundle: #bundle, comment: "Installed detail: assess upgrade impact")
+                            } icon: {
+                                Image(systemName: "sparkles")
+                            }
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(viewModel.isAnalyzingUpgradeImpact)
+                }
 
                 if let title = upgrade.primaryButtonTitle {
                     HStack(spacing: BrewSpacing.sm) {

@@ -50,6 +50,12 @@ struct InstalledPackagesContent: Equatable {
 final class InstalledViewModel {
     @ObservationIgnored private let repository: any InstalledInventoryObserving
     @ObservationIgnored private let preferences: any InstalledPreferences
+    @ObservationIgnored private let aiEngine: (any AIEngineProtocol)?
+    @ObservationIgnored private let commandFactory: (any BrewMutatingCommandFactory)?
+    @ObservationIgnored private let brewCommandCenter: (any BrewCommandCenter)?
+
+    private(set) var housekeepingReport: AIHousekeepingReport?
+    private(set) var isAnalyzingHousekeeping: Bool = false
 
     private var preSearchSelectedPackageID: InstalledBrewPackage.ID?
     private var searchPreviewSelectedPackageID: InstalledBrewPackage.ID?
@@ -149,10 +155,40 @@ final class InstalledViewModel {
         repository: any InstalledInventoryObserving,
         preferences: any InstalledPreferences,
         initialSelection: InstalledBrewPackage.ID? = nil,
+        aiEngine: (any AIEngineProtocol)? = nil,
+        commandFactory: (any BrewMutatingCommandFactory)? = nil,
+        brewCommandCenter: (any BrewCommandCenter)? = nil,
     ) {
         self.repository = repository
         self.preferences = preferences
         selectedPackageID = initialSelection
+        self.aiEngine = aiEngine
+        self.commandFactory = commandFactory
+        self.brewCommandCenter = brewCommandCenter
+    }
+
+    func analyzeHousekeeping() async {
+        guard let aiEngine else { return }
+        isAnalyzingHousekeeping = true
+        let allPackages = allRows
+        let candidateLeaves = allPackages.filter { !$0.installedOnRequest }.map(\.name)
+        let leaves = candidateLeaves.isEmpty ? allPackages.prefix(5).map(\.name) : candidateLeaves
+        let report = await aiEngine.assessHousekeeping(installedPackages: allPackages, leaves: Array(leaves))
+        self.housekeepingReport = report
+        self.isAnalyzingHousekeeping = false
+    }
+
+    func runHousekeepingCommand(_ command: String) {
+        guard let commandFactory, let brewCommandCenter else { return }
+        let parts = command.split(separator: " ").map(String.init)
+        guard parts.first == "brew" else { return }
+        let args = Array(parts.dropFirst())
+        guard !args.isEmpty else { return }
+        let brewCommand = commandFactory.doctorFixCommand(arguments: args)
+        let operationID = BrewOperationID(maintenanceToken: command, displayCommand: command)
+        Task {
+            try? await brewCommandCenter.perform(brewCommand, id: operationID)
+        }
     }
 
     func load() async {

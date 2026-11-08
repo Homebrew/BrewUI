@@ -516,6 +516,27 @@ struct DiscoverViewModelTests {
         #expect(String(localized: viewModel.subtitleText) == "1 package matches “git”")
     }
 
+    @Test @MainActor func `search with semantic toggle formats semantic match subtitle`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: []),
+            ),
+            catalogueRepository: StubCatalogueRepository(
+                searchResults: [cataloguePackage(name: "git")],
+            ),
+            installedRepository: installedRepo(),
+            aiEngine: StubAIEngine(),
+        )
+
+        viewModel.isSemanticSearch = true
+        viewModel.query = "version control"
+        await viewModel.search()
+
+        #expect(viewModel.isSemanticSearch)
+        #expect(String(localized: viewModel.paneHeading) == "Results")
+        #expect(String(localized: viewModel.subtitleText) == "1 AI semantic match for “version control”")
+    }
+
     @Test @MainActor func `search subtitle reports no matches`() async {
         let viewModel = DiscoverViewModel(
             discoverPackagesRepository: StubDiscoverPackagesRepository(
@@ -588,6 +609,39 @@ struct DiscoverViewModelTests {
         )
         await viewModel.load()
         return viewModel
+    }
+
+    @Test func `switching curated collection loads curated packages`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: [])
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+            aiEngine: PreviewSupport.aiEngine
+        )
+        await viewModel.load()
+        #expect(viewModel.selectedCollection == .trending)
+
+        await viewModel.selectCollection(.cliTools)
+        #expect(viewModel.selectedCollection == .cliTools)
+        #expect(viewModel.activeState.isLoaded)
+        #expect(viewModel.visiblePackages.count > 0)
+    }
+
+    @Test func `selecting for you collection loads ai recommendations`() async {
+        let viewModel = DiscoverViewModel(
+            discoverPackagesRepository: StubDiscoverPackagesRepository(
+                snapshot: DiscoverTopPackagesSnapshot(topFormulae: [], topCasks: [])
+            ),
+            catalogueRepository: StubCatalogueRepository(),
+            installedRepository: installedRepo(),
+            aiEngine: PreviewSupport.aiEngine
+        )
+        await viewModel.selectCollection(.forYou)
+        #expect(viewModel.selectedCollection == .forYou)
+        #expect(viewModel.activeState.isLoaded)
+        #expect(!viewModel.visiblePackages.isEmpty)
     }
 }
 

@@ -10,6 +10,18 @@
             "value" : "%@, solución disponible"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, 수정 가능"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, åtgärd finns"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -21,20 +33,11 @@
             "state" : "translated",
             "value" : "%@，可修復"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, åtgärd finns"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, 수정 가능"
-          }
         }
       }
+    },
+    "AI Explain & Remedy" : {
+      "comment" : "Doctor detail: trigger AI remediation analysis"
     },
     "Copy brew doctor output" : {
       "comment" : "VoiceOver: Doctor copy-output button",
@@ -43,6 +46,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiar salida de brew doctor"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor 출력 복사"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera utdata från brew doctor"
           }
         },
         "zh-Hans" : {
@@ -56,18 +71,6 @@
             "state" : "translated",
             "value" : "拷貝 brew doctor 輸出"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopiera utdata från brew doctor"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brew doctor 출력 복사"
-          }
         }
       }
     },
@@ -78,6 +81,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiar salida"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출력 복사"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera utdata"
           }
         },
         "zh-Hans" : {
@@ -91,18 +106,6 @@
             "state" : "translated",
             "value" : "拷貝輸出"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopiera utdata"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "출력 복사"
-          }
         }
       }
     },
@@ -113,6 +116,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peligro"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위험"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fara"
           }
         },
         "zh-Hans" : {
@@ -126,18 +141,6 @@
             "state" : "translated",
             "value" : "危險"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fara"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "위험"
-          }
         }
       }
     },
@@ -148,6 +151,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Doctor"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "진단"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnostik"
           }
         },
         "zh-Hans" : {
@@ -161,18 +176,6 @@
             "state" : "translated",
             "value" : "診斷"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diagnostik"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "진단"
-          }
         }
       }
     },
@@ -183,6 +186,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Problemas de Doctor"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "진단 문제"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnostikproblem"
           }
         },
         "zh-Hans" : {
@@ -196,18 +211,6 @@
             "state" : "translated",
             "value" : "診斷問題"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diagnostikproblem"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "진단 문제"
-          }
         }
       }
     },
@@ -218,6 +221,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Solución disponible"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "수정 가능"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åtgärd finns"
           }
         },
         "zh-Hans" : {
@@ -231,18 +246,6 @@
             "state" : "translated",
             "value" : "可修復"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Åtgärd finns"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "수정 가능"
-          }
         }
       }
     },
@@ -253,6 +256,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Última revisión"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "마지막 확인"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senast kontrollerad"
           }
         },
         "zh-Hans" : {
@@ -266,18 +281,6 @@
             "state" : "translated",
             "value" : "上次檢查"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Senast kontrollerad"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "마지막 확인"
-          }
         }
       }
     },
@@ -288,6 +291,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Requiere permisos de administrador · se ejecuta en Terminal"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "관리자 권한 필요 · 터미널에서 실행"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kräver administratörsbehörighet · körs i Terminal"
           }
         },
         "zh-Hans" : {
@@ -301,18 +316,6 @@
             "state" : "translated",
             "value" : "需要管理者權限 · 在「終端機」中執行"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kräver administratörsbehörighet · körs i Terminal"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "관리자 권한 필요 · 터미널에서 실행"
-          }
         }
       }
     },
@@ -323,6 +326,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se encontraron problemas"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "문제 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga problem hittades"
           }
         },
         "zh-Hans" : {
@@ -336,18 +351,6 @@
             "state" : "translated",
             "value" : "未發現問題"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga problem hittades"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "문제 없음"
-          }
         }
       }
     },
@@ -358,6 +361,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sin selección"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택 항목 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget valt"
           }
         },
         "zh-Hans" : {
@@ -371,18 +386,6 @@
             "state" : "translated",
             "value" : "尚未選取"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inget valt"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "선택 항목 없음"
-          }
         }
       }
     },
@@ -393,6 +396,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salida sin formato"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "원본 출력"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rå utdata"
           }
         },
         "zh-Hans" : {
@@ -406,18 +421,6 @@
             "state" : "translated",
             "value" : "原始輸出"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rå utdata"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "원본 출력"
-          }
         }
       }
     },
@@ -428,6 +431,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Revisando de nuevo"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 확인 중"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollerar igen"
           }
         },
         "zh-Hans" : {
@@ -441,18 +456,6 @@
             "state" : "translated",
             "value" : "正在重新檢查"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontrollerar igen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 확인 중"
-          }
         }
       }
     },
@@ -463,6 +466,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Revisando de nuevo…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 확인 중…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollerar igen…"
           }
         },
         "zh-Hans" : {
@@ -476,18 +491,6 @@
             "state" : "translated",
             "value" : "正在重新檢查…"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontrollerar igen…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 확인 중…"
-          }
         }
       }
     },
@@ -498,6 +501,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ejecutar de nuevo"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 실행"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör igen"
           }
         },
         "zh-Hans" : {
@@ -511,18 +526,6 @@
             "state" : "translated",
             "value" : "再次執行"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kör igen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 실행"
-          }
         }
       }
     },
@@ -533,6 +536,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aplicar solución"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "수정 실행"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör åtgärd"
           }
         },
         "zh-Hans" : {
@@ -546,18 +561,6 @@
             "state" : "translated",
             "value" : "執行修復"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kör åtgärd"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "수정 실행"
-          }
         }
       }
     },
@@ -568,6 +571,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ejecuta el diagnóstico y luego elige un problema para ver los detalles y las soluciones."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "진단을 실행한 후 문제를 선택하면 세부사항과 수정 방법이 표시됩니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör diagnostik och välj sedan ett problem för att se information och åtgärder."
           }
         },
         "zh-Hans" : {
@@ -581,18 +596,6 @@
             "state" : "translated",
             "value" : "執行診斷後，選擇問題以查看詳細資訊與修復方式。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kör diagnostik och välj sedan ett problem för att se information och åtgärder."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "진단을 실행한 후 문제를 선택하면 세부사항과 수정 방법이 표시됩니다."
-          }
         }
       }
     },
@@ -603,6 +606,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ejecutando brew doctor…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor 실행 중…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kör brew doctor…"
           }
         },
         "zh-Hans" : {
@@ -616,18 +631,6 @@
             "state" : "translated",
             "value" : "正在執行 brew doctor…"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kör brew doctor…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brew doctor 실행 중…"
-          }
         }
       }
     },
@@ -638,6 +641,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gravedad: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "심각도: %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allvarlighetsgrad: %@"
           }
         },
         "zh-Hans" : {
@@ -651,18 +666,6 @@
             "state" : "translated",
             "value" : "嚴重程度：%@"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allvarlighetsgrad: %@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "심각도: %@"
-          }
         }
       }
     },
@@ -673,6 +676,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se pudo completar la revisión"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인을 완료할 수 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollen kunde inte slutföras"
           }
         },
         "zh-Hans" : {
@@ -686,18 +701,6 @@
             "state" : "translated",
             "value" : "無法完成檢查"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontrollen kunde inte slutföras"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "확인을 완료할 수 없음"
-          }
         }
       }
     },
@@ -708,6 +711,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No compatible"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원되지 않음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stöds inte"
           }
         },
         "zh-Hans" : {
@@ -721,18 +736,6 @@
             "state" : "translated",
             "value" : "不支援"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stöds inte"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지원되지 않음"
-          }
         }
       }
     },
@@ -745,6 +748,18 @@
             "value" : "Advertencia"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경고"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varning"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -755,18 +770,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "警告"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varning"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "경고"
           }
         }
       }
@@ -780,6 +783,18 @@
             "value" : "Se encontraron advertencias"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경고 발견"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Varningar hittades"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -790,18 +805,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "發現警告"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varningar hittades"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "경고 발견"
           }
         }
       }
@@ -815,6 +818,18 @@
             "value" : "Tu sistema está listo para usar Homebrew"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시스템에서 Homebrew를 사용할 준비가 되었습니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ditt system är redo för Homebrew"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -825,18 +840,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "系統已準備好使用 Homebrew"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ditt system är redo för Homebrew"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "시스템에서 Homebrew를 사용할 준비가 되었습니다"
           }
         }
       }
@@ -850,6 +853,18 @@
             "value" : "brew doctor no encontró problemas."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor에서 문제를 찾지 못했습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew doctor hittade inga problem."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -860,18 +875,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "brew doctor 未發現問題。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brew doctor hittade inga problem."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brew doctor에서 문제를 찾지 못했습니다."
           }
         }
       }

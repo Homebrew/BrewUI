@@ -40,4 +40,10 @@ public extension EnvironmentValues {
     @Entry var configRepository: any ConfigRepository = UnimplementedConfigRepository()
 
     @Entry var servicesRepository: any ServicesRepository = UnimplementedServicesRepository()
+
+    /// On-device AI engine for diagnostic and command failure explanations.
+    @Entry var aiEngine: any AIEngineProtocol = UnimplementedAIEngine()
+
+    /// Local model manager and hardware fit advisor.
+    @Entry var aiModelManager: any AIModelManaging = UnimplementedAIModelManager()
 }

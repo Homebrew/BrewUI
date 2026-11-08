@@ -15,6 +15,7 @@ public struct InstalledUpgradesRoot: View {
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
     @Environment(\.navigateToInstalledPackage) private var navigateToInstalledPackage
+    @Environment(\.aiEngine) private var aiEngine
 
     private let mode: Mode
     @Binding private var deepLinkSelection: InstalledBrewPackage.ID?
@@ -34,6 +35,7 @@ public struct InstalledUpgradesRoot: View {
             brewCommandCenter: brewCommandCenter,
             mutatingCommandFactory: mutatingCommandFactory,
             navigateToInstalledPackage: navigateToInstalledPackage,
+            aiEngine: aiEngine,
             mode: mode,
             deepLinkSelection: $deepLinkSelection,
         )
@@ -59,6 +61,7 @@ struct InstalledUpgradesContainer: View {
         brewCommandCenter: any BrewCommandCenter,
         mutatingCommandFactory: any BrewMutatingCommandFactory,
         navigateToInstalledPackage: @escaping @MainActor (InstalledBrewPackage.ID) -> Void,
+        aiEngine: any AIEngineProtocol,
         mode: InstalledUpgradesRoot.Mode,
         deepLinkSelection: Binding<InstalledBrewPackage.ID?>,
     ) {
@@ -67,6 +70,9 @@ struct InstalledUpgradesContainer: View {
                 repository: installedPackagesRepository,
                 preferences: installedPreferences,
                 initialSelection: deepLinkSelection.wrappedValue,
+                aiEngine: aiEngine,
+                commandFactory: mutatingCommandFactory,
+                brewCommandCenter: brewCommandCenter,
             ),
         )
         _upgrades = State(

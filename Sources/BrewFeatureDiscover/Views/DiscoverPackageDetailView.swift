@@ -29,6 +29,10 @@ struct DiscoverPackageDetailView: View {
     let package: DiscoveryBrewPackage
     @State private var viewModel: DiscoverPackageDetailViewModel
 
+    @Environment(\.aiEngine) private var aiEngine
+    @Environment(\.catalogueRepository) private var catalogueRepository
+    @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+
     init(
         package: DiscoveryBrewPackage,
         installedRepository: any InstalledPackageStatusReading,
@@ -49,8 +53,32 @@ struct DiscoverPackageDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.xl) {
-                DiscoverPackageDetailHeroSection(viewModel: viewModel)
+                DiscoverPackageDetailHeroSection(
+                    viewModel: viewModel,
+                    onCompare: {
+                        if let firstAlt = viewModel.alternatives.first {
+                            Task {
+                                await viewModel.compare(with: firstAlt.name, using: aiEngine, catalogue: catalogueRepository)
+                            }
+                        }
+                    }
+                )
                 DiscoverPackageDetailMetadataSection(viewModel: viewModel)
+                if !viewModel.alternatives.isEmpty {
+                    PackageDetailSectionDivider()
+                    PackageAlternativesShelf(
+                        alternatives: viewModel.alternatives,
+                        onSelectPackage: nil,
+                        onComparePackage: { targetName in
+                            Task {
+                                await viewModel.compare(with: targetName, using: aiEngine, catalogue: catalogueRepository)
+                            }
+                        },
+                        onInstallPackage: { command in
+                            viewModel.installAlternative(command: command)
+                        }
+                    )
+                }
                 PackageDetailSectionDivider()
                 DiscoverPackageDetailDependenciesSection(viewModel: viewModel)
                 if viewModel.showsInstallSection {
@@ -68,14 +96,35 @@ struct DiscoverPackageDetailView: View {
         .task(id: package) {
             await viewModel.observeInstallUpdates()
         }
+        .task(id: package.id) {
+            await viewModel.loadAlternatives(using: aiEngine)
+        }
         .onChange(of: package) { _, newPackage in
             viewModel.update(package: newPackage)
+        }
+        .sheet(isPresented: $viewModel.isShowingComparison) {
+            if let comparison = viewModel.comparisonResult, let target = viewModel.comparisonTarget {
+                PackageComparisonSheet(
+                    comparison: comparison,
+                    packageA: viewModel.discoveryPackage.package,
+                    packageB: target,
+                    isPackageAInstalled: installedPackagesRepository.isInstalled(viewModel.discoveryPackage.id),
+                    isPackageBInstalled: installedPackagesRepository.isInstalled(target.id),
+                    onInstall: { pkg in
+                        viewModel.installPackage(pkg)
+                    },
+                    onDismiss: {
+                        viewModel.dismissComparison()
+                    }
+                )
+            }
         }
     }
 }
 
 private struct DiscoverPackageDetailHeroSection: View {
     let viewModel: DiscoverPackageDetailViewModel
+    var onCompare: (() -> Void)? = nil
 
     var body: some View {
         let chrome = viewModel.packageKindChrome
@@ -92,7 +141,7 @@ private struct DiscoverPackageDetailHeroSection: View {
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 HStack(spacing: BrewSpacing.sm) {
-                    Text(viewModel.name)
+                    Text(verbatim: viewModel.name)
                         .font(.brewTitle1)
                         .foregroundStyle(Color.brewTextPrimary)
 
@@ -113,10 +162,26 @@ private struct DiscoverPackageDetailHeroSection: View {
                     if viewModel.installedStatusLabel != nil {
                         DiscoverInstalledBadge()
                     }
+
+                    Spacer()
+
+                    if let onCompare, !viewModel.alternatives.isEmpty {
+                        Button {
+                            onCompare()
+                        } label: {
+                            HStack(spacing: BrewSpacing.xxs) {
+                                Image(systemName: "arrow.left.and.right")
+                                Text("Compare", bundle: #bundle, comment: "Compare package button in hero section")
+                            }
+                            .font(.brewCaption)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
                 }
 
                 if let description = viewModel.packageDescription {
-                    Text(description)
+                    Text(verbatim: description)
                         .font(.brewSubheadline)
                         .foregroundStyle(Color.brewTextSecondary)
                 }

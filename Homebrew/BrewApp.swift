@@ -42,6 +42,8 @@ struct BrewApp: App {
     private let servicesRepository: BrewServicesRepository
     private let crashReportController: CrashReportController
     private let selfUpgradeCoordinator: SelfUpgradeCoordinator
+    private let aiModelManager: BrewAIModelManager
+    private let aiEngine: LocalAIEngine
     #if DEBUG
         private let selfUpgradeDebugControl = SelfUpgradeDebugControl()
     #endif
@@ -105,6 +107,10 @@ struct BrewApp: App {
             selfUpgradeCoordinator = Self.makeSelfUpgradeCoordinator(selfUpgradeContext)
         #endif
 
+        let aiModelMgr = BrewAIModelManager()
+        aiModelManager = aiModelMgr
+        aiEngine = LocalAIEngine(modelManager: aiModelMgr)
+
         NSWindow.allowsAutomaticWindowTabbing = false
     }
 
@@ -123,6 +129,8 @@ struct BrewApp: App {
                 .environment(\.configRepository, configRepository)
                 .environment(\.servicesRepository, servicesRepository)
                 .environment(\.selfUpgradeCoordinator, selfUpgradeCoordinator)
+                .environment(\.aiModelManager, aiModelManager)
+                .environment(\.aiEngine, aiEngine)
                 .task {
                     async let catalogue: Void = catalogueCache.prepare()
                     async let analytics: Void = discoverAnalyticsCache.prepare()

@@ -11,6 +11,7 @@ public struct DiscoverColumnsRoot: View {
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
     @Environment(\.catalogueRepository) private var catalogueRepository
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
+    @Environment(\.aiEngine) private var aiEngine
 
     public init() {}
 
@@ -19,6 +20,7 @@ public struct DiscoverColumnsRoot: View {
             discoverPackagesRepository: discoverPackagesRepository,
             catalogueRepository: catalogueRepository,
             installedRepository: installedPackagesRepository,
+            aiEngine: aiEngine,
         )
     }
 }
@@ -30,12 +32,15 @@ struct DiscoverColumns: View {
         discoverPackagesRepository: any DiscoverPackagesRepository,
         catalogueRepository: any CatalogueRepository,
         installedRepository: any InstalledPackageStatusReading,
+        aiEngine: any AIEngineProtocol = PreviewSupport.aiEngine,
     ) {
         _viewModel = State(
             initialValue: DiscoverViewModel(
                 discoverPackagesRepository: discoverPackagesRepository,
                 catalogueRepository: catalogueRepository,
                 installedRepository: installedRepository,
+                installedInventory: installedRepository as? any InstalledInventoryObserving,
+                aiEngine: aiEngine,
             ),
         )
     }

@@ -10,6 +10,18 @@
             "value" : "%@\n\nHasta que esto funcione, la app no puede saber si hay algo que actualizar."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@\n\n확인에 성공해야 앱에서 업그레이드가 필요한 항목이 있는지 알 수 있습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@\n\nInnan detta lyckas kan appen inte avgöra om något behöver uppgraderas."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -20,18 +32,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@\n\n這項檢查成功完成後，App 才能判斷是否有套件需要升級。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@\n\nInnan detta lyckas kan appen inte avgöra om något behöver uppgraderas."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@\n\n확인에 성공해야 앱에서 업그레이드가 필요한 항목이 있는지 알 수 있습니다."
           }
         }
       }
@@ -45,6 +45,18 @@
             "value" : "%@ (enlazado)"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (링크됨)"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (länkad)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -55,18 +67,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@（已連結）"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ (länkad)"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ (링크됨)"
           }
         }
       }
@@ -80,6 +80,18 @@
             "value" : "%@ — la última revisión falló"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — 마지막 확인 실패"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: senaste kontrollen misslyckades"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -90,18 +102,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ — 上次檢查失敗"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@: senaste kontrollen misslyckades"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ — 마지막 확인 실패"
           }
         }
       }
@@ -115,6 +115,18 @@
             "value" : "%@, no instalado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, 설치되지 않음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, inte installerad"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -125,18 +137,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@，尚未安裝"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, inte installerad"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, 설치되지 않음"
           }
         }
       }
@@ -150,6 +150,18 @@
             "value" : "Los filtros actuales ocultan %lld paquetes desactualizados."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 필터로 구버전 패키지 %lld개가 숨겨져 있습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld inaktuella paket döljs av aktuella filter."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -161,18 +173,6 @@
             "state" : "translated",
             "value" : "目前的篩選條件隱藏了 %lld 個可升級套件。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld inaktuella paket döljs av aktuella filter."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "현재 필터로 구버전 패키지 %lld개가 숨겨져 있습니다."
-          }
         }
       }
     },
@@ -183,6 +183,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld paquetes"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 %lld개"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paket"
           }
         },
         "zh-Hans" : {
@@ -208,18 +220,6 @@
               }
             }
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지 %lld개"
-          }
         }
       }
     },
@@ -238,6 +238,18 @@
             "value" : "Los %1$lld paquetes de arriba dependen de %2$@. Desinstálalos primero."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위의 패키지 %1$lld개가 %2$@에 의존합니다. 먼저 해당 패키지를 제거하세요."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paket ovan är beroende av %@. Avinstallera dem först."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -248,18 +260,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上方 %lld 個套件依賴 %@。請先解除安裝這些套件。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld paket ovan är beroende av %@. Avinstallera dem först."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "위의 패키지 %1$lld개가 %2$@에 의존합니다. 먼저 해당 패키지를 제거하세요."
           }
         }
       }
@@ -273,6 +273,18 @@
             "value" : "%lld paquetes se pueden actualizar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 %lld개를 업그레이드할 수 있습니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld paket kan uppgraderas"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -283,18 +295,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 個套件可升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld paket kan uppgraderas"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지 %lld개를 업그레이드할 수 있습니다"
           }
         }
       }
@@ -308,6 +308,18 @@
             "value" : "%lld actualizaciones disponibles"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 %lld개 사용 가능"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld uppgraderingar tillgängliga"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -318,18 +330,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 項升級可用"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld uppgraderingar tillgängliga"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드 %lld개 사용 가능"
           }
         }
       }
@@ -343,6 +343,18 @@
             "value" : "Los filtros actuales ocultan 1 paquete desactualizado."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "현재 필터로 구버전 패키지 1개가 숨겨져 있습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 inaktuellt paket döljs av aktuella filter."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -353,18 +365,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目前的篩選條件隱藏了 1 個可升級套件。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 inaktuellt paket döljs av aktuella filter."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "현재 필터로 구버전 패키지 1개가 숨겨져 있습니다."
           }
         }
       }
@@ -378,6 +378,18 @@
             "value" : "1 paquete"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 1개"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -388,18 +400,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 個套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지 1개"
           }
         }
       }
@@ -413,6 +413,18 @@
             "value" : "El paquete de arriba depende de %@. Desinstálalo primero."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위의 패키지 1개가 %@에 의존합니다. 먼저 해당 패키지를 제거하세요."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket ovan är beroende av %@. Avinstallera det först."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -423,18 +435,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "上方 1 個套件依賴 %@。請先解除安裝該套件。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 paket ovan är beroende av %@. Avinstallera det först."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "위의 패키지 1개가 %@에 의존합니다. 먼저 해당 패키지를 제거하세요."
           }
         }
       }
@@ -448,6 +448,18 @@
             "value" : "1 paquete se puede actualizar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 1개를 업그레이드할 수 있습니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 paket kan uppgraderas"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -459,20 +471,11 @@
             "state" : "translated",
             "value" : "1 個套件可升級"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "1 paket kan uppgraderas"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지 1개를 업그레이드할 수 있습니다"
-          }
         }
       }
+    },
+    "AI Housekeeping" : {
+      "comment" : "Installed tab: AI storage & housekeeping advisor"
     },
     "All" : {
       "comment" : "Scope picker: every package kind",
@@ -481,6 +484,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todos"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "전체"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla"
           }
         },
         "zh-Hans" : {
@@ -493,18 +508,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alla"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "전체"
           }
         }
       }
@@ -518,6 +521,18 @@
             "value" : "Los %lld paquetes instalados están actualizados."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 패키지 %lld개가 모두 최신 버전입니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alla %lld installerade paket är uppdaterade."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -528,18 +543,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝的 %lld 個套件皆為最新版本。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alla %lld installerade paket är uppdaterade."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치된 패키지 %lld개가 모두 최신 버전입니다."
           }
         }
       }
@@ -553,6 +556,18 @@
             "value" : "Como dependencia"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존성으로 설치"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Som beroende"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -564,20 +579,11 @@
             "state" : "translated",
             "value" : "作為相依套件安裝"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Som beroende"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "의존성으로 설치"
-          }
         }
       }
+    },
+    "Assess Upgrade Impact with AI" : {
+      "comment" : "Installed detail: assess upgrade impact"
     },
     "Available upgrades" : {
       "comment" : "Upgrades tab heading",
@@ -586,6 +592,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Actualizaciones disponibles"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용 가능한 업그레이드"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillgängliga uppgraderingar"
           }
         },
         "zh-Hans" : {
@@ -599,18 +617,6 @@
             "state" : "translated",
             "value" : "可用升級"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tillgängliga uppgraderingar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "사용 가능한 업그레이드"
-          }
         }
       }
     },
@@ -621,6 +627,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bloqueado por paquetes instalados que lo usan. Actívalo para ver por qué."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 패키지에 의존하는 패키지가 설치되어 있어 제거할 수 없습니다. 활성화하면 이유를 볼 수 있습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blockeras av installerade paket som är beroende av detta paket. Aktivera om du vill se varför."
           }
         },
         "zh-Hans" : {
@@ -634,18 +652,6 @@
             "state" : "translated",
             "value" : "其他已安裝套件依賴此套件，無法解除安裝。啟用以查看原因。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blockeras av installerade paket som är beroende av detta paket. Aktivera om du vill se varför."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 패키지에 의존하는 패키지가 설치되어 있어 제거할 수 없습니다. 활성화하면 이유를 볼 수 있습니다."
-          }
         }
       }
     },
@@ -656,6 +662,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aún no se puede desinstalar."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 제거할 수 없습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kan inte avinstalleras ännu."
           }
         },
         "zh-Hans" : {
@@ -669,18 +687,6 @@
             "state" : "translated",
             "value" : "目前無法解除安裝。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kan inte avinstalleras ännu."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "아직 제거할 수 없습니다."
-          }
         }
       }
     },
@@ -693,6 +699,18 @@
             "value" : "Cancelar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "취소"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avbryt"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -703,18 +721,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avbryt"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "취소"
           }
         }
       }
@@ -728,13 +734,7 @@
             "value" : "Casks"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cask"
-          }
-        },
-        "zh-Hant" : {
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cask"
@@ -746,7 +746,13 @@
             "value" : "Caskar"
           }
         },
-        "ko" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cask"
@@ -763,6 +769,18 @@
             "value" : "Buscar actualizaciones de nuevo"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 다시 확인"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök efter uppgraderingar igen"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -773,18 +791,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再次檢查可用升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sök efter uppgraderingar igen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드 다시 확인"
           }
         }
       }
@@ -798,6 +804,18 @@
             "value" : "Selecciona un paquete de la lista para ver los detalles."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목록에서 패키지를 선택하면 세부사항이 표시됩니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Välj ett paket i listan för att se information."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -808,18 +826,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "從列表中選擇套件以查看詳細資訊。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Välj ett paket i listan för att se information."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "목록에서 패키지를 선택하면 세부사항이 표시됩니다."
           }
         }
       }
@@ -833,6 +839,18 @@
             "value" : "No se pudieron buscar actualizaciones"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드를 확인할 수 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kunde inte söka efter uppgraderingar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -843,18 +861,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法檢查可用升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kunde inte söka efter uppgraderingar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드를 확인할 수 없음"
           }
         }
       }
@@ -868,6 +874,18 @@
             "value" : "OBSOLETO"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원 중단됨"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FÖRÅLDRAD"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -878,18 +896,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已棄用"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "FÖRÅLDRAD"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지원 중단됨"
           }
         }
       }
@@ -903,6 +909,18 @@
             "value" : "Dependencias"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존성"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beroenden"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -913,18 +931,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "相依套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Beroenden"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "의존성"
           }
         }
       }
@@ -938,6 +944,18 @@
             "value" : "Usado por"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존하는 패키지"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Används av"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -948,18 +966,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "依賴此套件的套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Används av"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "의존하는 패키지"
           }
         }
       }
@@ -973,6 +979,18 @@
             "value" : "Obsoleto"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원 중단됨"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Föråldrad"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -983,18 +1001,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已棄用"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Föråldrad"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "지원 중단됨"
           }
         }
       }
@@ -1008,6 +1014,18 @@
             "value" : "Detalles"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세부사항"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Information"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1018,18 +1036,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "詳細資訊"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Information"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "세부사항"
           }
         }
       }
@@ -1043,6 +1049,18 @@
             "value" : "Todo está actualizado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모두 최신 버전입니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allt är uppdaterat"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1053,18 +1071,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "所有套件皆為最新版本"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allt är uppdaterat"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모두 최신 버전입니다"
           }
         }
       }
@@ -1078,13 +1084,7 @@
             "value" : "Fórmulas"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Formula"
-          }
-        },
-        "zh-Hant" : {
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Formula"
@@ -1096,7 +1096,13 @@
             "value" : "Formler"
           }
         },
-        "ko" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formula"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Formula"
@@ -1113,6 +1119,18 @@
             "value" : "Ocultar dependencias"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존성 가리기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dölj beroenden"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1123,18 +1141,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "隱藏依賴套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dölj beroenden"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "의존성 가리기"
           }
         }
       }
@@ -1148,6 +1154,18 @@
             "value" : "Sitio web"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "홈페이지"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hemsida"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1158,18 +1176,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "首頁"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hemsida"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "홈페이지"
           }
         }
       }
@@ -1183,6 +1189,18 @@
             "value" : "Motivo de instalación"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치 이유"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installationsorsak"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1193,18 +1211,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安裝原因"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installationsorsak"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치 이유"
           }
         }
       }
@@ -1218,6 +1224,18 @@
             "value" : "Instalado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치됨"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1228,18 +1246,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installerad"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치됨"
           }
         }
       }
@@ -1253,6 +1259,18 @@
             "value" : "Instalado y actualizado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치됨, 최신 버전"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad och uppdaterad"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1263,18 +1281,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝且為最新版本"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installerad och uppdaterad"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치됨, 최신 버전"
           }
         }
       }
@@ -1288,6 +1294,18 @@
             "value" : "Fecha de instalación"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치 날짜"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerad den"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1298,18 +1316,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "安裝日期"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installerad den"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치 날짜"
           }
         }
       }
@@ -1323,6 +1329,18 @@
             "value" : "Paquetes instalados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 패키지"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerade paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1333,18 +1351,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝的套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installerade paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치된 패키지"
           }
         }
       }
@@ -1358,13 +1364,7 @@
             "value" : "Keg-only"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keg-only（不链接到前缀目录）"
-          }
-        },
-        "zh-Hant" : {
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keg-only"
@@ -1376,7 +1376,13 @@
             "value" : "Endast keg"
           }
         },
-        "ko" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keg-only（不链接到前缀目录）"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keg-only"
@@ -1393,6 +1399,18 @@
             "value" : "Última versión"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최신 버전"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Senaste versionen"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1403,18 +1421,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最新版本"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Senaste versionen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "최신 버전"
           }
         }
       }
@@ -1434,6 +1440,18 @@
             "value" : "Licencia"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이선스"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licens"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1444,18 +1462,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "授權條款"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licens"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "라이선스"
           }
         }
       }
@@ -1469,6 +1475,18 @@
             "value" : "Cargando paquetes…"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 불러오는 중…"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Läser in paket…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1479,18 +1497,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在載入套件…"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Läser in paket…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지 불러오는 중…"
           }
         }
       }
@@ -1504,6 +1510,18 @@
             "value" : "Sin dependencias."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의존성이 없습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga beroenden."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1514,18 +1532,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有相依套件。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga beroenden."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "의존성이 없습니다."
           }
         }
       }
@@ -1539,6 +1545,18 @@
             "value" : "Ningún paquete lo usa."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 패키지에 의존하는 패키지가 없습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga paket är beroende av detta."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1549,18 +1567,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有套件依賴此套件。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga paket är beroende av detta."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 패키지에 의존하는 패키지가 없습니다."
           }
         }
       }
@@ -1574,6 +1580,18 @@
             "value" : "No hay paquetes instalados para revisar."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "확인할 설치된 패키지가 없습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga installerade paket att kontrollera."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1584,18 +1602,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有已安裝的套件可供檢查。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga installerade paket att kontrollera."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "확인할 설치된 패키지가 없습니다."
           }
         }
       }
@@ -1609,6 +1615,18 @@
             "value" : "Sin coincidencias en %lld paquetes desactualizados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전 패키지 %lld개 중 일치 항목 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga träffar bland %lld inaktuella paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1619,18 +1637,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 個可升級套件中沒有符合項目"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga träffar bland %lld inaktuella paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전 패키지 %lld개 중 일치 항목 없음"
           }
         }
       }
@@ -1644,6 +1650,18 @@
             "value" : "Sin coincidencias en 1 paquete desactualizado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전 패키지 1개 중 일치 항목 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga träffar bland 1 inaktuellt paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1654,18 +1672,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1 個可升級套件中沒有符合項目"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga träffar bland 1 inaktuellt paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전 패키지 1개 중 일치 항목 없음"
           }
         }
       }
@@ -1679,6 +1685,18 @@
             "value" : "Ninguna actualización coincide"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일치하는 업그레이드 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga matchande uppgraderingar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1689,18 +1707,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有符合條件的升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga matchande uppgraderingar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "일치하는 업그레이드 없음"
           }
         }
       }
@@ -1714,6 +1720,18 @@
             "value" : "Sin selección"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선택 항목 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget valt"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1724,18 +1742,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚未選取"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inget valt"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "선택 항목 없음"
           }
         }
       }
@@ -1749,6 +1755,18 @@
             "value" : "Ninguno."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "없음."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inga."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1759,18 +1777,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inga."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "없음."
           }
         }
       }
@@ -1784,6 +1790,18 @@
             "value" : "Nada que actualizar aquí"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "여기에는 업그레이드할 항목이 없습니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inget att uppgradera här"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1794,18 +1812,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這裡沒有需要升級的套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inget att uppgradera här"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "여기에는 업그레이드할 항목이 없습니다"
           }
         }
       }
@@ -1819,6 +1825,18 @@
             "value" : "DESACTUALIZADO"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INAKTUELL"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1829,18 +1847,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "INAKTUELL"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전"
           }
         }
       }
@@ -1854,6 +1860,18 @@
             "value" : "Abrir paquete instalado %@"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 패키지 %@ 열기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Öppna installerat paket %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1864,18 +1882,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打開已安裝的套件 %@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Öppna installerat paket %@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치된 패키지 %@ 열기"
           }
         }
       }
@@ -1889,6 +1895,18 @@
             "value" : "Paquetes desactualizados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전 패키지"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktuella paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1899,18 +1917,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可升級套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inaktuella paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전 패키지"
           }
         }
       }
@@ -1924,6 +1930,18 @@
             "value" : "Fijado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고정됨"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fäst"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1934,18 +1952,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已鎖定版本"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fäst"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "고정됨"
           }
         }
       }
@@ -1959,6 +1965,18 @@
             "value" : "Instalado desde binario precompilado — %@"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottle에서 설치 — %@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installerades från binärpaket: %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1969,18 +1987,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "以 bottle 安裝 — %@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Installerades från binärpaket: %@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bottle에서 설치 — %@"
           }
         }
       }
@@ -1994,6 +2000,18 @@
             "value" : "Refrescar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로 고침"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppdatera"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2004,18 +2022,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新整理"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppdatera"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "새로 고침"
           }
         }
       }
@@ -2029,6 +2035,18 @@
             "value" : "Tipo"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "범위"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omfattning"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2039,18 +2057,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "範圍"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Omfattning"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "범위"
           }
         }
       }
@@ -2064,6 +2070,18 @@
             "value" : "Buscar paquetes instalados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 패키지 검색"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök bland installerade paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2074,18 +2092,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "搜尋已安裝的套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sök bland installerade paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치된 패키지 검색"
           }
         }
       }
@@ -2099,6 +2105,18 @@
             "value" : "Buscar actualizaciones"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 검색"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sök bland uppgraderingar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2109,18 +2127,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "搜尋可用升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sök bland uppgraderingar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드 검색"
           }
         }
       }
@@ -2134,6 +2140,18 @@
             "value" : "Mostrar todas las actualizaciones"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 업그레이드 보기"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visa alla uppgraderingar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2144,18 +2162,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示所有升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visa alla uppgraderingar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모든 업그레이드 보기"
           }
         }
       }
@@ -2175,6 +2181,18 @@
             "value" : "Mostrando %1$lld de %2$lld actualizaciones"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 %2$lld개 중 %1$lld개 표시"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visar %lld av %lld uppgraderingar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2185,18 +2203,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示 %lld 項升級（共 %lld 項）"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Visar %lld av %lld uppgraderingar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드 %2$lld개 중 %1$lld개 표시"
           }
         }
       }
@@ -2210,6 +2216,18 @@
             "value" : "Algo salió mal al cargar los paquetes."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지를 불러오는 중 문제가 발생했습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paket lästes in."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2220,18 +2238,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "載入套件時發生錯誤。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Något gick fel när paket lästes in."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지를 불러오는 중 문제가 발생했습니다."
           }
         }
       }
@@ -2245,6 +2251,18 @@
             "value" : "Algo salió mal al desinstalar este paquete."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 패키지를 제거하는 중 문제가 발생했습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paketet avinstallerades."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2255,18 +2273,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "解除安裝此套件時發生錯誤。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Något gick fel när paketet avinstallerades."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 패키지를 제거하는 중 문제가 발생했습니다."
           }
         }
       }
@@ -2280,6 +2286,18 @@
             "value" : "Algo salió mal al actualizar este paquete."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 패키지를 업그레이드하는 중 문제가 발생했습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Något gick fel när paketet uppgraderades."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2290,18 +2308,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級此套件時發生錯誤。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Något gick fel när paketet uppgraderades."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 패키지를 업그레이드하는 중 문제가 발생했습니다."
           }
         }
       }
@@ -2315,6 +2321,18 @@
             "value" : "Origen"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "출처"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Källa"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2325,18 +2343,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "來源"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Källa"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "출처"
           }
         }
       }
@@ -2350,6 +2356,18 @@
             "value" : "Esto desinstalará %@ de esta Mac con Homebrew."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew를 사용해 이 Mac에서 %@ 패키지를 제거합니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detta tar bort %@ från den här Macen med Homebrew."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2360,18 +2378,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這會透過 Homebrew 從這部 Mac 解除安裝 %@。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detta tar bort %@ från den här Macen med Homebrew."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew를 사용해 이 Mac에서 %@ 패키지를 제거합니다."
           }
         }
       }
@@ -2385,6 +2391,18 @@
             "value" : "Reintentar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 시도"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Försök igen"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2395,18 +2413,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再試一次"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Försök igen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다시 시도"
           }
         }
       }
@@ -2420,6 +2426,18 @@
             "value" : "Desinstalar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "제거"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallera"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2430,18 +2448,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "解除安裝"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avinstallera"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "제거"
           }
         }
       }
@@ -2455,6 +2461,18 @@
             "value" : "¿Desinstalar %@?"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 패키지를 제거할까요?"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallera %@?"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2465,18 +2483,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "要解除安裝 %@ 嗎？"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avinstallera %@?"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ 패키지를 제거할까요?"
           }
         }
       }
@@ -2490,6 +2496,18 @@
             "value" : "Desinstalando"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "제거 중"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallerar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2500,18 +2518,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在解除安裝"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avinstallerar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "제거 중"
           }
         }
       }
@@ -2525,6 +2531,18 @@
             "value" : "Desinstala este paquete de esta Mac"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 Mac에서 패키지를 제거합니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avinstallerar paketet från den här Macen"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2535,18 +2553,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "從這部 Mac 解除安裝此套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avinstallerar paketet från den här Macen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 Mac에서 패키지를 제거합니다"
           }
         }
       }
@@ -2560,6 +2566,18 @@
             "value" : "Actualizar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2570,18 +2588,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgradera"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드"
           }
         }
       }
@@ -2595,6 +2601,18 @@
             "value" : "Actualizar todo (%lld)"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모두 업그레이드 (%lld)"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera alla (%lld)"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2605,18 +2623,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "全部升級（%lld）"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgradera alla (%lld)"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모두 업그레이드 (%lld)"
           }
         }
       }
@@ -2630,6 +2636,18 @@
             "value" : "Actualizar los %lld paquetes"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패키지 %lld개 모두 업그레이드"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera alla %lld paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2640,18 +2658,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級全部 %lld 個套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgradera alla %lld paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "패키지 %lld개 모두 업그레이드"
           }
         }
       }
@@ -2665,6 +2671,18 @@
             "value" : "Actualización disponible"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 가능"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradering tillgänglig"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2675,18 +2693,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有升級可用"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgradering tillgänglig"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드 가능"
           }
         }
       }
@@ -2700,6 +2706,18 @@
             "value" : "Actualización a %@ disponible"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@(으)로 업그레이드 가능"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradering till %@ är tillgänglig"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2710,18 +2728,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可升級至 %@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgradering till %@ är tillgänglig"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@(으)로 업그레이드 가능"
           }
         }
       }
@@ -2735,6 +2741,18 @@
             "value" : "Actualizar a %@"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@(으)로 업그레이드"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgradera till %@"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2745,18 +2763,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級至 %@"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgradera till %@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@(으)로 업그레이드"
           }
         }
       }
@@ -2770,6 +2776,18 @@
             "value" : "Actualiza todos los casks desactualizados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전 Cask를 모두 업그레이드합니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar alla inaktuella caskar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2780,18 +2798,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級所有可升級的 Cask"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderar alla inaktuella caskar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전 Cask를 모두 업그레이드합니다"
           }
         }
       }
@@ -2805,6 +2811,18 @@
             "value" : "Actualiza todas las fórmulas desactualizadas"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전 Formula를 모두 업그레이드합니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar alla inaktuella formler"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2815,18 +2833,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級所有可升級的 Formula"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderar alla inaktuella formler"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전 Formula를 모두 업그레이드합니다"
           }
         }
       }
@@ -2840,6 +2846,18 @@
             "value" : "Actualiza todos los paquetes desactualizados"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구버전 패키지를 모두 업그레이드합니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar alla inaktuella paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2850,18 +2868,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級所有可升級的套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderar alla inaktuella paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "구버전 패키지를 모두 업그레이드합니다"
           }
         }
       }
@@ -2875,6 +2881,18 @@
             "value" : "Actualiza los %lld paquetes que coinciden con tu búsqueda"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "검색과 일치하는 패키지 %lld개를 업그레이드합니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar de %lld paket som matchar din sökning"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2885,18 +2903,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級符合搜尋條件的 %lld 個套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderar de %lld paket som matchar din sökning"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "검색과 일치하는 패키지 %lld개를 업그레이드합니다"
           }
         }
       }
@@ -2910,6 +2916,18 @@
             "value" : "Actualiza el paquete que coincide con tu búsqueda"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "검색과 일치하는 패키지 1개를 업그레이드합니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar det paket som matchar din sökning"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2920,18 +2938,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "升級符合搜尋條件的 1 個套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderar det paket som matchar din sökning"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "검색과 일치하는 패키지 1개를 업그레이드합니다"
           }
         }
       }
@@ -2945,6 +2951,18 @@
             "value" : "Actualiza este paquete a la última versión disponible"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 패키지를 사용 가능한 최신 버전으로 업그레이드합니다"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar paketet till den senaste tillgängliga versionen"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2955,18 +2973,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "將此套件升級至最新可用版本"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderar paketet till den senaste tillgängliga versionen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 패키지를 사용 가능한 최신 버전으로 업그레이드합니다"
           }
         }
       }
@@ -2980,6 +2986,18 @@
             "value" : "Actualizando"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 중"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppgraderar"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2990,18 +3008,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在升級"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppgraderar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "업그레이드 중"
           }
         }
       }
@@ -3015,6 +3021,18 @@
             "value" : "Sí"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3025,18 +3043,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "是"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ja"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "예"
           }
         }
       }
@@ -3050,6 +3056,18 @@
             "value" : "Tu paquete instalado está actualizado."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 패키지가 최신 버전입니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det installerade paketet är uppdaterat."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3060,18 +3078,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已安裝的套件為最新版本。"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Det installerade paketet är uppdaterat."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설치된 패키지가 최신 버전입니다."
           }
         }
       }
@@ -3085,6 +3091,18 @@
             "value" : "Tus paquetes"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 패키지"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dina paket"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3095,18 +3113,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "你的套件"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dina paket"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "내 패키지"
           }
         }
       }
@@ -3120,6 +3126,18 @@
             "value" : "impide desinstalar"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "제거 차단 중"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "blockerar avinstallation"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3130,18 +3148,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "導致無法解除安裝"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "blockerar avinstallation"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "제거 차단 중"
           }
         }
       }

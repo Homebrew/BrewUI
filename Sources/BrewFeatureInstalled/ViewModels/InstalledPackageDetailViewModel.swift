@@ -16,9 +16,13 @@ final class InstalledPackageDetailViewModel {
     private let commandFactory: any BrewMutatingCommandFactory
     private let installedDependentsRepository: any InstalledDependentsRepository
     private let installedInventoryReading: any InstalledInventoryReading
+    private let aiEngine: (any AIEngineProtocol)?
     private var mutationTask: Task<Void, Never>?
     @ObservationIgnored private let operationObserver: PackageOperationObserver
     private var operationPhase: BrewOperationPhase = .idle
+
+    private(set) var upgradeImpact: AIUpgradeImpact?
+    private(set) var isAnalyzingUpgradeImpact: Bool = false
 
     private(set) var package: InstalledBrewPackage
     /// Inline message when upgrade fails; cleared when a new upgrade starts.
@@ -114,13 +118,41 @@ final class InstalledPackageDetailViewModel {
         commandFactory: any BrewMutatingCommandFactory,
         installedDependentsRepository: any InstalledDependentsRepository,
         installedInventoryReading: any InstalledInventoryReading,
+        aiEngine: (any AIEngineProtocol)? = nil,
     ) {
         self.package = package
         self.brewCommandCenter = brewCommandCenter
         self.commandFactory = commandFactory
         self.installedDependentsRepository = installedDependentsRepository
         self.installedInventoryReading = installedInventoryReading
+        self.aiEngine = aiEngine
         operationObserver = PackageOperationObserver(commandCenter: brewCommandCenter)
+    }
+
+    func analyzeUpgradeImpact() async {
+        guard let aiEngine, showsUpgradeAvailable else { return }
+        isAnalyzingUpgradeImpact = true
+        let targetVersion = package.latestVersion.isEmpty ? "latest" : package.latestVersion
+        let dependents = dependentRelationships.map(\.displayName)
+        let impact = await aiEngine.assessUpgradeImpact(
+            package: package,
+            targetVersion: targetVersion,
+            dependents: dependents
+        )
+        self.upgradeImpact = impact
+        self.isAnalyzingUpgradeImpact = false
+    }
+
+    func runVerificationCommand(_ command: String) {
+        let parts = command.split(separator: " ").map(String.init)
+        guard parts.first == "brew" else { return }
+        let args = Array(parts.dropFirst())
+        guard !args.isEmpty else { return }
+        let brewCommand = commandFactory.doctorFixCommand(arguments: args)
+        let operationID = BrewOperationID(maintenanceToken: command, displayCommand: command)
+        Task {
+            try? await brewCommandCenter.perform(brewCommand, id: operationID)
+        }
     }
 
     /// Refreshes both dependency and dependent relationships for the current package.

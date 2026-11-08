@@ -22,9 +22,11 @@ struct MainWindowView: View {
     @Environment(\.servicesRepository) private var servicesRepository
     @Environment(\.brewCommandCenter) private var brewCommandCenter
     @Environment(\.mutatingCommandFactory) private var mutatingCommandFactory
+    @Environment(\.aiEngine) private var aiEngine
 
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
+    @State private var isPresentingAIBrewfile: Bool = false
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
@@ -55,6 +57,15 @@ struct MainWindowView: View {
             \.saveBrewfile,
             SaveBrewfileAction(commandCenter: brewCommandCenter, commandFactory: mutatingCommandFactory),
         )
+        .focusedSceneValue(
+            \.generateBrewfile,
+            GenerateBrewfileAction { isPresentingAIBrewfile = true },
+        )
+        .sheet(isPresented: $isPresentingAIBrewfile) {
+            AIBrewfileGeneratorSheet(aiEngine: aiEngine) { cmd in
+                runBrewCommand(cmd)
+            }
+        }
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
@@ -163,6 +174,18 @@ struct MainWindowView: View {
                 .navigationSubtitle(String(localized: "Homebrew environment & diagnostics", bundle: #bundle, comment: "Window subtitle, Configuration"))
         }
     }
+
+    private func runBrewCommand(_ command: String) {
+        let parts = command.split(separator: " ").map(String.init)
+        guard parts.first == "brew" else { return }
+        let args = Array(parts.dropFirst())
+        guard !args.isEmpty else { return }
+        let brewCommand = mutatingCommandFactory.doctorFixCommand(arguments: args)
+        let id = BrewOperationID(maintenanceToken: command, displayCommand: command)
+        Task {
+            try? await brewCommandCenter.perform(brewCommand, id: id)
+        }
+    }
 }
 
 #if DEBUG
@@ -176,5 +199,7 @@ struct MainWindowView: View {
             .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
             .environment(\.configRepository, PreviewSupport.makeConfigRepository())
             .environment(\.servicesRepository, PreviewSupport.makeServicesRepository())
+            .environment(\.aiEngine, PreviewSupport.aiEngine)
+            .environment(\.aiModelManager, PreviewSupport.makeAIModelManager())
     }
 #endif

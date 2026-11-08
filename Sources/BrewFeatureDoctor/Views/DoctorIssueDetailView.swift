@@ -50,12 +50,48 @@ struct DoctorIssueDetailView: View {
     // MARK: - Hero
 
     private var heroSection: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.sm) {
-            DoctorSeverityBadge(severity: item.severity)
-            Text(item.title)
-                .font(.brewTitle2)
-                .foregroundStyle(Color.brewTextPrimary)
-                .textSelection(.enabled)
+        VStack(alignment: .leading, spacing: BrewSpacing.md) {
+            VStack(alignment: .leading, spacing: BrewSpacing.sm) {
+                DoctorSeverityBadge(severity: item.severity)
+                Text(item.title)
+                    .font(.brewTitle2)
+                    .foregroundStyle(Color.brewTextPrimary)
+                    .textSelection(.enabled)
+            }
+
+            aiRemediationAffordance
+        }
+    }
+
+    @ViewBuilder
+    private var aiRemediationAffordance: some View {
+        if let analysis = viewModel.aiAnalysis(for: item) {
+            AIDiagnosticView(
+                result: analysis,
+                isCommandRunning: { viewModel.isAICommandRunning($0) },
+                errorMessage: { viewModel.aiCommandError($0) },
+                onRunCommand: { command in
+                    viewModel.runAICommand(command)
+                }
+            )
+        } else {
+            Button {
+                Task {
+                    await viewModel.analyzeWithAI(for: item)
+                }
+            } label: {
+                HStack(spacing: BrewSpacing.xs) {
+                    if viewModel.isAnalyzingAI {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Image(systemName: "sparkles")
+                    }
+                    Text("AI Explain & Remedy", bundle: #bundle, comment: "Doctor detail: trigger AI remediation analysis")
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .disabled(viewModel.isAnalyzingAI)
         }
     }
 

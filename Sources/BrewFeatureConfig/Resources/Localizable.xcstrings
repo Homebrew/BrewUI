@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Active Engine:" : {
+      "comment" : "Config: active AI engine label"
+    },
     "Build settings" : {
       "comment" : "Configuration card title: HOMEBREW_* build options",
       "localizations" : {
@@ -8,6 +11,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajustes de compilación"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "빌드 설정"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bygginställningar"
           }
         },
         "zh-Hans" : {
@@ -21,18 +36,6 @@
             "state" : "translated",
             "value" : "建置設定"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bygginställningar"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "빌드 설정"
-          }
         }
       }
     },
@@ -43,6 +46,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Copiar reporte"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보고서 복사"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopiera rapport"
           }
         },
         "zh-Hans" : {
@@ -56,18 +71,6 @@
             "state" : "translated",
             "value" : "拷貝報告"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopiera rapport"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "보고서 복사"
-          }
         }
       }
     },
@@ -78,6 +81,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se pudo localizar el ejecutable de brew. Instala Homebrew y luego refresca."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew 실행 파일을 찾을 수 없습니다. Homebrew를 설치한 후 새로 고치세요."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det gick inte att hitta det körbara programmet brew. Installera Homebrew och uppdatera sedan."
           }
         },
         "zh-Hans" : {
@@ -91,18 +106,6 @@
             "state" : "translated",
             "value" : "找不到 brew 執行檔。請安裝 Homebrew，然後重新整理。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Det gick inte att hitta det körbara programmet brew. Installera Homebrew och uppdatera sedan."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "brew 실행 파일을 찾을 수 없습니다. Homebrew를 설치한 후 새로 고치세요."
-          }
         }
       }
     },
@@ -113,6 +116,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No se pudo leer la configuración de Homebrew."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 구성을 읽을 수 없습니다."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det gick inte att läsa konfigurationen för Homebrew."
           }
         },
         "zh-Hans" : {
@@ -126,18 +141,6 @@
             "state" : "translated",
             "value" : "無法讀取 Homebrew 配置。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Det gick inte att läsa konfigurationen för Homebrew."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 구성을 읽을 수 없습니다."
-          }
         }
       }
     },
@@ -150,13 +153,7 @@
             "value" : "Homebrew"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew"
-          }
-        },
-        "zh-Hant" : {
+        "ko" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -168,7 +165,13 @@
             "value" : "Homebrew"
           }
         },
-        "ko" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew"
@@ -185,6 +188,18 @@
             "value" : "Homebrew no encontrado"
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew를 찾을 수 없음"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew hittades inte"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -195,18 +210,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "找不到 Homebrew"
-          }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew hittades inte"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew를 찾을 수 없음"
           }
         }
       }
@@ -220,6 +223,18 @@
             "value" : "Los ajustes de Homebrew se leen de los archivos brew.env. Se ignoran los perfiles de shell y las variables exportadas. Pon tus ajustes de usuario en ~/.homebrew/brew.env y vuelve a abrir BrewUI."
           }
         },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 설정은 brew.env 파일에서 읽습니다. 셸 프로파일과 내보낸 변수는 무시됩니다. 사용자 설정을 ~/.homebrew/brew.env에 넣은 다음 BrewUI를 다시 실행하세요."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inställningar för Homebrew läses från filerna brew.env. Skalprofiler och exporterade variabler ignoreras. Lägg användarinställningar i ~/.homebrew/brew.env och starta sedan om BrewUI."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -231,20 +246,20 @@
             "state" : "translated",
             "value" : "Homebrew 設定從 brew.env 檔案讀取，不讀取 Shell 設定檔或匯出的環境變數。請將使用者設定寫入 ~/.homebrew/brew.env，然後重新開啟 BrewUI。"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inställningar för Homebrew läses från filerna brew.env. Skalprofiler och exporterade variabler ignoreras. Lägg användarinställningar i ~/.homebrew/brew.env och starta sedan om BrewUI."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Homebrew 설정은 brew.env 파일에서 읽습니다. 셸 프로파일과 내보낸 변수는 무시됩니다. 사용자 설정을 ~/.homebrew/brew.env에 넣은 다음 BrewUI를 다시 실행하세요."
-          }
         }
       }
+    },
+    "Host RAM:" : {
+      "comment" : "Config: host memory label"
+    },
+    "Local Expert Engine" : {
+      "comment" : "Config: default built-in AI engine name"
+    },
+    "Manage Models…" : {
+      "comment" : "Config: open model manager sheet"
+    },
+    "On-Device AI Engine & Models" : {
+      "comment" : "Config card title: AI diagnostics"
     },
     "Refresh" : {
       "comment" : "Configuration header: re-run brew config",
@@ -253,6 +268,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Refrescar"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새로 고침"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uppdatera"
           }
         },
         "zh-Hans" : {
@@ -266,18 +293,6 @@
             "state" : "translated",
             "value" : "重新整理"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uppdatera"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "새로 고침"
-          }
         }
       }
     },
@@ -288,6 +303,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sistema"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시스템"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System"
           }
         },
         "zh-Hans" : {
@@ -301,20 +328,11 @@
             "state" : "translated",
             "value" : "系統"
           }
-        },
-        "sv" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "시스템"
-          }
         }
       }
+    },
+    "• Zero telemetry, runs 100% locally" : {
+      "comment" : "Config: local privacy note"
     }
   },
   "version" : "1.0"

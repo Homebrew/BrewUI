@@ -25,6 +25,7 @@ final class DoctorViewModel {
     @ObservationIgnored private let doctorRepository: any DoctorRepository
     @ObservationIgnored private let brewCommandCenter: any BrewCommandCenter
     @ObservationIgnored private let commandFactory: any BrewMutatingCommandFactory
+    @ObservationIgnored private let aiEngine: (any AIEngineProtocol)?
     @ObservationIgnored private var fixTasks: [String: Task<Void, Never>] = [:]
 
     /// The selected issue id — read each row in `listRowBackground`, so this stays O(1) and never
@@ -34,15 +35,21 @@ final class DoctorViewModel {
     private(set) var runningFixTokens: Set<String> = []
     /// Inline fix errors keyed by fix token.
     private(set) var fixErrorMessages: [String: String] = [:]
+    /// AI diagnostic analysis keyed by issue content id.
+    private(set) var aiAnalysisByIssueID: [Int: AIAnalysisResult] = [:]
+    /// Whether an AI analysis task is currently executing.
+    private(set) var isAnalyzingAI: Bool = false
 
     init(
         doctorRepository: any DoctorRepository,
         brewCommandCenter: any BrewCommandCenter,
         commandFactory: any BrewMutatingCommandFactory,
+        aiEngine: (any AIEngineProtocol)? = nil
     ) {
         self.doctorRepository = doctorRepository
         self.brewCommandCenter = brewCommandCenter
         self.commandFactory = commandFactory
+        self.aiEngine = aiEngine
     }
 
     // MARK: - Derived state (projected from the repository)
@@ -178,6 +185,93 @@ final class DoctorViewModel {
             return nil
         }
         return fixErrorMessages[token]
+    }
+
+    func aiAnalysis(for item: DoctorIssueItem) -> AIAnalysisResult? {
+        aiAnalysisByIssueID[item.id]
+    }
+
+    func analyzeWithAI(for item: DoctorIssueItem) async {
+        guard let aiEngine else { return }
+        isAnalyzingAI = true
+        defer { isAnalyzingAI = false }
+
+        let raw = item.blocks.compactMap { block -> String? in
+            switch block.content {
+            case let .prose(lines): lines.joined(separator: "\n")
+            case let .command(steps): steps.map(\.displayCommand).joined(separator: "\n")
+            case let .data(items): items.joined(separator: "\n")
+            case let .link(links): links.map(\.url.absoluteString).joined(separator: "\n")
+            }
+        }.joined(separator: "\n")
+
+        var result = await aiEngine.analyzeDoctorIssue(title: item.title, rawOutput: raw)
+
+        if let runnable = item.primaryRunnableStep?.displayCommand, !runnable.isEmpty {
+            if !result.suggestedCommands.contains(runnable) {
+                var commands = result.suggestedCommands.filter { !$0.contains("<") }
+                commands.insert(runnable, at: 0)
+                result = AIAnalysisResult(
+                    summary: result.summary,
+                    rootCause: result.rootCause,
+                    suggestedCommands: commands,
+                    modelName: result.modelName
+                )
+            }
+        }
+
+        aiAnalysisByIssueID[item.id] = result
+    }
+
+    func isAICommandRunning(_ command: String) -> Bool {
+        runningFixTokens.contains(command)
+    }
+
+    func aiCommandError(_ command: String) -> String? {
+        fixErrorMessages[command]
+    }
+
+    func runAICommand(_ command: String) {
+        let parts = command.split(separator: " ").map(String.init)
+        guard parts.first == "brew" else { return }
+        let args = Array(parts.dropFirst())
+        guard !args.isEmpty else { return }
+
+        let token = command
+        guard !runningFixTokens.contains(token) else { return }
+
+        let operationID = BrewOperationID(maintenanceToken: token, displayCommand: command)
+        let brewCommand = commandFactory.doctorFixCommand(arguments: args)
+        fixErrorMessages[token] = nil
+        runningFixTokens.insert(token)
+        fixTasks[token]?.cancel()
+        fixTasks[token] = Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer {
+                if !Task.isCancelled {
+                    fixTasks[token] = nil
+                }
+            }
+            do {
+                try await brewCommandCenter.perform(brewCommand, id: operationID)
+            } catch {
+                if error is CancellationError {
+                    runningFixTokens.remove(token)
+                    return
+                }
+                let latestPhase = await brewCommandCenter.phase(for: operationID)
+                let message: String = if case let .failed(reason) = latestPhase {
+                    BrewErrorCopy.message(for: reason)
+                } else {
+                    BrewErrorCopy.message(for: OperationFailure(catching: error))
+                }
+                fixErrorMessages[token] = message
+                runningFixTokens.remove(token)
+                return
+            }
+            runningFixTokens.remove(token)
+            await load(forceRefresh: true)
+        }
     }
 
     // MARK: - Intents
