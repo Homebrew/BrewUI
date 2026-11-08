@@ -736,7 +736,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bloqueado por dependências instaladas. Active para saber por quê."
+            "value" : "Bloqueado por dependências instaladas. Ative-o para saber por quê."
           }
         }}
     },
@@ -1016,7 +1016,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "DESCONTINUADO"
+            "value" : "OBSOLETO"
           }
         }}
     },
@@ -1136,7 +1136,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Descontinuado"
+            "value" : "Obsoleto"
           }
         }}
     },
@@ -1982,7 +1982,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nenhuma selecção"
+            "value" : "Nenhum selecionado"
           }
         }}
     },
