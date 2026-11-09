@@ -39,6 +39,12 @@
             "state" : "translated",
             "value" : "%1$@ %2$@"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ %2$@"
+          }
         }
       }
     },
@@ -85,6 +91,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld일 전"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 日前"
           }
         }
       }
@@ -133,6 +145,12 @@
             "state" : "translated",
             "value" : "%lld시간 전"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 時間前"
+          }
         }
       }
     },
@@ -180,6 +198,12 @@
             "state" : "translated",
             "value" : "%lld분 전"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 分前"
+          }
         }
       }
     },
@@ -214,6 +238,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1일 전"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 日前"
           }
         }
       }
@@ -250,6 +280,12 @@
             "state" : "translated",
             "value" : "1시간 전"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 時間前"
+          }
         }
       }
     },
@@ -284,6 +320,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1분 전"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 分前"
           }
         }
       }
@@ -320,6 +362,12 @@
             "state" : "translated",
             "value" : "복사됨"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーしました"
+          }
         }
       }
     },
@@ -354,6 +402,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "복사"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピー"
           }
         }
       }
@@ -390,6 +444,12 @@
             "state" : "translated",
             "value" : "모두 복사"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてコピー"
+          }
         }
       }
     },
@@ -424,6 +484,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew를 찾을 수 없습니다. Homebrew를 설치하거나 brew가 기본 위치에 있는지 확인하세요."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew が見つかりませんでした。インストールするか、brew がデフォルトの場所にあることを確認してください。"
           }
         }
       }
@@ -460,6 +526,12 @@
             "state" : "translated",
             "value" : "찾기"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索"
+          }
         }
       }
     },
@@ -495,6 +567,12 @@
             "state" : "translated",
             "value" : "Homebrew 명령이 실패했습니다."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew コマンドが失敗しました。"
+          }
         }
       }
     },
@@ -517,6 +595,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrew 명령은 끝났지만 서비스가 요청한 상태가 되지 않았습니다. 콘솔을 확인하고 새로 고치세요."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew の処理は終わりましたが、要求された状態にサービスが達していません。コンソールを確認して再読み込みしてください。"
           }
         }
       }
@@ -553,6 +637,12 @@
             "state" : "translated",
             "value" : "Homebrew가 앱에서 읽을 수 없는 출력을 반환했습니다."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew がアプリで読み取れない出力を返しました。"
+          }
         }
       }
     },
@@ -587,6 +677,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "새로 고침"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再読み込み"
           }
         }
       }
@@ -623,6 +719,12 @@
             "state" : "translated",
             "value" : "다시 시도"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
         }
       }
     },
@@ -657,6 +759,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "터미널 명령"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルコマンド"
           }
         }
       }
@@ -693,6 +801,12 @@
             "state" : "translated",
             "value" : "터미널 명령"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルコマンド"
+          }
         }
       }
     },
@@ -715,6 +829,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "이 서비스는 여기에서 관리할 수 없습니다. 상태를 새로 고치거나 터미널을 사용하세요."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このサービスはここでは管理できません。状態を再読み込みするか、ターミナルを使用してください。"
           }
         }
       }
@@ -750,6 +870,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "방금"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "たった今"
           }
         }
       }
