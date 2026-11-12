@@ -17,9 +17,12 @@ public struct DiscoverColumnsRoot: View {
     }
 
     @Binding private var searchQuery: String
+    private var isSearchFocused = false
 
-    public init(searchQuery: Binding<String>) {
+    /// `isSearchFocused` reports whether the window's toolbar search field holds the keyboard.
+    public init(searchQuery: Binding<String>, isSearchFocused: Bool = false) {
         _searchQuery = searchQuery
+        self.isSearchFocused = isSearchFocused
     }
 
     public static var searchPrompt: String {
@@ -32,6 +35,7 @@ public struct DiscoverColumnsRoot: View {
             catalogueRepository: catalogueRepository,
             installedRepository: installedPackagesRepository,
             searchQuery: $searchQuery,
+            isSearchFocused: isSearchFocused,
         )
     }
 }
@@ -39,12 +43,14 @@ public struct DiscoverColumnsRoot: View {
 struct DiscoverColumns: View {
     @State private var viewModel: DiscoverViewModel
     @Binding private var searchQuery: String
+    private let isSearchFocused: Bool
 
     init(
         discoverPackagesRepository: any DiscoverPackagesRepository,
         catalogueRepository: any CatalogueRepository,
         installedRepository: any InstalledPackageStatusReading,
         searchQuery: Binding<String> = .constant(""),
+        isSearchFocused: Bool = false,
     ) {
         _viewModel = State(
             initialValue: DiscoverViewModel(
@@ -54,11 +60,12 @@ struct DiscoverColumns: View {
             ),
         )
         _searchQuery = searchQuery
+        self.isSearchFocused = isSearchFocused
     }
 
     var body: some View {
         HSplitView {
-            DiscoverPackagesView(viewModel: viewModel, searchQuery: $searchQuery)
+            DiscoverPackagesView(viewModel: viewModel, searchQuery: $searchQuery, isSearchFocused: isSearchFocused)
                 .frame(
                     minWidth: BrewLayout.installedListColumnMinWidth,
                     idealWidth: BrewLayout.installedListColumnIdealWidth,

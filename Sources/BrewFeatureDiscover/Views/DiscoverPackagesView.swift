@@ -8,6 +8,9 @@ import SwiftUI
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
     @Binding var searchQuery: String
+    /// Whether the window's toolbar search field holds the keyboard. That field is AppKit and lives
+    /// outside this view, so `focus` stays nil while the user types in it.
+    var isSearchFocused = false
 
     /// The search field lives in the window toolbar now, so this view only hands the list the keyboard.
     @FocusState private var focus: SearchFocusTarget?
@@ -66,6 +69,10 @@ struct DiscoverPackagesView: View {
             return
         }
         hasFocusedList = true
+        // The user is typing in the toolbar field; leave the keyboard with them.
+        guard !isSearchFocused else {
+            return
+        }
         Task { @MainActor in
             if focus == nil {
                 focus = .list

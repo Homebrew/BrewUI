@@ -217,7 +217,7 @@ private struct FeatureColumnContent: View {
                 searchQuery: $searchQuery,
             )
         case .discover:
-            DiscoverColumnsRoot(searchQuery: $searchQuery)
+            DiscoverColumnsRoot(searchQuery: $searchQuery, isSearchFocused: isSearchFocused)
         case .services:
             ServicesRoot()
         case .doctor:
