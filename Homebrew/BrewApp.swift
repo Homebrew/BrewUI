@@ -86,7 +86,7 @@ struct BrewApp: App {
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
-        cleanupRepository = BrewCleanupRepository(commandCenter: center)
+        cleanupRepository = BrewCleanupRepository(executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
         servicesRepository = BrewServicesRepository(executionContext: executionContext, commandCenter: center)
 

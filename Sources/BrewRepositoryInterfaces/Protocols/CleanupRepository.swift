@@ -9,9 +9,9 @@ import Observation
 
 /// App-scoped, observable preview of what `brew cleanup` would remove.
 ///
-/// This is the *read* path: it runs `brew cleanup --dry-run` through the command center, so the preview
-/// appears in the console, and never removes anything itself. It is long-lived so reopening the Clean Up
-/// sheet shows the last report while it checks again. Refines `Observable` so SwiftUI tracks reads through
+/// This is the *read* path: it runs `brew cleanup --dry-run` directly, outside the console, and never
+/// removes anything itself. It is long-lived so reopening the Clean Up sheet shows the last report while it
+/// checks again. Refines `Observable` so SwiftUI tracks reads through
 /// the existential.
 @MainActor
 public protocol CleanupRepository: Observable, Sendable {

@@ -8,7 +8,7 @@ import Foundation
 /// What `brew cleanup --dry-run` says a real `brew cleanup` would remove.
 ///
 /// Actor-neutral domain value (no presentation). Homebrew owns every number in it: sizes and the total are
-/// kept as the text Homebrew printed rather than recomputed, so the report never disagrees with the console.
+/// kept as the text Homebrew printed rather than recomputed, so the report never disagrees with Homebrew.
 public struct CleanupReport: Equatable, Sendable {
     /// Whether the preview ran with `--prune=all`, so a report is never shown for the other option.
     public var pruneAll: Bool
@@ -18,22 +18,28 @@ public struct CleanupReport: Equatable, Sendable {
     public var removals: [CleanupRemoval]
     /// Homebrew's own total, e.g. `67.5MB`; `nil` when it printed none, as it does when nothing would be freed.
     public var reclaimableSpace: String?
+    /// Lines Homebrew printed in a shape the parser does not read, kept verbatim so the list is never
+    /// silently incomplete.
+    public var unreadLines: [String]
 
     public init(
         pruneAll: Bool,
         unneededFormulae: [String],
         removals: [CleanupRemoval],
         reclaimableSpace: String?,
+        unreadLines: [String] = [],
     ) {
         self.pruneAll = pruneAll
         self.unneededFormulae = unneededFormulae
         self.removals = removals
         self.reclaimableSpace = reclaimableSpace
+        self.unreadLines = unreadLines
     }
 
-    /// `true` when a real `brew cleanup` would change nothing.
+    /// `true` when a real `brew cleanup` would change nothing. An unread line may describe a removal, so
+    /// it counts too.
     public var isEmpty: Bool {
-        unneededFormulae.isEmpty && removals.isEmpty
+        unneededFormulae.isEmpty && removals.isEmpty && unreadLines.isEmpty
     }
 }
 

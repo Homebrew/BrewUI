@@ -119,6 +119,19 @@ struct CleanupViewModelTests {
         #expect(viewModel.canCleanUp)
     }
 
+    /// An unread line may be a removal the sheet cannot list, such as `Would prune 3 files from: …`.
+    @Test func `a preview with only unread lines can still be cleaned up`() {
+        let report = CleanupReport(
+            pruneAll: false,
+            unneededFormulae: [],
+            removals: [],
+            reclaimableSpace: "1MB",
+            unreadLines: ["Would prune 3 files from: /cache/api"],
+        )
+        let viewModel = Self.viewModel(repository: StubCleanupRepository(report: report))
+        #expect(viewModel.canCleanUp)
+    }
+
     @Test func `prune all changes the command shown and re-previews with it`() async {
         let repository = StubCleanupRepository(report: Self.report)
         let viewModel = Self.viewModel(repository: repository)

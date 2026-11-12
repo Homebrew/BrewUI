@@ -65,7 +65,7 @@ struct CleanupOutputParserTests {
         #expect(report.isEmpty && report.reclaimableSpace == nil)
     }
 
-    @Test func `unrecognised lines are ignored rather than misread`() {
+    @Test func `unrecognised lines are kept verbatim rather than misread`() {
         let output = """
         Warning: Skipping old-tool: most recent version 2.0 not installed
         ==> Would autoremove 1 unneeded formula:
@@ -74,6 +74,12 @@ struct CleanupOutputParserTests {
         Some future line Homebrew might print
         """
         let report = CleanupOutputParser.parse(output, pruneAll: false)
-        #expect(report == CleanupReport(pruneAll: false, unneededFormulae: ["libyaml"], removals: [], reclaimableSpace: nil))
+        #expect(report == CleanupReport(
+            pruneAll: false,
+            unneededFormulae: ["libyaml"],
+            removals: [],
+            reclaimableSpace: nil,
+            unreadLines: ["Warning: Skipping old-tool: most recent version 2.0 not installed", "Some future line Homebrew might print"],
+        ))
     }
 }

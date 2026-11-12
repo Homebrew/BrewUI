@@ -46,7 +46,7 @@ database mappings and cache snapshots stay with their infrastructure boundary.
 `BrewCommandCenter` is an actor protocol. `SerialBrewCommandCenter` serialises scheduled work,
 coalesces duplicate operation IDs and publishes phase/output streams. Mutating commands go through
 this shared pipeline; feature executors remain thin. Repositories own read/parsing work such as
-installed inventory. Doctor and Cleanup reads also use the centre so their output appears in the console.
+installed inventory. Doctor reads also use the centre so their output appears in the console.
 
 Commands run asynchronously with cancellation and preserved or streamed stdout/stderr. Production
 execution, including self-upgrades, uses `ZshBrewCommandRunner` and the
@@ -139,11 +139,12 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
   the app, so the cache is shown immediately and re-read on each visit and app activation; a failed
   refresh keeps the cached data.
 - *Tools › Clean Up…* opens a sheet that runs `brew cleanup --dry-run` each time it opens, since installs
-  and upgrades change what is stale. The cleanup repository parses only the line shapes Homebrew prints
-  and keeps Homebrew's own sizes; anything else stays in the console. The sheet's Clean Up button runs
-  `brew cleanup` with the same flags as the preview, so what runs is what was reviewed, then closes and
-  leaves the outcome to the console. Homebrew autoremoves unneeded dependencies as part of
-  `brew cleanup` unless `HOMEBREW_NO_AUTOREMOVE` is set.
+  and upgrades change what is stale. The dry run changes nothing, so it runs outside the command centre
+  and the console and never waits behind a mutation. The cleanup repository parses only the line shapes
+  Homebrew prints and keeps Homebrew's own sizes; the sheet shows any other line verbatim as a partial
+  error. The sheet's Clean Up button runs `brew cleanup` with the same flags as the preview, so what
+  runs is what was reviewed, then closes and leaves the outcome to the console. Homebrew autoremoves
+  unneeded dependencies as part of `brew cleanup` unless `HOMEBREW_NO_AUTOREMOVE` is set.
 
 ## Self-upgrades and console
 

@@ -16,14 +16,15 @@ struct BrewCleanupRepositoryTests {
     private static let preview = ["cleanup", "--dry-run"]
     private static let pruneAllPreview = ["cleanup", "--dry-run", "--prune=all"]
 
-    /// A real `SerialBrewCommandCenter` over a mock runner, so the preview takes the production submit path.
     private static func makeRepository(
         behaviors: [[String]: MockBrewCommandRunnerBehavior],
         locator: any BrewExecutableLocating = BrewExecutableLocator(overrideURL: brewURL),
     ) -> BrewCleanupRepository {
-        let context = BrewCommandExecutionContext(commandRunner: MockBrewCommandRunner(behaviors: behaviors), locator: locator)
-        let center = SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler())
-        return BrewCleanupRepository(commandCenter: center)
+        BrewCleanupRepository(commandRunner: MockBrewCommandRunner(behaviors: behaviors), locator: locator)
+    }
+
+    private static func makeRepository(runner: SequencedRunner) -> BrewCleanupRepository {
+        BrewCleanupRepository(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: brewURL))
     }
 
     private static func output(_ stdout: String, stderr: String = "", exitCode: Int32 = 0) -> MockBrewCommandRunnerBehavior {
@@ -83,10 +84,7 @@ struct BrewCleanupRepositoryTests {
             .output(CommandOutput(standardOutput: "Would remove: /cache/a.tar.gz (1MB)\n", standardError: "", terminationStatus: 0)),
             .throw(BrewCommandError.launchFailed(underlying: "spawn failed")),
         ])
-        let context = BrewCommandExecutionContext(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: Self.brewURL))
-        let repository = BrewCleanupRepository(
-            commandCenter: SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler()),
-        )
+        let repository = Self.makeRepository(runner: runner)
 
         await repository.load(pruneAll: false)
         await repository.load(pruneAll: false)
@@ -106,10 +104,7 @@ struct BrewCleanupRepositoryTests {
             terminationStatus: 0,
         ))
         let runner = SequencedRunner([success, .throw(BrewCommandError.launchFailed(underlying: "spawn failed")), recovered])
-        let context = BrewCommandExecutionContext(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: Self.brewURL))
-        let repository = BrewCleanupRepository(
-            commandCenter: SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler()),
-        )
+        let repository = Self.makeRepository(runner: runner)
 
         await repository.load(pruneAll: false)
         await repository.load(pruneAll: false)
@@ -123,10 +118,7 @@ struct BrewCleanupRepositoryTests {
             .output(CommandOutput(standardOutput: "Would remove: /cache/a.tar.gz (1MB)\n", standardError: "", terminationStatus: 0)),
             .throw(BrewCommandError.launchFailed(underlying: "spawn failed")),
         ])
-        let context = BrewCommandExecutionContext(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: Self.brewURL))
-        let repository = BrewCleanupRepository(
-            commandCenter: SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler()),
-        )
+        let repository = Self.makeRepository(runner: runner)
 
         await repository.load(pruneAll: false)
         await repository.load(pruneAll: true)
@@ -139,31 +131,13 @@ struct BrewCleanupRepositoryTests {
             .output(CommandOutput(standardOutput: "Would remove: /cache/a.tar.gz (1MB)\n", standardError: "", terminationStatus: 0)),
             .throw(BrewCommandError.launchFailed(underlying: "spawn failed")),
         ])
-        let context = BrewCommandExecutionContext(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: Self.brewURL))
-        let repository = BrewCleanupRepository(
-            commandCenter: SerialBrewCommandCenter(executionContext: context, reconciler: NoopBrewOperationReconciler()),
-        )
+        let repository = Self.makeRepository(runner: runner)
 
         await repository.load(pruneAll: false)
         await repository.load(pruneAll: false)
         await repository.load(pruneAll: true)
 
         #expect(repository.state.value == nil && repository.refreshFailure == nil)
-    }
-
-    @Test func `the preview runs in the console as a read-only maintenance job`() async {
-        let context = BrewCommandExecutionContext(
-            commandRunner: MockBrewCommandRunner(behaviors: [Self.preview: Self.output("")]),
-            locator: BrewExecutableLocator(overrideURL: Self.brewURL),
-        )
-        let center = RecordingSerialBrewCommandCenter(executionContext: context)
-        let repository = BrewCleanupRepository(commandCenter: center)
-
-        await repository.load(pruneAll: false)
-
-        let entries = await center.recordedSubmitEntries
-        #expect(entries.map(\.kind) == [.cleanupPreview])
-        #expect(entries.first?.id == .maintenance(token: "cleanupPreview", displayCommand: "brew cleanup --dry-run"))
     }
 }
 

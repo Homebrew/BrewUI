@@ -195,6 +195,9 @@ struct CleanupSheet: View {
                         .foregroundStyle(Color.brewTextSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if !report.unreadLines.isEmpty {
+                    CleanupUnreadOutput(lines: report.unreadLines)
+                }
             }
             .padding(BrewSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -254,6 +257,34 @@ private struct CleanupSection<Rows: View>: View {
                 }
             }
             rows()
+        }
+    }
+}
+
+/// Lines of the dry run the parser does not read, shown verbatim as a partial error so the list above
+/// is never silently incomplete.
+private struct CleanupUnreadOutput: View {
+    let lines: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+            Label {
+                Text(
+                    "Homebrew also printed lines this list doesn't show, so it may be incomplete:",
+                    bundle: #bundle,
+                    comment: "Clean Up sheet partial error above dry-run lines the app could not read",
+                )
+                .fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "exclamationmark.triangle")
+            }
+            .font(.brewCallout)
+            .foregroundStyle(Color.brewStatusWarning)
+            Text(verbatim: lines.joined(separator: "\n"))
+                .font(.brewCode)
+                .foregroundStyle(Color.brewTextPrimary)
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }

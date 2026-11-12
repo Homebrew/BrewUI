@@ -3,13 +3,14 @@
 //  BrewRepositories
 //
 
+import BrewCLI
 import BrewCore
 import BrewRepositoryInterfaces
 import Foundation
 import Observation
 
-/// Previews `brew cleanup` with `--dry-run`. The run goes through ``BrewCommandCenter`` so the user sees
-/// exactly what Homebrew printed in the console, and the parsed report is only a structured view of it.
+/// Previews `brew cleanup` with `--dry-run`. The dry run changes nothing, so it runs directly rather than
+/// through the command center: it stays out of the console and never queues behind a running mutation.
 @Observable
 @MainActor
 public final class BrewCleanupRepository: CleanupRepository {
@@ -17,12 +18,20 @@ public final class BrewCleanupRepository: CleanupRepository {
     public private(set) var refreshFailure: (any Error)?
     public private(set) var isRefreshing = false
 
-    @ObservationIgnored private let commandCenter: any BrewCommandCenter
+    @ObservationIgnored private let commandRunner: any BrewCommandRunning
+    @ObservationIgnored private let locator: any BrewExecutableLocating
     @ObservationIgnored private var inFlight: Task<Void, Never>?
     @ObservationIgnored private var inFlightPruneAll = false
 
-    public init(commandCenter: any BrewCommandCenter) {
-        self.commandCenter = commandCenter
+    public init(commandRunner: any BrewCommandRunning, locator: any BrewExecutableLocating) {
+        self.commandRunner = commandRunner
+        self.locator = locator
+    }
+
+    /// Takes the context rather than building its own runner, so the composition root points every
+    /// brew invocation at one place: production's isolated zsh runner, or a UI test's fake executable.
+    public convenience init(executionContext: BrewCommandExecutionContext) {
+        self.init(commandRunner: executionContext.commandRunner, locator: executionContext.locator)
     }
 
     public func load(pruneAll: Bool) async {
@@ -56,12 +65,10 @@ public final class BrewCleanupRepository: CleanupRepository {
         }
         defer { isRefreshing = false }
 
-        let command = BrewCommands.cleanupPreview(pruneAll: pruneAll)
-        // One token for both options, so the console reuses a single preview job rather than adding one per visit.
-        let id = BrewOperationID(maintenanceToken: "cleanupPreview", displayCommand: command.displayCommand)
         do {
-            let output = try await commandCenter.capture(command, id: id)
-            // Capture leaves exit codes to the caller; unlike `brew doctor`, a dry run exits 0 when it works.
+            let brew = try locator.findBrewExecutable()
+            let output = try await commandRunner.run(executableURL: brew, arguments: Self.arguments(pruneAll: pruneAll))
+            // Unlike `brew doctor`, a dry run exits 0 when it works.
             guard output.terminationStatus == 0 else {
                 throw BrewCommandError.failed(
                     exitCode: output.terminationStatus,
@@ -79,5 +86,9 @@ public final class BrewCleanupRepository: CleanupRepository {
                 state = .failed(error)
             }
         }
+    }
+
+    private static func arguments(pruneAll: Bool) -> [String] {
+        ["cleanup", "--dry-run"] + (pruneAll ? ["--prune=all"] : [])
     }
 }

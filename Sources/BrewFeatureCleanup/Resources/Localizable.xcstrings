@@ -43,6 +43,9 @@
     "Empty folder" : {
       "comment" : "Cleanup row: the path is an empty directory"
     },
+    "Homebrew also printed lines this list doesn't show, so it may be incomplete:" : {
+      "comment" : "Clean Up sheet partial error above dry-run lines the app could not read"
+    },
     "Installed only as dependencies of formulae that no longer need them." : {
       "comment" : "Cleanup section caption for brew autoremove"
     },

@@ -9,13 +9,14 @@ import Foundation
 /// Pure text→domain parser for `brew cleanup --dry-run` output. No dependencies, no isolation — unit-tested
 /// directly.
 ///
-/// Homebrew has no JSON form of this output, so the parser reads only the line shapes `cleanup.rb` prints
-/// and ignores everything else: an unfamiliar line is left to the console rather than guessed at.
+/// Homebrew has no JSON form of this output, so the parser reads only the line shapes `cleanup.rb` prints.
+/// Any other non-blank line is kept verbatim in ``CleanupReport/unreadLines`` rather than guessed at.
 public enum CleanupOutputParser {
     public static func parse(_ output: String, pruneAll: Bool) -> CleanupReport {
         var unneededFormulae: [String] = []
         var removals: [CleanupRemoval] = []
         var reclaimableSpace: String?
+        var unreadLines: [String] = []
         var isReadingFormulae = false
 
         for rawLine in ANSIParser.plainText(output).components(separatedBy: .newlines) {
@@ -34,6 +35,8 @@ public enum CleanupOutputParser {
                 removals.append(removal)
             } else if let total = total(in: line) {
                 reclaimableSpace = total
+            } else if !line.isEmpty {
+                unreadLines.append(line)
             }
         }
 
@@ -42,6 +45,7 @@ public enum CleanupOutputParser {
             unneededFormulae: unneededFormulae,
             removals: removals,
             reclaimableSpace: reclaimableSpace,
+            unreadLines: unreadLines,
         )
     }
 
