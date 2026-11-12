@@ -53,15 +53,17 @@ struct DiscoverPackagesView: View {
                 searchFocus.contentDidLoad()
             }
         }
-        .onChange(of: viewModel.query, initial: true) { _, query in
-            if searchQuery != query {
+        .onChange(of: viewModel.query, initial: true) { oldQuery, query in
+            // Sync only real changes (the initial call has old == new). Seeding either side from the
+            // other on mount races the sidebar-switch reset and ping-pongs forever, hanging the app.
+            if oldQuery != query, searchQuery != query {
                 searchQuery = query
             }
             if !query.isEmpty {
                 searchFocus.searchFieldDidPresent()
             }
         }
-        .onChange(of: searchQuery, initial: true) { _, query in
+        .onChange(of: searchQuery) { _, query in
             if viewModel.query != query {
                 viewModel.query = query
             }

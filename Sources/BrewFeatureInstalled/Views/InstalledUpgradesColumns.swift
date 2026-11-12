@@ -137,15 +137,17 @@ struct InstalledUpgradesContainer: View {
             }
             // Also this view's only read of the query, which is what subscribes it to changes:
             // the binding handed to `.searchable` is lazy and subscribes to nothing.
-            .onChange(of: activeSearchQuery.wrappedValue, initial: true) { _, query in
-                if searchQuery != query {
+            .onChange(of: activeSearchQuery.wrappedValue, initial: true) { oldQuery, query in
+                // Sync only real changes (the initial call has old == new). Seeding either side from the
+                // other on mount races the sidebar-switch reset and ping-pongs forever, hanging the app.
+                if oldQuery != query, searchQuery != query {
                     searchQuery = query
                 }
                 if !query.isEmpty {
                     searchFocus.searchFieldDidPresent()
                 }
             }
-            .onChange(of: searchQuery, initial: true) { _, query in
+            .onChange(of: searchQuery) { _, query in
                 if activeSearchQuery.wrappedValue != query {
                     activeSearchQuery.wrappedValue = query
                 }
