@@ -39,6 +39,12 @@
     "Administrator password" : {
       "comment" : "Askpass: secure password field label",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administratörslösenord"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -50,6 +56,12 @@
     "Authenticate" : {
       "comment" : "Askpass: submit the administrator password",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autentisera"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -131,6 +143,12 @@
     "Cancel" : {
       "comment" : "Askpass: cancel administrator authentication",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avbryt"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -338,6 +356,12 @@
     "Enter your password to allow this." : {
       "comment" : "Askpass: explains that the password allows the change",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ange ditt lösenord för att tillåta detta."
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -419,6 +443,12 @@
     "Homebrew wants to make changes." : {
       "comment" : "Askpass: primary message, standard macOS authorization wording",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew vill göra ändringar."
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
