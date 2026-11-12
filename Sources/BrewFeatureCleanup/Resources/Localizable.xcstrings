@@ -61,8 +61,11 @@
     "Remove all cached downloads" : {
       "comment" : "Cleanup option: add --prune=all"
     },
-    "Removes everything listed above" : {
-      "comment" : "Command block summary below the Clean Up list"
+    "Removes everything listed above, plus unreferenced cached downloads" : {
+      "comment" : "Command block summary below the Clean Up list; the dry run does not list unreferenced downloads"
+    },
+    "Retry" : {
+      "comment" : "Clean Up: re-run the preview after a re-check failed"
     },
     "This also uninstalls %@." : {
       "comment" : "Cleanup confirmation message; %@ is a comma-separated list of formula names"

@@ -139,6 +139,48 @@ struct BrewCleanupRepositoryTests {
 
         #expect(repository.state.value == nil && repository.refreshFailure == nil)
     }
+
+    @Test func `calls waiting for the other option share one preview`() async {
+        let runner = GatedRunner()
+        let repository = BrewCleanupRepository(commandRunner: runner, locator: BrewExecutableLocator(overrideURL: Self.brewURL))
+        let loads = [false, true, true].map { pruneAll in
+            Task { await repository.load(pruneAll: pruneAll) }
+        }
+        var started = runner.firstRunStarted.makeAsyncIterator()
+        _ = await started.next()
+        await runner.release()
+        for load in loads {
+            await load.value
+        }
+
+        #expect(await runner.runs == [Self.preview, Self.pruneAllPreview])
+    }
+}
+
+/// Holds the first run until released and records the arguments of every run.
+private actor GatedRunner: BrewCommandRunning {
+    private(set) var runs: [[String]] = []
+    nonisolated let firstRunStarted: AsyncStream<Void>
+    private let firstRunStartedContinuation: AsyncStream<Void>.Continuation
+    private var gate: CheckedContinuation<Void, Never>?
+
+    init() {
+        (firstRunStarted, firstRunStartedContinuation) = AsyncStream.makeStream(of: Void.self)
+    }
+
+    func run(executableURL _: URL, arguments: [String], options _: BrewRunOptions) async throws -> CommandOutput {
+        runs.append(arguments)
+        if runs.count == 1 {
+            firstRunStartedContinuation.yield()
+            await withCheckedContinuation { gate = $0 }
+        }
+        return CommandOutput(standardOutput: "", standardError: "", terminationStatus: 0)
+    }
+
+    func release() {
+        gate?.resume()
+        gate = nil
+    }
 }
 
 /// Answers each run with the next step, repeating the last one.

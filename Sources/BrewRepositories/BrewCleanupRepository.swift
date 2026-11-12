@@ -35,9 +35,13 @@ public final class BrewCleanupRepository: CleanupRepository {
     }
 
     public func load(pruneAll: Bool) async {
-        if let inFlight {
+        // Loops because another waiter may start a run while this one waits; that run is checked again.
+        while let running = inFlight {
             let sharesRun = inFlightPruneAll == pruneAll
-            await inFlight.value
+            await running.value
+            if inFlight == running {
+                inFlight = nil
+            }
             if sharesRun {
                 return
             }
@@ -51,7 +55,10 @@ public final class BrewCleanupRepository: CleanupRepository {
         inFlight = task
         inFlightPruneAll = pruneAll
         await task.value
-        inFlight = nil
+        // A waiter may already have cleared it and started the next run.
+        if inFlight == task {
+            inFlight = nil
+        }
     }
 
     private func fetch(pruneAll: Bool) async {

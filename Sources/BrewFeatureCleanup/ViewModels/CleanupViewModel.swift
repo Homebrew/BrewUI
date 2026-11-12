@@ -80,8 +80,8 @@ final class CleanupViewModel {
         commandFactory.cleanupCommand(pruneAll: pruneAll).displayCommand
     }
 
-    /// Clean Up waits for a fresh, non-empty preview made with the same option, so the run never removes
-    /// more than the sheet shows. A failed refresh leaves a stale report on screen, so it blocks too.
+    /// Clean Up waits for a fresh, non-empty preview made with the same option, so the run matches what
+    /// the sheet shows (apart from unreferenced downloads, which the dry run never lists). A failed refresh leaves a stale report on screen, so it blocks too.
     var canCleanUp: Bool {
         presentation == .removable
             && !isRefreshing

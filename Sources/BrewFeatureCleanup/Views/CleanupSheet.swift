@@ -96,7 +96,14 @@ struct CleanupSheet: View {
             onRetry: { Task { await viewModel.load() } },
             loaded: { report in
                 if report.isEmpty {
-                    cleanState
+                    VStack(spacing: BrewSpacing.md) {
+                        cleanState
+                        // A retained empty report may be re-checking or have failed to re-check.
+                        if viewModel.isRefreshing {
+                            refreshSpinner
+                        }
+                        refreshFailureNotice
+                    }
                 } else {
                     removablePreview(report: report)
                 }
@@ -130,9 +137,7 @@ struct CleanupSheet: View {
                     .font(.brewTitle3)
                     .foregroundStyle(Color.brewTextPrimary)
                 if viewModel.isRefreshing {
-                    ProgressView()
-                        .controlSize(.small)
-                        .accessibilityLabel(String(localized: "Checking again", bundle: #bundle, comment: "VoiceOver: Clean Up re-check spinner"))
+                    refreshSpinner
                 }
             }
             // Outside the scroll region and short, so it is always visible however long the list grows.
@@ -148,16 +153,34 @@ struct CleanupSheet: View {
             CommandBlockView(
                 command: viewModel.cleanupDisplayCommand,
                 summaryText: LocalizedStringResource(
-                    "Removes everything listed above",
+                    "Removes everything listed above, plus unreferenced cached downloads",
                     bundle: #bundle,
-                    comment: "Command block summary below the Clean Up list",
+                    comment: "Command block summary below the Clean Up list; the dry run does not list unreferenced downloads",
                 ),
             )
-            if let message = viewModel.refreshFailureMessage {
+            refreshFailureNotice
+        }
+    }
+
+    private var refreshSpinner: some View {
+        ProgressView()
+            .controlSize(.small)
+            .accessibilityLabel(String(localized: "Checking again", bundle: #bundle, comment: "VoiceOver: Clean Up re-check spinner"))
+    }
+
+    /// A failed re-check keeps the previous report on screen, so it needs its own retry.
+    @ViewBuilder
+    private var refreshFailureNotice: some View {
+        if let message = viewModel.refreshFailureMessage {
+            HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
                 Text(verbatim: message)
                     .font(.brewCallout)
                     .foregroundStyle(Color.brewStatusError)
                     .textSelection(.enabled)
+                Button(String(localized: "Retry", bundle: #bundle, comment: "Clean Up: re-run the preview after a re-check failed")) {
+                    Task { await viewModel.load() }
+                }
+                .disabled(viewModel.isRefreshing)
             }
         }
     }
