@@ -501,6 +501,12 @@
     "Homebrew finished, but the service hasn't reached the requested state. Check the console and refresh." : {
       "comment" : "Service action error: reported state does not match the completed command",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew är klart, men tjänsten har inte nått det begärda tillståndet. Kontrollera konsolen och uppdatera."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -699,6 +705,12 @@
     "This service can't be managed here. Refresh its status or use Terminal." : {
       "comment" : "Service action error: ownership or state prevents a safe operation",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Den här tjänsten kan inte hanteras här. Uppdatera dess status eller använd Terminal."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
