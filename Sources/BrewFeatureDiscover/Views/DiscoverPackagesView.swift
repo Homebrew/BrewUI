@@ -9,8 +9,9 @@ struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
     @Binding var searchQuery: String
 
-    @State private var searchFocus = SearchFocusArbiter()
+    /// The search field lives in the window toolbar now, so this view only hands the list the keyboard.
     @FocusState private var focus: SearchFocusTarget?
+    @State private var hasFocusedList = false
 
     @Environment(\.packageListBanner) private var packageListBanner
 
@@ -33,34 +34,14 @@ struct DiscoverPackagesView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.discoverScreen)
-        .onChange(of: searchFocus.target) { _, _ in
-            moveFocusToTarget()
-        }
-        .onChange(of: focus) { _, focus in
-            searchFocus.focusDidChange(to: focus)
-            if focus != .searchField, viewModel.query.isEmpty {
-                searchFocus.emptySearchFieldDidLoseFocus()
-            }
-        }
-        .onClickOutsideSearchField {
-            guard focus == .searchField else {
-                return
-            }
-            searchFocus.clickLandedOutsideSearchField(searchFieldIsEmpty: viewModel.query.isEmpty)
-        }
         .onChange(of: canFocusList, initial: true) { _, canFocus in
-            if canFocus {
-                searchFocus.contentDidLoad()
-            }
+            focusListOnFirstLoad(canFocus: canFocus)
         }
-        .onChange(of: viewModel.query, initial: true) { oldQuery, query in
-            // Sync only real changes (the initial call has old == new). Seeding either side from the
-            // other on mount races the sidebar-switch reset and ping-pongs forever, hanging the app.
-            if oldQuery != query, searchQuery != query {
+        // Neither sync runs on mount: seeding one side from the other then races the window's
+        // sidebar-switch reset, which searches with the previous tab's query or ping-pongs forever.
+        .onChange(of: viewModel.query) { _, query in
+            if searchQuery != query {
                 searchQuery = query
-            }
-            if !query.isEmpty {
-                searchFocus.searchFieldDidPresent()
             }
         }
         .onChange(of: searchQuery) { _, query in
@@ -78,15 +59,17 @@ struct DiscoverPackagesView: View {
         }
     }
 
-    /// Hopping off this update is load-bearing. `.searchable` reports its dismissal from inside
-    /// AppKit's layout pass, so writing the arbiter's new target straight back into `.searchFocused`
-    /// re-enters that pass, which dismisses again — Escape used to wedge the app until the stack ran out.
-    private func moveFocusToTarget() {
+    /// Only the first load claims the keyboard: later loads follow a search, and taking focus then
+    /// would pull the cursor out of the toolbar field mid-typing. The hop lets the list mount first.
+    private func focusListOnFirstLoad(canFocus: Bool) {
+        guard canFocus, !hasFocusedList else {
+            return
+        }
+        hasFocusedList = true
         Task { @MainActor in
-            guard focus != searchFocus.target else {
-                return
+            if focus == nil {
+                focus = .list
             }
-            focus = searchFocus.target
         }
     }
 

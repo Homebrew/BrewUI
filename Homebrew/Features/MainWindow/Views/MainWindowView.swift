@@ -54,9 +54,10 @@ struct MainWindowView: View {
                             columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly
                         }
                     } label: {
-                        Image(systemName: "sidebar.leading")
+                        Label(sidebarToggleTitle, systemImage: "sidebar.leading")
                     }
                     .labelStyle(.iconOnly)
+                    .help(sidebarToggleTitle)
                 }
             }
         }
@@ -128,6 +129,12 @@ struct MainWindowView: View {
     /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be
     /// sourced from the catalogue once a package-count property is exposed.
     fileprivate static let approximateCatalogueSize = 9000
+
+    private var sidebarToggleTitle: String {
+        columnVisibility == .detailOnly
+            ? String(localized: "Show Sidebar", bundle: #bundle, comment: "Toolbar button and tooltip: reveal the sidebar")
+            : String(localized: "Hide Sidebar", bundle: #bundle, comment: "Toolbar button and tooltip: collapse the sidebar")
+    }
 
     private var sidebarColumn: some View {
         MainSidebarView(selection: $selectedSidebarItem)
