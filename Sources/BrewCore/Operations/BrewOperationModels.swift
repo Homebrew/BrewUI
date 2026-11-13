@@ -24,6 +24,8 @@ public enum BrewOperationKind: String, Hashable, Sendable {
     case doctorRead
     case bundleDump
     case serviceControl
+    /// `brew cleanup`, which also autoremoves unneeded dependencies unless `HOMEBREW_NO_AUTOREMOVE` is set.
+    case cleanup
 
     /// `true` when the command's ordinary output arrives on stderr, as `brew doctor`'s does — the
     /// console would otherwise paint the whole run in the error role.

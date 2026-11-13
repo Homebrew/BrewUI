@@ -60,6 +60,16 @@ public enum AXID: Hashable, Sendable {
     case serviceRuntimeCommand
     case serviceRestartCommand
 
+    // Cleanup
+    case cleanupSheet
+    case cleanupEmptyState
+    case cleanupButton
+    case cleanupCancelButton
+    case cleanupDoneButton
+    case cleanupPruneAllToggle
+    /// A formula name or a path, whichever the row shows.
+    case cleanupRow(name: String)
+
     // Detail / Console
     case packageDetail
     case installButton
@@ -123,6 +133,13 @@ public enum AXID: Hashable, Sendable {
         case .serviceActionRestriction: "services.action.restriction"
         case .serviceRuntimeCommand: "services.command.runtime"
         case .serviceRestartCommand: "services.command.restart"
+        case .cleanupSheet: "cleanup.sheet"
+        case .cleanupEmptyState: "cleanup.empty"
+        case .cleanupButton: "cleanup.run"
+        case .cleanupCancelButton: "cleanup.cancel"
+        case .cleanupDoneButton: "cleanup.done"
+        case .cleanupPruneAllToggle: "cleanup.pruneAll"
+        case let .cleanupRow(name): "cleanup.row.\(name)"
         case .brewNotFoundState: "brew.not.found"
         case .packageDetail: "package.detail"
         case .installButton: "detail.install"

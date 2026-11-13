@@ -192,6 +192,9 @@
         }
       }
     },
+    "Clean Up…" : {
+      "comment" : "Tools menu: preview and run brew cleanup"
+    },
     "Configuration" : {
       "comment" : "Sidebar: brew config and environment",
       "localizations" : {
@@ -750,6 +753,9 @@
           }
         }
       }
+    },
+    "Tools" : {
+      "comment" : "Menu bar: occasional Homebrew maintenance commands"
     },
     "Upgrades" : {
       "comment" : "Sidebar: outdated packages",

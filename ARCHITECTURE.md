@@ -138,6 +138,13 @@ See [zsh's startup-file documentation](https://zsh.sourceforge.io/Doc/Release/Fi
 - The services repository caches the service inventory for the app lifetime. Services change outside
   the app, so the cache is shown immediately and re-read on each visit and app activation; a failed
   refresh keeps the cached data.
+- *Tools › Clean Up…* opens a sheet that runs `brew cleanup --dry-run` each time it opens, since installs
+  and upgrades change what is stale. The dry run changes nothing, so it runs outside the command centre
+  and the console and never waits behind a mutation. The cleanup repository parses only the line shapes
+  Homebrew prints and keeps Homebrew's own sizes; the sheet shows any other line verbatim as a partial
+  error. The sheet's Clean Up button runs `brew cleanup` with the same flags as the preview, so what
+  runs is what was reviewed, then closes and leaves the outcome to the console. Homebrew autoremoves
+  unneeded dependencies as part of `brew cleanup` unless `HOMEBREW_NO_AUTOREMOVE` is set.
 
 ## Self-upgrades and console
 
