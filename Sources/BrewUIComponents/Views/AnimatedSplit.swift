@@ -78,9 +78,6 @@ public struct AnimatedSplit<Top: View, Bottom: View>: NSViewRepresentable {
     }
 
     public func updateNSView(_ nsView: AnimatedSplitView, context: Context) {
-        if let topHost = context.coordinator.topHost as? NSHostingView<Top> {
-            topHost.rootView = top()
-        }
         if let bottomHost = context.coordinator.bottomHost as? NSHostingView<Bottom> {
             bottomHost.rootView = bottom()
         }
