@@ -51,6 +51,12 @@
             "value" : "管理者のパスワード"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administratörslösenord"
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -66,6 +72,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "認証"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autentisera"
           }
         },
         "ko" : {
@@ -165,6 +177,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "キャンセル"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avbryt"
           }
         },
         "ko" : {
@@ -407,6 +425,12 @@
             "value" : "許可するにはパスワードを入力してください。"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ange ditt lösenord för att tillåta detta."
+          }
+        },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
@@ -504,6 +528,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Homebrewが変更を加えようとしています。"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew vill göra ändringar."
           }
         },
         "ko" : {

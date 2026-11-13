@@ -399,6 +399,7 @@
 				"zh-Hant",
 				Base,
 				es,
+				sv,
 				ko,
 				ja,
 			);

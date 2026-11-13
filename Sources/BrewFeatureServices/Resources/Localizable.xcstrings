@@ -4,6 +4,12 @@
     "%@: %@" : {
       "comment" : "Services: action failure; %1$@ is the service name, %2$@ is the error detail",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@: %2$@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
@@ -540,6 +546,12 @@
     "Homebrew hasn't reported enough information to manage this service." : {
       "comment" : "Services: actions are unavailable when registration or load state is unknown",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew har inte rapporterat tillräckligt med information för att hantera den här tjänsten."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -720,6 +732,12 @@
     "Only services owned by the current user can be managed here." : {
       "comment" : "Services: other-user and system services remain read-only",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Här kan endast tjänster som ägs av den aktuella användaren hanteras."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -819,6 +837,12 @@
     "Restart" : {
       "comment" : "Service action: restart the selected service",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starta om"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -848,6 +872,12 @@
     "Restarts this service" : {
       "comment" : "Service restart command summary",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startar om den här tjänsten"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1087,6 +1117,12 @@
     "Start" : {
       "comment" : "Service action: start the selected service",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starta"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1151,6 +1187,12 @@
     "Starts this service" : {
       "comment" : "Service start command summary",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startar den här tjänsten"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1215,6 +1257,12 @@
     "Stop" : {
       "comment" : "Service action: stop the selected service",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppa"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1279,6 +1327,12 @@
     "Stops this service" : {
       "comment" : "Service stop command summary",
       "localizations" : {
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stoppar den här tjänsten"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
