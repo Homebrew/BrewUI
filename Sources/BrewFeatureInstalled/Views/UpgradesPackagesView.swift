@@ -47,6 +47,7 @@ struct UpgradesPackagesView: View {
                 },
             )
         }
+        .brewAlignWithWindowTitle()
         .accessibilityElement(children: .contain)
         .axid(.upgradesScreen)
         .task {
@@ -64,7 +65,7 @@ struct UpgradesPackagesView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
-        .padding(.vertical, BrewSpacing.md)
+        .padding(.bottom, BrewSpacing.md)
     }
 
     private func upgradesList(_ content: InstalledPackagesContent) -> some View {

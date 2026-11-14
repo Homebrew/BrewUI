@@ -138,13 +138,6 @@ final class DiscoverViewModel {
         )
     }
 
-    var showsSubtitleTrendIcon: Bool {
-        if case .loaded = activeState, !isSearching {
-            return true
-        }
-        return false
-    }
-
     var isSubtitleError: Bool {
         if case .failed = activeState {
             return true

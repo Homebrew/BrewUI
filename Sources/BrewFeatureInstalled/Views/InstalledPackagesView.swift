@@ -21,17 +21,12 @@ struct InstalledPackagesView: View {
         VStack(alignment: .leading, spacing: 0) {
             packageListBanner()
 
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
+            PaneHeader {
+                Text(viewModel.packageCountSubtitle)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageCountSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BrewSpacing.lg)
-            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text("Your packages", bundle: #bundle, comment: "Installed tab heading"))
             .accessibilityHeading(.h1)
 
             scopePicker
@@ -47,6 +42,7 @@ struct InstalledPackagesView: View {
                 },
             )
         }
+        .brewAlignWithWindowTitle()
         .accessibilityElement(children: .contain)
         .axid(.installedScreen)
         .task {
@@ -64,7 +60,7 @@ struct InstalledPackagesView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .padding(.horizontal, BrewSpacing.lg)
-        .padding(.bottom, BrewSpacing.sm)
+        .padding(.bottom, BrewSpacing.md)
     }
 
     private var hideDependenciesToggle: some View {

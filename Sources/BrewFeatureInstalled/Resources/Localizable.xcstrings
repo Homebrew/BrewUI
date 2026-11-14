@@ -1808,7 +1808,8 @@
             "value" : "여기에는 업그레이드할 항목이 없습니다"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "OUTDATED" : {
       "comment" : "Installed outdated status badge label",

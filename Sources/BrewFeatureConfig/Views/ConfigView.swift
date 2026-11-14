@@ -23,6 +23,7 @@ struct ConfigView: View {
             header
             content
         }
+        .brewAlignWithWindowTitle()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.configScreen)
@@ -32,18 +33,22 @@ struct ConfigView: View {
     }
 
     private var header: some View {
-        HStack(spacing: BrewSpacing.sm) {
-            Spacer(minLength: 0)
-            Button(String(localized: "Copy report", bundle: #bundle, comment: "Configuration header: copy the diagnostic report"), systemImage: "doc.on.doc") {
-                copyReport()
-            }
-            .disabled(!viewModel.canCopyReport)
-            Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
-                Task { await viewModel.refresh() }
+        PaneHeader {
+            Text("Homebrew environment & diagnostics", bundle: #bundle, comment: "Configuration content heading: Homebrew environment and diagnostic information")
+                .font(.brewTitle2)
+                .foregroundStyle(Color.brewTextPrimary)
+        } actions: {
+            HStack(spacing: BrewSpacing.sm) {
+                Button(String(localized: "Copy report", bundle: #bundle, comment: "Configuration header: copy the diagnostic report"), systemImage: "doc.on.doc") {
+                    copyReport()
+                }
+                .disabled(!viewModel.canCopyReport)
+                Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
+                    Task { await viewModel.refresh() }
+                }
             }
         }
-        .padding(.horizontal, BrewSpacing.lg)
-        .padding(.vertical, BrewSpacing.md)
+        .accessibilityHeading(.h1)
         .brewPaneContentWidth()
     }
 

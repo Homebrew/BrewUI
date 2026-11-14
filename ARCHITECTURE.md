@@ -41,6 +41,20 @@ Feature folders use `Views/` and `ViewModels/`; feature `*Item` types belong in 
 `Models/` contains domain value types and relationships only. Command JSON, API payloads,
 database mappings and cache snapshots stay with their infrastructure boundary.
 
+Window titles use the unmodified native macOS style without static instructional subtitles.
+`brewAlignWithWindowTitle()` adds a 4-point leading inset to each content pane.
+It aligns the existing 16-point content padding with the native 20-point title gutter.
+List insets, column boundaries and trailing scrollbars retain their native layout. List pages use
+`PaneHeader` for a count or current state in the existing panel-heading style, followed by filters.
+Configuration uses its environment and diagnostics heading in the same position.
+The header stacks actions below the heading when translated text does not fit alongside them. Page headings remain available
+to VoiceOver without repeating the window title visually. Bulk-upgrade and service-inventory commands
+remain expanded. Configuration guidance and the verbatim Doctor warning preamble remain in their original
+blue callouts above the data. Doctor exposes its purpose through a native toolbar tooltip.
+The status heading and actions share one minimum gap before falling back to a stacked layout.
+UI tests can request dark appearance through `BrewUITestingEnvironmentKey.darkAppearance`.
+This changes only the test process after fixture mode is confirmed, never the system preference.
+
 ## Command execution
 
 `BrewCommandCenter` is an actor protocol. `SerialBrewCommandCenter` serialises scheduled work,

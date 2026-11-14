@@ -21,19 +21,26 @@ struct DoctorView: View {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .brewAlignWithWindowTitle()
         .accessibilityElement(children: .contain)
         .axid(.doctorScreen)
+        .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Image(systemName: "info.circle")
+                    .foregroundStyle(Color.brewTextSecondary)
+                    .help(Text(checkPurpose))
+                    .accessibilityLabel(Text(checkPurpose))
+                    .axid(.doctorPurposeInfo)
+            }
+        }
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
+        PaneHeader {
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Doctor", bundle: #bundle, comment: "Doctor tab heading")
+                Text(viewModel.subtitle)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.subtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
                 if let lastCheckedAt = viewModel.lastCheckedAt {
                     LastUpdatedLabel(lead: LocalizedStringResource(
                         "Last checked",
@@ -42,13 +49,19 @@ struct DoctorView: View {
                     ), date: lastCheckedAt)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        } actions: {
             headerControls
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BrewSpacing.lg)
-        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text("Doctor", bundle: #bundle, comment: "Doctor tab heading"))
         .accessibilityHeading(.h1)
+    }
+
+    private var checkPurpose: LocalizedStringResource {
+        LocalizedStringResource(
+            "Check your Homebrew installation for problems",
+            bundle: #bundle,
+            comment: "Doctor header: tooltip explaining what the check does",
+        )
     }
 
     @ViewBuilder
@@ -64,13 +77,11 @@ struct DoctorView: View {
                     Button(String(localized: "Copy output", bundle: #bundle, comment: "Doctor header: copy raw brew doctor output")) {
                         viewModel.copyDoctorOutput()
                     }
-                    .controlSize(.small)
                     .accessibilityLabel(String(localized: "Copy brew doctor output", bundle: #bundle, comment: "VoiceOver: Doctor copy-output button"))
                 }
                 Button(String(localized: "Run Again", bundle: #bundle, comment: "Doctor header: re-run brew doctor")) {
                     Task { await viewModel.load(forceRefresh: true) }
                 }
-                .controlSize(.small)
                 .disabled(viewModel.isRefreshing)
             }
             .fixedSize(horizontal: true, vertical: false)

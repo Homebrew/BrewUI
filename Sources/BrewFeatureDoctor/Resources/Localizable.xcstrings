@@ -36,6 +36,41 @@
         }
       }
     },
+    "Check your Homebrew installation for problems" : {
+      "comment" : "Doctor header: tooltip explaining what the check does",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Busca problemas en tu instalación de Homebrew"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查 Homebrew 安装是否存在问题"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "檢查 Homebrew 安裝是否有問題"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontrollera din installation av Homebrew efter problem"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 설치의 문제 확인"
+          }
+        }
+      }
+    },
     "Copy brew doctor output" : {
       "comment" : "VoiceOver: Doctor copy-output button",
       "localizations" : {

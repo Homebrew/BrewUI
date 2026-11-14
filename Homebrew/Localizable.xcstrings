@@ -103,7 +103,8 @@
             "value" : "패키지 %lld개 이상 둘러보기 및 검색"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Browse or search your installed packages" : {
       "comment" : "Window subtitle, Installed",
@@ -138,7 +139,8 @@
             "value" : "설치된 패키지 둘러보기 및 검색"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Cancel" : {
       "comment" : "Askpass: cancel administrator authentication",
@@ -190,7 +192,8 @@
             "value" : "Homebrew 설치의 문제 확인"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Configuration" : {
       "comment" : "Sidebar: brew config and environment",
@@ -435,7 +438,8 @@
             "value" : "Homebrew 환경 및 진단 정보"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Homebrew wants to make changes." : {
       "comment" : "Askpass: primary message, standard macOS authorization wording",
@@ -633,7 +637,8 @@
             "value" : "구버전 패키지 검토 및 업그레이드"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Services" : {
       "comment" : "Sidebar: read-only Homebrew service inventory",
@@ -819,7 +824,8 @@
             "value" : "Homebrew 서비스 보기"
           }
         }
-      }
+      },
+      "extractionState" : "stale"
     },
     "Wait for the running Homebrew command to finish, then upgrade the Homebrew app." : {
       "comment" : "Shown when the self-upgrade is attempted while another brew command is still running",

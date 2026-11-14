@@ -16,6 +16,8 @@ public enum BrewUITestingEnvironmentKey {
     /// Any value: the app forgets every autosaved window and split-view frame before it opens a window.
     /// The runner is sandboxed and cannot reach the app's defaults itself.
     public static let resetWindowState = "BREW_UITEST_RESET_WINDOW_STATE"
+    /// 仅改变测试进程的外观，不写入用户的系统设置。
+    public static let darkAppearance = "BREW_UITEST_DARK_APPEARANCE"
 }
 
 /// The fixture tree, in transit: relative paths to bytes, JSON then deflated then base64'd.

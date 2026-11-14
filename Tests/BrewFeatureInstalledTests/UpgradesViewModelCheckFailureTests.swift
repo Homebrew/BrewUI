@@ -20,7 +20,6 @@ struct UpgradesViewModelCheckFailureTests {
         ], refreshFailure: Self.brewError)
 
         #expect(viewModel.showsUpgradeCheckFailure)
-        #expect(viewModel.emptyUpgradeActionTitle == "Couldn't check for upgrades")
         #expect(viewModel.outdatedSubtitle == "Couldn't check for upgrades")
         #expect(viewModel.upgradeCheckFailureMessage == "Not a git repository")
         #expect(viewModel.upgradeCheckFailureDetail.hasPrefix("Not a git repository"))
@@ -32,7 +31,6 @@ struct UpgradesViewModelCheckFailureTests {
         ], refreshFailure: nil)
 
         #expect(!viewModel.showsUpgradeCheckFailure)
-        #expect(viewModel.emptyUpgradeActionTitle == UpgradesUpToDateCopy.headline)
         #expect(viewModel.outdatedSubtitle == UpgradesUpToDateCopy.headline)
         #expect(viewModel.upgradeCheckFailureMessage == nil)
     }
@@ -54,8 +52,7 @@ struct UpgradesViewModelCheckFailureTests {
             .fixture(name: "git", kind: .formula, outdated: false),
         ], refreshFailure: Self.brewError)
 
-        #expect(!viewModel.isFilteringOutEveryUpgrade)
-        #expect(viewModel.emptyUpgradeActionTitle != "Nothing to upgrade here")
+        #expect(viewModel.outdatedSubtitle == "Couldn't check for upgrades")
     }
 
     @Test @MainActor func `filters hiding every upgrade win over a failed check`() {
@@ -67,7 +64,7 @@ struct UpgradesViewModelCheckFailureTests {
         viewModel.searchQuery = "no-such-package"
 
         #expect(!viewModel.showsUpgradeCheckFailure)
-        #expect(viewModel.emptyUpgradeActionTitle == "Nothing to upgrade here")
+        #expect(viewModel.outdatedSubtitle == "No matches in 1 outdated package — last check failed")
     }
 
     @Test @MainActor func `the failure detail spells out that empty means unknown`() {

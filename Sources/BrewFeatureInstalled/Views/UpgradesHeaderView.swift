@@ -8,47 +8,38 @@ import BrewCore
 import BrewUIComponents
 import SwiftUI
 
-/// Top of the Upgrades tab: title, subtitle, the bulk `brew upgrade` command, and the action row.
+/// 升级页先呈现筛选范围和操作，再展示对应的终端命令。
 struct UpgradesHeaderView: View {
     let viewModel: UpgradesViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Available upgrades", bundle: #bundle, comment: "Upgrades tab heading")
+        VStack(alignment: .leading, spacing: 0) {
+            PaneHeader {
+                Text(viewModel.outdatedSubtitle)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.outdatedSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
+            } actions: {
+                if viewModel.state.isLoaded {
+                    HStack(spacing: BrewSpacing.sm) {
+                        if viewModel.outdatedCount > 0 {
+                            upgradeAllButton
+                        }
+                        refreshButton
+                    }
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text("Available upgrades", bundle: #bundle, comment: "Upgrades tab heading"))
             .accessibilityHeading(.h1)
 
-            if viewModel.state.isLoaded {
+            if viewModel.outdatedCount > 0 {
                 CommandBlockView(
                     command: viewModel.bulkUpgradeDisplayCommand,
                     summaryText: viewModel.bulkUpgradeSummary,
                 )
-
-                actionRow
+                .padding(.horizontal, BrewSpacing.lg)
+                .padding(.bottom, BrewSpacing.md)
             }
         }
-        .padding(BrewSpacing.lg)
-    }
-
-    private var actionRow: some View {
-        HStack(spacing: BrewSpacing.sm) {
-            if viewModel.outdatedCount > 0 {
-                upgradeAllButton
-            } else {
-                nothingToUpgradeIndicator
-            }
-            Spacer(minLength: 0)
-            refreshButton
-        }
-        .frame(height: BrewLayout.headerActionHeight)
     }
 
     private var upgradeAllButton: some View {
@@ -73,41 +64,20 @@ struct UpgradesHeaderView: View {
         Button {
             Task { await viewModel.refresh() }
         } label: {
-            // The label stays laid out while hidden, so swapping in the spinner cannot resize the button.
-            Label(String(localized: "Refresh", bundle: #bundle, comment: "Upgrades tab: re-check for upgrades button"), systemImage: "arrow.clockwise")
-                .opacity(viewModel.isRefreshing ? 0 : 1)
-                .overlay {
-                    if viewModel.isRefreshing {
-                        ProgressView()
-                            .controlSize(.small)
-                    }
+            Label {
+                Text("Refresh", bundle: #bundle, comment: "Upgrades tab: re-check for upgrades button")
+            } icon: {
+                if viewModel.isRefreshing {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(systemName: "arrow.clockwise")
                 }
+            }
         }
         .controlSize(.regular)
         .disabled(viewModel.isRefreshing)
         .accessibilityLabel(String(localized: "Check for upgrades again", bundle: #bundle, comment: "VoiceOver: upgrades refresh button"))
         .axid(.upgradesRefreshButton)
-    }
-
-    /// A green tick claims nothing needs upgrading; a failed check has no such claim to make.
-    private var nothingToUpgradeIndicator: some View {
-        HStack {
-            statusGlyph
-                .accessibilityHidden(true)
-            Text(viewModel.emptyUpgradeActionTitle)
-                .foregroundStyle(Color.brewTextSecondary)
-        }
-        .font(.brewBody)
-    }
-
-    @ViewBuilder
-    private var statusGlyph: some View {
-        if viewModel.showsUpgradeCheckFailure {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .brewWarningGlyphStyle()
-        } else {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(Color.brewStatusSuccess)
-        }
     }
 }

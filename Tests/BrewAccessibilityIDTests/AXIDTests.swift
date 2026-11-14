@@ -12,6 +12,8 @@ import Testing
 struct AXIDTests {
     private static let staticIdentifiers: [(AXID, String)] = [
         (.sidebar, "sidebar"),
+        (.paneHeader, "pane.header"),
+        (.paneHeaderSummary, "pane.header.summary"),
         (.installedScreen, "installed.screen"),
         (.installedList, "installed.list"),
         (.installedSearchField, "installed.search"),
@@ -24,6 +26,7 @@ struct AXIDTests {
         (.discoverList, "discover.list"),
         (.configScreen, "config.screen"),
         (.doctorScreen, "doctor.screen"),
+        (.doctorPurposeInfo, "doctor.purpose.info"),
         (.brewNotFoundState, "brew.not.found"),
         (.packageDetail, "package.detail"),
         (.installButton, "detail.install"),

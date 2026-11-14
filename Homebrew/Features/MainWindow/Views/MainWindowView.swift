@@ -112,10 +112,6 @@ struct MainWindowView: View {
         }
     }
 
-    /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be
-    /// sourced from the catalogue once a package-count property is exposed.
-    private static let approximateCatalogueSize = 9000
-
     private var sidebarColumn: some View {
         MainSidebarView(selection: $selectedSidebarItem)
             .navigationSplitViewColumnWidth(
@@ -136,31 +132,18 @@ struct MainWindowView: View {
                 deepLinkSelection: $pendingInstalledSelection,
             )
             .navigationTitle(selectedSidebarItem.title)
-            .navigationSubtitle(
-                selectedSidebarItem == .upgrades
-                    ? String(localized: "Review and upgrade outdated packages", bundle: #bundle, comment: "Window subtitle, Upgrades")
-                    : String(localized: "Browse or search your installed packages", bundle: #bundle, comment: "Window subtitle, Installed"),
-            )
         case .discover:
             DiscoverColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(
-                    localized: "Browse and search \(Self.approximateCatalogueSize)+ packages",
-                    bundle: #bundle,
-                    comment: "Window subtitle, Discover; %lld is the approximate catalog size",
-                ))
         case .services:
             ServicesRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "View your Homebrew services", bundle: #bundle, comment: "Window subtitle, read-only Services tab"))
         case .doctor:
             DoctorColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor"))
         case .configuration:
             ConfigColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "Homebrew environment & diagnostics", bundle: #bundle, comment: "Window subtitle, Configuration"))
         }
     }
 }

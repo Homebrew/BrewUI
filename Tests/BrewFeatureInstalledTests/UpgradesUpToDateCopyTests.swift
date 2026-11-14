@@ -19,7 +19,6 @@ struct UpgradesUpToDateCopyTests {
 
         let phrase = UpgradesUpToDateCopy.headline
         #expect(viewModel.outdatedSubtitle == phrase)
-        #expect(viewModel.emptyUpgradeActionTitle == phrase)
         #expect(viewModel.upToDateTitle == phrase)
     }
 
@@ -56,8 +55,8 @@ struct UpgradesUpToDateCopyTests {
 
         viewModel.searchQuery = "no-such-package"
 
-        #expect(viewModel.emptyUpgradeActionTitle != UpgradesUpToDateCopy.headline)
-        #expect(viewModel.emptyUpgradeActionTitle == "Nothing to upgrade here")
+        #expect(viewModel.outdatedSubtitle != UpgradesUpToDateCopy.headline)
+        #expect(viewModel.outdatedSubtitle == "No matches in 1 outdated package")
     }
 
     @MainActor

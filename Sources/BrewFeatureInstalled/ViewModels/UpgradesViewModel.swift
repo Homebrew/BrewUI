@@ -105,8 +105,7 @@ final class UpgradesViewModel {
 
     /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
     /// inventory when no search is active, and "Showing N of M" / "No matches
-    /// in M outdated packages" once a query narrows the list. The window-chrome
-    /// subtitle is a static tab description owned by `MainWindowView`.
+    /// in M outdated packages" once a query narrows the list.
     var outdatedSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", bundle: #bundle, comment: "Upgrades tab subtitle while fetching")
@@ -114,7 +113,7 @@ final class UpgradesViewModel {
         if showsUpgradeCheckFailure {
             return Self.upgradeCheckFailedTitle
         }
-        let subtitle = isFiltering ? filteredSubtitle : inventorySubtitle
+        let subtitle = isFiltering && totalOutdatedCount > 0 ? filteredSubtitle : inventorySubtitle
         guard upgradeCheckFailureMessage != nil else {
             return subtitle
         }
@@ -378,24 +377,6 @@ extension UpgradesViewModel {
             bundle: #bundle,
             comment: "Upgrades header command summary for multiple searched packages",
         )
-    }
-
-    var isFilteringOutEveryUpgrade: Bool {
-        outdatedCount == 0 && totalOutdatedCount > 0
-    }
-
-    var emptyUpgradeActionTitle: String {
-        if showsUpgradeCheckFailure {
-            return Self.upgradeCheckFailedTitle
-        }
-        if isFilteringOutEveryUpgrade {
-            return String(
-                localized: "Nothing to upgrade here",
-                bundle: #bundle,
-                comment: "Upgrades header stand-in when filters hide every available upgrade",
-            )
-        }
-        return UpgradesUpToDateCopy.headline
     }
 
     var upToDateTitle: String {

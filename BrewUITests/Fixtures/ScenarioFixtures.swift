@@ -23,8 +23,8 @@ enum ScenarioFixtures {
         switch scenario {
         case .empty, .brewNotFound, .servicesBasic, .servicesControls, .servicesControlFailure:
             emptyInstalledFixtures(for: scenario)
-        case .installedBasic:
-            installedBasicFixtures()
+        case .installedBasic, .installedUpToDate:
+            installedBasicFixtures(upToDate: scenario == .installedUpToDate)
         case .installedLarge:
             installedLargeFixtures()
         case .doctorHasIssues:
@@ -115,7 +115,10 @@ enum ScenarioFixtures {
         return set
     }
 
-    private static func installedBasicFixtures() -> FixtureSet {
+    private static func installedBasicFixtures(upToDate: Bool) -> FixtureSet {
+        if upToDate {
+            return installedUpToDateFixtures()
+        }
         let installed = [wget, ripgrep, iterm2, rectangle]
         var set = FixtureSet()
         set.brewFiles = baseBrewFiles(installed: installed)
@@ -130,6 +133,25 @@ enum ScenarioFixtures {
         )
         set.brewFiles["uninstall_--formula_wget.next-info"] = infoJSON(for: remaining)
 
+        set.httpFiles = catalogueFiles(packages: installed)
+            .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
+        return set
+    }
+
+    private static func installedUpToDateFixtures() -> FixtureSet {
+        let installed = [wget, ripgrep, iterm2, rectangle].map { package in
+            FixturePackage(
+                token: package.token,
+                kind: package.kind,
+                displayName: package.displayName,
+                summary: package.summary,
+                installedVersion: package.latestVersion,
+                latestVersion: package.latestVersion,
+                dependencies: package.dependencies,
+            )
+        }
+        var set = FixtureSet()
+        set.brewFiles = baseBrewFiles(installed: installed)
         set.httpFiles = catalogueFiles(packages: installed)
             .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
         return set

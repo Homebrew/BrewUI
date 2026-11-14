@@ -29,6 +29,7 @@ struct DiscoverPackagesView: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .brewAlignWithWindowTitle()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.discoverScreen)
@@ -126,16 +127,11 @@ struct DiscoverPackagesView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-            Text(viewModel.paneHeading)
-                .font(.brewTitle2)
-                .foregroundStyle(Color.brewTextPrimary)
-            HStack(spacing: BrewSpacing.xs) {
-                if viewModel.showsSubtitleTrendIcon {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.brewSubheadline)
-                        .foregroundStyle(Color.brewTextBrand)
-                }
+        PaneHeader {
+            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
+                Text(viewModel.paneHeading)
+                    .font(.brewTitle2)
+                    .foregroundStyle(Color.brewTextPrimary)
                 Text(viewModel.subtitleText)
                     .font(.brewSubheadline)
                     .foregroundStyle(
@@ -143,8 +139,8 @@ struct DiscoverPackagesView: View {
                     )
             }
         }
-        .padding(BrewSpacing.lg)
-        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(viewModel.paneHeading))
+        .accessibilityHeading(.h1)
     }
 
     /// Persistent kind filter, always visible (trending and results). Filters client-side; never refetches.

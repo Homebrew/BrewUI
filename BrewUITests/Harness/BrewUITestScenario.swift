@@ -18,6 +18,8 @@ enum BrewUITestScenario: String, CaseIterable {
     case servicesControlFailure
     /// Two formulae and two casks installed; one formula is outdated.
     case installedBasic
+    /// Four installed packages, all at their current catalogue versions.
+    case installedUpToDate
     /// Enough formulae that `brew info` overruns a pipe buffer, which only a concurrent drain survives.
     case installedLarge
     /// `brew doctor` reports warnings and exits non-zero, which is data rather than failure.

@@ -15,6 +15,8 @@ public enum AXID: Hashable, Sendable {
     // Navigation
     case sidebar
     case sidebarItem(SidebarDestination)
+    case paneHeader
+    case paneHeaderSummary
 
     // Installed / Upgrades
     case installedScreen
@@ -42,6 +44,7 @@ public enum AXID: Hashable, Sendable {
     // Config / Doctor
     case configScreen
     case doctorScreen
+    case doctorPurposeInfo
     case brewNotFoundState
 
     // Services
@@ -90,6 +93,8 @@ public enum AXID: Hashable, Sendable {
         switch self {
         case .sidebar: "sidebar"
         case let .sidebarItem(destination): "sidebar.item.\(destination.rawValue)"
+        case .paneHeader: "pane.header"
+        case .paneHeaderSummary: "pane.header.summary"
         case .installedScreen: "installed.screen"
         case .installedList: "installed.list"
         case let .installedRow(token): "installed.row.\(token)"
@@ -109,6 +114,7 @@ public enum AXID: Hashable, Sendable {
         case let .discoverRow(token): "discover.row.\(token)"
         case .configScreen: "config.screen"
         case .doctorScreen: "doctor.screen"
+        case .doctorPurposeInfo: "doctor.purpose.info"
         case .servicesScreen: "services.screen"
         case .servicesList: "services.list"
         case .servicesEmptyState: "services.empty"

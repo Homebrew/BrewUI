@@ -36,7 +36,7 @@ struct ServicesView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .padding(.horizontal, BrewSpacing.lg)
-                .padding(.vertical, BrewSpacing.md)
+                .padding(.bottom, BrewSpacing.md)
                 .axid(.servicesScopePicker)
                 Divider()
                 AsyncContentView(
@@ -48,6 +48,7 @@ struct ServicesView: View {
                     },
                 )
             }
+            .brewAlignWithWindowTitle()
             .frame(minWidth: BrewLayout.installedListColumnMinWidth, idealWidth: BrewLayout.installedListColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             // HSplitView resets its divider when a pane's identity changes, so `.id` stays inside.
@@ -80,47 +81,48 @@ struct ServicesView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Services", bundle: #bundle, comment: "Services list heading")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
+        VStack(alignment: .leading, spacing: 0) {
+            PaneHeader {
                 if let subtitle = viewModel.runningServiceSubtitle {
-                    Text(subtitle).font(.brewSubheadline).foregroundStyle(Color.brewTextSecondary)
+                    Text(subtitle).font(.brewTitle2).foregroundStyle(Color.brewTextPrimary)
                 }
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityHeading(.h1)
-            CommandBlockView(
-                command: "brew services info --all --json",
-                summaryText: LocalizedStringResource("Shows services for the current user", bundle: #bundle, comment: "Services command: reads the current user inventory"),
-            )
-            HStack(spacing: BrewSpacing.sm) {
-                Spacer(minLength: 0)
+            } actions: {
                 Button {
                     Task { await viewModel.refresh() }
                 } label: {
-                    Label(String(localized: "Refresh", bundle: #bundle, comment: "Services: read the current service inventory"), systemImage: "arrow.clockwise")
-                        .opacity(viewModel.isRefreshing ? 0 : 1)
-                        .overlay {
-                            if viewModel.isRefreshing { ProgressView().controlSize(.small) }
+                    Label {
+                        Text("Refresh", bundle: #bundle, comment: "Services: read the current service inventory")
+                    } icon: {
+                        if viewModel.isRefreshing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
                         }
+                    }
                 }
                 .controlSize(.regular)
                 .disabled(viewModel.isRefreshing)
                 .axid(.servicesRefreshButton)
             }
-            .frame(height: BrewLayout.headerActionHeight)
+            .accessibilityLabel(Text("Services", bundle: #bundle, comment: "Services list heading"))
+            .accessibilityHeading(.h1)
+            CommandBlockView(
+                command: "brew services info --all",
+                summaryText: LocalizedStringResource("Shows services for the current user", bundle: #bundle, comment: "Services command: reads the current user inventory"),
+            )
+            .padding(.horizontal, BrewSpacing.lg)
             if let message = viewModel.refreshFailure {
                 Text(message).foregroundStyle(Color.brewStatusError).textSelection(.enabled)
+                    .padding(.horizontal, BrewSpacing.lg)
             }
             if let message = viewModel.actionFailure {
                 Text(verbatim: message).font(.brewCallout).foregroundStyle(Color.brewStatusError)
                     .textSelection(.enabled)
                     .axid(.serviceActionError)
+                    .padding(.horizontal, BrewSpacing.lg)
             }
         }
-        .padding(BrewSpacing.lg)
+        .padding(.bottom, BrewSpacing.md)
     }
 
     @ViewBuilder
