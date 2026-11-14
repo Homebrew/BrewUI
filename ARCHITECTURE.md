@@ -47,11 +47,19 @@ It aligns the existing 16-point content padding with the native 20-point title g
 List insets, column boundaries and trailing scrollbars retain their native layout. List pages use
 `PaneHeader` for a count or current state in the existing panel-heading style, followed by filters.
 Configuration uses its environment and diagnostics heading in the same position.
+The default upgrades heading leaves the package count to the bulk-action button.
 The header stacks actions below the heading when translated text does not fit alongside them. Page headings remain available
 to VoiceOver without repeating the window title visually. Bulk-upgrade and service-inventory commands
 remain expanded. Configuration guidance and the verbatim Doctor warning preamble remain in their original
 blue callouts above the data. Doctor exposes its purpose through a native toolbar tooltip.
 The status heading and actions share one minimum gap before falling back to a stacked layout.
+The first heading aligns its text-box centre with the sidebar's first row, not its text baseline.
+A measured `brewBody` reference defines that axis without changing typography.
+A fixed-height action slot keeps timestamps from moving the axis.
+`brewDetailTopAnchor()` marks the leading logo or severity badge in a detail header.
+`brewDetailPaneContent()` aligns that anchor with the first action slot without rearranging its content.
+The layout clamps top padding at zero so long content never clips above the scroll view.
+The detail start stays stable when a narrow header stacks its actions.
 UI tests can request dark appearance through `BrewUITestingEnvironmentKey.darkAppearance`.
 This changes only the test process after fixture mode is confirmed, never the system preference.
 

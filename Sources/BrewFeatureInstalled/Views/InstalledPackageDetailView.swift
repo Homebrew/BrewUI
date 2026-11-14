@@ -89,7 +89,7 @@ struct InstalledPackageDetailView: View {
                 packageActionsFooter(viewModel: viewModel)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BrewSpacing.xl)
+            .brewDetailPaneContent()
             .brewPaneContentWidth()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -284,7 +284,7 @@ struct InstalledPackageDetailPlaceholder: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(BrewSpacing.xl)
+        .brewDetailPaneContent()
         .brewPaneContentWidth()
     }
 }

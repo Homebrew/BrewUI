@@ -26,6 +26,8 @@ final class HeaderLayoutUITests: BrewUITestCase {
         setComparisonWindowSize(installed.app)
         capture("Installed\(suffix)", app: installed.app, screen: .installedScreen)
         installed.sidebar.goToUpgrades().assertHasPackage("ripgrep")
+        let upgradeHeading = BrewUIElement(installed.app, .paneHeaderSummary).waitToExist().element
+        XCTAssertEqual(upgradeHeading.value as? String, suffix.isEmpty ? "可用升級" : "Available upgrades")
         capture("Upgrades\(suffix)", app: installed.app, screen: .upgradesScreen)
         installed.sidebar.goToConfiguration().assertShowsEntry("HOMEBREW_VERSION")
         capture("Configuration\(suffix)", app: installed.app, screen: .configScreen)
@@ -106,6 +108,9 @@ final class HeaderLayoutUITests: BrewUITestCase {
             XCTAssertTrue(button.isHittable)
             XCTAssertLessThan(button.frame.minY, summary.frame.minY + 20, "Normal-width actions stay beside the status heading")
         }
+        let severity = text(containing: "Severity: Warning", in: doctor.app)
+        XCTAssertTrue(severity.exists)
+        XCTAssertEqual(severity.frame.minY, header.buttons.firstMatch.frame.minY, accuracy: 2, "The detail badge follows the first action row")
         let info = BrewUIElement(doctor.app, .doctorPurposeInfo).waitToExist().element
         XCTAssertLessThan(info.frame.maxY, header.frame.minY, "Purpose guidance belongs to the native toolbar")
         capture("Doctor English", app: doctor.app, screen: .doctorScreen)
@@ -167,6 +172,8 @@ final class HeaderLayoutUITests: BrewUITestCase {
         let summary = BrewUIElement(installed.app, .paneHeaderSummary).waitToExist().element
         let sidebar = BrewUIElement(installed.app, .sidebar).element
         XCTAssertEqual(summary.frame.minX - sidebar.frame.maxX, 20, accuracy: 1, "Content follows the native toolbar title gutter")
+        let navigationItem = BrewUIElement(installed.app, .sidebarItem(.installed)).element
+        XCTAssertEqual(summary.frame.midY, navigationItem.frame.midY, accuracy: 0.5, "Text boxes share their vertical centre, not their baseline")
         // 原生 List 将整行文字合并为一个元素，直接比较行的前缘。
         let firstRow = installed.list.row("iterm2").waitToExist().element
         XCTAssertEqual(firstRow.frame.minX, summary.frame.minX, accuracy: 1)

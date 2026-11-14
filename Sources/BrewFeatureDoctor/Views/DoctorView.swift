@@ -41,6 +41,7 @@ struct DoctorView: View {
                 Text(viewModel.subtitle)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
+                    .brewPaneHeadingAnchor()
                 if let lastCheckedAt = viewModel.lastCheckedAt {
                     LastUpdatedLabel(lead: LocalizedStringResource(
                         "Last checked",

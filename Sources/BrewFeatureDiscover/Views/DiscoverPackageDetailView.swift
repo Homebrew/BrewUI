@@ -59,7 +59,7 @@ struct DiscoverPackageDetailView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BrewSpacing.xl)
+            .brewDetailPaneContent()
             .brewPaneContentWidth()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -89,6 +89,7 @@ private struct DiscoverPackageDetailHeroSection: View {
                     .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
+            .brewDetailTopAnchor()
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 HStack(spacing: BrewSpacing.sm) {
@@ -312,7 +313,7 @@ struct DiscoverPackageDetailPlaceholder: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(BrewSpacing.xl)
+        .brewDetailPaneContent()
         .brewPaneContentWidth()
     }
 }

@@ -44,7 +44,7 @@ struct UpgradesViewModelCheckFailureTests {
 
         #expect(!viewModel.showsUpgradeCheckFailure)
         #expect(viewModel.outdatedCount == 2)
-        #expect(viewModel.outdatedSubtitle == "2 packages can be upgraded — last check failed")
+        #expect(viewModel.outdatedSubtitle == "Available upgrades — last check failed")
     }
 
     @Test @MainActor func `a failed check does not masquerade as a filtered-out list`() {

@@ -58,6 +58,7 @@ struct ServiceDetailView: View {
                     .foregroundStyle(Color.brewTextBrand)
             }
             .accessibilityHidden(true)
+            .brewDetailTopAnchor()
 
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: BrewSpacing.sm) {
@@ -151,7 +152,7 @@ struct ServiceDetailPlaceholder: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(BrewSpacing.xl)
+        .brewDetailPaneContent()
         .brewPaneContentWidth()
     }
 }

@@ -23,6 +23,7 @@ struct InstalledPackageDetailHeroSection: View {
                     .foregroundStyle(accentColor(chrome.accent))
             }
             .accessibilityHidden(true)
+            .brewDetailTopAnchor()
 
             VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                 ViewThatFits(in: .horizontal) {

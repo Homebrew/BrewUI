@@ -132,6 +132,7 @@ struct DiscoverPackagesView: View {
                 Text(viewModel.paneHeading)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
+                    .brewPaneHeadingAnchor()
                 Text(viewModel.subtitleText)
                     .font(.brewSubheadline)
                     .foregroundStyle(

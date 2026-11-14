@@ -92,7 +92,7 @@ struct UpgradesViewModelTests {
         #expect(vm.outdatedCount == 0)
     }
 
-    @Test @MainActor func `outdatedSubtitle renders zero singular and plural copy`() {
+    @Test @MainActor func `outdatedSubtitle reports current status without duplicating upgrade counts`() {
         let none = Self.makeViewModel(packages: [
             .fixture(name: "wget", kind: .formula, outdated: false),
         ])
@@ -101,10 +101,10 @@ struct UpgradesViewModelTests {
         let one = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: true),
         ])
-        #expect(one.outdatedSubtitle == "1 package can be upgraded")
+        #expect(one.outdatedSubtitle == "Available upgrades")
 
         let many = Self.makeViewModel(packages: Self.mixedPackages)
-        #expect(many.outdatedSubtitle == "2 packages can be upgraded")
+        #expect(many.outdatedSubtitle == "Available upgrades")
     }
 
     @Test @MainActor func `outdatedSubtitle switches to Showing N of M while searching`() {

@@ -233,7 +233,7 @@ struct UpgradesViewModelScopeTests {
 
     @Test @MainActor func `the header distinguishes hidden upgrades from none`() {
         let vm = Self.makeViewModel(packages: Self.mixedOutdated)
-        #expect(vm.outdatedSubtitle == "2 packages can be upgraded")
+        #expect(vm.outdatedSubtitle == "Available upgrades")
 
         vm.searchQuery = "no-such-package"
         #expect(vm.outdatedSubtitle == "No matches in 2 outdated packages")

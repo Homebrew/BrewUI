@@ -103,9 +103,7 @@ final class UpgradesViewModel {
         return false
     }
 
-    /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
-    /// inventory when no search is active, and "Showing N of M" / "No matches
-    /// in M outdated packages" once a query narrows the list.
+    /// 升级页头不重复批量按钮的数量；筛选、全部最新与检查失败仍有独立状态。
     var outdatedSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", bundle: #bundle, comment: "Upgrades tab subtitle while fetching")
@@ -132,22 +130,9 @@ final class UpgradesViewModel {
     )
 
     private var inventorySubtitle: String {
-        switch totalOutdatedCount {
-        case 0:
-            UpgradesUpToDateCopy.headline
-        case 1:
-            String(
-                localized: "1 package can be upgraded",
-                bundle: #bundle,
-                comment: "Upgrades tab subtitle for a single outdated package",
-            )
-        default:
-            String(
-                localized: "\(totalOutdatedCount) packages can be upgraded",
-                bundle: #bundle,
-                comment: "Upgrades tab subtitle when multiple packages are outdated",
-            )
-        }
+        totalOutdatedCount == 0
+            ? UpgradesUpToDateCopy.headline
+            : String(localized: "Available upgrades", bundle: #bundle, comment: "Upgrades tab heading")
     }
 
     /// Subtitle while a scope and/or search filter is narrowing the list: "Showing N of M upgrades", or

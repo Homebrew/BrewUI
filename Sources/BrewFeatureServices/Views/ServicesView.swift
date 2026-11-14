@@ -56,7 +56,7 @@ struct ServicesView: View {
                 if let service = viewModel.selectedService {
                     ScrollView {
                         ServiceDetailView(service: service, viewModel: viewModel)
-                            .padding(BrewSpacing.xl)
+                            .brewDetailPaneContent()
                             .brewPaneContentWidth()
                     }
                     .id(service.id)
