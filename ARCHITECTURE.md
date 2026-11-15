@@ -57,7 +57,8 @@ The first heading aligns its text-box centre with the sidebar's first row, not i
 A measured `brewBody` reference defines that axis without changing typography.
 A fixed-height action slot keeps timestamps from moving the axis.
 `brewDetailTopAnchor()` marks the leading logo or severity badge in a detail header.
-`brewDetailPaneContent()` aligns that anchor with the first action slot without rearranging its content.
+`brewDetailPaneContent()` aligns that anchor with the heading text box top without rearranging its content.
+The layout measures the existing `brewTitle2` line height; buttons do not define the detail start.
 The layout clamps top padding at zero so long content never clips above the scroll view.
 The detail start stays stable when a narrow header stacks its actions.
 UI tests can request dark appearance through `BrewUITestingEnvironmentKey.darkAppearance`.

@@ -12,7 +12,7 @@ extension VerticalAlignment {
 
 nonisolated enum PaneFirstRowTarget {
     case textCentre
-    case actionTop
+    case headingTop
 }
 
 public extension View {
@@ -28,10 +28,13 @@ extension View {
             anchor: anchor,
             target: target,
             navigationTextInset: BrewSpacing.sm * 2,
-            actionHeight: BrewLayout.headerActionHeight,
         ) {
             Text(verbatim: " ")
                 .font(.brewBody)
+                .hidden()
+                .accessibilityHidden(true)
+            Text(verbatim: " ")
+                .font(.brewTitle2)
                 .hidden()
                 .accessibilityHidden(true)
             self
@@ -43,29 +46,28 @@ private struct PaneFirstRowInsetLayout: Layout {
     let anchor: VerticalAlignment
     let target: PaneFirstRowTarget
     let navigationTextInset: CGFloat
-    let actionHeight: CGFloat
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
-        guard subviews.count == 2 else { return .zero }
-        let dimensions = subviews[1].dimensions(in: ProposedViewSize(width: proposal.width, height: nil))
-        return CGSize(width: dimensions.width, height: dimensions.height + topInset(dimensions, reference: subviews[0]))
+        guard subviews.count == 3 else { return .zero }
+        let dimensions = subviews[2].dimensions(in: ProposedViewSize(width: proposal.width, height: nil))
+        return CGSize(width: dimensions.width, height: dimensions.height + topInset(dimensions, navigation: subviews[0], heading: subviews[1]))
     }
 
     func placeSubviews(in bounds: CGRect, proposal _: ProposedViewSize, subviews: Subviews, cache _: inout ()) {
-        guard subviews.count == 2 else { return }
+        guard subviews.count == 3 else { return }
         let proposal = ProposedViewSize(width: bounds.width, height: nil)
-        let dimensions = subviews[1].dimensions(in: proposal)
-        subviews[1].place(
-            at: CGPoint(x: bounds.minX, y: bounds.minY + topInset(dimensions, reference: subviews[0])),
+        let dimensions = subviews[2].dimensions(in: proposal)
+        subviews[2].place(
+            at: CGPoint(x: bounds.minX, y: bounds.minY + topInset(dimensions, navigation: subviews[0], heading: subviews[1])),
             anchor: .topLeading,
             proposal: proposal,
         )
     }
 
-    private func topInset(_ dimensions: ViewDimensions, reference: LayoutSubview) -> CGFloat {
-        let textHeight = reference.sizeThatFits(.unspecified).height
+    private func topInset(_ dimensions: ViewDimensions, navigation: LayoutSubview, heading: LayoutSubview) -> CGFloat {
+        let textHeight = navigation.sizeThatFits(.unspecified).height
         let centre = navigationTextInset + textHeight / 2
-        let targetY = target == .textCentre ? centre : centre - actionHeight / 2
+        let targetY = target == .textCentre ? centre : centre - heading.sizeThatFits(.unspecified).height / 2
         return max(0, targetY - (dimensions[explicit: anchor] ?? 0))
     }
 }

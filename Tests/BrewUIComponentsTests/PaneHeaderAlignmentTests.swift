@@ -59,6 +59,41 @@ struct PaneHeaderAlignmentTests {
             #expect(abs(actionFrame.midY - headingFrame.midY) <= 0.5, "action \(actionFrame), heading \(headingFrame)")
         }
     }
+
+    @Test(arguments: [44.0, 60.0])
+    func `the logo top follows the heading while the hero remains centred`(textHeight: CGFloat) throws {
+        let heading = FrameReference()
+        let logo = FrameReference()
+        let description = FrameReference()
+        let content = HStack(alignment: .top, spacing: 0) {
+            PaneHeader {
+                Text(verbatim: "4 packages")
+                    .font(.brewTitle2)
+                    .background(FrameProbe(reference: heading))
+            }
+            .frame(width: 300)
+            HStack(alignment: .center, spacing: BrewSpacing.md) {
+                Color.clear.frame(width: 44, height: 44)
+                    .background(FrameProbe(reference: logo))
+                    .brewDetailTopAnchor()
+                Color.clear.frame(width: 170, height: textHeight)
+                    .background(FrameProbe(reference: description))
+            }
+            .brewDetailPaneContent()
+            .frame(width: 300)
+        }
+        let host = NSHostingView(rootView: content)
+        host.setFrameSize(host.fittingSize)
+        host.layoutSubtreeIfNeeded()
+        let headingView = try #require(heading.view)
+        let logoView = try #require(logo.view)
+        let descriptionView = try #require(description.view)
+        let headingFrame = headingView.convert(headingView.bounds, to: host)
+        let logoFrame = logoView.convert(logoView.bounds, to: host)
+        let descriptionFrame = descriptionView.convert(descriptionView.bounds, to: host)
+        #expect(abs(logoFrame.minY - headingFrame.minY) <= 0.5, "logo \(logoFrame), heading \(headingFrame)")
+        #expect(abs(logoFrame.midY - descriptionFrame.midY) <= 0.5)
+    }
 }
 
 @MainActor

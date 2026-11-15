@@ -21,9 +21,9 @@ struct DetailPaneContentTests {
         host.layoutSubtreeIfNeeded()
 
         let iconInset = max(0, (textHeight - 44) / 2)
-        let topPadding = max(0, firstActionTop - iconInset)
+        let topPadding = max(0, firstHeadingTop - iconInset)
         let expectedHeight = max(44, textHeight) + BrewSpacing.xl * 2 + 30 + topPadding
-        #expect(abs(host.fittingSize.height - expectedHeight) < 0.5)
+        #expect(abs(host.fittingSize.height - expectedHeight) <= 0.5)
     }
 
     @Test func `content without a logo uses the shared header inset`() {
@@ -31,11 +31,12 @@ struct DetailPaneContentTests {
         let host = NSHostingView(rootView: content)
         host.layoutSubtreeIfNeeded()
 
-        #expect(abs(host.fittingSize.height - (40 + BrewSpacing.xl + firstActionTop)) < 0.5)
+        #expect(abs(host.fittingSize.height - (40 + BrewSpacing.xl + firstHeadingTop)) <= 0.5)
     }
 
-    private var firstActionTop: CGFloat {
-        let reference = NSHostingView(rootView: Text(verbatim: " ").font(.brewBody))
-        return BrewSpacing.sm * 2 + reference.fittingSize.height / 2 - BrewLayout.headerActionHeight / 2
+    private var firstHeadingTop: CGFloat {
+        let navigation = NSHostingView(rootView: Text(verbatim: " ").font(.brewBody))
+        let heading = NSHostingView(rootView: Text(verbatim: " ").font(.brewTitle2))
+        return BrewSpacing.sm * 2 + navigation.fittingSize.height / 2 - heading.fittingSize.height / 2
     }
 }

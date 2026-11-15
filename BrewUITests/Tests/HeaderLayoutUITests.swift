@@ -110,7 +110,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
         }
         let severity = text(containing: "Severity: Warning", in: doctor.app)
         XCTAssertTrue(severity.exists)
-        XCTAssertEqual(severity.frame.minY, header.buttons.firstMatch.frame.minY, accuracy: 2, "The detail badge follows the first action row")
+        XCTAssertEqual(severity.frame.minY, summary.frame.minY, accuracy: 1, "The detail badge follows the heading top, not the action row")
         let info = BrewUIElement(doctor.app, .doctorPurposeInfo).waitToExist().element
         XCTAssertLessThan(info.frame.maxY, header.frame.minY, "Purpose guidance belongs to the native toolbar")
         capture("Doctor English", app: doctor.app, screen: .doctorScreen)
@@ -201,6 +201,8 @@ final class HeaderLayoutUITests: BrewUITestCase {
 
     @MainActor
     private func capture(_ name: String, app: XCUIApplication, screen: AXID? = nil) {
+        BrewApp.activate(app)
+        XCTAssertEqual(app.state, .runningForeground, "Capture the foreground app, never a covered window")
         let collapsedStatus = BrewUIElement(app, .consoleStatus).element
         if !collapsedStatus.exists {
             BrewUIButton(app, .consoleToggle).tap()
