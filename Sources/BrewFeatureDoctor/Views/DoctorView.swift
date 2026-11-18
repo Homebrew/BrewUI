@@ -51,19 +51,14 @@ struct DoctorView: View {
     @ViewBuilder
     private var headerControls: some View {
         if viewModel.showsHeaderControls {
-            PaneHeaderActions {
-                if viewModel.rawDoctorOutput != nil {
-                    HStack(spacing: BrewSpacing.sm) {
-                        refreshingIndicator
+            HStack(alignment: .top, spacing: BrewSpacing.sm) {
+                refreshingIndicator
+                PaneHeaderActions {
+                    if viewModel.rawDoctorOutput != nil {
                         Button(String(localized: "Copy output", bundle: #bundle, comment: "Doctor header: copy raw brew doctor output")) {
                             viewModel.copyDoctorOutput()
                         }
                         .accessibilityLabel(String(localized: "Copy brew doctor output", bundle: #bundle, comment: "VoiceOver: Doctor copy-output button"))
-                    }
-                }
-                HStack(spacing: BrewSpacing.sm) {
-                    if viewModel.rawDoctorOutput == nil {
-                        refreshingIndicator
                     }
                     Button(String(localized: "Run Again", bundle: #bundle, comment: "Doctor header: re-run brew doctor")) {
                         Task { await viewModel.load(forceRefresh: true) }
@@ -79,6 +74,7 @@ struct DoctorView: View {
         if viewModel.isRefreshing {
             ProgressView()
                 .controlSize(.small)
+                .frame(minHeight: BrewLayout.headerActionHeight)
                 .accessibilityLabel(String(localized: "Re-checking", bundle: #bundle, comment: "VoiceOver: Doctor re-check spinner"))
         }
     }

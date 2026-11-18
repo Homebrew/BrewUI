@@ -61,6 +61,43 @@ struct PaneHeaderAlignmentTests {
         }
     }
 
+    @Test(arguments: [false, true])
+    func `only stacked buttons take the wider button's native width`(showsSecondAction: Bool) throws {
+        var measuredWidths: [(first: CGFloat, second: CGFloat?)] = []
+        for width in [430.0, 210.0] {
+            let first = FrameReference()
+            let second = FrameReference()
+            let content = PaneHeader(wrapsSummary: true) {
+                Text(verbatim: "Available").font(.brewTitle2)
+            } actions: {
+                PaneHeaderActions {
+                    Button(action: {}, label: { Text(verbatim: "Upgrade All (20)") })
+                        .buttonStyle(.borderedProminent)
+                        .background(FrameProbe(reference: first))
+                    if showsSecondAction {
+                        Button(action: {}, label: { Image(systemName: "arrow.clockwise") })
+                            .background(FrameProbe(reference: second))
+                    }
+                }
+            }
+            .frame(width: width)
+            let host = NSHostingView(rootView: content)
+            host.setFrameSize(host.fittingSize)
+            host.layoutSubtreeIfNeeded()
+            let firstView = try #require(first.view)
+            measuredWidths.append((firstView.frame.width, second.view?.frame.width))
+        }
+        let wide = measuredWidths[0]
+        let narrow = measuredWidths[1]
+        #expect(narrow.first == wide.first)
+        if showsSecondAction {
+            #expect(try #require(wide.second) < wide.first)
+            #expect(narrow.second == narrow.first)
+        } else {
+            #expect(narrow.second == nil)
+        }
+    }
+
     @Test(arguments: [300.0, 430.0, 700.0])
     func `headers and details use matching horizontal gutters`(width: CGFloat) throws {
         let heading = FrameReference()

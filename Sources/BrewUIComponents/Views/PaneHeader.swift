@@ -134,10 +134,14 @@ public struct PaneHeaderActions<Content: View>: View {
     }
 
     private var stacked: some View {
-        VStack(alignment: .trailing, spacing: BrewSpacing.xs) {
-            ForEach(subviews: content) { action in
-                action.frame(minHeight: BrewLayout.headerActionHeight)
+        Group(subviews: content) { actions in
+            VStack(alignment: .trailing, spacing: BrewSpacing.xs) {
+                ForEach(actions) { action in
+                    action.frame(minHeight: BrewLayout.headerActionHeight)
+                }
             }
+            .buttonSizing(actions.count == 2 ? .flexible : .automatic)
+            .fixedSize(horizontal: true, vertical: false)
         }
     }
 }

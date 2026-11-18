@@ -100,6 +100,7 @@ SwiftUI sizes a new window to the available display if it is narrower and still 
 The minimum remains 820 points. The column constraints remain unchanged.
 Upgrades and Doctor wrap titles beside the controls first.
 If the horizontal controls do not fit, the controls stack beside the title and align with its first line.
+Only a vertical pair of buttons shares the wider button's natural width.
 The full group moves below the title only when neither side-by-side layout fits.
 Page headings remain available
 to VoiceOver without repeating the window title visually. Bulk-upgrade and service-inventory commands

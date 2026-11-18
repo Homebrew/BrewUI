@@ -203,6 +203,15 @@ final class HeaderLayoutUITests: BrewUITestCase {
             if let firstButton = buttons.first {
                 XCTAssertLessThan(firstButton.frame.minY, summary.frame.minY + 14, "The first action stays on the heading's first line")
             }
+            if buttons.count == 2 {
+                let first = buttons[0].frame
+                let second = buttons[1].frame
+                if abs(first.midY - second.midY) > 1 {
+                    XCTAssertEqual(first.width, second.width, accuracy: 1, "Only vertically stacked buttons share a width")
+                } else {
+                    XCTAssertGreaterThan(first.width, second.width, "Horizontal buttons keep their native widths")
+                }
+            }
             XCTAssertTrue(BrewUIButton(upgrades.app, .consoleToggle).element.isHittable)
             capture("Upgrades compact \(description) \(Int(width))pt", app: upgrades.app, screen: .upgradesScreen)
         }
