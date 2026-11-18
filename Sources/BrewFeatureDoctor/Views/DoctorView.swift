@@ -51,24 +51,35 @@ struct DoctorView: View {
     @ViewBuilder
     private var headerControls: some View {
         if viewModel.showsHeaderControls {
-            HStack(spacing: BrewSpacing.sm) {
-                if viewModel.isRefreshing {
-                    ProgressView()
-                        .controlSize(.small)
-                        .accessibilityLabel(String(localized: "Re-checking", bundle: #bundle, comment: "VoiceOver: Doctor re-check spinner"))
-                }
+            PaneHeaderActions {
                 if viewModel.rawDoctorOutput != nil {
-                    Button(String(localized: "Copy output", bundle: #bundle, comment: "Doctor header: copy raw brew doctor output")) {
-                        viewModel.copyDoctorOutput()
+                    HStack(spacing: BrewSpacing.sm) {
+                        refreshingIndicator
+                        Button(String(localized: "Copy output", bundle: #bundle, comment: "Doctor header: copy raw brew doctor output")) {
+                            viewModel.copyDoctorOutput()
+                        }
+                        .accessibilityLabel(String(localized: "Copy brew doctor output", bundle: #bundle, comment: "VoiceOver: Doctor copy-output button"))
                     }
-                    .accessibilityLabel(String(localized: "Copy brew doctor output", bundle: #bundle, comment: "VoiceOver: Doctor copy-output button"))
                 }
-                Button(String(localized: "Run Again", bundle: #bundle, comment: "Doctor header: re-run brew doctor")) {
-                    Task { await viewModel.load(forceRefresh: true) }
+                HStack(spacing: BrewSpacing.sm) {
+                    if viewModel.rawDoctorOutput == nil {
+                        refreshingIndicator
+                    }
+                    Button(String(localized: "Run Again", bundle: #bundle, comment: "Doctor header: re-run brew doctor")) {
+                        Task { await viewModel.load(forceRefresh: true) }
+                    }
+                    .disabled(viewModel.isRefreshing)
                 }
-                .disabled(viewModel.isRefreshing)
             }
-            .fixedSize(horizontal: true, vertical: false)
+        }
+    }
+
+    @ViewBuilder
+    private var refreshingIndicator: some View {
+        if viewModel.isRefreshing {
+            ProgressView()
+                .controlSize(.small)
+                .accessibilityLabel(String(localized: "Re-checking", bundle: #bundle, comment: "VoiceOver: Doctor re-check spinner"))
         }
     }
 

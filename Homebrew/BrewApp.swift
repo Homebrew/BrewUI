@@ -147,10 +147,13 @@ struct BrewApp: App {
                 )
                 .crashReportSheet(controller: crashReportController)
         }
-        .defaultSize(
-            width: BrewLayout.defaultWindowWidth,
-            height: BrewLayout.defaultWindowHeight,
-        )
+        .defaultWindowPlacement { _, context in
+            let available = context.defaultDisplay.visibleRect.size
+            return WindowPlacement(size: CGSize(
+                width: min(BrewLayout.defaultWindowWidth, available.width),
+                height: min(BrewLayout.defaultWindowHeight, available.height),
+            ))
+        }
         .commands {
             SearchCommands()
             SidebarCommands()

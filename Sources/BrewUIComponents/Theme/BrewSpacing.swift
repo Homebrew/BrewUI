@@ -64,15 +64,14 @@ public enum BrewLayout {
     /// 诊断健康状态与升级完成状态共用的成功徽章尺寸。
     public static let successBadgeSize: CGFloat = 44
 
-    /// Default window width.
-    public static let defaultWindowWidth: CGFloat = minWindowWidth
+    /// 默认宽度让六种语言的三位数升级操作在标准分栏中保持同排。
+    public static let defaultWindowWidth: CGFloat = 1080
 
     /// Default window height. Kept above ``minWindowHeight`` so a first launch opens at the size asked for.
     public static let defaultWindowHeight: CGFloat = 720
 
-    /// 六语言短标题含三位数数量按 414pt 预算；每栏另留 15pt 宽度余量。
-    /// 保留原分栏规则：220 + 2 × (414 + 15) + 2 = 1080，让标题与两个按钮同排。
-    public static let minWindowWidth: CGFloat = 1080
+    /// 保留原窄窗下限；页头根据栏宽重新排布。
+    public static let minWindowWidth: CGFloat = 820
 
     /// Derived rather than picked: ``mainPaneMinHeight`` (521) + ``consoleMinExpandedHeight`` (150) +
     /// the split's own 7pt of chrome = 678, rounded up. Sized against the console's floor, not its default.

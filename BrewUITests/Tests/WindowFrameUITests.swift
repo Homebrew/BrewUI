@@ -11,8 +11,8 @@ import XCTest
 /// address in the key, so every launch saved under a fresh name and none found the last one.
 ///
 /// Running this resets the developer's own saved frame once: the app forgets it on the first launch
-/// so the window opens at its default size. The default width now equals the minimum, so grow it
-/// before quitting instead of attempting a resize below the supported minimum.
+/// so the window opens at its default size, which it is then shrunk from. Shrinking rather than
+/// growing keeps the drag on screen whatever the display size; CI runs at 1024x768.
 final class WindowFrameUITests: BrewUITestCase {
     @MainActor
     func testWindowReopensAtTheSizeItWasQuitAt() {
@@ -20,8 +20,8 @@ final class WindowFrameUITests: BrewUITestCase {
         let window = first.windows.firstMatch
         let initial = window.frame
 
-        let resized = window.resizeWindow(by: CGVector(dx: 120, dy: 0))
-        XCTAssertGreaterThan(resized.width, initial.width, "The drag did not grow the window from \(initial)")
+        let resized = window.resizeWindow(by: CGVector(dx: -120, dy: -30))
+        XCTAssertNotEqual(resized.size, initial.size, "The drag did not resize the window from \(initial)")
 
         first.quit()
 

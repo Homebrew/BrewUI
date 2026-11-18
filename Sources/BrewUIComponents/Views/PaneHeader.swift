@@ -41,16 +41,21 @@ public struct PaneHeader<Summary: View, Actions: View, Metadata: View>: View {
 
     private var wrappingRow: some View {
         ViewThatFits(in: .horizontal) {
-            PaneHeaderInlineLayout(spacing: BrewSpacing.sm, actionHeight: BrewLayout.headerActionHeight) {
-                summaryContent
-                // 加载与失败状态没有按钮，仍保留布局的操作槽。
-                HStack(spacing: 0) { actions }.fixedSize()
-                Text(verbatim: " ")
-                    .font(.brewTitle2)
-                    .hidden()
-                    .accessibilityHidden(true)
-            }
+            inlineRow(stacksActions: false)
+            inlineRow(stacksActions: true)
             adaptiveRow
+        }
+    }
+
+    private func inlineRow(stacksActions: Bool) -> some View {
+        PaneHeaderInlineLayout(spacing: BrewSpacing.sm, actionHeight: BrewLayout.headerActionHeight, stacksActions: stacksActions) {
+            summaryContent
+            // 加载与失败状态没有按钮，仍保留布局的操作槽。
+            HStack(spacing: 0) { actions.environment(\.paneHeaderStacksActions, stacksActions) }.fixedSize()
+            Text(verbatim: " ")
+                .font(.brewTitle2)
+                .hidden()
+                .accessibilityHidden(true)
         }
     }
 
@@ -92,12 +97,12 @@ public struct PaneHeader<Summary: View, Actions: View, Metadata: View>: View {
 }
 
 public extension PaneHeader where Metadata == EmptyView {
-    /// 不提供独立元数据时，保留原有的操作换行规则。
-    init(@ViewBuilder summary: () -> Summary, @ViewBuilder actions: () -> Actions) {
+    /// 允许标题在操作区旁换行；其他调用方可保留原有的操作换行规则。
+    init(wrapsSummary: Bool = false, @ViewBuilder summary: () -> Summary, @ViewBuilder actions: () -> Actions) {
         self.summary = summary()
         self.actions = actions()
         metadata = EmptyView()
-        wrapsSummary = false
+        self.wrapsSummary = wrapsSummary
     }
 }
 
@@ -107,16 +112,52 @@ public extension PaneHeader where Actions == EmptyView, Metadata == EmptyView {
     }
 }
 
+/// 操作区比一行更宽时纵向排布，不缩短按钮文案。
+public struct PaneHeaderActions<Content: View>: View {
+    @Environment(\.paneHeaderStacksActions) private var stacksActions
+    private let content: Content
+
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    public var body: some View {
+        if stacksActions {
+            stacked
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: BrewSpacing.sm) { content }
+                    .fixedSize(horizontal: true, vertical: false)
+                stacked
+            }
+        }
+    }
+
+    private var stacked: some View {
+        VStack(alignment: .trailing, spacing: BrewSpacing.xs) {
+            ForEach(subviews: content) { action in
+                action.frame(minHeight: BrewLayout.headerActionHeight)
+            }
+        }
+    }
+}
+
+private extension EnvironmentValues {
+    @Entry var paneHeaderStacksActions = false
+}
+
 /// 优先为操作保留原生宽度，再让标题换行。仅在连一个标题字框都放不下时回退。
 private struct PaneHeaderInlineLayout: Layout {
     let spacing: CGFloat
     let actionHeight: CGFloat
+    let stacksActions: Bool
 
     private struct Measurement {
         let size: CGSize
         let titleWidth: CGFloat
         let lineHeight: CGFloat
         let centre: CGFloat
+        let actionTop: CGFloat
     }
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
@@ -131,8 +172,8 @@ private struct PaneHeaderInlineLayout: Layout {
             proposal: ProposedViewSize(width: measurement.titleWidth, height: nil),
         )
         subviews[1].place(
-            at: CGPoint(x: bounds.maxX, y: bounds.minY + measurement.centre),
-            anchor: .trailing,
+            at: CGPoint(x: bounds.maxX, y: bounds.minY + measurement.actionTop),
+            anchor: .topTrailing,
             proposal: .unspecified,
         )
         subviews[2].place(at: bounds.origin, proposal: .unspecified)
@@ -158,13 +199,17 @@ private struct PaneHeaderInlineLayout: Layout {
         let width = max(proposedWidth ?? minimumWidth, minimumWidth)
         let titleWidth = width - actions.width - gap
         let title = subviews[0].sizeThatFits(ProposedViewSize(width: titleWidth, height: nil))
-        let centre = max(actionHeight, lineHeight, actions.height) / 2
-        let height = max(centre * 2, centre - lineHeight / 2 + title.height)
+        // 纵排时对齐第一颗按钮，不对齐整组按钮的中点。
+        let actionCentre = (stacksActions ? min(actionHeight, actions.height) : actions.height) / 2
+        let centre = max(actionHeight / 2, lineHeight / 2, actionCentre)
+        let actionTop = centre - actionCentre
+        let height = max(centre * 2, centre - lineHeight / 2 + title.height, actionTop + actions.height)
         return Measurement(
             size: CGSize(width: width, height: height),
             titleWidth: titleWidth,
             lineHeight: lineHeight,
             centre: centre,
+            actionTop: actionTop,
         )
     }
 }

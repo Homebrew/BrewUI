@@ -5,6 +5,62 @@ import Testing
 
 @MainActor
 struct PaneHeaderAlignmentTests {
+    @Test func `the default window can shrink to fit a 1024 point display`() {
+        #expect(BrewLayout.defaultWindowWidth == 1080)
+        #expect(BrewLayout.minWindowWidth < 1024)
+    }
+
+    @Test(arguments: [210.0, 300.0, 360.0, 430.0])
+    func `the header wraps its title then its actions before putting actions below`(width: CGFloat) throws {
+        let title = FrameReference()
+        let first = FrameReference()
+        let second = FrameReference()
+        let content = PaneHeader {
+            Text(verbatim: "Tillgängliga").font(.brewTitle2)
+                .background(FrameProbe(reference: title))
+                .brewPaneHeadingAnchor()
+        } actions: {
+            PaneHeaderActions {
+                // 瑞典语三位数升级操作的原生尺寸，窄栏不应压缩这些按钮。
+                Color.clear.frame(width: 159, height: 28).background(FrameProbe(reference: first))
+                Color.clear.frame(width: 111, height: 28).background(FrameProbe(reference: second))
+            }
+        } metadata: {
+            EmptyView()
+        }
+        .frame(width: width)
+        let host = NSHostingView(rootView: content)
+        host.setFrameSize(host.fittingSize)
+        host.layoutSubtreeIfNeeded()
+        let firstView = try #require(first.view)
+        let secondView = try #require(second.view)
+        let titleView = try #require(title.view)
+        let firstFrame = firstView.convert(firstView.bounds, to: host)
+        let secondFrame = secondView.convert(secondView.bounds, to: host)
+        let titleFrame = titleView.convert(titleView.bounds, to: host)
+        let lineHeight = NSHostingView(rootView: Text(verbatim: " ").font(.brewTitle2)).fittingSize.height
+        let firstLineCentre = host.isFlipped ? titleFrame.minY + lineHeight / 2 : titleFrame.maxY - lineHeight / 2
+        for frame in [firstFrame, secondFrame] {
+            #expect(frame.minX >= 20 && frame.maxX <= width - 20)
+        }
+        if width <= 300 {
+            #expect(firstFrame.maxX == secondFrame.maxX)
+            #expect(abs(firstFrame.midY - secondFrame.midY) >= 28)
+        } else {
+            #expect(firstFrame.midY == secondFrame.midY)
+            #expect(firstFrame.maxX < secondFrame.minX)
+        }
+        if width == 210 {
+            #expect(abs(firstFrame.midY - firstLineCentre) > 14)
+        } else {
+            #expect(firstFrame.minX >= titleFrame.maxX + 7)
+            #expect(abs(firstFrame.midY - firstLineCentre) <= 1)
+        }
+        if width == 360 {
+            #expect(titleFrame.height > lineHeight)
+        }
+    }
+
     @Test(arguments: [300.0, 430.0, 700.0])
     func `headers and details use matching horizontal gutters`(width: CGFloat) throws {
         let heading = FrameReference()

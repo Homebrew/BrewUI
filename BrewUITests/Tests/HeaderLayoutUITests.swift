@@ -163,10 +163,16 @@ final class HeaderLayoutUITests: BrewUITestCase {
 
     @MainActor
     func testLongTranslationKeepsUpgradeActionsInsideThePane() {
+        checkCompactUpgrades(language: "es", locale: "es_ES", description: "Spanish")
+        checkCompactUpgrades(language: "sv", locale: "sv_SE", description: "Swedish")
+    }
+
+    @MainActor
+    private func checkCompactUpgrades(language: String, locale: String, description: String) {
         let upgrades = launch(
             .installedBasic,
             environment: [BrewUITestingEnvironmentKey.resetWindowState: "1"],
-            arguments: ["-AppleLanguages", "(es)", "-AppleLocale", "es_ES"],
+            arguments: ["-AppleLanguages", "(\(language))", "-AppleLocale", locale],
         ).sidebar.goToUpgrades().assertHasPackage("ripgrep")
         let window = upgrades.app.windows.firstMatch
         let originalFrame = window.frame
@@ -176,16 +182,30 @@ final class HeaderLayoutUITests: BrewUITestCase {
                 dx: originalFrame.width - compactFrame.width,
                 dy: originalFrame.height - compactFrame.height,
             ))
+            upgrades.app.terminate()
         }
-        _ = window.resizeWindow(by: CGVector(dx: -400, dy: -300))
-        let header = BrewUIElement(upgrades.app, .paneHeader, in: upgrades.root.element).element
-        XCTAssertEqual(header.buttons.count, 2)
-        for button in header.buttons.allElementsBoundByIndex {
-            XCTAssertTrue(button.isHittable)
-            XCTAssertGreaterThanOrEqual(button.frame.minX, header.frame.minX)
-            XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX)
+        let widths: [CGFloat] = [min(1024, NSScreen.main?.visibleFrame.width ?? 1024), 820]
+        for width in widths {
+            let currentWidth = window.frame.width
+            if abs(currentWidth - width) > 1 {
+                _ = window.resizeWindow(by: CGVector(dx: width - currentWidth, dy: 0))
+            }
+            XCTAssertEqual(window.frame.width, width, accuracy: 1)
+            let header = BrewUIElement(upgrades.app, .paneHeader, in: upgrades.root.element).element
+            let summary = BrewUIElement(upgrades.app, .paneHeaderSummary, in: header).element
+            let buttons = header.buttons.allElementsBoundByIndex
+            XCTAssertEqual(buttons.count, 2)
+            for button in buttons {
+                XCTAssertTrue(button.isHittable)
+                XCTAssertGreaterThanOrEqual(button.frame.minX, header.frame.minX)
+                XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX)
+            }
+            if let firstButton = buttons.first {
+                XCTAssertLessThan(firstButton.frame.minY, summary.frame.minY + 14, "The first action stays on the heading's first line")
+            }
+            XCTAssertTrue(BrewUIButton(upgrades.app, .consoleToggle).element.isHittable)
+            capture("Upgrades compact \(description) \(Int(width))pt", app: upgrades.app, screen: .upgradesScreen)
         }
-        capture("Upgrades compact Spanish", app: upgrades.app, screen: .upgradesScreen)
     }
 
     @MainActor
@@ -234,7 +254,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
         attachment.lifetime = .keepAlways
         add(attachment)
         let bitmap = try XCTUnwrap(NSBitmapImageRep(data: screenshot.pngRepresentation))
-        let scale = CGFloat(bitmap.pixelsWide) / window.frame.width
+        let scale = try snapshotScale(bitmap, window: window)
         let left = Int((pane.frame.minX - window.frame.minX) * scale)
         let right = Int((pane.frame.maxX - window.frame.minX) * scale)
         let top = Int((title.frame.minY - window.frame.minY) * scale)
@@ -284,17 +304,16 @@ final class HeaderLayoutUITests: BrewUITestCase {
         let splitter = try contentSplitter(in: app)
         let screenshot = window.screenshot()
         let bitmap = try XCTUnwrap(NSBitmapImageRep(data: screenshot.pngRepresentation))
-        let scaleX = CGFloat(bitmap.pixelsWide) / window.frame.width
-        let scaleY = CGFloat(bitmap.pixelsHigh) / window.frame.height
-        let jointX = Int((splitter.frame.midX - window.frame.minX) * scaleX)
-        let topY = Int((splitter.frame.minY - window.frame.minY) * scaleY)
-        let referenceX = jointX - Int(8 * scaleX)
-        let belowY = topY + Int(4 * scaleY)
+        let scale = try snapshotScale(bitmap, window: window)
+        let jointX = Int((splitter.frame.midX - window.frame.minX) * scale)
+        let topY = Int((splitter.frame.minY - window.frame.minY) * scale)
+        let referenceX = jointX - Int(8 * scale)
+        let belowY = topY + Int(4 * scale)
         let reference = try pixelComponents(bitmap, x: referenceX, y: topY)
         let below = try pixelComponents(bitmap, x: referenceX, y: belowY)
         // 先证明采样位置确实有线，避免把两个相同的正文背景误判为通过。
         XCTAssertGreaterThan(zip(reference, below).map { abs($0 - $1) }.max() ?? 0, 4.0 / 255)
-        for offset in 0 ..< max(1, Int(scaleY)) {
+        for offset in 0 ..< max(1, Int(scale)) {
             let line = try pixelComponents(bitmap, x: referenceX, y: topY + offset)
             let joint = try pixelComponents(bitmap, x: jointX, y: topY + offset)
             for (actual, expected) in zip(joint, line) {
@@ -308,6 +327,19 @@ final class HeaderLayoutUITests: BrewUITestCase {
     }
 
     @MainActor
+    private func snapshotScale(_ bitmap: NSBitmapImageRep, window: XCUIElement) throws -> CGFloat {
+        let size = window.frame.size
+        let scale = (CGFloat(bitmap.pixelsHigh) / size.height).rounded()
+        let fullWidth = abs(CGFloat(bitmap.pixelsWide) - size.width * scale) <= 1
+        let fullHeight = abs(CGFloat(bitmap.pixelsHigh) - size.height * scale) <= 1
+        // 若窗口被屏幕裁切，不把变短的截图宽度误用为坐标缩放比例。
+        return try XCTUnwrap(
+            fullWidth && fullHeight ? scale : nil,
+            "Expected an unclipped window screenshot; got \(bitmap.pixelsWide) × \(bitmap.pixelsHigh) for \(size)",
+        )
+    }
+
+    @MainActor
     private func pixelComponents(_ bitmap: NSBitmapImageRep, x: Int, y: Int) throws -> [CGFloat] {
         XCTAssertTrue((0 ..< bitmap.pixelsWide).contains(x) && (0 ..< bitmap.pixelsHigh).contains(y))
         let colour = try XCTUnwrap(bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB))
@@ -318,9 +350,14 @@ final class HeaderLayoutUITests: BrewUITestCase {
     private func setComparisonWindowSize(_ app: XCUIApplication) {
         let window = app.windows.firstMatch
         let frame = window.frame
-        _ = window.resizeWindow(by: CGVector(dx: 1080 - frame.width, dy: 732 - frame.height))
-        XCTAssertEqual(window.frame.width, 1080, accuracy: 1)
-        XCTAssertEqual(window.frame.height, 732, accuracy: 1)
+        let display = NSScreen.main?.visibleFrame.size ?? CGSize(width: 1080, height: 732)
+        let width = min(1080, display.width)
+        let height = min(732, display.height)
+        if abs(frame.width - width) > 1 || abs(frame.height - height) > 1 {
+            _ = window.resizeWindow(by: CGVector(dx: width - frame.width, dy: height - frame.height))
+        }
+        XCTAssertEqual(window.frame.width, width, accuracy: 1)
+        XCTAssertEqual(window.frame.height, height, accuracy: 1)
     }
 
     @MainActor

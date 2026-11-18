@@ -14,13 +14,13 @@ struct UpgradesHeaderView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            PaneHeader {
+            PaneHeader(wrapsSummary: true) {
                 Text(viewModel.outdatedSubtitle)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
             } actions: {
                 if viewModel.state.isLoaded {
-                    HStack(spacing: BrewSpacing.sm) {
+                    PaneHeaderActions {
                         if viewModel.outdatedCount > 0 {
                             upgradeAllButton
                         }

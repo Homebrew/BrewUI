@@ -95,10 +95,13 @@ package count to the bulk-action button.
 The up-to-date state keeps that heading and the original command block.
 Its existing central status carries the success checkmark instead of a second status row in the header.
 Doctor and the up-to-date state share the seal checkmark, success colour and 44-point badge size.
-The default and minimum window width are 1080 points: 220 points for the sidebar, two
-414-point header budgets, 15 spare points per column and two points for the divider and rounding. The header budget covers all six current languages with
-a three-digit upgrade count. The column constraints remain unchanged.
-The header stacks actions below the heading when translated text does not fit alongside them. Page headings remain available
+The preferred default window width is 1080 points. This fits six languages with a three-digit upgrade count.
+SwiftUI sizes a new window to the available display if it is narrower and still restores saved window sizes.
+The minimum remains 820 points. The column constraints remain unchanged.
+Upgrades and Doctor wrap titles beside the controls first.
+If the horizontal controls do not fit, the controls stack beside the title and align with its first line.
+The full group moves below the title only when neither side-by-side layout fits.
+Page headings remain available
 to VoiceOver without repeating the window title visually. Bulk-upgrade and service-inventory commands
 remain expanded. When a command block precedes a list filter, the header leaves 24 points before
 the filter. Command blocks next to their own actions do not use this section gap.
@@ -112,7 +115,7 @@ Doctor uses the independent `PaneHeader` metadata row across the full content wi
 Its status wraps in the space left by the native-width actions.
 Actions align with the first title line, so neither title wrapping nor the time moves them down.
 The inline layout measures the existing heading token without fixing a text height.
-Only a column too narrow for the actions and one title line box uses the stacking fallback.
+Only a column too narrow for the stacked actions and one title line box moves the actions below.
 Other `PaneHeader` callers retain their action-stacking behaviour.
 `LastUpdatedLabel` accepts presentation tokens; other callers keep its caption defaults.
 The status heading and actions share one minimum gap before falling back to a stacked layout.

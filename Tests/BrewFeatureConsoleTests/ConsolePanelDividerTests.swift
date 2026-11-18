@@ -6,42 +6,60 @@ import Testing
 
 @MainActor
 struct ConsolePanelDividerTests {
-    @Test(arguments: [false, true])
-    func `the toolbar divider keeps the native strength`(dark: Bool) throws {
+    @Test(arguments: [false, true], [1, 2])
+    func `the toolbar divider keeps the native strength`(dark: Bool, scale: Int) throws {
         _ = NSApplication.shared
         let harness = ConsoleJobsHarness()
-        let toolbar = NSHostingView(rootView: ConsoleToolbar(expanded: .constant(true), viewModel: harness.viewModel))
-        let toolbarHeight = toolbar.fittingSize.height
+        let size = NSSize(width: 600, height: 200)
         let panel = ConsolePanel(expanded: .constant(true), commandJobsRepository: harness.repository)
-            .frame(width: 600, height: 200)
-        let bitmap = try render(panel, size: NSSize(width: 600, height: 200), dark: dark)
-        let scale = CGFloat(bitmap.pixelsHigh) / 200
-        let x = bitmap.pixelsWide / 2
-        let y = Int(toolbarHeight * scale)
-        // 保持内容、底面和尺寸一致，只以未修饰的系统线作为外观基准。
-        let reference = VStack(spacing: 0) {
-            ConsoleToolbar(expanded: .constant(true), viewModel: harness.viewModel)
-            Divider()
-            ConsoleBody(viewModel: harness.viewModel)
+        func reference(dividerOpacity: Double) -> some View {
+            VStack(spacing: 0) {
+                ConsoleToolbar(expanded: .constant(true), viewModel: harness.viewModel)
+                Divider().opacity(dividerOpacity)
+                ConsoleBody(viewModel: harness.viewModel)
+            }
+            .background(Color.brewSurface)
         }
-        .frame(width: 600, height: 200)
-        .background(Color.brewSurface)
-        let nativeBitmap = try render(reference, size: NSSize(width: 600, height: 200), dark: dark)
-        let native = try components(nativeBitmap, x: x, y: y)
-        let actual = try components(bitmap, x: x, y: y)
-        let background = try components(bitmap, x: x, y: y - Int(4 * scale))
+        let actual = try render(panel, size: size, dark: dark, scale: scale)
+        let native = try render(reference(dividerOpacity: 1), size: size, dark: dark, scale: scale)
+        let background = try render(reference(dividerOpacity: 0), size: size, dark: dark, scale: scale)
+        let x = native.pixelsWide / 2
+        let row = Int(BrewLayout.consoleToolbarHeight) * scale
+        let band = (row - 2 * scale) ... (row + 2 * scale)
+        var hasNativeDivider = false
 
-        #expect(zip(native, background).contains { abs($0 - $1) > 4.0 / 255 }, "The reference must contain a visible native divider")
-        #expect(zip(actual, native).allSatisfy { abs($0 - $1) <= 1.0 / 255 }, "Console \(actual) must match native \(native)")
+        // 原生细线会按背板像素取整；比较整个交界带，不猜它落在哪一行。
+        // 透明基准保留相同几何和两侧不同底色，只消除分隔线的绘制。
+        for y in band {
+            let expected = try components(native, x: x, y: y)
+            let undrawn = try components(background, x: x, y: y)
+            let measured = try components(actual, x: x, y: y)
+            hasNativeDivider = hasNativeDivider || zip(expected, undrawn).contains { abs($0 - $1) > 4.0 / 255 }
+            #expect(zip(measured, expected).allSatisfy { abs($0 - $1) <= 1.0 / 255 }, "Row \(y): console \(measured) must match native \(expected)")
+        }
+        #expect(hasNativeDivider, "The reference must contain a visible native divider")
     }
 
-    private func render(_ content: some View, size: NSSize, dark: Bool) throws -> NSBitmapImageRep {
-        let host = NSHostingView(rootView: content.environment(\.colorScheme, dark ? .dark : .light))
+    private func render(_ content: some View, size: NSSize, dark: Bool, scale: Int) throws -> NSBitmapImageRep {
+        let host = NSHostingView(rootView: content.frame(width: size.width, height: size.height)
+            .environment(\.colorScheme, dark ? .dark : .light))
         let window = NSWindow(contentRect: NSRect(origin: .zero, size: size), styleMask: .borderless, backing: .buffered, defer: false)
         window.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
         window.contentView = host
         host.layoutSubtreeIfNeeded()
-        let bitmap = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
+        let bitmap = try #require(NSBitmapImageRep(
+            bitmapDataPlanes: nil,
+            pixelsWide: Int(size.width) * scale,
+            pixelsHigh: Int(size.height) * scale,
+            bitsPerSample: 8,
+            samplesPerPixel: 4,
+            hasAlpha: true,
+            isPlanar: false,
+            colorSpaceName: .deviceRGB,
+            bytesPerRow: 0,
+            bitsPerPixel: 0,
+        ))
+        bitmap.size = size
         host.cacheDisplay(in: host.bounds, to: bitmap)
         return bitmap
     }
