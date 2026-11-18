@@ -25,13 +25,15 @@ struct UpgradesViewModelCheckFailureTests {
         #expect(viewModel.upgradeCheckFailureDetail.hasPrefix("Not a git repository"))
     }
 
-    @Test @MainActor func `an empty inventory after a successful check still claims up to date`() {
+    @Test @MainActor func `an empty inventory after a successful check shows the up-to-date content`() {
         let viewModel = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: false),
         ], refreshFailure: nil)
 
         #expect(!viewModel.showsUpgradeCheckFailure)
-        #expect(viewModel.outdatedSubtitle == UpgradesUpToDateCopy.headline)
+        #expect(viewModel.outdatedSubtitle == "Available")
+        #expect(viewModel.outdatedCount == 0)
+        #expect(viewModel.upToDateTitle == UpgradesUpToDateCopy.headline)
         #expect(viewModel.upgradeCheckFailureMessage == nil)
     }
 
@@ -44,7 +46,7 @@ struct UpgradesViewModelCheckFailureTests {
 
         #expect(!viewModel.showsUpgradeCheckFailure)
         #expect(viewModel.outdatedCount == 2)
-        #expect(viewModel.outdatedSubtitle == "Available upgrades — last check failed")
+        #expect(viewModel.outdatedSubtitle == "Available — last check failed")
     }
 
     @Test @MainActor func `a failed check does not masquerade as a filtered-out list`() {

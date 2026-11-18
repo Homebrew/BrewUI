@@ -233,7 +233,7 @@ struct UpgradesViewModelScopeTests {
 
     @Test @MainActor func `the header distinguishes hidden upgrades from none`() {
         let vm = Self.makeViewModel(packages: Self.mixedOutdated)
-        #expect(vm.outdatedSubtitle == "Available upgrades")
+        #expect(vm.outdatedSubtitle == "Available")
 
         vm.searchQuery = "no-such-package"
         #expect(vm.outdatedSubtitle == "No matches in 2 outdated packages")
@@ -241,10 +241,10 @@ struct UpgradesViewModelScopeTests {
         let upToDate = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: false),
         ])
-        #expect(upToDate.outdatedSubtitle == "Everything is up to date")
+        #expect(upToDate.outdatedSubtitle == "Available")
 
         upToDate.scope = .casks
-        #expect(upToDate.outdatedSubtitle == "Everything is up to date")
+        #expect(upToDate.outdatedSubtitle == "Available")
     }
 
     @Test @MainActor func `scope that hides every upgrade reports the filtered title`() {

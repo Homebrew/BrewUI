@@ -14,6 +14,9 @@ import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
+    /// 主窗口正文的统一顶界开关，不随页面或滚动状态变化。
+    private static let showsContentTopSeparator = true
+
     @Environment(\.selfUpgradeCoordinator) private var selfUpgradeCoordinator
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
@@ -45,9 +48,20 @@ struct MainWindowView: View {
             } bottom: {
                 ConsolePanelRoot(expanded: $consoleExpanded)
             }
+            .overlay(alignment: .top) {
+                if Self.showsContentTopSeparator {
+                    Divider()
+                        // 独立底面阻止横竖线叠色；背景只占线条范围，不跨入工具栏。
+                        .background(.background, ignoresSafeAreaEdges: [])
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
+            }
             .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         }
         .navigationSplitViewStyle(.automatic)
+        // 关闭工具栏背景自带的自动边界，正文顶界只由上方的 Divider 绘制。
+        .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         .focusedSceneValue(\.sidebarSelection, $selectedSidebarItem)
         .focusedSceneValue(\.refreshAll, RefreshAllAction { refreshAll() })

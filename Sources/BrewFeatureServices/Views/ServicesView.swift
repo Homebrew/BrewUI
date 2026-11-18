@@ -35,7 +35,7 @@ struct ServicesView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .padding(.horizontal, BrewSpacing.lg)
+                .padding(.horizontal, BrewLayout.paneContentInset)
                 .padding(.bottom, BrewSpacing.md)
                 .axid(.servicesScopePicker)
                 Divider()
@@ -48,7 +48,6 @@ struct ServicesView: View {
                     },
                 )
             }
-            .brewAlignWithWindowTitle()
             .frame(minWidth: BrewLayout.installedListColumnMinWidth, idealWidth: BrewLayout.installedListColumnIdealWidth,
                    maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             // HSplitView resets its divider when a pane's identity changes, so `.id` stays inside.
@@ -110,19 +109,19 @@ struct ServicesView: View {
                 command: "brew services info --all",
                 summaryText: LocalizedStringResource("Shows services for the current user", bundle: #bundle, comment: "Services command: reads the current user inventory"),
             )
-            .padding(.horizontal, BrewSpacing.lg)
+            .padding(.horizontal, BrewLayout.paneContentInset)
             if let message = viewModel.refreshFailure {
                 Text(message).foregroundStyle(Color.brewStatusError).textSelection(.enabled)
-                    .padding(.horizontal, BrewSpacing.lg)
+                    .padding(.horizontal, BrewLayout.paneContentInset)
             }
             if let message = viewModel.actionFailure {
                 Text(verbatim: message).font(.brewCallout).foregroundStyle(Color.brewStatusError)
                     .textSelection(.enabled)
                     .axid(.serviceActionError)
-                    .padding(.horizontal, BrewSpacing.lg)
+                    .padding(.horizontal, BrewLayout.paneContentInset)
             }
         }
-        .padding(.bottom, BrewSpacing.md)
+        .padding(.bottom, BrewSpacing.xl)
     }
 
     @ViewBuilder
@@ -156,7 +155,8 @@ struct ServicesView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(BrewSpacing.xl)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.vertical, BrewSpacing.xl)
         .accessibilityElement(children: .combine)
         .axid(.servicesEmptyState)
     }
@@ -171,15 +171,12 @@ struct ServicesView: View {
                 .padding(.vertical, BrewSpacing.xs)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
-                .listRowBackground(
-                    RoundedRectangle(cornerRadius: BrewRadius.lg, style: .continuous)
-                        .fill(viewModel.activeSelectedServiceID == service.id ? Color.brewBrandTint : Color.clear)
-                        .padding(.horizontal, BrewSpacing.sm),
-                )
+                .brewPaneListRowSelection(isSelected: viewModel.activeSelectedServiceID == service.id)
                 .onTapGesture { viewModel.selectedServiceID = service.id; listIsFocused = true }
                 .id(service.id)
                 .accessibilityElement(children: .combine)
                 .axid(.serviceRow(name: service.name))
+                .brewPaneListRowInsets()
             }
             .listStyle(.inset)
             .accessibilityLabel(String(localized: "Services", bundle: #bundle, comment: "VoiceOver: the services list"))

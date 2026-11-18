@@ -42,16 +42,79 @@ Feature folders use `Views/` and `ViewModels/`; feature `*Item` types belong in 
 database mappings and cache snapshots stay with their infrastructure boundary.
 
 Window titles use the unmodified native macOS style without static instructional subtitles.
-`brewAlignWithWindowTitle()` adds a 4-point leading inset to each content pane.
-It aligns the existing 16-point content padding with the native 20-point title gutter.
-List insets, column boundaries and trailing scrollbars retain their native layout. List pages use
-`PaneHeader` for a count or current state in the existing panel-heading style, followed by filters.
+`MainWindowView.showsContentTopSeparator` controls one full-width boundary above the main content.
+It defaults to visible and does not depend on the selected page, scrolling or console expansion.
+The divider overlays the content without changing its layout, hit testing or accessibility.
+Its contextual system background prevents the translucent split divider from being composited twice.
+The background stays within the divider bounds and does not extend into the toolbar safe area.
+It changes neither the native separator colour nor the content's alignment.
+Ordinary content dividers use the unmodified system appearance.
+`PackageDetailSectionDivider` adds no colour overlay, and the console toolbar divider adds no opacity.
+Native lists and split views retain their separator drawing.
+Custom console split chrome and drag affordances retain their existing theme tokens and behaviour.
+SwiftUI hides the window toolbar background, whose automatic boundary otherwise follows scroll content.
+This prevents a second line without changing native window properties, titles or controls.
+`BrewLayout.paneContentInset` owns the 20-point horizontal content inset across all six pages.
+It also sets the gap from the top content boundary to the centre pane's standard first row.
+The shared first-row layout shifts the sidebar, pane header and detail content by the same amount.
+It preserves their relative alignment without moving the toolbar or the split boundaries.
+List content, headings, Configuration and detail content use the same value on both sides.
+Thus the list and detail panes have four equal horizontal gutters at the default window size.
+The inset list's native 16-point margin stays in place; `brewPaneListRowInsets()` supplies the difference.
+Native row and section separators end at the shared content inset.
+Content lists share `brewPaneListRowSelection(isSelected:)` for their rounded brand-tint background.
+The background has a 10-point inset on each side, matching the filter-to-first-row gap in Upgrades.
+The inset does not change row height, content alignment or hit targets.
+Native window-title styling remains unchanged; no one-sided compensation moves content toward it.
+Structural dividers and trailing scrollbars retain their full-width native layout.
+List pages use `PaneHeader` for a count or current state in the existing panel-heading style, followed by filters.
 Configuration uses its environment and diagnostics heading in the same position.
-The default upgrades heading leaves the package count to the bulk-action button.
+Its heading and data share an 880-point content limit, increased by the default window's 80-point
+width change. Card insets and the 240-point field-label column remain unchanged.
+Other panes retain their 800-point content limit.
+The loaded Discover landing keeps Trending and Popular section names.
+Its original 30-day ranking explanation sits beside Trending as read-only secondary text.
+The original copy and translations remain unchanged.
+Search, loading and error states keep their existing subtitle position.
+Discover and Doctor share the existing plain pinned-header appearance through
+`brewPlainListSectionHeader()` in `BrewUIComponents`.
+`DiscoverSectionHeader` retains its existing call sites and appearance.
+The modifier keeps native list pinning while suppressing the floating edge.
+Native section separators do not read row alignment guides. The modifier covers the excess at each
+end without redrawing the system separator or changing row layout.
+It derives pinning from native row positions and listens to clip-view bounds notifications.
+It observes native floating-state redraws so resizing or collapsing the console does not restore the edge.
+The pinned heading and separator ends use tint-aware AppKit window backgrounds.
+The pinned background covers scrolled content without a flat colour band in dark appearance.
+The bridge restores row appearance on removal and does not replace the list delegate or change selection.
+If the native table or scroll notifications are unavailable, it leaves native appearance unchanged.
+Installed places its existing dependency filter switch beside the package count; the kind filter
+remains below the header.
+The default upgrades heading uses “Available” under the Upgrades window title and leaves the
+package count to the bulk-action button.
+The up-to-date state keeps that heading and the original command block.
+Its existing central status carries the success checkmark instead of a second status row in the header.
+Doctor and the up-to-date state share the seal checkmark, success colour and 44-point badge size.
+The default and minimum window width are 1080 points: 220 points for the sidebar, two
+414-point header budgets, 15 spare points per column and two points for the divider and rounding. The header budget covers all six current languages with
+a three-digit upgrade count. The column constraints remain unchanged.
 The header stacks actions below the heading when translated text does not fit alongside them. Page headings remain available
 to VoiceOver without repeating the window title visually. Bulk-upgrade and service-inventory commands
-remain expanded. Configuration guidance and the verbatim Doctor warning preamble remain in their original
-blue callouts above the data. Doctor exposes its purpose through a native toolbar tooltip.
+remain expanded. When a command block precedes a list filter, the header leaves 24 points before
+the filter. Command blocks next to their own actions do not use this section gap.
+Configuration guidance and the verbatim Doctor warning preamble remain in their original
+blue callouts above the data. Doctor retains the native window title without an extra toolbar help item.
+Doctor keeps all five original status strings as panel headings.
+Its severity sections retain the inset separator below the heading, matching Popular sections.
+They add neither a full-width floating edge nor a custom divider.
+Its last-check time uses the existing subheadline and secondary text tokens.
+Doctor uses the independent `PaneHeader` metadata row across the full content width.
+Its status wraps in the space left by the native-width actions.
+Actions align with the first title line, so neither title wrapping nor the time moves them down.
+The inline layout measures the existing heading token without fixing a text height.
+Only a column too narrow for the actions and one title line box uses the stacking fallback.
+Other `PaneHeader` callers retain their action-stacking behaviour.
+`LastUpdatedLabel` accepts presentation tokens; other callers keep its caption defaults.
 The status heading and actions share one minimum gap before falling back to a stacked layout.
 The first heading aligns its text-box centre with the sidebar's first row, not its text baseline.
 A measured `brewBody` reference defines that axis without changing typography.

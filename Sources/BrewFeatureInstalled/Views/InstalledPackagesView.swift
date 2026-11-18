@@ -25,12 +25,13 @@ struct InstalledPackagesView: View {
                 Text(viewModel.packageCountSubtitle)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
+            } actions: {
+                hideDependenciesToggle
             }
             .accessibilityLabel(Text("Your packages", bundle: #bundle, comment: "Installed tab heading"))
             .accessibilityHeading(.h1)
 
             scopePicker
-            hideDependenciesToggle
             Divider()
 
             AsyncContentView(
@@ -42,7 +43,6 @@ struct InstalledPackagesView: View {
                 },
             )
         }
-        .brewAlignWithWindowTitle()
         .accessibilityElement(children: .contain)
         .axid(.installedScreen)
         .task {
@@ -59,7 +59,7 @@ struct InstalledPackagesView: View {
         }
         .pickerStyle(.segmented)
         .labelsHidden()
-        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.horizontal, BrewLayout.paneContentInset)
         .padding(.bottom, BrewSpacing.md)
     }
 
@@ -69,8 +69,6 @@ struct InstalledPackagesView: View {
             .controlSize(.mini)
             .font(.brewSubheadline)
             .foregroundStyle(Color.brewTextSecondary)
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.md)
             .axid(.installedHideDependenciesSwitch)
     }
 
@@ -113,21 +111,13 @@ struct InstalledPackagesView: View {
         InstalledListRowRoot(package: package)
             .id(package.id)
             .contentShape(Rectangle())
-            .listRowBackground(
-                RoundedRectangle(
-                    cornerRadius: BrewRadius.lg,
-                    style: .continuous,
-                )
-                .fill(
-                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                )
-                .padding(.horizontal, BrewSpacing.sm),
-            )
+            .brewPaneListRowSelection(isSelected: viewModel.activeSelectedPackageID == package.id)
             .onTapGesture {
                 // Needed to suppress the default ugly blue macOS highlight state
                 viewModel.setSelection(package.id)
             }
             .axid(.installedRow(token: package.name))
+            .brewPaneListRowInsets()
     }
 
     private func scrollToSelection(

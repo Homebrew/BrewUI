@@ -5,6 +5,41 @@ import Testing
 
 @MainActor
 struct PaneHeaderAlignmentTests {
+    @Test(arguments: [300.0, 430.0, 700.0])
+    func `headers and details use matching horizontal gutters`(width: CGFloat) throws {
+        let heading = FrameReference()
+        let action = FrameReference()
+        let detail = FrameReference()
+        let content = VStack(spacing: 0) {
+            PaneHeader {
+                Text(verbatim: "Available")
+                    .font(.brewTitle2)
+                    .background(FrameProbe(reference: heading))
+            } actions: {
+                Color.clear.frame(width: 60, height: BrewLayout.headerActionHeight)
+                    .background(FrameProbe(reference: action))
+            }
+            Color.clear.frame(height: 40)
+                .background(FrameProbe(reference: detail))
+                .brewDetailPaneContent()
+        }
+        .frame(width: width)
+        let host = NSHostingView(rootView: content)
+        host.setFrameSize(host.fittingSize)
+        host.layoutSubtreeIfNeeded()
+        let headingView = try #require(heading.view)
+        let actionView = try #require(action.view)
+        let detailView = try #require(detail.view)
+        let headingFrame = headingView.convert(headingView.bounds, to: host)
+        let actionFrame = actionView.convert(actionView.bounds, to: host)
+        let detailFrame = detailView.convert(detailView.bounds, to: host)
+
+        #expect(headingFrame.minX == 20)
+        #expect(width - actionFrame.maxX == 20)
+        #expect(detailFrame.minX == 20)
+        #expect(width - detailFrame.maxX == 20)
+    }
+
     @Test(arguments: [false, true], [
         (240.0, "Available upgrades"),
         (700.0, "Available upgrades"),
@@ -26,6 +61,7 @@ struct PaneHeaderAlignmentTests {
                 .background(FrameProbe(reference: navigation))
                 .padding(BrewSpacing.sm)
                 .padding(.top, BrewSpacing.sm)
+                .brewSidebarFirstRowInset()
             PaneHeader {
                 VStack(alignment: .leading, spacing: BrewSpacing.xs) {
                     Text(verbatim: headingText)
@@ -56,6 +92,7 @@ struct PaneHeaderAlignmentTests {
         if width == 700 {
             let actionView = try #require(action.view)
             let actionFrame = actionView.convert(actionView.bounds, to: host)
+            #expect(abs(actionFrame.minY - 20) <= 0.5, "The centre pane's first row starts 20pt below the content boundary")
             #expect(abs(actionFrame.midY - headingFrame.midY) <= 0.5, "action \(actionFrame), heading \(headingFrame)")
         }
     }

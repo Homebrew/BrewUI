@@ -11,6 +11,7 @@ extension VerticalAlignment {
 }
 
 nonisolated enum PaneFirstRowTarget {
+    case sidebar
     case textCentre
     case headingTop
 }
@@ -20,6 +21,11 @@ public extension View {
     func brewPaneHeadingAnchor() -> some View {
         alignmentGuide(.brewPaneHeadingCentre) { $0[VerticalAlignment.center] }
     }
+
+    /// 随正文首行一起下移侧栏，保留导航项内部留白。
+    func brewSidebarFirstRowInset() -> some View {
+        brewPaneFirstRowInset(anchor: .center, target: .sidebar)
+    }
 }
 
 extension View {
@@ -28,6 +34,8 @@ extension View {
             anchor: anchor,
             target: target,
             navigationTextInset: BrewSpacing.sm * 2,
+            actionHeight: BrewLayout.headerActionHeight,
+            contentInset: BrewLayout.paneContentInset,
         ) {
             Text(verbatim: " ")
                 .font(.brewBody)
@@ -46,6 +54,8 @@ private struct PaneFirstRowInsetLayout: Layout {
     let anchor: VerticalAlignment
     let target: PaneFirstRowTarget
     let navigationTextInset: CGFloat
+    let actionHeight: CGFloat
+    let contentInset: CGFloat
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
         guard subviews.count == 3 else { return .zero }
@@ -67,7 +77,17 @@ private struct PaneFirstRowInsetLayout: Layout {
     private func topInset(_ dimensions: ViewDimensions, navigation: LayoutSubview, heading: LayoutSubview) -> CGFloat {
         let textHeight = navigation.sizeThatFits(.unspecified).height
         let centre = navigationTextInset + textHeight / 2
-        let targetY = target == .textCentre ? centre : centre - heading.sizeThatFits(.unspecified).height / 2
-        return max(0, targetY - (dimensions[explicit: anchor] ?? 0))
+        let headingHeight = heading.sizeThatFits(.unspecified).height
+        let rowHeight = max(actionHeight, headingHeight)
+        // 以中栏首行的标准操作槽为尺，只平移既有对齐结果。
+        let offset = contentInset + rowHeight / 2 - centre
+        switch target {
+        case .sidebar:
+            return offset
+        case .textCentre:
+            return offset + max(0, centre - (dimensions[explicit: anchor] ?? 0))
+        case .headingTop:
+            return offset + max(0, centre - headingHeight / 2 - (dimensions[explicit: anchor] ?? 0))
+        }
     }
 }

@@ -21,7 +21,7 @@ struct DetailPaneContentTests {
         host.layoutSubtreeIfNeeded()
 
         let iconInset = max(0, (textHeight - 44) / 2)
-        let topPadding = max(0, firstHeadingTop - iconInset)
+        let topPadding = rowOffset + max(0, firstHeadingTop - iconInset)
         let expectedHeight = max(44, textHeight) + BrewSpacing.xl * 2 + 30 + topPadding
         #expect(abs(host.fittingSize.height - expectedHeight) <= 0.5)
     }
@@ -31,12 +31,18 @@ struct DetailPaneContentTests {
         let host = NSHostingView(rootView: content)
         host.layoutSubtreeIfNeeded()
 
-        #expect(abs(host.fittingSize.height - (40 + BrewSpacing.xl + firstHeadingTop)) <= 0.5)
+        #expect(abs(host.fittingSize.height - (40 + BrewSpacing.xl + firstHeadingTop + rowOffset)) <= 0.5)
     }
 
     private var firstHeadingTop: CGFloat {
         let navigation = NSHostingView(rootView: Text(verbatim: " ").font(.brewBody))
         let heading = NSHostingView(rootView: Text(verbatim: " ").font(.brewTitle2))
         return BrewSpacing.sm * 2 + navigation.fittingSize.height / 2 - heading.fittingSize.height / 2
+    }
+
+    private var rowOffset: CGFloat {
+        let heading = NSHostingView(rootView: Text(verbatim: " ").font(.brewTitle2))
+        let halfRow = max(BrewLayout.headerActionHeight, heading.fittingSize.height) / 2
+        return 20 + halfRow - heading.fittingSize.height / 2 - firstHeadingTop
     }
 }

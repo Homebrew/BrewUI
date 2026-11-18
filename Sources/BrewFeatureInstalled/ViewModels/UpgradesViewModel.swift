@@ -130,9 +130,7 @@ final class UpgradesViewModel {
     )
 
     private var inventorySubtitle: String {
-        totalOutdatedCount == 0
-            ? UpgradesUpToDateCopy.headline
-            : String(localized: "Available upgrades", bundle: #bundle, comment: "Upgrades tab heading")
+        String(localized: "Available", bundle: #bundle, comment: "Upgrades tab status heading: upgrades are available; the window title supplies the context")
     }
 
     /// Subtitle while a scope and/or search filter is narrowing the list: "Showing N of M upgrades", or

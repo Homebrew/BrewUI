@@ -29,7 +29,6 @@ struct DiscoverPackagesView: View {
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .brewAlignWithWindowTitle()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.discoverScreen)
@@ -133,15 +132,25 @@ struct DiscoverPackagesView: View {
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
                     .brewPaneHeadingAnchor()
-                Text(viewModel.subtitleText)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(
-                        viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
-                    )
+                if !viewModel.showsInlineAnalyticsSummary {
+                    headerSubtitle
+                }
+            }
+        } actions: {
+            if viewModel.showsInlineAnalyticsSummary {
+                headerSubtitle
             }
         }
         .accessibilityLabel(Text(viewModel.paneHeading))
         .accessibilityHeading(.h1)
+    }
+
+    private var headerSubtitle: some View {
+        Text(viewModel.subtitleText)
+            .font(.brewSubheadline)
+            .foregroundStyle(
+                viewModel.isSubtitleError ? Color.brewStatusError : Color.brewTextSecondary,
+            )
     }
 
     /// Persistent kind filter, always visible (trending and results). Filters client-side; never refetches.
@@ -153,7 +162,7 @@ struct DiscoverPackagesView: View {
         }
         .pickerStyle(.segmented)
         .labelsHidden()
-        .padding(.horizontal, BrewSpacing.lg)
+        .padding(.horizontal, BrewLayout.paneContentInset)
         .padding(.bottom, BrewSpacing.md)
     }
 }
@@ -178,13 +187,17 @@ private struct DiscoverPackageSections: View {
         ScrollViewReader { proxy in
             List {
                 if viewModel.showsFormulaeSection {
-                    Section(viewModel.formulaeSectionTitle) {
+                    Section {
                         sectionContent(formulae, kind: .formula)
+                    } header: {
+                        DiscoverSectionHeader(title: viewModel.formulaeSectionTitle)
                     }
                 }
                 if viewModel.showsCasksSection {
-                    Section(viewModel.casksSectionTitle) {
+                    Section {
                         sectionContent(casks, kind: .cask)
+                    } header: {
+                        DiscoverSectionHeader(title: viewModel.casksSectionTitle)
                     }
                 }
             }
@@ -224,21 +237,13 @@ private struct DiscoverPackageSections: View {
                 listRow(package)
                     .id(package.id)
                     .contentShape(Rectangle())
-                    .listRowBackground(
-                        RoundedRectangle(
-                            cornerRadius: BrewRadius.lg,
-                            style: .continuous,
-                        )
-                        .fill(
-                            viewModel.selectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                        )
-                        .padding(.horizontal, BrewSpacing.sm),
-                    )
+                    .brewPaneListRowSelection(isSelected: viewModel.selectedPackageID == package.id)
                     .onTapGesture {
                         // Needed to suppress the default ugly blue macOS highlight state
                         viewModel.setSelection(package.id)
                     }
                     .axid(.discoverRow(token: package.name))
+                    .brewPaneListRowInsets()
             }
         }
     }
@@ -257,6 +262,7 @@ private struct DiscoverPackageSections: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, BrewSpacing.sm)
             .listRowBackground(Color.clear)
+            .brewPaneListRowInsets()
     }
 
     private func emptyStateMessage(for kind: HomebrewPackageKind) -> String {

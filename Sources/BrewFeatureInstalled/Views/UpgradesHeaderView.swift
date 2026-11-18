@@ -31,13 +31,17 @@ struct UpgradesHeaderView: View {
             .accessibilityLabel(Text("Available upgrades", bundle: #bundle, comment: "Upgrades tab heading"))
             .accessibilityHeading(.h1)
 
-            if viewModel.outdatedCount > 0 {
+            if viewModel.outdatedCount > 0 || (
+                viewModel.totalOutdatedCount == 0
+                    && viewModel.state.isLoaded
+                    && !viewModel.showsUpgradeCheckFailure
+            ) {
                 CommandBlockView(
                     command: viewModel.bulkUpgradeDisplayCommand,
                     summaryText: viewModel.bulkUpgradeSummary,
                 )
-                .padding(.horizontal, BrewSpacing.lg)
-                .padding(.bottom, BrewSpacing.md)
+                .padding(.horizontal, BrewLayout.paneContentInset)
+                .padding(.bottom, viewModel.totalOutdatedCount > 0 ? BrewSpacing.xl : BrewSpacing.md)
             }
         }
     }

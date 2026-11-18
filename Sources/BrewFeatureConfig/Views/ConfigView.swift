@@ -23,7 +23,6 @@ struct ConfigView: View {
             header
             content
         }
-        .brewAlignWithWindowTitle()
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.configScreen)
@@ -49,7 +48,7 @@ struct ConfigView: View {
             }
         }
         .accessibilityHeading(.h1)
-        .brewPaneContentWidth()
+        .brewPaneContentWidth(maxWidth: BrewLayout.configPaneContentMaxWidth)
     }
 
     @ViewBuilder
@@ -82,8 +81,9 @@ struct ConfigView: View {
                     ConfigSectionCard(section: section)
                 }
             }
-            .padding(BrewSpacing.lg)
-            .brewPaneContentWidth()
+            .padding(.vertical, BrewSpacing.lg)
+            .padding(.horizontal, BrewLayout.paneContentInset)
+            .brewPaneContentWidth(maxWidth: BrewLayout.configPaneContentMaxWidth)
         }
     }
 
@@ -123,7 +123,8 @@ struct ConfigView: View {
             .padding(.top, BrewSpacing.xs)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(BrewSpacing.xl)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.vertical, BrewSpacing.xl)
         .accessibilityElement(children: .combine)
     }
 

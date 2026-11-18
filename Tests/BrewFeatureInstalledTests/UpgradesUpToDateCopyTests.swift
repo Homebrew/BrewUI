@@ -11,14 +11,14 @@ import Foundation
 import Testing
 
 struct UpgradesUpToDateCopyTests {
-    @Test @MainActor func `every up-to-date surface renders the same phrase`() {
+    @Test @MainActor func `up-to-date content keeps its phrase under the availability heading`() {
         let viewModel = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: false),
             .fixture(name: "wget", kind: .formula, outdated: false),
         ])
 
         let phrase = UpgradesUpToDateCopy.headline
-        #expect(viewModel.outdatedSubtitle == phrase)
+        #expect(viewModel.outdatedSubtitle == "Available")
         #expect(viewModel.upToDateTitle == phrase)
     }
 

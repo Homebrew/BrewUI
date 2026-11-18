@@ -51,18 +51,28 @@ public enum BrewLayout {
 
     public static let paneContentMaxWidth: CGFloat = 800
 
+    /// 正文水平边距与中栏首行距顶界的基准留白。
+    public static let paneContentInset: CGFloat = 20
+
+    /// 配置正文随默认窗口增加 80pt，字段列宽不变。
+    public static let configPaneContentMaxWidth: CGFloat = 880
+
     /// Call-to-action row in a pane header. Clears a `.regular` bordered button, so pinning the row to it
     /// leaves the button's own metrics alone while giving anything that stands in for it the same height.
     public static let headerActionHeight: CGFloat = 28
 
+    /// 诊断健康状态与升级完成状态共用的成功徽章尺寸。
+    public static let successBadgeSize: CGFloat = 44
+
     /// Default window width.
-    public static let defaultWindowWidth: CGFloat = 1000
+    public static let defaultWindowWidth: CGFloat = minWindowWidth
 
     /// Default window height. Kept above ``minWindowHeight`` so a first launch opens at the size asked for.
     public static let defaultWindowHeight: CGFloat = 720
 
-    /// Minimum supported window width.
-    public static let minWindowWidth: CGFloat = 820
+    /// 六语言短标题含三位数数量按 414pt 预算；每栏另留 15pt 宽度余量。
+    /// 保留原分栏规则：220 + 2 × (414 + 15) + 2 = 1080，让标题与两个按钮同排。
+    public static let minWindowWidth: CGFloat = 1080
 
     /// Derived rather than picked: ``mainPaneMinHeight`` (521) + ``consoleMinExpandedHeight`` (150) +
     /// the split's own 7pt of chrome = 678, rounded up. Sized against the console's floor, not its default.

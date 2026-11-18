@@ -3,12 +3,48 @@
 //  BrewUITests
 //
 
+import AppKit
 import BrewAccessibilityID
 import BrewUITestContract
 import XCTest
 
 /// 同一窗口尺寸下保留六页截图，检查页头精简后仍能访问列表和操作。
 final class HeaderLayoutUITests: BrewUITestCase {
+    @MainActor
+    func testSectionSeparatorsShareTheTwentyPointContentGutters() throws {
+        for dark in [false, true] {
+            let environment = dark ? [BrewUITestingEnvironmentKey.darkAppearance: "1"] : [:]
+            let arguments = ["-AppleLanguages", "(en-GB)"]
+            let doctor = launch(.doctorHasIssues, environment: environment, arguments: arguments)
+                .sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
+            setComparisonWindowSize(doctor.app)
+            BrewApp.activate(doctor.app)
+            try assertSectionSeparatorInsets(in: doctor.root.element, heading: "Warning", app: doctor.app)
+            doctor.app.terminate()
+
+            let discover = launch(.discoverSearch, environment: environment, arguments: arguments)
+                .sidebar.goToDiscover().assertHasPackage("fd")
+            setComparisonWindowSize(discover.app)
+            BrewApp.activate(discover.app)
+            try assertSectionSeparatorInsets(in: discover.root.element, heading: "Popular Formulae", app: discover.app)
+            try assertSectionSeparatorInsets(in: discover.root.element, heading: "Popular Casks", app: discover.app)
+            discover.app.terminate()
+        }
+    }
+
+    @MainActor
+    func testContentBoundaryDoesNotDarkenAtTheSplitIntersection() throws {
+        for dark in [false, true] {
+            let environment = dark ? [BrewUITestingEnvironmentKey.darkAppearance: "1"] : [:]
+            let doctor = launch(.doctorHasIssues, environment: environment)
+                .sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
+            setComparisonWindowSize(doctor.app)
+            BrewApp.activate(doctor.app)
+            try assertUniformContentBoundary(in: doctor.app)
+            doctor.app.terminate()
+        }
+    }
+
     @MainActor
     func testHeaderScreenshots() {
         captureTour(arguments: ["-AppleLanguages", "(zh-Hant)", "-AppleLocale", "zh_TW"], suffix: "")
@@ -27,7 +63,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
         capture("Installed\(suffix)", app: installed.app, screen: .installedScreen)
         installed.sidebar.goToUpgrades().assertHasPackage("ripgrep")
         let upgradeHeading = BrewUIElement(installed.app, .paneHeaderSummary).waitToExist().element
-        XCTAssertEqual(upgradeHeading.value as? String, suffix.isEmpty ? "可用升級" : "Available upgrades")
+        XCTAssertEqual(upgradeHeading.value as? String, suffix.isEmpty ? "可用升級" : "Available")
         capture("Upgrades\(suffix)", app: installed.app, screen: .upgradesScreen)
         installed.sidebar.goToConfiguration().assertShowsEntry("HOMEBREW_VERSION")
         capture("Configuration\(suffix)", app: installed.app, screen: .configScreen)
@@ -67,7 +103,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
         let header = BrewUIElement(upgrades.app, .paneHeader, in: upgrades.root.element).waitToExist().element
         let headline = suffix.isEmpty ? "所有套件皆為最新版本" : "Everything is up to date"
         XCTAssertTrue(text(containing: headline, in: upgrades.app).waitForExistence(timeout: BrewUITestTimeout.default))
-        XCTAssertFalse(upgrades.root.element.staticTexts["brew upgrade"].exists)
+        XCTAssertTrue(upgrades.root.element.staticTexts["brew upgrade"].exists, "The original command remains expanded in the up-to-date state")
         XCTAssertEqual(header.buttons.count, 1, "Only refresh remains when no upgrades are available")
         setComparisonWindowSize(upgrades.app)
         capture("Upgrades up to date\(suffix)", app: upgrades.app, screen: .upgradesScreen)
@@ -94,7 +130,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
     }
 
     @MainActor
-    func testDoctorKeepsActionsBesideStatusAndHelpInToolbar() {
+    func testDoctorKeepsActionsBesideStatusWithoutExtraToolbarHelp() {
         let doctor = launch(
             .doctorHasIssues,
             arguments: ["-AppleLanguages", "(en-GB)", "-AppleLocale", "en_GB"],
@@ -111,8 +147,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
         let severity = text(containing: "Severity: Warning", in: doctor.app)
         XCTAssertTrue(severity.exists)
         XCTAssertEqual(severity.frame.minY, summary.frame.minY, accuracy: 1, "The detail badge follows the heading top, not the action row")
-        let info = BrewUIElement(doctor.app, .doctorPurposeInfo).waitToExist().element
-        XCTAssertLessThan(info.frame.maxY, header.frame.minY, "Purpose guidance belongs to the native toolbar")
+        BrewUIElement(doctor.app, .doctorPurposeInfo).assertDoesNotExist()
         capture("Doctor English", app: doctor.app, screen: .doctorScreen)
         doctor.sidebar.goToInstalled().assertRowCount(0)
         BrewUIElement(doctor.app, .doctorPurposeInfo).assertDoesNotExist()
@@ -167,16 +202,19 @@ final class HeaderLayoutUITests: BrewUITestCase {
     }
 
     @MainActor
-    func testInstalledHeaderDoesNotRepeatThePageTitle() {
+    func testInstalledHeaderDoesNotRepeatThePageTitle() throws {
         let installed = launch(.installedBasic).assertHasPackage("iterm2")
         let summary = BrewUIElement(installed.app, .paneHeaderSummary).waitToExist().element
         let sidebar = BrewUIElement(installed.app, .sidebar).element
-        XCTAssertEqual(summary.frame.minX - sidebar.frame.maxX, 20, accuracy: 1, "Content follows the native toolbar title gutter")
+        XCTAssertEqual(summary.frame.minX - sidebar.frame.maxX, 20, accuracy: 1, "Content shares the symmetric pane inset")
         let navigationItem = BrewUIElement(installed.app, .sidebarItem(.installed)).element
         XCTAssertEqual(summary.frame.midY, navigationItem.frame.midY, accuracy: 0.5, "Text boxes share their vertical centre, not their baseline")
+        let contentTop = try contentSplitter(in: installed.app).frame.minY
+        XCTAssertEqual(summary.frame.midY - contentTop, 20 + 28 / 2, accuracy: 0.5, "The standard first row starts 20pt below the content boundary")
         // 原生 List 将整行文字合并为一个元素，直接比较行的前缘。
         let firstRow = installed.list.row("iterm2").waitToExist().element
         XCTAssertEqual(firstRow.frame.minX, summary.frame.minX, accuracy: 1)
+        XCTAssertEqual(installed.root.element.frame.maxX - firstRow.frame.maxX, 20, accuracy: 1, "List content keeps the same trailing inset")
         let descriptions = installed.root.element.staticTexts.matching(NSPredicate(
             format: "label CONTAINS %@ OR value CONTAINS %@",
             "Your packages", "Your packages",
@@ -185,11 +223,103 @@ final class HeaderLayoutUITests: BrewUITestCase {
     }
 
     @MainActor
+    private func assertSectionSeparatorInsets(in pane: XCUIElement, heading: String, app: XCUIApplication) throws {
+        let title = pane.descendants(matching: .staticText)
+            .matching(NSPredicate(format: "label == %@ OR value == %@", heading, heading)).firstMatch
+        XCTAssertTrue(title.waitForExistence(timeout: BrewUITestTimeout.default))
+        let window = app.windows.firstMatch
+        let screenshot = window.screenshot()
+        let attachment = XCTAttachment(screenshot: screenshot)
+        attachment.name = "Section separator gutters - \(heading)"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        let bitmap = try XCTUnwrap(NSBitmapImageRep(data: screenshot.pngRepresentation))
+        let scale = CGFloat(bitmap.pixelsWide) / window.frame.width
+        let left = Int((pane.frame.minX - window.frame.minX) * scale)
+        let right = Int((pane.frame.maxX - window.frame.minX) * scale)
+        let top = Int((title.frame.minY - window.frame.minY) * scale)
+        var separator: ClosedRange<Int>?
+        var separatorY = top
+        for y in top ..< min(bitmap.pixelsHigh, top + Int(40 * scale)) {
+            let line = try pixelComponents(bitmap, x: (left + right) / 2, y: y)
+            let surface = try pixelComponents(bitmap, x: left + Int(2 * scale), y: y)
+            // 系统分隔线会继承桌面染色，用对比度和跨度识别，不要求纯灰。
+            guard zip(line, surface).contains(where: { abs($0 - $1) > 4.0 / 255 }) else { continue }
+            let columns = try (left ..< right).filter { x in
+                let colour = try pixelComponents(bitmap, x: x, y: y)
+                return zip(colour, line).allSatisfy { abs($0 - $1) <= 1.0 / 255 }
+            }
+            guard columns.count > (right - left) * 4 / 5, let first = columns.first, let last = columns.last else { continue }
+            separator = first ... last
+            separatorY = y
+            break
+        }
+        let actual = try XCTUnwrap(separator, "The section must retain its visible short separator")
+        XCTAssertEqual(actual.lowerBound - left, Int(20 * scale), "\(heading): leading separator gutter must be 20pt")
+        XCTAssertEqual(right - actual.upperBound - 1, Int(20 * scale), "\(heading): trailing separator gutter must be 20pt")
+        // 采两端未被选中底色覆盖的留白，确保分组底面和端点与正文融合。
+        for x in [left + Int(3 * scale), right - Int(3 * scale)] {
+            let surface = try pixelComponents(bitmap, x: x, y: separatorY + Int(3 * scale))
+            for y in [top, separatorY] {
+                let sample = try pixelComponents(bitmap, x: x, y: y)
+                let difference = zip(sample, surface).map { abs($0 - $1) }.max() ?? 0
+                XCTAssertLessThanOrEqual(difference, 2.0 / 255, "\(heading): the section background must match its list")
+            }
+        }
+    }
+
+    @MainActor
+    private func contentSplitter(in app: XCUIApplication) throws -> XCUIElement {
+        let window = app.windows.firstMatch
+        let sidebar = BrewUIElement(app, .sidebar).element
+        let centre = (sidebar.frame.maxX + window.frame.maxX) / 2
+        return try XCTUnwrap(window.splitters.allElementsBoundByIndex
+            .filter { $0.frame.height > $0.frame.width }
+            .min { abs($0.frame.midX - centre) < abs($1.frame.midX - centre) })
+    }
+
+    @MainActor
+    private func assertUniformContentBoundary(in app: XCUIApplication) throws {
+        let window = app.windows.firstMatch
+        let splitter = try contentSplitter(in: app)
+        let screenshot = window.screenshot()
+        let bitmap = try XCTUnwrap(NSBitmapImageRep(data: screenshot.pngRepresentation))
+        let scaleX = CGFloat(bitmap.pixelsWide) / window.frame.width
+        let scaleY = CGFloat(bitmap.pixelsHigh) / window.frame.height
+        let jointX = Int((splitter.frame.midX - window.frame.minX) * scaleX)
+        let topY = Int((splitter.frame.minY - window.frame.minY) * scaleY)
+        let referenceX = jointX - Int(8 * scaleX)
+        let belowY = topY + Int(4 * scaleY)
+        let reference = try pixelComponents(bitmap, x: referenceX, y: topY)
+        let below = try pixelComponents(bitmap, x: referenceX, y: belowY)
+        // 先证明采样位置确实有线，避免把两个相同的正文背景误判为通过。
+        XCTAssertGreaterThan(zip(reference, below).map { abs($0 - $1) }.max() ?? 0, 4.0 / 255)
+        for offset in 0 ..< max(1, Int(scaleY)) {
+            let line = try pixelComponents(bitmap, x: referenceX, y: topY + offset)
+            let joint = try pixelComponents(bitmap, x: jointX, y: topY + offset)
+            for (actual, expected) in zip(joint, line) {
+                XCTAssertEqual(actual, expected, accuracy: 1.0 / 255, "The split intersection must not apply the translucent separator twice")
+            }
+        }
+        let attachment = XCTAttachment(screenshot: screenshot)
+        attachment.name = "Content boundary intersection"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    @MainActor
+    private func pixelComponents(_ bitmap: NSBitmapImageRep, x: Int, y: Int) throws -> [CGFloat] {
+        XCTAssertTrue((0 ..< bitmap.pixelsWide).contains(x) && (0 ..< bitmap.pixelsHigh).contains(y))
+        let colour = try XCTUnwrap(bitmap.colorAt(x: x, y: y)?.usingColorSpace(.sRGB))
+        return [colour.redComponent, colour.greenComponent, colour.blueComponent]
+    }
+
+    @MainActor
     private func setComparisonWindowSize(_ app: XCUIApplication) {
         let window = app.windows.firstMatch
         let frame = window.frame
-        _ = window.resizeWindow(by: CGVector(dx: 1000 - frame.width, dy: 732 - frame.height))
-        XCTAssertEqual(window.frame.width, 1000, accuracy: 1)
+        _ = window.resizeWindow(by: CGVector(dx: 1080 - frame.width, dy: 732 - frame.height))
+        XCTAssertEqual(window.frame.width, 1080, accuracy: 1)
         XCTAssertEqual(window.frame.height, 732, accuracy: 1)
     }
 
@@ -214,7 +344,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
                 .waitToExist().element
             XCTAssertGreaterThanOrEqual(summary.frame.height, 20, "Counts and status use the existing panel-heading style")
             let sidebar = BrewUIElement(app, .sidebar).element
-            XCTAssertEqual(summary.frame.minX - sidebar.frame.maxX, 20, accuracy: 1, "Headings follow the native toolbar title gutter")
+            XCTAssertEqual(summary.frame.minX - sidebar.frame.maxX, 20, accuracy: 1, "Headings share the symmetric pane inset")
             let metrics = XCTAttachment(string: "screen: \(root.frame)\nsummary: \(summary.frame)")
             metrics.name = "Header geometry - \(name)"
             metrics.lifetime = .keepAlways

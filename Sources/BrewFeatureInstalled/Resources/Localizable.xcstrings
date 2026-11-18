@@ -581,6 +581,41 @@
         }
       }
     },
+    "Available" : {
+      "comment" : "Upgrades tab status heading: upgrades are available; the window title supplies the context",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponible"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用升级"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可用升級"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillgängligt"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "업그레이드 가능"
+          }
+        }
+      }
+    },
     "Available upgrades" : {
       "comment" : "Upgrades tab heading",
       "localizations" : {

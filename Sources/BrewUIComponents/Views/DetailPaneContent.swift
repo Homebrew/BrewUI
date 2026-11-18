@@ -16,11 +16,11 @@ public extension View {
         alignmentGuide(.brewDetailTop) { $0[.top] }
     }
 
-    /// 整体平移详情，使锚点对齐正文主标题的文字框顶部；保留原有横向与底部留白。
+    /// 整体平移详情，使锚点对齐正文主标题的文字框顶部；横向使用共用正文边距，底部留白不变。
     /// 长文案超出顶部留白时，不用负边距裁掉文字。
     func brewDetailPaneContent() -> some View {
         brewPaneFirstRowInset(anchor: .brewDetailTop, target: .headingTop)
-            .padding(.horizontal, BrewSpacing.xl)
+            .padding(.horizontal, BrewLayout.paneContentInset)
             .padding(.bottom, BrewSpacing.xl)
     }
 }
