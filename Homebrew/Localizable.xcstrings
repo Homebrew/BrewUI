@@ -1,5 +1,5 @@
 {
-  "sourceLanguage" : "uk",
+  "sourceLanguage" : "en",
   "strings" : {
     "A report was saved after the app quit unexpectedly. You can send it to the Homebrew team on GitHub to help fix the problem, or discard it." : {
       "comment" : "Crash report dialog body",
