@@ -8,23 +8,23 @@ import BrewAccessibilityID
 import BrewUITestContract
 import XCTest
 
-/// 同一窗口尺寸下保留六页截图，检查页头精简后仍能访问列表和操作。
+/// 用完整的原生窗口验收六页；只有窄窗用例要求精确宽度。
 final class HeaderLayoutUITests: BrewUITestCase {
+    private let freshWindow = [BrewUITestingEnvironmentKey.resetWindowState: "1"]
+
     @MainActor
     func testSectionSeparatorsShareTheTwentyPointContentGutters() throws {
         for dark in [false, true] {
-            let environment = dark ? [BrewUITestingEnvironmentKey.darkAppearance: "1"] : [:]
+            let environment = windowEnvironment(dark: dark)
             let arguments = ["-AppleLanguages", "(en-GB)"]
             let doctor = launch(.doctorHasIssues, environment: environment, arguments: arguments)
                 .sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
-            setComparisonWindowSize(doctor.app)
             BrewApp.activate(doctor.app)
             try assertSectionSeparatorInsets(in: doctor.root.element, heading: "Warning", app: doctor.app)
             doctor.app.terminate()
 
             let discover = launch(.discoverSearch, environment: environment, arguments: arguments)
                 .sidebar.goToDiscover().assertHasPackage("fd")
-            setComparisonWindowSize(discover.app)
             BrewApp.activate(discover.app)
             try assertSectionSeparatorInsets(in: discover.root.element, heading: "Popular Formulae", app: discover.app)
             try assertSectionSeparatorInsets(in: discover.root.element, heading: "Popular Casks", app: discover.app)
@@ -35,10 +35,9 @@ final class HeaderLayoutUITests: BrewUITestCase {
     @MainActor
     func testContentBoundaryDoesNotDarkenAtTheSplitIntersection() throws {
         for dark in [false, true] {
-            let environment = dark ? [BrewUITestingEnvironmentKey.darkAppearance: "1"] : [:]
+            let environment = windowEnvironment(dark: dark)
             let doctor = launch(.doctorHasIssues, environment: environment)
                 .sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
-            setComparisonWindowSize(doctor.app)
             BrewApp.activate(doctor.app)
             try assertUniformContentBoundary(in: doctor.app)
             doctor.app.terminate()
@@ -57,33 +56,28 @@ final class HeaderLayoutUITests: BrewUITestCase {
 
     @MainActor
     private func captureTour(arguments: [String], suffix: String) {
-        let environment = [BrewUITestingEnvironmentKey.resetWindowState: "1"]
-        let installed = launch(.installedBasic, environment: environment, arguments: arguments).assertHasPackage("wget")
-        setComparisonWindowSize(installed.app)
+        let installed = launch(.installedBasic, environment: freshWindow, arguments: arguments).assertHasPackage("wget")
         capture("Installed\(suffix)", app: installed.app, screen: .installedScreen)
         installed.sidebar.goToUpgrades().assertHasPackage("ripgrep")
         let upgradeHeading = BrewUIElement(installed.app, .paneHeaderSummary).waitToExist().element
-        XCTAssertEqual(upgradeHeading.value as? String, suffix.isEmpty ? "可用升級" : "Available")
+        assertText(suffix.isEmpty ? "可用升級" : "Available", in: upgradeHeading)
         capture("Upgrades\(suffix)", app: installed.app, screen: .upgradesScreen)
         installed.sidebar.goToConfiguration().assertShowsEntry("HOMEBREW_VERSION")
         capture("Configuration\(suffix)", app: installed.app, screen: .configScreen)
         installed.app.terminate()
 
-        let discover = launch(.discoverSearch, environment: environment, arguments: arguments).sidebar.goToDiscover()
+        let discover = launch(.discoverSearch, environment: freshWindow, arguments: arguments).sidebar.goToDiscover()
         discover.assertHasPackage("fd")
-        setComparisonWindowSize(discover.app)
         capture("Discover\(suffix)", app: discover.app, screen: .discoverScreen)
         discover.app.terminate()
 
-        let services = launch(.servicesBasic, environment: environment, arguments: arguments).sidebar.goToServices()
+        let services = launch(.servicesBasic, environment: freshWindow, arguments: arguments).sidebar.goToServices()
         services.row("redis").waitToExist()
-        setComparisonWindowSize(services.app)
         capture("Services\(suffix)", app: services.app, screen: .servicesScreen)
         services.app.terminate()
 
-        let doctor = launch(.doctorHasIssues, environment: environment, arguments: arguments).sidebar.goToDoctor()
+        let doctor = launch(.doctorHasIssues, environment: freshWindow, arguments: arguments).sidebar.goToDoctor()
         doctor.assertShowsIssue(containing: "deprecated or disabled")
-        setComparisonWindowSize(doctor.app)
         capture("Doctor\(suffix)", app: doctor.app, screen: .doctorScreen)
     }
 
@@ -97,45 +91,48 @@ final class HeaderLayoutUITests: BrewUITestCase {
     private func captureUpToDate(arguments: [String], suffix: String) {
         let upgrades = launch(
             .installedUpToDate,
-            environment: [BrewUITestingEnvironmentKey.resetWindowState: "1"],
+            environment: freshWindow,
             arguments: arguments,
         ).assertHasPackage("wget").sidebar.goToUpgrades()
         let header = BrewUIElement(upgrades.app, .paneHeader, in: upgrades.root.element).waitToExist().element
         let headline = suffix.isEmpty ? "所有套件皆為最新版本" : "Everything is up to date"
-        XCTAssertTrue(text(containing: headline, in: upgrades.app).waitForExistence(timeout: BrewUITestTimeout.default))
+        let state = BrewUIElement(upgrades.app, .upgradesUpToDate, in: upgrades.root.element).waitToExist().element
+        assertText(headline, in: state)
         XCTAssertTrue(upgrades.root.element.staticTexts["brew upgrade"].exists, "The original command remains expanded in the up-to-date state")
         XCTAssertEqual(header.buttons.count, 1, "Only refresh remains when no upgrades are available")
-        setComparisonWindowSize(upgrades.app)
         capture("Upgrades up to date\(suffix)", app: upgrades.app, screen: .upgradesScreen)
         upgrades.app.terminate()
     }
 
     @MainActor
     func testConfigurationGuidanceRemainsAboveTheData() {
-        let config = launch(.installedBasic).sidebar.goToConfiguration().assertShowsEntry("HOMEBREW_VERSION")
-        let heading = text(containing: "Homebrew environment & diagnostics", in: config.app)
-        XCTAssertTrue(heading.exists)
-        // macOS 将原有可选文字提示框暴露为 Info，而不是正文文本。
-        let guidance = config.root.element.otherElements["Info"]
-        XCTAssertTrue(guidance.waitForExistence(timeout: BrewUITestTimeout.default))
-        let firstEntry = text(containing: "HOMEBREW_VERSION", in: config.app)
+        let config = launch(
+            .installedBasic,
+            environment: freshWindow,
+            arguments: ["-AppleLanguages", "(en-GB)"],
+        ).sidebar.goToConfiguration().assertShowsEntry("HOMEBREW_VERSION")
+        let root = config.root.element
+        let heading = BrewUIElement(config.app, .paneHeaderSummary, in: root).waitToExist().element
+        assertText("Homebrew environment & diagnostics", in: heading)
+        let guidance = BrewUIElement(config.app, .configGuidance, in: root).waitToExist().element
+        let firstEntry = root.staticTexts["HOMEBREW_VERSION"]
         XCTAssertLessThanOrEqual(guidance.frame.maxY, firstEntry.frame.minY)
     }
 
     @MainActor
     func testDoctorWarningGuidanceRemainsVisible() {
-        let doctor = launch(.doctorHasIssues).sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
-        let guidance = doctor.root.element.otherElements["Info"]
-        XCTAssertTrue(guidance.waitForExistence(timeout: BrewUITestTimeout.default))
+        let doctor = launch(.doctorHasIssues, environment: freshWindow)
+            .sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
+        BrewUIElement(doctor.app, .doctorWarningGuidance, in: doctor.root.element).waitToExist()
     }
 
     @MainActor
     func testDoctorKeepsActionsBesideStatusWithoutExtraToolbarHelp() {
         let doctor = launch(
             .doctorHasIssues,
+            environment: freshWindow,
             arguments: ["-AppleLanguages", "(en-GB)", "-AppleLocale", "en_GB"],
         ).sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
-        setComparisonWindowSize(doctor.app)
         BrewApp.activate(doctor.app)
         let header = BrewUIElement(doctor.app, .paneHeader, in: doctor.root.element).waitToExist().element
         let summary = BrewUIElement(doctor.app, .paneHeaderSummary, in: header).element
@@ -144,8 +141,8 @@ final class HeaderLayoutUITests: BrewUITestCase {
             XCTAssertTrue(button.isHittable)
             XCTAssertLessThan(button.frame.minY, summary.frame.minY + 20, "Normal-width actions stay beside the status heading")
         }
-        let severity = text(containing: "Severity: Warning", in: doctor.app)
-        XCTAssertTrue(severity.exists)
+        let severity = BrewUIElement(doctor.app, .doctorDetailSeverity).waitToExist().element
+        assertText("Severity: Warning", in: severity)
         XCTAssertEqual(severity.frame.minY, summary.frame.minY, accuracy: 1, "The detail badge follows the heading top, not the action row")
         BrewUIElement(doctor.app, .doctorPurposeInfo).assertDoesNotExist()
         capture("Doctor English", app: doctor.app, screen: .doctorScreen)
@@ -171,7 +168,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
     private func checkCompactUpgrades(language: String, locale: String, description: String) {
         let upgrades = launch(
             .installedBasic,
-            environment: [BrewUITestingEnvironmentKey.resetWindowState: "1"],
+            environment: freshWindow,
             arguments: ["-AppleLanguages", "(\(language))", "-AppleLocale", locale],
         ).sidebar.goToUpgrades().assertHasPackage("ripgrep")
         let window = upgrades.app.windows.firstMatch
@@ -191,6 +188,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
                 _ = window.resizeWindow(by: CGVector(dx: width - currentWidth, dy: 0))
             }
             XCTAssertEqual(window.frame.width, width, accuracy: 1)
+            BrewApp.activate(upgrades.app)
             let header = BrewUIElement(upgrades.app, .paneHeader, in: upgrades.root.element).element
             let summary = BrewUIElement(upgrades.app, .paneHeaderSummary, in: header).element
             let buttons = header.buttons.allElementsBoundByIndex
@@ -212,7 +210,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
                     XCTAssertGreaterThan(first.width, second.width, "Horizontal buttons keep their native widths")
                 }
             }
-            XCTAssertTrue(BrewUIButton(upgrades.app, .consoleToggle).element.isHittable)
+            BrewUIButton(upgrades.app, .consoleToggle).waitToBeHittable()
             capture("Upgrades compact \(description) \(Int(width))pt", app: upgrades.app, screen: .upgradesScreen)
         }
     }
@@ -220,7 +218,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
     @MainActor
     func testTraditionalChineseDarkHeaders() {
         let arguments = ["-AppleLanguages", "(zh-Hant)", "-AppleLocale", "zh_TW"]
-        let environment = [BrewUITestingEnvironmentKey.darkAppearance: "1"]
+        let environment = windowEnvironment(dark: true)
         let services = launch(.servicesBasic, environment: environment, arguments: arguments).sidebar.goToServices()
         services.row("redis").waitToExist()
         capture("Services dark", app: services.app, screen: .servicesScreen)
@@ -355,24 +353,17 @@ final class HeaderLayoutUITests: BrewUITestCase {
         return [colour.redComponent, colour.greenComponent, colour.blueComponent]
     }
 
-    @MainActor
-    private func setComparisonWindowSize(_ app: XCUIApplication) {
-        let window = app.windows.firstMatch
-        let frame = window.frame
-        let display = NSScreen.main?.visibleFrame.size ?? CGSize(width: 1080, height: 732)
-        let width = min(1080, display.width)
-        let height = min(732, display.height)
-        if abs(frame.width - width) > 1 || abs(frame.height - height) > 1 {
-            _ = window.resizeWindow(by: CGVector(dx: width - frame.width, dy: height - frame.height))
+    private func windowEnvironment(dark: Bool) -> [String: String] {
+        var environment = freshWindow
+        if dark {
+            environment[BrewUITestingEnvironmentKey.darkAppearance] = "1"
         }
-        XCTAssertEqual(window.frame.width, width, accuracy: 1)
-        XCTAssertEqual(window.frame.height, height, accuracy: 1)
+        return environment
     }
 
     @MainActor
-    private func text(containing substring: String, in app: XCUIApplication) -> XCUIElement {
-        app.descendants(matching: .any)
-            .matching(NSPredicate(format: "label CONTAINS %@ OR value CONTAINS %@", substring, substring)).firstMatch
+    private func assertText(_ expected: String, in element: XCUIElement) {
+        XCTAssertTrue(element.label == expected || element.value as? String == expected, "Expected ‘\(expected)’ in \(element)")
     }
 
     @MainActor
@@ -396,7 +387,10 @@ final class HeaderLayoutUITests: BrewUITestCase {
             metrics.lifetime = .keepAlways
             add(metrics)
         }
-        let attachment = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+        let window = app.windows.firstMatch
+        let screenshot = window.screenshot()
+        XCTAssertNoThrow(try snapshotScale(XCTUnwrap(NSBitmapImageRep(data: screenshot.pngRepresentation)), window: window))
+        let attachment = XCTAttachment(screenshot: screenshot)
         attachment.name = "Header - \(name)"
         attachment.lifetime = .keepAlways
         add(attachment)

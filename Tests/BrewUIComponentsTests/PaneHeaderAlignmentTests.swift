@@ -7,7 +7,7 @@ import Testing
 struct PaneHeaderAlignmentTests {
     @Test func `the default window can shrink to fit a 1024 point display`() {
         #expect(BrewLayout.defaultWindowWidth == 1080)
-        #expect(BrewLayout.minWindowWidth < 1024)
+        #expect(BrewLayout.minWindowWidth == 820)
     }
 
     @Test(arguments: [210.0, 300.0, 360.0, 430.0])

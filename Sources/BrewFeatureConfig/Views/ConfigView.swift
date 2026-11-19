@@ -77,6 +77,7 @@ struct ConfigView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
                 NoteCallout(settingsNote, tone: .info)
+                    .axid(.configGuidance)
                 ForEach(viewModel.sections(for: snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }

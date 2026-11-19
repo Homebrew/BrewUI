@@ -26,6 +26,7 @@ public enum AXID: Hashable, Sendable {
     case installedHideDependenciesSwitch
     case upgradesScreen
     case upgradesList
+    case upgradesUpToDate
     case upgradesRow(token: String)
     case upgradesRefreshButton
 
@@ -43,7 +44,10 @@ public enum AXID: Hashable, Sendable {
 
     // Config / Doctor
     case configScreen
+    case configGuidance
     case doctorScreen
+    case doctorWarningGuidance
+    case doctorDetailSeverity
     case doctorPurposeInfo
     case brewNotFoundState
 
@@ -102,6 +106,7 @@ public enum AXID: Hashable, Sendable {
         case .installedHideDependenciesSwitch: "installed.hideDependencies"
         case .upgradesScreen: "upgrades.screen"
         case .upgradesList: "upgrades.list"
+        case .upgradesUpToDate: "upgrades.upToDate"
         case let .upgradesRow(token): "upgrades.row.\(token)"
         case .upgradesRefreshButton: "upgrades.refresh"
         case .selfUpgradeBanner: "selfupgrade.banner"
@@ -113,7 +118,10 @@ public enum AXID: Hashable, Sendable {
         case .discoverList: "discover.list"
         case let .discoverRow(token): "discover.row.\(token)"
         case .configScreen: "config.screen"
+        case .configGuidance: "config.guidance"
         case .doctorScreen: "doctor.screen"
+        case .doctorWarningGuidance: "doctor.warning.guidance"
+        case .doctorDetailSeverity: "doctor.detail.severity"
         case .doctorPurposeInfo: "doctor.purpose.info"
         case .servicesScreen: "services.screen"
         case .servicesList: "services.list"

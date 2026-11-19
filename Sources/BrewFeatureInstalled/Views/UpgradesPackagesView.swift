@@ -138,6 +138,7 @@ struct UpgradesPackagesView: View {
                     .foregroundStyle(Color.brewStatusSuccess)
             },
         )
+        .axid(.upgradesUpToDate)
     }
 
     /// An empty list after a failed check means "unknown", not "up to date".
