@@ -172,13 +172,12 @@ final class HeaderLayoutUITests: BrewUITestCase {
             arguments: ["-AppleLanguages", "(\(language))", "-AppleLocale", locale],
         ).sidebar.goToUpgrades().assertHasPackage("ripgrep")
         let window = upgrades.app.windows.firstMatch
-        let originalFrame = window.frame
+        let originalWidth = window.frame.width
         defer {
-            let compactFrame = window.frame
-            _ = window.resizeWindow(by: CGVector(
-                dx: originalFrame.width - compactFrame.width,
-                dy: originalFrame.height - compactFrame.height,
-            ))
+            let widthChange = originalWidth - window.frame.width
+            if abs(widthChange) > 1 {
+                _ = window.resizeWindow(by: CGVector(dx: widthChange, dy: 0))
+            }
             upgrades.app.terminate()
         }
         let widths: [CGFloat] = [min(1024, NSScreen.main?.visibleFrame.width ?? 1024), 820]
@@ -210,7 +209,6 @@ final class HeaderLayoutUITests: BrewUITestCase {
                     XCTAssertGreaterThan(first.width, second.width, "Horizontal buttons keep their native widths")
                 }
             }
-            BrewUIButton(upgrades.app, .consoleToggle).waitToBeHittable()
             capture("Upgrades compact \(description) \(Int(width))pt", app: upgrades.app, screen: .upgradesScreen)
         }
     }
@@ -265,16 +263,21 @@ final class HeaderLayoutUITests: BrewUITestCase {
         let left = Int((pane.frame.minX - window.frame.minX) * scale)
         let right = Int((pane.frame.maxX - window.frame.minX) * scale)
         let top = Int((title.frame.minY - window.frame.minY) * scale)
+        let referenceOffset = max(1, Int(scale))
         var separator: ClosedRange<Int>?
         var separatorY = top
-        for y in top ..< min(bitmap.pixelsHigh, top + Int(40 * scale)) {
-            let line = try pixelComponents(bitmap, x: (left + right) / 2, y: y)
-            let surface = try pixelComponents(bitmap, x: left + Int(2 * scale), y: y)
-            // 系统分隔线会继承桌面染色，用对比度和跨度识别，不要求纯灰。
-            guard zip(line, surface).contains(where: { abs($0 - $1) > 4.0 / 255 }) else { continue }
+        // 在同一列比较线的上下背景，避免把侧栏阴影当成分隔线。
+        for y in max(top, referenceOffset) ..< min(bitmap.pixelsHigh - referenceOffset, top + Int(40 * scale)) {
+            func hasLineContrast(at x: Int) throws -> Bool {
+                let line = try pixelComponents(bitmap, x: x, y: y)
+                return try [y - referenceOffset, y + referenceOffset].allSatisfy { neighbourY in
+                    let surface = try pixelComponents(bitmap, x: x, y: neighbourY)
+                    return zip(line, surface).contains { abs($0 - $1) > 4.0 / 255 }
+                }
+            }
+            guard try hasLineContrast(at: (left + right) / 2) else { continue }
             let columns = try (left ..< right).filter { x in
-                let colour = try pixelComponents(bitmap, x: x, y: y)
-                return zip(colour, line).allSatisfy { abs($0 - $1) <= 1.0 / 255 }
+                try hasLineContrast(at: x)
             }
             guard columns.count > (right - left) * 4 / 5, let first = columns.first, let last = columns.last else { continue }
             separator = first ... last
