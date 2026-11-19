@@ -32,12 +32,12 @@ struct ConfigView: View {
     }
 
     private var header: some View {
-        PaneHeader {
+        PaneHeader(wrapsSummary: true) {
             Text("Homebrew environment & diagnostics", bundle: #bundle, comment: "Configuration content heading: Homebrew environment and diagnostic information")
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
         } actions: {
-            HStack(spacing: BrewSpacing.sm) {
+            PaneHeaderActions {
                 Button(String(localized: "Copy report", bundle: #bundle, comment: "Configuration header: copy the diagnostic report"), systemImage: "doc.on.doc") {
                     copyReport()
                 }

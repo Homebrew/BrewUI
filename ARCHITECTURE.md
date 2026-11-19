@@ -98,7 +98,7 @@ Doctor and the up-to-date state share the seal checkmark, success colour and 44-
 The preferred default window width is 1080 points. This fits six languages with a three-digit upgrade count.
 SwiftUI sizes a new window to the available display if it is narrower and still restores saved window sizes.
 The minimum remains 820 points. The column constraints remain unchanged.
-Upgrades and Doctor wrap titles beside the controls first.
+Upgrades, Doctor and Configuration wrap titles beside the controls first.
 If the horizontal controls do not fit, the controls stack beside the title and align with its first line.
 Only a vertical pair of buttons shares the wider button's natural width.
 The full group moves below the title only when neither side-by-side layout fits.
@@ -128,8 +128,8 @@ A fixed-height action slot keeps timestamps from moving the axis.
 The layout measures the existing `brewTitle2` line height; buttons do not define the detail start.
 The layout clamps top padding at zero so long content never clips above the scroll view.
 The detail start stays stable when a narrow header stacks its actions.
-UI tests can request dark appearance through `BrewUITestingEnvironmentKey.darkAppearance`.
-This changes only the test process after fixture mode is confirmed, never the system preference.
+UI tests can request light or dark appearance through `BrewUITestingEnvironmentKey.appearance`.
+The override applies only to the fixture process. Without a request, the app follows the system.
 
 ## Command execution
 

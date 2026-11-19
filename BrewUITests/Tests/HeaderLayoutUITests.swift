@@ -14,8 +14,8 @@ final class HeaderLayoutUITests: BrewUITestCase {
 
     @MainActor
     func testSectionSeparatorsShareTheTwentyPointContentGutters() throws {
-        for dark in [false, true] {
-            let environment = windowEnvironment(dark: dark)
+        for appearance in BrewUITestingAppearance.allCases {
+            let environment = windowEnvironment(appearance: appearance)
             let arguments = ["-AppleLanguages", "(en-GB)"]
             let doctor = launch(.doctorHasIssues, environment: environment, arguments: arguments)
                 .sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
@@ -34,12 +34,12 @@ final class HeaderLayoutUITests: BrewUITestCase {
 
     @MainActor
     func testContentBoundaryDoesNotDarkenAtTheSplitIntersection() throws {
-        for dark in [false, true] {
-            let environment = windowEnvironment(dark: dark)
+        for appearance in BrewUITestingAppearance.allCases {
+            let environment = windowEnvironment(appearance: appearance)
             let doctor = launch(.doctorHasIssues, environment: environment)
                 .sidebar.goToDoctor().assertShowsIssue(containing: "deprecated or disabled")
             BrewApp.activate(doctor.app)
-            try assertUniformContentBoundary(in: doctor.app)
+            try assertUniformContentBoundary(in: doctor.app, appearance: appearance)
             doctor.app.terminate()
         }
     }
@@ -117,6 +117,61 @@ final class HeaderLayoutUITests: BrewUITestCase {
         let guidance = BrewUIElement(config.app, .configGuidance, in: root).waitToExist().element
         let firstEntry = root.staticTexts["HOMEBREW_VERSION"]
         XCTAssertLessThanOrEqual(guidance.frame.maxY, firstEntry.frame.minY)
+    }
+
+    @MainActor
+    func testConfigurationWrapsTheHeadingBeforeMovingItsActions() throws {
+        let config = launch(.installedBasic, environment: freshWindow, arguments: ["-AppleLanguages", "(es)", "-AppleLocale", "es_ES"])
+            .sidebar.goToConfiguration().assertShowsEntry("HOMEBREW_VERSION")
+        let app = config.app
+        let header = BrewUIElement(app, .paneHeader, in: config.root.element).waitToExist().element
+        let title = BrewUIElement(app, .paneHeaderSummary, in: header).waitToExist().element
+        assertText("Entorno y diagnóstico de Homebrew", in: title)
+        let singleLineHeight = title.frame.height
+        let window = app.windows.firstMatch
+        let originalWidth = window.frame.width
+        defer {
+            let widthChange = originalWidth - window.frame.width
+            if abs(widthChange) > 1 {
+                _ = window.resizeWindow(by: CGVector(dx: widthChange, dy: 0))
+            }
+        }
+        if abs(originalWidth - 820) > 1 {
+            _ = window.resizeWindow(by: CGVector(dx: 820 - originalWidth, dy: 0))
+        }
+        XCTAssertEqual(window.frame.width, 820, accuracy: 1)
+        BrewApp.activate(app)
+        let sidebar = BrewUIElement(app, .sidebar).element
+        let sidebarEdge = sidebar.frame.maxX
+        let sidebarSplitter = try XCTUnwrap(window.splitters.allElementsBoundByIndex
+            .filter { $0.frame.height > $0.frame.width }
+            .min { abs($0.frame.midX - sidebarEdge) < abs($1.frame.midX - sidebarEdge) })
+        let grip = sidebarSplitter.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        defer {
+            let widthChange = sidebarEdge - sidebar.frame.maxX
+            if abs(widthChange) > 1 {
+                grip.click(forDuration: 0.3, thenDragTo: grip.withOffset(CGVector(dx: widthChange, dy: 0)))
+            }
+        }
+        grip.click(forDuration: 0.3, thenDragTo: grip.withOffset(CGVector(dx: 45, dy: 0)))
+        XCTAssertGreaterThan(sidebar.frame.maxX - sidebarEdge, 30)
+
+        let screenshot = XCTAttachment(screenshot: window.screenshot())
+        screenshot.name = "Configuration compact Spanish"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        let buttons = header.buttons.allElementsBoundByIndex
+        XCTAssertEqual(buttons.count, 2)
+        let first = try XCTUnwrap(buttons.first)
+        let second = try XCTUnwrap(buttons.dropFirst().first)
+        XCTAssertGreaterThan(title.frame.height, singleLineHeight, "The heading wraps at this width")
+        XCTAssertLessThan(first.frame.minY, title.frame.minY + 14, "The actions stay beside the first line")
+        XCTAssertEqual(first.frame.midY, second.frame.midY, accuracy: 1, "The two actions still fit on one row")
+        for button in buttons {
+            XCTAssertTrue(button.isHittable)
+            XCTAssertGreaterThan(button.frame.minX, title.frame.maxX)
+            XCTAssertLessThanOrEqual(button.frame.maxX, header.frame.maxX)
+        }
     }
 
     @MainActor
@@ -216,7 +271,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
     @MainActor
     func testTraditionalChineseDarkHeaders() {
         let arguments = ["-AppleLanguages", "(zh-Hant)", "-AppleLocale", "zh_TW"]
-        let environment = windowEnvironment(dark: true)
+        let environment = windowEnvironment(appearance: .dark)
         let services = launch(.servicesBasic, environment: environment, arguments: arguments).sidebar.goToServices()
         services.row("redis").waitToExist()
         capture("Services dark", app: services.app, screen: .servicesScreen)
@@ -309,7 +364,7 @@ final class HeaderLayoutUITests: BrewUITestCase {
     }
 
     @MainActor
-    private func assertUniformContentBoundary(in app: XCUIApplication) throws {
+    private func assertUniformContentBoundary(in app: XCUIApplication, appearance: BrewUITestingAppearance) throws {
         let window = app.windows.firstMatch
         let splitter = try contentSplitter(in: app)
         let screenshot = window.screenshot()
@@ -321,6 +376,8 @@ final class HeaderLayoutUITests: BrewUITestCase {
         let belowY = topY + Int(4 * scale)
         let reference = try pixelComponents(bitmap, x: referenceX, y: topY)
         let below = try pixelComponents(bitmap, x: referenceX, y: belowY)
+        // 区分实际渲染的明暗外观，不依赖分隔线的颜色或透明度。
+        XCTAssertEqual(below.allSatisfy { $0 < 0.5 }, appearance == .dark, "Content must render in \(appearance.rawValue) appearance")
         // 先证明采样位置确实有线，避免把两个相同的正文背景误判为通过。
         XCTAssertGreaterThan(zip(reference, below).map { abs($0 - $1) }.max() ?? 0, 4.0 / 255)
         for offset in 0 ..< max(1, Int(scale)) {
@@ -356,12 +413,8 @@ final class HeaderLayoutUITests: BrewUITestCase {
         return [colour.redComponent, colour.greenComponent, colour.blueComponent]
     }
 
-    private func windowEnvironment(dark: Bool) -> [String: String] {
-        var environment = freshWindow
-        if dark {
-            environment[BrewUITestingEnvironmentKey.darkAppearance] = "1"
-        }
-        return environment
+    private func windowEnvironment(appearance: BrewUITestingAppearance) -> [String: String] {
+        freshWindow.merging([BrewUITestingEnvironmentKey.appearance: appearance.rawValue]) { _, override in override }
     }
 
     @MainActor

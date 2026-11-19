@@ -27,8 +27,10 @@ extension BrewApp {
         guard let uiTesting else {
             return nil
         }
-        if ProcessInfo.processInfo.environment[BrewUITestingEnvironmentKey.darkAppearance] != nil {
-            NSApplication.shared.appearance = NSAppearance(named: .darkAqua)
+        if let value = ProcessInfo.processInfo.environment[BrewUITestingEnvironmentKey.appearance],
+           let appearance = BrewUITestingAppearance(rawValue: value)
+        {
+            NSApplication.shared.appearance = NSAppearance(named: appearance == .dark ? .darkAqua : .aqua)
         }
         if uiTesting.resetsWindowState {
             clearAutosavedWindowState()
