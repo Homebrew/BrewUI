@@ -49,9 +49,9 @@ Its contextual system background prevents the translucent split divider from bei
 The background stays within the divider bounds and does not extend into the toolbar safe area.
 It changes neither the native separator colour nor the content's alignment.
 Ordinary content dividers use the unmodified system appearance.
-`PackageDetailSectionDivider` adds no colour overlay, and the console toolbar divider adds no opacity.
+`PackageDetailSectionDivider` adds no colour overlay.
 Native lists and split views retain their separator drawing.
-Custom console split chrome and drag affordances retain their existing theme tokens and behaviour.
+The console retains its existing toolbar divider, split chrome and drag affordance.
 SwiftUI hides the window toolbar background, whose automatic boundary otherwise follows scroll content.
 This prevents a second line without changing native window properties, titles or controls.
 `BrewLayout.paneContentInset` owns the 20-point horizontal content inset across all six pages.

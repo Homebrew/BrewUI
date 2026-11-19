@@ -368,7 +368,6 @@ let package = Package(
             name: "BrewFeatureConsoleTests",
             dependencies: [
                 "BrewFeatureConsole",
-                "BrewUIComponents",
                 "BrewCore",
                 "BrewRepositoryInterfaces",
                 "BrewRepositories",

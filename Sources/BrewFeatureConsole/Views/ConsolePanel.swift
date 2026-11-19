@@ -25,7 +25,7 @@ struct ConsolePanel: View {
         VStack(spacing: 0) {
             if expanded {
                 ConsoleToolbar(expanded: $expanded, viewModel: viewModel)
-                Divider()
+                Divider().opacity(0.4)
                 ConsoleBody(viewModel: viewModel)
             } else {
                 ConsoleStatusBar(expanded: $expanded, viewModel: viewModel)
