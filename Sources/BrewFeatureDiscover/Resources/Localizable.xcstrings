@@ -33,6 +33,12 @@
             "state" : "translated",
             "value" : "%@ (링크됨)"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@(リンク済み)"
+          }
         }
       }
     },
@@ -68,6 +74,12 @@
             "state" : "translated",
             "value" : "%@회 설치 (30일)"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 回インストール(30日間)"
+          }
         }
       }
     },
@@ -102,6 +114,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "30일간 %@회 설치"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30日間で %@ 回インストール"
           }
         }
       }
@@ -144,6 +162,12 @@
             "state" : "translated",
             "value" : "“%2$@” 검색 결과 패키지 %1$lld개"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%2$@” に一致するパッケージ %1$lld 件"
+          }
         }
       }
     },
@@ -178,6 +202,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "“%@” 검색 결과 패키지 1개"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” に一致するパッケージ 1 件"
           }
         }
       }
@@ -214,6 +244,12 @@
             "state" : "translated",
             "value" : "30일간 설치 수"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30日間のインストール数"
+          }
         }
       }
     },
@@ -248,6 +284,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "전체"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて"
           }
         }
       }
@@ -284,6 +326,12 @@
             "state" : "translated",
             "value" : "의존성으로 설치"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依存関係として"
+          }
         }
       }
     },
@@ -315,6 +363,12 @@
           }
         },
         "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cask"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cask"
@@ -354,6 +408,12 @@
             "state" : "translated",
             "value" : "둘러보기에서 패키지를 선택하면 세부사항이 표시됩니다."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「発見」からパッケージを選択すると詳細が表示されます。"
+          }
         }
       }
     },
@@ -388,6 +448,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "패키지를 불러올 수 없음"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パッケージを読み込めませんでした"
           }
         }
       }
@@ -424,6 +490,12 @@
             "state" : "translated",
             "value" : "패키지를 검색할 수 없음"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パッケージを検索できませんでした"
+          }
         }
       }
     },
@@ -458,6 +530,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "의존성"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依存関係"
           }
         }
       }
@@ -494,6 +572,12 @@
             "state" : "translated",
             "value" : "세부사항"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細"
+          }
         }
       }
     },
@@ -529,6 +613,12 @@
             "state" : "translated",
             "value" : "패키지 둘러보기"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パッケージを発見"
+          }
         }
       }
     },
@@ -560,6 +650,12 @@
           }
         },
         "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formula"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Formula"
@@ -599,6 +695,12 @@
             "state" : "translated",
             "value" : "홈페이지"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホームページ"
+          }
         }
       }
     },
@@ -633,6 +735,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "설치됨"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール済み"
           }
         }
       }
@@ -669,6 +777,12 @@
             "state" : "translated",
             "value" : "설치"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール"
+          }
         }
       }
     },
@@ -703,6 +817,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "설치 이유"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール理由"
           }
         }
       }
@@ -739,6 +859,12 @@
             "state" : "translated",
             "value" : "설치됨"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール済み"
+          }
         }
       }
     },
@@ -773,6 +899,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "설치 날짜"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール日"
           }
         }
       }
@@ -809,6 +941,12 @@
             "state" : "translated",
             "value" : "설치 중"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストール中"
+          }
         }
       }
     },
@@ -844,6 +982,12 @@
             "state" : "translated",
             "value" : "이 Mac에 패키지를 설치합니다"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このパッケージを Mac にインストールします"
+          }
         }
       }
     },
@@ -878,6 +1022,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "최신 버전"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最新バージョン"
           }
         }
       }
@@ -920,6 +1070,12 @@
             "state" : "translated",
             "value" : "라이선스"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライセンス"
+          }
         }
       }
     },
@@ -954,6 +1110,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "패키지 불러오는 중…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "パッケージを読み込み中…"
           }
         }
       }
@@ -990,6 +1152,12 @@
             "state" : "translated",
             "value" : "최근 30일간 가장 많이 설치된 패키지"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去30日間で最もインストールされたパッケージ"
+          }
         }
       }
     },
@@ -1024,6 +1192,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "일치하는 Cask 없음"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一致する Cask はありません"
           }
         }
       }
@@ -1060,6 +1234,12 @@
             "state" : "translated",
             "value" : "의존성이 없습니다."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "依存関係はありません。"
+          }
         }
       }
     },
@@ -1094,6 +1274,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "일치하는 Formula 없음"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一致する Formula はありません"
           }
         }
       }
@@ -1130,6 +1316,12 @@
             "state" : "translated",
             "value" : "일치 항목 없음"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一致する項目はありません"
+          }
         }
       }
     },
@@ -1164,6 +1356,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "선택 항목 없음"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選択されていません"
           }
         }
       }
@@ -1200,6 +1398,12 @@
             "state" : "translated",
             "value" : "“%@” 검색 결과 없음"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@” に一致する項目は見つかりませんでした"
+          }
         }
       }
     },
@@ -1234,6 +1438,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "인기 Cask"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "人気の Cask"
           }
         }
       }
@@ -1270,6 +1480,12 @@
             "state" : "translated",
             "value" : "인기 Formula"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "人気の Formula"
+          }
         }
       }
     },
@@ -1304,6 +1520,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bottle에서 설치 — %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bottle からインストール — %@"
           }
         }
       }
@@ -1340,6 +1562,12 @@
             "state" : "translated",
             "value" : "결과"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結果"
+          }
         }
       }
     },
@@ -1374,6 +1602,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "범위"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範囲"
           }
         }
       }
@@ -1410,6 +1644,12 @@
             "state" : "translated",
             "value" : "Homebrew 패키지 검색"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew のパッケージを検索"
+          }
         }
       }
     },
@@ -1445,6 +1685,12 @@
             "state" : "translated",
             "value" : "검색 중…"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索中…"
+          }
         }
       }
     },
@@ -1479,6 +1725,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "둘러보기 패키지를 불러오는 중 문제가 발생했습니다."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「発見」のパッケージを読み込み中に問題が発生しました。"
           }
         }
       }
@@ -1521,6 +1773,12 @@
             "state" : "translated",
             "value" : "카탈로그를 검색하는 중 문제가 발생했습니다."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カタログの検索中に問題が発生しました。"
+          }
         }
       }
     },
@@ -1555,6 +1813,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "이 패키지를 설치하는 중 문제가 발생했습니다."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このパッケージのインストール中に問題が発生しました。"
           }
         }
       }
@@ -1591,6 +1855,12 @@
             "state" : "translated",
             "value" : "출처"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ソース"
+          }
         }
       }
     },
@@ -1625,6 +1895,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "인기"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トレンド"
           }
         }
       }
