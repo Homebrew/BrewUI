@@ -1,0 +1,78 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%lld old versions, downloads and logs" : {
+      "comment" : "Cleanup section title; %lld is the path count"
+    },
+    "%lld unneeded dependencies" : {
+      "comment" : "Cleanup section title; %lld is the formula count"
+    },
+    "1 old version, download or log" : {
+      "comment" : "Cleanup section title, one path"
+    },
+    "1 unneeded dependency" : {
+      "comment" : "Cleanup section title, one formula"
+    },
+    "About %@ can be freed" : {
+      "comment" : "Cleanup summary; %@ is Homebrew's disk-space total, e.g. 67.5MB"
+    },
+    "Adds --prune=all. Without it, Homebrew keeps recent downloads so reinstalling is quicker." : {
+      "comment" : "Cleanup option caption explaining --prune=all"
+    },
+    "Broken link" : {
+      "comment" : "Cleanup row: the path is a symlink whose target is gone"
+    },
+    "Cancel" : {
+      "comment" : "Clean Up sheet: close without removing anything"
+    },
+    "Checking again" : {
+      "comment" : "VoiceOver: Clean Up re-check spinner"
+    },
+    "Clean Up" : {
+      "comment" : "Cleanup: run brew cleanup"
+    },
+    "Clean Up Homebrew" : {
+      "comment" : "Clean Up sheet title"
+    },
+    "Couldn't check what Homebrew can clean up." : {
+      "comment" : "Clean Up sheet, generic dry-run failure"
+    },
+    "Done" : {
+      "comment" : "Clean Up sheet: close when there is nothing to remove"
+    },
+    "Empty folder" : {
+      "comment" : "Cleanup row: the path is an empty directory"
+    },
+    "Homebrew also printed lines this list doesn't show, so it may be incomplete:" : {
+      "comment" : "Clean Up sheet partial error above dry-run lines the app could not read"
+    },
+    "Installed only as dependencies of formulae that no longer need them." : {
+      "comment" : "Cleanup section caption for brew autoremove"
+    },
+    "Nothing to clean up" : {
+      "comment" : "Cleanup empty state title"
+    },
+    "Old versions and cached downloads are deleted and cannot be restored." : {
+      "comment" : "Clean Up sheet warning above the list of what will be removed"
+    },
+    "Ready to clean up" : {
+      "comment" : "Cleanup summary when Homebrew printed no disk-space total"
+    },
+    "Remove all cached downloads" : {
+      "comment" : "Cleanup option: add --prune=all"
+    },
+    "Removes everything listed above, plus unreferenced cached downloads" : {
+      "comment" : "Command block summary below the Clean Up list; the dry run does not list unreferenced downloads"
+    },
+    "Retry" : {
+      "comment" : "Clean Up: re-run the preview after a re-check failed"
+    },
+    "This also uninstalls %@." : {
+      "comment" : "Cleanup confirmation message; %@ is a comma-separated list of formula names"
+    },
+    "brew cleanup found no old versions, stale downloads or unneeded dependencies." : {
+      "comment" : "Cleanup empty state body"
+    }
+  },
+  "version" : "1.0"
+}

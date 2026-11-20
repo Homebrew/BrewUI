@@ -2,6 +2,7 @@ import AppKit
 import BrewAccessibilityID
 import BrewAppEnvironment
 import BrewCore
+import BrewFeatureCleanup
 import BrewFeatureConfig
 import BrewFeatureConsole
 import BrewFeatureDiscover
@@ -25,6 +26,7 @@ struct MainWindowView: View {
 
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
+    @State private var showsCleanup = false
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
@@ -55,6 +57,10 @@ struct MainWindowView: View {
             \.saveBrewfile,
             SaveBrewfileAction(commandCenter: brewCommandCenter, commandFactory: mutatingCommandFactory),
         )
+        .focusedSceneValue(\.showCleanup, ShowCleanupAction(isPresented: $showsCleanup))
+        .sheet(isPresented: $showsCleanup) {
+            CleanupSheetRoot()
+        }
         .environment(\.navigateToInstalledPackage) { id in
             pendingInstalledSelection = id
             selectedSidebarItem = .installed
@@ -174,6 +180,7 @@ struct MainWindowView: View {
             .environment(\.catalogueRepository, PreviewSupport.makeDiscoverCatalogueRepository())
             .environment(\.installedDependentsRepository, PreviewSupport.makeInstalledDependentsRepository())
             .environment(\.doctorRepository, PreviewSupport.makeDoctorRepository())
+            .environment(\.cleanupRepository, PreviewSupport.makeCleanupRepository())
             .environment(\.configRepository, PreviewSupport.makeConfigRepository())
             .environment(\.servicesRepository, PreviewSupport.makeServicesRepository())
     }
