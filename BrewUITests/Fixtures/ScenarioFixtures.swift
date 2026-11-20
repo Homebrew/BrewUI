@@ -21,7 +21,7 @@ enum ScenarioFixtures {
 
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
-        case .empty, .brewNotFound, .servicesBasic, .servicesControls, .servicesControlFailure:
+        case .empty, .brewNotFound, .servicesBasic, .servicesLarge, .servicesControls, .servicesControlFailure:
             emptyInstalledFixtures(for: scenario)
         case .installedBasic, .installedUpToDate:
             installedBasicFixtures(upToDate: scenario == .installedUpToDate)
@@ -373,9 +373,21 @@ enum ScenarioFixtures {
 
     // MARK: - Builders
 
+    private static func servicesLargeFixtures() -> FixtureSet {
+        var set = emptyFixtures()
+        let services: [[String: Any]] = (0 ..< 128).map { index in
+            ["name": "worker-\(index)", "status": "started", "running": true, "pid": 43000 + index]
+        }
+        set.brewFiles["\(servicesInfoKey).stdout"] = json(services)
+        return set
+    }
+
     private static func emptyInstalledFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         if scenario == .servicesControls || scenario == .servicesControlFailure {
             return servicesControlsFixtures(startSucceeds: scenario == .servicesControls)
+        }
+        if scenario == .servicesLarge {
+            return servicesLargeFixtures()
         }
         var set = emptyFixtures()
         guard scenario == .servicesBasic else { return set }

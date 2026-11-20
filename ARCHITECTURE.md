@@ -98,10 +98,11 @@ Doctor and the up-to-date state share the seal checkmark, success colour and 44-
 The preferred default window width is 1080 points. This fits six languages with a three-digit upgrade count.
 SwiftUI sizes a new window to the available display if it is narrower and still restores saved window sizes.
 The minimum remains 820 points. The column constraints remain unchanged.
-Upgrades, Doctor and Configuration wrap titles beside the controls first.
+Upgrades, Doctor, Configuration and Services wrap titles beside their action buttons first.
 If the horizontal controls do not fit, the controls stack beside the title and align with its first line.
 Only a vertical pair of buttons shares the wider button's natural width.
 The full group moves below the title only when neither side-by-side layout fits.
+Services has one action, so Refresh stays beside the first line until the count and button cannot fit side by side.
 Page headings remain available
 to VoiceOver without repeating the window title visually. Bulk-upgrade and service-inventory commands
 remain expanded. When a command block precedes a list filter, the header leaves 24 points before

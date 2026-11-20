@@ -81,9 +81,12 @@ struct ServicesView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 0) {
-            PaneHeader {
-                if let subtitle = viewModel.runningServiceSubtitle {
-                    Text(subtitle).font(.brewTitle2).foregroundStyle(Color.brewTextPrimary)
+            PaneHeader(wrapsSummary: true) {
+                // 加载时尚无计数，但行布局仍需要一个标题槽。
+                VStack(alignment: .leading, spacing: 0) {
+                    if let subtitle = viewModel.runningServiceSubtitle {
+                        Text(subtitle).font(.brewTitle2).foregroundStyle(Color.brewTextPrimary)
+                    }
                 }
             } actions: {
                 Button {

@@ -214,6 +214,42 @@ final class HeaderLayoutUITests: BrewUITestCase {
     }
 
     @MainActor
+    func testServicesKeepsRefreshBesideTheRunningCountOnANarrowPane() throws {
+        let services = launch(.servicesLarge, environment: freshWindow, arguments: ["-AppleLanguages", "(en-GB)"])
+            .sidebar.goToServices()
+        services.row("worker-0").waitToExist()
+        let app = services.app
+        let window = app.windows.firstMatch
+        let originalWidth = window.frame.width
+        defer {
+            let widthChange = originalWidth - window.frame.width
+            if abs(widthChange) > 1 {
+                _ = window.resizeWindow(by: CGVector(dx: widthChange, dy: 0))
+            }
+        }
+        if abs(originalWidth - 820) > 1 {
+            _ = window.resizeWindow(by: CGVector(dx: 820 - originalWidth, dy: 0))
+        }
+        BrewApp.activate(app)
+        let splitter = try contentSplitter(in: app)
+        let grip = splitter.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+        grip.click(forDuration: 0.3, thenDragTo: grip.withOffset(CGVector(dx: -100, dy: 0)))
+        XCTAssertEqual(window.frame.width, 820, accuracy: 1)
+
+        let header = BrewUIElement(app, .paneHeader, in: services.root.element).waitToExist().element
+        XCTAssertEqual(header.frame.width, 260, accuracy: 2, "The 300pt pane keeps both 20pt gutters")
+        let title = BrewUIElement(app, .paneHeaderSummary, in: header).waitToExist().element
+        assertText("128 running services", in: title)
+        let refresh = services.refreshButton.waitToBeHittable().element
+        let screenshot = XCTAttachment(screenshot: window.screenshot())
+        screenshot.name = "Services compact English"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        XCTAssertGreaterThan(refresh.frame.minX, title.frame.maxX)
+        XCTAssertLessThan(refresh.frame.minY, title.frame.minY + 14, "Refresh stays beside the first line")
+    }
+
+    @MainActor
     func testLongTranslationKeepsUpgradeActionsInsideThePane() {
         checkCompactUpgrades(language: "es", locale: "es_ES", description: "Spanish")
         checkCompactUpgrades(language: "sv", locale: "sv_SE", description: "Swedish")
