@@ -83,6 +83,11 @@ final class DiscoverViewModel {
 
     // MARK: - Heading
 
+    /// 榜单已加载时，将统计口径放到标题右侧；其他状态保留原说明位置。
+    var showsInlineAnalyticsSummary: Bool {
+        !isSearching && trending.isLoaded
+    }
+
     var paneHeading: LocalizedStringResource {
         guard isSearching else {
             return LocalizedStringResource("Trending", bundle: #bundle, comment: "Discover list heading, trending landing")
@@ -136,13 +141,6 @@ final class DiscoverViewModel {
             bundle: #bundle,
             comment: "Discover subhead, search result count",
         )
-    }
-
-    var showsSubtitleTrendIcon: Bool {
-        if case .loaded = activeState, !isSearching {
-            return true
-        }
-        return false
     }
 
     var isSubtitleError: Bool {

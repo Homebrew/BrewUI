@@ -294,7 +294,6 @@ struct DiscoverViewModelTests {
 
         #expect(String(localized: viewModel.paneHeading) == "Trending")
         #expect(String(localized: viewModel.subtitleText) == "Most-installed packages in the last 30 days")
-        #expect(viewModel.showsSubtitleTrendIcon)
         #expect(!viewModel.isSubtitleError)
     }
 
@@ -495,7 +494,6 @@ struct DiscoverViewModelTests {
 
         #expect(String(localized: viewModel.paneHeading) == "Results")
         #expect(String(localized: viewModel.subtitleText) == "2 packages match “git”")
-        #expect(!viewModel.showsSubtitleTrendIcon)
     }
 
     @Test @MainActor func `search subtitle uses singular for one match`() async {

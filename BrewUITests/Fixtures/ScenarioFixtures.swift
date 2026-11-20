@@ -21,10 +21,10 @@ enum ScenarioFixtures {
 
     static func fixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         switch scenario {
-        case .empty, .brewNotFound, .servicesBasic, .servicesControls, .servicesControlFailure:
+        case .empty, .brewNotFound, .servicesBasic, .servicesLarge, .servicesControls, .servicesControlFailure:
             emptyInstalledFixtures(for: scenario)
-        case .installedBasic:
-            installedBasicFixtures()
+        case .installedBasic, .installedUpToDate:
+            installedBasicFixtures(upToDate: scenario == .installedUpToDate)
         case .installedLarge:
             installedLargeFixtures()
         case .doctorHasIssues:
@@ -115,7 +115,10 @@ enum ScenarioFixtures {
         return set
     }
 
-    private static func installedBasicFixtures() -> FixtureSet {
+    private static func installedBasicFixtures(upToDate: Bool) -> FixtureSet {
+        if upToDate {
+            return installedUpToDateFixtures()
+        }
         let installed = [wget, ripgrep, iterm2, rectangle]
         var set = FixtureSet()
         set.brewFiles = baseBrewFiles(installed: installed)
@@ -130,6 +133,25 @@ enum ScenarioFixtures {
         )
         set.brewFiles["uninstall_--formula_wget.next-info"] = infoJSON(for: remaining)
 
+        set.httpFiles = catalogueFiles(packages: installed)
+            .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
+        return set
+    }
+
+    private static func installedUpToDateFixtures() -> FixtureSet {
+        let installed = [wget, ripgrep, iterm2, rectangle].map { package in
+            FixturePackage(
+                token: package.token,
+                kind: package.kind,
+                displayName: package.displayName,
+                summary: package.summary,
+                installedVersion: package.latestVersion,
+                latestVersion: package.latestVersion,
+                dependencies: package.dependencies,
+            )
+        }
+        var set = FixtureSet()
+        set.brewFiles = baseBrewFiles(installed: installed)
         set.httpFiles = catalogueFiles(packages: installed)
             .merging(analyticsFiles(formulae: [], casks: []), uniquingKeysWith: { first, _ in first })
         return set
@@ -351,9 +373,21 @@ enum ScenarioFixtures {
 
     // MARK: - Builders
 
+    private static func servicesLargeFixtures() -> FixtureSet {
+        var set = emptyFixtures()
+        let services: [[String: Any]] = (0 ..< 128).map { index in
+            ["name": "worker-\(index)", "status": "started", "running": true, "pid": 43000 + index]
+        }
+        set.brewFiles["\(servicesInfoKey).stdout"] = json(services)
+        return set
+    }
+
     private static func emptyInstalledFixtures(for scenario: BrewUITestScenario) -> FixtureSet {
         if scenario == .servicesControls || scenario == .servicesControlFailure {
             return servicesControlsFixtures(startSucceeds: scenario == .servicesControls)
+        }
+        if scenario == .servicesLarge {
+            return servicesLargeFixtures()
         }
         var set = emptyFixtures()
         guard scenario == .servicesBasic else { return set }

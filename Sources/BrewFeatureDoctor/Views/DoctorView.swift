@@ -26,54 +26,56 @@ struct DoctorView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: BrewSpacing.sm) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Doctor", bundle: #bundle, comment: "Doctor tab heading")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.subtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
-                if let lastCheckedAt = viewModel.lastCheckedAt {
-                    LastUpdatedLabel(lead: LocalizedStringResource(
-                        "Last checked",
-                        bundle: #bundle,
-                        comment: "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”",
-                    ), date: lastCheckedAt)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+        PaneHeader {
+            Text(viewModel.subtitle)
+                .font(.brewTitle2)
+                .foregroundStyle(Color.brewTextPrimary)
+                .brewPaneHeadingAnchor()
+        } actions: {
             headerControls
+        } metadata: {
+            if let lastCheckedAt = viewModel.lastCheckedAt {
+                LastUpdatedLabel(lead: LocalizedStringResource(
+                    "Last checked",
+                    bundle: #bundle,
+                    comment: "Doctor header: lead-in before a relative time, e.g. “Last checked 5 minutes ago”",
+                ), date: lastCheckedAt, font: .brewSubheadline, color: .brewTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BrewSpacing.lg)
-        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text("Doctor", bundle: #bundle, comment: "Doctor tab heading"))
         .accessibilityHeading(.h1)
     }
 
     @ViewBuilder
     private var headerControls: some View {
         if viewModel.showsHeaderControls {
-            HStack(spacing: BrewSpacing.sm) {
-                if viewModel.isRefreshing {
-                    ProgressView()
-                        .controlSize(.small)
-                        .accessibilityLabel(String(localized: "Re-checking", bundle: #bundle, comment: "VoiceOver: Doctor re-check spinner"))
-                }
-                if viewModel.rawDoctorOutput != nil {
-                    Button(String(localized: "Copy output", bundle: #bundle, comment: "Doctor header: copy raw brew doctor output")) {
-                        viewModel.copyDoctorOutput()
+            HStack(alignment: .top, spacing: BrewSpacing.sm) {
+                refreshingIndicator
+                PaneHeaderActions {
+                    if viewModel.rawDoctorOutput != nil {
+                        Button(String(localized: "Copy output", bundle: #bundle, comment: "Doctor header: copy raw brew doctor output")) {
+                            viewModel.copyDoctorOutput()
+                        }
+                        .accessibilityLabel(String(localized: "Copy brew doctor output", bundle: #bundle, comment: "VoiceOver: Doctor copy-output button"))
                     }
-                    .controlSize(.small)
-                    .accessibilityLabel(String(localized: "Copy brew doctor output", bundle: #bundle, comment: "VoiceOver: Doctor copy-output button"))
+                    Button(String(localized: "Run Again", bundle: #bundle, comment: "Doctor header: re-run brew doctor")) {
+                        Task { await viewModel.load(forceRefresh: true) }
+                    }
+                    .disabled(viewModel.isRefreshing)
                 }
-                Button(String(localized: "Run Again", bundle: #bundle, comment: "Doctor header: re-run brew doctor")) {
-                    Task { await viewModel.load(forceRefresh: true) }
-                }
-                .controlSize(.small)
-                .disabled(viewModel.isRefreshing)
             }
-            .fixedSize(horizontal: true, vertical: false)
+        }
+    }
+
+    @ViewBuilder
+    private var refreshingIndicator: some View {
+        if viewModel.isRefreshing {
+            ProgressView()
+                .controlSize(.small)
+                .frame(minHeight: BrewLayout.headerActionHeight)
+                .accessibilityLabel(String(localized: "Re-checking", bundle: #bundle, comment: "VoiceOver: Doctor re-check spinner"))
         }
     }
 
@@ -94,7 +96,7 @@ struct DoctorView: View {
     private var healthyState: some View {
         VStack(spacing: BrewSpacing.md) {
             Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: 44))
+                .font(.system(size: BrewLayout.successBadgeSize))
                 .foregroundStyle(Color.brewStatusSuccess)
             Text("Your system is ready to brew", bundle: #bundle, comment: "Doctor healthy state title")
                 .font(.brewTitle3)
@@ -104,7 +106,8 @@ struct DoctorView: View {
                 .foregroundStyle(Color.brewTextSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(BrewSpacing.xl)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.vertical, BrewSpacing.xl)
     }
 
     private func issuesList(groups: [DoctorIssueGroup]) -> some View {
@@ -115,18 +118,10 @@ struct DoctorView: View {
                     Section {
                         ForEach(group.items) { item in
                             DoctorIssueRowView(item: item)
+                                .brewPaneListRowInsets()
                                 .id(item.id)
                                 .contentShape(Rectangle())
-                                .listRowBackground(
-                                    RoundedRectangle(
-                                        cornerRadius: BrewRadius.lg,
-                                        style: .continuous,
-                                    )
-                                    .fill(
-                                        viewModel.selectedIssueID == item.id ? Color.brewBrandTint : Color.clear,
-                                    )
-                                    .padding(.horizontal, BrewSpacing.sm),
-                                )
+                                .brewPaneListRowSelection(isSelected: viewModel.selectedIssueID == item.id)
                                 .onTapGesture {
                                     // Needed to suppress the default ugly blue macOS highlight state
                                     viewModel.setSelection(item.id)
@@ -162,13 +157,15 @@ private struct DoctorSeveritySectionHeader: View {
         Text(DoctorSeverityStyle.displayName(severity))
             .font(.brewSubheadline.weight(.semibold))
             .foregroundStyle(DoctorSeverityStyle.foreground(severity))
+            .brewPlainListSectionHeader()
     }
 }
 
 private struct DoctorReassuranceNote: View {
     var body: some View {
         NoteCallout(verbatim: DoctorCopy.warningPreamble, tone: .info)
-            .padding(.horizontal, BrewSpacing.lg)
+            .axid(.doctorWarningGuidance)
+            .padding(.horizontal, BrewLayout.paneContentInset)
             .padding(.bottom, BrewSpacing.sm)
     }
 }

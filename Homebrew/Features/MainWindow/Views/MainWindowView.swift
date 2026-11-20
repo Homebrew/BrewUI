@@ -14,6 +14,9 @@ import BrewUIComponents
 import SwiftUI
 
 struct MainWindowView: View {
+    /// 主窗口正文的统一顶界开关，不随页面或滚动状态变化。
+    private static let showsContentTopSeparator = true
+
     @Environment(\.selfUpgradeCoordinator) private var selfUpgradeCoordinator
     @Environment(\.installedPackagesRepository) private var installedPackagesRepository
     @Environment(\.discoverPackagesRepository) private var discoverPackagesRepository
@@ -45,9 +48,20 @@ struct MainWindowView: View {
             } bottom: {
                 ConsolePanelRoot(expanded: $consoleExpanded)
             }
+            .overlay(alignment: .top) {
+                if Self.showsContentTopSeparator {
+                    Divider()
+                        // 独立底面阻止横竖线叠色；背景只占线条范围，不跨入工具栏。
+                        .background(.background, ignoresSafeAreaEdges: [])
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
+                }
+            }
             .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         }
         .navigationSplitViewStyle(.automatic)
+        // 关闭工具栏背景自带的自动边界，正文顶界只由上方的 Divider 绘制。
+        .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
         .focusedSceneValue(\.sidebarSelection, $selectedSidebarItem)
         .focusedSceneValue(\.refreshAll, RefreshAllAction { refreshAll() })
@@ -112,10 +126,6 @@ struct MainWindowView: View {
         }
     }
 
-    /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be
-    /// sourced from the catalogue once a package-count property is exposed.
-    private static let approximateCatalogueSize = 9000
-
     private var sidebarColumn: some View {
         MainSidebarView(selection: $selectedSidebarItem)
             .navigationSplitViewColumnWidth(
@@ -136,31 +146,18 @@ struct MainWindowView: View {
                 deepLinkSelection: $pendingInstalledSelection,
             )
             .navigationTitle(selectedSidebarItem.title)
-            .navigationSubtitle(
-                selectedSidebarItem == .upgrades
-                    ? String(localized: "Review and upgrade outdated packages", bundle: #bundle, comment: "Window subtitle, Upgrades")
-                    : String(localized: "Browse or search your installed packages", bundle: #bundle, comment: "Window subtitle, Installed"),
-            )
         case .discover:
             DiscoverColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(
-                    localized: "Browse and search \(Self.approximateCatalogueSize)+ packages",
-                    bundle: #bundle,
-                    comment: "Window subtitle, Discover; %lld is the approximate catalog size",
-                ))
         case .services:
             ServicesRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "View your Homebrew services", bundle: #bundle, comment: "Window subtitle, read-only Services tab"))
         case .doctor:
             DoctorColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor"))
         case .configuration:
             ConfigColumnsRoot()
                 .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "Homebrew environment & diagnostics", bundle: #bundle, comment: "Window subtitle, Configuration"))
         }
     }
 }

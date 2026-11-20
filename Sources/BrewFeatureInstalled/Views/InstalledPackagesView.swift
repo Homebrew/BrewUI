@@ -21,21 +21,17 @@ struct InstalledPackagesView: View {
         VStack(alignment: .leading, spacing: 0) {
             packageListBanner()
 
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Your packages", bundle: #bundle, comment: "Installed tab heading")
+            PaneHeader {
+                Text(viewModel.packageCountSubtitle)
                     .font(.brewTitle2)
                     .foregroundStyle(Color.brewTextPrimary)
-                Text(viewModel.packageCountSubtitle)
-                    .font(.brewSubheadline)
-                    .foregroundStyle(Color.brewTextSecondary)
+            } actions: {
+                hideDependenciesToggle
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BrewSpacing.lg)
-            .accessibilityElement(children: .combine)
+            .accessibilityLabel(Text("Your packages", bundle: #bundle, comment: "Installed tab heading"))
             .accessibilityHeading(.h1)
 
             scopePicker
-            hideDependenciesToggle
             Divider()
 
             AsyncContentView(
@@ -63,8 +59,8 @@ struct InstalledPackagesView: View {
         }
         .pickerStyle(.segmented)
         .labelsHidden()
-        .padding(.horizontal, BrewSpacing.lg)
-        .padding(.bottom, BrewSpacing.sm)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.bottom, BrewSpacing.md)
     }
 
     private var hideDependenciesToggle: some View {
@@ -73,8 +69,6 @@ struct InstalledPackagesView: View {
             .controlSize(.mini)
             .font(.brewSubheadline)
             .foregroundStyle(Color.brewTextSecondary)
-            .padding(.horizontal, BrewSpacing.lg)
-            .padding(.bottom, BrewSpacing.md)
             .axid(.installedHideDependenciesSwitch)
     }
 
@@ -117,21 +111,13 @@ struct InstalledPackagesView: View {
         InstalledListRowRoot(package: package)
             .id(package.id)
             .contentShape(Rectangle())
-            .listRowBackground(
-                RoundedRectangle(
-                    cornerRadius: BrewRadius.lg,
-                    style: .continuous,
-                )
-                .fill(
-                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                )
-                .padding(.horizontal, BrewSpacing.sm),
-            )
+            .brewPaneListRowSelection(isSelected: viewModel.activeSelectedPackageID == package.id)
             .onTapGesture {
                 // Needed to suppress the default ugly blue macOS highlight state
                 viewModel.setSelection(package.id)
             }
             .axid(.installedRow(token: package.name))
+            .brewPaneListRowInsets()
     }
 
     private func scrollToSelection(

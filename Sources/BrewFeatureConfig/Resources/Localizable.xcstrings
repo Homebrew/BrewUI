@@ -176,6 +176,41 @@
         }
       }
     },
+    "Homebrew environment & diagnostics" : {
+      "comment" : "Configuration content heading: Homebrew environment and diagnostic information",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entorno y diagnóstico de Homebrew"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 环境与诊断信息"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 環境與診斷資訊"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew-miljö och diagnostik"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew 환경 및 진단 정보"
+          }
+        }
+      }
+    },
     "Homebrew not found" : {
       "comment" : "Configuration tab, brew-not-found title",
       "localizations" : {
