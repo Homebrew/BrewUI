@@ -23,16 +23,18 @@ extension XCUIElement {
     /// A click exactly on the edge, or outside it, starts no resize; a few points inside does.
     private static let resizeGripInset: CGFloat = 3
 
-    /// Drags the right edge for width-only changes and the bottom-right corner otherwise.
-    /// Returns the settled frame. Prefer shrinking: growing needs screen room a 1024x768 CI display does not have.
+    /// Drags a side edge for width-only changes and a bottom corner otherwise.
+    /// Positive deltas grow the window. Returns the settled frame.
     @MainActor
-    func resizeWindow(by delta: CGVector) -> CGRect {
+    func resizeWindow(by delta: CGVector, fromLeftEdge: Bool = false) -> CGRect {
         let initial = frame
         // 只改宽度时避开底部 Dock，确保窄窗也能拖回原宽。
         let widthOnly = delta.dy == 0
-        let grip = coordinate(withNormalizedOffset: CGVector(dx: 1, dy: widthOnly ? 0.5 : 1))
-            .withOffset(CGVector(dx: -Self.resizeGripInset, dy: widthOnly ? 0 : -Self.resizeGripInset))
-        grip.click(forDuration: 0.3, thenDragTo: grip.withOffset(delta))
+        let direction: CGFloat = fromLeftEdge ? -1 : 1
+        let grip = coordinate(withNormalizedOffset: CGVector(dx: fromLeftEdge ? 0 : 1, dy: widthOnly ? 0.5 : 1))
+            .withOffset(CGVector(dx: -direction * Self.resizeGripInset, dy: widthOnly ? 0 : -Self.resizeGripInset))
+        let drag = CGVector(dx: direction * delta.dx, dy: delta.dy)
+        grip.click(forDuration: 0.3, thenDragTo: grip.withOffset(drag))
         return waitForFrameToSettle(differingFrom: initial)
     }
 
