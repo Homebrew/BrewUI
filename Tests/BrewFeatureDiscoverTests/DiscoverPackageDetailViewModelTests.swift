@@ -27,7 +27,7 @@ struct DiscoverPackageDetailViewModelTests {
         #expect(viewModel.installedStatusLabel == "Installed")
         #expect(viewModel.installedVersionLabel == "v1.9.0")
         #expect(viewModel.stableVersionLabel == "2.0.0")
-        #expect(viewModel.installs30DayLabel == "3,500")
+        #expect(viewModel.installs30DayLabel == 3500.formatted())
         #expect(viewModel.showsInstallMetrics)
         #expect(viewModel.homepageURL?.absoluteString == "https://example.org")
     }

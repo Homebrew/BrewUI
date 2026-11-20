@@ -10,7 +10,8 @@ import XCTest
 @MainActor
 final class BrewUIButton: BrewUIElement {
     init(_ app: XCUIApplication, _ id: AXID, in container: XCUIElement? = nil) {
-        super.init(app, id, type: .any, in: container)
+        // Query buttons by role. A generic accessibility snapshot of a live brew transcript can time out.
+        super.init(app, id, type: .button, in: container)
     }
 
     /// Waits for hittability: a button can exist while off-screen or covered, and clicking one throws.
