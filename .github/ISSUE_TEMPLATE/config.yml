@@ -1,5 +1,4 @@
-# Released apps submit crash reports through issues/new?title=...&body=....
-# Keep that route available until crash reporting uses the bug form.
+# Older app releases submit crash reports through issues/new?title=...&body=....
 blank_issues_enabled: true
 contact_links:
   - name: Questions and general discussion

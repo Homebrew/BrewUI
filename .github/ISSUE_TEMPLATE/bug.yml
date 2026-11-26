@@ -93,7 +93,8 @@ body:
       label: Logs, screenshots and crash reports
       description: |
         Select the affected command in the app's console and use Copy or Save to include its output. Attach screenshots or a recording for visual problems.
-        For a crash, copy the report shown when reopening the app, or attach the Homebrew crash report from macOS Console. For a hang, attach a sample from Activity Monitor if available.
+        For a crash, open Crash Reports in macOS Console and select the Homebrew report for the time of the crash. Paste its contents here or attach a `.txt` copy.
+        For a hang, attach a sample from Activity Monitor if available.
         For Homebrew command failures, include the Doctor output. If you have already tried the same command in Terminal, include the result and whether it differs from the app.
         Remove tokens, credentials and private information before posting.
   - type: textarea

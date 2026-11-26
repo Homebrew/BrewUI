@@ -3,7 +3,6 @@
 //  Brew
 //
 
-import Foundation
 import SwiftUI
 
 #if DEBUG
@@ -12,19 +11,10 @@ import SwiftUI
 
         var body: some Commands {
             CommandMenu(Text(verbatim: "Debug")) {
-                debugButton("Clear UserDefaults") {
+                Button {
                     UserDefaultsDebug.clearAll()
-                }
-
-                Divider()
-
-                // Exercises the crash-reporting flow: the report appears on next launch.
-                Menu {
-                    ForEach(DebugCrash.allCases, id: \.self) { crash in
-                        debugButton(crash.title) { crash.crash() }
-                    }
                 } label: {
-                    Text(verbatim: "Force Crash")
+                    Text(verbatim: "Clear UserDefaults")
                 }
 
                 Divider()
@@ -33,10 +23,6 @@ import SwiftUI
                     Text(verbatim: "Show the Self-Upgrade Banner")
                 }
             }
-        }
-
-        private func debugButton(_ title: String, action: @escaping () -> Void) -> some View {
-            Button(action: action) { Text(verbatim: title) }
         }
     }
 #endif
