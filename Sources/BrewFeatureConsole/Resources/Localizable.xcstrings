@@ -33,6 +33,12 @@
             "state" : "translated",
             "value" : "지우기"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "消去"
+          }
         }
       }
     },
@@ -67,6 +73,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "완료된 작업 지우기"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了したジョブを消去"
           }
         }
       }
@@ -103,6 +115,12 @@
             "state" : "translated",
             "value" : "지워짐"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "消去しました"
+          }
         }
       }
     },
@@ -137,6 +155,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "복사됨"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピーしました"
           }
         }
       }
@@ -173,6 +197,12 @@
             "state" : "translated",
             "value" : "복사"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コピー"
+          }
         }
       }
     },
@@ -207,6 +237,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "출력을 클립보드에 복사"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出力をクリップボードにコピー"
           }
         }
       }
@@ -243,6 +279,12 @@
             "state" : "translated",
             "value" : "닫기"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "閉じる"
+          }
         }
       }
     },
@@ -277,6 +319,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "콘솔 패널 자동으로 펼치기"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コンソールパネルを自動的に展開"
           }
         }
       }
@@ -313,6 +361,12 @@
             "state" : "translated",
             "value" : "콘솔 가리기"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コンソールを非表示"
+          }
         }
       }
     },
@@ -347,6 +401,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "콘솔 가리기"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コンソールを非表示"
           }
         }
       }
@@ -383,6 +443,12 @@
             "state" : "translated",
             "value" : "활동 없음"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクティビティなし"
+          }
         }
       }
     },
@@ -417,6 +483,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "준비됨"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "準備完了"
           }
         }
       }
@@ -453,6 +525,12 @@
             "state" : "translated",
             "value" : "brew 명령을 실행하면 여기에 출력이 표시됩니다."
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brew コマンドを実行すると、ここに出力が表示されます。"
+          }
         }
       }
     },
@@ -487,6 +565,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "저장"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存"
           }
         }
       }
@@ -523,6 +607,12 @@
             "state" : "translated",
             "value" : "출력을 파일로 저장"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出力をファイルに保存"
+          }
         }
       }
     },
@@ -557,6 +647,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "콘솔 보기"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コンソールを表示"
           }
         }
       }
@@ -593,6 +689,12 @@
             "state" : "translated",
             "value" : "콘솔 보기"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コンソールを表示"
+          }
         }
       }
     },
@@ -627,6 +729,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "완료"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "完了"
           }
         }
       }
@@ -663,6 +771,12 @@
             "state" : "translated",
             "value" : "실패"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "失敗"
+          }
         }
       }
     },
@@ -685,6 +799,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "새로 고치는 중"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再読み込み中"
           }
         }
       }
@@ -721,6 +841,12 @@
             "state" : "translated",
             "value" : "실행 중"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "実行中"
+          }
         }
       }
     },
@@ -752,6 +878,12 @@
           }
         },
         "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— %@"
+          }
+        },
+        "ja" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "— %@"
@@ -791,6 +923,12 @@
             "state" : "translated",
             "value" : "— 완료"
           }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 完了"
+          }
         }
       }
     },
@@ -825,6 +963,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "— 실패 · 종료 코드 %d"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "— 失敗 · 終了コード %d"
           }
         }
       }
