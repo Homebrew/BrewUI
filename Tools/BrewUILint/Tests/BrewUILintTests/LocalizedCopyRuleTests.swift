@@ -40,7 +40,7 @@ struct LocalizedCopyRuleTests {
         #"Picker("Scope", selection: $scope) {}"#,
         #"Section("Details") {}"#,
         #"Link("Homebrew Documentation", destination: url)"#,
-        #"Menu("Force Crash") {}"#,
+        #"Menu("Sort By") {}"#,
         #"CommandMenu("Debug") {}"#,
         #"ContentUnavailableView("No activity", systemImage: "terminal")"#,
         #"let s = String(localized: "Loading…")"#,

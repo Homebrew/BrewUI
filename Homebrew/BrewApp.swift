@@ -8,7 +8,6 @@
 import BrewAppEnvironment
 import BrewCLI
 import BrewCore
-import BrewCrashReporting
 import BrewFeatureConsole
 import BrewFeatureSelfUpgrade
 import BrewNetworking
@@ -22,7 +21,7 @@ import SwiftUI
 @main
 struct BrewApp: App {
     private static let documentationURL = URL(string: "https://docs.brew.sh/")!
-    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new/choose")!
+    private static let reportIssueURL = URL(string: "https://github.com/Homebrew/BrewUI/issues/new?template=bug.yml")!
 
     @Environment(\.scenePhase) private var scenePhase
 
@@ -40,7 +39,6 @@ struct BrewApp: App {
     private let doctorRepository: BrewDoctorRepository
     private let configRepository: BrewConfigRepository
     private let servicesRepository: BrewServicesRepository
-    private let crashReportController: CrashReportController
     private let selfUpgradeCoordinator: SelfUpgradeCoordinator
     #if DEBUG
         private let selfUpgradeDebugControl = SelfUpgradeDebugControl()
@@ -53,7 +51,6 @@ struct BrewApp: App {
         let uiTesting = BrewUITestingLaunchConfiguration.current()
         // Writes this run's fixture tree into the app's own temp directory, before anything reads it.
         let fixtures = Self.prepareUITestingProcess(uiTesting: uiTesting)
-        crashReportController = Self.makeCrashReportController(fixtures: fixtures)
         let selfUpgradeKeyPrefix = Self.defaultsKeyPrefix(base: "selfUpgrade", fixtures: fixtures)
         // Before the caches are built: `makeCatalogueCache` sweeps every `UITesting.`-prefixed default.
         let launchOutcome = SelfUpgradeLaunchNotice(defaultsKeyPrefix: selfUpgradeKeyPrefix).consume()
@@ -145,7 +142,6 @@ struct BrewApp: App {
                     minWidth: BrewLayout.minWindowWidth,
                     minHeight: BrewLayout.minWindowHeight,
                 )
-                .crashReportSheet(controller: crashReportController)
         }
         .defaultSize(
             width: BrewLayout.defaultWindowWidth,

@@ -13,7 +13,6 @@ let package = Package(
         .library(name: "BrewSelfUpgradeContract", targets: ["BrewSelfUpgradeContract"]),
         .library(name: "BrewSelfUpgradeHelperCore", targets: ["BrewSelfUpgradeHelperCore"]),
         .library(name: "BrewCore", targets: ["BrewCore"]),
-        .library(name: "BrewCrashReporting", targets: ["BrewCrashReporting"]),
         .library(name: "BrewUIComponents", targets: ["BrewUIComponents"]),
         .library(name: "BrewCLI", targets: ["BrewCLI"]),
         .library(name: "BrewNetworking", targets: ["BrewNetworking"]),
@@ -74,13 +73,6 @@ let package = Package(
         ),
         .target(
             name: "BrewCore",
-            swiftSettings: [
-                .defaultIsolation(nil),
-                .swiftLanguageMode(.v6),
-            ],
-        ),
-        .target(
-            name: "BrewCrashReporting",
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
@@ -300,17 +292,6 @@ let package = Package(
         .testTarget(
             name: "BrewSelfUpgradeHelperCoreTests",
             dependencies: ["BrewSelfUpgradeHelperCore", "BrewCore"],
-            swiftSettings: [
-                .defaultIsolation(nil),
-                .swiftLanguageMode(.v6),
-            ],
-        ),
-        .testTarget(
-            name: "BrewCrashReportingTests",
-            dependencies: ["BrewCrashReporting"],
-            resources: [
-                .copy("Fixtures"),
-            ],
             swiftSettings: [
                 .defaultIsolation(nil),
                 .swiftLanguageMode(.v6),
