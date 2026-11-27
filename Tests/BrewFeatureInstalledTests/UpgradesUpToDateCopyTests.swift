@@ -11,15 +11,14 @@ import Foundation
 import Testing
 
 struct UpgradesUpToDateCopyTests {
-    @Test @MainActor func `every up-to-date surface renders the same phrase`() {
+    @Test @MainActor func `up-to-date content keeps its phrase under the availability heading`() {
         let viewModel = Self.makeViewModel(packages: [
             .fixture(name: "git", kind: .formula, outdated: false),
             .fixture(name: "wget", kind: .formula, outdated: false),
         ])
 
         let phrase = UpgradesUpToDateCopy.headline
-        #expect(viewModel.outdatedSubtitle == phrase)
-        #expect(viewModel.emptyUpgradeActionTitle == phrase)
+        #expect(viewModel.outdatedSubtitle == "Available")
         #expect(viewModel.upToDateTitle == phrase)
     }
 
@@ -56,8 +55,8 @@ struct UpgradesUpToDateCopyTests {
 
         viewModel.searchQuery = "no-such-package"
 
-        #expect(viewModel.emptyUpgradeActionTitle != UpgradesUpToDateCopy.headline)
-        #expect(viewModel.emptyUpgradeActionTitle == "Nothing to upgrade here")
+        #expect(viewModel.outdatedSubtitle != UpgradesUpToDateCopy.headline)
+        #expect(viewModel.outdatedSubtitle == "No matches in 1 outdated package")
     }
 
     @MainActor

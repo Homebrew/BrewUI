@@ -35,8 +35,8 @@ struct ServicesView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .padding(.horizontal, BrewSpacing.lg)
-                .padding(.vertical, BrewSpacing.md)
+                .padding(.horizontal, BrewLayout.paneContentInset)
+                .padding(.bottom, BrewSpacing.md)
                 .axid(.servicesScopePicker)
                 Divider()
                 AsyncContentView(
@@ -55,7 +55,7 @@ struct ServicesView: View {
                 if let service = viewModel.selectedService {
                     ScrollView {
                         ServiceDetailView(service: service, viewModel: viewModel)
-                            .padding(BrewSpacing.xl)
+                            .brewDetailPaneContent()
                             .brewPaneContentWidth()
                     }
                     .id(service.id)
@@ -80,47 +80,51 @@ struct ServicesView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: BrewSpacing.md) {
-            VStack(alignment: .leading, spacing: BrewSpacing.xs) {
-                Text("Services", bundle: #bundle, comment: "Services list heading")
-                    .font(.brewTitle2)
-                    .foregroundStyle(Color.brewTextPrimary)
-                if let subtitle = viewModel.runningServiceSubtitle {
-                    Text(subtitle).font(.brewSubheadline).foregroundStyle(Color.brewTextSecondary)
+        VStack(alignment: .leading, spacing: 0) {
+            PaneHeader(wrapsSummary: true) {
+                // 加载时尚无计数，但行布局仍需要一个标题槽。
+                VStack(alignment: .leading, spacing: 0) {
+                    if let subtitle = viewModel.runningServiceSubtitle {
+                        Text(subtitle).font(.brewTitle2).foregroundStyle(Color.brewTextPrimary)
+                    }
                 }
-            }
-            .accessibilityElement(children: .combine)
-            .accessibilityHeading(.h1)
-            CommandBlockView(
-                command: "brew services info --all --json",
-                summaryText: LocalizedStringResource("Shows services for the current user", bundle: #bundle, comment: "Services command: reads the current user inventory"),
-            )
-            HStack(spacing: BrewSpacing.sm) {
-                Spacer(minLength: 0)
+            } actions: {
                 Button {
                     Task { await viewModel.refresh() }
                 } label: {
-                    Label(String(localized: "Refresh", bundle: #bundle, comment: "Services: read the current service inventory"), systemImage: "arrow.clockwise")
-                        .opacity(viewModel.isRefreshing ? 0 : 1)
-                        .overlay {
-                            if viewModel.isRefreshing { ProgressView().controlSize(.small) }
+                    Label {
+                        Text("Refresh", bundle: #bundle, comment: "Services: read the current service inventory")
+                    } icon: {
+                        if viewModel.isRefreshing {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
                         }
+                    }
                 }
                 .controlSize(.regular)
                 .disabled(viewModel.isRefreshing)
                 .axid(.servicesRefreshButton)
             }
-            .frame(height: BrewLayout.headerActionHeight)
+            .accessibilityLabel(Text("Services", bundle: #bundle, comment: "Services list heading"))
+            .accessibilityHeading(.h1)
+            CommandBlockView(
+                command: "brew services info --all",
+                summaryText: LocalizedStringResource("Shows services for the current user", bundle: #bundle, comment: "Services command: reads the current user inventory"),
+            )
+            .padding(.horizontal, BrewLayout.paneContentInset)
             if let message = viewModel.refreshFailure {
                 Text(message).foregroundStyle(Color.brewStatusError).textSelection(.enabled)
+                    .padding(.horizontal, BrewLayout.paneContentInset)
             }
             if let message = viewModel.actionFailure {
                 Text(verbatim: message).font(.brewCallout).foregroundStyle(Color.brewStatusError)
                     .textSelection(.enabled)
                     .axid(.serviceActionError)
+                    .padding(.horizontal, BrewLayout.paneContentInset)
             }
         }
-        .padding(BrewSpacing.lg)
+        .padding(.bottom, BrewSpacing.xl)
     }
 
     @ViewBuilder
@@ -154,7 +158,8 @@ struct ServicesView: View {
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(BrewSpacing.xl)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.vertical, BrewSpacing.xl)
         .accessibilityElement(children: .combine)
         .axid(.servicesEmptyState)
     }
@@ -169,15 +174,12 @@ struct ServicesView: View {
                 .padding(.vertical, BrewSpacing.xs)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
-                .listRowBackground(
-                    RoundedRectangle(cornerRadius: BrewRadius.lg, style: .continuous)
-                        .fill(viewModel.activeSelectedServiceID == service.id ? Color.brewBrandTint : Color.clear)
-                        .padding(.horizontal, BrewSpacing.sm),
-                )
+                .brewPaneListRowSelection(isSelected: viewModel.activeSelectedServiceID == service.id)
                 .onTapGesture { viewModel.selectedServiceID = service.id; listIsFocused = true }
                 .id(service.id)
                 .accessibilityElement(children: .combine)
                 .axid(.serviceRow(name: service.name))
+                .brewPaneListRowInsets()
             }
             .listStyle(.inset)
             .accessibilityLabel(String(localized: "Services", bundle: #bundle, comment: "VoiceOver: the services list"))

@@ -32,19 +32,23 @@ struct ConfigView: View {
     }
 
     private var header: some View {
-        HStack(spacing: BrewSpacing.sm) {
-            Spacer(minLength: 0)
-            Button(String(localized: "Copy report", bundle: #bundle, comment: "Configuration header: copy the diagnostic report"), systemImage: "doc.on.doc") {
-                copyReport()
-            }
-            .disabled(!viewModel.canCopyReport)
-            Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
-                Task { await viewModel.refresh() }
+        PaneHeader(wrapsSummary: true) {
+            Text("Homebrew environment & diagnostics", bundle: #bundle, comment: "Configuration content heading: Homebrew environment and diagnostic information")
+                .font(.brewTitle2)
+                .foregroundStyle(Color.brewTextPrimary)
+        } actions: {
+            PaneHeaderActions {
+                Button(String(localized: "Copy report", bundle: #bundle, comment: "Configuration header: copy the diagnostic report"), systemImage: "doc.on.doc") {
+                    copyReport()
+                }
+                .disabled(!viewModel.canCopyReport)
+                Button(String(localized: "Refresh", bundle: #bundle, comment: "Configuration header: re-run brew config"), systemImage: "arrow.clockwise") {
+                    Task { await viewModel.refresh() }
+                }
             }
         }
-        .padding(.horizontal, BrewSpacing.lg)
-        .padding(.vertical, BrewSpacing.md)
-        .brewPaneContentWidth()
+        .accessibilityHeading(.h1)
+        .brewPaneContentWidth(maxWidth: BrewLayout.configPaneContentMaxWidth)
     }
 
     @ViewBuilder
@@ -73,12 +77,14 @@ struct ConfigView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BrewSpacing.lg) {
                 NoteCallout(settingsNote, tone: .info)
+                    .axid(.configGuidance)
                 ForEach(viewModel.sections(for: snapshot)) { section in
                     ConfigSectionCard(section: section)
                 }
             }
-            .padding(BrewSpacing.lg)
-            .brewPaneContentWidth()
+            .padding(.vertical, BrewSpacing.lg)
+            .padding(.horizontal, BrewLayout.paneContentInset)
+            .brewPaneContentWidth(maxWidth: BrewLayout.configPaneContentMaxWidth)
         }
     }
 
@@ -118,7 +124,8 @@ struct ConfigView: View {
             .padding(.top, BrewSpacing.xs)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        .padding(BrewSpacing.xl)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.vertical, BrewSpacing.xl)
         .accessibilityElement(children: .combine)
     }
 

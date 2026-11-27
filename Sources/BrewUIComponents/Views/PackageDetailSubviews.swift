@@ -20,12 +20,11 @@ public struct PackageDetailSectionHeading: View {
     }
 }
 
-/// Hairline divider between package-detail sections.
+/// Native divider between package-detail sections, without an additional colour layer.
 public struct PackageDetailSectionDivider: View {
     public init() {}
 
     public var body: some View {
         Divider()
-            .overlay(Color.brewBorderSeparator)
     }
 }

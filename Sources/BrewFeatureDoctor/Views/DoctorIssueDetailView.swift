@@ -3,6 +3,7 @@
 //  BrewFeatureDoctor
 //
 
+import BrewAccessibilityID
 import BrewCore
 import BrewUIComponents
 import SwiftUI
@@ -32,7 +33,7 @@ struct DoctorIssueDetailView: View {
                 Divider()
                 rawOutputSection
             }
-            .padding(BrewSpacing.xl)
+            .brewDetailPaneContent()
             .brewPaneContentWidth()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -52,6 +53,8 @@ struct DoctorIssueDetailView: View {
     private var heroSection: some View {
         VStack(alignment: .leading, spacing: BrewSpacing.sm) {
             DoctorSeverityBadge(severity: item.severity)
+                .axid(.doctorDetailSeverity)
+                .brewDetailTopAnchor()
             Text(item.title)
                 .font(.brewTitle2)
                 .foregroundStyle(Color.brewTextPrimary)
@@ -241,7 +244,7 @@ struct DoctorDetailPlaceholder: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(BrewSpacing.xl)
+        .brewDetailPaneContent()
         .brewPaneContentWidth()
     }
 }

@@ -36,10 +36,20 @@ public enum RelativeTimeText {
 public struct LastUpdatedLabel: View {
     private let lead: LocalizedStringResource
     private let date: Date
+    private let font: Font
+    private let color: Color
 
-    public init(lead: LocalizedStringResource, date: Date) {
+    /// 默认保留时间元数据样式；页面可复用现有字体和颜色 token。
+    public init(
+        lead: LocalizedStringResource,
+        date: Date,
+        font: Font = .brewCaption,
+        color: Color = .brewTextTertiary,
+    ) {
         self.lead = lead
         self.date = date
+        self.font = font
+        self.color = color
     }
 
     public var body: some View {
@@ -50,8 +60,8 @@ public struct LastUpdatedLabel: View {
                 bundle: #bundle,
                 comment: "Last-updated label: %1$@ is the lead phrase (e.g. “Last checked”), %2$@ the relative time",
             ))
-            .font(.brewCaption)
-            .foregroundStyle(Color.brewTextTertiary)
+            .font(font)
+            .foregroundStyle(color)
         }
     }
 }

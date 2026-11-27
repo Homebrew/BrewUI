@@ -641,7 +641,12 @@ All component and layout work should reference these tokens only. Values are giv
 | `color.border.default` | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.08)` | Standard card/panel border |
 | `color.border.strong` | `rgba(0,0,0,0.16)` | `rgba(255,255,255,0.16)` | Focused input ring, prominent divider |
 | `color.border.brand` | `Amber 500 #FBB040` | `Amber 500 #FBB040` | Focused field brand ring |
-| `color.border.separator` | `rgba(0,0,0,0.06)` | `rgba(255,255,255,0.06)` | List row separator |
+| `color.border.separator` | `rgba(0,0,0,0.06)` | `rgba(255,255,255,0.06)` | Custom console split chrome |
+
+Ordinary content separators use an unmodified system `Divider`. Native lists and split views keep
+their system-drawn separators. Do not overlay border tokens or apply extra opacity to these lines.
+Keep separator lengths and insets specific to their role. Custom console split chrome and drag
+affordances retain their own tokens and interaction states.
 
 ---
 
@@ -701,7 +706,7 @@ Standard `List` selection uses the system accent. The amber tint is applied only
 | `listRow.backgroundHover` | `Cellar 100 #EFEFEA` | `Hops 800 #2D2D2D` | |
 | `listRow.backgroundSelected` | **system accent (auto)** | **system accent (auto)** | Standard `List` selection – respect system |
 | `listRow.backgroundQueued` | `Amber 100 #FEF3DC` | `rgba(251,176,64,0.15)` | **Custom amber** – "queued for action" state, distinct from selection |
-| `listRow.separatorColor` | `rgba(0,0,0,0.06)` | `rgba(255,255,255,0.06)` | |
+| `listRow.separatorColor` | **system (auto)** | **system (auto)** | Native list separator |
 
 #### 5.4 Sidebar
 

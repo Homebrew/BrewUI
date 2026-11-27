@@ -3,6 +3,7 @@
 //  Homebrew
 //
 
+import AppKit
 import BrewCLI
 import BrewCore
 import BrewCrashReporting
@@ -25,6 +26,11 @@ extension BrewApp {
     ) -> BrewUITestingFixtureInstaller.Installation? {
         guard let uiTesting else {
             return nil
+        }
+        if let value = ProcessInfo.processInfo.environment[BrewUITestingEnvironmentKey.appearance],
+           let appearance = BrewUITestingAppearance(rawValue: value)
+        {
+            NSApplication.shared.appearance = NSAppearance(named: appearance == .dark ? .darkAqua : .aqua)
         }
         if uiTesting.resetsWindowState {
             clearAutosavedWindowState()

@@ -20,6 +20,7 @@ struct MainSidebarView: View {
             )
             .padding(.horizontal, BrewSpacing.sm)
             .padding(.top, BrewSpacing.sm)
+            .brewSidebarFirstRowInset()
 
             sidebarRow(
                 title: SidebarItem.upgrades.title,

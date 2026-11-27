@@ -103,10 +103,7 @@ final class UpgradesViewModel {
         return false
     }
 
-    /// Subtitle for the in-page Upgrades header. Reflects the unfiltered
-    /// inventory when no search is active, and "Showing N of M" / "No matches
-    /// in M outdated packages" once a query narrows the list. The window-chrome
-    /// subtitle is a static tab description owned by `MainWindowView`.
+    /// 升级页头不重复批量按钮的数量；筛选、全部最新与检查失败仍有独立状态。
     var outdatedSubtitle: String {
         if shouldShowInitialLoadingIndicator {
             return String(localized: "Loading packages…", bundle: #bundle, comment: "Upgrades tab subtitle while fetching")
@@ -114,7 +111,7 @@ final class UpgradesViewModel {
         if showsUpgradeCheckFailure {
             return Self.upgradeCheckFailedTitle
         }
-        let subtitle = isFiltering ? filteredSubtitle : inventorySubtitle
+        let subtitle = isFiltering && totalOutdatedCount > 0 ? filteredSubtitle : inventorySubtitle
         guard upgradeCheckFailureMessage != nil else {
             return subtitle
         }
@@ -133,22 +130,7 @@ final class UpgradesViewModel {
     )
 
     private var inventorySubtitle: String {
-        switch totalOutdatedCount {
-        case 0:
-            UpgradesUpToDateCopy.headline
-        case 1:
-            String(
-                localized: "1 package can be upgraded",
-                bundle: #bundle,
-                comment: "Upgrades tab subtitle for a single outdated package",
-            )
-        default:
-            String(
-                localized: "\(totalOutdatedCount) packages can be upgraded",
-                bundle: #bundle,
-                comment: "Upgrades tab subtitle when multiple packages are outdated",
-            )
-        }
+        String(localized: "Available", bundle: #bundle, comment: "Upgrades tab status heading: upgrades are available; the window title supplies the context")
     }
 
     /// Subtitle while a scope and/or search filter is narrowing the list: "Showing N of M upgrades", or
@@ -378,24 +360,6 @@ extension UpgradesViewModel {
             bundle: #bundle,
             comment: "Upgrades header command summary for multiple searched packages",
         )
-    }
-
-    var isFilteringOutEveryUpgrade: Bool {
-        outdatedCount == 0 && totalOutdatedCount > 0
-    }
-
-    var emptyUpgradeActionTitle: String {
-        if showsUpgradeCheckFailure {
-            return Self.upgradeCheckFailedTitle
-        }
-        if isFilteringOutEveryUpgrade {
-            return String(
-                localized: "Nothing to upgrade here",
-                bundle: #bundle,
-                comment: "Upgrades header stand-in when filters hide every available upgrade",
-            )
-        }
-        return UpgradesUpToDateCopy.headline
     }
 
     var upToDateTitle: String {

@@ -63,8 +63,8 @@ struct UpgradesPackagesView: View {
         }
         .pickerStyle(.segmented)
         .labelsHidden()
-        .padding(.horizontal, BrewSpacing.lg)
-        .padding(.vertical, BrewSpacing.md)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.bottom, BrewSpacing.md)
     }
 
     private func upgradesList(_ content: InstalledPackagesContent) -> some View {
@@ -105,21 +105,13 @@ struct UpgradesPackagesView: View {
         InstalledListRowRoot(package: package)
             .id(package.id)
             .contentShape(Rectangle())
-            .listRowBackground(
-                RoundedRectangle(
-                    cornerRadius: BrewRadius.lg,
-                    style: .continuous,
-                )
-                .fill(
-                    viewModel.activeSelectedPackageID == package.id ? Color.brewBrandTint : Color.clear,
-                )
-                .padding(.horizontal, BrewSpacing.sm),
-            )
+            .brewPaneListRowSelection(isSelected: viewModel.activeSelectedPackageID == package.id)
             .onTapGesture {
                 // Needed to suppress the default ugly blue macOS highlight state
                 viewModel.setSelection(package.id)
             }
             .axid(.upgradesRow(token: package.name))
+            .brewPaneListRowInsets()
     }
 
     private func scrollToSelection(
@@ -140,7 +132,13 @@ struct UpgradesPackagesView: View {
             title: viewModel.upToDateTitle,
             subtitle: viewModel.upToDateDetail,
             accessibilityLabel: viewModel.upToDateTitle,
+            icon: {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: BrewLayout.successBadgeSize))
+                    .foregroundStyle(Color.brewStatusSuccess)
+            },
         )
+        .axid(.upgradesUpToDate)
     }
 
     /// An empty list after a failed check means "unknown", not "up to date".
@@ -203,7 +201,8 @@ struct UpgradesPackagesView: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(BrewSpacing.xl)
+        .padding(.horizontal, BrewLayout.paneContentInset)
+        .padding(.vertical, BrewSpacing.xl)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityLabel)
     }
