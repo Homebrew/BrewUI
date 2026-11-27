@@ -25,11 +25,12 @@ struct MainWindowView: View {
 
     @State var selectedSidebarItem: SidebarItem = .installed
     @State private var pendingInstalledSelection: InstalledBrewPackage.ID?
+    @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @SceneStorage("consoleExpanded") private var consoleExpanded: Bool = false
     @SceneStorage("consoleHeight") private var consoleHeight: Double = BrewLayout.consoleDefaultExpandedHeight
 
     var body: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             sidebarColumn
         } detail: {
             AnimatedSplit(
@@ -46,6 +47,19 @@ struct MainWindowView: View {
                 ConsolePanelRoot(expanded: $consoleExpanded)
             }
             .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    Button {
+                        withAnimation(.brewSpring) {
+                            columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly
+                        }
+                    } label: {
+                        Label(sidebarToggleTitle, systemImage: "sidebar.leading")
+                    }
+                    .labelStyle(.iconOnly)
+                    .help(sidebarToggleTitle)
+                }
+            }
         }
         .navigationSplitViewStyle(.automatic)
         .focusedSceneValue(\.consoleExpanded, $consoleExpanded)
@@ -114,7 +128,13 @@ struct MainWindowView: View {
 
     /// Approximate catalogue size for the Discover subtitle. Hardcoded for now; should eventually be
     /// sourced from the catalogue once a package-count property is exposed.
-    private static let approximateCatalogueSize = 9000
+    fileprivate static let approximateCatalogueSize = 9000
+
+    private var sidebarToggleTitle: String {
+        columnVisibility == .detailOnly
+            ? String(localized: "Show Sidebar", bundle: #bundle, comment: "Toolbar button and tooltip: reveal the sidebar")
+            : String(localized: "Hide Sidebar", bundle: #bundle, comment: "Toolbar button and tooltip: collapse the sidebar")
+    }
 
     private var sidebarColumn: some View {
         MainSidebarView(selection: $selectedSidebarItem)
@@ -123,44 +143,130 @@ struct MainWindowView: View {
                 ideal: BrewLayout.sidebarWidth,
                 max: BrewLayout.sidebarWidth + 40,
             )
+            .toolbar(removing: .sidebarToggle)
+    }
+
+    private var featureColumn: some View {
+        FeatureColumnContent(
+            selectedSidebarItem: $selectedSidebarItem,
+            deepLinkSelection: $pendingInstalledSelection,
+        )
+    }
+}
+
+private struct FeatureColumnContent: View {
+    @Binding var selectedSidebarItem: SidebarItem
+    @Binding var deepLinkSelection: InstalledBrewPackage.ID?
+    @State private var searchQuery = ""
+    @State private var isSearchFocused = false
+    @State private var searchFocusRequest = 0
+
+    var body: some View {
+        Group {
+            if supportsSearch {
+                searchableContent
+            } else {
+                content
+            }
+        }
+        .navigationTitle(selectedSidebarItem.title)
+        .navigationSubtitle(selectedSidebarItem.subtitle)
+    }
+
+    private var searchableContent: some View {
+        content
+            // List rows use tap gestures and do not become AppKit first responders themselves.
+            // Explicitly end text editing so typing after a row selection cannot continue the query.
+            .simultaneousGesture(TapGesture().onEnded { isSearchFocused = false })
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    ToolbarSearchField(
+                        text: $searchQuery,
+                        isFocused: $isSearchFocused,
+                        prompt: searchPrompt,
+                        focusRequest: searchFocusRequest,
+                    )
+                    .frame(width: 320)
+                }
+            }
+            .focusedSceneValue(\.focusSearchField, FocusSearchFieldAction {
+                searchFocusRequest += 1
+            })
+            .onChange(of: selectedSidebarItem) { _, _ in
+                let shouldRestoreFocus = isSearchFocused
+                searchQuery = ""
+                guard shouldRestoreFocus else {
+                    return
+                }
+                Task { @MainActor in
+                    await Task.yield()
+                    searchFocusRequest += 1
+                }
+            }
     }
 
     @ViewBuilder
-    private var featureColumn: some View {
+    private var content: some View {
         switch selectedSidebarItem {
-        // One combined case keeps the shared toolbar search field alive across the switch
+        // One combined case keeps the shared toolbar search field alive across switches
         // (see `InstalledUpgradesRoot`).
         case .installed, .upgrades:
             InstalledUpgradesRoot(
                 mode: selectedSidebarItem == .upgrades ? .upgrades : .installed,
-                deepLinkSelection: $pendingInstalledSelection,
-            )
-            .navigationTitle(selectedSidebarItem.title)
-            .navigationSubtitle(
-                selectedSidebarItem == .upgrades
-                    ? String(localized: "Review and upgrade outdated packages", bundle: #bundle, comment: "Window subtitle, Upgrades")
-                    : String(localized: "Browse or search your installed packages", bundle: #bundle, comment: "Window subtitle, Installed"),
+                deepLinkSelection: $deepLinkSelection,
+                searchQuery: $searchQuery,
             )
         case .discover:
-            DiscoverColumnsRoot()
-                .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(
-                    localized: "Browse and search \(Self.approximateCatalogueSize)+ packages",
-                    bundle: #bundle,
-                    comment: "Window subtitle, Discover; %lld is the approximate catalog size",
-                ))
+            DiscoverColumnsRoot(searchQuery: $searchQuery, isSearchFocused: isSearchFocused)
         case .services:
             ServicesRoot()
-                .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "View your Homebrew services", bundle: #bundle, comment: "Window subtitle, read-only Services tab"))
         case .doctor:
             DoctorColumnsRoot()
-                .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor"))
         case .configuration:
             ConfigColumnsRoot()
-                .navigationTitle(selectedSidebarItem.title)
-                .navigationSubtitle(String(localized: "Homebrew environment & diagnostics", bundle: #bundle, comment: "Window subtitle, Configuration"))
+        }
+    }
+
+    private var searchPrompt: String {
+        switch selectedSidebarItem {
+        case .installed:
+            InstalledUpgradesRoot.searchPrompt(for: .installed)
+        case .upgrades:
+            InstalledUpgradesRoot.searchPrompt(for: .upgrades)
+        case .discover:
+            DiscoverColumnsRoot.searchPrompt
+        case .services, .doctor, .configuration:
+            ""
+        }
+    }
+
+    private var supportsSearch: Bool {
+        switch selectedSidebarItem {
+        case .installed, .upgrades, .discover: true
+        case .services, .doctor, .configuration: false
+        }
+    }
+}
+
+private extension SidebarItem {
+    var subtitle: String {
+        switch self {
+        case .installed:
+            String(localized: "Browse or search your installed packages", bundle: #bundle, comment: "Window subtitle, Installed")
+        case .upgrades:
+            String(localized: "Review and upgrade outdated packages", bundle: #bundle, comment: "Window subtitle, Upgrades")
+        case .discover:
+            String(
+                localized: "Browse and search \(MainWindowView.approximateCatalogueSize)+ packages",
+                bundle: #bundle,
+                comment: "Window subtitle, Discover; %lld is the approximate catalog size",
+            )
+        case .services:
+            String(localized: "View your Homebrew services", bundle: #bundle, comment: "Window subtitle, read-only Services tab")
+        case .doctor:
+            String(localized: "Check your Homebrew installation for problems", bundle: #bundle, comment: "Window subtitle, Doctor")
+        case .configuration:
+            String(localized: "Homebrew environment & diagnostics", bundle: #bundle, comment: "Window subtitle, Configuration")
         }
     }
 }

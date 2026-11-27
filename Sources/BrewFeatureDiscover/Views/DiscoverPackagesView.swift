@@ -7,9 +7,14 @@ import SwiftUI
 /// Middle column of the main window: Discover package list.
 struct DiscoverPackagesView: View {
     @Bindable var viewModel: DiscoverViewModel
+    @Binding var searchQuery: String
+    /// Whether the window's toolbar search field holds the keyboard. That field is AppKit and lives
+    /// outside this view, so `focus` stays nil while the user types in it.
+    var isSearchFocused = false
 
-    @State private var searchFocus = SearchFocusArbiter()
+    /// The search field lives in the window toolbar now, so this view only hands the list the keyboard.
     @FocusState private var focus: SearchFocusTarget?
+    @State private var hasFocusedList = false
 
     @Environment(\.packageListBanner) private var packageListBanner
 
@@ -32,51 +37,19 @@ struct DiscoverPackagesView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .accessibilityElement(children: .contain)
         .axid(.discoverScreen)
-        // `.searchable` injects its field into the window toolbar, and SwiftUI offers no hook to
-        // put an accessibility identifier on it — an `.axid` here would land on this content and
-        // overwrite `.discoverScreen`. `AXID.discoverSearchField` therefore stays unattached until
-        // the field is custom; query it via `app.searchFields` for now.
-        .searchable(
-            text: $viewModel.query,
-            isPresented: searchFieldPresented,
-            placement: .toolbar,
-            prompt: String(localized: "Search Homebrew’s Packages", bundle: #bundle, comment: "Search field placeholder, Discover tab"),
-        )
-        .searchFocused($focus, equals: .searchField)
-        .focusedSceneValue(\.focusSearchField, focusSearchField)
-        .onChange(of: searchFocus.target) { _, _ in
-            moveFocusToTarget()
-        }
-        .onChange(of: focus) { _, focus in
-            searchFocus.focusDidChange(to: focus)
-            if focus != .searchField, viewModel.query.isEmpty {
-                searchFocus.emptySearchFieldDidLoseFocus()
-            }
-        }
-        .onClickOutsideSearchField {
-            guard focus == .searchField else {
-                return
-            }
-            searchFocus.clickLandedOutsideSearchField(searchFieldIsEmpty: viewModel.query.isEmpty)
-        }
-        .onChange(of: searchFocus.isSearchFieldPresented) { _, presented in
-            guard presented else {
-                return
-            }
-            // The field only reaches the toolbar after this update commits, so a ⌘F that had to
-            // present it first has to wait a turn before it can be handed the keyboard.
-            Task { @MainActor in
-                searchFocus.searchFieldDidPresent()
-            }
-        }
         .onChange(of: canFocusList, initial: true) { _, canFocus in
-            if canFocus {
-                searchFocus.contentDidLoad()
+            focusListOnFirstLoad(canFocus: canFocus)
+        }
+        // Neither sync runs on mount: seeding one side from the other then races the window's
+        // sidebar-switch reset, which searches with the previous tab's query or ping-pongs forever.
+        .onChange(of: viewModel.query) { _, query in
+            if searchQuery != query {
+                searchQuery = query
             }
         }
-        .onChange(of: viewModel.query, initial: true) { _, query in
-            if !query.isEmpty {
-                searchFocus.searchFieldDidPresent()
+        .onChange(of: searchQuery) { _, query in
+            if viewModel.query != query {
+                viewModel.query = query
             }
         }
         .task(id: viewModel.query) {
@@ -89,35 +62,22 @@ struct DiscoverPackagesView: View {
         }
     }
 
-    /// Hopping off this update is load-bearing. `.searchable` reports its dismissal from inside
-    /// AppKit's layout pass, so writing the arbiter's new target straight back into `.searchFocused`
-    /// re-enters that pass, which dismisses again — Escape used to wedge the app until the stack ran out.
-    private func moveFocusToTarget() {
+    /// Only the first load claims the keyboard: later loads follow a search, and taking focus then
+    /// would pull the cursor out of the toolbar field mid-typing. The hop lets the list mount first.
+    private func focusListOnFirstLoad(canFocus: Bool) {
+        guard canFocus, !hasFocusedList else {
+            return
+        }
+        hasFocusedList = true
+        // The user is typing in the toolbar field; leave the keyboard with them.
+        guard !isSearchFocused else {
+            return
+        }
         Task { @MainActor in
-            guard focus != searchFocus.target else {
-                return
+            if focus == nil {
+                focus = .list
             }
-            focus = searchFocus.target
         }
-    }
-
-    private var focusSearchField: FocusSearchFieldAction {
-        FocusSearchFieldAction {
-            searchFocus.requestSearchFocus()
-        }
-    }
-
-    private var searchFieldPresented: Binding<Bool> {
-        Binding(
-            get: { searchFocus.isSearchFieldPresented },
-            set: { presented in
-                if presented {
-                    searchFocus.searchFieldDidPresent()
-                } else {
-                    searchFocus.searchFieldDidDismiss()
-                }
-            },
-        )
     }
 
     /// Clearing the query back to empty must not kick the cursor out of the search field.

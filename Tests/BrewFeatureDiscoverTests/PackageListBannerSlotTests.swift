@@ -39,9 +39,9 @@ struct PackageListBannerSlotTests {
 
     @Test func `the Discover list makes room for the banner slot`() {
         let viewModel = makeViewModel()
-        let empty = height(DiscoverPackagesView(viewModel: viewModel))
+        let empty = height(DiscoverPackagesView(viewModel: viewModel, searchQuery: .constant("")))
         let filled = height(
-            DiscoverPackagesView(viewModel: viewModel)
+            DiscoverPackagesView(viewModel: viewModel, searchQuery: .constant(""))
                 .environment(\.packageListBanner, PackageListBanner { probe }),
         )
 
@@ -51,9 +51,9 @@ struct PackageListBannerSlotTests {
     /// Nothing is injected in previews, tests, or any tab the shell does not fill the slot for.
     @Test func `an unfilled slot costs the list nothing`() {
         let viewModel = makeViewModel()
-        let unfilled = height(DiscoverPackagesView(viewModel: viewModel))
+        let unfilled = height(DiscoverPackagesView(viewModel: viewModel, searchQuery: .constant("")))
         let explicitlyEmpty = height(
-            DiscoverPackagesView(viewModel: viewModel)
+            DiscoverPackagesView(viewModel: viewModel, searchQuery: .constant(""))
                 .environment(\.packageListBanner, PackageListBanner { EmptyView() }),
         )
 
