@@ -33,4 +33,8 @@ public struct LiveBrewMutatingCommandFactory: BrewMutatingCommandFactory {
     public func bundleDumpCommand(fileURL: URL) -> BrewCommand {
         BrewCommands.bundleDump(fileURL: fileURL)
     }
+
+    public func cleanupCommand(pruneAll: Bool) -> BrewCommand {
+        BrewCommands.cleanup(pruneAll: pruneAll)
+    }
 }

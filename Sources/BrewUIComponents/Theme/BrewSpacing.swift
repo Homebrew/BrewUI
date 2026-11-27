@@ -55,6 +55,11 @@ public enum BrewLayout {
     /// leaves the button's own metrics alone while giving anything that stands in for it the same height.
     public static let headerActionHeight: CGFloat = 28
 
+    /// Fixed size of a confirmation sheet built around a scrolling list, such as Clean Up. Fixed so the
+    /// sheet does not jump as the list loads, and short enough to fit the smallest main window.
+    public static let listSheetWidth: CGFloat = 560
+    public static let listSheetHeight: CGFloat = 560
+
     /// Default window width.
     public static let defaultWindowWidth: CGFloat = 1000
 

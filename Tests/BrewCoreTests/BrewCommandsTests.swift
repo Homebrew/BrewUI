@@ -64,6 +64,16 @@ struct BrewCommandsTests {
         #expect(command.operationKind == .bundleDump)
     }
 
+    @Test func `cleanup runs brew cleanup under cleanup`() {
+        let command = BrewCommands.cleanup(pruneAll: false)
+        #expect(command.arguments == ["cleanup"])
+        #expect(command.operationKind == .cleanup)
+    }
+
+    @Test func `prune all adds --prune=all`() {
+        #expect(BrewCommands.cleanup(pruneAll: true).arguments == ["cleanup", "--prune=all"])
+    }
+
     @Test func `displayCommand renders the literal a person would type`() {
         let command = BrewCommands.bundleDump(fileURL: URL(fileURLWithPath: "/tmp/Brewfile"))
         #expect(command.displayCommand == "brew bundle dump --file=/tmp/Brewfile --force")

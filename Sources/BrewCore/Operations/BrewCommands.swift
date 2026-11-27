@@ -88,6 +88,11 @@ public enum BrewCommands {
         }
     }
 
+    /// `brew cleanup`. `pruneAll` adds `--prune=all`, which removes every cached download regardless of age.
+    public static func cleanup(pruneAll: Bool) -> BrewCommand {
+        BrewCommand(operationKind: .cleanup, arguments: ["cleanup"] + (pruneAll ? ["--prune=all"] : []))
+    }
+
     private static func flag(for kind: HomebrewPackageKind) -> String {
         kind == .formula ? "--formula" : "--cask"
     }

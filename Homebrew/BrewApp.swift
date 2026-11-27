@@ -27,7 +27,7 @@ struct BrewApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     private let commandCenter: SerialBrewCommandCenter
-    private let commandFactory: LiveBrewMutatingCommandFactory
+    private let commandFactory = LiveBrewMutatingCommandFactory()
     private let installedInventoryCache: InstalledInventoryCache
     private let catalogueCache: CatalogueCache
     private let discoverAnalyticsCache: DiscoverAnalyticsCache
@@ -38,6 +38,7 @@ struct BrewApp: App {
     private let catalogueRepository: BrewCatalogueRepository
     private let discoverPackagesRepository: BrewDiscoverPackagesRepository
     private let doctorRepository: BrewDoctorRepository
+    private let cleanupRepository: BrewCleanupRepository
     private let configRepository: BrewConfigRepository
     private let servicesRepository: BrewServicesRepository
     private let crashReportController: CrashReportController
@@ -71,7 +72,6 @@ struct BrewApp: App {
         catalogueCache = catalogue
         discoverAnalyticsCache = discoverAnalytics
         commandCenter = center
-        commandFactory = LiveBrewMutatingCommandFactory()
         installedPackagesRepository = installedPackages
         installedPreferences = UserDefaultsInstalledPreferences(
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "installed", fixtures: fixtures),
@@ -86,6 +86,7 @@ struct BrewApp: App {
             defaultsKeyPrefix: Self.defaultsKeyPrefix(base: "DiscoverAnalytics", fixtures: fixtures),
         )
         doctorRepository = BrewDoctorRepository(commandCenter: center, executionContext: executionContext)
+        cleanupRepository = BrewCleanupRepository(executionContext: executionContext)
         configRepository = BrewConfigRepository(executionContext: executionContext)
         servicesRepository = BrewServicesRepository(executionContext: executionContext, commandCenter: center)
 
@@ -120,6 +121,7 @@ struct BrewApp: App {
                 .environment(\.catalogueRepository, catalogueRepository)
                 .environment(\.discoverPackagesRepository, discoverPackagesRepository)
                 .environment(\.doctorRepository, doctorRepository)
+                .environment(\.cleanupRepository, cleanupRepository)
                 .environment(\.configRepository, configRepository)
                 .environment(\.servicesRepository, servicesRepository)
                 .environment(\.selfUpgradeCoordinator, selfUpgradeCoordinator)
@@ -157,6 +159,7 @@ struct BrewApp: App {
             RefreshCommands()
             ConsoleCommands()
             BrewfileCommands()
+            ToolsCommands()
 
             // Replace the default "Homebrew Help" item (which points at a
             // non-existent help book) with a link to the online documentation.
